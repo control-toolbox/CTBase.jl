@@ -1,0 +1,11 @@
+name = "CTBase"
+uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
+authors = ["Olivier Cots <olivier.cots@enseeiht.fr>"]
+version = "0.1.0"
+
+[deps]
+ControlToolboxTools = "3a0bcf43-9180-47f3-913c-e71e0d69f39f"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
