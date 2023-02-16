@@ -1,7 +1,7 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
 authors = ["Olivier Cots <olivier.cots@enseeiht.fr>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ControlToolboxTools = "3a0bcf43-9180-47f3-913c-e71e0d69f39f"
