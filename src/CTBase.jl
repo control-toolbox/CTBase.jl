@@ -1,14 +1,11 @@
 module CTBase
 
-# this should be in ControlToolboxTools, which should be renamed CTBase
-
 # using
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Parameters # @with_kw: permit to have default values in struct
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-#import Base: show # to print an OptimalControlModel
 using Printf # to print a OptimalControlModel
-using ControlToolboxTools # tools: callbacks, exceptions, functions and more
+import Base: \, Base
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -29,8 +26,24 @@ const Adjoint = MyVector # todo: ajouter type adjoint pour faire par exemple p*f
 const Dimension = Integer
 
 #
-types() = MyNumber, MyVector, Time, Times, TimesDisc, States, Adjoints, Controls, State, Adjoint, Dimension
+#num_types() = MyNumber, MyVector, Time, Times, TimesDisc, States, Adjoints, Controls, State, Adjoint, Dimension
 
+# General abstract type for callbacks
+abstract type CTCallback end
+const CTCallbacks = Tuple{Vararg{CTCallback}}
+
+# A desription is a tuple of symbols
+const DescVarArg = Vararg{Symbol} # or Symbol...
+const Description = Tuple{DescVarArg}
+
+#tools_types() = CTCallbacks, Description
+
+#
+include("exceptions.jl")
+include("descriptions.jl")
+include("callbacks.jl")
+include("macros.jl")
+include("functions.jl")
 #
 include("utils.jl")
 #include("algorithms.jl")
@@ -39,33 +52,43 @@ include("print.jl")
 include("solutions.jl")
 include("default.jl")
 
-#function solve(ocp::OptimalControlModel, algo::AbstractControlAlgorithm, method::Description; kwargs...)
-#    error("solve not implemented")
-#end
-
 #
-# export only for users
+# Numeric types
+export MyNumber, MyVector, Time, Times, TimesDisc
+export States, Adjoints, Controls, State, Adjoint, Dimension
+
+# callback
+export CTCallback, CTCallbacks, PrintCallback, StopCallback
+export get_priority_print_callbacks, get_priority_stop_callbacks
+
+# exceptions
+export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+
+# description
+export Description, makeDescription, add, getFullDescription
 
 # utils
 export Ad, Poisson
 
 # model
+export AbstractOptimalControlModel, OptimalControlModel
 export Model, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
 export ismin, dynamics, lagrange, criterion, initial_time, final_time
 export control_dimension, state_dimension, constraints, initial_condition, final_constraint
 
 # solution
+export AbstractOptimalControlSolution, DirectSolution, DirectShootingSolution
 export time_steps_length, state_dimension, control_dimension
 export time_steps, state, control, adjoint, objective
 export iterations, success, message, stopping
 export constraints_violation
 
-# export structs
-export AbstractOptimalControlModel, OptimalControlModel
-export AbstractOptimalControlSolution, DirectSolution, DirectShootingSolution
-#export AbstractControlAlgorithm, DirectAlgorithm, DirectShootingAlgorithm
+# macros
+export @callable, @time_dependence_function
 
-# solve
-#export solve
+# functions
+export Hamiltonian, HamiltonianVectorField, VectorField
+export LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
+export StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
 
 end

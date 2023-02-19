@@ -1,0 +1,12 @@
+abstract type AbstractCTFunction{time_dependence} <: Function end
+
+@time_dependence_function Hamiltonian, AbstractCTFunction
+@time_dependence_function HamiltonianVectorField, AbstractCTFunction
+@time_dependence_function VectorField, AbstractCTFunction
+@time_dependence_function LagrangeFunction, AbstractCTFunction
+@time_dependence_function DynamicsFunction, AbstractCTFunction
+@time_dependence_function StateConstraintFunction, AbstractCTFunction
+@time_dependence_function ControlConstraintFunction, AbstractCTFunction
+@time_dependence_function MixedConstraintFunction, AbstractCTFunction
+@time_dependence_function ControlFunction, AbstractCTFunction
+@time_dependence_function MultiplierFunction, AbstractCTFunction
