@@ -20,13 +20,15 @@ A = [ 0.0 1.0
       0.0 0.0 ]
 B = [ 0.0
       1.0 ]
-constraint!(ocp, :dynamics, (x, u) -> A*x + B*u[1])
+constraint!(ocp, :dynamics, (x, u) -> A*x + B*u)
 objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2) # default is to minimise
 
 #
 @test isautonomous(ocp)
 @test dynamics(ocp)(0.0, [0.; 1.], 1.0) ≈ [1.; 1.] atol=1e-8
+@test dynamics(ocp)(0.0, [0.; 1.], [1.0]) ≈ [1.; 1.] atol=1e-8
 @test lagrange(ocp)(0.0, [0.; 0.], 1.0) ≈ 0.5 atol=1e-8
+@test lagrange(ocp)(0.0, [0.; 0.], [1.0]) ≈ 0.5 atol=1e-8
 @test mayer(ocp) === nothing
 @test ismin(ocp)
 @test initial_time(ocp) == t0
@@ -63,7 +65,7 @@ objective!(ocp, :mayer,  (t0, x0, tf, xf) -> xf[1], :max)
 D(x) = Cd * x[2]^2 * exp(-β*(x[1]-1))
 F0(x) = [ x[2], -D(x)/x[3]-1/x[1]^2, 0 ]
 F1(x) = [ 0, Tmax/x[3], -b*Tmax ]
-f(x, u) = F0(x) + u[1]*F1(x)
+f(x, u) = F0(x) + u*F1(x)
 constraint!(ocp, :dynamics, f)
 
 #

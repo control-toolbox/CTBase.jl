@@ -18,12 +18,14 @@ const Time = MyNumber
 const Times = MyVector
 const TimesDisc = Union{MyVector,StepRangeLen}
 
-const States = Vector{<:MyVector}
-const Adjoints = Vector{<:MyVector}
-const Controls = Vector{<:MyVector}
-
 const State = MyVector
 const Adjoint = MyVector # todo: ajouter type adjoint pour faire par exemple p*f(x, u) au lieu de p'*f(x,u)
+const Control = MyVector
+
+const States = Vector{<:State}
+const Adjoints = Vector{<:Adjoint}
+const Controls = Vector{<:Control}
+
 const Dimension = Integer
 
 # General abstract type for callbacks
@@ -82,11 +84,11 @@ export iterations, success, message, stopping
 export constraints_violation
 
 # macros
-export @callable, @time_dependence_function
+export @callable, @ctfunction_td_sv, @ctfunction_sv
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
-export LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
-export StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
+export MayerFunction, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
+export BoundaryConstraintFunction, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
 
 end
