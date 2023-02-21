@@ -10,3 +10,5 @@ abstract type AbstractCTFunction{time_dependence} <: Function end
 @time_dependence_function MixedConstraintFunction, AbstractCTFunction
 @time_dependence_function ControlFunction, AbstractCTFunction
 @time_dependence_function MultiplierFunction, AbstractCTFunction
+
+

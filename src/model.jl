@@ -51,6 +51,28 @@ function initial_condition(ocp::OptimalControlModel)
     end
     return x0
 end
+function final_condition(ocp::OptimalControlModel) 
+    cs = constraints(ocp)
+    xf = nothing
+    for (_, c) ∈ cs
+        type, _, _, val = c
+        if type == :final
+             xf = val
+        end
+    end
+    return xf
+end
+function initial_constraint(ocp::OptimalControlModel) 
+    cs = constraints(ocp)
+    c0 = nothing
+    for (_, c) ∈ cs
+        type, _, f, val = c
+        if type == :initial
+            c0 = x -> f(x) - val
+        end
+    end
+    return c0
+end
 function final_constraint(ocp::OptimalControlModel) 
     cs = constraints(ocp)
     cf = nothing

@@ -7,7 +7,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     dimx = state_dimension(ocp) === nothing ? "n" : state_dimension(ocp)
     dimu = control_dimension(ocp) === nothing ? "m" : control_dimension(ocp)
 
-    printstyled(io, "\nOptimal control problem of the form:\n", bold=true)
+    printstyled(io, "Optimal control problem of the form:\n", bold=true)
     println(io, "")
     printstyled(io, "    minimize  ", color=:blue); print("J(t0, tf, x, u) = ")
     if ocp.mayer !== nothing

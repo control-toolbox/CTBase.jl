@@ -7,9 +7,8 @@ mutable struct PrintCallback <: CTCallback
         new(cb, priority)
     end
 end
-# todo: essayer de mettre args... pour éviter de fixer ici les arguments
-function (cb::PrintCallback)(i, sᵢ, dᵢ, xᵢ, gᵢ, fᵢ)
-    return cb.callback(i, sᵢ, dᵢ, xᵢ, gᵢ, fᵢ)
+function (cb::PrintCallback)(args...; kwargs...)
+    return cb.callback(args...; kwargs...)
 end
 const PrintCallbacks = Tuple{Vararg{PrintCallback}}
 
@@ -42,10 +41,8 @@ mutable struct StopCallback <: CTCallback
         new(cb, priority)
     end
 end
-function (cb::StopCallback)(i, sᵢ, dᵢ, xᵢ, gᵢ, fᵢ, ng₀, optimalityTolerance, absoluteTolerance, 
-            stagnationTolerance, iterations)
-    return cb.callback(i, sᵢ, dᵢ, xᵢ, gᵢ, fᵢ, ng₀, optimalityTolerance, absoluteTolerance, 
-            stagnationTolerance, iterations)
+function (cb::StopCallback)(args...; kwargs...)
+    return cb.callback(args...; kwargs...)
 end
 const StopCallbacks = Tuple{Vararg{StopCallback}}
 

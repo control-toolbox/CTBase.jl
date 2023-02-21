@@ -1,3 +1,5 @@
+function test_callbacks()
+
 # stop callback
 function mystop(i, sᵢ, dᵢ, xᵢ, gᵢ, fᵢ, ng₀, oTol, aTol, sTol, iterations)
     stop = false
@@ -31,3 +33,5 @@ callbacks_stop = get_priority_stop_callbacks(cbs)
 
 @test callbacks_print[1] == cb_print_1
 @test callbacks_stop[1] == cb_stop_2
+
+end

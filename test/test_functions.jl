@@ -1,8 +1,10 @@
+function test_functions()
 #
 t = 1
 x = 2
 p = 3
 u = 4
+f(t, x, u) = t+x+u
 
 #
 H(t, x, p) = t + x^2+p^2
@@ -41,7 +43,6 @@ L2 = LagrangeFunction((x, u) -> L(0.0, x, u))
 @test L2(t, x, u) == 6
 
 # DynamicsFunction
-f(t, x, u) = t+x+u
 F1 = DynamicsFunction{:nonautonomous}(f)
 F2 = DynamicsFunction((x, u) -> f(0.0, x, u))
 @test F1(t, x, u) == 7
@@ -53,9 +54,6 @@ control(t, x, p) = p
 myH = makeH(F1, control)
 H3 = Hamiltonian{:nonautonomous}(myH)
 @test H3(t, x, p) == 6
-
-#
-f(t, x, u) = t+x+u
 
 # StateConstraintFunction
 f1 = StateConstraintFunction{:nonautonomous}(f)
@@ -86,3 +84,5 @@ f1 = MultiplierFunction{:nonautonomous}(f)
 f2 = MultiplierFunction((x, u) -> f(0.0, x, u))
 @test f1(t, x, u) == 7
 @test f2(t, x, u) == 6
+
+end

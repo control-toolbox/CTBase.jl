@@ -1,5 +1,4 @@
-#
-const gFD = getFullDescription
+function test_descriptions()
 
 # make a description from symbols or a tuple of symbols
 @test makeDescription(:tt, :vv) == (:tt, :vv)
@@ -52,3 +51,5 @@ algorithmes = add(algorithmes, (:a, :b, :c, :d))
 algorithmes = add(algorithmes, (:a, :b, :c)) 
 @test gFD((:a, :b), algorithmes) == (:a, :b, :c, :d)
 @test gFD((:a, :b, :c, :d), algorithmes) == (:a, :b, :c, :d)
+
+end

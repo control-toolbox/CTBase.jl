@@ -6,6 +6,7 @@ using Parameters # @with_kw: permit to have default values in struct
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using Printf # to print a OptimalControlModel
 import Base: \, Base
+using MacroTools
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -25,9 +26,6 @@ const State = MyVector
 const Adjoint = MyVector # todo: ajouter type adjoint pour faire par exemple p*f(x, u) au lieu de p'*f(x,u)
 const Dimension = Integer
 
-#
-#num_types() = MyNumber, MyVector, Time, Times, TimesDisc, States, Adjoints, Controls, State, Adjoint, Dimension
-
 # General abstract type for callbacks
 abstract type CTCallback end
 const CTCallbacks = Tuple{Vararg{CTCallback}}
@@ -35,8 +33,6 @@ const CTCallbacks = Tuple{Vararg{CTCallback}}
 # A desription is a tuple of symbols
 const DescVarArg = Vararg{Symbol} # or Symbol...
 const Description = Tuple{DescVarArg}
-
-#tools_types() = CTCallbacks, Description
 
 #
 include("exceptions.jl")
@@ -62,19 +58,21 @@ export CTCallback, CTCallbacks, PrintCallback, StopCallback
 export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # exceptions
-export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod, IncorrectArgument
 
 # description
 export Description, makeDescription, add, getFullDescription
 
 # utils
-export Ad, Poisson
+export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate
 
 # model
 export AbstractOptimalControlModel, OptimalControlModel
 export Model, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
-export ismin, dynamics, lagrange, criterion, initial_time, final_time
-export control_dimension, state_dimension, constraints, initial_condition, final_constraint
+export ismin, dynamics, lagrange, mayer, criterion, initial_time, final_time
+export control_dimension, state_dimension, constraints
+export initial_condition, final_condition, initial_constraint, final_constraint
+export isautonomous, isnonautonomous
 
 # solution
 export AbstractOptimalControlSolution, DirectSolution, DirectShootingSolution

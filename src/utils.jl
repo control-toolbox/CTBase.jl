@@ -3,6 +3,11 @@
 ctgradient(f::Function, x) = ForwardDiff.gradient(f, x)
 ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)
 
+# simple interpolation
+function ctinterpolate(x, f) # default for interpolation of the initialization
+    return Interpolations.linear_interpolation(x, f, extrapolation_bc=Interpolations.Line())
+end
+
 # transform a Vector{<:Vector{<:MyNumber}} to a Vector{<:MyNumber}
 function vec2vec(x::Vector{<:Vector{<:MyNumber}})
     y = x[1]
@@ -21,17 +26,9 @@ function vec2vec(x::Vector{<:MyNumber}, n::Integer)
     return y
 end
 
-function expand(x::Vector{<:Vector{<:MyNumber}})
-    return vec2vec(x)
-end
-
-function expand(x::Vector{<:MyNumber})
-    return x
-end
-
-function expand(x::Matrix{<:MyNumber})
-    return expand(matrix2vec(x, 1))
-end
+expand(x::Vector{<:Vector{<:MyNumber}}) = vec2vec(x)
+expand(x::Vector{<:MyNumber}) = x
+expand(x::Matrix{<:MyNumber}) = expand(matrix2vec(x, 1))
 
 # transform a Matrix{<:MyNumber} to a Vector{<:Vector{<:MyNumber}}
 function matrix2vec(x::Matrix{<:MyNumber}, dim::Integer=__matrix_dimension_stock())

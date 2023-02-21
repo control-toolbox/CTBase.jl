@@ -9,25 +9,6 @@ end
 
 macro callable(expr)
 
-#=      @show(expr)
-    println("---")
-    println(expr)
-    println("---")
-    println(typeof(expr))
-    println("---")
-    println(Meta.show_sexpr(expr))
-    println("---")
-    println(expr.head)
-    println("---")
-    println(expr.args[1])
-    println("---")
-    println(expr.args[2])
-    println("---")
-    println(expr.args[3])
-    println("==================================================") =#
-
-    #dump(expr)
-
     # first elements must be :struct
     if !hasproperty(expr, :head) || expr.head != Symbol(:struct)
         return :(throw_callable_error())
@@ -46,8 +27,6 @@ macro callable(expr)
         struct_name = expr.args[2]
         struct_params = ""
     end
-    #println(struct_name)
-    #println(struct_params)
 
     fun = gensym("fun")
 
@@ -56,12 +35,6 @@ macro callable(expr)
             struct $struct_name{$(struct_params...)}
                 $fun::Function
                 $corps
-                #function $struct_name{$(struct_params...)}(caller::Function, args...) where {$(struct_params...)}
-                #    new{$(struct_params...)}(caller, args...)
-                #end
-                #function $struct_name{$(struct_params...)}(args...; caller::Function) where {$(struct_params...)}
-                #    new{$(struct_params...)}(caller, args...)
-                #end
             end
             (s::$struct_name{$(struct_params...)})(args...; kwargs...) where {$(struct_params...)} = s.$fun(args...; kwargs...)
         end)
@@ -70,18 +43,11 @@ macro callable(expr)
             struct $struct_name
                 $fun::Function
                 $corps
-                #function $struct_name(caller::Function, args...)
-                #    new(caller, args...)
-                #end
-                #function $struct_name(args...; caller::Function)
-                #    new(caller, args...)
-                #end
             end
             (s::$struct_name)(args...; kwargs...) = s.$fun(args...; kwargs...)
         end)
     end
 end
-
 
 # generate callable structure with the managing of autonomous vs nonautonomous cases
 macro time_dependence_function(expr)
@@ -93,7 +59,6 @@ macro time_dependence_function(expr)
     end
 
     function_name = expr.args[1]
-    abstract_name = Symbol(:Abstract, function_name)
     abstract_heritance = expr.args[2]
 
     esc(quote
@@ -112,5 +77,4 @@ macro time_dependence_function(expr)
             return time_dependence==:autonomous ? F.f(args...; kwargs...) : F.f(t, args...; kwargs...)
         end
     end)
-
 end
