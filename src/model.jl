@@ -27,9 +27,9 @@ function Model{time_dependence, scalar_vectorial}() where {time_dependence, scal
     return OptimalControlModel{time_dependence, scalar_vectorial}()
 end
 function Model{time_dependence}() where {time_dependence}
-    return OptimalControlModel{time_dependence, :scalar}()
+    return OptimalControlModel{time_dependence, _ocp_scalar_vectorial()}()
 end
-Model() = Model{:autonomous, :scalar}() # default value
+Model() = Model{_ocp_time_dependence(), _ocp_scalar_vectorial()}() # default value
 
 # -------------------------------------------------------------------------------------------
 # getters

@@ -80,10 +80,10 @@ macro ctfunction_td_sv(expr)
                     error("usage: $(function_name){time_dependence, scalar_vectorial}(fun) " *
                     "with time_dependence ∈ [:autonomous, :nonautonomous]")
                 else
-                    new{time_dependence, :vectorial}(f)
+                    new{time_dependence, _fun_scalar_vectorial()}(f)
                 end
             end
-            $(function_name)(f::Function) = new{:autonomous, :vectorial}(f)
+            $(function_name)(f::Function) = new{_fun_time_dependence(), _fun_scalar_vectorial()}(f)
         end
         # basic usage
         function (F::$(function_name))(args...; kwargs...)
@@ -119,7 +119,7 @@ macro ctfunction_sv(expr)
                     new{scalar_vectorial}(f)
                 end
             end
-            $(function_name)(f::Function) = new{:vectorial}(f)
+            $(function_name)(f::Function) = new{_fun_scalar_vectorial()}(f)
         end
         # basic usage
         function (F::$(function_name))(args...; kwargs...)

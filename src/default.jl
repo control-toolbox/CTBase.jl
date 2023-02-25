@@ -1,5 +1,13 @@
 # --------------------------------------------------------------------------------------------------
-# commun
+# functions: time dependence and scalar/vectorial
+_fun_time_dependence() = :autonomous
+_fun_scalar_vectorial() = :scalar
+#
+# optimal control model: time dependence and scalar/vectorial
+_ocp_time_dependence() = :autonomous
+_ocp_scalar_vectorial() = :scalar
+
+# common
 __matrix_dimension_stock() = 1 
 
 # --------------------------------------------------------------------------------------------------
