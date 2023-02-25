@@ -25,3 +25,9 @@ struct IncorrectArgument <: CTException
     var::String
 end
 Base.showerror(io::IO, e::IncorrectArgument) = print(io, e.var)
+
+# incorrect argument
+struct IncorrectOutput <: CTException
+    var::String
+end
+Base.showerror(io::IO, e::IncorrectOutput) = print(io, e.var)

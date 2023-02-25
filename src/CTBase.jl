@@ -60,7 +60,7 @@ export CTCallback, CTCallbacks, PrintCallback, StopCallback
 export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # exceptions
-export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod, IncorrectArgument
+export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod, IncorrectArgument, IncorrectOutput
 
 # description
 export Description, makeDescription, add, getFullDescription
