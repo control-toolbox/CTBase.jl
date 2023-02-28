@@ -10,6 +10,21 @@ f(t, x, u) = t+x+u
 H(t, x, p) = t + x^2+p^2
 @test_throws ErrorException Hamiltonian{:ttt, :scalar}(H) # :autonomous or :nonautonomous
 
+# boundary constraint
+b(t0, x0, tf, xf) = (tf*xf) / (t0*x0) # scalar case
+B1 = BoundaryConstraintFunction{:scalar}(b)
+@test B1(1.0, 1.0, 1.0, 1.0) == 1.0 # call as b
+@test B1(1.0, [1.0], 1.0, [1.0]) ≈ [1.0] atol=1e-6 # call as a BoundaryConstraintFunction
+Be = BoundaryConstraintFunction{:scalar}((t0, x0, tf, xf) -> [b(t0, x0, tf, xf)])
+@test_throws IncorrectOutput Be(1.0, [1.0], 1.0, [1.0]) # if output and usage are scalar, return a scalar 
+
+# Mayer
+g(t0, x0, tf, xf) = (tf*xf[1]) / (t0*x0[1])
+G1 = MayerFunction{:vectorial}(g)
+@test G1(1.0, [1.0], 1.0, [1.0]) ≈ 1.0 atol=1e-6
+Ge = MayerFunction{:scalar}((t0, x0, tf, xf) -> [g(t0, x0, tf, xf)])
+@test_throws IncorrectOutput Ge(1.0, [1.0], 1.0, [1.0])
+
 # HamiltonianVectorField: the name is not important since here we have Hamiltonians
 H1 = HamiltonianVectorField{:nonautonomous}(H)
 H2 = HamiltonianVectorField((x, p) -> H(0.0, x, p))

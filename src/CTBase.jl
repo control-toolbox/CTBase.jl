@@ -6,7 +6,9 @@ using Parameters # @with_kw: permit to have default values in struct
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using Printf # to print a OptimalControlModel
 import Base: \, Base
-using MacroTools
+using Plots
+import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
+using AbstractTrees
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -43,12 +45,13 @@ include("callbacks.jl")
 include("macros.jl")
 include("functions.jl")
 #
+include("default.jl")
 include("utils.jl")
 #include("algorithms.jl")
 include("model.jl")
 include("print.jl")
 include("solutions.jl")
-include("default.jl")
+include("plot.jl")
 
 #
 # Numeric types
@@ -66,7 +69,7 @@ export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod,
 export Description, makeDescription, add, getFullDescription
 
 # utils
-export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate
+export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices
 
 # model
 export AbstractOptimalControlModel, OptimalControlModel
@@ -77,14 +80,15 @@ export initial_condition, final_condition, initial_constraint, final_constraint
 export isautonomous, isnonautonomous
 
 # solution
-export AbstractOptimalControlSolution, DirectSolution, DirectShootingSolution
+export AbstractOptimalControlSolution, OptimalControlSolution
 export time_steps_length, state_dimension, control_dimension
 export time_steps, state, control, adjoint, objective
 export iterations, success, message, stopping
 export constraints_violation
+export plot, plot!
 
 # macros
-export @callable, @ctfunction_td_sv, @ctfunction_sv
+export @ctfunction_td_sv, @ctfunction_sv
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField

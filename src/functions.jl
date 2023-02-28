@@ -9,7 +9,7 @@ abstract_heritance=:AbstractCTFunction
 function_name=:BoundaryConstraintFunction
 #
 @eval @ctfunction_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
+# handling scalar / vectorial usage
 # output: vectorial
 @eval function (F::$(function_name){scalar_vectorial})(t0::Time, 
     x0::State, tf::Time, xf::State, args...; kwargs...) where {scalar_vectorial}

@@ -1,4 +1,13 @@
 #
+ctindice(i::Integer) = '\u2080' + i
+function ctindices(i::Integer)
+    s=""
+    for d ∈ digits(i)
+        s = ctindice(d) * s
+    end
+    return s
+end
+
 # method to compute gradient and Jacobian
 ctgradient(f::Function, x) = ForwardDiff.gradient(f, x)
 ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)

@@ -17,7 +17,6 @@ const gFD = getFullDescription
         :exceptions,
         :callbacks,
         :descriptions,
-        :macros,
         :functions,
         :model,
         )
