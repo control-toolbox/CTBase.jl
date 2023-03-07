@@ -124,6 +124,7 @@ end
 
 # -------------------------------------------------------------------------------------------
 #
+# debug: starts here
 function constraint!(ocp::OptimalControlModel, type::Symbol, val::State, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :eq, x -> x, val)
