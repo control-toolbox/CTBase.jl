@@ -124,10 +124,18 @@ end
 
 # -------------------------------------------------------------------------------------------
 #
-# debug: starts here
 function constraint!(ocp::OptimalControlModel, type::Symbol, val::State, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :initial, :final ]
-        ocp.constraints[label] = (type, :eq, x -> x, val)
+    if type ∈ [ :initial, :final ] # not allowed for :control or :state
+        ocp.constraints[label] = (type, :eq, 1:state_dimension(ocp), val)
+    else
+        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+        ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
+    end
+end
+
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::UnitRange{Int}, val::State, label::Symbol=gensym(:anonymous))
+    if type ∈ [ :initial, :final ] # not allowed for :control or :state
+        ocp.constraints[label] = (type, :eq, rg, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
@@ -135,11 +143,38 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::State, label::
 end
 
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :initial, :final ]
-        ocp.constraints[label] = (type, :ineq, x -> x, ub, lb)
+    if type ∈ [ :initial, :final, :control, :state ]
+        ocp.constraints[label] = (type, :ineq, 1:state_dimension(ocp), ub, lb)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
+    end
+end
+
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::UnitRange{Int}, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
+    if type ∈ [ :initial, :final, :control, :state ]
+        ocp.constraints[label] = (type, :ineq, rg, ub, lb)
+    else
+        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+        ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
+    end
+end
+
+function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val::Real, label::Symbol=gensym(:anonymous))
+    if type ∈ [ :control, :state, :mixed, :boundary ]
+        ocp.constraints[label] = (type, :eq, f, val)
+    else
+        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+        ". Please choose in [ :control, :mixed, :boundary ] or check the arguments of the constraint! method."))
+    end
+end
+
+function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
+    if type ∈ [ :control, :state, :mixed, :boundary ]
+        ocp.constraints[label] = (type, :ineq, f, lb, ub)
+    else
+        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+        ". Please choose in [ :control, :mixed, :boundary ] or check the arguments of the constraint! method."))
     end
 end
 
@@ -152,24 +187,6 @@ function constraint!(ocp::OptimalControlModel{time_dependence, scalar_vectorial}
     end
 end
 
-function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val::Real, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :control, :mixed, :boundary ]
-        ocp.constraints[label] = (type, :eq, f, val)
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :control, :mixed, :boundary ] or check the arguments of the constraint! method."))
-    end
-end
-
-function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :control, :mixed, :boundary ]
-        ocp.constraints[label] = (type, :ineq, f, lb, ub)
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :control, :mixed, :boundary ] or check the arguments of the constraint! method."))
-    end
-end
-
 #
 function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
     delete!(ocp.constraints, label)
@@ -178,68 +195,27 @@ end
 #
 function constraint(ocp::OptimalControlModel{time_dependence, scalar_vectorial}, label::Symbol) where {time_dependence, scalar_vectorial}
     con = ocp.constraints[label]
-    if length(con) == 5
-        throw(IncorrectArgument("the following constraint is not valid: " * String(label) *
-        ". You must choose the bound in [ :lower, :upper ]."))
+    @match con begin
+        (:initial , _, rg :: UnitRange{Int}, val   ) => return x -> x[rg]
+        (:final   , _, rg :: UnitRange{Int}, val   ) => return x -> x[rg]
+        (:boundary, _, f                   , val   ) => return f 
+        (:boundary, _, f                   , lb, ub) => return f 
+        (:control , _, rg :: UnitRange{Int}, lb, ub) => return u -> u[rg]
+        (:control , _, f                   , val   ) => return f 
+        (:control , _, f                   , lb, ub) => return f 
+        (:state   , _, rg :: UnitRange{Int}, lb, ub) => return x -> x[rg]
+        (:state   , _, f                   , val   ) => return f 
+        (:state   , _, f                   , lb, ub) => return f 
+        (:mixed   , _, f                   , val   ) => return f 
+        (:mixed   , _, f                   , lb, ub) => return f 
+        _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+             ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed ]."))
     end
-    type, _, f, val = con
-    if type ∈ [ :initial, :final ]
-        return x -> f(x) - val
-    elseif type == :boundary
-        return (t0, x0, tf, xf) -> f(t0, x0, tf, xf) - val
-    elseif type == :control
-        return isautonomous(time_dependence) ? u -> f(u) - val : (t, u) -> f(t, u) - val
-    elseif type == :mixed
-        return isautonomous(time_dependence) ? (x, u) -> f(x, u) - val : (t, x, u) -> f(t, x, u) - val
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :boundary, :control, :mixed ]."))
-    end
-    return nothing
-end
-
-#
-function constraint(ocp::OptimalControlModel{time_dependence, scalar_vectorial}, label::Symbol, bound::Symbol) where {time_dependence, scalar_vectorial}
-    # constraints are all >= 0
-    con = ocp.constraints[label]
-    if length(con) == 4
-        throw(IncorrectArgument("the following constraint is not valid: " * String(label) *
-        ". You can't choose a bound."))
-    end
-    type, _, f, lb, ub = con
-    if !( bound ∈ [ :lower, :upper ] )
-        throw(IncorrectArgument("the following bound is not valid: " * String(bound) *
-        ". Please choose in [ :lower, :upper ]."))
-    end
-    if (bound == :lower && lb == -Inf) || (bound == :upper && ub == Inf)
-        throw(IncorrectArgument("there is no constraint for the bound: " * String(bound)))
-    end
-    if type ∈ [ :initial, :final ]
-        return bound == :lower ? x -> f(x) - lb : x -> ub - f(x)
-    elseif type == :boundary
-        return bound == :lower ? (t0, x0, tf, xf) -> f(t0, x0, tf, xf) - lb : (t0, x0, tf, xf) -> ub - f(t0, x0, tf, xf)
-    elseif type == :control
-        if isautonomous(time_dependence)
-            return bound == :lower ? u -> f(u) - lb : u -> ub - f(u)
-        else
-            return bound == :lower ? (t, u) -> f(t, u) - lb : (t, u) -> ub - f(t, u)
-        end
-    elseif type == :mixed
-        if isautonomous(time_dependence)
-            return bound == :lower ? (x, u) -> f(x, u) - lb : (x, u) -> ub - f(x, u) 
-        else
-            return bound == :lower ? (t, x, u) -> f(t, x, u) - lb : (t, x, u) -> ub - f(t, x, u) 
-        end
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :boundary, :control, :mixed ]."))
-    end
-    return nothing
 end
 
 #
 function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vectorial}) where {time_dependence, scalar_vectorial}
-    #
+ 
     constraints = ocp.constraints
     n = ocp.state_dimension
     
