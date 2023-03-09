@@ -45,7 +45,7 @@ final_time(ocp::OptimalControlModel) = ocp.final_time
 control_dimension(ocp::OptimalControlModel) = ocp.control_dimension
 state_dimension(ocp::OptimalControlModel) = ocp.state_dimension
 constraints(ocp::OptimalControlModel) = ocp.constraints
-function initial_condition(ocp::OptimalControlModel) 
+function initial_condition(ocp::OptimalControlModel)  # debug: does not make sense for a range ≠ 1:n
     cs = constraints(ocp)
     x0 = nothing
     for (_, c) ∈ cs
@@ -126,7 +126,7 @@ end
 #
 function constraint!(ocp::OptimalControlModel, type::Symbol, val::State, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ] # not allowed for :control or :state
-        ocp.constraints[label] = (type, :eq, 1:state_dimension(ocp), val)
+        ocp.constraints[label] = (type, :eq, x -> x, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
@@ -135,7 +135,7 @@ end
 
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::UnitRange{Int}, val::State, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ] # not allowed for :control or :state
-        ocp.constraints[label] = (type, :eq, rg, val)
+        ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
@@ -143,7 +143,9 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::UnitRange{Int},
 end
 
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :initial, :final, :control, :state ]
+    if type ∈ [ :initial, :final ]
+        ocp.constraints[label] = (type, :ineq, x -> x, ub, lb)
+    elseif type ∈ [ :control, :state ]
         ocp.constraints[label] = (type, :ineq, 1:state_dimension(ocp), ub, lb)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
@@ -152,7 +154,9 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Real, ub::Real,
 end
 
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::UnitRange{Int}, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :initial, :final, :control, :state ]
+    if type ∈ [ :initial, :final ]
+        ocp.constraints[label] = (type, :ineq, x -> x[rg], ub, lb)
+    elseif type ∈ [ :control, :state ]
         ocp.constraints[label] = (type, :ineq, rg, ub, lb)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
@@ -162,7 +166,7 @@ end
 
 function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val::Real, label::Symbol=gensym(:anonymous))
     if type ∈ [ :control, :state, :mixed, :boundary ]
-        ocp.constraints[label] = (type, :eq, f, val)
+        ocp.constraints[label] = (type, :eq, f, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :control, :mixed, :boundary ] or check the arguments of the constraint! method."))
@@ -196,18 +200,14 @@ end
 function constraint(ocp::OptimalControlModel{time_dependence, scalar_vectorial}, label::Symbol) where {time_dependence, scalar_vectorial}
     con = ocp.constraints[label]
     @match con begin
-        (:initial , _, rg :: UnitRange{Int}, val   ) => return x -> x[rg]
-        (:final   , _, rg :: UnitRange{Int}, val   ) => return x -> x[rg]
-        (:boundary, _, f                   , val   ) => return f 
-        (:boundary, _, f                   , lb, ub) => return f 
-        (:control , _, rg :: UnitRange{Int}, lb, ub) => return u -> u[rg]
-        (:control , _, f                   , val   ) => return f 
-        (:control , _, f                   , lb, ub) => return f 
-        (:state   , _, rg :: UnitRange{Int}, lb, ub) => return x -> x[rg]
-        (:state   , _, f                   , val   ) => return f 
-        (:state   , _, f                   , lb, ub) => return f 
-        (:mixed   , _, f                   , val   ) => return f 
-        (:mixed   , _, f                   , lb, ub) => return f 
+        (:initial , _, f                   , _, _) => return f
+        (:final   , _, f                   , _, _) => return f
+        (:boundary, _, f                   , _, _) => return f 
+        (:control , _, rg :: UnitRange{Int}, _, _) => return u -> u[rg]
+        (:control , _, f                   , _, _) => return f 
+        (:state   , _, rg :: UnitRange{Int}, _, _) => return x -> x[rg]
+        (:state   , _, f                   , _, _) => return f 
+        (:mixed   , _, f                   , _, _) => return f 
         _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
              ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed ]."))
     end
@@ -223,32 +223,44 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
     ηf = Vector{StateConstraintFunction}(); ηl = Vector{MyNumber}(); ηu = Vector{MyNumber}()
     ψf = Vector{MixedConstraintFunction}(); ψl = Vector{MyNumber}(); ψu = Vector{MyNumber}()
     ϕf = Vector{BoundaryConstraintFunction}(); ϕl = Vector{MyNumber}(); ϕu = Vector{MyNumber}()
+    uind = Vector{Int}(); ulb = Vector{MyNumber}(); uub = Vector{MyNumber}()
+    xind = Vector{Int}(); xlb = Vector{MyNumber}(); xub = Vector{MyNumber}()
 
     for (_, c) ∈ constraints
-        if c[1] == :control
-            push!(ξf, ControlConstraintFunction{time_dependence, scalar_vectorial}(c[3]))
-            append!(ξl, c[4])
-            append!(ξu, c[2] == :eq ? c[4] : c[5])
-        elsif c[1] == :state
-            push!(ηf, StateConstraintFunction{time_dependence, scalar_vectorial}(c[3]))
-            append!(ηl, c[4])
-            append!(ηu, c[2] == :eq ? c[4] : c[5])
-        elseif c[1] == :mixed
-            push!(ψf, MixedConstraintFunction{time_dependence, scalar_vectorial}(c[3]))
-            append!(ψl, c[4])
-            append!(ψu, c[2] == :eq ? c[4] : c[5])
-        elseif c[1] == :initial
-            push!(ϕf, BoundaryConstraintFunction{scalar_vectorial}((t0, x0, tf, xf) -> c[3](x0)))
-            append!(ϕl, c[4])
-            append!(ϕu, c[2] == :eq ? c[4] : c[5])
-        elseif c[1] == :final
-            push!(ϕf, BoundaryConstraintFunction{scalar_vectorial}((t0, x0, tf, xf) -> c[3](xf)))
-            append!(ϕl, c[4])
-            append!(ϕu, c[2] == :eq ? c[4] : c[5])
-        elseif c[1] == :boundary
-            push!(ϕf, BoundaryConstraintFunction{scalar_vectorial}((t0, x0, tf, xf) -> c[3](t0, x0, tf, xf)))
-            append!(ϕl, c[4])
-            append!(ϕu, c[2] == :eq ? c[4] : c[5])
+        @match c begin
+        (:initial, _, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraintFunction{scalar_vectorial}((t0, x0, tf, xf) -> f(x0)))
+            append!(ϕl, lb)
+            append!(ϕu, ub)
+        (:final, _, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraintFunction{scalar_vectorial}((t0, x0, tf, xf) -> f(xf)))
+            append!(ϕl, lb)
+            append!(ϕu, ub)
+        (:boundary, _, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraintFunction{scalar_vectorial}((t0, x0, tf, xf) -> f(t0, x0, tf, xf)))
+            append!(ϕl, lb)
+            append!(ϕu, ub)
+        (:control, _, rg :: UnitRange{Int}, lb, ub) => begin 
+	    append!(uind, rg)
+	    append!(ulb, lb)
+	    append!(uub, ub) end
+        (:control, _, f, lb, ub) => begin
+            push!(ξf, ControlConstraintFunction{time_dependence, scalar_vectorial}(f))
+            append!(ξl, lb)
+            append!(ξu, ub) end
+        (:state, _, rg :: UnitRange{Int}, lb, ub) => begin
+	    append!(xind, rg)
+	    append!(xlb, lb)
+	    append!(xub, ub) end
+        (:state, _, f, lb, ub) => begin
+            push!(ηf, StateConstraintFunction{time_dependence, scalar_vectorial}(f))
+            append!(ηl, lb)
+            append!(ηu, ub) end
+        (:mixed, _, f, lb, ub) => begin
+            push!(ψf, MixedConstraintFunction{time_dependence, scalar_vectorial}(f))
+            append!(ψl, lb)
+            append!(ψu, ub) end
+        _ => throw("debug")
         end
     end
 
@@ -280,7 +292,7 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
     return val
     end 
 
-    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu)
+    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub)
 
 end
 
