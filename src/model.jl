@@ -220,6 +220,7 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
     n = ocp.state_dimension
     
     ξf = Vector{ControlConstraintFunction}(); ξl = Vector{MyNumber}(); ξu = Vector{MyNumber}()
+    ηf = Vector{StateConstraintFunction}(); ηl = Vector{MyNumber}(); ηu = Vector{MyNumber}()
     ψf = Vector{MixedConstraintFunction}(); ψl = Vector{MyNumber}(); ψu = Vector{MyNumber}()
     ϕf = Vector{BoundaryConstraintFunction}(); ϕl = Vector{MyNumber}(); ϕu = Vector{MyNumber}()
 
@@ -228,6 +229,10 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
             push!(ξf, ControlConstraintFunction{time_dependence, scalar_vectorial}(c[3]))
             append!(ξl, c[4])
             append!(ξu, c[2] == :eq ? c[4] : c[5])
+        elsif c[1] == :state
+            push!(ηf, StateConstraintFunction{time_dependence, scalar_vectorial}(c[3]))
+            append!(ηl, c[4])
+            append!(ηu, c[2] == :eq ? c[4] : c[5])
         elseif c[1] == :mixed
             push!(ψf, MixedConstraintFunction{time_dependence, scalar_vectorial}(c[3]))
             append!(ψl, c[4])
@@ -257,6 +262,12 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
     return val
     end 
 
+    function η(t, x)
+        val = Vector{MyNumber}()
+        for i ∈ 1:length(ηf) append!(val, ηf[i](t, x)) end
+    return val
+    end 
+
     function ψ(t, x, u)
         val = Vector{MyNumber}()
         for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u)) end
@@ -269,7 +280,7 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
     return val
     end 
 
-    return (ξl, ξ, ξu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu)
+    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu)
 
 end
 
