@@ -145,7 +145,9 @@ end
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Real, ub::Real, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x, ub, lb)
-    elseif type ∈ [ :control, :state ]
+    elseif type == :control
+        ocp.constraints[label] = (type, :ineq, 1:control_dimension(ocp), ub, lb)
+    elseif type == :state
         ocp.constraints[label] = (type, :ineq, 1:state_dimension(ocp), ub, lb)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
