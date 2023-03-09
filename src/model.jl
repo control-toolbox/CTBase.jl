@@ -260,8 +260,7 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, scalar_vector
             push!(ψf, MixedConstraintFunction{time_dependence, scalar_vectorial}(f))
             append!(ψl, lb)
             append!(ψu, ub) end
-        _ => throw("debug")
-        end
+        _ => throw(NotImplemented("dealing with this kind of constraint is not implemented"))
     end
 
 #    ξ!(val, u) = [ val[i] = ξf[i](u) for i ∈ 1:length(ξf) ]
