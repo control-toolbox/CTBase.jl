@@ -204,7 +204,8 @@ function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}
         elseif vv == :adjoint || vv == :costate
             x = [P[i][1] for i in 1:m]
         else
-            x = vcat([U[i][1] for i in 1:m-1], U[m-1][1])
+            #x = vcat([U[i][1] for i in 1:m-1], U[m-1][1])
+            x = [U[i][1] for i in 1:m]
         end
     else
         vv = xx[1]
@@ -216,7 +217,8 @@ function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}
         elseif vv == :adjoint || vv == :costate
             x = [P[i][ii] for i in 1:m]
         else
-            x = vcat([U[i][ii] for i in 1:m-1], U[m-1][ii])
+            #x = vcat([U[i][ii] for i in 1:m-1], U[m-1][ii])
+            x = [U[i][ii] for i in 1:m]
         end
     end
 
