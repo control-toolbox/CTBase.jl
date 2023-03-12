@@ -43,7 +43,9 @@ ismin(ocp::OptimalControlModel) = criterion(ocp) == :min
 initial_time(ocp::OptimalControlModel) = ocp.initial_time
 final_time(ocp::OptimalControlModel) = ocp.final_time
 control_dimension(ocp::OptimalControlModel) = ocp.control_dimension
+control_labels(ocp::OptimalControlModel) = ocp.control_labels
 state_dimension(ocp::OptimalControlModel) = ocp.state_dimension
+state_labels(ocp::OptimalControlModel) = ocp.state_labels
 constraints(ocp::OptimalControlModel) = ocp.constraints
 function initial_condition(ocp::OptimalControlModel) 
     cs = constraints(ocp)
