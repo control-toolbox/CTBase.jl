@@ -3,7 +3,7 @@
 #
 abstract type AbstractOptimalControlSolution end
 
-# getters
+#= # getters
 message_aocs = "method not implemented for solutions of type "
 error_aocs(sol::AbstractOptimalControlSolution) = error(message_aocs*String(typeof(sol)))
 #
@@ -20,7 +20,7 @@ iterations(sol::AbstractOptimalControlSolution) = error_aocs(sol)
 success(sol::AbstractOptimalControlSolution) = error_aocs(sol)
 message(sol::AbstractOptimalControlSolution) = error_aocs(sol)
 stopping(sol::AbstractOptimalControlSolution) = error_aocs(sol)
-constraints_violation(sol::AbstractOptimalControlSolution) = error_aocs(sol)
+constraints_violation(sol::AbstractOptimalControlSolution) = error_aocs(sol) =#
 
 @with_kw mutable struct OptimalControlSolution <: AbstractOptimalControlSolution 
     state_dimension::Union{Nothing, Dimension}=nothing
@@ -39,7 +39,7 @@ constraints_violation(sol::AbstractOptimalControlSolution) = error_aocs(sol)
     infos::Dict{Symbol, Any}=Dict{Symbol, Any}()
 end
 
-# getters
+#= # getters
 state_dimension(sol::OptimalControlSolution) = sol.state_dimension
 control_dimension(sol::OptimalControlSolution) = sol.control_dimension
 time_steps(sol::OptimalControlSolution) = sol.times
@@ -53,4 +53,10 @@ objective(sol::OptimalControlSolution) = sol.objective
 iterations(sol::OptimalControlSolution) = sol.iterations   
 success(sol::OptimalControlSolution) = sol.success
 message(sol::OptimalControlSolution) = sol.message
-stopping(sol::OptimalControlSolution) = sol.stopping
+stopping(sol::OptimalControlSolution) = sol.stopping =#
+
+# we get an error when a solution is printed so I add this function
+# which has to be put in the package CTBase and has to be completed
+function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
+    nothing
+end

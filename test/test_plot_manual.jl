@@ -18,7 +18,7 @@ p0 = C\D
 x(t) = [a+b*(t-t0)+β*(t-t0)^2/2.0-α*(t-t0)^3/6.0, b+β*(t-t0)-α*(t-t0)^2/2.0]
 p(t) = [α, -α*(t-t0)+β]
 u(t) = [p(t)[2]]
-objective = 0.5*(α^2*(tf-t0)^3/3+β^2*(tf-t0)-α*β*(tf-t0)^2/2)
+objective = 0.5*(α^2*(tf-t0)^3/3+β^2*(tf-t0)-α*β*(tf-t0)^2)
 #
 N=201
 times = range(t0, tf, N)
@@ -40,7 +40,7 @@ sol.message = "ceci est un test"
 sol.success = true
 
 #
-plot(sol, layout=:split)
+plot(sol, layout=:split, size=(900, 600))
 #plot(sol, layout=:group)
 #ps=plot(sol, :time, (:state, 1))
 #plot!(ps, sol, :time, (:control, 1))

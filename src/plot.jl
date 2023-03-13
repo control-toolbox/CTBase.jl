@@ -1,12 +1,8 @@
 # --------------------------------------------------------------------------------------------------
-# Plot solution
-# print("x", '\u2080'+9) : x₉ 
-#
-
-const SymbolPlot = Tuple{Symbol,Integer}
-
+# Tree for plot 
 #
 abstract type AbstractPlotNode end
+const SymbolPlot = Tuple{Symbol,Integer}
 
 # leaf
 struct PlotLeaf <: AbstractPlotNode
@@ -21,15 +17,15 @@ struct PlotNode <: AbstractPlotNode
     children::Vector{<:AbstractPlotNode}
     PlotNode(element::Union{Symbol, Matrix{Any}}, children::Vector{<:AbstractPlotNode}) = new(element, children)
 end
-
 AbstractTrees.children(node::PlotNode) = node.children
 
 # tree
-struct PlotTree
-    root::AbstractPlotNode
-end
+#struct PlotTree
+#    root::AbstractPlotNode
+#end
 
-# internal plot
+# --------------------------------------------------------------------------------------------------
+# internal plots
 function _plot_time(sol::OptimalControlSolution, d::Dimension, s::Symbol; 
     labels::Vector{String}, title::String, kwargs...)
     p = Plots.plot(; xlabel="time", title=title, kwargs...)
@@ -41,24 +37,25 @@ end
 
 function _plot_time(sol::OptimalControlSolution, s::Symbol, i::Integer;
     label::String, kwargs...)
-    p = CTBase.plot(sol, :time, (s, i); label=label, kwargs...)
+    p = CTBase.plot(sol, :time, (s, i); label=label, kwargs...) # use simple plot
     return p
 end
 
 function _plot_time!(p, sol::OptimalControlSolution, s::Symbol, i::Integer;
     label::String, kwargs...)
-    CTBase.plot!(p, sol, :time, (s, i); label=label, kwargs...)
+    CTBase.plot!(p, sol, :time, (s, i); label=label, kwargs...) # use simple plot
 end
 
+# --------------------------------------------------------------------------------------------------
 # General plot
 function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
     state_style=(), control_style=(), adjoint_style=(), kwargs...)
 
     # parameters
-    n = state_dimension(sol)
-    m = control_dimension(sol)
-    x_labels = state_labels(sol)
-    u_labels = control_labels(sol)
+    n = sol.state_dimension
+    m = sol.control_dimension
+    x_labels = sol.state_labels
+    u_labels = sol.control_labels
 
     if layout==:group
             
@@ -76,7 +73,7 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
 
     elseif layout==:split
     
-        # create tree root
+        # create tree plot
         state_plots = Vector{PlotLeaf}()
         adjoint_plots = Vector{PlotLeaf}()
         control_plots = Vector{PlotLeaf}()
@@ -89,10 +86,10 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
             push!(control_plots, PlotLeaf((:control, i)))
         end
 
+        #
         node_x = PlotNode(:column, state_plots)
         node_p = PlotNode(:column, adjoint_plots)
         node_u = PlotNode(:column, control_plots)
-
         node_xp = PlotNode(:row, [node_x, node_p])
 
         function _width(r) # generate a{0.2h}, if r=0.2
@@ -100,7 +97,6 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
             a = Expr(:curly, :a, i)
             return a
         end
-
         r = round(n/(n+m), digits=2)
         a = _width(r)
         @eval l = @layout [$a
@@ -108,7 +104,7 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
         root = PlotNode(l, [node_xp, node_u])
 
         #
-        function rec_plot(node::PlotLeaf)
+        function rec_plot(node::PlotLeaf, depth::Integer)
             (s, i) = node.element
             if s==:state
                 l = x_labels[i]
@@ -129,22 +125,23 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
             return pc
         end
 
-        function rec_plot(node::PlotNode)
+        function rec_plot(node::PlotNode, depth::Integer=0)
             subplots=()
             for c ∈ node.children
-                pc = rec_plot(c)
+                pc = rec_plot(c, depth+1)
                 subplots = (subplots..., pc)
             end
+            kwargs_plot = depth==0 ? kwargs : ()
             if typeof(node.element)==Symbol
                 if node.element==:row
-                    ps = plot(subplots..., layout=(1, length(subplots)))
+                    ps = plot(subplots...; layout=(1, length(subplots)), kwargs_plot...)
                 elseif node.element==:column
-                    ps = plot(subplots..., layout=(length(subplots), 1))
+                    ps = plot(subplots...; layout=(length(subplots), 1), kwargs_plot...)
                 else 
                     error("no such choice for layout")
                 end
             else
-                ps = plot(subplots..., layout=node.element)
+                ps = plot(subplots...; layout=node.element, kwargs_plot...)
             end
             return ps
         end
@@ -158,6 +155,7 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
 
 end
 
+# --------------------------------------------------------------------------------------------------
 # simple plot: use a Plots recipe 
 @recipe function f(sol::OptimalControlSolution,
     xx::Union{Symbol,Tuple{Symbol,Integer}}, yy::Union{Symbol,Tuple{Symbol,Integer}})
@@ -182,16 +180,18 @@ end
     x, y
 end
 
+# --------------------------------------------------------------------------------------------------
+# getter for plots
 """
 	get(sol::UncFreeXfSolution, xx::Union{Symbol, Tuple{Symbol, Integer}})
 TBW
 """
 function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}})
 
-    T = time_steps(sol)
-    X = state(sol).(T)
-    U = control(sol).(T)
-    P = adjoint(sol).(T)
+    T = sol.times
+    X = sol.state.(T)
+    U = sol.control.(T)
+    P = sol.adjoint.(T)
 
     m = length(T)
 

@@ -5,7 +5,7 @@ using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Parameters # @with_kw: permit to have default values in struct
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using Printf # to print a OptimalControlModel
-import Base: \, Base
+import Base: show, \, Base
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using AbstractTrees
@@ -82,10 +82,10 @@ export control_labels, state_labels
 
 # solution
 export AbstractOptimalControlSolution, OptimalControlSolution
-export time_steps_length, state_dimension, control_dimension
-export time_steps, state, control, adjoint, objective
-export iterations, success, message, stopping
-export constraints_violation
+#export time_steps_length, state_dimension, control_dimension
+#export time_steps, state, control, adjoint, objective
+#export iterations, success, message, stopping
+#export constraints_violation
 export plot, plot!
 
 # macros

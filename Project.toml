@@ -1,7 +1,7 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
 authors = ["Olivier Cots <olivier.cots@enseeiht.fr>"]
-version = "0.4.2"
+version = "0.4.3"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
