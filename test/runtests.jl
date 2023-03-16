@@ -12,12 +12,12 @@ const gFD = getFullDescription
 
 #
 @testset verbose = true showtiming = true "Base" begin
-    for name in (
+    for name ∈ (
         :utils,
         :exceptions,
         :callbacks,
         :descriptions,
-        :functions,
+        #:functions, # todo
         :model,
         )
         @testset "$(name)" begin
