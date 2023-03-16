@@ -17,7 +17,7 @@ const gFD = getFullDescription
         :exceptions,
         :callbacks,
         :descriptions,
-        #:functions, # todo
+        :functions,
         :model,
         )
         @testset "$(name)" begin

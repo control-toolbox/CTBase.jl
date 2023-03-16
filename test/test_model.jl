@@ -88,18 +88,14 @@ n = 3
 time!(ocp, :initial, t0) # if not provided, final time is free
 state!(ocp, n) # state dim
 control!(ocp, m) # control dim
-constraint!(ocp, :initial, x0)
+constraint!(ocp, :initial, x0, :initial_con1)
 constraint!(ocp, :control, 0., 1., :control_con1)
-constraint!(ocp, :mixed, 1:2, [ r0, 0 ], [ Inf, vmax ], :state_con1)
-constraint!(ocp, :mixed, 3:3, m0, mf, :state_con2)
+constraint!(ocp, :state, 1:2, [ r0, 0 ], [ Inf, vmax ], :state_con1)
+constraint!(ocp, :state, 3, m0, mf, :state_con2)
 #
 objective!(ocp, :mayer, (t0, x0, tf, xf) -> xf[1], :max)
 #
-D(x) = Cd * x[2]^2 * exp(-β*(x[1]-1))
-F0(x) = [ x[2], -D(x)/x[3]-1/x[1]^2, 0 ]
-F1(x) = [ 0, Tmax/x[3], -b*Tmax ]
-f(x, u) = F0(x) + u*F1(x)
-constraint!(ocp, :dynamics, f)
+constraint!(ocp, :dynamics, f) # see previous defs
 
 #
 @test isautonomous(ocp)
@@ -110,8 +106,9 @@ constraint!(ocp, :dynamics, f)
 @test final_time(ocp) === nothing
 @test control_dimension(ocp) == m
 @test state_dimension(ocp) == n
+@test constraint(ocp, :initial_con1)(x0) == x0 
 @test constraint(ocp, :control_con1)(1) == 1 
 @test constraint(ocp, :state_con1)(x0) == x0[1:2]
-@test constraint(ocp, :state_con2)(x0) == x0[3:3]
+@test constraint(ocp, :state_con2)(x0) == x0[3]
 
 end
