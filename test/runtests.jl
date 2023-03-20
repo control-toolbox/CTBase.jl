@@ -19,6 +19,8 @@ const gFD = getFullDescription
         :descriptions,
         :functions,
         :model,
+        #:ctparser,
+        :ctparser_utils,
         )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

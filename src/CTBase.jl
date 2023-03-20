@@ -52,9 +52,9 @@ include("utils.jl")
 #include("algorithms.jl")
 include("model.jl")
 #
-include("parser-utils.jl")
-include("parser.jl")
-@reexport using .CtParser
+include("ctparser-utils.jl")
+#include("ctparser.jl")
+#@reexport using .CtParser
 #
 include("print.jl")
 include("solutions.jl")
@@ -102,5 +102,8 @@ export @ctfunction_td_sv, @ctfunction_sv
 export Hamiltonian, HamiltonianVectorField, VectorField
 export MayerFunction, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
 export BoundaryConstraintFunction, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
+
+# ctparser-utils
+export prune_call, subs, constraint_type, has
 
 end
