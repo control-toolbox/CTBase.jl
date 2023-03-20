@@ -1,6 +1,7 @@
 module CTBase
 
 # using
+using Reexport
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Parameters # @with_kw: permit to have default values in struct
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
@@ -49,6 +50,11 @@ include("default.jl")
 include("utils.jl")
 #include("algorithms.jl")
 include("model.jl")
+#
+include("parser-utils.jl")
+include("parser.jl")
+@reexport using .CtParser
+#
 include("print.jl")
 include("solutions.jl")
 include("plot.jl")
