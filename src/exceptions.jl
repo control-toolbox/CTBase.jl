@@ -26,8 +26,14 @@ struct IncorrectArgument <: CTException
 end
 Base.showerror(io::IO, e::IncorrectArgument) = print(io, e.var)
 
-# incorrect argument
+# incorrect output
 struct IncorrectOutput <: CTException
     var::String
 end
 Base.showerror(io::IO, e::IncorrectOutput) = print(io, e.var)
+
+# not implemented
+struct NotImplemented <: CTException
+    var::String
+end
+Base.showerror(io::IO, e::NotImplemented) = print(io, e.var)

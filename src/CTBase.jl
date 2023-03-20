@@ -10,6 +10,7 @@ import Base: show, \, Base
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using AbstractTrees
+using MLStyle
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -22,7 +23,7 @@ const Times = MyVector
 const TimesDisc = Union{MyVector,StepRangeLen}
 
 const State = MyVector
-const Adjoint = MyVector # todo: ajouter type adjoint pour faire par exemple p*f(x, u) au lieu de p'*f(x,u)
+const Adjoint = MyVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 const Control = MyVector
 
 const States = Vector{<:State}
