@@ -78,13 +78,11 @@ constraint!(ocp, :dynamics, f)
 # 
 # goddard (version 2, ranges, vectorial constraints)
 ocp = Model()
-#
 Cd = 310.; Tmax = 3.5; β = 500.; b = 2.; t0 = 0.; r0 = 1.; v0 = 0.
 vmax = 0.1; m0 = 1.; mf = 0.6; x0 = [r0, v0, m0]
-#
 m = 1
 n = 3
-#
+
 time!(ocp, :initial, t0) # if not provided, final time is free
 state!(ocp, n) # state dim
 control!(ocp, m) # control dim
@@ -92,23 +90,38 @@ constraint!(ocp, :initial, x0, :initial_con1)
 constraint!(ocp, :control, 0., 1., :control_con1)
 constraint!(ocp, :state, 1:2, [ r0, 0 ], [ Inf, vmax ], :state_con1)
 constraint!(ocp, :state, 3, m0, mf, :state_con2)
-#
+
 objective!(ocp, :mayer, (t0, x0, tf, xf) -> xf[1], :max)
-#
+
 constraint!(ocp, :dynamics, f) # see previous defs
 
-#
 @test isautonomous(ocp)
 @test lagrange(ocp) === nothing
 @test mayer(ocp)(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
 @test !ismin(ocp)
+
 @test initial_time(ocp) == t0
 @test final_time(ocp) === nothing
 @test control_dimension(ocp) == m
 @test state_dimension(ocp) == n
+
 @test constraint(ocp, :initial_con1)(x0) == x0 
 @test constraint(ocp, :control_con1)(1) == 1 
 @test constraint(ocp, :state_con1)(x0) == x0[1:2]
 @test constraint(ocp, :state_con2)(x0) == x0[3]
+
+(ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
+@test ξl == [ ]
+@test ξu == [ ]
+@test ηl == [ ]
+@test ηu == [ ]
+@test ψl == [ ] 
+@test ψu == [ ]
+@test ϕl == x0 
+@test ϕu == x0 
+@test ulb == [ 0 ][uind]
+@test uub == [ 1 ][uind]
+@test xlb == [ r0, 0, m0 ][xind]
+@test xub == [ Inf, vmax, mf ][xind]
 
 end
