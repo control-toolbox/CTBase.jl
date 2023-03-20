@@ -1,16 +1,15 @@
 module CTBase
 
 # using
-using Reexport
-using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
-using Parameters # @with_kw: permit to have default values in struct
-using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-using Printf # to print a OptimalControlModel
 import Base: show, \, Base
+using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
+using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
+using MLStyle
+using Parameters # @with_kw: permit to have default values in struct
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
-using AbstractTrees
-using MLStyle
+using Printf # to print a OptimalControlModel
+using Reexport
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -57,7 +56,7 @@ include("ctparser-utils.jl")
 #@reexport using .CtParser
 #
 include("print.jl")
-include("solutions.jl")
+include("solution.jl")
 include("plot.jl")
 
 #

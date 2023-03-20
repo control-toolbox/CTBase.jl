@@ -8,6 +8,7 @@ _ocp_time_dependence() = :autonomous
 _ocp_scalar_vectorial() = :scalar
 _state_labels(n::Dimension) = n==1 ? ["x"] : [ "x" * ctindices(i) for i ∈ range(1, n)]
 _control_labels(m::Dimension) = m==1 ? ["u"] : [ "u" * ctindices(i) for i ∈ range(1, m)]
+_time_label() = "t"
 
 # common
 __matrix_dimension_stock() = 1 

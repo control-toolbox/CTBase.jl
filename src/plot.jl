@@ -9,7 +9,6 @@ struct PlotLeaf <: AbstractPlotNode
     element::SymbolPlot
     PlotLeaf(element::SymbolPlot) = new(element) 
 end
-AbstractTrees.children(::PlotLeaf) = ()
 
 # node
 struct PlotNode <: AbstractPlotNode
@@ -17,33 +16,27 @@ struct PlotNode <: AbstractPlotNode
     children::Vector{<:AbstractPlotNode}
     PlotNode(element::Union{Symbol, Matrix{Any}}, children::Vector{<:AbstractPlotNode}) = new(element, children)
 end
-AbstractTrees.children(node::PlotNode) = node.children
-
-# tree
-#struct PlotTree
-#    root::AbstractPlotNode
-#end
 
 # --------------------------------------------------------------------------------------------------
 # internal plots
 function _plot_time(sol::OptimalControlSolution, d::Dimension, s::Symbol; 
-    labels::Vector{String}, title::String, kwargs...)
+    t_label, labels::Vector{String}, title::String, kwargs...)
     p = Plots.plot(; xlabel="time", title=title, kwargs...)
     for i in range(1, d)
-        _plot_time!(p, sol, s, i; label=labels[i], kwargs...)
+        _plot_time!(p, sol, s, i; t_label=t_label, label=labels[i], kwargs...)
     end
     return p
 end
 
 function _plot_time(sol::OptimalControlSolution, s::Symbol, i::Integer;
-    label::String, kwargs...)
-    p = CTBase.plot(sol, :time, (s, i); label=label, kwargs...) # use simple plot
+    t_label, label::String, kwargs...)
+    p = CTBase.plot(sol, :time, (s, i); xlabel=t_label, label=label, kwargs...) # use simple plot
     return p
 end
 
 function _plot_time!(p, sol::OptimalControlSolution, s::Symbol, i::Integer;
-    label::String, kwargs...)
-    CTBase.plot!(p, sol, :time, (s, i); label=label, kwargs...) # use simple plot
+    t_label, label::String, kwargs...)
+    CTBase.plot!(p, sol, :time, (s, i); xlabel=t_label, label=label, kwargs...) # use simple plot
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -56,17 +49,18 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
     m = sol.control_dimension
     x_labels = sol.state_labels
     u_labels = sol.control_labels
+    t_label = sol.time_label
 
     if layout==:group
             
         # state
-        px = _plot_time(sol, n, :state; labels=x_labels, title="state", state_style...)
+        px = _plot_time(sol, n, :state; t_label=t_label, labels=x_labels, title="state", state_style...)
         
         # control
-        pu = _plot_time(sol, m, :control; labels=u_labels, title="control", control_style...)
+        pu = _plot_time(sol, m, :control; t_label=t_label, labels=u_labels, title="control", control_style...)
 
         # adjoint
-        pp = _plot_time(sol, n, :adjoint; labels="p".*x_labels, title="adjoint", adjoint_style...)
+        pp = _plot_time(sol, n, :adjoint; t_label=t_label, labels="p".*x_labels, title="adjoint", adjoint_style...)
 
         # layout
         ps = Plots.plot(px, pu, pp, layout=(1, 3); kwargs...)
@@ -121,7 +115,7 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
             end
             pc = _plot_time(sol, s, i; 
                 tickfontsize=8, titlefontsize=8, labelfontsize=8,
-                label=l, title=t, style...)
+                t_label=t_label, label=l, title=t, style...)
             return pc
         end
 
@@ -175,6 +169,14 @@ end
             label --> sol.control_labels[i]
         elseif s==:adjoint
             label --> "p"*sol.state_labels[i]
+        end
+        # change ylims if the gap between min and max is less than a tol
+        tol = 1e-3
+        ymin = minimum(y)
+        ymax = maximum(y)
+        if abs(ymax-ymin)≤abs(ymin)*tol
+            ymiddle = (ymin+ymax)/2.0
+            ylims --> (0.9*ymiddle, 1.1*ymiddle)
         end
     end
     x, y

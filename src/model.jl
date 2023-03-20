@@ -5,6 +5,7 @@ abstract type AbstractOptimalControlModel end
 @with_kw mutable struct OptimalControlModel{time_dependence, scalar_vectorial} <: AbstractOptimalControlModel
     initial_time::Union{Time,Nothing}=nothing
     final_time::Union{Time,Nothing}=nothing
+    time_label::Union{String, Nothing}=nothing
     lagrange::Union{LagrangeFunction{time_dependence, scalar_vectorial},Nothing}=nothing
     mayer::Union{MayerFunction{scalar_vectorial},Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
@@ -60,7 +61,7 @@ Define the state dimension and possibly the names of each coordinate.
 julia> state!(ocp, 2, [ "x₁", "x₂" ])
 ```
 """
-function state!(ocp::OptimalControlModel, n::Dimension; labels::Vector{String}=_state_labels(n))
+function state!(ocp::OptimalControlModel, n::Dimension, labels::Vector{String}=_state_labels(n))
     ocp.state_dimension = n
     ocp.state_labels = labels
 end
@@ -75,7 +76,7 @@ Define the control dimension and possibly the names of each coordinate.
 julia> control!(ocp, 2, [ "u₁", "u₂" ])
 ```
 """
-function control!(ocp::OptimalControlModel, m::Dimension; labels::Vector{String}=_control_labels(m))
+function control!(ocp::OptimalControlModel, m::Dimension, labels::Vector{String}=_control_labels(m))
     ocp.control_dimension = m
     ocp.control_labels = labels
 end
@@ -83,20 +84,21 @@ end
 # -------------------------------------------------------------------------------------------
 # 
 """
-    time!(ocp, type, t)
+    time!(ocp, type, t[, label])
 
 Fix initial (resp. final) time, the final (resp. initial) time being variable (free),
 when type is `:initial`. And conversely when type is `:final`. 
 
 # Examples
 ```jldoctest
-julia> time!(ocp, :initial, 0)
-julia> time!(ocp, :final, 1)
+julia> time!(ocp, :initial, 0, "t")
+julia> time!(ocp, :final, 1, "t")
 """
-function time!(ocp::OptimalControlModel, type::Symbol, time::Time)
+function time!(ocp::OptimalControlModel, type::Symbol, time::Time, label::String=_time_label())
     type_ = Symbol(type, :_time)
     if type_ ∈ [ :initial_time, :final_time ]
         setproperty!(ocp, type_, time)
+        ocp.time_label = label
     else
         throw(IncorrectArgument("the following type of time is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ]."))
@@ -104,20 +106,21 @@ function time!(ocp::OptimalControlModel, type::Symbol, time::Time)
 end
 
 """
-    time!(ocp, t)
+    time!(ocp, t[, label])
 
 Fix initial and final times to `t[1]` and `t[2]`, respectively.
 
 # Examples
 ```jldoctest
-julia> time!(ocp, [ 0, 1 ])
+julia> time!(ocp, [ 0, 1 ], "t")
 """
-function time!(ocp::OptimalControlModel, times::Times)
+function time!(ocp::OptimalControlModel, times::Times, label::String=_time_label())
     if length(times) != 2
         throw(IncorrectArgument("times must be of dimension 2"))
     end
     ocp.initial_time=times[1]
     ocp.final_time=times[2]
+    ocp.time_label = label
 end
 
 # -------------------------------------------------------------------------------------------
@@ -153,7 +156,7 @@ julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
 julia> constraint!(ocp, :final, 1, 0)
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg, val, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, UnitRange{<:Integer}}, val, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ] # not allowed for :control or :state
         ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
     else
@@ -175,7 +178,7 @@ julia> constraint!(ocp, :control, 1, 0, 2)
 julia> constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symbol=gensym(:anonymous)) where {td, sv}
+function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x, ub, lb)
     elseif type == :control
@@ -303,7 +306,7 @@ computation (not taking into account provided value / bounds).
 julia> constraint(ocp, :con)
 ```
 """
-function constraint(ocp::OptimalControlModel{time_dependence, scalar_vectorial}, label::Symbol) where {time_dependence, scalar_vectorial}
+function constraint(ocp::OptimalControlModel, label::Symbol)
     con = ocp.constraints[label]
     @match con begin
         (:initial , _, f          , _, _) => return f

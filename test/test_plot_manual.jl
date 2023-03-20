@@ -28,6 +28,7 @@ sol = OptimalControlSolution()
 sol.state_dimension = n
 sol.control_dimension = m
 sol.times = times
+sol.time_label="t"
 sol.state = x
 sol.state_labels = [ "x" * ctindices(i) for i ∈ range(1, n)]
 sol.adjoint = p
