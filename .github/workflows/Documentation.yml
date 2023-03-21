@@ -3,12 +3,9 @@ name: Documentation
 
 on:
   push:
-    paths:
-      - 'docs/**'
     branches:
-      - main
-    tags: '*'
-    
+      - doc
+  
 jobs:
   build:
     runs-on: ubuntu-latest
