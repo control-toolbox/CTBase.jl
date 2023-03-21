@@ -104,7 +104,7 @@ julia> has(e, :u, :t)
 true
 ```
 """
-has(e, x, t) = begin # debug: rewrite with @match
+has(e, x, t) = begin # debug:  rewrite with @match
     foo(x, t) = (h, args...) ->
     if Expr(h, args...) == :($x($t))
         :yes
