@@ -66,14 +66,6 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         end
         nb_fixed += 1
     end
-    if initial_condition(ocp) !== nothing
-        if s == ""
-            s = s * "x0"
-        else
-            s = s * " and x0"
-        end
-        nb_fixed += 1
-    end
     if nb_fixed > 1
         s = s * " are fixed."
     elseif nb_fixed == 1

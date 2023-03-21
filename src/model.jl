@@ -152,7 +152,7 @@ julia> constraint!(ocp, :final, 1, 0)
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, UnitRange{<:Integer}}, val, label::Symbol=gensym(:anonymous))
-    if type ∈ [ :initial, :final ] # not allowed for :control or :state
+    if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
         ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
@@ -175,11 +175,11 @@ julia> constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ]
-        ocp.constraints[label] = (type, :ineq, x -> x, ub, lb)
+        ocp.constraints[label] = (type, :ineq, x -> x, lb, ub)
     elseif type == :control
-        ocp.constraints[label] = (type, :ineq, lb isa MyNumber ? 1 : 1:control_dimension(ocp), ub, lb) # debug
+        ocp.constraints[label] = (type, :ineq, lb isa MyNumber ? 1 : 1:control_dimension(ocp), lb, ub) # debug
     elseif type == :state
-        ocp.constraints[label] = (type, :ineq, lb isa MyNumber ? 1 : 1:state_dimension(ocp), ub, lb) # debug
+        ocp.constraints[label] = (type, :ineq, lb isa MyNumber ? 1 : 1:state_dimension(ocp), lb, ub) # debug
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :control, :state ] or check the arguments of the constraint! method."))
@@ -199,11 +199,11 @@ julia> constraint!(ocp, :control, 1, 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg, lb, ub, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, UnitRange{<:Integer}}, lb, ub, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ]
-        ocp.constraints[label] = (type, :ineq, x -> x[rg], ub, lb)
+        ocp.constraints[label] = (type, :ineq, x -> x[rg], lb, ub)
     elseif type ∈ [ :control, :state ]
-        ocp.constraints[label] = (type, :ineq, rg, ub, lb)
+        ocp.constraints[label] = (type, :ineq, rg, lb, ub)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :contol, :state ] or check the arguments of the constraint! method."))
@@ -319,7 +319,7 @@ end
 
 #
 """
-    nlp_constraint(ocp)
+    nlp_constraints(ocp)
 
 Return a 6-tuple of tuples:
 - `(ξl, ξ, ξu)` are control constraints
@@ -331,7 +331,7 @@ Return a 6-tuple of tuples:
 
 # Examples
 ```jldoctest
-julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraint(ocp)
+julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
 ```
 """
 function nlp_constraints(ocp::OptimalControlModel{time_dependence, dimension_usage}) where {time_dependence, dimension_usage}

@@ -82,9 +82,9 @@ export AbstractOptimalControlModel, OptimalControlModel
 export Model, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
 export ismin, dynamics, lagrange, mayer, criterion, initial_time, final_time
 export control_dimension, state_dimension, constraints
-export initial_condition, final_condition, initial_constraint, final_constraint
 export isautonomous, isnonautonomous
 export control_labels, state_labels
+export nlp_constraints
 
 # solution
 export AbstractOptimalControlSolution, OptimalControlSolution
