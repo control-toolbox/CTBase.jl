@@ -114,9 +114,9 @@ end
 # overload show()
 function Base.show(io::IO, c::_code)
     if isnothing(c.name)
-        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content)")
+        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), info=$(c.info)")
     else
-        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), name=$(c.name)")
+        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
     end
 end
 
@@ -176,7 +176,10 @@ macro def( args... )
     # - detect dupplicates
     # - store everything in _parsed_code
     #
-    count = 0 # (will be increased **before** use)
+    count = 0 # (starts with 0 because, it will be increased **before** use)
+
+    # sanity test (prob.args exists)
+
     for i ∈ 1:length(prob.args)
         # recursively remove all line nodes (which break in case
         # of imbricated expressions)
@@ -302,8 +305,7 @@ macro def( args... )
         # objectives
         #
         @when :($a -> begin min end) = node begin
-            if  _type_and_var_already_parsed( e_objective_min, [a])[1] ||
-                _type_and_var_already_parsed( e_objective_max, [a])[1]
+            if _types_already_parsed(e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
@@ -311,8 +313,7 @@ macro def( args... )
             continue
         end
         @when :($a -> begin max end) = node begin
-            if  _type_and_var_already_parsed( e_objective_max, [a])[1] ||
-                _type_and_var_already_parsed( e_objective_max, [a])[1]
+            if _types_already_parsed(e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
@@ -397,6 +398,8 @@ macro def( args... )
         ( status_f, t_index_f) = _type_and_var_already_parsed( e_variable, [y])
 
         if status_0 && status_f
+            # if t0 and tf are both variables, throw an exception
+            # (can be changed in the future)
             return :(throw(CtParserException("cannot have both $x and $y as time variables")))
         end
 
