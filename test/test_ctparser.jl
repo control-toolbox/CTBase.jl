@@ -3,10 +3,12 @@
 # unit test for ctparser.jl
 #
 
-#using Test
-
-#include("../src/ctparser.jl")
-#using .CtParser
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    using Test
+    include("../src/ctparser.jl")
+    using .CtParser
+end
 
 # remark: all tests are independant
 #         and define unrelated problems
@@ -104,4 +106,10 @@ function test_ctparser()
 
 end
 
+end
+
+
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    test_ctparser()
 end
