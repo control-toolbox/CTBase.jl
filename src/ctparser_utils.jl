@@ -22,7 +22,6 @@ expr_it(e, _Expr, f) =
 $(SIGNATURES)
 
 Prune calls `x(t)` into just `x` in an expression.
-Prune anything like `foo(t)` into `foo` in an expression.
 
 # Examples
 ```jldoctest
@@ -138,30 +137,35 @@ end
 """
 $(SIGNATURES)
 
-Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
+Replace calls in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `y`, `y[i](t)` or `y[i:j](t)`, resp.
 
 # Example
 ```jldoctest
-julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
-:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
 
-julia> has(e, :x, :t)
-true
+julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
-julia> has(e, :u, :t)
-true
+julia> e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
+:((x[1])(0) * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
+
+julia> x0 = Symbol(x, 0); e = replace_call(e, x, t0, x0)
+:(x0[1] * (2 * x(tf)) - (x[2])(tf) * (2x0))
+
+julia> xf = Symbol(x, "f"); replace_call(ans, x, tf, xf)
+:(x0[1] * (2xf) - xf[2] * (2x0))
 ```
 """
 replace_call(e, x, t, y) = begin
-    foo(x, t) = (h, args...) ->
-    if Expr(h, args...) == :($x($t))
-        :yes
-    elseif h == :ref && length(args) ≥ 1 && args[1] == x
-        x
-    else
-        isempty(findall(x -> x == :yes, args)) ? Expr(h, args...) : :yes
+    foo(x, t, y) = (h, args...) -> begin
+        ee = Expr(h, args...)
+	@match ee begin
+	    :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
+	    :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
+	    :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
+	    :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
+	    _ => ee
+        end
     end
-    expr_it(e, foo(x, t), x -> x) == :yes
+    expr_it(e, foo(x, t, y), x -> x)
 end
 
 """
@@ -238,7 +242,8 @@ constraint_type(e, t, t0, tf, x, u) =
         _                      => :other
     end
 
-# todo: provide (?) transformed expression into the appropriate function:
+# debug: provide (?) transformed expression into the appropriate function:
 # - pruning t
 # - replacing x(t0) by x0 (and returning x0 ... -> e)
 # - case of variables: now = tf (may be t0, but outside POC)
+# replace if... by @match as in replace_call
