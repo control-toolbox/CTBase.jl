@@ -168,8 +168,8 @@ Add an :initial, :final, :control or :state box constraint (whole range).
 # Examples
 ```jldoctest
 julia> constraint!(ocp, :initial, [ 0, 0, 0 ], [ 1, 2, 1 ])
-julia> constraint!(ocp, :final, 1, 0, 2)
-julia> constraint!(ocp, :control, 1, 0, 2)
+julia> constraint!(ocp, :final, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :control, [ 0, 0 ], [ 2, 3 ])
 julia> constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
 ```
 """
