@@ -17,6 +17,11 @@ for i ∈ 1:2
 end
 @test f[3] == :(∫((u[1])(t) ^ 2 + 2 * (u[2])(t)) → min)
 
+t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
+e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
+x0 = Symbol(x, 0)
+@test subs(e, :( $x[1]($(t0)) ), :( $x0[1] )) == :(x0[1] * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
+
 e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test has(e, :x, :t)
 @test has(e, :u, :t)

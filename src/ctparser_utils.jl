@@ -22,7 +22,6 @@ expr_it(e, _Expr, f) =
 $(SIGNATURES)
 
 Prune calls `x(t)` into just `x` in an expression.
-    prune_call(e, t)
 Prune anything like `foo(t)` into `foo` in an expression.
 
 # Examples
@@ -71,7 +70,7 @@ end
 """
 $(SIGNATURES)
 
-Substitute litteral `x` by expression `y` in expression e.
+Substitute expression `e1` by expression `e2` in expression `e`.
 
 # Examples
 ```jldoctest
@@ -88,23 +87,18 @@ julia> for i ∈ 1:2
        e = subs(e, Symbol(:u, Char(8320+i)), :( u[\$i] ))
        end; e
 :(∫((u[1])(t) ^ 2 + 2 * (u[2])(t)) → min)
-```
-"""
-subs(e, x, y) = expr_it(e, Expr, z -> z == x ? y : z)
 
-"""
-$(SIGNATURES)
-
-# Example
-```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
 julia> e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
+:((x[1])(0) * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
 
 julia> x0 = Symbol(x, 0); subs(e, :( \$x[1](\$(t0)) ), :( \$x0[1] ))
 ```
 """
-subs_f(e, e1, e2) = begin
+subs(e, e1 :: Union{Symbol, Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
+
+subs(e, e1, e2) = begin
     foo(e1, e2) = (h, args...) -> begin
         f = Expr(h, args...)
         f == e1 ? e2 : f
@@ -120,13 +114,45 @@ Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
 # Example
 ```jldoctest
 julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
+:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
+
 julia> has(e, :x, :t)
 true
+
 julia> has(e, :u, :t)
 true
 ```
 """
 has(e, x, t) = begin
+    foo(x, t) = (h, args...) ->
+    if Expr(h, args...) == :($x($t))
+        :yes
+    elseif h == :ref && length(args) ≥ 1 && args[1] == x
+        x
+    else
+        isempty(findall(x -> x == :yes, args)) ? Expr(h, args...) : :yes
+    end
+    expr_it(e, foo(x, t), x -> x) == :yes
+end
+
+"""
+$(SIGNATURES)
+
+Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
+
+# Example
+```jldoctest
+julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
+:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
+
+julia> has(e, :x, :t)
+true
+
+julia> has(e, :u, :t)
+true
+```
+"""
+replace_call(e, x, t, y) = begin
     foo(x, t) = (h, args...) ->
     if Expr(h, args...) == :($x($t))
         :yes
