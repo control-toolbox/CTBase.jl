@@ -1,5 +1,5 @@
 """
-    expr_it(e, _Expr, f)
+$(SIGNATURES)
 
 Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 
@@ -19,7 +19,7 @@ expr_it(e, _Expr, f) =
     end
 
 """
-    prune_call(e, x, t)
+$(SIGNATURES)
 
 Prune calls `x(t)` into just `x` in an expression.
     prune_call(e, t)
@@ -45,7 +45,8 @@ prune_call(e, x, t) = begin
 end
 
 """
-    prune_call(e, t)
+$(SIGNATURES)
+
 Prune anything like `foo(t)` into `foo` in an expression.
 
 # Examples
@@ -68,9 +69,9 @@ prune_call(e, t) = begin
 end
 
 """
-    subs(e, x, y)
+$(SIGNATURES)
 
-Substitute `x` by `y` in expression e.
+Substitute litteral `x` by expression `y` in expression e.
 
 # Examples
 ```jldoctest
@@ -87,19 +88,32 @@ julia> for i ∈ 1:2
        e = subs(e, Symbol(:u, Char(8320+i)), :( u[\$i] ))
        end; e
 :(∫((u[1])(t) ^ 2 + 2 * (u[2])(t)) → min)
+```
+"""
+subs(e, x, y) = expr_it(e, Expr, z -> z == x ? y : z)
 
+"""
+$(SIGNATURES)
+
+# Example
+```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
 julia> e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
 
-julia> x0 = Symbol(x, 0); subs(e, :( $x[1]($(t0)) ), :( $x0[1] ))
+julia> x0 = Symbol(x, 0); subs(e, :( \$x[1](\$(t0)) ), :( \$x0[1] ))
 ```
 """
-subs(e, x, y) = expr_it(e, Expr, z -> z == x ? y : z)
-# debug: very basic... TBC
+subs_f(e, e1, e2) = begin
+    foo(e1, e2) = (h, args...) -> begin
+        f = Expr(h, args...)
+        f == e1 ? e2 : f
+    end
+    expr_it(e, foo(e1, e2), f -> f == e1 ? e2 : f)
+end
 
 """
-    has(e, x, t)
+$(SIGNATURES)
 
 Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
 
@@ -125,7 +139,7 @@ has(e, x, t) = begin
 end
 
 """
-    constraint_type(e, t, t0, tf, x, u) = begin
+$(SIGNATURES)
 
 Return the type constraint among 
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
@@ -198,7 +212,7 @@ constraint_type(e, t, t0, tf, x, u) =
         _                      => :other
     end
 
-# debug: provide (?) transformed expression into the appropriate function:
+# todo: provide (?) transformed expression into the appropriate function:
 # - pruning t
-# - replacing x(t0) by x0 (and returning x0 ... -> e) 
+# - replacing x(t0) by x0 (and returning x0 ... -> e)
 # - case of variables: now = tf (may be t0, but outside POC)
