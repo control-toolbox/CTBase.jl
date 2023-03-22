@@ -34,7 +34,7 @@ julia> prune_call(e, :x, :t)
 """
 prune_call(e, x, t) = begin
     foo(x, t) = (h, args...) ->
-    if Expr(h, args...) == :($x($t))
+    if Expr(h, args...) == :($x($t)) # debug: use @match
         x
     else
         Expr(h, args...)
@@ -58,7 +58,7 @@ julia> prune_call(e, :t)
 """
 prune_call(e, t) = begin
     foo(t) = (h, args...) ->
-    if h == :call && args[2] == t
+    if h == :call && args[2] == t # debug: use @match
         args[1]
     else
         Expr(h, args...)
@@ -157,8 +157,18 @@ true
 ```
 """
 has(e, x, t) = begin
-    foo(x, t) = (h, args...) ->
-    if Expr(h, args...) == :($x($t))
+    foo(x, t) = (h, args...) -> begin
+      ee = Expr(h, args...)
+      @match ee begin
+          :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
+          :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
+          :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
+          :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
+          _ => ee
+        end
+    end
+          
+
         :yes
     elseif h == :ref && length(args) ≥ 1 && args[1] == x
         x
