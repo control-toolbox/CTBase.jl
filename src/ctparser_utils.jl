@@ -21,54 +21,6 @@ expr_it(e, _Expr, f) =
 """
 $(SIGNATURES)
 
-Prune calls `x(t)` into just `x` in an expression.
-
-# Examples
-```jldoctest
-julia> e = :( ∫( x(t)^2 + 2u[1](t)) → min )
-:(∫(x(t) ^ 2 + 2 * u(t)) → min)
-
-julia> prune_call(e, :x, :t)
-:(∫(x ^ 2 + 2 * (u[1])(t)) → min)
-```
-"""
-prune_call(e, x, t) = begin
-    foo(x, t) = (h, args...) ->
-    if Expr(h, args...) == :($x($t)) # debug: use @match
-        x
-    else
-        Expr(h, args...)
-    end
-    expr_it(e, foo(x, t), x -> x)
-end
-
-"""
-$(SIGNATURES)
-
-Prune anything like `foo(t)` into `foo` in an expression.
-
-# Examples
-```jldoctest
-julia> e = :( ∫( x(t)^2 + 2u[1](t)) → min )
-:(∫(x(t) ^ 2 + 2 * u(t)) → min)
-
-julia> prune_call(e, :t)
-:(∫(x ^ 2 + 2 * u[1]) → min)
-```
-"""
-prune_call(e, t) = begin
-    foo(t) = (h, args...) ->
-    if h == :call && args[2] == t # debug: use @match
-        args[1]
-    else
-        Expr(h, args...)
-    end
-    expr_it(e, foo(t), x -> x)
-end
-
-"""
-$(SIGNATURES)
-
 Substitute expression `e1` by expression `e2` in expression `e`.
 
 # Examples
@@ -158,22 +110,18 @@ true
 """
 has(e, x, t) = begin
     foo(x, t) = (h, args...) -> begin
-      ee = Expr(h, args...)
-      @match ee begin
-          :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
-          :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
-          :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
-          :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
-          _ => ee
+        ee = Expr(h, args...)
+	if :yes ∈ args
+	    :yes
+	else
+            @match ee begin
+                :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+                :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+                :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
+                :( $xx($tt)        ) => (xx == x && tt == t) ? :yes : ee
+                _ => ee
+            end
         end
-    end
-          
-
-        :yes
-    elseif h == :ref && length(args) ≥ 1 && args[1] == x
-        x
-    else
-        isempty(findall(x -> x == :yes, args)) ? Expr(h, args...) : :yes
     end
     expr_it(e, foo(x, t), x -> x) == :yes
 end
@@ -183,7 +131,8 @@ $(SIGNATURES)
 
 Return the type constraint among 
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
-`:state_fun`, `:mixed` (`:other` otherwise).
+`:state_fun`, `:mixed` (`:other` otherwise), together with the appropriate value
+(range or updated expression).
 
 # Example
 ```jldoctest
@@ -202,7 +151,7 @@ julia> constraint_type(:( x[1](tf) ), t, t0, tf, x, u)
 (:final, 1)
 
 julia> constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u)
-:boundary
+(:boundary, :(var"x#f"[1] - var"x#0"[2]))
 
 julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u)
 (:control_range, 1:2)
@@ -211,7 +160,7 @@ julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u)
 (:control_range, 1)
 
 julia> constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u)
-:control_fun
+(:control_fun, :(2 * u[1] ^ 2))
 
 julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u)
 (:state_range, 1:2)
@@ -220,10 +169,10 @@ julia> constraint_type(:( x[1](t) ), t, t0, tf, x, u)
 (:state_range, 1)
 
 julia> constraint_type(:( 2x[1](t)^2 ), t, t0, tf, x, u)
-:state_fun
+(:state_fun, :(2 * x[1] ^ 2))
 
 julia> constraint_type(:( 2u[1](t)^2 * x(t) ), t, t0, tf, x, u)
-:mixed
+(:mixed, :((2 * u[1] ^ 2) * x))
 
 julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
 :other
@@ -239,21 +188,21 @@ constraint_type(e, t, t0, tf, x, u) =
             :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j) : :other
             :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, i  ) : :other
 	    _                  => :other end                
-        [ true , true , false, false, false, false ] => :boundary
+        [ true , true , false, false, false, false ] => begin
+	    ee = replace_call(e , x, t0, Symbol(x, "#0")) 
+	    ee = replace_call(ee, x, tf, Symbol(x, "#f")) 
+	    (:boundary, ee) end
         [ false, false, true , false, false, false ] => @match e begin
-            :( $v[$i:$j]($s) ) => (v == u && s == t) ? (:control_range, i:j) : :other
-            :( $v[$i   ]($s) ) => (v == u && s == t) ? (:control_range, i  ) : :other
-	     _                  => :control_fun end                
+            :( $v[$i:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:j) : :other
+            :( $v[$i   ]($s) ) => (v == u && s == t ) ? (:control_range, i  ) : :other
+	    _                  => (:control_fun, replace_call(e, u, t, u)) end                
         [ false, false, false, true , false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == t) ? (:state_range, i:j) : :other
-            :( $y[$i   ]($s) ) => (y == x && s == t) ? (:state_range, i  ) : :other
-	    _                  => :state_fun end                
-        [ false, false, true , true , false, false ] => :mixed
+            :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:j) : :other
+            :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range, i  ) : :other
+	    _                  => (:state_fun  , replace_call(e, x, t, x)) end                
+        [ false, false, true , true , false, false ] => begin
+	    ee = replace_call(e , u, t, u)
+	    ee = replace_call(ee, x, t, x)
+	    (:mixed, ee) end
         _                      => :other
     end
-
-# debug: provide (?) transformed expression into the appropriate function:
-# - pruning t
-# - replacing x(t0) by x0 (and returning x0 ... -> e)
-# - case of variables: now = tf (may be t0, but outside POC)
-# replace if... by @match as in replace_call
