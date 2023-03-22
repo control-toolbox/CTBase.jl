@@ -78,6 +78,13 @@ function test_ctparser()
             t ∈ [ t0, tf ], time
         end
 
+        # bad time expression
+        @test_throws "@def parsing error" @def begin
+            t0, variable
+            tf, variable
+            t ∈ [ t0, tf ], time
+        end
+
         @test_throws "@def parsing error" @def syntax_only=true begin
             u, control
             v, control

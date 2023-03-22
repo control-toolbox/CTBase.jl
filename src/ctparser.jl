@@ -400,7 +400,7 @@ macro def( args... )
         if status_0 && status_f
             # if t0 and tf are both variables, throw an exception
             # (can be changed in the future)
-            return :(throw(CtParserException("cannot have both $x and $y as time variables")))
+            return :(throw(CtParserException("cannot release both ends of time interval")))
         end
 
         # is t0 a variable ?
