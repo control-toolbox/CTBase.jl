@@ -11,35 +11,35 @@ macro ctfunction_td_sv(expr)
     abstract_heritance = expr.args[2]
 
     esc(quote
-        struct $(function_name){time_dependence, scalar_vectorial} <: $(abstract_heritance)
+        struct $(function_name){time_dependence, dimension_usage} <: $(abstract_heritance)
             f::Function
-            function $(function_name){time_dependence, scalar_vectorial}(f::Function) where {time_dependence, scalar_vectorial}
+            function $(function_name){time_dependence, dimension_usage}(f::Function) where {time_dependence, dimension_usage}
                 if !(time_dependence ∈ [:autonomous, :nonautonomous]) 
-                    error("usage: $(function_name){time_dependence, scalar_vectorial}(fun) " *
+                    error("usage: $(function_name){time_dependence, dimension_usage}(fun) " *
                     "with time_dependence ∈ [:autonomous, :nonautonomous]")
-                elseif !(scalar_vectorial ∈ [:scalar, :vectorial])
-                    error("usage: $(function_name){time_dependence, scalar_vectorial}(fun) " *
-                    "with scalar_vectorial ∈ [:scalar, :vectorial]")
+                elseif !(dimension_usage ∈ [:scalar, :vectorial])
+                    error("usage: $(function_name){time_dependence, dimension_usage}(fun) " *
+                    "with dimension_usage ∈ [:scalar, :vectorial]")
                 else
-                    new{time_dependence, scalar_vectorial}(f)
+                    new{time_dependence, dimension_usage}(f)
                 end
             end
             function $(function_name){time_dependence}(f::Function) where {time_dependence}
                 if !(time_dependence ∈ [:autonomous, :nonautonomous]) 
-                    error("usage: $(function_name){time_dependence, scalar_vectorial}(fun) " *
+                    error("usage: $(function_name){time_dependence, dimension_usage}(fun) " *
                     "with time_dependence ∈ [:autonomous, :nonautonomous]")
                 else
-                    new{time_dependence, _fun_scalar_vectorial()}(f)
+                    new{time_dependence, _fun_dimension_usage()}(f)
                 end
             end
-            $(function_name)(f::Function) = new{_fun_time_dependence(), _fun_scalar_vectorial()}(f)
+            $(function_name)(f::Function) = new{_fun_time_dependence(), _fun_dimension_usage()}(f)
         end
         # basic usage
         function (F::$(function_name))(args...; kwargs...)
             return F.f(args...; kwargs...)
         end
         # handling time dependence
-        function (F::$(function_name){time_dependence, scalar_vectorial})(t::Time, args...; kwargs...) where {time_dependence, scalar_vectorial}
+        function (F::$(function_name){time_dependence, dimension_usage})(t::Time, args...; kwargs...) where {time_dependence, dimension_usage}
             return time_dependence==:autonomous ? F.f(args...; kwargs...) : F.f(t, args...; kwargs...)
         end
     end)
@@ -58,17 +58,17 @@ macro ctfunction_sv(expr)
     abstract_heritance = expr.args[2]
 
     esc(quote
-        struct $(function_name){scalar_vectorial} <: $(abstract_heritance)
+        struct $(function_name){dimension_usage} <: $(abstract_heritance)
             f::Function
-            function $(function_name){scalar_vectorial}(f::Function) where {scalar_vectorial}
-                if !(scalar_vectorial ∈ [:scalar, :vectorial]) 
-                    error("usage: $(function_name){scalar_vectorial}(fun) " *
-                    "with scalar_vectorial ∈ [:scalar, :vectorial]")
+            function $(function_name){dimension_usage}(f::Function) where {dimension_usage}
+                if !(dimension_usage ∈ [:scalar, :vectorial]) 
+                    error("usage: $(function_name){dimension_usage}(fun) " *
+                    "with dimension_usage ∈ [:scalar, :vectorial]")
                 else
-                    new{scalar_vectorial}(f)
+                    new{dimension_usage}(f)
                 end
             end
-            $(function_name)(f::Function) = new{_fun_scalar_vectorial()}(f)
+            $(function_name)(f::Function) = new{_fun_dimension_usage()}(f)
         end
         # basic usage
         function (F::$(function_name))(args...; kwargs...)

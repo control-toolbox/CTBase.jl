@@ -2,7 +2,7 @@
 # Display: text/html ?  
 # Base.show, Base.print
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence}) where {time_dependence}
+function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, dimension_usage}) where {time_dependence, dimension_usage}
 
     dimx = state_dimension(ocp) === nothing ? "n" : state_dimension(ocp)
     dimu = control_dimension(ocp) === nothing ? "m" : control_dimension(ocp)

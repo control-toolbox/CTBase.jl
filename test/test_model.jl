@@ -1,7 +1,7 @@
 function test_model()
 
 # basic model
-ocp = Model()
+ocp = Model(time_dependence=:autonomous, dimension_usage=:scalar)
 #
 n = 2
 m = 1

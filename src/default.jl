@@ -1,11 +1,11 @@
 # --------------------------------------------------------------------------------------------------
 # functions: time dependence and scalar/vectorial
 _fun_time_dependence() = :autonomous
-_fun_scalar_vectorial() = :scalar
+_fun_dimension_usage() = :scalar
 #
 # optimal control model: time dependence and scalar/vectorial
 _ocp_time_dependence() = :autonomous
-_ocp_scalar_vectorial() = :scalar
+_ocp_dimension_usage() = :scalar
 _state_labels(n::Dimension) = n==1 ? ["x"] : [ "x" * ctindices(i) for i ∈ range(1, n)]
 _control_labels(m::Dimension) = m==1 ? ["u"] : [ "u" * ctindices(i) for i ∈ range(1, m)]
 _time_label() = "t"
