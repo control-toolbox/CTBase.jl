@@ -108,35 +108,6 @@ end
 """
 $(SIGNATURES)
 
-Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
-
-# Example
-```jldoctest
-julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
-:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
-
-julia> has(e, :x, :t)
-true
-
-julia> has(e, :u, :t)
-true
-```
-"""
-has(e, x, t) = begin
-    foo(x, t) = (h, args...) ->
-    if Expr(h, args...) == :($x($t))
-        :yes
-    elseif h == :ref && length(args) ≥ 1 && args[1] == x
-        x
-    else
-        isempty(findall(x -> x == :yes, args)) ? Expr(h, args...) : :yes
-    end
-    expr_it(e, foo(x, t), x -> x) == :yes
-end
-
-"""
-$(SIGNATURES)
-
 Replace calls in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `y`, `y[i](t)` or `y[i:j](t)`, resp.
 
 # Example
@@ -166,6 +137,35 @@ replace_call(e, x, t, y) = begin
         end
     end
     expr_it(e, foo(x, t, y), x -> x)
+end
+
+"""
+$(SIGNATURES)
+
+Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
+
+# Example
+```jldoctest
+julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
+:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
+
+julia> has(e, :x, :t)
+true
+
+julia> has(e, :u, :t)
+true
+```
+"""
+has(e, x, t) = begin
+    foo(x, t) = (h, args...) ->
+    if Expr(h, args...) == :($x($t))
+        :yes
+    elseif h == :ref && length(args) ≥ 1 && args[1] == x
+        x
+    else
+        isempty(findall(x -> x == :yes, args)) ? Expr(h, args...) : :yes
+    end
+    expr_it(e, foo(x, t), x -> x) == :yes
 end
 
 """
