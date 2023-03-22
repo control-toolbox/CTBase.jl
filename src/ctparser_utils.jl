@@ -144,11 +144,17 @@ julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u)
 julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u)
 (:initial, 1)
 
+julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u)
+(:boundary, :(2 * var"x#0"[1] ^ 2))
+
 julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u)
 (:final, 1:2)
 
 julia> constraint_type(:( x[1](tf) ), t, t0, tf, x, u)
 (:final, 1)
+
+julia> constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u)
+(:boundary, :(2 * var"x#f"[1] ^ 2))
 
 julia> constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u)
 (:boundary, :(var"x#f"[1] - var"x#0"[2]))
@@ -183,11 +189,11 @@ constraint_type(e, t, t0, tf, x, u) =
         [ true , false, false, false, false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j) : :other
             :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, i  ) : :other
-	    _                  => :other end                
+	    _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
         [ false, true , false, false, false, false ] => @match e begin 
             :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j) : :other
             :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, i  ) : :other
-	    _                  => :other end                
+	    _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false ] => begin
 	    ee = replace_call(e , x, t0, Symbol(x, "#0")) 
 	    ee = replace_call(ee, x, tf, Symbol(x, "#f")) 
