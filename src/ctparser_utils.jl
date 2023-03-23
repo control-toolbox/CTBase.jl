@@ -111,16 +111,13 @@ true
 has(e, x, t) = begin
     foo(x, t) = (h, args...) -> begin
         ee = Expr(h, args...)
-	if :yes ∈ args
-	    :yes
-	else
-            @match ee begin
-                :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
-                :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
-                :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
-                :( $xx($tt)        ) => (xx == x && tt == t) ? :yes : ee
-                _ => ee
-            end
+	if :yes ∈ args :yes
+	else @match ee begin
+            :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx($tt)        ) => (xx == x && tt == t) ? :yes : ee
+            _ => ee end
         end
     end
     expr_it(e, foo(x, t), x -> x) == :yes
