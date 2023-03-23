@@ -1,3 +1,16 @@
+#!/usr/bin/env julia
+#
+# unit test for ctparser_utils.jl
+#
+
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    using Test
+    using MLStyle
+    SIGNATURES="WTF"
+    include("../src/ctparser_utils.jl")
+end
+
 function test_ctparser_utils()
 
 # test utils
@@ -42,6 +55,11 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u
 @test constraint_type(:( x[1](t)            ), t, t0, tf, x, u) == (:state_range, 1)
 @test constraint_type(:( 2x[1](t)^2         ), t, t0, tf, x, u) == (:state_fun, :(2 * x[1] ^ 2))
 @test constraint_type(:( 2u[1](t)^2 * x(t)  ), t, t0, tf, x, u) == (:mixed, :((2 * u[1] ^ 2) * x))
-@test constraint_type(:( 2u[1](0)^2 * x(t)  ), t, t0, tf, x, u) ==  :other  
+@test constraint_type(:( 2u[1](0)^2 * x(t)  ), t, t0, tf, x, u) ==  :other
 
+end
+
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    test_ctparser_utils()
 end
