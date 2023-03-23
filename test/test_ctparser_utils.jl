@@ -6,10 +6,11 @@
 # if it is run interactively
 if abspath(PROGRAM_FILE) == @__FILE__
     using Test
-    using MLStyle
-    SIGNATURES="WTF"
-    include("../src/ctparser_utils.jl")
 end
+
+using MLStyle
+SIGNATURES="WTF"
+include("../src/ctparser_utils.jl")
 
 function test_ctparser_utils()
 
