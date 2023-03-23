@@ -111,7 +111,8 @@ true
 has(e, x, t) = begin
     foo(x, t) = (h, args...) -> begin
         ee = Expr(h, args...)
-	if :yes ∈ args :yes
+	if :yes ∈ args
+	    :yes
 	else @match ee begin
             :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
             :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
