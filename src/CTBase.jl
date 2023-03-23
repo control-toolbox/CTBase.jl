@@ -5,11 +5,12 @@ import Base: show, \, Base
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using MLStyle
-using Parameters # @with_kw: permit to have default values in struct
+using Parameters # @with_kw: to have default values in struct
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
-using Printf # to print a OptimalControlModel
+using Printf # to print an OptimalControlModel
 using Reexport
+using DocStringExtensions
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -62,7 +63,7 @@ include("plot.jl")
 #
 # Numeric types
 export MyNumber, MyVector, Time, Times, TimesDisc
-export States, Adjoints, Controls, State, Adjoint, Dimension
+export States, Adjoints, Controls, State, Adjoint, Dimension, Index
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback

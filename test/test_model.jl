@@ -14,7 +14,7 @@ state!(ocp, n)   # dimension of the state
 control!(ocp, m) # dimension of the control
 time!(ocp, [t0, tf])
 constraint!(ocp, :initial, x0)
-constraint!(ocp, :final,   xf)
+constraint!(ocp, :final  , xf)
 #
 A = [ 0.0 1.0
       0.0 0.0 ]
@@ -89,7 +89,7 @@ control!(ocp, m) # control dim
 constraint!(ocp, :initial, x0, :initial_con1)
 constraint!(ocp, :control, 0., 1., :control_con1)
 constraint!(ocp, :state, 1:2, [ r0, 0 ], [ Inf, vmax ], :state_con1)
-constraint!(ocp, :state, 3, m0, mf, :state_con2)
+constraint!(ocp, :state, Index(3), m0, mf, :state_con2)
 
 objective!(ocp, :mayer, (t0, x0, tf, xf) -> xf[1], :max)
 
