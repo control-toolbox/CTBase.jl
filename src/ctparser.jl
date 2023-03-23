@@ -51,8 +51,11 @@ end
 
 import Base.show  # for overloading
 
-using MLStyle     # for parsing
-using Printf      #
+using MLStyle         # for parsing
+using Printf          #
+
+SIGNATURES="WTF"
+include("ctparser_utils.jl")
 
 export @def
 export print_parsed_code
@@ -480,6 +483,7 @@ macro def( args... )
     end
 
     # 5/ classify constraints depending of time boundaries
+
     _classify_constraints()
 
     # x) final line (return the created ocp object)
