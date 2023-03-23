@@ -3,10 +3,12 @@
 # unit test for ctparser.jl
 #
 
-#using Test
-
-#include("../src/ctparser.jl")
-#using .CtParser
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    using Test
+    include("../src/ctparser.jl")
+    using .CtParser
+end
 
 # remark: all tests are independant
 #         and define unrelated problems
@@ -76,6 +78,13 @@ function test_ctparser()
             t ∈ [ t0, tf ], time
         end
 
+        # bad time expression
+        @test_throws "@def parsing error" @def begin
+            t0, variable
+            tf, variable
+            t ∈ [ t0, tf ], time
+        end
+
         @test_throws "@def parsing error" @def syntax_only=true begin
             u, control
             v, control
@@ -104,4 +113,10 @@ function test_ctparser()
 
 end
 
+end
+
+
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    test_ctparser()
 end

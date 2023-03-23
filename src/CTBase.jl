@@ -1,6 +1,7 @@
 module CTBase
 
 # using
+using DocStringExtensions
 import Base: show, \, Base
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
@@ -51,7 +52,7 @@ include("utils.jl")
 #include("algorithms.jl")
 include("model.jl")
 #
-include("ctparser-utils.jl")
+include("ctparser_utils.jl")
 #include("ctparser.jl")
 #@reexport using .CtParser
 #
@@ -102,7 +103,7 @@ export Hamiltonian, HamiltonianVectorField, VectorField
 export MayerFunction, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
 export BoundaryConstraintFunction, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
 
-# ctparser-utils
-export prune_call, subs, constraint_type, has
+# ctparser_utils
+export prune_call, subs, has, replace_call, constraint_type
 
 end

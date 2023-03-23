@@ -51,14 +51,18 @@ end
 
 import Base.show  # for overloading
 
-using MLStyle     # for parsing
-using Printf      #
+using MLStyle         # for parsing
+using Printf          #
+
+SIGNATURES="WTF"
+include("ctparser_utils.jl")
 
 export @def
 export print_parsed_code
 export set_verbose_level
 export CtParserException
 export code_info
+export print_generated_code
 
 # only export then debugging
 export get_parsed_line
@@ -114,9 +118,9 @@ end
 # overload show()
 function Base.show(io::IO, c::_code)
     if isnothing(c.name)
-        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content)")
+        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), info=$(c.info)")
     else
-        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), name=$(c.name)")
+        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
     end
 end
 
@@ -130,6 +134,7 @@ end
 _parsed_code::Array{_code} = []  # memorize all code lines during parsing
 _verbose_level = 0           # default = do not print at all
 _syntax_only   = false       # parser only checks the syntax (no code generation)
+_generated_code::Array{String} = [] # memorize generated code
 
 #
 # remove all LineNumberNode on expression (these lines will break the pattern matching)
@@ -169,6 +174,7 @@ macro def( args... )
 
     # start from scratch (may be modified later)
     global _parsed_code = []
+    global _generated_code = []
 
     # pass 1:
     #
@@ -176,7 +182,10 @@ macro def( args... )
     # - detect dupplicates
     # - store everything in _parsed_code
     #
-    count = 0 # (will be increased **before** use)
+    count = 0 # (starts with 0 because, it will be increased **before** use)
+
+    # sanity test (prob.args exists)
+
     for i ∈ 1:length(prob.args)
         # recursively remove all line nodes (which break in case
         # of imbricated expressions)
@@ -302,8 +311,7 @@ macro def( args... )
         # objectives
         #
         @when :($a -> begin min end) = node begin
-            if  _type_and_var_already_parsed( e_objective_min, [a])[1] ||
-                _type_and_var_already_parsed( e_objective_max, [a])[1]
+            if _types_already_parsed(e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
@@ -311,8 +319,7 @@ macro def( args... )
             continue
         end
         @when :($a -> begin max end) = node begin
-            if  _type_and_var_already_parsed( e_objective_max, [a])[1] ||
-                _type_and_var_already_parsed( e_objective_max, [a])[1]
+            if _types_already_parsed(e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
@@ -383,7 +390,6 @@ macro def( args... )
 
     # 1/ create ocp
     push!(_final_code, :(ocp = fakemodel()))
-
     # 2/ call time!
 
     # is time is present in parsed code ?
@@ -397,7 +403,9 @@ macro def( args... )
         ( status_f, t_index_f) = _type_and_var_already_parsed( e_variable, [y])
 
         if status_0 && status_f
-            return :(throw(CtParserException("cannot have both $x and $y as time variables")))
+            # if t0 and tf are both variables, throw an exception
+            # (can be changed in the future)
+            return :(throw(CtParserException("cannot release both ends of time interval")))
         end
 
         # is t0 a variable ?
@@ -405,9 +413,9 @@ macro def( args... )
             code = quote time!(ocp,:final, $(esc(y))) end
             push!(_final_code, code)
             _parsed_code[index].info = "final time definition with $y"
-            _parsed_code[index].code = "time!(ocp,:final, $y)"
+            _store_code_as_string( "time!(ocp,:final, $y)", index)
             _parsed_code[t_index_0].info = "use $x as initial time variable"
-            _parsed_code[t_index_0].code = "<none>"
+            _parsed_code[t_index_0].code = "<none: included in time!() call>"
             @goto after_time
         end
 
@@ -416,22 +424,26 @@ macro def( args... )
             code = quote time!(ocp,:initial, $(esc(x))) end
             push!(_final_code, code)
             _parsed_code[index].info = "initial time definition with $x"
-            _parsed_code[index].code = "time!(ocp,:initial, $x)"
+            _store_code_as_string( "time!(ocp,:initial, $x)", index)
             _parsed_code[t_index_f].info = "use $y as final time variable"
-            _parsed_code[t_index_f].code = "<none>"
+            _parsed_code[t_index_f].code = "<none: included in time!() call>"
             @goto after_time
         end
         # nor t0 and tf are variables (in Main scope)
         code = quote time!(ocp, [ $(esc(x)), $(esc(y))] ) end
         push!(_final_code, code)
         _parsed_code[index].info = "time definition with [ $x, $y]"
-        _parsed_code[index].code = "time!(ocp, [ $x, $y])"
+        _store_code_as_string( "time!(ocp, [ $x, $y])", index)
 
+        # store the Symbol used as time
+        _time_variable = c.content[1]
         @label after_time
+    else
+        # no time defintion is present, cannot continue
+        return :(throw(CtParserException("a time variable must be provided in order to process other directives")))
     end
 
     # 3/ call state!
-    # is time is present in parsed code ?
     (c, index) = _line_of_type(e_state_vector)
     if c != nothing
         s = c.content[1]  # aka state name
@@ -439,7 +451,7 @@ macro def( args... )
         code = quote state!(ocp, $(esc(d))) end
         push!(_final_code, code)
         _parsed_code[index].info = "state vector ($s) of dimension $d"
-        _parsed_code[index].code = "state!(ocp, $d)"
+        _store_code_as_string( "state!(ocp, $d)", index)
     end
     (c, index) = _line_of_type(e_state_scalar)
     if c != nothing
@@ -447,7 +459,7 @@ macro def( args... )
         code = quote state!(ocp, 1) end
         push!(_final_code, code)
         _parsed_code[index].info = "state scalar ($s)"
-        _parsed_code[index].code = "state!(ocp, 1)"
+        _store_code_as_string( "state!(ocp, 1)", index)
     end
 
 
@@ -459,7 +471,7 @@ macro def( args... )
         code = quote control!(ocp, $(esc(d))) end
         push!(_final_code, code)
         _parsed_code[index].info = "control vector ($s) of dimension $d"
-        _parsed_code[index].code = "control!(ocp, $d)"
+        _store_code_as_string( "control!(ocp, $d)", index)
     end
     (c, index) = _line_of_type(e_control_scalar)
     if c != nothing
@@ -467,10 +479,11 @@ macro def( args... )
         code = quote control!(ocp, 1) end
         push!(_final_code, code)
         _parsed_code[index].info = "control scalar ($s)"
-        _parsed_code[index].code = "control!(ocp, 1)"
+        _store_code_as_string( "control!(ocp, 1)", index)
     end
 
     # 5/ classify constraints depending of time boundaries
+
     _classify_constraints()
 
     # x) final line (return the created ocp object)
@@ -559,6 +572,17 @@ function _classify_constraints()
 end
 
 #
+# (internal)
+#
+function _store_code_as_string(info::String, index::Integer)
+    global _parsed_code
+    global _generated_code
+
+    _parsed_code[index].code = info
+    push!(_generated_code, info)
+end
+
+#
 # verbose message: only print then level <= verbose_level
 #
 # level == 0     -> always print
@@ -612,7 +636,7 @@ function get_parsed_line( i::Integer )
 end
 
 #
-# print informations on parsed lines
+# print informations on each parsed lines
 #
 function code_info( )
     if size(_parsed_code)[1] == 0
@@ -630,5 +654,19 @@ function code_info( )
         println("")
     end
 end # parsed_code_info
+
+#
+# print generated code as strings
+#
+function print_generated_code()
+    if size(_generated_code)[1] == 0
+        println("=== No code for this definition")
+        return
+    end
+    println("=== Generated code")
+    println("ocp = Model()")
+    println.(_generated_code)
+    return
+end # print_generated_code
 
 end # module CtParser

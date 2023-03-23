@@ -47,7 +47,7 @@ constraints(ocp::OptimalControlModel) = ocp.constraints
 # -------------------------------------------------------------------------------------------
 # 
 """
-    state!(ocp, n[, labels])
+$(SIGNATURES)
 
 Define the state dimension and possibly the names of each coordinate.
 
@@ -62,7 +62,7 @@ function state!(ocp::OptimalControlModel, n::Dimension, labels::Vector{String}=_
 end
 
 """
-    control!(ocp, m[, labels])
+$(SIGNATURES)
 
 Define the control dimension and possibly the names of each coordinate.
 
@@ -79,7 +79,7 @@ end
 # -------------------------------------------------------------------------------------------
 # 
 """
-    time!(ocp, type, t[, label])
+$(SIGNATURES)
 
 Fix initial (resp. final) time, the final (resp. initial) time being variable (free),
 when type is `:initial`. And conversely when type is `:final`. 
@@ -101,7 +101,7 @@ function time!(ocp::OptimalControlModel, type::Symbol, time::Time, label::String
 end
 
 """
-    time!(ocp, t[, label])
+$(SIGNATURES)
 
 Fix initial and final times to `t[1]` and `t[2]`, respectively.
 
@@ -121,7 +121,7 @@ end
 # -------------------------------------------------------------------------------------------
 #
 """
-    constraint!(ocp, type, val[, label])
+$(SIGNATURES)
 
 Add an `:initial` or `:final` value constraint on the state.
 
@@ -141,7 +141,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=
 end
 
 """
-    constraint!(ocp, type, rg, val[, label])
+$(SIGNATURES)
 
 Add an `:initial` or `:final` value constraint on a range of the state.
 
@@ -161,7 +161,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, 
 end
 
 """
-    constraint!(ocp, type, lb, ub[, label])
+$(SIGNATURES)
 
 Add an :initial, :final, :control or :state box constraint (whole range).
 
@@ -187,7 +187,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
 end
 
 """
-    constraint!(ocp, type, rg, lb, ub[, label])
+$(SIGNATURES)
 
 Add an `:initial`, `:final`, `:control` or `:state` box constraint on a range.
 
@@ -211,7 +211,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, 
 end
 
 """
-    constraint!(ocp, type, f, val[, label])
+$(SIGNATURES)
 
 Add a `:boundary`, `:control`, `:state` or `:mixed` value functional constraint.
 
@@ -233,7 +233,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val, l
 end
 
 """
-    constraint!(ocp, type, f, lb, ub[, label])
+$(SIGNATURES)
 
 Add a `:boundary`, `:control`, `:state` or `:mixed` box functional constraint.
 
@@ -255,7 +255,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub
 end
 
 """
-    constraint!(ocp, type, f)
+$(SIGNATURES)
 
 Provide dynamics (possibly in place).
 
@@ -276,7 +276,7 @@ end
 
 #
 """
-    remove_constraint!(ocp, label)
+$(SIGNATURES)
 
 Remove a labeled constraint.
 
@@ -291,7 +291,7 @@ end
 
 #
 """
-    constraint(ocp, label)
+$(SIGNATURES)
 
 Retrieve a labeled constraint. The result is a function associated with the constraint
 computation (not taking into account provided value / bounds).
@@ -319,7 +319,7 @@ end
 
 #
 """
-    nlp_constraints(ocp)
+$(SIGNATURES)
 
 Return a 6-tuple of tuples:
 - `(ξl, ξ, ξu)` are control constraints
@@ -415,7 +415,7 @@ end
 # -------------------------------------------------------------------------------------------
 # 
 """
-    objective!(ocp, type, f, criterion=:min)
+$(SIGNATURES)
 
 Set the criterion to the function `f`. Type can be `:mayer` or `:lagrange`. Criterion is `:min` or `:max`.
 
