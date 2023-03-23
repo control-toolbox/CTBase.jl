@@ -412,7 +412,7 @@ macro def( args... )
             _parsed_code[index].info = "final time definition with $y"
             _store_code_as_string( "time!(ocp,:final, $y)", index)
             _parsed_code[t_index_0].info = "use $x as initial time variable"
-            _parsed_code[t_index_0].code = "<none>"
+            _parsed_code[t_index_0].code = "<none: included in time!() call>"
             @goto after_time
         end
 
@@ -423,7 +423,7 @@ macro def( args... )
             _parsed_code[index].info = "initial time definition with $x"
             _store_code_as_string( "time!(ocp,:initial, $x)", index)
             _parsed_code[t_index_f].info = "use $y as final time variable"
-            _parsed_code[t_index_f].code = "<none>"
+            _parsed_code[t_index_f].code = "<none: included in time!() call>"
             @goto after_time
         end
         # nor t0 and tf are variables (in Main scope)
@@ -432,11 +432,15 @@ macro def( args... )
         _parsed_code[index].info = "time definition with [ $x, $y]"
         _store_code_as_string( "time!(ocp, [ $x, $y])", index)
 
+        # store the Symbol used as time
+        _time_variable = c.content[1]
         @label after_time
+    else
+        # no time defintion is present, cannot continue
+        return :(throw(CtParserException("a time variable must be provided in order to process other directives")))
     end
 
     # 3/ call state!
-    # is time is present in parsed code ?
     (c, index) = _line_of_type(e_state_vector)
     if c != nothing
         s = c.content[1]  # aka state name
