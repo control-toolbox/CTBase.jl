@@ -1,7 +1,7 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
 authors = ["Olivier Cots <olivier.cots@enseeiht.fr>"]
-version = "0.5.1"
+version = "0.5.2"
 
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
@@ -14,9 +14,12 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
+DocStringExtensions = "0.9"
 ForwardDiff = "0.10"
 Interpolations = "0.14"
 MLStyle = "0.4"
 Parameters = "0.12"
+Plots = "1.38"
 Printf = "1.8"
+Reexport = "1.2"
 julia = "1.8"
