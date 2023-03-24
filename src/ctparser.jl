@@ -54,7 +54,6 @@ import Base.show  # for overloading
 using MLStyle         # for parsing
 using Printf          #
 
-SIGNATURES="WTF"
 include("ctparser_utils.jl")
 
 export @def
@@ -80,9 +79,6 @@ end
 # type of input lines
 @enum _type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_alias e_objective_min e_objective_max e_variable
 
-# type of constraint type
-@enum _ctype ec_initial ec_final ec_boundary
-
 # store a parsed line
 mutable struct _code
     line::Union{Expr, Symbol}         # initial line of code
@@ -93,20 +89,19 @@ mutable struct _code
 
     # for constraints
     name::Union{Symbol, Nothing}      # constraint name
-    ctype::Union{_ctype, Nothing}     # constraint type
 
     # user/debug information (code_info)
     info::String                      # debug info
     code::String                      # final code after tranformation
 
     # struct constructors
-    _code(l, t, c)    = new(l, t, c, nothing, nothing, "", "")
+    _code(l, t, c)    = new(l, t, c, nothing, "", "")
     function _code(l, t, c, n)
         if n isa Integer
             n = "eq" * string(n)
-            new(l, t, c, Symbol(n), nothing, "", "")
+            new(l, t, c, Symbol(n), "", "")
         else
-            new(l, t, c, n, nothing, "", "")
+            new(l, t, c, n, "", "")
         end
     end
 end
@@ -390,6 +385,8 @@ macro def( args... )
 
     # 1/ create ocp
     push!(_final_code, :(ocp = fakemodel()))
+    #push!(_final_code, :(ocp = Model()))
+
     # 2/ call time!
 
     # is time is present in parsed code ?
@@ -482,9 +479,46 @@ macro def( args... )
         _store_code_as_string( "control!(ocp, 1)", index)
     end
 
-    # 5/ classify constraints depending of time boundaries
+    # 5/ explicit aliases
+    for c ∈ _parsed_code
+        if c.type != e_alias
+            continue
+        end
 
-    _classify_constraints()
+        # alias found
+        a = c.content[1]
+        b = c.content[2]
+        for l ∈ _parsed_code
+            t1 = ( l.type != e_constraint )
+            t2 = ( l.type != e_objective_min )
+            t3 = ( l.type != e_objective_max )
+
+            #println("DEBUG: ", t1, t2, t3)
+            if t1 && t2 && t3
+                continue
+            end
+
+            if has(l.line, a)
+                println("ALIAS: replace $a by $b in: ", l.line)
+                e = subs(l.line, a, b)
+                println("AFTER: ", e)
+            end
+        end
+
+    end
+
+    # 6/ implicit aliases (from state/control)
+
+    # 7/ constraints
+    for c ∈ _parsed_code
+        if c.type != e_constraint
+            continue
+        end
+    end
+
+    # 6/ objective
+    (c, index) = _line_of_type(e_objective_min)
+    (c, index) = _line_of_type(e_objective_max)
 
     # x) final line (return the created ocp object)
     push!(_final_code, :(ocp))
@@ -527,7 +561,7 @@ function _type_and_var_already_parsed( type::_type, content::Any )
 end # function _type_and_var_already_parsed
 
 #
-# (internal) return the line corresponding to a type
+# (internal) return the (first) line corresponding to a type
 #
 function _line_of_type( type::_type)
     count = 1
