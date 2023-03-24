@@ -487,15 +487,12 @@ macro def( args... )
         end
 
         # alias found
-        a = c.content[1]
+        a = c.content[1]  # a = b
         b = c.content[2]
         for l ∈ _parsed_code
-            t1 = ( l.type != e_constraint )
-            t2 = ( l.type != e_objective_min )
-            t3 = ( l.type != e_objective_max )
-
-            #println("DEBUG: ", t1, t2, t3)
-            if t1 && t2 && t3
+            if  ( l.type != e_constraint ) &&
+                ( l.type != e_objective_min ) &&
+                ( l.type != e_objective_max )
                 continue
             end
 
@@ -510,6 +507,37 @@ macro def( args... )
     end
 
     # 6/ implicit aliases (from state/control)
+    for tt in [ e_state_vector, e_control_vector]
+
+        # find definition of state_vector and control_vector
+        (c, index) = _line_of_type(tt)
+
+        if c != nothing
+            a = c.content[1]  # aka name
+            m = c.content[2]  # aka dimension
+
+            for i ∈ 1:m       # generate a\_i up to dimension
+
+                symb_1 = Symbol(a, Char(8320+i))  # a\_i
+                symb_2 = :( $a[$i] )              # a[i]
+
+                for l ∈ _parsed_code
+                    if  ( l.type != e_constraint ) &&
+                        ( l.type != e_objective_min ) &&
+                        ( l.type != e_objective_max )
+                        continue
+                    end
+
+                    if has(l.line, symb_1)
+                        verbose(50,"ALIAS: replace $symb_1 by $symb_2 in: ", l.line)
+                        e = subs(l.line, symb_1, symb_2)
+                        verbose(50,"AFTER: ", e)
+                        l.line = e
+                    end
+                end
+            end
+        end
+    end
 
     # 7/ constraints
     for c ∈ _parsed_code
