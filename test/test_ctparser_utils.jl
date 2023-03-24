@@ -27,6 +27,17 @@ e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test has(e, :u, :t)
 @test !has(e, :v, :t)
 
+@test has(e, 2)
+@test has(e, :x)
+@test has(e, :min)
+
+@test !has(e, 3)
+@test !has(e, :max)
+
+@test has(:x, :x)
+@test !has(:x, 2)
+@test !has(:x, :y)
+
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u
 @test constraint_type(:( x[1:2](0)          ), t, t0, tf, x, u) == (:initial, 1:2)
 @test constraint_type(:( x[1](0)            ), t, t0, tf, x, u) == (:initial, 1)
