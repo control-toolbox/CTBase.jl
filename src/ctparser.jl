@@ -81,7 +81,7 @@ end
 
 # store a parsed line
 mutable struct _code
-    line::Union{Expr, Symbol}         # initial line of code
+    line::Union{Expr, Symbol}         # line of code (initial, but also transformed after aliasing)
 
     # result of first parsing phase
     type::_type                       # type of this code
@@ -91,17 +91,18 @@ mutable struct _code
     name::Union{Symbol, Nothing}      # constraint name
 
     # user/debug information (code_info)
+    initial_line::Union{Expr, Symbol} # initial line of code
     info::String                      # debug info
     code::String                      # final code after tranformation
 
     # struct constructors
-    _code(l, t, c)    = new(l, t, c, nothing, "", "")
+    _code(l, t, c)    = new(l, t, c, nothing, l, "", "")
     function _code(l, t, c, n)
         if n isa Integer
             n = "eq" * string(n)
-            new(l, t, c, Symbol(n), "", "")
+            new(l, t, c, Symbol(n), l, "", "")
         else
-            new(l, t, c, n, "", "")
+            new(l, t, c, n, l, "", "")
         end
     end
 end
@@ -113,9 +114,9 @@ end
 # overload show()
 function Base.show(io::IO, c::_code)
     if isnothing(c.name)
-        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), info=$(c.info)")
+        println(io, "Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), info=$(c.info)")
     else
-        println(io, "Code: line=$(c.line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
+        println(io, "Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
     end
 end
 
@@ -499,9 +500,10 @@ macro def( args... )
             end
 
             if has(l.line, a)
-                println("ALIAS: replace $a by $b in: ", l.line)
+                verbose(50,"ALIAS: replace $a by $b in: ", l.line)
                 e = subs(l.line, a, b)
-                println("AFTER: ", e)
+                verbose(50,"AFTER: ", e)
+                l.line = e
             end
         end
 
@@ -681,10 +683,13 @@ function code_info( )
     count = 1
     for c in _parsed_code
         println("Line number: $count") ; count += 1
-        println("- line   : ", c.line |> remove_line_number_node)
-        println("- content: ", c.content |> remove_line_number_node)
-        println("- info   : ", c.info)
-        println("- code   : ", c.code)
+        println("- initial line: ", c.initial_line |> remove_line_number_node)
+        if c.line != c.initial_line
+            println("- current line: ", c.line |> remove_line_number_node)
+        end
+        println("- content     : ", c.content |> remove_line_number_node)
+        println("- info        : ", c.info)
+        println("- code        : ", c.code)
         println("")
     end
 end # parsed_code_info
