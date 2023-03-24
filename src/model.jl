@@ -18,6 +18,13 @@ abstract type AbstractOptimalControlModel end
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
 end
 
+# Constraint index
+mutable struct Index
+    val::Integer
+    Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
+end
+Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
+
 #
 isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
 isautonomous(time_dependence::Symbol) = !isnonautonomous(time_dependence)
@@ -148,11 +155,12 @@ Add an `:initial` or `:final` value constraint on a range of the state.
 # Examples
 ```jldoctest
 julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
-julia> constraint!(ocp, :final, 1, 0)
+julia> constraint!(ocp, :final, Index(1), 0)
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, UnitRange{<:Integer}}, val, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, val, label::Symbol=gensym(:anonymous))
     if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
+	rg = rg isa Index ? rg.val : rg
         ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
@@ -177,9 +185,9 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x, lb, ub)
     elseif type == :control
-        ocp.constraints[label] = (type, :ineq, lb isa MyNumber ? 1 : 1:control_dimension(ocp), lb, ub) # debug
+        ocp.constraints[label] = (type, :ineq, control_dimension(ocp) == 1 ? 1 : 1:control_dimension(ocp), lb, ub)
     elseif type == :state
-        ocp.constraints[label] = (type, :ineq, lb isa MyNumber ? 1 : 1:state_dimension(ocp), lb, ub) # debug
+        ocp.constraints[label] = (type, :ineq, state_dimension(ocp) == 1 ? 1 : 1:state_dimension(ocp), lb, ub)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :control, :state ] or check the arguments of the constraint! method."))
@@ -194,12 +202,13 @@ Add an `:initial`, `:final`, `:control` or `:state` box constraint on a range.
 # Examples
 ```jldoctest
 julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [1, 2])
-julia> constraint!(ocp, :final, 1, 0, 2)
-julia> constraint!(ocp, :control, 1, 0, 2)
+julia> constraint!(ocp, :final, Index(1), 0, 2)
+julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Integer, UnitRange{<:Integer}}, lb, ub, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, lb, ub, label::Symbol=gensym(:anonymous))
+    rg = rg isa Index ? rg.val : rg
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x[rg], lb, ub)
     elseif type ∈ [ :control, :state ]
