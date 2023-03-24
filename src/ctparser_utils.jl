@@ -1,4 +1,6 @@
-""" 
+using DocStringExtensions
+
+"""
 $(SIGNATURES)
 
 Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
@@ -8,11 +10,11 @@ Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 julia> id(e) = expr_it(e, Expr, x -> x)
 ```
 """
-expr_it(e, _Expr, f) = 
+expr_it(e, _Expr, f) =
     if e isa Expr
-	args = e.args
-	n = length(args)
-	newargs = [ expr_it(e.args[i], _Expr, f) for i ∈ 1:n ]
+    args = e.args
+    n = length(args)
+    newargs = [ expr_it(e.args[i], _Expr, f) for i ∈ 1:n ]
         return _Expr(e.head, newargs...)
     else
         return f(e)
@@ -80,12 +82,12 @@ julia> xf = Symbol(x, "f"); replace_call(ans, x, tf, xf)
 replace_call(e, x, t, y) = begin
     foo(x, t, y) = (h, args...) -> begin
         ee = Expr(h, args...)
-	@match ee begin
-	    :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
-	    :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
-	    :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
-	    :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
-	    _ => ee
+    @match ee begin
+        :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
+        :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
+        :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
+        :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
+        _ => ee
         end
     end
     expr_it(e, foo(x, t, y), x -> x)
@@ -111,9 +113,9 @@ true
 has(e, x, t) = begin
     foo(x, t) = (h, args...) -> begin
         ee = Expr(h, args...)
-	if :yes ∈ args
-	    :yes
-	else @match ee begin
+    if :yes ∈ args
+        :yes
+    else @match ee begin
             :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
             :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
             :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
@@ -127,7 +129,31 @@ end
 """
 $(SIGNATURES)
 
-Return the type constraint among 
+Return true if e contains x
+
+"""
+has(e, x) = begin
+    @match e begin
+        ee :: Expr =>
+            let
+                ee == x && return true
+                for i in ee.args
+                    has(i, x) && return true
+                end
+                return false
+            end
+        a         =>
+            let
+                a == x && return true
+                return false
+            end
+    end
+end
+
+"""
+$(SIGNATURES)
+
+Return the type constraint among
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
 `:state_fun`, `:mixed` (`:other` otherwise), together with the appropriate value
 (range or updated expression).
@@ -187,26 +213,26 @@ constraint_type(e, t, t0, tf, x, u) =
         [ true , false, false, false, false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j) : :other
             :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, i  ) : :other
-	    _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
-        [ false, true , false, false, false, false ] => @match e begin 
+        _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
+        [ false, true , false, false, false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j) : :other
             :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, i  ) : :other
-	    _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
+        _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false ] => begin
-	    ee = replace_call(e , x, t0, Symbol(x, "#0")) 
-	    ee = replace_call(ee, x, tf, Symbol(x, "#f")) 
-	    (:boundary, ee) end
+        ee = replace_call(e , x, t0, Symbol(x, "#0"))
+        ee = replace_call(ee, x, tf, Symbol(x, "#f"))
+        (:boundary, ee) end
         [ false, false, true , false, false, false ] => @match e begin
             :( $v[$i:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:j) : :other
             :( $v[$i   ]($s) ) => (v == u && s == t ) ? (:control_range, i  ) : :other
-	    _                  => (:control_fun, replace_call(e, u, t, u)) end                
+        _                  => (:control_fun, replace_call(e, u, t, u)) end
         [ false, false, false, true , false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:j) : :other
             :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range, i  ) : :other
-	    _                  => (:state_fun  , replace_call(e, x, t, x)) end                
+        _                  => (:state_fun  , replace_call(e, x, t, x)) end
         [ false, false, true , true , false, false ] => begin
-	    ee = replace_call(e , u, t, u)
-	    ee = replace_call(ee, x, t, x)
-	    (:mixed, ee) end
+        ee = replace_call(e , u, t, u)
+        ee = replace_call(ee, x, t, x)
+        (:mixed, ee) end
         _                      => :other
     end
