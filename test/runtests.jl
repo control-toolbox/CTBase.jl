@@ -19,7 +19,7 @@ const gFD = getFullDescription
         :descriptions,
         :functions,
         :model,
-        #:ctparser,
+        :ctparser,
         :ctparser_utils,
         )
         @testset "$(name)" begin
