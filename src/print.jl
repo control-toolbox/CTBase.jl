@@ -4,6 +4,22 @@
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
 function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, dimension_usage}) where {time_dependence, dimension_usage}
 
+    if  ocp.initial_time === nothing &&
+        ocp.final_time === nothing &&
+        ocp.time_label === nothing &&
+        ocp.lagrange === nothing &&
+        ocp.mayer === nothing && 
+        ocp.criterion === nothing &&
+        ocp.dynamics === nothing &&
+        ocp.dynamics! === nothing &&
+        ocp.state_dimension === nothing &&
+        isempty(ocp.state_labels)  &&
+        ocp.control_dimension === nothing &&
+        isempty(ocp.control_labels)
+        printstyled(io, "Empty optimal control problem", bold=true)
+        return
+    end
+
     dimx = state_dimension(ocp) === nothing ? "n" : state_dimension(ocp)
     dimu = control_dimension(ocp) === nothing ? "m" : control_dimension(ocp)
 
