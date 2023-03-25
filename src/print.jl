@@ -9,7 +9,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
 
     printstyled(io, "Optimal control problem of the form:\n", bold=true)
     println(io, "")
-    printstyled(io, "    minimize  ", color=:blue); print("J(t0, tf, x, u) = ")
+    printstyled(io, "    minimize  ", color=:blue); print(io, "J(t0, tf, x, u) = ")
     if ocp.mayer !== nothing
         print(io, " g(t0, x(t0), tf, x(tf))")
     end
@@ -34,20 +34,24 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     has_ξ = !isempty(ξ[1])
     has_ψ = !isempty(ψ[1])
     has_ϕ = !isempty(ϕ[1])
+    has_constraints = false
     if has_ξ
+        has_constraints = true
         isnonautonomous(ocp) ? 
         println(io, "        ξl ≤ ξ(t, u(t)) ≤ ξu, ") :
         println(io, "        ξl ≤ ξ(u(t)) ≤ ξu, ") 
     end
     if has_ψ
+        has_constraints = true
         isnonautonomous(ocp) ? 
         println(io, "        ψl ≤ ψ(t, x(t), u(t)) ≤ ψu, ") :
         println(io, "        ψl ≤ ψ(x(t), u(t)) ≤ ψu, ") 
     end
     if has_ϕ
+        has_constraints = true
         println(io, "        ϕl ≤ ϕ(t0, x(t0), tf, x(tf)) ≤ ϕu, ") 
     end
-    println(io, "")
+    has_constraints ? println(io, "") : nothing
     print(io, "    where x(t) ", '\u2208', " R", dimx == 1 ? "" : Base.string("^", dimx))
     print(io, " and u(t) ", '\u2208', " R", dimu == 1 ? "" : Base.string("^", dimu), ".")
     println(io, "")
