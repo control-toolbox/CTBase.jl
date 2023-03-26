@@ -4,68 +4,102 @@
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
 function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, dimension_usage}) where {time_dependence, dimension_usage}
 
-    if  ocp.initial_time === nothing &&
-        ocp.final_time === nothing &&
-        ocp.time_label === nothing &&
-        ocp.lagrange === nothing &&
-        ocp.mayer === nothing && 
-        ocp.criterion === nothing &&
-        ocp.dynamics === nothing &&
-        ocp.dynamics! === nothing &&
-        ocp.state_dimension === nothing &&
+    if  isnothing(ocp.initial_time) &&
+        isnothing(ocp.final_time) &&
+        isnothing(ocp.time_label) &&
+        isnothing(ocp.lagrange) &&
+        isnothing(ocp.mayer) && 
+        isnothing(ocp.criterion) &&
+        isnothing(ocp.dynamics) &&
+        isnothing(ocp.dynamics!) &&
+        isnothing(ocp.state_dimension) &&
         isempty(ocp.state_labels)  &&
-        ocp.control_dimension === nothing &&
+        isnothing(ocp.control_dimension) &&
         isempty(ocp.control_labels)
         printstyled(io, "Empty optimal control problem", bold=true)
         return
     end
 
-    dimx = state_dimension(ocp) === nothing ? "n" : state_dimension(ocp)
-    dimu = control_dimension(ocp) === nothing ? "m" : control_dimension(ocp)
+    # dimensions
+    dimx = isnothing(ocp.state_dimension) ? "n" : ocp.state_dimension
+    dimu = isnothing(ocp.control_dimension) ? "m" : ocp.control_dimension
 
+    # 
     printstyled(io, "Optimal control problem of the form:\n", bold=true)
     println(io, "")
-    printstyled(io, "    minimize  ", color=:blue); print(io, "J(t0, tf, x, u) = ")
-    if ocp.mayer !== nothing
-        print(io, " g(t0, x(t0), tf, x(tf))")
+
+    is_t0_free = isnothing(ocp.initial_time)
+    is_tf_free = isnothing(ocp.final_time)
+
+    # construct J
+    sJ = "J("
+    is_t0_free ? sJ = sJ * "t0, " : nothing
+    is_tf_free ? sJ = sJ * "tf, " : nothing
+    sJ = sJ * "x, u)"
+    printstyled(io, "    minimize  ", color=:blue); print(io, sJ * " = ")
+
+    # Mayer
+    if !isnothing(ocp.mayer)
+        sg = "g("
+        is_t0_free ? sg = sg * "t0, " : nothing
+        sg = sg * "x(t0), "
+        is_tf_free ? sg = sg * "tf, " : nothing
+        sg = sg * "x(tf))"
+        print(io, sg)
     end
-    if ocp.mayer !== nothing && lagrange(ocp) !== nothing 
+
+    #
+    if !isnothing(ocp.mayer) && !isnothing(ocp.lagrange)
         print(io, " +")
     end
-    if lagrange(ocp) !== nothing 
+
+    # Lagrange
+    if !isnothing(ocp.lagrange)
         isnonautonomous(ocp) ? 
         println(io, '\u222B', " f⁰(t, x(t), u(t)) dt, over [t0, tf]") : 
         println(io, '\u222B', " f⁰(x(t), u(t)) dt, over [t0, tf]")
     end
+
+    # constraints
     println(io, "")
     printstyled(io, "    subject to\n", color=:blue)
     println(io, "")
-    isnonautonomous(ocp) ? println(io, "        x", '\u0307', "(t) = f(t, x(t), u(t)), t in [t0, tf] a.e.,") : println(io, "        x", '\u0307', "(t) = f(x(t), u(t)), t in [t0, tf] a.e.,")
+
+    # dynamics
+    isnonautonomous(ocp) ? 
+    println(io, "        x", '\u0307', "(t) = f(t, x(t), u(t)), t in [t0, tf] a.e.,") : 
+    println(io, "        x", '\u0307', "(t) = f(x(t), u(t)), t in [t0, tf] a.e.,")
     println(io, "")
-    # constraints
-    ξ, ψ, ϕ = nlp_constraints(ocp)
-    dim_ξ = length(ξ[1])      # dimension of the boundary constraints
-    dim_ψ = length(ψ[1])
-    dim_ϕ = length(ϕ[1])
-    has_ξ = !isempty(ξ[1])
-    has_ψ = !isempty(ψ[1])
-    has_ϕ = !isempty(ϕ[1])
+
+    # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
     has_constraints = false
-    if has_ξ
+    if !isempty(ξl)
         has_constraints = true
         isnonautonomous(ocp) ? 
         println(io, "        ξl ≤ ξ(t, u(t)) ≤ ξu, ") :
         println(io, "        ξl ≤ ξ(u(t)) ≤ ξu, ") 
     end
-    if has_ψ
+    if !isempty(ηl)
+        has_constraints = true
+        isnonautonomous(ocp) ? 
+        println(io, "        ηl ≤ η(t, x(t)) ≤ ηu, ") :
+        println(io, "        ηl ≤ η(x(t)) ≤ ηu, ") 
+    end
+    if !isempty(ψl)
         has_constraints = true
         isnonautonomous(ocp) ? 
         println(io, "        ψl ≤ ψ(t, x(t), u(t)) ≤ ψu, ") :
         println(io, "        ψl ≤ ψ(x(t), u(t)) ≤ ψu, ") 
     end
-    if has_ϕ
+    if !isempty(ϕl)
         has_constraints = true
-        println(io, "        ϕl ≤ ϕ(t0, x(t0), tf, x(tf)) ≤ ϕu, ") 
+        sϕ = "ϕ("
+        is_t0_free ? sϕ = sϕ * "t0, " : nothing
+        sϕ = sϕ * "x(t0), "
+        is_tf_free ? sϕ = sϕ * "tf, " : nothing
+        sϕ = sϕ * "x(tf))"
+        println(io, "        ϕl ≤ ", sϕ, " ≤ ϕu, ")
     end
     has_constraints ? println(io, "") : nothing
     print(io, "    where x(t) ", '\u2208', " R", dimx == 1 ? "" : Base.string("^", dimx))
@@ -74,16 +108,12 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     println(io, "")
     nb_fixed = 0
     s = ""
-    if initial_time(ocp) !== nothing
+    if !is_t0_free # t0 is fixed
         s = s * "t0"
         nb_fixed += 1
     end
-    if final_time(ocp) !== nothing
-        if s == ""
-            s = s * "tf"
-        else
-            s = s * ", tf"
-        end
+    if !is_tf_free # tf is fixed
+        s == "" ? s = s * "tf" : s = s * ", tf"
         nb_fixed += 1
     end
     if nb_fixed > 1
@@ -94,6 +124,5 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     if nb_fixed > 0
         println(io, "    Besides, ", s)
     end
-    #println(io, "")
 
 end
