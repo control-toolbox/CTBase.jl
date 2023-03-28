@@ -5,11 +5,10 @@ e = :( ∫( r(t)^2 + 2u₁(t)) → min )
 @test subs(e, :r, :( x[1] )) == :(∫((x[1])(t) ^ 2 + 2 * u₁(t)) → min)
 
 e = :( ∫( u₁(t)^2 + 2u₂(t)) → min )
-f = [ e, :foo, :foo ]
 for i ∈ 1:2
-     f[i+1] = subs(f[i], Symbol(:u, Char(8320+i)), :( u[$i] ))
+     e = subs(e, Symbol(:u, Char(8320+i)), :( u[$i] ))
 end
-@test f[3] == :(∫((u[1])(t) ^ 2 + 2 * (u[2])(t)) → min)
+@test e == :(∫((u[1])(t) ^ 2 + 2 * (u[2])(t)) → min)
 
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
