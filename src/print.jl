@@ -74,13 +74,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
     has_constraints = false
-    if !isempty(ξl)
+    if !isempty(ξl) || !isempty(ulb)
         has_constraints = true
         isnonautonomous(ocp) ? 
         println(io, "        ξl ≤ ξ(t, u(t)) ≤ ξu, ") :
         println(io, "        ξl ≤ ξ(u(t)) ≤ ξu, ") 
     end
-    if !isempty(ηl)
+    if !isempty(ηl) || !isempty(xlb)
         has_constraints = true
         isnonautonomous(ocp) ? 
         println(io, "        ηl ≤ η(t, x(t)) ≤ ηu, ") :
