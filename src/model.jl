@@ -156,7 +156,7 @@ julia> constraint!(ocp, :initial, [ 0, 0, 0 ])
 julia> constraint!(ocp, :final, [ 0, 0, 0 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=_constraint_label())
     if type ∈ [ :initial, :final ] # not allowed for :control or :state
         ocp.constraints[label] = (type, :eq, x -> x, val, val)
     else
@@ -176,7 +176,7 @@ julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
 julia> constraint!(ocp, :final, Index(1), 0)
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, val, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, val, label::Symbol=_constraint_label())
     if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
 	rg = rg isa Index ? rg.val : rg
         ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
@@ -199,7 +199,7 @@ julia> constraint!(ocp, :control, [ 0, 0 ], [ 2, 3 ])
 julia> constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symbol=_constraint_label())
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x, lb, ub)
     elseif type == :control
@@ -225,7 +225,7 @@ julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, lb, ub, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, lb, ub, label::Symbol=_constraint_label())
     rg = rg isa Index ? rg.val : rg
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x[rg], lb, ub)
@@ -250,7 +250,7 @@ julia> constraint!(ocp, :state, f, [ 0, 0 ])
 julia> constraint!(ocp, :mixed, f, [ 0, 0 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val, label::Symbol=_constraint_label())
     if type ∈ [ :boundary, :control, :state, :mixed ]
         ocp.constraints[label] = (type, :eq, f, val, val)
     else
@@ -272,7 +272,7 @@ julia> constraint!(ocp, :state, f, [ 0, 0 ], [ 1, 2 ])
 julia> constraint!(ocp, :mixed, f, [ 0, 0 ], [ 1, 2 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub, label::Symbol=gensym(:anonymous))
+function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub, label::Symbol=_constraint_label())
     if type ∈ [ :boundary, :control, :state, :mixed ]
         ocp.constraints[label] = (type, :ineq, f, lb, ub)
     else
