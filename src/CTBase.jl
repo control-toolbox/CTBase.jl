@@ -86,7 +86,7 @@ export ismin, ismax, dynamics, lagrange, mayer, criterion, initial_time, final_t
 export control_dimension, state_dimension, constraints
 export isautonomous, isnonautonomous
 export control_labels, state_labels
-export nlp_constraints
+export nlp_constraints, constraints_labels
 
 # solution
 export AbstractOptimalControlSolution, OptimalControlSolution

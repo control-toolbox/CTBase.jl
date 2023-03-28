@@ -323,14 +323,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns a [`KeySet`](@ref) which contains the list of constraints labels.
+Returns the labels of the constraints as a [`KeySet`](@ref).
 
 # Examples
 ```@example
-julia> constraints(ocp)
+julia> constraints_labels(ocp)
 ```
 """
-function constraints(ocp::OptimalControlModel)
+function constraints_labels(ocp::OptimalControlModel)
     return keys(ocp.constraints)
 end
 
