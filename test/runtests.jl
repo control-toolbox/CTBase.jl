@@ -13,6 +13,7 @@ const gFD = getFullDescription
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
+        :print,
         :utils,
         :exceptions,
         :callbacks,

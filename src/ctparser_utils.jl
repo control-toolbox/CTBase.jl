@@ -47,6 +47,7 @@ julia> e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
 :((x[1])(0) * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
 
 julia> x0 = Symbol(x, 0); subs(e, :( \$x[1](\$(t0)) ), :( \$x0[1] ))
+:(x0[1] * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
 ```
 """
 subs(e, e1 :: Union{Symbol, Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
@@ -166,7 +167,7 @@ julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u)
 (:initial, 1:2)
 
 julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u)
-(:initial, 1)
+(:initial, Index(1))
 
 julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u)
 (:boundary, :(2 * var"x#0"[1] ^ 2))
@@ -175,7 +176,7 @@ julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u)
 (:final, 1:2)
 
 julia> constraint_type(:( x[1](tf) ), t, t0, tf, x, u)
-(:final, 1)
+(:final, Index(1))
 
 julia> constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u)
 (:boundary, :(2 * var"x#f"[1] ^ 2))
@@ -187,7 +188,7 @@ julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u)
 (:control_range, 1:2)
 
 julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u)
-(:control_range, 1)
+(:control_range, Index(1))
 
 julia> constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u)
 (:control_fun, :(2 * u[1] ^ 2))
@@ -196,7 +197,7 @@ julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u)
 (:state_range, 1:2)
 
 julia> constraint_type(:( x[1](t) ), t, t0, tf, x, u)
-(:state_range, 1)
+(:state_range, Index(1))
 
 julia> constraint_type(:( 2x[1](t)^2 ), t, t0, tf, x, u)
 (:state_fun, :(2 * x[1] ^ 2))

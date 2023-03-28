@@ -24,6 +24,9 @@ constraint!(ocp, :dynamics, (x, u) -> A*x + B*u)
 objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2) # default is to minimise
 
 #
+@test display(ocp) isa Nothing
+
+#
 @test isautonomous(ocp)
 @test dynamics(ocp)(0.0, [0, 1], 10) ≈ [ 1, 10 ] atol=1e-8
 @test dynamics(ocp)(0.0, [0, 1], [ 1 ]) ≈ [ 1, 1 ] atol=1e-8
