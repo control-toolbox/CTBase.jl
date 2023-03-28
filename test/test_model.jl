@@ -25,6 +25,9 @@ objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2) # default is to minimise
 
 #
 @test display(ocp) isa Nothing
+@test constraints(ocp) isa Base.KeySet
+
+@test_throws IncorrectArgument remove_constraint!(ocp, :dummy_con)
 
 #
 @test isautonomous(ocp)

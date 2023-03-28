@@ -82,7 +82,7 @@ export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices
 # model
 export AbstractOptimalControlModel, OptimalControlModel
 export Model, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
-export ismin, dynamics, lagrange, mayer, criterion, initial_time, final_time
+export ismin, ismax, dynamics, lagrange, mayer, criterion, initial_time, final_time
 export control_dimension, state_dimension, constraints
 export isautonomous, isnonautonomous
 export control_labels, state_labels
