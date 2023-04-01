@@ -41,6 +41,9 @@ mutable struct Index
     Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
 end
 Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
+Base.to_index(i::Index) = i.val
+Base.getindex(x::AbstractArray, i::Index) = x[i.val]
+Base.getindex(x::Real, i::Index) = x[i.val]
 
 #
 isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
