@@ -235,5 +235,5 @@ constraint_type(e, t, t0, tf, x, u) =
         ee = replace_call(e , u, t, u)
         ee = replace_call(ee, x, t, x)
         (:mixed, ee) end
-        _                      => :other
+        _                      => ( :other, nothing )
     end

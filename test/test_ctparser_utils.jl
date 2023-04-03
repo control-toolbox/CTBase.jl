@@ -52,6 +52,6 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u
 @test constraint_type(:( x[1](t)            ), t, t0, tf, x, u) == (:state_range, Index(1))
 @test constraint_type(:( 2x[1](t)^2         ), t, t0, tf, x, u) == (:state_fun, :(2 * x[1] ^ 2))
 @test constraint_type(:( 2u[1](t)^2 * x(t)  ), t, t0, tf, x, u) == (:mixed, :((2 * u[1] ^ 2) * x))
-@test constraint_type(:( 2u[1](0)^2 * x(t)  ), t, t0, tf, x, u) ==  :other
+@test constraint_type(:( 2u[1](0)^2 * x(t)  ), t, t0, tf, x, u) == (:other, nothing)
 
 end
