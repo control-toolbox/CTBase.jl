@@ -160,7 +160,7 @@ julia> constraint!(ocp, :final, [ 0, 0, 0 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=_constraint_label())
-    if type ∈ [ :initial, :final ] # not allowed for :control or :state
+    if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
         ocp.constraints[label] = (type, :eq, x -> x, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
