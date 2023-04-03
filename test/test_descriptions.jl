@@ -11,6 +11,9 @@ descriptions = add(descriptions, (:b,))
 @test descriptions[1] == (:a,)
 @test descriptions[2] == (:b,)
 
+# print a tuple of descriptions
+@test display(descriptions) isa Nothing
+
 # get the complete description of the chosen method
 algorithmes = ()
 algorithmes = add(algorithmes, (:descent, :bfgs, :bissection))

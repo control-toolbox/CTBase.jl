@@ -10,8 +10,17 @@ const DescVarArg = Vararg{Symbol}
 """
 const Description = Tuple{DescVarArg}
 
-# -------------------------------------------------------------------------------------------------- 
-# the description may be given as a tuple or a list of symbols (Vararg{Symbol})
+"""
+$(TYPEDSIGNATURES)
+
+Print a tuple of descriptions.
+"""
+function Base.show(io::IO, ::MIME"text/plain", descriptions::Tuple{Vararg{Description}})
+    for description ∈ descriptions
+        println(io, description)
+    end
+end
+
 """
 $(TYPEDSIGNATURES)
 
