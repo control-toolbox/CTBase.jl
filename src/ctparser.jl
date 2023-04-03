@@ -32,7 +32,7 @@ end
 
 # store a parsed line
 mutable struct _code
-    line::Union{Expr, Symbol}         # line of code (initial, but also transformed after aliasing)
+    line::Union{Expr, Symbol}         # line of code (initial, but also transformed after unaliasing)
 
     # result of first parsing phase
     type::_type                       # type of this code
@@ -51,6 +51,9 @@ mutable struct _code
     function _code(l, t, c, n)
         if n isa Integer
             n = "eq" * string(n)
+            new(l, t, c, Symbol(n), l, "", "")
+        elseif n isa Expr
+            n = "_" * string(n)
             new(l, t, c, Symbol(n), l, "", "")
         else
             new(l, t, c, n, l, "", "")
@@ -335,6 +338,18 @@ macro def( args... )
     # store the code to produce
     _final_code = []
 
+    # 0/ some global values to record
+    _time_variable    = :very_stupid_name_for_a_variable
+    _t0_variable      = :very_stupid_name_for_a_variable
+    _tf_variable      = :very_stupid_name_for_a_variable
+    _state_variable   = :very_stupid_name_for_a_variable
+    _control_variable = :very_stupid_name_for_a_variable
+    _time_variable    = nothing
+    _t0_variable      = nothing
+    _tf_variable      = nothing
+    _state_variable   = nothing
+    _control_variable = nothing
+
     # 1/ create ocp
     push!(_final_code, :(ocp = Model()))
 
@@ -343,6 +358,7 @@ macro def( args... )
     # is time is present in parsed code ?
     (c, index) = _line_of_type(e_time)
     if c != nothing
+        _time_variable = c.content[1]
         x = c.content[2]  # aka t0
         y = c.content[3]  # aka tf
 
@@ -358,6 +374,7 @@ macro def( args... )
 
         # is t0 a variable ?
         if status_0
+            _tf_variable = y
             code = quote time!(ocp,:final, $(esc(y))) end
             push!(_final_code, code)
             _parsed_code[index].info = "final time definition with $y"
@@ -369,6 +386,7 @@ macro def( args... )
 
         # is tf a variable ?
         if status_f
+            _t0_variable = x
             code = quote time!(ocp,:initial, $(esc(x))) end
             push!(_final_code, code)
             _parsed_code[index].info = "initial time definition with $x"
@@ -378,13 +396,14 @@ macro def( args... )
             @goto after_time
         end
         # nor t0 and tf are variables (in Main scope)
+        _t0_variable = x
+        _tf_variable = y
+
         code = quote time!(ocp, [ $(esc(x)), $(esc(y))] ) end
         push!(_final_code, code)
         _parsed_code[index].info = "time definition with [ $x, $y]"
         _store_code_as_string( "time!(ocp, [ $x, $y])", index)
 
-        # store the Symbol used as time
-        _time_variable = c.content[1]
         @label after_time
     else
         # no time defintion is present, cannot continue
@@ -394,19 +413,19 @@ macro def( args... )
     # 3/ call state!
     (c, index) = _line_of_type(e_state_vector)
     if c != nothing
-        s = c.content[1]  # aka state name
+        _state_variable = c.content[1]  # aka state name
         d = c.content[2]  # aka dimention
         code = quote state!(ocp, $(esc(d))) end
         push!(_final_code, code)
-        _parsed_code[index].info = "state vector ($s) of dimension $d"
+        _parsed_code[index].info = "state vector ($_state_variable) of dimension $d"
         _store_code_as_string( "state!(ocp, $d)", index)
     end
     (c, index) = _line_of_type(e_state_scalar)
     if c != nothing
-        s = c.content[1]  # aka state name
+        _state_variable = c.content[1]  # aka state name
         code = quote state!(ocp, 1) end
         push!(_final_code, code)
-        _parsed_code[index].info = "state scalar ($s)"
+        _parsed_code[index].info = "state scalar ($_state_variable)"
         _store_code_as_string( "state!(ocp, 1)", index)
     end
 
@@ -414,19 +433,19 @@ macro def( args... )
     # 4/ call control!
     (c, index) = _line_of_type(e_control_vector)
     if c != nothing
-        s = c.content[1]  # aka control name
+        _control_variable = c.content[1]  # aka control name
         d = c.content[2]  # aka dimention
         code = quote control!(ocp, $(esc(d))) end
         push!(_final_code, code)
-        _parsed_code[index].info = "control vector ($s) of dimension $d"
+        _parsed_code[index].info = "control vector ($_control_variable) of dimension $d"
         _store_code_as_string( "control!(ocp, $d)", index)
     end
     (c, index) = _line_of_type(e_control_scalar)
     if c != nothing
-        s = c.content[1]  # aka control name
+        _control_variable = c.content[1]  # aka control name
         code = quote control!(ocp, 1) end
         push!(_final_code, code)
-        _parsed_code[index].info = "control scalar ($s)"
+        _parsed_code[index].info = "control scalar ($_control_variable)"
         _store_code_as_string( "control!(ocp, 1)", index)
     end
 
@@ -490,10 +509,37 @@ macro def( args... )
     end
 
     # 7/ constraints
-    for c ∈ _parsed_code
-        if c.type != e_constraint
-            continue
-        end
+    @show _time_variable
+    @show _t0_variable
+    @show _tf_variable
+    @show _state_variable
+    @show _control_variable
+
+    for i ∈ 1:length(_parsed_code)
+        c = _parsed_code[i]
+
+        c.type != e_constraint && continue
+
+        # # try to recognize all constraint types
+        # _c_expr = @match c.line begin
+        #     :( $x <= $y <= $z ) => y
+        #     :( $x ≤  $y ≤  $z ) => y
+        #     :( $x == $y       ) => y
+        #     :( $x <= $y       ) => y
+        #     :( $x ≤  $y       ) => y
+        #     _                   => nothing
+        # end
+        # @show _c_expr
+
+        @show c.line
+
+        @show constraint_type(c.line,
+                              _time_variable,
+                              _t0_variable,
+                              _tf_variable,
+                              _state_variable,
+                              _control_variable)
+
     end
 
     # 6/ objective
