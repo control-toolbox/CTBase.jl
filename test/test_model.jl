@@ -25,6 +25,9 @@ objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2) # default is to minimise
 
 #
 @test display(ocp) isa Nothing
+@test display(constraints(ocp)) isa Nothing
+
+@test_throws IncorrectArgument remove_constraint!(ocp, :dummy_con)
 
 #
 @test isautonomous(ocp)
@@ -127,5 +130,7 @@ constraint!(ocp, :dynamics, f) # see previous defs
 @test uub == [ 1 ][uind]
 @test xlb == [ r0, 0, m0 ][xind]
 @test xub == [ Inf, vmax, mf ][xind]
+@test [ Inf, vmax, mf ][Index(2)] == vmax
+@test [ Inf, vmax, mf ][Index(2)][Index(1)] == vmax
 
 end

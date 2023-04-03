@@ -10,6 +10,8 @@ _state_labels(n::Dimension) = n==1 ? ["x"] : [ "x" * ctindices(i) for i ∈ rang
 _control_labels(m::Dimension) = m==1 ? ["u"] : [ "u" * ctindices(i) for i ∈ range(1, m)]
 _time_label() = "t"
 
+_constraint_label() = gensym(:unamed)
+
 # common
 __matrix_dimension_stock() = 1 
 
