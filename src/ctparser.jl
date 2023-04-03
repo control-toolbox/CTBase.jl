@@ -2,59 +2,10 @@
 # problem definition as a 'julia like' syntax
 
 
-#
-# temporary hack to speed up the dev/test of CtParser
-#
-
-
-
-#
-#
-#
-module CtParser
-
-####### FakeModel
-# used instead of Model, to instantiate ocp
-# will be removed later
-
-mutable struct fakemodel
-    count::Integer         # to check which fakemodel() is returned
-    fakemodel(n) = new(n)
-    function fakemodel()
-        new(1)
-    end
-end
-
-function increment(f::fakemodel, n)
-    f.count += n
-end
-
-function time!(args...)
-    println("FAKE__: time!", args)
-end
-function state!(args...)
-    println("FAKE__: state!", args)
-end
-function control!(args...)
-    println("FAKE__: control!", args)
-end
-function variable!(args...)
-    println("FAKE__: variable!", args)
-end
-function constraint!(args...)
-    println("FAKE__: constraint!", args)
-end
-function objective!(args...)
-    println("FAKE__: objective!", args)
-end
-####### FakeModel
-
-import Base.show  # for overloading
+import Base.show      # for overloading show()
 
 using MLStyle         # for parsing
 using Printf          #
-
-include("ctparser_utils.jl")
 
 export @def
 export print_parsed_code
@@ -385,8 +336,7 @@ macro def( args... )
     _final_code = []
 
     # 1/ create ocp
-    push!(_final_code, :(ocp = fakemodel()))
-    #push!(_final_code, :(ocp = Model()))
+    push!(_final_code, :(ocp = Model()))
 
     # 2/ call time!
 
@@ -735,5 +685,3 @@ function print_generated_code()
     println.(_generated_code)
     return
 end # print_generated_code
-
-end # module CtParser

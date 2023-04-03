@@ -52,7 +52,7 @@ function test_ctparser()
         mf ≤ m(t) ≤ m0    =>   (mass_constraint)
         r(tf) -> max
     end
-    @test ocp isa CtParser.fakemodel # should be CTBase.Model in last version
+    @test ocp isa  OptimalControlModel
 
     # ... up to here: all the remaining are KO
     @test_throws "@def parsing error" @def syntax_only=true begin

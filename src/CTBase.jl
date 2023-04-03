@@ -55,7 +55,6 @@ include("model.jl")
 #
 include("ctparser_utils.jl")
 include("ctparser.jl")
-@reexport using .CtParser
 #
 include("print.jl")
 include("solution.jl")
