@@ -10,7 +10,7 @@ tf = 1
 x0 = [-1, 0]
 xf = [ 0, 0]
 #
-state!(ocp, n)   # dimension of the state
+state!(ocp, n, ["r", "v"])   # dimension of the state
 control!(ocp, m) # dimension of the control
 time!(ocp, [t0, tf])
 constraint!(ocp, :initial, x0)
@@ -25,22 +25,27 @@ objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2) # default is to minimise
 
 #
 @test display(ocp) isa Nothing
-@test display(constraints(ocp)) isa Nothing
+@test display(ocp.constraints) isa Nothing
 
 @test_throws IncorrectArgument remove_constraint!(ocp, :dummy_con)
 
 #
 @test isautonomous(ocp)
-@test dynamics(ocp)(0.0, [0, 1], 10) ≈ [ 1, 10 ] atol=1e-8
-@test dynamics(ocp)(0.0, [0, 1], [ 1 ]) ≈ [ 1, 1 ] atol=1e-8
-@test lagrange(ocp)(0.0, [0, 0], 1) ≈ 0.5 atol=1e-8
-@test lagrange(ocp)(0.0, [0, 0], [ 1 ]) ≈ 0.5 atol=1e-8
-@test mayer(ocp) === nothing
+@test ocp.dynamics(0.0, [0, 1], 10) ≈ [ 1, 10 ] atol=1e-8
+@test ocp.dynamics(0.0, [0, 1], [ 1 ]) ≈ [ 1, 1 ] atol=1e-8
+@test ocp.lagrange(0.0, [0, 0], 1) ≈ 0.5 atol=1e-8
+@test ocp.lagrange(0.0, [0, 0], [ 1 ]) ≈ 0.5 atol=1e-8
+@test ocp.mayer === nothing
 @test ismin(ocp)
-@test initial_time(ocp) == t0
-@test final_time(ocp) == tf
-@test control_dimension(ocp) == m
-@test state_dimension(ocp) == n
+@test ocp.initial_time == t0
+@test ocp.final_time == tf
+@test ocp.control_dimension == m
+@test ocp.state_dimension == n
+
+# replace the cost
+objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0, (x, u) -> 0.5u^2)
+@test ocp.lagrange(0.0, [0, 0], 1) ≈ 0.5 atol=1e-8
+@test ocp.mayer(0.0, [0, 0], 1, [0, 0]) ≈ 0 atol=1e-8
 
 # -------------------------------------------------------------------------------------------
 # 
@@ -72,13 +77,13 @@ constraint!(ocp, :dynamics, f)
 
 #
 @test isautonomous(ocp)
-@test lagrange(ocp) === nothing
-@test mayer(ocp)(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
+@test ocp.lagrange === nothing
+@test ocp.mayer(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
 @test !ismin(ocp)
-@test initial_time(ocp) == t0
-@test final_time(ocp) === nothing
-@test control_dimension(ocp) == m
-@test state_dimension(ocp) == n
+@test ocp.initial_time == t0
+@test ocp.final_time === nothing
+@test ocp.control_dimension == m
+@test ocp.state_dimension == n
 
 # -------------------------------------------------------------------------------------------
 # 
@@ -103,14 +108,14 @@ objective!(ocp, :mayer, (t0, x0, tf, xf) -> xf[1], :max)
 constraint!(ocp, :dynamics, f) # see previous defs
 
 @test isautonomous(ocp)
-@test lagrange(ocp) === nothing
-@test mayer(ocp)(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
+@test ocp.lagrange === nothing
+@test ocp.mayer(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
 @test !ismin(ocp)
 
-@test initial_time(ocp) == t0
-@test final_time(ocp) === nothing
-@test control_dimension(ocp) == m
-@test state_dimension(ocp) == n
+@test ocp.initial_time == t0
+@test ocp.final_time === nothing
+@test ocp.control_dimension == m
+@test ocp.state_dimension == n
 
 @test constraint(ocp, :initial_con1)(x0) == x0 
 @test constraint(ocp, :control_con1)(1) == 1 

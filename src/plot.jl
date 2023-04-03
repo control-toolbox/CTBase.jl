@@ -1,16 +1,32 @@
-# --------------------------------------------------------------------------------------------------
-# Tree for plot 
-#
+"""
+$(TYPEDEF)
+
+Abstract node for plot.
+"""
 abstract type AbstractPlotNode end
+
+"""
+$(TYPEDEF)
+
+Type alias for a plot element.
+"""
 const SymbolPlot = Tuple{Symbol,Integer}
 
-# leaf
+"""
+$(TYPEDEF)
+
+A leaf of a plot tree.
+"""
 struct PlotLeaf <: AbstractPlotNode
     element::SymbolPlot
     PlotLeaf(element::SymbolPlot) = new(element) 
 end
 
-# node
+"""
+$(TYPEDEF)
+
+A node of a plot tree.
+"""
 struct PlotNode <: AbstractPlotNode
     element::Union{Symbol, Matrix{Any}}
     children::Vector{<:AbstractPlotNode}
@@ -19,6 +35,12 @@ end
 
 # --------------------------------------------------------------------------------------------------
 # internal plots
+"""
+$(TYPEDSIGNATURES)
+
+Plot a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
+The argument `s` can be `:state`, `:control` or `:adjoint`.
+"""
 function _plot_time(sol::OptimalControlSolution, d::Dimension, s::Symbol; 
     t_label, labels::Vector{String}, title::String, kwargs...)
     p = Plots.plot(; xlabel="time", title=title, kwargs...)
@@ -28,28 +50,49 @@ function _plot_time(sol::OptimalControlSolution, d::Dimension, s::Symbol;
     return p
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
+The argument `s` can be `:state`, `:control` or `:adjoint`.
+"""
 function _plot_time(sol::OptimalControlSolution, s::Symbol, i::Integer;
     t_label, label::String, kwargs...)
     p = CTBase.plot(sol, :time, (s, i); xlabel=t_label, label=label, kwargs...) # use simple plot
     return p
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Update the plot `p` with the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where
+`f` is given by the symbol `s`.
+The argument `s` can be `:state`, `:control` or `:adjoint`.
+"""
 function _plot_time!(p, sol::OptimalControlSolution, s::Symbol, i::Integer;
     t_label, label::String, kwargs...)
     CTBase.plot!(p, sol, :time, (s, i); xlabel=t_label, label=label, kwargs...) # use simple plot
 end
 
-# --------------------------------------------------------------------------------------------------
-# General plot
+"""
+$(TYPEDSIGNATURES)
+
+Plot the optimal control solution `sol` using the layout `layout`.
+The argument `layout` can be `:group` or `:split` (default).
+
+!!! note
+
+    The keyword arguments `state_style`, `control_style` and `adjoint_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `adjoint_style` is passed to the plot of the adjoint.
+"""
 function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
     state_style=(), control_style=(), adjoint_style=(), kwargs...)
 
     # parameters
     n = sol.state_dimension
     m = sol.control_dimension
-    x_labels = sol.state_labels
-    u_labels = sol.control_labels
-    t_label = sol.time_label
+    x_labels = sol.state_names
+    u_labels = sol.control_names
+    t_label = sol.time_name
 
     if layout==:group
             
@@ -149,8 +192,18 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
 
 end
 
-# --------------------------------------------------------------------------------------------------
-# simple plot: use a Plots recipe 
+"""
+$(TYPEDSIGNATURES)
+
+Returns `x` and `y` for the plot of the optimal control solution `sol` 
+corresponding respectively to the argument `xx` and the argument `yy`.
+
+**Notes.**
+
+- The argument `xx` can be `:time`, `:state`, `:control` or `:adjoint`.
+- If `xx` is `:time`, then, a label is added to the plot.
+- The argument `yy` can be `:state`, `:control` or `:adjoint`.
+"""
 @recipe function f(sol::OptimalControlSolution,
     xx::Union{Symbol,Tuple{Symbol,Integer}}, yy::Union{Symbol,Tuple{Symbol,Integer}})
     x = get(sol, xx)
@@ -164,11 +217,11 @@ end
             i = yy[2]
         end
         if s==:state
-            label --> sol.state_labels[i]
+            label --> sol.state_names[i]
         elseif s==:control
-            label --> sol.control_labels[i]
+            label --> sol.control_names[i]
         elseif s==:adjoint
-            label --> "p"*sol.state_labels[i]
+            label --> "p"*sol.state_names[i]
         end
         # change ylims if the gap between min and max is less than a tol
         tol = 1e-3
@@ -182,11 +235,10 @@ end
     x, y
 end
 
-# --------------------------------------------------------------------------------------------------
-# getter for plots
 """
-	get(sol::UncFreeXfSolution, xx::Union{Symbol, Tuple{Symbol, Integer}})
-TBW
+$(TYPEDSIGNATURES)
+
+Get the data for plotting.
 """
 function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}})
 
