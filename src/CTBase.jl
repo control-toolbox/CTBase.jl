@@ -105,7 +105,8 @@ export get_priority_print_callbacks, get_priority_stop_callbacks
 export Description, makeDescription, add, getFullDescription, \
 
 # exceptions
-export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod, IncorrectArgument, IncorrectOutput
+export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+export IncorrectArgument, IncorrectOutput, NotImplemented
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField

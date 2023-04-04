@@ -72,7 +72,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
-__state_names(n::Dimension) = n==1 ? ["x"] : [ "x" * ctindices(i) for i ∈ range(1, n)]
+__state_names(n::Dimension) = n==1 ? "x" : [ "x" * ctindices(i) for i ∈ range(1, n)]
 
 """
 $(TYPEDSIGNATURES)
@@ -80,7 +80,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the controls.
 The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
 """
-__control_names(m::Dimension) = m==1 ? ["u"] : [ "u" * ctindices(i) for i ∈ range(1, m)]
+__control_names(m::Dimension) = m==1 ? "u" : [ "u" * ctindices(i) for i ∈ range(1, m)]
 
 """
 $(TYPEDSIGNATURES)

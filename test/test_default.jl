@@ -17,12 +17,12 @@ function test_default()
     end
 
     @testset "Default value of the state names of the Optimal Control Problem" begin
-        @test CTBase.__state_names(1) == ["x"]
+        @test CTBase.__state_names(1) == "x"
         @test CTBase.__state_names(2) == ["x₁", "x₂"]
     end
 
     @testset "Default value of the control names of the Optimal Control Problem" begin
-        @test CTBase.__control_names(1) == ["u"]
+        @test CTBase.__control_names(1) == "u"
         @test CTBase.__control_names(2) == ["u₁", "u₂"]
     end
 
