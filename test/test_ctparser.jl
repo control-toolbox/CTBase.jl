@@ -39,6 +39,14 @@ function test_ctparser()
         mf ≤ m(t) ≤ m0
     end
 
+    @test @def syntax_only=true begin
+        x(t0) == [ r0, v0, m0 ], (1)
+        0  ≤ u(t) ≤ 1          , (1bis)
+        r0 ≤ x(t)[1]           , (deux)
+        0  ≤ x₂(t) ≤ vmax     => (2bis)
+        mf ≤ m(t) ≤ m0        => (1+1)
+    end
+
     # should pass parsing + evaluation
     t0 = 1.1
     ocp = @def begin
@@ -91,4 +99,10 @@ function test_ctparser()
         tf, variable
         tf, variable
     end
+
+     @test_throws "@def parsing error" @def syntax_only=true begin
+         r(t) -> min
+         x(t) -> max
+    end
+
 end
