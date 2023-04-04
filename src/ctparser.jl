@@ -9,9 +9,10 @@ using Printf          #
 
 export @def
 export print_parsed_code
-export set_verbose_level
 export CtParserException
 export print_generated_code
+export set_verbose_level
+export verbose
 
 # only export then debugging
 export get_parsed_line
@@ -356,8 +357,6 @@ macro def( args... )
         end
 
         @when :($e) = node begin
-            println("DEBUG")
-            @show e
             if _type_and_var_already_parsed( e_constraint, [e])[1]
                 return :(throw(CtParserException("constraint defined twice")))
             end
@@ -630,6 +629,7 @@ end # macro @def
 # (internal) find if some types are already parsed
 #
 function _types_already_parsed( types::_type...)
+    global parsed_code
     for c in _parsed_code
         for t in types
             if c.type == t
@@ -644,6 +644,7 @@ end # function _types_already_parsed
 # (internal) find if some type/var is already parsed
 #
 function _type_and_var_already_parsed( type::_type, content::Any )
+    global parsed_code
     count = 1
     for c in _parsed_code
         if c.type == type && c.content == content
@@ -658,6 +659,7 @@ end # function _type_and_var_already_parsed
 # (internal) return the (first) line corresponding to a type
 #
 function _line_of_type( type::_type)
+    global parsed_code
     count = 1
     for c in _parsed_code
         if c.type == type
@@ -667,37 +669,6 @@ function _line_of_type( type::_type)
     end
     return nothing, 0
 end # _line_of_type
-
-#
-# (internal) recognize constraints
-#
-
-function _classify_constraints()
-    for i ∈ 1:length(_parsed_code)
-        c = _parsed_code[i]
-        if c.type == e_constraint
-            if c.content[1].head == Symbol(:comparison)
-                _parsed_code[i].info = "(temporary_2: constraint double comparison)"
-                continue
-            end
-
-            if  c.content[1].head == Symbol(:call) &&
-                ( c.content[1].args[1] == Symbol(:≤) ||
-                c.content[1].args[1] == Symbol(:<=) ||
-                c.content[1].args[1] == Symbol(:<))
-                _parsed_code[i].info = "(temporary_2: constraint simple comparison)"
-                continue
-            end
-
-            if  c.content[1].head == Symbol(:call) &&
-                c.content[1].args[1] == Symbol(:(==))
-                _parsed_code[i].info = "(temporary_2: constraint egality)"
-                continue
-            end
-
-        end
-    end
-end
 
 #
 # (internal)
@@ -728,6 +699,7 @@ function verbose(level::Int, args...)
     end
 end # function verbose
 
+
 #
 # helpers to modify the parser behavior.
 # useful for debugging/testing
@@ -744,10 +716,16 @@ function set_verbose_level(level::Int)
     _verbose_level = level < 0 ? 0 : ( level > 100 ? 100 : level )
 end
 
+# COV_EXCL_START
+
+# we may think of removing all of the remaining....
+# of "code cover" these lines with more tests
+
 #
 # print parsed informations (debug)
 #
 function print_parsed_code( )
+    global parsed_code
     for c in _parsed_code
         show(c)
     end
@@ -757,6 +735,7 @@ end # function print_parsed_code
 # getter of a line of code (debug)
 #
 function get_parsed_line( i::Integer )
+    global parsed_code
     if i <= 0 || i > size(_parsed_code)[1]
         return false
     end
@@ -767,6 +746,7 @@ end
 # print informations on each parsed lines
 #
 function code_debug_info( )
+    global parsed_code
     if size(_parsed_code)[1] == 0
         println("=== No debug information from CtParser (empty code)")
         return
@@ -799,3 +779,5 @@ function print_generated_code()
     println.(_generated_code)
     return
 end # print_generated_code
+
+# COV_EXCL_STOP
