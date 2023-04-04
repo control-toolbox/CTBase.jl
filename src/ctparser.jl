@@ -11,11 +11,11 @@ export @def
 export print_parsed_code
 export set_verbose_level
 export CtParserException
-export code_info
 export print_generated_code
 
 # only export then debugging
 export get_parsed_line
+export code_debug_info
 
 #
 # _code "class"
@@ -41,7 +41,7 @@ mutable struct _code
     # for constraints
     name::Union{Symbol, Nothing}      # constraint name
 
-    # user/debug information (code_info)
+    # user/debug information (code_debug_info)
     initial_line::Union{Expr, Symbol} # initial line of code
     info::String                      # debug info
     code::String                      # final code after tranformation
@@ -268,7 +268,56 @@ macro def( args... )
             _parsed_code[count].info = "(temporary_1: min objective)"
             continue
         end
+        @when :($a → begin min end) = node begin
+            if _types_already_parsed(e_objective_max, e_objective_min)
+                return :(throw(CtParserException("objective defined twice")))
+            end
+            push!(_parsed_code,_code( node, e_objective_min, [a]))
+            _parsed_code[count].info = "(temporary_1: min objective)"
+            continue
+        end
+        @when :($a -> min ) = node begin
+            if _types_already_parsed(e_objective_max, e_objective_min)
+                return :(throw(CtParserException("objective defined twice")))
+            end
+            push!(_parsed_code,_code( node, e_objective_min, [a]))
+            _parsed_code[count].info = "(temporary_1: min objective)"
+            continue
+        end
+        @when :($a → min) = node begin
+            if _types_already_parsed(e_objective_max, e_objective_min)
+                return :(throw(CtParserException("objective defined twice")))
+            end
+            push!(_parsed_code,_code( node, e_objective_min, [a]))
+            _parsed_code[count].info = "(temporary_1: min objective)"
+            continue
+        end
+        #
         @when :($a -> begin max end) = node begin
+            if _types_already_parsed(e_objective_max, e_objective_min)
+                return :(throw(CtParserException("objective defined twice")))
+            end
+            push!(_parsed_code,_code( node, e_objective_max, [a]))
+            _parsed_code[count].info = "(temporary_1: max objective)"
+            continue
+        end
+        @when :($a → begin max end) = node begin
+            if _types_already_parsed(e_objective_max, e_objective_min)
+                return :(throw(CtParserException("objective defined twice")))
+            end
+            push!(_parsed_code,_code( node, e_objective_max, [a]))
+            _parsed_code[count].info = "(temporary_1: max objective)"
+            continue
+        end
+        @when :($a -> max) = node begin
+            if _types_already_parsed(e_objective_max, e_objective_min)
+                return :(throw(CtParserException("objective defined twice")))
+            end
+            push!(_parsed_code,_code( node, e_objective_max, [a]))
+            _parsed_code[count].info = "(temporary_1: max objective)"
+            continue
+        end
+        @when :($a → max) = node begin
             if _types_already_parsed(e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
@@ -520,26 +569,23 @@ macro def( args... )
 
         c.type != e_constraint && continue
 
-        # # try to recognize all constraint types
-        # _c_expr = @match c.line begin
-        #     :( $x <= $y <= $z ) => y
-        #     :( $x ≤  $y ≤  $z ) => y
-        #     :( $x == $y       ) => y
-        #     :( $x <= $y       ) => y
-        #     :( $x ≤  $y       ) => y
-        #     _                   => nothing
-        # end
-        # @show _c_expr
-
         @show c.line
 
-        @show constraint_type(c.line,
-                              _time_variable,
-                              _t0_variable,
-                              _tf_variable,
-                              _state_variable,
-                              _control_variable)
+        ( _t, _e ) =  constraint_type(c.line,
+                                      _time_variable,
+                                      _t0_variable,
+                                      _tf_variable,
+                                      _state_variable,
+                                      _control_variable)
 
+        if isnothing(c.name)
+            @show _t
+            @show _e
+        else
+            @show _t
+            @show _e
+            @show c.name
+        end
     end
 
     # 6/ objective
@@ -698,7 +744,7 @@ end
 #
 # print informations on each parsed lines
 #
-function code_info( )
+function code_debug_info( )
     if size(_parsed_code)[1] == 0
         println("=== No debug information from CtParser (empty code)")
         return
@@ -716,7 +762,7 @@ function code_info( )
         println("- code        : ", c.code)
         println("")
     end
-end # parsed_code_info
+end # parsed_code_debug_info
 
 #
 # print generated code as strings
