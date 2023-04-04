@@ -52,7 +52,13 @@ mutable struct _code
         @show _line
         @show _type
         @show _content
-        new(_line, _type, _content, nothing, _line, "", "")
+        if _type == e_objective_min ||
+            _type == e_objective_max ||
+            _type == e_constraint
+            new(_content[1], _type, _content, nothing, _line, "", "")
+        else
+            new(_line, _type, _content, nothing, _line, "", "")
+        end
     end
     function _code(_line, _type, _content, _name)
         # named constraint is tricky
