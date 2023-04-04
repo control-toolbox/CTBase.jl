@@ -206,7 +206,7 @@ julia> constraint!(ocp, :final, [ 0, 0, 0 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=__constraint_label())
-    if type ∈ [ :initial, :final ] # not allowed for :control or :state
+    if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
         ocp.constraints[label] = (type, :eq, x -> x, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
@@ -392,20 +392,20 @@ computation (not taking into account provided value / bounds).
 
 # Examples
 ```jldoctest
-julia> constraint(ocp, :con)
+julia> constraint(ocp, :eq)
 ```
 """
 function constraint(ocp::OptimalControlModel, label::Symbol)
     con = ocp.constraints[label]
     @match con begin
-        (:initial , _, f          , _, _) => return f
-        (:final   , _, f          , _, _) => return f
-        (:boundary, _, f          , _, _) => return f 
+        (:initial , _, f::Function, _, _) => return f
+        (:final   , _, f::Function, _, _) => return f
+        (:boundary, _, f::Function, _, _) => return f 
         (:control , _, f::Function, _, _) => return f 
         (:control , _, rg         , _, _) => return u -> u[rg]
         (:state   , _, f::Function, _, _) => return f 
         (:state   , _, rg         , _, _) => return x -> x[rg]
-        (:mixed   , _, f          , _, _) => return f 
+        (:mixed   , _, f::Function, _, _) => return f 
         _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
              ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed ]."))
     end
