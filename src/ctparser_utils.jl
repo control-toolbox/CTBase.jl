@@ -1,7 +1,5 @@
-using DocStringExtensions
-
-"""
-$(SIGNATURES)
+""" 
+$(TYPEDSIGNATURES)
 
 Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 
@@ -10,18 +8,18 @@ Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 julia> id(e) = expr_it(e, Expr, x -> x)
 ```
 """
-expr_it(e, _Expr, f) =
+expr_it(e, _Expr, f) = 
     if e isa Expr
-    args = e.args
-    n = length(args)
-    newargs = [ expr_it(e.args[i], _Expr, f) for i ∈ 1:n ]
+	args = e.args
+	n = length(args)
+	newargs = [ expr_it(e.args[i], _Expr, f) for i ∈ 1:n ]
         return _Expr(e.head, newargs...)
     else
         return f(e)
     end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Substitute expression `e1` by expression `e2` in expression `e`.
 
@@ -61,7 +59,7 @@ subs(e, e1, e2) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Replace calls in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `y`, `y[i](t)` or `y[i:j](t)`, resp.
 
@@ -83,19 +81,72 @@ julia> xf = Symbol(x, "f"); replace_call(ans, x, tf, xf)
 replace_call(e, x, t, y) = begin
     foo(x, t, y) = (h, args...) -> begin
         ee = Expr(h, args...)
-    @match ee begin
-        :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
-        :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
-        :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
-        :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
-        _ => ee
+	@match ee begin
+	    :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
+	    :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
+	    :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
+	    :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
+	    _ => ee
         end
     end
     expr_it(e, foo(x, t, y), x -> x)
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
+
+Return true if e contains e1.
+
+# Example
+```jldoctest
+julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
+:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
+
+julia> has(e, 2)
+true
+
+julia> has(e, :x)
+true
+
+julia> has(e, :min)
+true
+
+julia> has(e, :( x[1](t)^2 ))
+true
+
+julia> !has(e, :( x[1](t)^3 ))
+true
+
+julia> !has(e, 3)
+true
+
+julia> !has(e, :max)
+true
+
+julia> has(:x, :x)
+true
+
+julia> !has(:x, 2)
+true
+
+julia> !has(:x, :y)
+true
+```
+"""
+has(e, e1) = begin
+    foo(e1) = (h, args...) -> begin
+        ee = Expr(h, args...)
+	if :yes ∈ args
+	    :yes
+	else 
+	    ee == e1 ? :yes : ee
+        end
+    end
+    expr_it(e, foo(e1), x -> x == e1 ? :yes : x) == :yes
+end
+
+"""
+$(TYPEDSIGNATURES)
 
 Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
 
@@ -114,9 +165,9 @@ true
 has(e, x, t) = begin
     foo(x, t) = (h, args...) -> begin
         ee = Expr(h, args...)
-    if :yes ∈ args
-        :yes
-    else @match ee begin
+	if :yes ∈ args
+	    :yes
+	else @match ee begin
             :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
             :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
             :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
@@ -128,33 +179,9 @@ has(e, x, t) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
-Return true if e contains x
-
-"""
-has(e, x) = begin
-    @match e begin
-        ee :: Expr =>
-            let
-                ee == x && return true
-                for i in ee.args
-                    has(i, x) && return true
-                end
-                return false
-            end
-        a         =>
-            let
-                a == x && return true
-                return false
-            end
-    end
-end
-
-"""
-$(SIGNATURES)
-
-Return the type constraint among
+Return the type constraint among 
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
 `:state_fun`, `:mixed` (`:other` otherwise), together with the appropriate value
 (range or updated expression).
@@ -162,6 +189,9 @@ Return the type constraint among
 # Example
 ```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
+
+julia> constraint_type(:( x(0) ), t, t0, tf, x, u)
+(:initial, nothing)
 
 julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u)
 (:initial, 1:2)
@@ -171,6 +201,9 @@ julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u)
 
 julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u)
 (:boundary, :(2 * var"x#0"[1] ^ 2))
+
+julia> constraint_type(:( x(tf) ), t, t0, tf, x, u)
+(:final, nothing)
 
 julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u)
 (:final, 1:2)
@@ -206,7 +239,7 @@ julia> constraint_type(:( 2u[1](t)^2 * x(t) ), t, t0, tf, x, u)
 (:mixed, :((2 * u[1] ^ 2) * x))
 
 julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
-:other
+(:other, nothing)
 ```
 """
 constraint_type(e, t, t0, tf, x, u) =
@@ -214,26 +247,28 @@ constraint_type(e, t, t0, tf, x, u) =
         [ true , false, false, false, false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : :other
             :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : :other
-        _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
-        [ false, true , false, false, false, false ] => @match e begin
+            :( $y($s)        ) => (y == x && s == t0) ? (:initial, nothing ) : :other
+	    _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
+        [ false, true , false, false, false, false ] => @match e begin 
             :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : :other
             :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : :other
-        _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
+            :( $y($s)        ) => (y == x && s == tf) ? (:final, nothing ) : :other
+	    _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false ] => begin
-        ee = replace_call(e , x, t0, Symbol(x, "#0"))
-        ee = replace_call(ee, x, tf, Symbol(x, "#f"))
-        (:boundary, ee) end
+	    ee = replace_call(e , x, t0, Symbol(x, "#0")) 
+	    ee = replace_call(ee, x, tf, Symbol(x, "#f")) 
+	    (:boundary, ee) end
         [ false, false, true , false, false, false ] => @match e begin
             :( $v[$i:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : :other
             :( $v[$i   ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : :other
-        _                  => (:control_fun, replace_call(e, u, t, u)) end
+	    _                  => (:control_fun, replace_call(e, u, t, u)) end                
         [ false, false, false, true , false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : :other
             :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : :other
-        _                  => (:state_fun  , replace_call(e, x, t, x)) end
+	    _                  => (:state_fun  , replace_call(e, x, t, x)) end                
         [ false, false, true , true , false, false ] => begin
-        ee = replace_call(e , u, t, u)
-        ee = replace_call(ee, x, t, x)
-        (:mixed, ee) end
-        _                      => ( :other, nothing )
+	    ee = replace_call(e , u, t, u)
+	    ee = replace_call(ee, x, t, x)
+	    (:mixed, ee) end
+        _                      => (:other, nothing)
     end
