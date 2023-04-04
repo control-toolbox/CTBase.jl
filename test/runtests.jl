@@ -1,27 +1,26 @@
 using CTBase
 using Test
 
-#
 # functions and types that are not exported
-const get_priority_print_callbacks = CTBase.get_priority_print_callbacks
-const get_priority_stop_callbacks = CTBase.get_priority_stop_callbacks
 const vec2vec  = CTBase.vec2vec
-
-#
-const gFD = getFullDescription
+const subs = CTBase.subs
+const has = CTBase.has
+const replace_call = CTBase.replace_call
+const constraint_type = CTBase.constraint_type
 
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
-        :print,
-        :utils,
-        :exceptions,
         :callbacks,
+        :ctparser_utils,
+        #:ctparser,
+        :default,
         :descriptions,
+        :exceptions,
         :functions,
         :model,
-        #:ctparser,
-        :ctparser_utils,
+        :print,
+        :utils,
         )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
