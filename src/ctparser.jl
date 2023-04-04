@@ -48,10 +48,6 @@ mutable struct _code
 
     # struct constructors
     function _code(_line, _type, _content)
-        println("== DEBUG")
-        @show _line
-        @show _type
-        @show _content
         if _type == e_objective_min ||
             _type == e_objective_max ||
             _type == e_constraint
@@ -178,7 +174,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_vector, [s, d]))
-            _parsed_code[count].info = "(temporary_1: state vector)"
+            _parsed_code[count].info = "(temporary_1: state vector 1)"
             continue
         end
         @when :($s ∈ R, state ) = node begin
@@ -186,7 +182,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_scalar, [s]))
-            _parsed_code[count].info = "(temporary_1: state scalar)"
+            _parsed_code[count].info = "(temporary_1: state scalar 2)"
             continue
         end
         @when :($s[$d], state ) = node begin
@@ -194,7 +190,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_vector, [s, d]))
-            _parsed_code[count].info = "(temporary_1: state vector)"
+            _parsed_code[count].info = "(temporary_1: state vector 3)"
             continue
         end
         @when :($s, state ) = node begin
@@ -202,7 +198,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_scalar, [s]))
-            _parsed_code[count].info = "(temporary_1: state scalar)"
+            _parsed_code[count].info = "(temporary_1: state scalar 4)"
             continue
         end
 
@@ -213,7 +209,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_vector, [s, d]))
-            _parsed_code[count].info = "(temporary_1: control vector)"
+            _parsed_code[count].info = "(temporary_1: control vector 1)"
             continue
         end
         @when :($s ∈ R, control ) = node begin
@@ -221,7 +217,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_scalar, [s]))
-            _parsed_code[count].info = "(temporary_1: contraol scalar)"
+            _parsed_code[count].info = "(temporary_1: control scalar 2)"
             continue
         end
         @when :($s[$d], control ) = node begin
@@ -229,7 +225,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_vector, [s, d]))
-            _parsed_code[count].info = "(temporary_1: control vector)"
+            _parsed_code[count].info = "(temporary_1: control vector 3)"
             continue
         end
         @when :($s, control ) = node begin
@@ -237,7 +233,7 @@ macro def( args... )
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_scalar, [s]))
-            _parsed_code[count].info = "(temporary_1: control scalar)"
+            _parsed_code[count].info = "(temporary_1: control scalar 4)"
             continue
         end
 
@@ -248,7 +244,7 @@ macro def( args... )
                 return :(throw(CtParserException("variable defined twice")))
             end
             push!(_parsed_code,_code( node, e_variable, [t]))
-            _parsed_code[count].info = "(temporary_1: scalar variable)"
+            _parsed_code[count].info = "(temporary_1: scalar variable 1)"
             continue
         end
         @when :($t, variable ) = node begin
@@ -256,7 +252,7 @@ macro def( args... )
                 return :(throw(CtParserException("variable defined twice")))
             end
             push!(_parsed_code,_code( node, e_variable, [t]))
-            _parsed_code[count].info = "(temporary_1: scalar variable)"
+            _parsed_code[count].info = "(temporary_1: scalar variable 2)"
             continue
         end
 
@@ -278,7 +274,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
-            _parsed_code[count].info = "(temporary_1: min objective)"
+            _parsed_code[count].info = "(temporary_1: min objective 1)"
             continue
         end
         @when :($a → begin min end) = node begin
@@ -286,7 +282,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
-            _parsed_code[count].info = "(temporary_1: min objective)"
+            _parsed_code[count].info = "(temporary_1: min objective 2)"
             continue
         end
         @when :($a -> min ) = node begin
@@ -294,7 +290,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
-            _parsed_code[count].info = "(temporary_1: min objective)"
+            _parsed_code[count].info = "(temporary_1: min objective 3)"
             continue
         end
         @when :($a → min) = node begin
@@ -302,7 +298,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
-            _parsed_code[count].info = "(temporary_1: min objective)"
+            _parsed_code[count].info = "(temporary_1: min objective 4)"
             continue
         end
         #
@@ -311,7 +307,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
-            _parsed_code[count].info = "(temporary_1: max objective)"
+            _parsed_code[count].info = "(temporary_1: max objective 5)"
             continue
         end
         @when :($a → begin max end) = node begin
@@ -319,7 +315,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
-            _parsed_code[count].info = "(temporary_1: max objective)"
+            _parsed_code[count].info = "(temporary_1: max objective 6)"
             continue
         end
         @when :($a -> max) = node begin
@@ -327,7 +323,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
-            _parsed_code[count].info = "(temporary_1: max objective)"
+            _parsed_code[count].info = "(temporary_1: max objective 7)"
             continue
         end
         @when :($a → max) = node begin
@@ -335,7 +331,7 @@ macro def( args... )
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
-            _parsed_code[count].info = "(temporary_1: max objective)"
+            _parsed_code[count].info = "(temporary_1: max objective 8)"
             continue
         end
 
@@ -346,7 +342,7 @@ macro def( args... )
                 return :(throw(CtParserException("constraint defined twice")))
             end
             push!(_parsed_code,_code( node, e_constraint, [e], n))
-            _parsed_code[count].info = "(temporary_1: named constraint)"
+            _parsed_code[count].info = "(temporary_1: named constraint 1)"
             continue
         end
 
@@ -355,11 +351,13 @@ macro def( args... )
                 return :(throw(CtParserException("constraint defined twice")))
             end
             push!(_parsed_code,_code( node, e_constraint, [e], n))
-            _parsed_code[count].info = "(temporary_1: named constraint)"
+            _parsed_code[count].info = "(temporary_1: named constraint 2)"
             continue
         end
 
         @when :($e) = node begin
+            println("DEBUG")
+            @show e
             if _type_and_var_already_parsed( e_constraint, [e])[1]
                 return :(throw(CtParserException("constraint defined twice")))
             end
@@ -368,8 +366,11 @@ macro def( args... )
             continue
         end
 
+        # (should never happend, because everything is caught by the previous match)
+        # COV_EXCL_START
         @printf "%40s : %s\n" type node
         return :(throw(CtParserException("unknown instruction")))
+        # COV_EXCL_STOP
     end
 
     if _syntax_only
