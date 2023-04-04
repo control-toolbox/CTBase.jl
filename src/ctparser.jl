@@ -49,14 +49,15 @@ mutable struct _code
     # struct constructors
     _code(l, t, c)    = new(l, t, c, nothing, l, "", "")
     function _code(l, t, c, n)
+        # named constraint is tricky
         if n isa Integer
             n = "eq" * string(n)
-            new(l, t, c, Symbol(n), l, "", "")
+            new(c[1], t, c, Symbol(n), l, "", "")
         elseif n isa Expr
             n = "_" * string(n)
-            new(l, t, c, Symbol(n), l, "", "")
+            new(c[1], t, c, Symbol(n), l, "", "")
         else
-            new(l, t, c, n, l, "", "")
+            new(c[1], t, c, n, l, "", "")
         end
     end
 end
