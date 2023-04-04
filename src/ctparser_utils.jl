@@ -1,5 +1,5 @@
 """ 
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 
@@ -19,7 +19,7 @@ expr_it(e, _Expr, f) =
     end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Substitute expression `e1` by expression `e2` in expression `e`.
 
@@ -59,7 +59,7 @@ subs(e, e1, e2) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Replace calls in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `y`, `y[i](t)` or `y[i:j](t)`, resp.
 
@@ -93,7 +93,7 @@ replace_call(e, x, t, y) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
 
@@ -126,7 +126,7 @@ has(e, x, t) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Return the type constraint among 
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
@@ -211,3 +211,19 @@ constraint_type(e, t, t0, tf, x, u) =
 	    (:mixed, ee) end
         _                      => :other
     end
+
+"""
+$(TYPEDSIGNATURES)
+
+Serve as a fake @def macro.
+
+# Example
+
+```jldoctest
+julia> @__def t ∈ [ 0, tf ], time
+```
+"""
+macro __def(e)
+    ocp = Model()
+    :( $ocp )
+end
