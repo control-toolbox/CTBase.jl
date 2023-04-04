@@ -571,7 +571,11 @@ macro def( args... )
 
         @show c.line
 
-        ( _t, _e ) =  constraint_type(c.line,
+        _code = @match c.line begin
+            :( $x == $y ) => x
+        end
+        @show _code
+        ( _t, _e ) =  constraint_type(_code,
                                       _time_variable,
                                       _t0_variable,
                                       _tf_variable,
