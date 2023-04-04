@@ -47,17 +47,23 @@ mutable struct _code
     code::String                      # final code after tranformation
 
     # struct constructors
-    _code(l, t, c)    = new(l, t, c, nothing, l, "", "")
-    function _code(l, t, c, n)
+    function _code(_line, _type, _content)
+        println("== DEBUG")
+        @show _line
+        @show _type
+        @show _content
+        new(_line, _type, _content, nothing, _line, "", "")
+    end
+    function _code(_line, _type, _content, _name)
         # named constraint is tricky
-        if n isa Integer
-            n = "eq" * string(n)
-            new(c[1], t, c, Symbol(n), l, "", "")
-        elseif n isa Expr
-            n = "eq" * string(n)
-            new(c[1], t, c, Symbol(n), l, "", "")
+        if _name isa Integer
+            _name = "eq" * string(_name)
+            new(_content[1], _type, _content, Symbol(_name), _line, "", "")
+        elseif _name isa Expr
+            _name = "eq" * string(_name)
+            new(_content[1], _type, _content, Symbol(_name), _line, "", "")
         else
-            new(c[1], t, c, n, l, "", "")
+            new(_content[1], _type, _content, _name, _line, "", "")
         end
     end
 end
