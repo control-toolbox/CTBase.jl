@@ -572,7 +572,11 @@ macro def( args... )
         @show c.line
 
         _code = @match c.line begin
-            :( $x == $y ) => x
+            :( $x == $y )      => x
+            :( $x <= $y )      => y
+            :( $x ≤  $y )      => y
+            :( $x <= $y <= $z) => y
+            :( $x ≤  $y  ≤ $z) => y
         end
         @show _code
         ( _t, _e ) =  constraint_type(_code,
