@@ -54,7 +54,7 @@ mutable struct _code
             n = "eq" * string(n)
             new(c[1], t, c, Symbol(n), l, "", "")
         elseif n isa Expr
-            n = "_" * string(n)
+            n = "eq" * string(n)
             new(c[1], t, c, Symbol(n), l, "", "")
         else
             new(c[1], t, c, n, l, "", "")
