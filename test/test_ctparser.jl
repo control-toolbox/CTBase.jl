@@ -34,9 +34,9 @@ function test_ctparser()
     @test @def syntax_only=true begin
         x(t0) == [ r0, v0, m0 ]
         0  ≤ u(t) ≤ 1
-        r0 ≤ x(t)[1],          (1)
-        0  ≤ x₂(t) ≤ vmax =>   (c2)
-        mf ≤ m(t) ≤ m0    =>   (toto)
+        r0 ≤ x(t)[1]
+        0  ≤ x₂(t) ≤ vmax
+        mf ≤ m(t) ≤ m0
     end
 
     # should pass parsing + evaluation
@@ -49,7 +49,7 @@ function test_ctparser()
         v = x₂
         m = x₃
         0  ≤ u(t) ≤ 1
-        mf ≤ m(t) ≤ m0    =>   (mass_constraint)
+        mf ≤ m(t) ≤ m0
         r(tf) -> max
     end
     @test ocp isa  OptimalControlModel
