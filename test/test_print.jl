@@ -1,5 +1,5 @@
 function test_print()
 
-    @test typeof(display(Model())) == Nothing
+    @test display(Model()) isa Nothing
 
 end

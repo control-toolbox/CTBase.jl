@@ -1,4 +1,7 @@
-# CTBase.jl 
+# Introduction to the `CTBase.jl` package
 
-## Overview
-This package implements the basic operations on a control problem, most notably the definition of an optimal control problem.
+The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
+
+## Installation
+
+To install a package from the control-toolbox ecosystem, please visit the [installation page](https://github.com/control-toolbox#installation).

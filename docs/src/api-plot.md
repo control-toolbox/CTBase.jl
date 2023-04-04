@@ -1,3 +1,17 @@
+# Plot
+
+```@meta
+CurrentModule =  CTBase
+```
+
+```@autodocs
+Modules = [CTBase]
+Order = [:module, :constant, :type, :function, :macro]
+Pages = ["plot.jl"]
+Private = false
+```
+
+```@setup main
 using CTBase
 
 # create a solution
@@ -39,9 +53,39 @@ sol.iterations = 0
 sol.stopping = :dummy
 sol.message = "ceci est un test"
 sol.success = true
+```
 
-#
-plot(sol, layout=:split, size=(900, 600))
-#plot(sol, layout=:group)
-#ps=plot(sol, :time, (:state, 1))
-#plot!(ps, sol, :time, (:control, 1))
+Let us consider we have defined an optimal control problem
+
+```julia
+ocp = Model()
+...
+```
+
+and solve it
+
+```julia
+sol = solve(ocp)
+```
+
+We can plot the solution with the default layout `:split`.
+
+```@example main
+plot(sol, layout=:split, size=(800, 600))
+```
+
+Or with the layout `:group`.
+
+```@example main
+plot(sol, layout=:group, size=(800, 300))
+```
+
+You can specify some styles:
+
+```@example main
+plot(sol, 
+    state_style=(color=:blue,), 
+    adjoint_style=(color=:black, linestyle=:dash),
+    control_style=(color=:red, linewidth=2),
+    size=(800, 600))
+```

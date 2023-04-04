@@ -1,5 +1,22 @@
+# General abstract type for callbacks
+"""
+$(TYPEDEF)
+
+Abstract type for callbacks.
+"""
+abstract type CTCallback end
+
+"""
+Tuple of callbacks
+"""
+const CTCallbacks = Tuple{Vararg{CTCallback}}
+
 # --------------------------------------------------------------------------------------------------
-# Print callback
+"""
+$(TYPEDEF)
+
+Callback for printing.
+"""
 mutable struct PrintCallback <: CTCallback
     callback::Function
     priority::Integer
@@ -7,12 +24,26 @@ mutable struct PrintCallback <: CTCallback
         new(cb, priority)
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Call the callback.
+"""
 function (cb::PrintCallback)(args...; kwargs...)
     return cb.callback(args...; kwargs...)
 end
+
+"""
+Tuple of print callbacks.
+"""
 const PrintCallbacks = Tuple{Vararg{PrintCallback}}
 
-#
+"""
+$(TYPEDSIGNATURES)
+
+Get the highest priority print callbacks.
+"""
 function get_priority_print_callbacks(cbs::CTCallbacks)
     callbacks_print = ()
     priority = -Inf
@@ -33,7 +64,11 @@ function get_priority_print_callbacks(cbs::CTCallbacks)
     return callbacks_print
 end
 
-# Stop callback
+"""
+$(TYPEDSIGNATURES)
+
+Stopping callback.
+"""
 mutable struct StopCallback <: CTCallback
     callback::Function
     priority::Integer
@@ -41,12 +76,26 @@ mutable struct StopCallback <: CTCallback
         new(cb, priority)
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Call the callback.
+"""
 function (cb::StopCallback)(args...; kwargs...)
     return cb.callback(args...; kwargs...)
 end
+
+"""
+Tuple of stop callbacks.
+"""
 const StopCallbacks = Tuple{Vararg{StopCallback}}
 
-#
+"""
+$(TYPEDSIGNATURES)
+
+Get the highest priority stop callbacks.
+"""
 function get_priority_stop_callbacks(cbs::CTCallbacks)
     callbacks_stop = ()
     priority = -Inf
