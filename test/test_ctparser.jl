@@ -67,7 +67,7 @@ function test_ctparser()
         u, control
 
         0  ≤ u(t) ≤ 1    => (one)
-        x(tf) -> max
+        x(tf) → max
     end ;
     @test ocp isa  OptimalControlModel
 
@@ -80,7 +80,7 @@ function test_ctparser()
 
         v = x₂
         [0, 0, 0]  ≤ u(t) ≤ [1, 1, 1]
-        v(tf) -> max
+        v(tf) → min
     end ;
     @test ocp isa  OptimalControlModel
 

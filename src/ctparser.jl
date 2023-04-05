@@ -282,22 +282,6 @@ macro def( args... )
             _parsed_code[count].info = "(temporary_1: min objective 1)"
             continue
         end
-        @when :($a → begin min end) = node begin
-            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
-                return :(throw(CtParserException("objective defined twice")))
-            end
-            push!(_parsed_code,_code( node, e_objective_min, [a]))
-            _parsed_code[count].info = "(temporary_1: min objective 2)"
-            continue
-        end
-        @when :($a -> min ) = node begin
-            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
-                return :(throw(CtParserException("objective defined twice")))
-            end
-            push!(_parsed_code,_code( node, e_objective_min, [a]))
-            _parsed_code[count].info = "(temporary_1: min objective 3)"
-            continue
-        end
         @when :($a → min) = node begin
             if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
@@ -313,22 +297,6 @@ macro def( args... )
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
             _parsed_code[count].info = "(temporary_1: max objective 5)"
-            continue
-        end
-        @when :($a → begin max end) = node begin
-            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
-                return :(throw(CtParserException("objective defined twice")))
-            end
-            push!(_parsed_code,_code( node, e_objective_max, [a]))
-            _parsed_code[count].info = "(temporary_1: max objective 6)"
-            continue
-        end
-        @when :($a -> max) = node begin
-            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
-                return :(throw(CtParserException("objective defined twice")))
-            end
-            push!(_parsed_code,_code( node, e_objective_max, [a]))
-            _parsed_code[count].info = "(temporary_1: max objective 7)"
             continue
         end
         @when :($a → max) = node begin
