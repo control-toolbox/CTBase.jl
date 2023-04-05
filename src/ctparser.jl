@@ -77,6 +77,8 @@ end
 #
 # internal global variables
 #
+# WARNING: these two variables **MUST** be removed from final code
+#
 _parsed_code::Array{_code} = []  # memorize all code lines during parsing
 _generated_code::Array{String} = [] # memorize generated code
 
@@ -129,6 +131,12 @@ macro def( args... )
     global _parsed_code = []
     global _generated_code = []
 
+    #
+    # FINAL CODE HERE !
+    #
+    # _parsed_code = []
+    # _generated_code = []
+
     # pass 1:
     #
     # - parse
@@ -139,6 +147,9 @@ macro def( args... )
 
     # sanity test (prob.args exists)
 
+    if ! (prob isa Expr)
+        return :(throw(CtParserException("input must be an Expr")))
+    end
     for i ∈ 1:length(prob.args)
         # recursively remove all line nodes (which break in case
         # of imbricated expressions)
@@ -366,7 +377,7 @@ macro def( args... )
     end
 
     if _debug_mode
-        code_debug_info(_parsed_code)
+        _code_debug_info(_parsed_code)
     end
 
     if _syntax_only
@@ -665,17 +676,6 @@ function _line_of_type( _pc::Array{_code},  type::_type)
 end # _line_of_type
 
 #
-# (internal)
-#
-function _store_code_as_string(info::String, index::Integer)
-    global _parsed_code
-    global _generated_code
-
-    _parsed_code[index].code = info
-    push!(_generated_code, info)
-end
-
-#
 # verbose message: only print then level <= _verbose_threshold
 #
 # level == 0     -> always print
@@ -692,37 +692,17 @@ function verbose(_verbose_threshold::Int, level::Int, args...)
     end
 end # function verbose
 
-
-# COV_EXCL_START
-
 #
-# helpers to modify the parser behavior.
-# useful for debugging/testing
-# --------------------------------------
-
-# WARNING: these functions are tricky and return sometimes bad results
-
-# we may think of removing all of the remaining....
-# of "code cover" these lines with more tests
-
+# (internal) print informations on each parsed lines
+# activated when debug flag is passed to the macro @def
 #
-# getter of a line of code (debug)
-#
-function get_parsed_line( i::Integer )
-    global _parsed_code
-    if i <= 0 || i > size(_parsed_code)[1]
-        return false
-    end
-    return _parsed_code[i]
-end
-
-#
-# print informations on each parsed lines
-#
-function code_debug_info( _pc::Array{_code} )
+function _code_debug_info( _pc::Array{_code} )
     if size(_pc)[1] == 0
+        # COV_EXCL_START
+        # this never happend since everything is parsed
         println("=== No debug information from CtParser (empty code)")
         return
+        # COV_EXCL_STOP
     end
     println("=== Debug information from CtParser:")
     count = 1
@@ -742,10 +722,45 @@ function code_debug_info( _pc::Array{_code} )
     end
 end # code_debug_info
 
+
+
+# COV_EXCL_START
+
+#
+# helpers to modify the parser behavior.
+# useful for debugging/testing
+# --------------------------------------
+
+# WARNING: these functions are tricky and return sometimes bad results
+
+#
+# all these functions **MUST** be removed from final code
+#
+function _store_code_as_string(info::String, index::Integer)
+    global _parsed_code
+    global _generated_code
+
+    _parsed_code[index].code = info
+    push!(_generated_code, info)
+end
+
+#
+# getter of a line of code (debug)
+#
+function get_parsed_line( i::Integer )
+    global _parsed_code
+    if i <= 0 || i > size(_parsed_code)[1]
+        return false
+    end
+    return _parsed_code[i]
+end
+
 #
 # print generated code as strings
 #
 function print_generated_code()
+    global _generated_code
+
     if size(_generated_code)[1] == 0
         println("=== No code for this definition")
         return
