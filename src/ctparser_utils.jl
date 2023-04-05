@@ -281,3 +281,40 @@ constraint_type(e, t, t0, tf, x, u) =
         (:mixed, ee) end
         _                      => (:other, nothing)
     end
+
+
+# type of input lines
+@enum _type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_named_constraint e_alias e_objective_min e_objective_max e_variable
+
+"""
+$(TYPEDSIGNATURES)
+
+Figure the type of parsed line passed as argument
+
+Returns a tuple (_type, Array{Any} )
+
+Example:
+"""
+line_type(e) =
+    @match e begin
+        :($t ∈ [ $a, $b ], time) => (e_time, [t, a, b])
+        :($s ∈ R^$d, state )     => (e_state_vector, [s, d])
+        :($s[$d], state )        => (e_state_vector, [s, d])
+        :($s ∈ R, state )        => (e_state_scalar, [s])
+        :($s, state )            => (e_state_scalar, [s])
+        :($s ∈ R^$d, control )   => (e_control_vector, [s, d])
+        :($s[$d], control )      => (e_control_vector, [s, d])
+        :($s ∈ R, control )      => (e_control_scalar, [s])
+        :($s, control )          => (e_control_scalar, [s])
+        :($t ∈ R, variable )     => (e_variable, [t])
+        :($t, variable )         => (e_variable, [t])
+        :($a = $b)               => (e_alias, [a, b])
+        :($a -> begin min end)   => (e_objective_min, [a])
+        :($a → min)              => (e_objective_min, [a])
+        :($a -> begin max end)   => (e_objective_max, [a])
+        :($a → max)              => (e_objective_max, [a])
+        :($e => ($n))            => (e_named_constraint, [e, n])
+        :($e , ($n))             => (e_named_constraint, [e, n])
+        :($e)                    => (e_constraint, [e])
+        _                        => (:other , nothing)
+    end
