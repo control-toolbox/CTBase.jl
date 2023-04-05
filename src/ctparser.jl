@@ -6,15 +6,14 @@ using MLStyle         # for parsing
 using Printf          #
 
 export @def
-export print_parsed_code
 export CtParserException
-export print_generated_code
-export set_verbose_level
-export verbose
 
 # only export then debugging
 export get_parsed_line
 export code_debug_info
+export print_parsed_code
+export print_generated_code
+
 
 #
 # _code "class"
@@ -81,8 +80,6 @@ end
 # internal global variables
 #
 _parsed_code::Array{_code} = []  # memorize all code lines during parsing
-_verbose_level = 0           # default = do not print at all
-_syntax_only   = false       # parser only checks the syntax (no code generation)
 _generated_code::Array{String} = [] # memorize generated code
 
 #
@@ -107,14 +104,19 @@ macro def( args... )
     # for the moment:
     # - syntax_only (boolean, default = false) -> stop just after parsing
     # useful globals
-    global _syntax_only
 
     # parse macros args
     _syntax_only = false
+    _verbose_threshold = 0
 
     for i in args[begin:end-1]
         @when :( syntax_only = true ) = i begin
             _syntax_only = true
+        end
+        @when :( verbose_threshold = $n ) = i begin
+            n = n > 100 ? 100 : n
+            n = n <   0 ?   0 : n
+            _verbose_threshold = n
         end
     end
 
@@ -140,7 +142,7 @@ macro def( args... )
         # of imbricated expressions)
         node = prob.args[i] |> remove_line_number_node
 
-        verbose(100, "= node = ", node)
+        verbose(_verbose_threshold, 100, "= node = ", node)
         if isa(node, LineNumberNode) || isnothing(node)
             continue
         end
@@ -363,7 +365,7 @@ macro def( args... )
 
     if _syntax_only
         # stop here
-        verbose(10, "Problem parsed correctly: ", length(_parsed_code), " instruction(s)")
+        verbose(_verbose_threshold, 10, "Problem parsed correctly: ", length(_parsed_code), " instruction(s)")
         return :(true)
     end
 
@@ -383,7 +385,7 @@ macro def( args... )
         !_types_already_parsed(e_constraint)
         #return :(throw(CtParserException("incomplete problem")))
         # incomplete problem is accepted (can be enhance by hand later)
-        verbose(20, "Incomplete problem")
+        verbose(_verbose_threshold, 20, "Incomplete problem")
     end
 
     # store the code to produce
@@ -517,9 +519,9 @@ macro def( args... )
             end
 
             if has(l.line, a)
-                verbose(50,"ALIAS: replace $a by $b in: ", l.line)
+                verbose(_verbose_threshold, 50,"ALIAS: replace $a by $b in: ", l.line)
                 e = subs(l.line, a, b)
-                verbose(50,"AFTER: ", e)
+                verbose(_verbose_threshold, 50,"AFTER: ", e)
                 l.line = e
             end
         end
@@ -549,9 +551,9 @@ macro def( args... )
                     end
 
                     if has(l.line, symb_1)
-                        verbose(50,"ALIAS: replace $symb_1 by $symb_2 in: ", l.line)
+                        verbose(_verbose_threshold, 50,"ALIAS: replace $symb_1 by $symb_2 in: ", l.line)
                         e = subs(l.line, symb_1, symb_2)
-                        verbose(50,"AFTER: ", e)
+                        verbose(_verbose_threshold, 50,"AFTER: ", e)
                         l.line = e
                     end
                 end
@@ -671,14 +673,13 @@ function _store_code_as_string(info::String, index::Integer)
 end
 
 #
-# verbose message: only print then level <= verbose_level
+# verbose message: only print then level <= _verbose_threshold
 #
 # level == 0     -> always print
 # level increase -> less print (mode debug)
 #
-function verbose(level::Int, args...)
-    global _verbose_level
-    if _verbose_level >= level
+function verbose(_verbose_threshold::Int, level::Int, args...)
+    if _verbose_threshold >= level
         for x in args
             print(x)
         end
@@ -689,23 +690,14 @@ function verbose(level::Int, args...)
 end # function verbose
 
 
+# COV_EXCL_START
+
 #
 # helpers to modify the parser behavior.
 # useful for debugging/testing
 # --------------------------------------
 
-#
-# as it says: set verbosity
-#
-# the highest -> more verbose
-#
-# Remark: level will be limited to interval [0, 100]
-function set_verbose_level(level::Int)
-    global _verbose_level
-    _verbose_level = level < 0 ? 0 : ( level > 100 ? 100 : level )
-end
-
-# COV_EXCL_START
+# WARNING: these functions are tricky and return sometimes bad results
 
 # we may think of removing all of the remaining....
 # of "code cover" these lines with more tests
