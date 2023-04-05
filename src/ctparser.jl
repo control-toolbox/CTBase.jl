@@ -232,7 +232,7 @@ macro def( args... )
         # variables (two syntaxes allowed)
         #
         @when :($t ∈ R, variable ) = node begin
-            if _type_and_var_already_parsed( e_variable, [t])[1]
+            if _type_and_var_already_parsed( _parsed_code,  e_variable, [t])[1]
                 return :(throw(CtParserException("variable defined twice")))
             end
             push!(_parsed_code,_code( node, e_variable, [t]))
@@ -240,7 +240,7 @@ macro def( args... )
             continue
         end
         @when :($t, variable ) = node begin
-            if _type_and_var_already_parsed( e_variable, [t])[1]
+            if _type_and_var_already_parsed( _parsed_code,  e_variable, [t])[1]
                 return :(throw(CtParserException("variable defined twice")))
             end
             push!(_parsed_code,_code( node, e_variable, [t]))
@@ -251,7 +251,7 @@ macro def( args... )
         # aliases
         #
         @when :($a = $b) = node begin
-            if _type_and_var_already_parsed( e_alias, [a, b])[1]
+            if _type_and_var_already_parsed( _parsed_code,  e_alias, [a, b])[1]
                 return :(throw(CtParserException("alias defined twice")))
             end
             push!(_parsed_code,_code( node, e_alias, [a, b]))
@@ -330,7 +330,7 @@ macro def( args... )
         # anything else is a constraint (and must be `julia parseable`)
         #
         @when :($e => ($n)) = node begin
-            if _type_and_var_already_parsed( e_constraint, [e])[1]
+            if _type_and_var_already_parsed( _parsed_code,  e_constraint, [e])[1]
                 return :(throw(CtParserException("constraint defined twice")))
             end
             push!(_parsed_code,_code( node, e_constraint, [e], n))
@@ -339,7 +339,7 @@ macro def( args... )
         end
 
         @when :($e , ($n)) = node begin
-            if _type_and_var_already_parsed( e_constraint, [e])[1]
+            if _type_and_var_already_parsed( _parsed_code,  e_constraint, [e])[1]
                 return :(throw(CtParserException("constraint defined twice")))
             end
             push!(_parsed_code,_code( node, e_constraint, [e], n))
@@ -348,7 +348,7 @@ macro def( args... )
         end
 
         @when :($e) = node begin
-            if _type_and_var_already_parsed( e_constraint, [e])[1]
+            if _type_and_var_already_parsed( _parsed_code,  e_constraint, [e])[1]
                 return :(throw(CtParserException("constraint defined twice")))
             end
             push!(_parsed_code,_code( node, e_constraint, [e]))
@@ -416,8 +416,8 @@ macro def( args... )
         y = c.content[3]  # aka tf
 
         # look for x and y in variable's list
-        ( status_0, t_index_0) = _type_and_var_already_parsed( e_variable, [x])
-        ( status_f, t_index_f) = _type_and_var_already_parsed( e_variable, [y])
+        ( status_0, t_index_0) = _type_and_var_already_parsed( _parsed_code,  e_variable, [x])
+        ( status_f, t_index_f) = _type_and_var_already_parsed( _parsed_code,  e_variable, [y])
 
         if status_0 && status_f
             # if t0 and tf are both variables, throw an exception
@@ -633,10 +633,9 @@ end # function _types_already_parsed
 #
 # (internal) find if some type/var is already parsed
 #
-function _type_and_var_already_parsed( type::_type, content::Any )
-    global _parsed_code
+function _type_and_var_already_parsed( parsed_code::Array{_code}, type::_type, content::Any )
     count = 1
-    for c in _parsed_code
+    for c in parsed_code
         if c.type == type && c.content == content
             return true, count
         end
