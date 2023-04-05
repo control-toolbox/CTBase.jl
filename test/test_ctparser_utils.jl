@@ -21,6 +21,15 @@ xf = Symbol(x, "#f")
 e = replace_call(e, x, t0, x0)
 @test replace_call(e, x, tf, xf) == :(var"x#0"[1] * (2var"x#f") - var"x#f"[2] * (2var"x#0"))
 
+e = :( A*x(t) + B*u(t) )
+@test replace_call(replace_call(e, x, t, x), u, t, u) == :(A * x + B * u)
+
+e = :( F0(x(t)) + u(t)*F1(x(t)) )
+@test replace_call(replace_call(e, x, t, x), u, t, u) == :(F0(x) + u * F1(x))
+
+e = :( 0.5u(t)^2  )
+@test replace_call(e, u, t, u) == :(0.5 * u ^ 2)
+
 e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test has(e, :x, :t)
 @test has(e, :u, :t)
