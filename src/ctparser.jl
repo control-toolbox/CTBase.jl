@@ -2,8 +2,6 @@
 # problem definition as a 'julia like' syntax
 
 
-import Base.show      # for overloading show()
-
 using MLStyle         # for parsing
 using Printf          #
 
@@ -74,15 +72,6 @@ end
 #
 # methods for _code
 #
-
-# overload show()
-function Base.show(io::IO, c::_code)
-    if isnothing(c.name)
-        println(io, "Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), info=$(c.info)")
-    else
-        println(io, "Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
-    end
-end
 
 #
 # parser part
@@ -629,7 +618,7 @@ end # macro @def
 # (internal) find if some types are already parsed
 #
 function _types_already_parsed( types::_type...)
-    global parsed_code
+    global _parsed_code
     for c in _parsed_code
         for t in types
             if c.type == t
@@ -644,7 +633,7 @@ end # function _types_already_parsed
 # (internal) find if some type/var is already parsed
 #
 function _type_and_var_already_parsed( type::_type, content::Any )
-    global parsed_code
+    global _parsed_code
     count = 1
     for c in _parsed_code
         if c.type == type && c.content == content
@@ -659,7 +648,7 @@ end # function _type_and_var_already_parsed
 # (internal) return the (first) line corresponding to a type
 #
 function _line_of_type( type::_type)
-    global parsed_code
+    global _parsed_code
     count = 1
     for c in _parsed_code
         if c.type == type
@@ -725,9 +714,13 @@ end
 # print parsed informations (debug)
 #
 function print_parsed_code( )
-    global parsed_code
+    global _parsed_code
     for c in _parsed_code
-        show(c)
+        if isnothing(c.name)
+            println("Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), info=$(c.info)")
+        else
+            println("Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
+        end
     end
 end # function print_parsed_code
 
@@ -735,7 +728,7 @@ end # function print_parsed_code
 # getter of a line of code (debug)
 #
 function get_parsed_line( i::Integer )
-    global parsed_code
+    global _parsed_code
     if i <= 0 || i > size(_parsed_code)[1]
         return false
     end
@@ -746,7 +739,7 @@ end
 # print informations on each parsed lines
 #
 function code_debug_info( )
-    global parsed_code
+    global _parsed_code
     if size(_parsed_code)[1] == 0
         println("=== No debug information from CtParser (empty code)")
         return
