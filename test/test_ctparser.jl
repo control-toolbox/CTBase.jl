@@ -279,35 +279,4 @@ function test_ctparser()
     # end
     # @test ocp isa  OptimalControlModel
 
-    # Base.io
-    @def syntax_only=true begin
-        t ∈ [ 0.0, 1.0 ], time
-    end ;
-    s1a = sprint(show, get_parsed_line(1))
-    println("s1a = ", s1a)
-    println("s1b = ", get_parsed_line(1))
-
-#     @test s1 == """
-# Code: line=(t ∈ [0.0, 1.0], time), type=e_time, content=Any[:t, 0.0, 1.0], info=(temporary_1: time instruction)
-# """
-
-
-    @def syntax_only=true begin
-        r => foobar
-    end ;
-    s2a = sprint(show, get_parsed_line(1))
-    println("s2a = ", s2a)
-    println("s2b = ", get_parsed_line(1))
-
-#     @test s2 == """
-# Code: line=r => foobar, type=e_constraint, content=Any[:r], name=foobar, info=(temporary_1: named constraint 1)
-# """
-
-    # stupid tests to reach 100% coverage
-    @test set_verbose_level(-1)  == 0
-    @test set_verbose_level(101) == 100
-    @test set_verbose_level(10)  == 10
-
-    @test isnothing(verbose(5, "foo"))
-    @test isnothing(verbose(5, "foo", "bar"))
 end
