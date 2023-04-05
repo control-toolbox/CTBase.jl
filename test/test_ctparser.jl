@@ -263,8 +263,6 @@ function test_ctparser()
     @test_throws "@def parsing error" @def begin
     end
 
-
-
     # t0 = 1.1
     # ocp = @def begin
     #     tf ∈ R, variable
@@ -280,3 +278,7 @@ function test_ctparser()
     # @test ocp isa  OptimalControlModel
 
 end
+
+# if it is run interactively
+if abspath(PROGRAM_FILE) == @__FILE__
+    test_ctparser()

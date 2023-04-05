@@ -22,9 +22,9 @@ $(TYPEDFIELDS)
     dynamics::Union{DynamicsFunction{time_dependence, dimension_usage},Nothing}=nothing
     dynamics!::Union{Function,Nothing}=nothing
     state_dimension::Union{Dimension,Nothing}=nothing
-    state_names::Vector{String}=Vector{String}()
+    state_names::Union{Vector{String}, Nothing}=nothing
     control_dimension::Union{Dimension,Nothing}=nothing
-    control_names::Vector{String}=Vector{String}()
+    control_names::Union{Vector{String}, Nothing}=nothing
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
 end
 
@@ -125,12 +125,19 @@ Define the state dimension and possibly the names of each coordinate.
 
 # Examples
 ```jldoctest
+julia> state!(ocp, 1, "y")
 julia> state!(ocp, 2, [ "x₁", "x₂" ])
 ```
 """
-function state!(ocp::OptimalControlModel, n::Dimension, names::Vector{String}=__state_names(n))
+function state!(ocp::OptimalControlModel, n::Dimension, names::Union{String, Vector{String}}=__state_names(n))
+    if n > 1 && length(names) != n
+        throw(InconsistentArgument("the number of state names must be equal to the state dimension"))
+    end
+    if n == 1 && names isa Vector{String}
+        throw(InconsistentArgument("if the state dimension is 1, then, the argument names must be a String"))
+    end
     ocp.state_dimension = n
-    ocp.state_names = names
+    ocp.state_names = n==1 ? [names] : names
 end
 
 """
@@ -140,12 +147,19 @@ Define the control dimension and possibly the names of each coordinate.
 
 # Examples
 ```jldoctest
+julia> control!(ocp, 1, "v")
 julia> control!(ocp, 2, [ "u₁", "u₂" ])
 ```
 """
-function control!(ocp::OptimalControlModel, m::Dimension, names::Vector{String}=__control_names(m))
+function control!(ocp::OptimalControlModel, m::Dimension, names::Union{String, Vector{String}}=__control_names(m))
+    if m > 1 && length(names) != m
+        throw(InconsistentArgument("the number of control names must be equal to the control dimension"))
+    end
+    if m == 1 && names isa Vector{String}
+        throw(InconsistentArgument("if the control dimension is 1, then, the argument names must be a String"))
+    end
     ocp.control_dimension = m
-    ocp.control_names = names
+    ocp.control_names = m==1 ? [names] : names
 end
 
 # -------------------------------------------------------------------------------------------

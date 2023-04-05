@@ -17,12 +17,12 @@ function test_default()
     end
 
     @testset "Default value of the state names of the Optimal Control Problem" begin
-        @test CTBase.__state_names(1) == ["x"]
+        @test CTBase.__state_names(1) == "x"
         @test CTBase.__state_names(2) == ["x₁", "x₂"]
     end
 
     @testset "Default value of the control names of the Optimal Control Problem" begin
-        @test CTBase.__control_names(1) == ["u"]
+        @test CTBase.__control_names(1) == "u"
         @test CTBase.__control_names(2) == ["u₁", "u₂"]
     end
 
@@ -52,34 +52,6 @@ function test_default()
 
     @testset "Default value of the interpolation function for initialisation" begin
         @test CTBase.__init_interpolation() isa Function
-    end
-
-    @testset "Default value of the grid size for the direct shooting method" begin
-        @test CTBase.__grid_size_direct_shooting() isa Integer
-    end
-
-    @testset "Default value of the penalty term for the direct shooting method" begin
-        @test CTBase.__penalty_term_direct_shooting() isa Real
-    end
-
-    @testset "Default value of the maximum number of iterations for the direct shooting method" begin
-        @test CTBase.__max_iter_direct_shooting() isa Integer
-    end
-
-    @testset "Default value of the absolute tolerance for the direct shooting method" begin
-        @test CTBase.__abs_tol_direct_shooting() isa Real
-    end
-
-    @testset "Default value of the optimality tolerance for the direct shooting method" begin
-        @test CTBase.__opt_tol_direct_shooting() isa Real
-    end
-
-    @testset "Default value of the stagnation tolerance for the direct shooting method" begin
-        @test CTBase.__stagnation_tol_direct_shooting() isa Real
-    end
-
-    @testset "Default value of the grid size for the direct method" begin
-        @test CTBase.__grid_size_direct() isa Integer
     end
 
     @testset "Default value of the print level of ipopt for the direct method" begin

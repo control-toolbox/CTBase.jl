@@ -18,9 +18,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         isnothing(ocp.dynamics) &&
         isnothing(ocp.dynamics!) &&
         isnothing(ocp.state_dimension) &&
-        isempty(ocp.state_names)  &&
+        isnothing(ocp.state_names)  &&
         isnothing(ocp.control_dimension) &&
-        isempty(ocp.control_names)
+        isnothing(ocp.control_names)
         printstyled(io, "Empty optimal control problem", bold=true)
         return
     end
@@ -115,7 +115,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     x_space = "R" * (dimx isa Integer ? (dimx == 1 ? "" : ctupperscripts(dimx)) : Base.string("^", dimx))
     u_space = "R" * (dimu isa Integer ? (dimu == 1 ? "" : ctupperscripts(dimu)) : Base.string("^", dimu))
     state_name = "x(" * t_name * ")"
-    if !isempty(ocp.state_names) && dimx isa Integer && dimx > 1 && dimx == length(ocp.state_names)
+    if !isnothing(ocp.state_names) && dimx isa Integer && dimx > 1 && dimx == length(ocp.state_names)
         state_name = state_name * " = ("
         for i ∈ 1:dimx
             state_name = state_name * ocp.state_names[i] * "(" * t_name * ")"
@@ -124,13 +124,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
             end
         end
         state_name = state_name * ")"
-    elseif !isempty(ocp.state_names) && dimx isa Integer && dimx == 1 && dimx == length(ocp.state_names)
+    elseif !isnothing(ocp.state_names) && dimx isa Integer && dimx == 1 && dimx == length(ocp.state_names)
         if ocp.state_names[1] != "x"
             state_name = state_name * " = " * ocp.state_names[1] * "(" * t_name * ")"
         end
     end
     control_name = "u(" * t_name * ")"
-    if !isempty(ocp.control_names) && dimu isa Integer && dimu > 1 && dimu == length(ocp.control_names)
+    if !isnothing(ocp.control_names) && dimu isa Integer && dimu > 1 && dimu == length(ocp.control_names)
         control_name = control_name * " = ("
         for i ∈ 1:dimu
             control_name = control_name * ocp.control_names[i] * "(" * t_name * ")"
@@ -139,7 +139,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
             end
         end
         control_name = control_name * ")"
-    elseif !isempty(ocp.control_names) && dimu isa Integer && dimu == 1 && dimu == length(ocp.control_names)
+    elseif !isnothing(ocp.control_names) && dimu isa Integer && dimu == 1 && dimu == length(ocp.control_names)
         if ocp.control_names[1] != "u"
             control_name = control_name * " = " * ocp.control_names[1] * "(" * t_name * ")"
         end

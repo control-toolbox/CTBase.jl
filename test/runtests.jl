@@ -1,5 +1,6 @@
 using CTBase
 using Test
+using Plots
 
 # functions and types that are not exported
 const vec2vec  = CTBase.vec2vec
@@ -19,6 +20,7 @@ const constraint_type = CTBase.constraint_type
         :exceptions,
         :functions,
         :model,
+        :plot,
         :print,
         :utils,
         )

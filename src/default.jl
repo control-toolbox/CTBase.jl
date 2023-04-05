@@ -72,7 +72,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
-__state_names(n::Dimension) = n==1 ? ["x"] : [ "x" * ctindices(i) for i ∈ range(1, n)]
+__state_names(n::Dimension) = n==1 ? "x" : [ "x" * ctindices(i) for i ∈ range(1, n)]
 
 """
 $(TYPEDSIGNATURES)
@@ -80,7 +80,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the controls.
 The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
 """
-__control_names(m::Dimension) = m==1 ? ["u"] : [ "u" * ctindices(i) for i ∈ range(1, m)]
+__control_names(m::Dimension) = m==1 ? "u" : [ "u" * ctindices(i) for i ∈ range(1, m)]
 
 """
 $(TYPEDSIGNATURES)
@@ -141,67 +141,8 @@ function __init_interpolation()
     return (T, U) -> Interpolations.linear_interpolation(T, U, extrapolation_bc = Interpolations.Line())
 end
 
-# --------------------------------------------------------------------------------------------------
-# Direct shooting method - default values
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the grid size for the direct shooting method.
-The default value is `201`.
-"""
-__grid_size_direct_shooting() = 201
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the penalty term in front of the final constraint for the direct shooting method.
-The default value is `1e4`.
-"""
-__penalty_term_direct_shooting() = 1e4
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the maximal number of iterations for the direct shooting method.
-The default value is `100`.
-"""
-__max_iter_direct_shooting() = 100
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the absolute tolerance for the stopping criterion for the direct shooting method.
-The default value is `10 * eps()`.
-"""
-__abs_tol_direct_shooting() = 10 * eps()
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the optimality relative tolerance for the stopping criterion for the direct shooting method.
-The default value is `1e-8`.
-"""
-__opt_tol_direct_shooting() = 1e-8
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the step stagnation relative tolerance for the stopping criterion for the direct shooting method.
-The default value is `1e-8`.
-"""
-__stagnation_tol_direct_shooting() = 1e-8
-
 # ------------------------------------------------------------------------------------
-# Direct method - default values
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the grid size for the direct method.
-The default value is `100`.
-"""
-__grid_size_direct() = 100
+# IPOPT
 
 """
 $(TYPEDSIGNATURES)
