@@ -151,7 +151,7 @@ macro def( args... )
         # time instruction
         #
         @when :($t ∈ [ $a, $b ], time) = node begin
-            if _types_already_parsed(e_time)
+            if _types_already_parsed( _parsed_code, e_time)
                 return :(throw(CtParserException("multiple time instructions")))
             end
             push!(_parsed_code, _code( node, e_time, [ t, a, b ]))
@@ -162,7 +162,7 @@ macro def( args... )
         # state instructions
         #
         @when :($s ∈ R^$d, state ) = node begin
-            if _types_already_parsed(e_state_scalar, e_state_vector)
+            if _types_already_parsed( _parsed_code, e_state_scalar, e_state_vector)
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_vector, [s, d]))
@@ -170,7 +170,7 @@ macro def( args... )
             continue
         end
         @when :($s ∈ R, state ) = node begin
-            if _types_already_parsed(e_state_scalar, e_state_vector)
+            if _types_already_parsed( _parsed_code, e_state_scalar, e_state_vector)
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_scalar, [s]))
@@ -178,7 +178,7 @@ macro def( args... )
             continue
         end
         @when :($s[$d], state ) = node begin
-            if _types_already_parsed(e_state_scalar, e_state_vector)
+            if _types_already_parsed( _parsed_code, e_state_scalar, e_state_vector)
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_vector, [s, d]))
@@ -186,7 +186,7 @@ macro def( args... )
             continue
         end
         @when :($s, state ) = node begin
-            if _types_already_parsed(e_state_scalar, e_state_vector)
+            if _types_already_parsed( _parsed_code, e_state_scalar, e_state_vector)
                 return :(throw(CtParserException("multiple state instructions")))
             end
             push!(_parsed_code, _code( node, e_state_scalar, [s]))
@@ -197,7 +197,7 @@ macro def( args... )
         # control instructions
         #
         @when :($s ∈ R^$d, control ) = node begin
-            if _types_already_parsed(e_control_scalar, e_control_vector)
+            if _types_already_parsed( _parsed_code, e_control_scalar, e_control_vector)
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_vector, [s, d]))
@@ -205,7 +205,7 @@ macro def( args... )
             continue
         end
         @when :($s ∈ R, control ) = node begin
-            if _types_already_parsed(e_control_scalar, e_control_vector)
+            if _types_already_parsed( _parsed_code, e_control_scalar, e_control_vector)
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_scalar, [s]))
@@ -213,7 +213,7 @@ macro def( args... )
             continue
         end
         @when :($s[$d], control ) = node begin
-            if _types_already_parsed(e_control_scalar, e_control_vector)
+            if _types_already_parsed( _parsed_code, e_control_scalar, e_control_vector)
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_vector, [s, d]))
@@ -221,7 +221,7 @@ macro def( args... )
             continue
         end
         @when :($s, control ) = node begin
-            if _types_already_parsed(e_control_scalar, e_control_vector)
+            if _types_already_parsed( _parsed_code, e_control_scalar, e_control_vector)
                 return :(throw(CtParserException("multiple control instructions")))
             end
             push!(_parsed_code, _code( node, e_control_scalar, [s]))
@@ -262,7 +262,7 @@ macro def( args... )
         # objectives
         #
         @when :($a -> begin min end) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
@@ -270,7 +270,7 @@ macro def( args... )
             continue
         end
         @when :($a → begin min end) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
@@ -278,7 +278,7 @@ macro def( args... )
             continue
         end
         @when :($a -> min ) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
@@ -286,7 +286,7 @@ macro def( args... )
             continue
         end
         @when :($a → min) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_min, [a]))
@@ -295,7 +295,7 @@ macro def( args... )
         end
         #
         @when :($a -> begin max end) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
@@ -303,7 +303,7 @@ macro def( args... )
             continue
         end
         @when :($a → begin max end) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
@@ -311,7 +311,7 @@ macro def( args... )
             continue
         end
         @when :($a -> max) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
@@ -319,7 +319,7 @@ macro def( args... )
             continue
         end
         @when :($a → max) = node begin
-            if _types_already_parsed(e_objective_max, e_objective_min)
+            if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                 return :(throw(CtParserException("objective defined twice")))
             end
             push!(_parsed_code,_code( node, e_objective_max, [a]))
@@ -378,11 +378,11 @@ macro def( args... )
     # - state
     # - objective
     # - constraint
-    if  !_types_already_parsed(e_time) ||
-        !_types_already_parsed(e_control_scalar, e_control_vector) ||
-        !_types_already_parsed(e_state_scalar, e_state_vector) ||
-        ! (_types_already_parsed(e_objective_min) || _types_already_parsed(e_objective_max)) ||
-        !_types_already_parsed(e_constraint)
+    if  !_types_already_parsed( _parsed_code, e_time) ||
+        !_types_already_parsed( _parsed_code, e_control_scalar, e_control_vector) ||
+        !_types_already_parsed( _parsed_code, e_state_scalar, e_state_vector) ||
+        ! (_types_already_parsed( _parsed_code, e_objective_min) || _types_already_parsed( _parsed_code, e_objective_max)) ||
+        !_types_already_parsed( _parsed_code, e_constraint)
         #return :(throw(CtParserException("incomplete problem")))
         # incomplete problem is accepted (can be enhance by hand later)
         verbose(_verbose_threshold, 20, "Incomplete problem")
@@ -619,9 +619,8 @@ end # macro @def
 #
 # (internal) find if some types are already parsed
 #
-function _types_already_parsed( types::_type...)
-    global _parsed_code
-    for c in _parsed_code
+function _types_already_parsed( parsed_code::Array{_code}, types::_type...)
+    for c in parsed_code
         for t in types
             if c.type == t
                 return true
