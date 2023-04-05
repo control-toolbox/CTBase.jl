@@ -18,6 +18,8 @@ function test_ctparser()
     @test @def syntax_only=true :(u, control)
     @test @def syntax_only=true :(u[4], control)
     @test @def syntax_only=true :(u ∈ R^3, control)
+    n = 3
+    @test @def syntax_only=true :(u ∈ R^n, control)
     @test @def syntax_only=true :(u ∈ R, control)
 
     # state
@@ -85,168 +87,172 @@ function test_ctparser()
     @test ocp isa  OptimalControlModel
 
     # ... up to here: all the remaining are KO
-    @test_throws "@def parsing error" @def syntax_only=true :( nothing)
+    @test_throws CtParserException @def syntax_only=true :( nothing)
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
     end
 
     # bad time expression
-    @test_throws "@def parsing error" @def begin
+    @test_throws CtParserException @def begin
         t0, variable
         tf, variable
         t ∈ [ t0, tf ], time
     end
 
     # multiple controls
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         u, control
         v, control
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         u, control
         w ∈ R^3, control
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         u[4], control
         w ∈ R^3, control
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         w ∈ R^3, control
         u, control
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         w ∈ R^3, control
         u[4], control
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         w ∈ R^3, control
         u ∈ R, control
     end
 
     # multiple states
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         u, state
         v, state
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         u, state
         x ∈ R^3, state
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         x ∈ R^3, state
         u, state
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         x ∈ R^3, state
         u[4], state
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         u, state
         x ∈ R, state
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         x ∈ R, state
         u, state
     end
 
     # multiple variables
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         tf, variable
         tf, variable
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         tf  ∈ R, variable
         tf, variable
     end
 
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         tf, variable
         tf  ∈ R, variable
     end
 
     # multiple objectives
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          r(t) -> min
          x(t) -> max
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          x(t) -> max
          r(t) -> min
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          r(t)  → min
          x(t)  → max
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          x(t)  → max
          r(t)  → min
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          r(t) →  min
          x(t) -> max
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          x(t) →  max
          r(t) -> min
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          r(t) -> min
          x(t)  → max
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
          x(t)  → max
          r(t) -> min
     end
 
     # multiple aliases
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         r = x[1]
         r = x[1]
         x₂ = x₃
     end
 
     # # aliases loops (not implemented yet)
-    # @test_throws "@def parsing error" @def syntax_only=true begin
+    # @test_throws CtParserException @def syntax_only=true begin
     #     r = u
     #     u = r
     # end
-    # @test_throws "@def parsing error" @def syntax_only=true begin
+    # @test_throws CtParserException @def syntax_only=true begin
     #     a = b
     #     b = c
     #     c = a
     # end
+    @test @def syntax_only=true begin
+        r = u
+        u = r
+    end
 
     # multiple constraints
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0
         r(t) == t0
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0 , named
         r(t) == t0
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0 => named
         r(t) == t0
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0
         r(t) == t0 , named
     end
-    @test_throws "@def parsing error" @def syntax_only=true begin
+    @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0
         r(t) == t0 => named
     end
@@ -273,7 +279,7 @@ function test_ctparser()
     @test ocp isa  OptimalControlModel
 
     # time must exist in our world
-    @test_throws "@def parsing error" @def begin
+    @test_throws CtParserException @def begin
     end
 
     # t0 = 1.1
