@@ -735,8 +735,8 @@ function code_debug_info( _pc::Array{_code} )
         println("- content     : ", c.content |> remove_line_number_node)
         println("- info        : ", c.info)
         println("- code        : ", c.code)
-        if c.name
-        println("- name        : ", c.name)
+        if !isnothing(c.name)
+            println("- name        : ", c.name)
         end
         println("")
     end

@@ -277,9 +277,10 @@ function test_ctparser()
     # end
     # @test ocp isa  OptimalControlModel
 
-    # helpers tests
-    @test @def syntax_only=true verbose_threshold=10 :()
-    @test @def syntax_only=true verbose_threshold=-100 :()
-    @test @def syntax_only=true verbose_threshold=1100 :()
+    # macro args tests
+    @test @def syntax_only=true verbose_threshold=10 :( t ∈ [ t0, tf ], time)
+    @test @def syntax_only=true verbose_threshold=-100 :( t ∈ [ t0, tf ], time)
+    @test @def syntax_only=true verbose_threshold=1100 :( t ∈ [ t0, tf ], time)
+    @test @def debug=true syntax_only=true :( t ∈ [ t0, tf ], time )
 
 end
