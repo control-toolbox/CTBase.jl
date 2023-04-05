@@ -24,7 +24,7 @@ mutable struct CtParserException <: Exception
 end
 
 # type of input lines
-@enum _type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_alias e_objective_min e_objective_max e_variable
+#@enum _type e_time e_state_scalar e_state_vector e_control_scalar e_con#trol_vector e_constraint e_alias e_objective_min e_objective_max e_variable
 
 # store a parsed line
 mutable struct _code
@@ -377,16 +377,12 @@ macro def( args... )
     _final_code = []
 
     # 0/ some global values to record
-    _time_variable    = :very_stupid_name_for_a_variable
-    _t0_variable      = :very_stupid_name_for_a_variable
-    _tf_variable      = :very_stupid_name_for_a_variable
-    _state_variable   = :very_stupid_name_for_a_variable
-    _control_variable = :very_stupid_name_for_a_variable
     _time_variable    = nothing
-    _t0_variable      = nothing
-    _tf_variable      = nothing
     _state_variable   = nothing
     _control_variable = nothing
+
+    _t0_variable      = nothing
+    _tf_variable      = nothing
 
     # 1/ create ocp
     push!(_final_code, :(ocp = Model()))
@@ -444,7 +440,7 @@ macro def( args... )
 
         @label after_time
     else
-        # no time defintion is present, cannot continue
+        # no time definition is present, cannot continue
         return :(throw(CtParserException("a time variable must be provided in order to process other directives")))
     end
 
@@ -523,7 +519,12 @@ macro def( args... )
             a = c.content[1]  # aka name
             m = c.content[2]  # aka dimension
 
-            for i ∈ 1:m       # generate a\_i up to dimension
+            if m isa Symbol
+                limit = 10
+            else
+                limit = m
+            end
+            for i ∈ 1:limit       # generate a\_i up to dimension
 
                 symb_1 = Symbol(a, Char(8320+i))  # a\_i
                 symb_2 = :( $a[$i] )              # a[i]
@@ -547,12 +548,6 @@ macro def( args... )
     end
 
     # 7/ constraints
-    @show _time_variable
-    @show _t0_variable
-    @show _tf_variable
-    @show _state_variable
-    @show _control_variable
-
     for i ∈ 1:length(_parsed_code)
         c = _parsed_code[i]
 
@@ -560,28 +555,43 @@ macro def( args... )
 
         @show c.line
 
-        _code = @match c.line begin
-            :( $x == $y )      => x
+        # test on ẋ before
+
+        @match c.line begin
+            :( $x == $y )      => let
+                (_t, _c ) = constraint_type(x,
+                                            _time_variable,
+                                            _t0_variable,
+                                            _tf_variable,
+                                            _state_variable,
+                                            _control_variable)
+                @match ( _t, _c ) begin
+                    ( :initial, nothing) => let
+                        println("### initial $y")
+                    end
+                    ( :final  , nothing) => let
+                        println("### final   $y")
+                    end
+                    _                    => let
+                        @show _t
+                        @show _c
+                    end
+                end
+            end
             :( $x <= $y )      => y
             :( $x ≤  $y )      => y
             :( $x <= $y <= $z) => y
-            :( $x ≤  $y  ≤ $z) => y
-        end
-        @show _code
-        ( _t, _e ) =  constraint_type(_code,
-                                      _time_variable,
-                                      _t0_variable,
-                                      _tf_variable,
-                                      _state_variable,
-                                      _control_variable)
+            :( $x ≤  $y  ≤ $z) => let
+                (_t, _c ) = constraint_type(y,
+                                            _time_variable,
+                                            _t0_variable,
+                                            _tf_variable,
+                                            _state_variable,
+                                            _control_variable)
+                @show _t
+                @show _c
+            end
 
-        if isnothing(c.name)
-            @show _t
-            @show _e
-        else
-            @show _t
-            @show _e
-            @show c.name
         end
     end
 
