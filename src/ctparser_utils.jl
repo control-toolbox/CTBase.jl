@@ -295,7 +295,7 @@ Returns a tuple (_type, Array{Any} )
 
 Example:
 """
-line_type(e) =
+input_line_type(e) =
     @match e begin
         :($t ∈ [ $a, $b ], time) => (e_time, [t, a, b])
         :($s ∈ R^$d, state )     => (e_state_vector, [s, d])
@@ -316,5 +316,5 @@ line_type(e) =
         :($e => ($n))            => (e_named_constraint, [e, n])
         :($e , ($n))             => (e_named_constraint, [e, n])
         :($e)                    => (e_constraint, [e])
-        _                        => (:other , nothing)
+        _                        => (:other , [])
     end
