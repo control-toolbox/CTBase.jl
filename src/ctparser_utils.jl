@@ -76,6 +76,15 @@ julia> x0 = Symbol(x, 0); e = replace_call(e, x, t0, x0)
 
 julia> xf = Symbol(x, "f"); replace_call(ans, x, tf, xf)
 :(x0[1] * (2xf) - xf[2] * (2x0))
+
+julia> e = :( A*x(t) + B*u(t) ); replace_call(replace_call(e, x, t, x), u, t, u)
+:(A * x + B * u)
+
+julia> e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(replace_call(e, x, t, x), u, t, u)
+:(F0(x) + u * F1(x))
+
+julia> e = :( 0.5u(t)^2  ); replace_call(e, u, t, u)
+:(0.5 * u ^ 2)
 ```
 """
 replace_call(e, x, t, y) = begin
