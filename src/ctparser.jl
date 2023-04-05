@@ -10,8 +10,6 @@ export CtParserException
 
 # only export then debugging
 export get_parsed_line
-export code_debug_info
-export print_parsed_code
 export print_generated_code
 
 
@@ -108,6 +106,7 @@ macro def( args... )
     # parse macros args
     _syntax_only = false
     _verbose_threshold = 0
+    _debug_mode = false
 
     for i in args[begin:end-1]
         @when :( syntax_only = true ) = i begin
@@ -117,6 +116,9 @@ macro def( args... )
             n = n > 100 ? 100 : n
             n = n <   0 ?   0 : n
             _verbose_threshold = n
+        end
+        @when :( debug = true ) = i begin
+            _debug_mode = true
         end
     end
 
@@ -363,6 +365,10 @@ macro def( args... )
         # COV_EXCL_STOP
     end
 
+    if _debug_mode
+        code_debug_info(_parsed_code)
+    end
+
     if _syntax_only
         # stop here
         verbose(_verbose_threshold, 10, "Problem parsed correctly: ", length(_parsed_code), " instruction(s)")
@@ -409,7 +415,7 @@ macro def( args... )
     # 2/ call time!
 
     # is time is present in parsed code ?
-    (c, index) = _line_of_type(e_time)
+    (c, index) = _line_of_type( _parsed_code, e_time)
     if c != nothing
         _time_variable = c.content[1]
         x = c.content[2]  # aka t0
@@ -464,7 +470,7 @@ macro def( args... )
     end
 
     # 3/ call state!
-    (c, index) = _line_of_type(e_state_vector)
+    (c, index) = _line_of_type( _parsed_code, e_state_vector)
     if c != nothing
         _state_variable = c.content[1]  # aka state name
         d = c.content[2]  # aka dimention
@@ -473,7 +479,7 @@ macro def( args... )
         _parsed_code[index].info = "state vector ($_state_variable) of dimension $d"
         _store_code_as_string( "state!(ocp, $d)", index)
     end
-    (c, index) = _line_of_type(e_state_scalar)
+    (c, index) = _line_of_type( _parsed_code, e_state_scalar)
     if c != nothing
         _state_variable = c.content[1]  # aka state name
         code = quote state!(ocp, 1) end
@@ -484,7 +490,7 @@ macro def( args... )
 
 
     # 4/ call control!
-    (c, index) = _line_of_type(e_control_vector)
+    (c, index) = _line_of_type( _parsed_code, e_control_vector)
     if c != nothing
         _control_variable = c.content[1]  # aka control name
         d = c.content[2]  # aka dimention
@@ -493,7 +499,7 @@ macro def( args... )
         _parsed_code[index].info = "control vector ($_control_variable) of dimension $d"
         _store_code_as_string( "control!(ocp, $d)", index)
     end
-    (c, index) = _line_of_type(e_control_scalar)
+    (c, index) = _line_of_type( _parsed_code, e_control_scalar)
     if c != nothing
         _control_variable = c.content[1]  # aka control name
         code = quote control!(ocp, 1) end
@@ -532,7 +538,7 @@ macro def( args... )
     for tt in [ e_state_vector, e_control_vector]
 
         # find definition of state_vector and control_vector
-        (c, index) = _line_of_type(tt)
+        (c, index) = _line_of_type( _parsed_code, tt)
 
         if c != nothing
             a = c.content[1]  # aka name
@@ -601,8 +607,8 @@ macro def( args... )
     end
 
     # 6/ objective
-    (c, index) = _line_of_type(e_objective_min)
-    (c, index) = _line_of_type(e_objective_max)
+    (c, index) = _line_of_type( _parsed_code, e_objective_min)
+    (c, index) = _line_of_type( _parsed_code, e_objective_max)
 
     # x) final line (return the created ocp object)
     push!(_final_code, :(ocp))
@@ -619,8 +625,8 @@ end # macro @def
 #
 # (internal) find if some types are already parsed
 #
-function _types_already_parsed( parsed_code::Array{_code}, types::_type...)
-    for c in parsed_code
+function _types_already_parsed( _pc::Array{_code}, types::_type...)
+    for c in _pc
         for t in types
             if c.type == t
                 return true
@@ -633,9 +639,9 @@ end # function _types_already_parsed
 #
 # (internal) find if some type/var is already parsed
 #
-function _type_and_var_already_parsed( parsed_code::Array{_code}, type::_type, content::Any )
+function _type_and_var_already_parsed( _pc::Array{_code}, type::_type, content::Any )
     count = 1
-    for c in parsed_code
+    for c in _pc
         if c.type == type && c.content == content
             return true, count
         end
@@ -647,10 +653,9 @@ end # function _type_and_var_already_parsed
 #
 # (internal) return the (first) line corresponding to a type
 #
-function _line_of_type( type::_type)
-    global _parsed_code
+function _line_of_type( _pc::Array{_code},  type::_type)
     count = 1
-    for c in _parsed_code
+    for c in _pc
         if c.type == type
             return c, count
         end
@@ -701,20 +706,6 @@ end # function verbose
 # of "code cover" these lines with more tests
 
 #
-# print parsed informations (debug)
-#
-function print_parsed_code( )
-    global _parsed_code
-    for c in _parsed_code
-        if isnothing(c.name)
-            println("Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), info=$(c.info)")
-        else
-            println("Code: line=$(c.initial_line), type=$(c.type), content=$(c.content), name=$(c.name), info=$(c.info)")
-        end
-    end
-end # function print_parsed_code
-
-#
 # getter of a line of code (debug)
 #
 function get_parsed_line( i::Integer )
@@ -728,15 +719,14 @@ end
 #
 # print informations on each parsed lines
 #
-function code_debug_info( )
-    global _parsed_code
-    if size(_parsed_code)[1] == 0
+function code_debug_info( _pc::Array{_code} )
+    if size(_pc)[1] == 0
         println("=== No debug information from CtParser (empty code)")
         return
     end
     println("=== Debug information from CtParser:")
     count = 1
-    for c in _parsed_code
+    for c in _pc
         println("Line number: $count") ; count += 1
         println("- initial line: ", c.initial_line |> remove_line_number_node)
         if c.line != c.initial_line
@@ -745,9 +735,12 @@ function code_debug_info( )
         println("- content     : ", c.content |> remove_line_number_node)
         println("- info        : ", c.info)
         println("- code        : ", c.code)
+        if c.name
+        println("- name        : ", c.name)
+        end
         println("")
     end
-end # parsed_code_debug_info
+end # code_debug_info
 
 #
 # print generated code as strings
