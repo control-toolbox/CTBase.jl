@@ -278,7 +278,3 @@ function test_ctparser()
     # @test ocp isa  OptimalControlModel
 
 end
-
-# if it is run interactively
-if abspath(PROGRAM_FILE) == @__FILE__
-    test_ctparser()
