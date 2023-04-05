@@ -60,20 +60,33 @@ function test_ctparser()
 
     # should pass parsing + evaluation
     t0 = 1.1
-    ocp = @def begin
+    ocp = @def debug=true begin
+        tf ∈ R, variable
+        t ∈ [ t0, tf ], time
+        x, state
+        u, control
+
+        0  ≤ u(t) ≤ 1    => (one)
+        x(tf) -> max
+    end ;
+    @test ocp isa  OptimalControlModel
+
+    #
+    ocp = @def debug=true begin
         tf ∈ R, variable
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
-        u, control
+        u ∈ R^3, control
+
         v = x₂
-        m = x₃
-        0  ≤ u(t) ≤ 1
-        mf ≤ m(t) ≤ m0
-        r(tf) -> max
+        [0, 0, 0]  ≤ u(t) ≤ [1, 1, 1]
+        v(tf) -> max
     end ;
     @test ocp isa  OptimalControlModel
 
     # ... up to here: all the remaining are KO
+    @test_throws "@def parsing error" @def syntax_only=true :( nothing)
+
     @test_throws "@def parsing error" @def syntax_only=true begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
