@@ -8,6 +8,7 @@ const subs = CTBase.subs
 const has = CTBase.has
 const replace_call = CTBase.replace_call
 const constraint_type = CTBase.constraint_type
+const input_line_type = CTBase.input_line_type
 
 #
 @testset verbose = true showtiming = true "Base" begin
