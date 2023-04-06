@@ -269,9 +269,7 @@ julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
 ```
 """
 constraint_type(e, t, t0, tf, x, u) =
-    if @match e begin
-       :( $y'($s) ) => y == x && s == t
-       _ => false end
+    if @match e begin :( $y'($s) ) => y == x && s == t; _ => false end
         (:dynamics, nothing)
     else @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf) ] begin
         [ true , false, false, false, false, false ] => @match e begin
