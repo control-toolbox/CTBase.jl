@@ -21,12 +21,16 @@ function test_ctparser()
     n = 3
     @test @def syntax_only=true :(u ∈ R^n, control)
     @test @def syntax_only=true :(u ∈ R, control)
+    n = 3
+    @test @def syntax_only=true :(y ∈ R^n, control)
 
     # state
     @test @def syntax_only=true :(y, state)
     @test @def syntax_only=true :(y[4], state)
     @test @def syntax_only=true :(y ∈ R^3, state)
     @test @def syntax_only=true :(y ∈ R, state)
+    n = 3
+    @test @def syntax_only=true :(y ∈ R^n, state)
 
     # objective
     @test @def syntax_only=true :(r(t) -> max)
@@ -78,7 +82,20 @@ function test_ctparser()
         tf ∈ R, variable
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
-        u ∈ R^3, control
+        u ∈ R^n, control
+
+        [0, 0, 0]  ≤ u(t) ≤ [1, 1, 1]
+        x₂(tf) → min
+    end ;
+    @test ocp isa  OptimalControlModel
+
+    #
+    n = 3
+    ocp = @def debug=true begin
+        tf ∈ R, variable
+        t ∈ [ t0, tf ], time
+        x ∈ R^n, state
+        u ∈ R^n, control
 
         v = x₂
         [0, 0, 0]  ≤ u(t) ≤ [1, 1, 1]
@@ -297,9 +314,10 @@ function test_ctparser()
     # @test ocp isa  OptimalControlModel
 
     # macro args tests
-    @test @def syntax_only=true verbose_threshold=10 :( t ∈ [ t0, tf ], time)
+    @test @def syntax_only=true  verbose_threshold=10 :( t ∈ [ t0, tf ], time)
     @test @def syntax_only=true verbose_threshold=-100 :( t ∈ [ t0, tf ], time)
     @test @def syntax_only=true verbose_threshold=1100 :( t ∈ [ t0, tf ], time)
-    @test @def debug=true syntax_only=true :( t ∈ [ t0, tf ], time )
+
+    @test_throws CtParserException @def no_such_option=true :( t ∈ [ t0, tf ], time )
 
 end

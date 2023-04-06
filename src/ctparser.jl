@@ -44,15 +44,6 @@ mutable struct _code
     code::String                      # final code after tranformation
 
     # struct constructors
-    function _code(_line, _type, _content)
-        if _type == e_objective_min ||
-            _type == e_objective_max ||
-            _type == e_constraint
-            new(_content[1], _type, _content, nothing, _line, "", "")
-        else
-            new(_line, _type, _content, nothing, _line, "", "")
-        end
-    end
     function _code(_line, _type, _content, _info)
         if _type == e_objective_min ||
             _type == e_objective_max ||
@@ -121,12 +112,10 @@ macro def( args... )
     _debug_mode = false
 
     for i in args[begin:end-1]
-        @when :( syntax_only = false ) = i continue
         @when :( syntax_only = true ) = i begin
             _syntax_only = true
             continue
         end
-        @when :( debug = false ) = i continue
         @when :( debug = true ) = i begin
             _debug_mode = true
             continue
@@ -257,12 +246,12 @@ macro def( args... )
                 end
                 push!(_parsed_code, _code( node, _t, _c,  "(temporary_1: scalar variable)"))
             end
+            # COV_EXCL_START
             e => let
                 # (should never happend, because everything is caught by the previous match)
-                # COV_EXCL_START
                 return :(throw(CtParserException("cannot parse line")))
-                # COV_EXCL_STOP
             end
+            # COV_EXCL_STOP
         end
     end
 
@@ -322,11 +311,13 @@ macro def( args... )
         ( status_0, t_index_0) = _type_and_var_already_parsed( _parsed_code,  e_variable, [x])
         ( status_f, t_index_f) = _type_and_var_already_parsed( _parsed_code,  e_variable, [y])
 
+        # COV_EXCL_START
         if status_0 && status_f
             # if t0 and tf are both variables, throw an exception
-            # (can be changed in the future)
+            # this is not possible (06/04/2023) but may be changed in the future
             return :(throw(CtParserException("cannot release both ends of time interval")))
         end
+        # COV_EXCL_STOP
 
         # is t0 a variable ?
         if status_0
@@ -599,13 +590,13 @@ end # function verbose
 # activated when debug flag is passed to the macro @def
 #
 function _code_debug_info( _pc::Array{_code} )
+    # COV_EXCL_START
     if size(_pc)[1] == 0
-        # COV_EXCL_START
         # this never happend since everything is parsed
         println("=== No debug information from CtParser (empty code)")
         return
-        # COV_EXCL_STOP
     end
+    # COV_EXCL_STOP
     println("=== Debug information from CtParser:")
     count = 1
     for c in _pc
