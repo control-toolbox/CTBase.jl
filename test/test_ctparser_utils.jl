@@ -46,6 +46,11 @@ e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test !has(:x, :y)
 
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u
+@test constraint_type(:( x'(t)              ), t, t0, tf, x, u) == (:dynamics, nothing)
+@test constraint_type(:( y'(t)              ), t, t0, tf, x, u) == (:other, nothing)
+@test constraint_type(:( x'(s)              ), t, t0, tf, x, u) == (:other, nothing)
+@test constraint_type(:( x(0)'              ), t, t0, tf, x, u) == (:boundary, :(var"x#0"'))
+@test constraint_type(:( x(t)'              ), t, t0, tf, x, u) == (:state_fun, :(x'))
 @test constraint_type(:( x(0)               ), t, t0, tf, x, u) == (:initial, nothing)
 @test constraint_type(:( x[1](0)            ), t, t0, tf, x, u) == (:initial, Index(1))
 @test constraint_type(:( x[1:2](0)          ), t, t0, tf, x, u) == (:initial, 1:2)

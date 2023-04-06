@@ -1,3 +1,5 @@
+# ctparser_utils
+
 """
 $(TYPEDSIGNATURES)
 
@@ -199,6 +201,21 @@ Return the type constraint among
 ```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
+julia> constraint_type(:( x'(t) ), t, t0, tf, x, u)
+(:dynamics, nothing)
+
+julia> constraint_type(:( y'(t) ), t, t0, tf, x, u)
+(:other, nothing)
+
+julia> constraint_type(:( x'(s) ), t, t0, tf, x, u)
+(:other, nothing)
+
+julia> constraint_type(:( x(0)' ), t, t0, tf, x, u)
+(:boundary, :(var"x#0"'))
+
+julia> constraint_type(:( x(t)' ), t, t0, tf, x, u)
+(:state_fun, :(x'))
+
 julia> constraint_type(:( x(0) ), t, t0, tf, x, u)
 (:initial, nothing)
 
@@ -252,7 +269,9 @@ julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
 ```
 """
 constraint_type(e, t, t0, tf, x, u) =
-    @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf) ] begin
+    if @match e begin :( $y'($s) ) => y == x && s == t; _ => false end
+        (:dynamics, nothing)
+    else @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf) ] begin
         [ true , false, false, false, false, false ] => @match e begin
             :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : (:other, nothing)
             :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : (:other, nothing)
@@ -279,9 +298,8 @@ constraint_type(e, t, t0, tf, x, u) =
         ee = replace_call(e , u, t, u)
         ee = replace_call(ee, x, t, x)
         (:mixed, ee) end
-        _                      => (:other, nothing)
+        _                      => (:other, nothing) end
     end
-
 
 # type of input lines
 @enum _ctparser_line_type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_named_constraint e_alias e_objective_min e_objective_max e_variable
