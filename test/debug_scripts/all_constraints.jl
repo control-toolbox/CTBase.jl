@@ -107,6 +107,6 @@ println("=== dynamic")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    ẋ(t) == 2x(t) + u(t)^2          => dynamic_1
-    ẋ(t) == f(x(t), u(t))           => dynamic_2
+    x'(t) == 2x(t) + u(t)^2          => dynamic_1
+    x'(t) == f(x(t), u(t))           => dynamic_2
 end

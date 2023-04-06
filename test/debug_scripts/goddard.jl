@@ -40,7 +40,7 @@ ocp = @def verbose_threshold=100 begin
     0  ≤ v(t) ≤ vmax,    (2bis)
     mf ≤ m(t) ≤ m0,      (trois)
 
-    ẋ(t) == F0(x(t)) + u(t)*F1(x(t))
+    x'(t) == F0(x(t)) + u(t)*F1(x(t))
 
     r(tf) -> max
 

@@ -33,7 +33,7 @@ ocp = @def verbose_threshold=50 debug=true begin
     x(t0) == x0    => (1)
     x(tf) == xf    ,  (deux)
 
-    ẋ(t) == A*x(t) + B*u(t)
+    x'(t) == A*x(t) + B*u(t)
 
     ∫( 0.5u(t)^2 ) → min
 
