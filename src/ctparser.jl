@@ -29,19 +29,19 @@ end
 
 # store a parsed line
 mutable struct _code
-    line::Union{Expr, Symbol}         # line of code (initial, but also transformed after unaliasing)
+    line::Union{Expr, Symbol}               # line of code (initial, but also transformed after unaliasing)
 
     # result of first parsing phase
-    type::_ctparser_line_type         # type of this code
-    content::Array{Any}               # user dependant (can be Symbol, Expr, Float, etc...)
+    const type::_ctparser_line_type         # type of this code
+    const content::Array{Any}               # user dependant (can be Symbol, Expr, Float, etc...)
 
     # for constraints
-    name::Union{Symbol, Nothing}      # constraint name
+    const name::Union{Symbol, Nothing}      # constraint name
 
     # user/debug information (code_debug_info)
-    initial_line::Union{Expr, Symbol} # initial line of code
-    info::String                      # debug info
-    code::String                      # final code after tranformation
+    const initial_line::Union{Expr, Symbol} # initial line of code
+    info::String                            # debug info
+    code::String                            # final code after tranformation
 
     # struct constructors
     function _code(_line, _type, _content, _info)
@@ -468,18 +468,24 @@ macro def( args... )
 
         println("====")
         @show c.line
-        @show c.type
-        println("====")
         # test on ẋ before
 
         @match c.line begin
-            :( $x == $y )      => let
+            :( $x == $y )      ||
+            :( $x ≥  $y )      ||
+            :( $x >= $y )      ||
+            :( $x <= $y )      ||
+            :( $x ≤  $y )      => let
+
                 (_t, _c ) = constraint_type(x,
                                             _time_variable,
                                             _t0_variable,
                                             _tf_variable,
                                             _state_variable,
                                             _control_variable)
+                @show _t
+                @show _c
+                println("typeof(_c) = ", typeof(_c))
                 @match ( _t, _c ) begin
                     ( :initial, nothing) => let
                         println("### initial $y")
@@ -488,14 +494,10 @@ macro def( args... )
                         println("### final   $y")
                     end
                     _                    => let
-                        @show _t
-                        @show _c
                     end
                 end
             end
-            :( $x <= $y )      => y
-            :( $x ≤  $y )      => y
-            :( $x <= $y <= $z) => y
+            :( $x <= $y <= $z) ||
             :( $x ≤  $y  ≤ $z) => let
                 (_t, _c ) = constraint_type(y,
                                             _time_variable,
@@ -505,6 +507,7 @@ macro def( args... )
                                             _control_variable)
                 @show _t
                 @show _c
+                println("typeof(_c) = ", typeof(_c))
             end
 
         end
