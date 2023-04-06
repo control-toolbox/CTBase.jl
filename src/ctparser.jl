@@ -53,16 +53,25 @@ mutable struct _code
             new(_line, _type, _content, nothing, _line, "", "")
         end
     end
-    function _code(_line, _type, _content, _name)
+    function _code(_line, _type, _content, _info)
+        if _type == e_objective_min ||
+            _type == e_objective_max ||
+            _type == e_constraint
+            new(_content[1], _type, _content, nothing, _line, _info, "")
+        else
+            new(_line, _type, _content, nothing, _line, "", "")
+        end
+    end
+    function _code(_line, _type, _content, _info, _name)
         # named constraint is tricky
         if _name isa Integer
             _name = "eq" * string(_name)
-            new(_content[1], _type, _content, Symbol(_name), _line, "", "")
+            new(_content[1], _type, _content, Symbol(_name), _line, _info, "")
         elseif _name isa Expr
             _name = "eq" * string(_name)
-            new(_content[1], _type, _content, Symbol(_name), _line, "", "")
+            new(_content[1], _type, _content, Symbol(_name), _line, _info, "")
         else
-            new(_content[1], _type, _content, _name, _line, "", "")
+            new(_content[1], _type, _content, _name, _line, _info, "")
         end
     end
 end
@@ -152,13 +161,12 @@ macro def( args... )
     # - detect dupplicates
     # - store everything in _parsed_code
     #
-    count = 0 # (starts with 0 because, it will be increased **before** use)
 
     # sanity test (prob.args exists)
-
     if ! (prob isa Expr)
         return :(throw(CtParserException("input must be an Expr")))
     end
+
     for i ∈ 1:length(prob.args)
         # recursively remove all line nodes (which break in case
         # of imbricated expressions)
@@ -169,7 +177,6 @@ macro def( args... )
             continue
         end
 
-        count += 1
         ( _t, _c ) = input_line_type( node )
         _ts = Symbol(_t)                        # pattern matching on enum cannot be used here
         @match _ts begin
@@ -178,95 +185,82 @@ macro def( args... )
                 if _types_already_parsed( _parsed_code, e_time)
                     return :(throw(CtParserException("multiple time instructions")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: time instruction)"
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: time instruction)"))
             end
             :e_state_scalar=> let
                 verbose(_verbose_threshold, 50, "E_STATE_SCALAR     with: ", _c)
                 if _types_already_parsed( _parsed_code, e_state_scalar, e_state_vector)
                     return :(throw(CtParserException("multiple state instructions")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: state scalar)"
-                continue
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: state scalar)"))
             end
             :e_state_vector=> let
                 verbose(_verbose_threshold, 50, "E_STATE_VECTOR     with: ", _c)
                 if _types_already_parsed( _parsed_code, e_state_scalar, e_state_vector)
                     return :(throw(CtParserException("multiple state instructions")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: state vector)"
-                continue
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: state vector)"))
             end
             :e_control_scalar=> let
                 verbose(_verbose_threshold, 50, "E_CONTROL_SCALAR   with: ", _c)
                 if _types_already_parsed( _parsed_code, e_control_scalar, e_control_vector)
                     return :(throw(CtParserException("multiple control instructions")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: control scalar)"
+                push!(_parsed_code, _code( node, _t, _c,"(temporary_1: control scalar)"))
             end
             :e_control_vector=> let
                 verbose(_verbose_threshold, 50, "E_CONTROL_VECTOR   with: ", _c)
                 if _types_already_parsed( _parsed_code, e_control_scalar, e_control_vector)
                     return :(throw(CtParserException("multiple control instructions")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: control vector)"
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: control vector)"))
             end
             :e_constraint=> let
                 verbose(_verbose_threshold, 50, "E_CONSTRAINT       with: ", _c)
                 if _type_and_var_already_parsed( _parsed_code,  e_constraint, _c)[1]
                     return :(throw(CtParserException("constraint defined twice")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: constraint)"
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: constraint)"))
             end
             :e_named_constraint=> let
                 verbose(_verbose_threshold, 50, "E_NAMED_CONSTRAINT with: ", _c)
                 if _type_and_var_already_parsed( _parsed_code,  e_constraint, [_c[1]])[1]
                     return :(throw(CtParserException("constraint defined twice")))
                 end
-                push!(_parsed_code, _code( node, e_constraint, [_c[1]], _c[2]))
-                _parsed_code[count].info = "(temporary_1: named constraint)"
+                push!(_parsed_code, _code( node, e_constraint, [_c[1]], "(temporary_1: named constraint)", _c[2]))
             end
             :e_alias=> let
                 verbose(_verbose_threshold, 50, "E_ALIAS            with: ", _c)
                 if _type_and_var_already_parsed( _parsed_code,  e_alias, _c)[1]
                     return :(throw(CtParserException("alias defined twice")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: alias)"
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: alias)"))
             end
             :e_objective_min=> let
                 verbose(_verbose_threshold, 50, "E_OBJECTIVE_MIN    with: ", _c)
                 if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                     return :(throw(CtParserException("objective defined twice")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: min objective)"
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: min objective)"))
             end
             :e_objective_max=> let
                 verbose(_verbose_threshold, 50, "E_OBJECTIVE_MAX    with: ", _c)
                 if _types_already_parsed( _parsed_code, e_objective_max, e_objective_min)
                     return :(throw(CtParserException("objective defined twice")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: max objective)"
+                push!(_parsed_code, _code( node, _t, _c, "(temporary_1: max objective)"))
             end
             :e_variable=> let
                 verbose(_verbose_threshold, 50, "E_VARIABLE         with: ", _c)
                 if _types_already_parsed(_parsed_code,  e_variable)
                     return :(throw(CtParserException("variable defined twice")))
                 end
-                push!(_parsed_code, _code( node, _t, _c))
-                _parsed_code[count].info = "(temporary_1: scalar variable)"
+                push!(_parsed_code, _code( node, _t, _c,  "(temporary_1: scalar variable)"))
             end
             e => let
                 # (should never happend, because everything is caught by the previous match)
                 # COV_EXCL_START
-                return :(throw(CtParserException("cannot parse line number $count")))
+                return :(throw(CtParserException("cannot parse line")))
                 # COV_EXCL_STOP
             end
         end
