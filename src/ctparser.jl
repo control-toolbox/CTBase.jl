@@ -3,6 +3,7 @@
 
 
 using MLStyle         # for parsing
+using MLStyle.AbstractPatterns: literal
 using Printf          #
 
 export @def
@@ -24,14 +25,14 @@ mutable struct CtParserException <: Exception
 end
 
 # type of input lines
-#@enum _type e_time e_state_scalar e_state_vector e_control_scalar e_con#trol_vector e_constraint e_alias e_objective_min e_objective_max e_variable
+#@enum _ctparser_line_type e_time e_state_scalar e_state_vector e_control_scalar e_con#trol_vector e_constraint e_alias e_objective_min e_objective_max e_variable
 
 # store a parsed line
 mutable struct _code
     line::Union{Expr, Symbol}         # line of code (initial, but also transformed after unaliasing)
 
     # result of first parsing phase
-    type::_type                       # type of this code
+    type::_ctparser_line_type         # type of this code
     content::Array{Any}               # user dependant (can be Symbol, Expr, Float, etc...)
 
     # for constraints
@@ -161,6 +162,23 @@ macro def( args... )
         end
 
         count += 1
+
+        ( _t, _c ) = input_line_type( node )
+        println("= +DEBUG")
+        println(_t)
+        println(typeof(_t))
+        #MLStyle.is_enum(::_ctparser_line_type) = true
+        #MLStyle.pattern_uncall(e::_ctparser_line_type, _, _, _, _) = literal(e)
+        @match _t begin
+            e_time => let
+                println("=====> E_TIME")
+            end
+            a => let
+                println("=====> ", a, " / ", typeof(a))
+            end
+        end
+        println("= -DEBUG")
+
         # time instruction
         #
         @when :($t ∈ [ $a, $b ], time) = node begin
@@ -614,7 +632,7 @@ end # macro @def
 #
 # (internal) find if some types are already parsed
 #
-function _types_already_parsed( _pc::Array{_code}, types::_type...)
+function _types_already_parsed( _pc::Array{_code}, types::_ctparser_line_type...)
     for c in _pc
         for t in types
             if c.type == t
@@ -628,7 +646,7 @@ end # function _types_already_parsed
 #
 # (internal) find if some type/var is already parsed
 #
-function _type_and_var_already_parsed( _pc::Array{_code}, type::_type, content::Any )
+function _type_and_var_already_parsed( _pc::Array{_code}, type::_ctparser_line_type, content::Any )
     count = 1
     for c in _pc
         if c.type == type && c.content == content
@@ -642,7 +660,7 @@ end # function _type_and_var_already_parsed
 #
 # (internal) return the (first) line corresponding to a type
 #
-function _line_of_type( _pc::Array{_code},  type::_type)
+function _line_of_type( _pc::Array{_code},  type::_ctparser_line_type)
     count = 1
     for c in _pc
         if c.type == type

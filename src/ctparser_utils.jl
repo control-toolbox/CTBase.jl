@@ -284,7 +284,7 @@ constraint_type(e, t, t0, tf, x, u) =
 
 
 # type of input lines
-@enum _type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_named_constraint e_alias e_objective_min e_objective_max e_variable
+@enum _ctparser_line_type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_named_constraint e_alias e_objective_min e_objective_max e_variable
 
 """
 $(TYPEDSIGNATURES)
