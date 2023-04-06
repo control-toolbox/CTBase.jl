@@ -112,17 +112,25 @@ macro def( args... )
     _debug_mode = false
 
     for i in args[begin:end-1]
+        @when :( syntax_only = false ) = i continue
         @when :( syntax_only = true ) = i begin
             _syntax_only = true
+            continue
+        end
+        @when :( debug = false ) = i continue
+        @when :( debug = true ) = i begin
+            _debug_mode = true
+            continue
         end
         @when :( verbose_threshold = $n ) = i begin
             n = n > 100 ? 100 : n
             n = n <   0 ?   0 : n
             _verbose_threshold = n
+            verbose(_verbose_threshold, 1, "== verbose_threshold = ", n)
+            continue
         end
-        @when :( debug = true ) = i begin
-            _debug_mode = true
-        end
+
+        return :(throw(CtParserException("bad option for @def")))
     end
 
     # extract the problem from args
@@ -156,7 +164,7 @@ macro def( args... )
         # of imbricated expressions)
         node = prob.args[i] |> remove_line_number_node
 
-        verbose(_verbose_threshold, 100, "= node = ", node)
+        verbose(_verbose_threshold, 100, "line = ", node)
         if isa(node, LineNumberNode) || isnothing(node)
             continue
         end
@@ -164,20 +172,45 @@ macro def( args... )
         count += 1
 
         ( _t, _c ) = input_line_type( node )
-        println("= +DEBUG")
-        println(_t)
-        println(typeof(_t))
-        #MLStyle.is_enum(::_ctparser_line_type) = true
-        #MLStyle.pattern_uncall(e::_ctparser_line_type, _, _, _, _) = literal(e)
+        _t = Symbol(_t)                        # pattern matching on enum cannot be used here
         @match _t begin
-            e_time => let
-                println("=====> E_TIME")
+            :e_time => let
+                verbose(_verbose_threshold, 50, "E_TIME             with: ", _c)
+            end
+            :e_state_scalar=> let
+                verbose(_verbose_threshold, 50, "E_STATE_SCALAR     with: ", _c)
+            end
+            :e_state_vector=> let
+                verbose(_verbose_threshold, 50, "E_STATE_VECTOR     with: ", _c)
+            end
+            :e_control_scalar=> let
+                verbose(_verbose_threshold, 50, "E_CONTROL_SCALAR   with: ", _c)
+            end
+            :e_control_vector=> let
+                verbose(_verbose_threshold, 50, "E_CONTROL_VECTOR   with: ", _c)
+            end
+            :e_constraint=> let
+                verbose(_verbose_threshold, 50, "E_CONSTRAINT       with: ", _c)
+            end
+            :e_named_constraint=> let
+                verbose(_verbose_threshold, 50, "E_NAMED_CONSTRAINT with: ", _c)
+            end
+            :e_alias=> let
+                verbose(_verbose_threshold, 50, "E_ALIAS            with: ", _c)
+            end
+            :e_objective_min=> let
+                verbose(_verbose_threshold, 50, "E_OBJECTIVE_MIN    with: ", _c)
+            end
+            :e_objective_max=> let
+                verbose(_verbose_threshold, 50, "E_OBJECTIVE_MAX    with: ", _c)
+            end
+            :e_variable=> let
+                verbose(_verbose_threshold, 50, "E_VARIABLE         with: ", _c)
             end
             a => let
-                println("=====> ", a, " / ", typeof(a))
+                return :(throw(CtParserException("Cannot parse line: $node")))
             end
         end
-        println("= -DEBUG")
 
         # time instruction
         #
