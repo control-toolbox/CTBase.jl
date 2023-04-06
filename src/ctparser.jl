@@ -413,9 +413,9 @@ macro def( args... )
             end
 
             if has(l.line, a)
-                verbose(_verbose_threshold, 50,"ALIAS: replace $a by $b in: ", l.line)
+                verbose(_verbose_threshold, 50,"ALIAS_EXP: replace $a by $b in: ", l.line)
                 e = subs(l.line, a, b)
-                verbose(_verbose_threshold, 50,"AFTER: ", e)
+                verbose(_verbose_threshold, 50,"AFTER    : ", e)
                 l.line = e
             end
         end
@@ -450,9 +450,9 @@ macro def( args... )
                     end
 
                     if has(l.line, symb_1)
-                        verbose(_verbose_threshold, 50,"ALIAS: replace $symb_1 by $symb_2 in: ", l.line)
+                        verbose(_verbose_threshold, 50,"ALIAS_IMP: replace $symb_1 by $symb_2 in: ", l.line)
                         e = subs(l.line, symb_1, symb_2)
-                        verbose(_verbose_threshold, 50,"AFTER: ", e)
+                        verbose(_verbose_threshold, 50,"AFTER   : ", e)
                         l.line = e
                     end
                 end
