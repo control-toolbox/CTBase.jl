@@ -33,6 +33,8 @@ function test_utils()
     @test CTBase.ctindice(9) == '₉'
 
     @test_throws IncorrectArgument CTBase.ctindices(-1)
+    @test CTBase.ctindices(019) == "₁₉"
+    @test CTBase.ctindices(314) == "₃₁₄"
 
     @test_throws IncorrectArgument CTBase.ctupperscript(-1)
     @test_throws IncorrectArgument CTBase.ctupperscript(10)
@@ -48,6 +50,7 @@ function test_utils()
     @test CTBase.ctupperscript(9) == '⁹'
 
     @test_throws IncorrectArgument CTBase.ctupperscripts(-1)
-
+    @test CTBase.ctupperscripts(019) == "¹⁹"
+    @test CTBase.ctupperscripts(109) == "¹⁰⁹"
 
 end
