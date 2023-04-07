@@ -30,7 +30,7 @@ println("=== initial")
     y0_b ≤ x[2:3](t0) ≤ y0_u   => initial_5
 end
 
-println("=== final")
+println("\n=== final")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -44,7 +44,7 @@ println("=== final")
     yf_b ≤ x[2:3](tf) ≤ yf_u   => final_5
 end
 
-println("=== boundary")
+println("\n=== boundary")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -60,7 +60,7 @@ println("=== boundary")
 
 end
 
-println("=== control")
+println("\n=== control")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -74,7 +74,7 @@ println("=== control")
     1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  => control_5
 end
 
-println("=== state")
+println("\n=== state")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -88,7 +88,7 @@ println("=== state")
     [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] => state_5
 end
 
-println("=== mixed")
+println("\n=== mixed")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -101,7 +101,7 @@ println("=== mixed")
     u[2](t) * x[1:2](t) ≥  [ -1, 1 ]             => mixed_4
 end
 
-println("=== dynamic")
+println("\n=== dynamic")
 @def begin
 
     t ∈ [ t0, tf], time
