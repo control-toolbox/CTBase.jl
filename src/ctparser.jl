@@ -4,7 +4,7 @@
 
 using MLStyle         # for parsing
 using MLStyle.AbstractPatterns: literal
-using Printf          #
+using Printf
 
 export @def
 export CtParserException
@@ -91,7 +91,7 @@ remove_line_number_node = @λ begin
             let tl = map(remove_line_number_node, e.args)
                 Expr(e.head, filter(!isnothing, tl)...)
             end
-    :: LineNumberNode -> nothing
+    :: LineNumberNode   -> nothing
     a                   -> a
 end
 
@@ -466,9 +466,23 @@ macro def( args... )
 
         c.type != e_constraint && continue
 
+        name = c.name
+
         println("====")
-        @show c.line
-        # test on ẋ before
+        @show c.initial_line
+
+        # record the single comparison type for later use
+        operator = @match c.line begin
+            :( $x == $y )      => :equal
+            :( $x ≥  $y )      ||
+            :( $x >= $y )      => :gt
+            :( $x <= $y )      ||
+            :( $x ≤  $y )      => :lt
+            :( $x <= $y <= $z) ||
+            :( $x ≤  $y  ≤ $z) => :double
+            _                  => :other
+        end
+        @show operator
 
         @match c.line begin
             :( $x == $y )      ||
@@ -483,17 +497,47 @@ macro def( args... )
                                             _tf_variable,
                                             _state_variable,
                                             _control_variable)
-                @show _t
-                @show _c
-                println("typeof(_c) = ", typeof(_c))
+
                 @match ( _t, _c ) begin
                     ( :initial, nothing) => let
-                        println("### initial $y")
+                        if isnothing(name)
+                            println("### initial, $y")
+                        else
+                            println("### initial, $y, :$name")
+                        end
+                    end
+                    ( :initial, a)  => let
+                        if isnothing(name)
+                            println("### initial, $_c, $y")
+                        else
+                            println("### initial, $_c, $y, :$name")
+                        end
                     end
                     ( :final  , nothing) => let
-                        println("### final   $y")
+                        if isnothing(name)
+                            println("### final, $y")
+                        else
+                            println("### final, $y, :$name")
+                        end
+                    end
+                    ( :final  , a) => let
+                        if isnothing(name)
+                            println("### final, $_c, $y")
+                        else
+                            println("### final, $_c, $y, :$name")
+                        end
+                    end
+                    ( :boundary, e) => let
+                        if isnothing(name)
+                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $y   [not fully implemented]")
+                        else
+                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $y, :$name   [not fully implemented]")
+                        end
                     end
                     _                    => let
+                        @show _t
+                        @show _c
+                        println("typeof(_c) = ", typeof(_c))
                     end
                 end
             end
@@ -505,9 +549,48 @@ macro def( args... )
                                             _tf_variable,
                                             _state_variable,
                                             _control_variable)
-                @show _t
-                @show _c
-                println("typeof(_c) = ", typeof(_c))
+                @match ( _t, _c ) begin
+                    ( :initial, nothing) => let
+                        if isnothing(name)
+                            println("### initial, $x, $z")
+                        else
+                            println("### initial, $x, $z, :$name")
+                        end
+                    end
+                    ( :initial, a)  => let
+                        if isnothing(name)
+                            println("### initial, $_c, $x, $z")
+                        else
+                            println("### initial, $_c, $x, $z, :$name")
+                        end
+                    end
+                    ( :final  , nothing) => let
+                        if isnothing(name)
+                            println("### final, $x, $z")
+                        else
+                            println("### final, $x, $z, :$name")
+                        end
+                    end
+                    ( :final  , a) => let
+                        if isnothing(name)
+                            println("### final, $_c, $x, $z")
+                        else
+                            println("### final, $_c, $x, $z, :$name")
+                        end
+                    end
+                    ( :boundary, e) => let
+                        if isnothing(name)
+                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $x, $z   [not fully implemented]")
+                        else
+                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $x, $z, :$name   [not fully implemented]")
+                        end
+                    end
+                    _                    => let
+                        @show _t
+                        @show _c
+                        println("typeof(_c) = ", typeof(_c))
+                    end
+                end
             end
 
         end
