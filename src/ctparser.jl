@@ -423,6 +423,7 @@ macro def( args... )
     end
 
     # 6/ implicit aliases (from state/control)
+    # replace subscript indices  by explicit one (eg: x₁ -> x[1])
     for tt in [ e_state_vector, e_control_vector]
 
         # find definition of state_vector and control_vector
@@ -432,11 +433,8 @@ macro def( args... )
             a = c.content[1]  # aka name
             m = c.content[2]  # aka dimension
 
-            if m isa Symbol
-                limit = 10
-            else
-                limit = m
-            end
+            # to be coherent with parsing of Rⁿ
+            limit = m isa Symbol ? 9 : m
             for i ∈ 1:limit       # generate a\_i up to dimension
 
                 symb_1 = Symbol(a, Char(8320+i))  # a\_i
@@ -528,9 +526,53 @@ macro def( args... )
                     end
                     ( :boundary, e) => let
                         if isnothing(name)
-                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $y   [not fully implemented]")
+                            println("### boundary, ( T0, X0, TF, XF) -> $_c, $y   [not fully implemented]")
                         else
-                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $y, :$name   [not fully implemented]")
+                            println("### boundary, ( T0, X0, TF, XF) -> $_c, $y, :$name   [not fully implemented]")
+                        end
+                    end
+                    ( :control_fun, e) => let
+                        if e == _control_variable
+                            if isnothing(name)
+                                println("### control, $y")
+                            else
+                                println("### control, $y, :$name")
+                            end
+                        else
+                            if isnothing(name)
+                                println("### control, U -> $e, $y  [not fully implemented]")
+                            else
+                                println("### control, U -> $e, $y, :$name  [not fully implemented]")
+                            end
+                        end
+                    end
+                    ( :control_range, e) => let
+                        if isnothing(name)
+                            println("### control, $e, $x, $z")
+                        else
+                            println("### control, $e, $x, $z, :$name")
+                        end
+                    end
+                    ( :state_fun, e) => let
+                        if e == _state_variable
+                            if isnothing(name)
+                                println("### state, $y")
+                            else
+                                println("### state, $y, :$name")
+                            end
+                        else
+                            if isnothing(name)
+                                println("### state, X -> $e, $y  [not fully implemented]")
+                            else
+                                println("### state, X -> $e, $y, :$name  [not fully implemented]")
+                            end
+                        end
+                    end
+                    ( :state_range, e) => let
+                        if isnothing(name)
+                            println("### state, $e, $x, $z")
+                        else
+                            println("### state, $e, $x, $z, :$name")
                         end
                     end
                     _                    => let
@@ -579,9 +621,53 @@ macro def( args... )
                     end
                     ( :boundary, e) => let
                         if isnothing(name)
-                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $x, $z   [not fully implemented]")
+                            println("### boundary, ( T0, X0, TF, XF) -> $_c, $x, $z   [not fully implemented]")
                         else
-                            println("### boundary, ( T0, TF, X0, XF) -> $_c, $x, $z, :$name   [not fully implemented]")
+                            println("### boundary, ( T0, X0, TF, XF) -> $_c, $x, $z, :$name   [not fully implemented]")
+                        end
+                    end
+                    ( :control_fun, e) => let
+                        if e == _control_variable
+                            if isnothing(name)
+                                println("### control, $x, $z")
+                            else
+                                println("### control, $x, $z, :$name")
+                            end
+                        else
+                            if isnothing(name)
+                                println("### control, U -> $e, $x, $z  [not fully implemented]")
+                            else
+                                println("### control, U -> $e, $x, $z, :$name  [not fully implemented]")
+                            end
+                        end
+                    end
+                    ( :control_range, e) => let
+                        if isnothing(name)
+                            println("### control, $e, $x, $z")
+                        else
+                            println("### control, $e, $x, $z, :$name")
+                        end
+                    end
+                    ( :state_fun, e) => let
+                        if e == _state_variable
+                            if isnothing(name)
+                                println("### state, $x, $z")
+                            else
+                                println("### state, $x, $z, :$name")
+                            end
+                        else
+                            if isnothing(name)
+                                println("### state, X -> $e, $x, $z  [not fully implemented]")
+                            else
+                                println("### state, X -> $e, $x, $z, :$name  [not fully implemented]")
+                            end
+                        end
+                    end
+                    ( :state_range, e) => let
+                        if isnothing(name)
+                            println("### state, $e, $x, $z")
+                        else
+                            println("### state, $e, $x, $z, :$name")
                         end
                     end
                     _                    => let
