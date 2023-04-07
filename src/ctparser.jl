@@ -50,7 +50,7 @@ mutable struct _code
             _type == e_constraint
             new(_content[1], _type, _content, nothing, _line, _info, "")
         else
-            new(_line, _type, _content, nothing, _line, "", "")
+            new(_line, _type, _content, nothing, _line, _info, "")
         end
     end
     function _code(_line, _type, _content, _info, _name)
@@ -468,7 +468,7 @@ macro def( args... )
 
         name = c.name
 
-        println("====")
+        println("")
         @show c.initial_line
 
         # record the single comparison type for later use
@@ -482,7 +482,6 @@ macro def( args... )
             :( $x ≤  $y  ≤ $z) => :double
             _                  => :other
         end
-        @show operator
 
         @match c.line begin
             :( $x == $y )      ||
