@@ -28,8 +28,6 @@ println("=== initial")
     x[2:3](t0) == y0           => initial_3
     x0_b ≤ x(t0) ≤ x0_u        => initial_4
     y0_b ≤ x[2:3](t0) ≤ y0_u   => initial_5
-    x[2](t0)^2 == 1            => initial_6
-    1 ≤ x[2](t0)^2 ≤ 2         => initial_7
 end
 
 println("=== final")
@@ -44,8 +42,6 @@ println("=== final")
     x[2](tf) == xf2            => final_3
     x[2:3](tf) == yf           => final_4
     yf_b ≤ x[2:3](tf) ≤ yf_u   => final_5
-    x[2](tf)^2 == 1            => final_6
-    1 ≤ x[2](tf)^2 ≤ 2         => final_7
 end
 
 println("=== boundary")
@@ -57,6 +53,11 @@ println("=== boundary")
 
     x(tf) - tf*x(t0) == [ 0, 1 ]            => boundary_1
     [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]  => boundary_2
+    x[2](t0)^2 == 1                         => boundary_3
+    1 ≤ x[2](t0)^2 ≤ 2                      => boundary_4
+    x[2](tf)^2 == 1                         => boundary_5
+    1 ≤ x[2](tf)^2 ≤ 2                      => boundary_6
+
 end
 
 println("=== control")
