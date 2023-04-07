@@ -193,9 +193,9 @@ end
 $(TYPEDSIGNATURES)
 
 Return the type constraint among
-`:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
-`:state_fun`, `:mixed` (`:other` otherwise), together with the appropriate value
-(range or updated expression).
+`:dynamics`, `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`,
+`:state_range`, `:state_fun`, `:mixed` (`:other` otherwise),
+together with the appropriate value (range, updated expression...)
 
 # Example
 ```jldoctest
