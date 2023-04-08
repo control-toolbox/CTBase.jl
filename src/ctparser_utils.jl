@@ -276,29 +276,29 @@ constraint_type(e, t, t0, tf, x, u) =
             :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : (:other, nothing)
             :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : (:other, nothing)
             :( $y($s)        ) => (y == x && s == t0) ? (:initial, nothing ) : (:other, nothing)
-        _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
+            _                  =>                                              (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
         [ false, true , false, false, false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : (:other, nothing)
-            :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : (:other, nothing)
-            :( $y($s)        ) => (y == x && s == tf) ? (:final, nothing ) : (:other, nothing)
-        _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
+            :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final  , i:j     ) : (:other, nothing)
+            :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final  , Index(i)) : (:other, nothing)
+            :( $y($s)        ) => (y == x && s == tf) ? (:final  , nothing ) : (:other, nothing)
+            _                  =>                                              (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false ] => begin
-        ee = replace_call(e , x, t0, Symbol(x, "#0"))
-        ee = replace_call(ee, x, tf, Symbol(x, "#f"))
-        (:boundary, ee) end
+            ee = replace_call(e , x, t0, Symbol(x, "#0"))
+            ee = replace_call(ee, x, tf, Symbol(x, "#f"))
+            (:boundary, ee) end
         [ false, false, true , false, false, false ] => @match e begin
             :( $v[$i:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : (:other, nothing)
             :( $v[$i   ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : (:other, nothing)
-        _                  => (:control_fun, replace_call(e, u, t, u)) end
+            _                  =>                                                    (:control_fun, replace_call(e, u, t, u)) end
         [ false, false, false, true , false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : (:other, nothing)
-            :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : (:other, nothing)
-        _                  => (:state_fun  , replace_call(e, x, t, x)) end
+            :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range  , i:j     ) : (:other, nothing)
+            :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range  , Index(i)) : (:other, nothing)
+            _                  =>                                                    (:state_fun  , replace_call(e, x, t, x)) end
         [ false, false, true , true , false, false ] => begin
-        ee = replace_call(e , u, t, u)
-        ee = replace_call(ee, x, t, x)
-        (:mixed, ee) end
-        _                      => (:other, nothing) end
+            ee = replace_call(e , u, t, u)
+            ee = replace_call(ee, x, t, x);
+            (:mixed, ee) end
+        _  => (:other, nothing) end
     end
 
 # type of input lines
