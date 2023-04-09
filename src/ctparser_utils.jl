@@ -1,5 +1,5 @@
 """ 
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 
@@ -19,7 +19,7 @@ expr_it(e, _Expr, f) =
     end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Substitute expression `e1` by expression `e2` in expression `e`.
 
@@ -59,7 +59,7 @@ subs(e, e1, e2) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Replace calls in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `y`, `y[i](t)` or `y[i:j](t)`, resp.
 
@@ -76,6 +76,15 @@ julia> x0 = Symbol(x, 0); e = replace_call(e, x, t0, x0)
 
 julia> xf = Symbol(x, "f"); replace_call(ans, x, tf, xf)
 :(x0[1] * (2xf) - xf[2] * (2x0))
+
+julia> e = :( A*x(t) + B*u(t) ); replace_call(replace_call(e, x, t, x), u, t, u)
+:(A * x + B * u)
+
+julia> e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(replace_call(e, x, t, x), u, t, u)
+:(F0(x) + u * F1(x))
+
+julia> e = :( 0.5u(t)^2  ); replace_call(e, u, t, u)
+:(0.5 * u ^ 2)
 ```
 """
 replace_call(e, x, t, y) = begin
@@ -93,7 +102,7 @@ replace_call(e, x, t, y) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
 
@@ -126,7 +135,7 @@ has(e, x, t) = begin
 end
 
 """
-$(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Return the type constraint among 
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`, `:state_range`,
