@@ -470,23 +470,24 @@ macro def( args... )
         @show c.initial_line
 
         # record the single comparison type for later use
-        operator = @match c.line begin
-            :( $x == $y )      => :equal
-            :( $x ≥  $y )      ||
-            :( $x >= $y )      => :gt
-            :( $x <= $y )      ||
-            :( $x ≤  $y )      => :lt
-            :( $x <= $y <= $z) ||
-            :( $x ≤  $y  ≤ $z) => :double
-            _                  => :other
-        end
+        # operator = @match c.line begin
+        #     :( $x == $y )      => :equal
+        #     :( $x ≥  $y )      ||
+        #     :( $x >= $y )      => :gt
+        #     :( $x <= $y )      ||
+        #     :( $x ≤  $y )      => :lt
+        #     :( $x <= $y <= $z) ||
+        #     :( $x ≤  $y  ≤ $z) => :double
+        #     _                  => :other
+        # end
 
         @match c.line begin
-            :( $x == $y )      ||
-            :( $x ≥  $y )      ||
-            :( $x >= $y )      ||
-            :( $x <= $y )      ||
-            :( $x ≤  $y )      => let
+            # :( $x == $y )      ||
+            # :( $x ≥  $y )      ||
+            # :( $x >= $y )      ||
+            # :( $x <= $y )      ||
+            # :( $x ≤  $y )      => let
+            :( $x == $y ) =>
 
                 (_t, _c ) = constraint_type(x,
                                             _time_variable,
