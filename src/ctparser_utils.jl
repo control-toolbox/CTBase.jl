@@ -249,6 +249,9 @@ julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u)
 julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u)
 (:control_range, Index(1))
 
+julia> constraint_type(:( u(t) ), t, t0, tf, x, u)
+(:control_range, nothing)
+
 julia> constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u)
 (:control_fun, :(2 * u[1] ^ 2))
 
@@ -257,6 +260,9 @@ julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u)
 
 julia> constraint_type(:( x[1](t) ), t, t0, tf, x, u)
 (:state_range, Index(1))
+
+julia> constraint_type(:( x(t) ), t, t0, tf, x, u)
+(:state_range, nothing)
 
 julia> constraint_type(:( 2x[1](t)^2 ), t, t0, tf, x, u)
 (:state_fun, :(2 * x[1] ^ 2))
@@ -276,29 +282,31 @@ constraint_type(e, t, t0, tf, x, u) =
             :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : (:other, nothing)
             :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : (:other, nothing)
             :( $y($s)        ) => (y == x && s == t0) ? (:initial, nothing ) : (:other, nothing)
-        _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
+            _                  =>                                              (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
         [ false, true , false, false, false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : (:other, nothing)
-            :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : (:other, nothing)
-            :( $y($s)        ) => (y == x && s == tf) ? (:final, nothing ) : (:other, nothing)
-        _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
+            :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final  , i:j     ) : (:other, nothing)
+            :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final  , Index(i)) : (:other, nothing)
+            :( $y($s)        ) => (y == x && s == tf) ? (:final  , nothing ) : (:other, nothing)
+            _                  =>                                              (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false ] => begin
-        ee = replace_call(e , x, t0, Symbol(x, "#0"))
-        ee = replace_call(ee, x, tf, Symbol(x, "#f"))
-        (:boundary, ee) end
+            ee = replace_call(e , x, t0, Symbol(x, "#0"))
+            ee = replace_call(ee, x, tf, Symbol(x, "#f"))
+            (:boundary, ee) end
         [ false, false, true , false, false, false ] => @match e begin
             :( $v[$i:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : (:other, nothing)
             :( $v[$i   ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : (:other, nothing)
-        _                  => (:control_fun, replace_call(e, u, t, u)) end
+            :( $v($s)        ) => (v == u && s == t ) ? (:control_range, nothing ) : (:other, nothing)
+            _                  =>                                                    (:control_fun, replace_call(e, u, t, u)) end
         [ false, false, false, true , false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : (:other, nothing)
-            :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : (:other, nothing)
-        _                  => (:state_fun  , replace_call(e, x, t, x)) end
+            :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range  , i:j     ) : (:other, nothing)
+            :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range  , Index(i)) : (:other, nothing)
+            :( $y($s)        ) => (y == x && s == t ) ? (:state_range  , nothing ) : (:other, nothing)
+            _                  =>                                                    (:state_fun  , replace_call(e, x, t, x)) end
         [ false, false, true , true , false, false ] => begin
-        ee = replace_call(e , u, t, u)
-        ee = replace_call(ee, x, t, x)
-        (:mixed, ee) end
-        _                      => (:other, nothing) end
+            ee = replace_call(e , u, t, u)
+            ee = replace_call(ee, x, t, x);
+            (:mixed, ee) end
+        _  => (:other, nothing) end
     end
 
 # type of input lines
@@ -343,9 +351,9 @@ input_line_type(e) =
         :($t ∈ R, variable )     => (e_variable, [t])
         :($t, variable )         => (e_variable, [t])
         :($a = $b)               => (e_alias, [a, b])
-        :($a -> begin min end)   => (e_objective_min, [a])
+        :($a -> begin min end)   => (e_objective_min, [a]) # debug: not allowed, remove
         :($a → min)              => (e_objective_min, [a])
-        :($a -> begin max end)   => (e_objective_max, [a])
+        :($a -> begin max end)   => (e_objective_max, [a]) # debug: not allowed, remove
         :($a → max)              => (e_objective_max, [a])
         :($e => ($n))            => (e_named_constraint, [e, n])
         :($e , ($n))             => (e_named_constraint, [e, n])
