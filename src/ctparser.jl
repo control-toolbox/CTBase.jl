@@ -515,135 +515,168 @@ macro def( args... )
         @show c.initial_line
 
 
-        (_t, _c ) = constraint_type(_expr,
+        (_ctype, _c ) = constraint_type(_expr,
                                     _time_variable,
                                     _t0_variable,
                                     _tf_variable,
                                     _state_variable,
                                     _control_variable)
 
-        @match ( _t, _c ) begin
-            ( :initial, nothing) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### initial, $_v1")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### initial, $_v1, $_v2")
-                elseif _type == :(==)
-                    println("### initial, $_v1, :$_name")
-                elseif _type == :(≤)
-                    println("### initial, $_v1, $_v2, :$_name")
-                else
-                    println("### ERROR 1")
-                end
+        @match ( _ctype, _c, _type, isnothing(_name)) begin
+
+            # initial
+            ( :initial, nothing, :(==), true) => let
+                println("### initial, $_v1")
             end
-            ( :initial, a)  => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### initial, $a, $_v1")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### initial, $a, $_v1, $_v2")
-                elseif _type == :(==)
-                    println("### initial, $a, $_v1, :$_name")
-                elseif _type == :(≤)
-                    println("### initial, $a, $_v1, $_v2, :$_name")
-                else
-                    println("### ERROR 2")
-                end
+            ( :initial, nothing, :(≤) , true) => let
+                println("### initial, $_v1, $_v2")
             end
-            ( :final  , nothing) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### final, $_v1")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### final, $_v1, $_v2")
-                elseif _type == :(==)
-                    println("### final, $_v1, :$_name")
-                elseif _type == :(≤)
-                    println("### final, $_v1, $_v2, :$_name")
-                else
-                    println("### ERROR 3")
-                end
+            ( :initial, nothing, :(==), false) => let
+                println("### initial, $_v1, :$_name")
             end
-            ( :final  , a) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### final, $a, $_v1")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### final, $a, $_v1, $_v2")
-                elseif _type == :(==)
-                    println("### final, $a, $_v1, :$_name")
-                elseif _type == :(≤)
-                    println("### final, $a, $_v1, $_v2, :$_name")
-                else
-                    println("### ERROR 4")
-                end
+            ( :initial, nothing, :(≤), false) => let
+                println("### initial, $_v1, $_v2, :$_name")
             end
-            ( :boundary, a) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1   [not fully implemented]")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1, $_v2   [not fully implemented]")
-                elseif _type == :(==)
-                    println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1, :$_name   [not fully implemented]")
-                elseif _type == :(≤)
-                    println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1, $_v2, :$_name   [not fully implemented]")
-                else
-                    println("### ERROR 5")
-                end
+
+            ( :initial, a, :(==), true)  => let
+                println("### initial, $a, $_v1")
             end
-            ( :control_fun, a) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### control, $_v1")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### control, U -> $a, $_v1  [not fully implemented]")
-                elseif _type == :(==)
-                    println("### control, $_v1, :$_name")
-                elseif _type == :(≤)
-                    println("### control, U -> $a, $_v1, :$_name  [not fully implemented]")
-                else
-                    println("### ERROR 6")
-                end
+            ( :initial, a, :(≤), true)  => let
+                println("### initial, $a, $_v1, $_v2")
             end
-            ( :control_range, a) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### control, $a, $_v1, $_v2")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### control, U -> $a, $_v1, $_v2  [not fully implemented]")
-                elseif _type == :(==)
-                    println("### control, $a, $_v1, $_v2, :$_name")
-                elseif _type == :(≤)
-                    println("### control, U -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
-                else
-                    println("### ERROR 7")
-                end
+            ( :initial, a, :(==), false)  => let
+                println("### initial, $a, $_v1, :$_name")
             end
-            ( :state_fun, a) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### state, $_v1")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### state, U -> $a, $_v1  [not fully implemented]")
-                elseif _type == :(==)
-                    println("### state, $_v1, :$_name")
-                elseif _type == :(≤)
-                    println("### state, U -> $a, $_v1, :$_name  [not fully implemented]")
-                else
-                    println("### ERROR 7")
-                end
+            ( :initial, a, :(≤), false)  => let
+                println("### initial, $a, $_v1, $_v2, :$_name")
             end
-            ( :state_range, a) => let
-                if     _type == :(==) && isnothing(_name)
-                    println("### state, $a, $_v1, $_v2")
-                elseif _type == :(≤)  && isnothing(_name)
-                    println("### state, U -> $a, $_v1, $_v2  [not fully implemented]")
-                elseif _type == :(==)
-                    println("### state, $a, $_v1, $_v2, :$_name")
-                elseif _type == :(≤)
-                    println("### state, U -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
-                else
-                    println("### ERROR 8")
-                end
+
+            # final
+            ( :final, nothing, :(==), true) => let
+                println("### final, $_v1")
             end
+            ( :final, nothing, :(≤) , true) => let
+                println("### final, $_v1, $_v2")
+            end
+            ( :final, nothing, :(==), false) => let
+                println("### final, $_v1, :$_name")
+            end
+            ( :final, nothing, :(≤), false) => let
+                println("### final, $_v1, $_v2, :$_name")
+            end
+
+            ( :final, a, :(==), true)  => let
+                println("### final, $a, $_v1")
+            end
+            ( :final, a, :(≤), true)  => let
+                println("### final, $a, $_v1, $_v2")
+            end
+            ( :final, a, :(==), false)  => let
+                println("### final, $a, $_v1, :$_name")
+            end
+            ( :final, a, :(≤), false)  => let
+                println("### final, $a, $_v1, $_v2, :$_name")
+            end
+
+            # boundary
+            ( :boundary, a, :(==), true) => let
+                println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1   [not fully implemented]")
+            end
+            ( :boundary, a, :(≤), true) => let
+                println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1, $_v2   [not fully implemented]")
+            end
+            ( :boundary, a, :(==), false) => let
+                println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1, :$_name   [not fully implemented]")
+            end
+            ( :boundary, a, :(≤), false) => let
+                println("### boundary, ( T0, X0, TF, XF) -> $a, $_v1, $_v2, :$_name   [not fully implemented]")
+            end
+
+            # control
+            ( :control_fun, a, :(==), true) => let
+                println("### control_1, $_v1")
+            end
+            ( :control_fun, a, :(≤), true) => let
+                println("### control_2, U -> $a, $_v1  [not fully implemented]")
+            end
+            ( :control_fun, a, :(==), false) => let
+                println("### control_3, $_v1, :$_name")
+            end
+            ( :control_fun, a, :(≤), false) => let
+                println("### control_4, U -> $a, $_v1, :$_name  [not fully implemented]")
+            end
+
+            ( :control_range, a, :(==), true) => let
+                println("### control_5, $a, $_v1")
+            end
+            ( :control_range, a, :(≤), true) => let
+                println("### control_6, U -> $a, $_v1, $_v2  [not fully implemented]")
+            end
+            ( :control_range, a, :(==), false) => let
+                println("### control_7, $a, $_v1, :$_name")
+            end
+            ( :control_range, a, :(≤), false) => let
+                println("### control_8, U -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
+            end
+
+            # state
+            ( :state_fun, a, :(==), true) => let
+                println("### state_1, $_v1")
+            end
+            ( :state_fun, a, :(≤), true) => let
+                println("### state_2, U -> $a, $_v1  [not fully implemented]")
+            end
+            ( :state_fun, a, :(==), false) => let
+                println("### state_3, $_v1, :$_name")
+            end
+            ( :state_fun, a, :(≤), false) => let
+                println("### state_4, U -> $a, $_v1, :$_name  [not fully implemented]")
+            end
+
+            ( :state_range, a, :(==), true) => let
+                println("### state_5, $a, $_v1, $_v2")
+            end
+            ( :state_range, a, :(≤), true) => let
+                println("### state_6, U -> $a, $_v1, $_v2  [not fully implemented]")
+            end
+            ( :state_range, a, :(==), false) => let
+                println("### state_7, $a, $_v1, $_v2, :$_name")
+            end
+            ( :state_range, a, :(≤), false) => let
+                println("### state_8, U -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
+            end
+
+            # mixed
+            ( :mixed, a, :(==), true) => let
+                println("### mixed_1, $_v1")
+            end
+            ( :mixed, a, :(≤), true) => let
+                println("### mixed_2, (x, u) -> $a, $_v1  [not fully implemented]")
+            end
+            ( :mixed, a, :(==), false) => let
+                println("### mixed_3, $_v1, :$_name")
+            end
+            ( :mixed, a, :(≤), false) => let
+                println("### mixed_4, (x, u) -> $a, $_v1, :$_name  [not fully implemented]")
+            end
+
+            # dynamic
+            ( :dynamics, a, :(==), true) => let
+                println("### dynamics_1, $_v1   [not fully implemented]")
+            end
+            ( :dynamics, a, :(==), false) => let
+                println("### dynamics_2, $_v1, :$_name  [not fully implemented]")
+            end
+
+
+            # error may still happend in some case (ex: x'(t) ≤ xxx)
+            # this cannot be detected at phase 1
             _                    => let
-                @show _t
+                @show _ctype
                 @show _c
                 println("typeof(_c) = ", typeof(_c))
+                verbose(_verbose_threshold, 0, "CtParser error: cannot parse line (", c.initial_line, ")")
+                return :(throw(CtParserException("parsing error (phase 2)")))
             end
         end
     end
