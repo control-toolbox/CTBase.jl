@@ -46,23 +46,51 @@ mutable struct _code
     # struct constructors
     function _code(_line, _type, _content, _info)
         if _type == e_objective_min ||
-            _type == e_objective_max ||
-            _type == e_constraint
+            _type == e_objective_max
+            #
+            # _content is:
+            #     [ expression ]
+            #
+            # code.line should containt expression
+            #
             new(_content[1], _type, _content, nothing, _line, _info, "")
+        elseif _type == e_constraint
+            #
+            # _content is:
+            #       [ :(==), y, x ]
+            #    or [ :(<=), y, x, z ]
+            #
+            # code.line should containt y
+            #
+            new(_content[2], _type, _content, nothing, _line, _info, "")
         else
+            #
+            # for all other line types, code.initial_line == code.line
+            #
             new(_line, _type, _content, nothing, _line, _info, "")
         end
     end
     function _code(_line, _type, _content, _info, _name)
-        # named constraint is tricky
+        #
+        # _content looks is:
+        #       [ name, :(==), y, x ]
+        #    or [ name, :(<=), y, x, z ]
+        #
+        # code.line    should containt y,
+        # code.content should not contain name
+        # code.name    should containt name
+        #
         if _name isa Integer
             _name = "eq" * string(_name)
-            new(_content[1], _type, _content, Symbol(_name), _line, _info, "")
+            #            new(_content[1], _type, _content, Symbol(_name), _line, _info, "")
+            new(_content[3], _type, _content[2:end], Symbol(_name), _line, _info, "")
         elseif _name isa Expr
             _name = "eq" * string(_name)
-            new(_content[1], _type, _content, Symbol(_name), _line, _info, "")
+            #            new(_content[1], _type, _content, Symbol(_name), _line, _info, "")
+            new(_content[3], _type, _content[2:end], Symbol(_name), _line, _info, "")
         else
-            new(_content[1], _type, _content, _name, _line, _info, "")
+            #            new(_content[1], _type, _content, _name, _line, _info, "")
+            new(_content[3], _type, _content[2:end], _name, _line, _info, "")
         end
     end
 end
@@ -128,7 +156,7 @@ macro def( args... )
             continue
         end
 
-        return :(throw(CtParserException("bad option for @def")))
+        return :(throw(CtParserException("bad option for @def (allowed: syntax_only=true, debug=true, verbose_threshold=n)")))
     end
 
     # extract the problem from args
@@ -213,10 +241,10 @@ macro def( args... )
             end
             :e_named_constraint=> let
                 verbose(_verbose_threshold, 50, "E_NAMED_CONSTRAINT with: ", _c)
-                if _type_and_var_already_parsed( _parsed_code,  e_constraint, [_c[1]])[1]
+                if _type_and_var_already_parsed( _parsed_code,  e_constraint, [_c[2:end]])[1]
                     return :(throw(CtParserException("constraint defined twice")))
                 end
-                push!(_parsed_code, _code( node, e_constraint, [_c[1]], "(temporary_1: named constraint)", _c[2]))
+                push!(_parsed_code, _code( node, e_constraint, _c, "(temporary_1: named constraint)", _c[1]))
             end
             :e_alias=> let
                 verbose(_verbose_threshold, 50, "E_ALIAS            with: ", _c)
@@ -246,12 +274,10 @@ macro def( args... )
                 end
                 push!(_parsed_code, _code( node, _t, _c,  "(temporary_1: scalar variable)"))
             end
-            # COV_EXCL_START
             e => let
-                # (should never happend, because everything is caught by the previous match)
-                return :(throw(CtParserException("cannot parse line")))
+                verbose(_verbose_threshold, 0, "CtParser error: cannot parse line (", node, ")")
+                return :(throw(CtParserException("parsing error")))
             end
-            # COV_EXCL_STOP
         end
     end
 
@@ -487,7 +513,7 @@ macro def( args... )
             # :( $x >= $y )      ||
             # :( $x <= $y )      ||
             # :( $x ≤  $y )      => let
-            :( $x == $y ) =>
+            :( $x == $y ) => let
 
                 (_t, _c ) = constraint_type(x,
                                             _time_variable,
