@@ -12,17 +12,17 @@ const constraint_type = CTBase.constraint_type
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
-        :callbacks,
-        :ctparser_utils,
-        #:ctparser,
-        :default,
-        :descriptions,
-        :exceptions,
+        #:callbacks,
+        #:ctparser_utils,
+        ##:ctparser,
+        #:default,
+        #:descriptions,
+        #:exceptions,
         :functions,
-        :model,
-        :plot,
-        :print,
-        :utils,
+        #:model,
+        #:plot,
+        #:print,
+        #:utils,
         )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

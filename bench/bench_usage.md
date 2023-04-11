@@ -36,8 +36,7 @@ F = Fun_dim_usage_each_call(((t, x, u)->begin
                 x + u
             end))
 
-be = #= /Users/ocots/Boulot/recherche/logiciels/dev/control-toolbox/CTBase/bench/bench_usage.jl:25 =# @benchmark(y = F(t, x, u))
-
+@benchmark(y = F(t, x, u))
 ```
 
 ```bash
@@ -58,8 +57,7 @@ F = Fun_dim_usage_each_call(((t, x, u)->begin
                 x + u[1]
             end))
 
-be = #= /Users/ocots/Boulot/recherche/logiciels/dev/control-toolbox/CTBase/bench/bench_usage.jl:30 =# @benchmark(y = F(t, x, u))
-
+@benchmark(y = F(t, x, u))
 ```
 
 ```bash
@@ -105,8 +103,7 @@ F = Fun_dim_usage_a_priori(((t, x, u)->begin
                 x + u
             end), 1, 1)
 
-be = #= /Users/ocots/Boulot/recherche/logiciels/dev/control-toolbox/CTBase/bench/bench_usage.jl:52 =# @benchmark(y = F(t, x, u))
-
+@benchmark(y = F(t, x, u))
 ```
 
 ```bash
@@ -127,8 +124,7 @@ F = Fun_dim_usage_a_priori(((t, x, u)->begin
                 x + u[1]
             end), 1, 1)
 
-be = #= /Users/ocots/Boulot/recherche/logiciels/dev/control-toolbox/CTBase/bench/bench_usage.jl:57 =# @benchmark(y = F(t, x, u))
-
+@benchmark(y = F(t, x, u))
 ```
 
 ```bash
@@ -157,8 +153,7 @@ F = Fun_dim_usage_parametrization{1, 1}(((t, x, u)->begin
                 x + u
             end))
 
-be = #= /Users/ocots/Boulot/recherche/logiciels/dev/control-toolbox/CTBase/bench/bench_usage.jl:74 =# @benchmark(y = F(t, x, u))
-
+@benchmark(y = F(t, x, u))
 ```
 
 ```bash
@@ -179,8 +174,7 @@ F = Fun_dim_usage_parametrization{1, 1}(((t, x, u)->begin
                 x + u[1]
             end))
 
-be = #= /Users/ocots/Boulot/recherche/logiciels/dev/control-toolbox/CTBase/bench/bench_usage.jl:79 =# @benchmark(y = F(t, x, u))
-
+@benchmark(y = F(t, x, u))
 ```
 
 ```bash

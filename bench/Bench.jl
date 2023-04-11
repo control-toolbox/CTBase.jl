@@ -49,5 +49,3 @@ function bench(file::String)
     include(mapexpr, file)
 
 end
-
-bench("bench_usage.jl")

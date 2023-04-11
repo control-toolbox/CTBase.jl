@@ -1,4 +1,71 @@
 function test_functions()
+
+# pour le model, demander à avoir les dimensions 
+# cas où ne donne pas les dimensions : user doit être cohérent
+# passer les dimensions en arguments nommés au lieu de paramètres
+# => pas besoin alors de tester les exceptions car fonctions non existantes
+
+# test BoundaryConstraintFunction
+@testset "BoundaryConstraintFunction" begin
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> xf - x0, state_dimension = 1, constraint_dimension = 1)
+    @test B(0, 0, 1, 1) == 1 # classical call 
+    @test B(0, [0], 1, [1]) == [1] # call as a BoundaryConstraintFunction
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> [xf - x0, t0 - tf], state_dimension = 1, constraint_dimension = 2)
+    @test B(0, 0, 1, 1) == [1, -1] # classical call
+    @test B(0, [0], 1, [1]) == [1, -1] # call as a BoundaryConstraintFunction
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> tf - t0, state_dimension = 2, constraint_dimension = 1)
+    @test B(0, [1, 0], 1, [0, 1]) == [1] # call as a BoundaryConstraintFunction
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]], state_dimension = 2, constraint_dimension = 2)
+    @test B(0, [1, 0], 1, [1, 0]) == [1, 1] # call as a BoundaryConstraintFunction
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> xf - x0)
+    @test B(0, 0, 1, 1) == 1
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> [xf - x0, t0 - tf])
+    @test B(0, 0, 1, 1) == [1, -1]
+    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> xf[2] - x0[1])
+    @test B(0, [1, 0], 1, [0, 1]) == 0
+end
+
+@testset "MayerFunction" begin
+    G = MayerFunction{1}((t0, x0, tf, xf) -> xf - x0)
+    @test G(0, 0, 1, 1) == 1 # classical call
+    @test G(0, [0], 1, [1]) == 1 # call as a MayerFunction
+    G = MayerFunction{2}((t0, x0, tf, xf) -> xf[2] - x0[1])
+    @test G(0, [1, 0], 1, [0, 1]) == 0 # call as a MayerFunction
+    @test_throws ErrorException MayerFunction{:dum}((t0, x0, tf, xf) -> xf - x0)
+end
+
+@testset "Hamiltonian" begin
+    H = Hamiltonian{:autonomous, 1}((x, p) -> p^2/2 - x)
+    @test H(0, 1) == 0.5 # classical call
+    @test H(0, [0], [1]) == 0.5 # call as a Hamiltonian
+    H = Hamiltonian{:nonautonomous, 1}((t, x, p) -> t + p^2/2 - x)
+    @test H(1, 0, 1) == 1.5 # classical call
+    @test H(1, [0], [1]) == 1.5 # call as a Hamiltonian
+    H = Hamiltonian{:autonomous, 2}((x, p) -> p[1]^2/2 - x[1] + p[2]^2/2 - x[2])
+    @test H([0, 0], [1, 1]) == 1 # call as a Hamiltonian
+    H = Hamiltonian{:nonautonomous, 2}((t, x, p) -> t + p[1]^2/2 - x[1] + p[2]^2/2 - x[2])
+    @test H(1, [0, 0], [1, 1]) == 2 # call as a Hamiltonian
+    @test_throws ErrorException Hamiltonian{1111, 1}((x, p) -> p^2/2 - x)
+    @test_throws ErrorException Hamiltonian{:autonomous, :dum}((x, p) -> p^2/2 - x)
+end
+
+@testset "HamiltonianVectorField" begin
+    Hv = HamiltonianVectorField{:autonomous, 1}((x, p) -> [p^2/2 - x, p^2/2 + x])
+    @test Hv(0, 1) == [0.5, 0.5] # classical call
+    @test Hv(0, [0], [1]) == [0.5, 0.5] # call as a HamiltonianVectorField
+    Hv = HamiltonianVectorField{:nonautonomous, 1}((t, x, p) -> [t + p^2/2 - x, t + p^2/2 + x])
+    @test Hv(1, 0, 1) == [1.5, 1.5] # classical call
+    @test Hv(1, [0], [1]) == [1.5, 1.5] # call as a HamiltonianVectorField
+    Hv = HamiltonianVectorField{:autonomous, 2}((x, p) -> [p[1]^2/2 - x[1] + p[2]^2/2 - x[2], p[1]^2/2 + x[1] + p[2]^2/2 + x[2]])
+    @test Hv([0, 0], [1, 1]) == [1, 1] # call as a HamiltonianVectorField
+    Hv = HamiltonianVectorField{:nonautonomous, 2}((t, x, p) -> [t + p[1]^2/2 - x[1] + p[2]^2/2 - x[2], t + p[1]^2/2 + x[1] + p[2]^2/2 + x[2]])
+    @test Hv(1, [0, 0], [1, 1]) == [2, 2] # call as a HamiltonianVectorField
+    @test_throws ErrorException HamiltonianVectorField{1111, 1}((x, p) -> [p^2/2 - x, p^2/2 + x])
+    @test_throws ErrorException HamiltonianVectorField{:autonomous, :dum}((x, p) -> [p^2/2 - x, p^2/2 + x])
+end
+
+
+
 #
 t = 1
 x = 2
@@ -8,55 +75,6 @@ f(t, x, u) = t+x+u
 
 #
 H(t, x, p) = t + x^2+p^2
-@test_throws ErrorException Hamiltonian{:ttt, :scalar}(H) # :autonomous or :nonautonomous
-@test_throws ErrorException Hamiltonian{:ttt}(H) # :autonomous or :nonautonomous
-@test_throws ErrorException Hamiltonian{:autonomous, :ttt}(H) # :scalar or :vectorial
-
-# boundary constraint
-b(t0, x0, tf, xf) = (tf*xf) / (t0*x0) # scalar case
-B1 = BoundaryConstraintFunction{:scalar}(b)
-@test_throws ErrorException BoundaryConstraintFunction{:ttt}(b)
-@test B1(1.0, 1.0, 1.0, 1.0) == 1.0 # call as b
-@test B1(1.0, [1.0], 1.0, [1.0]) ≈ [1.0] atol=1e-6 # call as a BoundaryConstraintFunction
-Be = BoundaryConstraintFunction{:scalar}((t0, x0, tf, xf) -> [b(t0, x0, tf, xf)])
-@test_throws IncorrectOutput Be(1.0, [1.0], 1.0, [1.0]) # if output and usage are scalar, return a scalar 
-
-# Mayer
-g(t0, x0, tf, xf) = (tf*xf[1]) / (t0*x0[1])
-G1 = MayerFunction{:vectorial}(g)
-@test G1(1.0, [1.0], 1.0, [1.0]) ≈ 1.0 atol=1e-6
-Ge = MayerFunction((t0, x0, tf, xf) -> [g(t0, x0, tf, xf)]) # default is :scalar
-@test_throws IncorrectOutput Ge(1.0, [1.0], 1.0, [1.0])
-
-# HamiltonianVectorField: the name is not important since here we have Hamiltonians
-H1 = HamiltonianVectorField{:nonautonomous}(H)
-H2 = HamiltonianVectorField((x, p) -> H(0.0, x, p))
-@test H1(t, x, p) == 14
-@test H2(t, x, p) == 13
-Hs = HamiltonianVectorField{:nonautonomous, :scalar}(H)
-@test Hs(t, [x], [p]) == 14
-
-# dim 2
-Hd2 = HamiltonianVectorField((x,p) -> x[1]^2+x[2]^2+p[1]^2+p[2]^2)
-@test Hd2(t, [0, 1], [1, 0]) == 2
-
-# Hamiltonian
-H1 = Hamiltonian{:nonautonomous}(H)
-H2 = Hamiltonian((x, p) -> H(0.0, x, p))
-@test H1(t, x, p) == 14
-@test H2(t, x, p) == 13
-Hs = Hamiltonian{:nonautonomous, :scalar}(H)
-@test Hs(t, [x], [p]) == 14
-He = Hamiltonian((x, p) -> [H(0, x, p)])
-@test_throws IncorrectOutput He(t, [x], [p])
-
-Hvec = Hamiltonian((x, p) -> H(0, x[1], p[1]))
-@test Hvec([x], [p]) == 13 # for basic usage, the input is a vector since otherwise
-# it is considered as a time
-
-# dim 2
-Hd2 = Hamiltonian((x,p) -> x[1]^2+x[2]^2+p[1]^2+p[2]^2)
-@test Hd2(t, [0, 1], [1, 0]) == 2
 
 # VectorField
 F(t, x) = t + x^2
@@ -109,8 +127,6 @@ Fd2 = DynamicsFunction((x, u) -> [x[1]^2+x[2]^2, u])
 makeH(f::Function, u::Function) = (t,x,p) -> f(t, x, u(t, x, p))
 control(t, x, p) = p
 myH = makeH(F1, control)
-H3 = Hamiltonian{:nonautonomous}(myH)
-@test H3(t, x, p) == 6
 
 # StateConstraintFunction
 f1 = StateConstraintFunction{:nonautonomous}((t, x) -> f(t, x, u))
