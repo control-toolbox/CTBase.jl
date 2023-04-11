@@ -90,12 +90,12 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u
 @test input_line_type(:(e == f  => (n)))              == (CTBase.e_named_constraint, [:n, :(==), :e, :f])
 @test input_line_type(:(e == f, (n)) )                == (CTBase.e_named_constraint, [:n, :(==), :e, :f])
 @test input_line_type(:(e == f))                      == (CTBase.e_constraint,       [    :(==), :e, :f])
-@test input_line_type(:(e <= f <= g  => (n)))         == (CTBase.e_named_constraint, [:n, :(≤),  :e, :f, :g])
-@test input_line_type(:(e <= f <= g , (n)) )          == (CTBase.e_named_constraint, [:n, :(≤),  :e, :f, :g])
-@test input_line_type(:(e <= f <= g))                 == (CTBase.e_constraint,       [    :(≤),  :e, :f, :g])
-@test input_line_type(:(e ≤ f ≤ g  => (n)))           == (CTBase.e_named_constraint, [:n, :(≤),  :e, :f, :g])
-@test input_line_type(:(e ≤ f ≤ g , (n)) )            == (CTBase.e_named_constraint, [:n, :(≤),  :e, :f, :g])
-@test input_line_type(:(e ≤ f ≤ g))                   == (CTBase.e_constraint,       [    :(≤),  :e, :f, :g])
+@test input_line_type(:(d <= e <= f  => (n)))         == (CTBase.e_named_constraint, [:n, :(≤),  :e, :d, :f])
+@test input_line_type(:(d <= e <= f , (n)) )          == (CTBase.e_named_constraint, [:n, :(≤),  :e, :d, :f])
+@test input_line_type(:(d <= e <= f))                 == (CTBase.e_constraint,       [    :(≤),  :e, :d, :f])
+@test input_line_type(:(d ≤  e ≤  f => (n)))          == (CTBase.e_named_constraint, [:n, :(≤),  :e, :d, :f])
+@test input_line_type(:(d ≤  e ≤  f , (n)) )          == (CTBase.e_named_constraint, [:n, :(≤),  :e, :d, :f])
+@test input_line_type(:(d ≤  e ≤  f))                 == (CTBase.e_constraint,       [    :(≤),  :e, :d, :f])
 @test input_line_type(:(e))                           == (:other, [])
 
 end
