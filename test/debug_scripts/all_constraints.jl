@@ -23,11 +23,11 @@ println("=== initial")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x(t0) == x0                => initial_1
-    x[2](t0) == x02            => initial_2
-    x[2:3](t0) == y0           => initial_3
-    x0_b ≤ x(t0) ≤ x0_u        => initial_4
-    y0_b ≤ x[2:3](t0) ≤ y0_u   => initial_5
+    x(t0) == x0
+    x[2](t0) == x02
+    x[2:3](t0) == y0
+    x0_b ≤ x(t0) ≤ x0_u
+    y0_b ≤ x[2:3](t0) ≤ y0_u
 end
 
 println("\n=== final")
@@ -37,11 +37,11 @@ println("\n=== final")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x(tf) == xf                => final_1
-    xf_b ≤ x(tf) ≤ xf_u        => final_2
-    x[2](tf) == xf2            => final_3
-    x[2:3](tf) == yf           => final_4
-    yf_b ≤ x[2:3](tf) ≤ yf_u   => final_5
+    x(tf) == xf
+    xf_b ≤ x(tf) ≤ xf_u
+    x[2](tf) == xf2
+    x[2:3](tf) == yf
+    yf_b ≤ x[2:3](tf) ≤ yf_u
 end
 
 println("\n=== boundary")
@@ -51,12 +51,12 @@ println("\n=== boundary")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x(tf) - tf*x(t0) == [ 0, 1 ]            => boundary_1
-    [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]  => boundary_2
-    x[2](t0)^2 == 1                         => boundary_3
-    1 ≤ x[2](t0)^2 ≤ 2                      => boundary_4
-    x[2](tf)^2 == 1                         => boundary_5
-    1 ≤ x[2](tf)^2 ≤ 2                      => boundary_6
+    x(tf) - tf*x(t0) == [ 0, 1 ]
+    [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]
+    x[2](t0)^2 == 1
+    1 ≤ x[2](t0)^2 ≤ 2
+    x[2](tf)^2 == 1
+    1 ≤ x[2](tf)^2 ≤ 2
 
 end
 
@@ -67,11 +67,11 @@ println("\n=== control")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    u_b ≤ u(t) ≤ u_u               => control_1
-    u2_b ≤ u[2](t) ≤ u2_u          => control_2
-    v_b ≤ u[2:3](t) ≤ v_u          => control_3
-    u[1](t)^2 + u[2](t)^2 == 1     => control_4
-    1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  => control_5
+    u_b ≤ u(t) ≤ u_u
+    u2_b ≤ u[2](t) ≤ u2_u
+    v_b ≤ u[2:3](t) ≤ v_u
+    u[1](t)^2 + u[2](t)^2 == 1
+    1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
 end
 
 println("\n=== state")
@@ -81,11 +81,11 @@ println("\n=== state")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x_b ≤ x(t) ≤ x_u                             => state_1
-    x2_b ≤ x[2](t) ≤ x2_u                        => state_2
-    y_b ≤ x[2:3](t) ≤ y_u                        => state_3
-    x[1:2](t) + x[3:4](t) == [ -1, 1 ]           => state_4
-    [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] => state_5
+    x_b ≤ x(t) ≤ x_u
+    x2_b ≤ x[2](t) ≤ x2_u
+    y_b ≤ x[2:3](t) ≤ y_u
+    x[1:2](t) + x[3:4](t) == [ -1, 1 ]
+    [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ]
 end
 
 println("\n=== mixed")
@@ -95,10 +95,8 @@ println("\n=== mixed")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    u[2](t) * x[1:2](t) == [ -1, 1 ]                       => mixed_1
-    [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]             => mixed_2
-    [ -Inf, -Inf ] ≤ u[2](t) * x[1:2](t) ≤  [ -1, 1 ]      => mixed_3
-    [ -1, 1 ]      ≤ u[2](t) * x[1:2](t) ≤  [ Inf, Inf ]   => mixed_4
+    u[2](t) * x[1:2](t) == [ -1, 1 ]
+    [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]
 end
 
 println("\n=== dynamic")
@@ -108,6 +106,6 @@ println("\n=== dynamic")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x'(t) == 2x(t) + u(t)^2          => dynamic_1
-    x'(t) == f(x(t), u(t))           => dynamic_2
+    x'(t) == 2x(t) + u(t)^2
+    x'(t) == f(x(t), u(t))
 end
