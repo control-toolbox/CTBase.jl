@@ -95,10 +95,10 @@ println("\n=== mixed")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    u[2](t) * x[1:2](t) == [ -1, 1 ]             => mixed_1
-    [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]   => mixed_2
-    u[2](t) * x[1:2](t) ≤  [ -1, 1 ]             => mixed_3
-    u[2](t) * x[1:2](t) ≥  [ -1, 1 ]             => mixed_4
+    u[2](t) * x[1:2](t) == [ -1, 1 ]                       => mixed_1
+    [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]             => mixed_2
+    [ -Inf, -Inf ] ≤ u[2](t) * x[1:2](t) ≤  [ -1, 1 ]      => mixed_3
+    [ -1, 1 ]      ≤ u[2](t) * x[1:2](t) ≤  [ Inf, Inf ]   => mixed_4
 end
 
 println("\n=== dynamic")
