@@ -30,6 +30,21 @@ println("=== initial")
     y0_b ≤ x[2:3](t0) ≤ y0_u
 end
 
+@def begin
+
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    x(t0) == x0                => initial_1
+    x[2](t0) == x02            => initial_2
+    x[2:3](t0) == y0           => initial_3
+    x0_b ≤ x(t0) ≤ x0_u        => initial_4
+    y0_b ≤ x[2:3](t0) ≤ y0_u   => initial_5
+end
+
+
+
 println("\n=== final")
 @def begin
 
@@ -43,6 +58,20 @@ println("\n=== final")
     x[2:3](tf) == yf
     yf_b ≤ x[2:3](tf) ≤ yf_u
 end
+
+@def begin
+
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    x(tf) == xf                => final_1
+    xf_b ≤ x(tf) ≤ xf_u        => final_2
+    x[2](tf) == xf2            => final_3
+    x[2:3](tf) == yf           => final_4
+    yf_b ≤ x[2:3](tf) ≤ yf_u   => final_5
+end
+
 
 println("\n=== boundary")
 @def begin
@@ -59,6 +88,20 @@ println("\n=== boundary")
     1 ≤ x[2](tf)^2 ≤ 2
 
 end
+@def begin
+
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    x(tf) - tf*x(t0) == [ 0, 1 ]            => boundary_1
+    [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]  => boundary_2
+    x[2](t0)^2 == 1                         => boundary_3
+    1 ≤ x[2](t0)^2 ≤ 2                      => boundary_4
+    x[2](tf)^2 == 1                         => boundary_5
+    1 ≤ x[2](tf)^2 ≤ 2                      => boundary_6
+
+end
 
 println("\n=== control")
 @def begin
@@ -68,11 +111,30 @@ println("\n=== control")
     u ∈ R^3, control
 
     u_b ≤ u(t) ≤ u_u
+    u(t) == u_u
     u2_b ≤ u[2](t) ≤ u2_u
+    u[2](t) == u2_u
     v_b ≤ u[2:3](t) ≤ v_u
+    u[2:3](t) == v_u
     u[1](t)^2 + u[2](t)^2 == 1
     1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
 end
+@def begin
+
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    u_b ≤ u(t) ≤ u_u               => control_1
+    u(t) == u_u                    => control_2
+    u2_b ≤ u[2](t) ≤ u2_u          => control_3
+    u[2](t) == u2_u                => control_4
+    v_b ≤ u[2:3](t) ≤ v_u          => control_5
+    u[2:3](t) == v_u               => control_6
+    u[1](t)^2 + u[2](t)^2 == 1     => control_7
+    1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  => control_8
+end
+
 
 println("\n=== state")
 @def begin
@@ -82,11 +144,31 @@ println("\n=== state")
     u ∈ R^3, control
 
     x_b ≤ x(t) ≤ x_u
+    x(t) == x_u
     x2_b ≤ x[2](t) ≤ x2_u
-    y_b ≤ x[2:3](t) ≤ y_u
+    x[2](t) == x2_u
+    x[2:3](t) == y_u
+    x_u ≤ x[2:3](t) ≤ y_u
     x[1:2](t) + x[3:4](t) == [ -1, 1 ]
     [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ]
 end
+println("\n=== state")
+@def begin
+
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    x_b ≤ x(t) ≤ x_u                             => state_1
+    x(t) == x_u                                  => state_2
+    x2_b ≤ x[2](t) ≤ x2_u                        => state_3
+    x[2](t) == x2_u                              => state_4
+    x[2:3](t) == y_u                             => state_5
+    x_u ≤ x[2:3](t) ≤ y_u                        => state_6
+    x[1:2](t) + x[3:4](t) == [ -1, 1 ]           => state_7
+    [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] => state_8
+end
+
 
 println("\n=== mixed")
 @def begin
@@ -98,8 +180,18 @@ println("\n=== mixed")
     u[2](t) * x[1:2](t) == [ -1, 1 ]
     [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]
 end
+@def begin
 
-println("\n=== dynamic")
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    u[2](t) * x[1:2](t) == [ -1, 1 ]                       => mixed_1
+    [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]             => mixed_2
+end
+
+
+println("\n=== dynamics")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -108,4 +200,13 @@ println("\n=== dynamic")
 
     x'(t) == 2x(t) + u(t)^2
     x'(t) == f(x(t), u(t))
+end
+@def begin
+
+    t ∈ [ t0, tf], time
+    x ∈ R^3, state
+    u ∈ R^3, control
+
+    x'(t) == 2x(t) + u(t)^2          => dynamics_1
+    x'(t) == f(x(t), u(t))           => dynamics_2
 end

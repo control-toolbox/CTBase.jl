@@ -513,7 +513,7 @@ macro def( args... )
 
         println("")
         @show c.initial_line
-
+        @show c.line
 
         (_ctype, _c ) = constraint_type(_expr,
                                     _time_variable,
@@ -594,78 +594,104 @@ macro def( args... )
 
             # control
             ( :control_fun, a, :(==), true) => let
-                println("### control_1, $_v1")
+                println("### control_1, U -> $a, $_v1 [not fully implemented]")
             end
             ( :control_fun, a, :(≤), true) => let
-                println("### control_2, U -> $a, $_v1  [not fully implemented]")
+                println("### control_2, U -> $a, $_v1, $_v2  [not fully implemented]")
             end
             ( :control_fun, a, :(==), false) => let
-                println("### control_3, $_v1, :$_name")
+                println("### control_3, U -> $_v1, :$_name [not fulle implemented]")
             end
             ( :control_fun, a, :(≤), false) => let
-                println("### control_4, U -> $a, $_v1, :$_name  [not fully implemented]")
+                println("### control_4, U -> $a, $_v1, , $_v2, :$_name  [not fully implemented]")
+            end
+
+            ( :control_range, nothing, :(==), true) => let
+                println("### control_5, $_v1")
+            end
+            ( :control_range, nothing, :(≤), true) => let
+                println("### control_6, $_v1, $_v2")
+            end
+            ( :control_range, nothing, :(==), false) => let
+                println("### control_7, $_v1, :$_name")
+            end
+            ( :control_range, nothing, :(≤), false) => let
+                println("### control_8, $_v1, $_v2, :$_name")
             end
 
             ( :control_range, a, :(==), true) => let
-                println("### control_5, $a, $_v1")
+                println("### control_9, $a, $_v1")
             end
             ( :control_range, a, :(≤), true) => let
-                println("### control_6, U -> $a, $_v1, $_v2  [not fully implemented]")
+                println("### control_10, $a, $_v1, $_v2")
             end
             ( :control_range, a, :(==), false) => let
-                println("### control_7, $a, $_v1, :$_name")
+                println("### control_11, $a, $_v1, :$_name")
             end
             ( :control_range, a, :(≤), false) => let
-                println("### control_8, U -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
+                println("### control_12, $a, $_v1, $_v2, :$_name")
             end
 
             # state
             ( :state_fun, a, :(==), true) => let
-                println("### state_1, $_v1")
+                println("### state_1, X -> $a, $_v1 [not fully implemented]")
             end
             ( :state_fun, a, :(≤), true) => let
-                println("### state_2, U -> $a, $_v1  [not fully implemented]")
+                println("### state_2, X -> $a, $_v1, $_v2  [not fully implemented]")
             end
             ( :state_fun, a, :(==), false) => let
-                println("### state_3, $_v1, :$_name")
+                println("### state_3, X -> $a, $_v1, :$_name [not fully implemented]")
             end
             ( :state_fun, a, :(≤), false) => let
-                println("### state_4, U -> $a, $_v1, :$_name  [not fully implemented]")
+                println("### state_4, X -> $a, $_v1, $_v2 :$_name  [not fully implemented]")
+            end
+
+            ( :state_range, nothing, :(==), true) => let
+                println("### state_5, $_v1")
+            end
+            ( :state_range, nothing, :(≤), true) => let
+                println("### state_6, $_v1, $_v2")
+            end
+            ( :state_range, nothing, :(==), false) => let
+                println("### state_7, $_v1, :$_name")
+            end
+            ( :state_range, nothing, :(≤), false) => let
+                println("### state_8, $_v1, $_v2, :$_name")
             end
 
             ( :state_range, a, :(==), true) => let
-                println("### state_5, $a, $_v1, $_v2")
+                println("### state_9, $a, $_v1")
             end
             ( :state_range, a, :(≤), true) => let
-                println("### state_6, U -> $a, $_v1, $_v2  [not fully implemented]")
+                println("### state_10, $a, $_v1, $_v2  [not fully implemented]")
             end
             ( :state_range, a, :(==), false) => let
-                println("### state_7, $a, $_v1, $_v2, :$_name")
+                println("### state_11, $a, $_v1, :$_name")
             end
             ( :state_range, a, :(≤), false) => let
-                println("### state_8, U -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
+                println("### state_12, $a, $_v1, $_v2, :$_name  [not fully implemented]")
             end
 
             # mixed
             ( :mixed, a, :(==), true) => let
-                println("### mixed_1, $_v1")
+                println("### mixed_1, (x, u) -> $a, $_v1 [not fully implemented]")
             end
             ( :mixed, a, :(≤), true) => let
-                println("### mixed_2, (x, u) -> $a, $_v1  [not fully implemented]")
+                println("### mixed_2, (x, u) -> $a, $_v1, $_v2  [not fully implemented]")
             end
             ( :mixed, a, :(==), false) => let
-                println("### mixed_3, $_v1, :$_name")
+                println("### mixed_3, (x, u) -> $a, $_v1, :$_name [not fully implemented]")
             end
             ( :mixed, a, :(≤), false) => let
-                println("### mixed_4, (x, u) -> $a, $_v1, :$_name  [not fully implemented]")
+                println("### mixed_4, (x, u) -> $a, $_v1, $_v2, :$_name  [not fully implemented]")
             end
 
             # dynamic
             ( :dynamics, a, :(==), true) => let
-                println("### dynamics_1, $_v1   [not fully implemented]")
+                println("### dynamics_1, (x, u) -> $a  [not fully implemented]")
             end
             ( :dynamics, a, :(==), false) => let
-                println("### dynamics_2, $_v1, :$_name  [not fully implemented]")
+                println("### dynamics_2, (x, u) -> $a, :$_name  [not fully implemented]")
             end
 
 
