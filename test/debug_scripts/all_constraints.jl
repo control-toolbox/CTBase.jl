@@ -81,7 +81,7 @@ println("\n=== state")
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x_b ≤ x(t) ≤ x_u                              => state_1
+    x_b ≤ x(t) ≤ x_u                             => state_1
     x2_b ≤ x[2](t) ≤ x2_u                        => state_2
     y_b ≤ x[2:3](t) ≤ y_u                        => state_3
     x[1:2](t) + x[3:4](t) == [ -1, 1 ]           => state_4
