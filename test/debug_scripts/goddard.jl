@@ -36,7 +36,7 @@ ocp = @def verbose_threshold=100 begin
 
     x(t0) == [ r0, v0, m0 ]
     0  ≤ u(t) ≤ 1
-    0  ≤ r(t),           (1)
+    0  ≤ r(t) ≤ 1,       (1)
     0  ≤ v(t) ≤ vmax,    (2bis)
     mf ≤ m(t) ≤ m0,      (trois)
 
