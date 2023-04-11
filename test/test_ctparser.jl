@@ -51,7 +51,7 @@ function test_ctparser()
     @test @def syntax_only=true begin
         x(t0) == [ r0, v0, m0 ]
         0  ≤ u(t) ≤ 1
-        r0 ≤ x(t)[1]
+        r0 ≤ x(t)[1] ≤ r1
         0  ≤ x₂(t) ≤ vmax
         mf ≤ m(t) ≤ m0
     end
@@ -59,7 +59,7 @@ function test_ctparser()
     @test @def syntax_only=true begin
         x(t0) == [ r0, v0, m0 ], (1)
         0  ≤ u(t) ≤ 1          , (1bis)
-        r0 ≤ x(t)[1]           , (deux)
+        r0 ≤ x(t)[1] ≤ r1      , (deux)
         0  ≤ x₂(t) ≤ vmax     => (2bis)
         mf ≤ m(t) ≤ m0        => (1+1)
     end
@@ -237,21 +237,6 @@ function test_ctparser()
         x₂ = x₃
     end
 
-    # # aliases loops (not implemented yet)
-    # @test_throws CtParserException @def syntax_only=true begin
-    #     r = u
-    #     u = r
-    # end
-    # @test_throws CtParserException @def syntax_only=true begin
-    #     a = b
-    #     b = c
-    #     c = a
-    # end
-    @test @def syntax_only=true begin
-        r = u
-        u = r
-    end
-
     # multiple constraints
     @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0
@@ -271,6 +256,14 @@ function test_ctparser()
     end
     @test_throws CtParserException @def syntax_only=true begin
         r(t) == t0
+        r(t) == t0 => named
+    end
+    @test_throws CtParserException @def syntax_only=true begin
+        r(t) == t0 , named
+        r(t) == t0 , named
+    end
+    @test_throws CtParserException @def syntax_only=true begin
+        r(t) == t0 => named
         r(t) == t0 => named
     end
 
