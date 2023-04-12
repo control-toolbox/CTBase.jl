@@ -348,8 +348,8 @@ macro def( args... )
         # is t0 a variable ?
         if status_0
             _tf_variable = y
-            code = quote time!(ocp,:final, $(esc(y))) end
-            push!(_final_code, code)
+            codeline = quote time!(ocp,:final, $(esc(y))) end
+            push!(_final_code, codeline)
             _parsed_code[index].info = "final time definition with $y"
             _store_code_as_string( "time!(ocp,:final, $y)", index)
             _parsed_code[t_index_0].info = "use $x as initial time variable"
@@ -360,8 +360,8 @@ macro def( args... )
         # is tf a variable ?
         if status_f
             _t0_variable = x
-            code = quote time!(ocp,:initial, $(esc(x))) end
-            push!(_final_code, code)
+            codeline = quote time!(ocp,:initial, $(esc(x))) end
+            push!(_final_code, codeline)
             _parsed_code[index].info = "initial time definition with $x"
             _store_code_as_string( "time!(ocp,:initial, $x)", index)
             _parsed_code[t_index_f].info = "use $y as final time variable"
@@ -372,8 +372,8 @@ macro def( args... )
         _t0_variable = x
         _tf_variable = y
 
-        code = quote time!(ocp, [ $(esc(x)), $(esc(y))] ) end
-        push!(_final_code, code)
+        codeline = quote time!(ocp, [ $(esc(x)), $(esc(y))] ) end
+        push!(_final_code, codeline)
         _parsed_code[index].info = "time definition with [ $x, $y]"
         _store_code_as_string( "time!(ocp, [ $x, $y])", index)
 
@@ -388,16 +388,16 @@ macro def( args... )
     if c != nothing
         _state_variable = c.content[1]  # aka state name
         d = c.content[2]  # aka dimention
-        code = quote state!(ocp, $(esc(d))) end
-        push!(_final_code, code)
+        codeline = quote state!(ocp, $(esc(d))) end
+        push!(_final_code, codeline)
         _parsed_code[index].info = "state vector ($_state_variable) of dimension $d"
         _store_code_as_string( "state!(ocp, $d)", index)
     end
     (c, index) = _line_of_type( _parsed_code, e_state_scalar)
     if c != nothing
         _state_variable = c.content[1]  # aka state name
-        code = quote state!(ocp, 1) end
-        push!(_final_code, code)
+        codeline = quote state!(ocp, 1) end
+        push!(_final_code, codeline)
         _parsed_code[index].info = "state scalar ($_state_variable)"
         _store_code_as_string( "state!(ocp, 1)", index)
     end
@@ -408,16 +408,16 @@ macro def( args... )
     if c != nothing
         _control_variable = c.content[1]  # aka control name
         d = c.content[2]  # aka dimention
-        code = quote control!(ocp, $(esc(d))) end
-        push!(_final_code, code)
+        codeline = quote control!(ocp, $(esc(d))) end
+        push!(_final_code, codeline)
         _parsed_code[index].info = "control vector ($_control_variable) of dimension $d"
         _store_code_as_string( "control!(ocp, $d)", index)
     end
     (c, index) = _line_of_type( _parsed_code, e_control_scalar)
     if c != nothing
         _control_variable = c.content[1]  # aka control name
-        code = quote control!(ocp, 1) end
-        push!(_final_code, code)
+        codeline = quote control!(ocp, 1) end
+        push!(_final_code, codeline)
         _parsed_code[index].info = "control scalar ($_control_variable)"
         _store_code_as_string( "control!(ocp, 1)", index)
     end
@@ -497,8 +497,9 @@ macro def( args... )
         #
         _type = c.content[1]   # :(==)  or :(<=)
         _expr = c.line         # contains y after unaliasing
-        _name = c.name         # name::String or nothing
+        _name = c.name         # name::Symbol or nothing
 
+        @show _name
         if _type == :(==)
             _v1 = c.content[3] # y  ( from x == y)
             _v2 = :nothing     #
@@ -544,176 +545,187 @@ macro def( args... )
                 _control_variable)
             println("DYN_FUN_2 = ", _dynamic_fun)
         end
+        _parsed_code[i].info = "constraint $_ctype"
+
         @match ( _ctype, _c, _type, isnothing(_name)) begin
 
             # initial
             ( :initial, nothing, :(==), true) => let
-                println("### initial_1, $_v1")
+                codeline = quote constraint!(ocp, :initial, $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1)", i)
             end
             ( :initial, nothing, :(≤) , true) => let
-                println("### initial_2, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                println("### initial, $_v1, $_v2")
             end
             ( :initial, nothing, :(==), false) => let
-                println("### initial_3, $_v1, :$_name")
+                codeline = quote constraint!(ocp, :initial, Symbol($(string(_name)))) end
+                println("=== ", codeline)
+                push!(_final_code, codeline)
+                println("### initial, $_v1, :$_name")
             end
             ( :initial, nothing, :(≤), false) => let
-                println("### initial_4, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2)), $_name) end
+                push!(_final_code, codeline)
+                println("### initial, $_v1, $_v2, :$_name")
             end
 
             ( :initial, a, :(==), true)  => let
-                println("### initial_5, $a, $_v1")
+                println("### initial, $a, $_v1")
             end
             ( :initial, a, :(≤), true)  => let
-                println("### initial_6, $a, $_v1, $_v2")
+                println("### initial, $a, $_v1, $_v2")
             end
             ( :initial, a, :(==), false)  => let
-                println("### initial_7, $a, $_v1, :$_name")
+                println("### initial, $a, $_v1, :$_name")
             end
             ( :initial, a, :(≤), false)  => let
-                println("### initial_8, $a, $_v1, $_v2, :$_name")
+                println("### initial, $a, $_v1, $_v2, :$_name")
             end
 
             # final
             ( :final, nothing, :(==), true) => let
-                println("### final_1, $_v1")
+                println("### final, $_v1")
             end
             ( :final, nothing, :(≤) , true) => let
-                println("### final_2, $_v1, $_v2")
+                println("### final, $_v1, $_v2")
             end
             ( :final, nothing, :(==), false) => let
-                println("### final_3, $_v1, :$_name")
+                println("### final, $_v1, :$_name")
             end
             ( :final, nothing, :(≤), false) => let
-                println("### final_4, $_v1, $_v2, :$_name")
+                println("### final, $_v1, $_v2, :$_name")
             end
 
             ( :final, a, :(==), true)  => let
-                println("### final_5, $a, $_v1")
+                println("### final, $a, $_v1")
             end
             ( :final, a, :(≤), true)  => let
-                println("### final_6, $a, $_v1, $_v2")
+                println("### final, $a, $_v1, $_v2")
             end
             ( :final, a, :(==), false)  => let
-                println("### final_7, $a, $_v1, :$_name")
+                println("### final, $a, $_v1, :$_name")
             end
             ( :final, a, :(≤), false)  => let
-                println("### final_8, $a, $_v1, $_v2, :$_name")
+                println("### final, $a, $_v1, $_v2, :$_name")
             end
 
             # boundary
             ( :boundary, a, :(==), true) => let
-                println("### boundary_1, $_tuple -> $a, $_v1")
+                println("### boundary, $_tuple -> $a, $_v1")
             end
             ( :boundary, a, :(≤), true) => let
-                println("### boundary_2, $_tuple -> $a, $_v1, $_v2")
+                println("### boundary, $_tuple -> $a, $_v1, $_v2")
             end
             ( :boundary, a, :(==), false) => let
-                println("### boundary_3, $_tuple -> $a, $_v1, :$_name]")
+                println("### boundary, $_tuple -> $a, $_v1, :$_name]")
             end
             ( :boundary, a, :(≤), false) => let
-                println("### boundary_4, $_tuple -> $a, $_v1, $_v2, :$_name")
+                println("### boundary, $_tuple -> $a, $_v1, $_v2, :$_name")
             end
 
             # control
             ( :control_fun, a, :(==), true) => let
-                println("### control_1, $_control_variable -> $a, $_v1")
+                println("### control, $_control_variable -> $a, $_v1")
             end
             ( :control_fun, a, :(≤), true) => let
-                println("### control_2, $_control_variable -> $a, $_v1, $_v2")
+                println("### control, $_control_variable -> $a, $_v1, $_v2")
             end
             ( :control_fun, a, :(==), false) => let
-                println("### control_3, $_control_variable -> $_v1, :$_name")
+                println("### control, $_control_variable -> $_v1, :$_name")
             end
             ( :control_fun, a, :(≤), false) => let
-                println("### control_4, $_control_variable -> $a, $_v1, , $_v2, :$_name")
+                println("### control, $_control_variable -> $a, $_v1, , $_v2, :$_name")
             end
 
             ( :control_range, nothing, :(==), true) => let
-                println("### control_5, $_v1")
+                println("### control, $_v1")
             end
             ( :control_range, nothing, :(≤), true) => let
-                println("### control_6, $_v1, $_v2")
+                println("### control, $_v1, $_v2")
             end
             ( :control_range, nothing, :(==), false) => let
-                println("### control_7, $_v1, :$_name")
+                println("### control, $_v1, :$_name")
             end
             ( :control_range, nothing, :(≤), false) => let
-                println("### control_8, $_v1, $_v2, :$_name")
+                println("### control, $_v1, $_v2, :$_name")
             end
 
             ( :control_range, a, :(==), true) => let
-                println("### control_9, $a, $_v1")
+                println("### control, $a, $_v1")
             end
             ( :control_range, a, :(≤), true) => let
-                println("### control_10, $a, $_v1, $_v2")
+                println("### control, $a, $_v1, $_v2")
             end
             ( :control_range, a, :(==), false) => let
-                println("### control_11, $a, $_v1, :$_name")
+                println("### control, $a, $_v1, :$_name")
             end
             ( :control_range, a, :(≤), false) => let
-                println("### control_12, $a, $_v1, $_v2, :$_name")
+                println("### control, $a, $_v1, $_v2, :$_name")
             end
 
             # state
             ( :state_fun, a, :(==), true) => let
-                println("### state_1, $_state_variable -> $a, $_v1")
+                println("### state, $_state_variable -> $a, $_v1")
             end
             ( :state_fun, a, :(≤), true) => let
-                println("### state_2, $_state_variable -> $a, $_v1, $_v2")
+                println("### state, $_state_variable -> $a, $_v1, $_v2")
             end
             ( :state_fun, a, :(==), false) => let
-                println("### state_3, $_state_variable -> $a, $_v1, :$_name")
+                println("### state, $_state_variable -> $a, $_v1, :$_name")
             end
             ( :state_fun, a, :(≤), false) => let
-                println("### state_4, $_state_variable -> $a, $_v1, $_v2 :$_name")
+                println("### state, $_state_variable -> $a, $_v1, $_v2 :$_name")
             end
 
             ( :state_range, nothing, :(==), true) => let
-                println("### state_5, $_v1")
+                println("### state, $_v1")
             end
             ( :state_range, nothing, :(≤), true) => let
-                println("### state_6, $_v1, $_v2")
+                println("### state, $_v1, $_v2")
             end
             ( :state_range, nothing, :(==), false) => let
-                println("### state_7, $_v1, :$_name")
+                println("### state, $_v1, :$_name")
             end
             ( :state_range, nothing, :(≤), false) => let
-                println("### state_8, $_v1, $_v2, :$_name")
+                println("### state, $_v1, $_v2, :$_name")
             end
 
             ( :state_range, a, :(==), true) => let
-                println("### state_9, $a, $_v1")
+                println("### state, $a, $_v1")
             end
             ( :state_range, a, :(≤), true) => let
-                println("### state_10, $a, $_v1, $_v2")
+                println("### state, $a, $_v1, $_v2")
             end
             ( :state_range, a, :(==), false) => let
-                println("### state_11, $a, $_v1, :$_name")
+                println("### state, $a, $_v1, :$_name")
             end
             ( :state_range, a, :(≤), false) => let
-                println("### state_12, $a, $_v1, $_v2, :$_name")
+                println("### state, $a, $_v1, $_v2, :$_name")
             end
 
             # mixed
             ( :mixed, a, :(==), true) => let
-                println("### mixed_1, ($_state_variable, $_control_variable) -> $a, $_v1")
+                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1")
             end
             ( :mixed, a, :(≤), true) => let
-                println("### mixed_2, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2")
+                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2")
             end
             ( :mixed, a, :(==), false) => let
-                println("### mixed_3, ($_state_variable, $_control_variable) -> $a, $_v1, :$_name")
+                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1, :$_name")
             end
             ( :mixed, a, :(≤), false) => let
-                println("### mixed_4, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name")
+                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name")
             end
 
             # dynamic
             ( :dynamics, a, :(==), true) => let
-                println("### dynamics_1, ($_state_variable, $_control_variable) -> $_dynamic_fun")
+                println("### dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun")
             end
             ( :dynamics, a, :(==), false) => let
-                println("### dynamics_2, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name")
+                println("### dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name")
             end
 
             # error may still happend in some case (ex: x'(t) ≤ xxx)
