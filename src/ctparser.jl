@@ -594,6 +594,49 @@ macro def( args... )
 
             # final
             ( :final, nothing, :(==), true) => let
+                codeline = quote constraint!(ocp, :final, $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1)", i)
+            end
+            ( :final, nothing, :(≤) , true) => let
+                codeline = quote constraint!(ocp, :final, $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1, $_v2)", i)
+            end
+            ( :final, nothing, :(==), false) => let
+                codeline = quote constraint!(ocp, :final, $(esc(_v1)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1, :$_name)", i)
+            end
+            ( :final, nothing, :(≤), false) => let
+                codeline = quote constraint!(ocp, :final, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1, $_v2, :$_name)", i)
+            end
+
+            ( :final, a, :(==), true)  => let
+                codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1)", i)
+            end
+            ( :final, a, :(≤), true)  => let
+                codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2)", i)
+            end
+            ( :final, a, :(==), false)  => let
+                codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, :$_name)", i)
+            end
+            ( :final, a, :(≤), false)  => let
+                codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2, :$_name)", i)
+            end
+
+            # final
+            ( :final, nothing, :(==), true) => let
                 println("### final, $_v1")
             end
             ( :final, nothing, :(≤) , true) => let
