@@ -28,31 +28,6 @@ F = Fun_dim_usage_each_call((t, x, u) -> x + u)
 F = Fun_dim_usage_each_call((t, x, u) -> x + u[1])
 @benchmark F(t, x, u)
 
-# func with dimension usage handled a priori
-struct Fun_dim_usage_a_priori
-    f::Function
-    dim_x::Int
-    dim_u::Int
-end
-
-function (F::Fun_dim_usage_a_priori)(t::Real, 
-    x::Vector{<:Real}, u::Vector{<:Real}, args...; kwargs...)
-    x_ = F.dim_x==1 ? (x[1],) : (x,)
-    u_ = F.dim_u==1 ? (u[1],) : (u,)
-    y = F.f(t, x_..., u_..., args...; kwargs...)
-    return y isa Real ? [y] : y
-end
-
-# bench func with dimension usage handled a priori
-
-# x, u scalar
-F = Fun_dim_usage_a_priori((t, x, u) -> x + u, 1, 1)
-@benchmark F(t, x, u)
-
-# x scalar, u vector
-F = Fun_dim_usage_a_priori((t, x, u) -> x + u[1], 1, 1)
-@benchmark F(t, x, u)
-
 # fun with dimension usage handled by parameterization
 struct Fun_dim_usage_parametrization{dim_x, dim_u}
     f::Function
@@ -82,3 +57,8 @@ F = Fun_dim_usage_parametrization{1, 1}((t, x, u) -> x + u[1])
 
 θ(t, x, u) = x + u
 @benchmark θ(t, x, u)[1]
+
+ξ(t, x, u) = x + u
+a = x[1]
+b = u[1]
+@benchmark ξ(t, a, b)
