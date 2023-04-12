@@ -787,16 +787,24 @@ macro def( args... )
 
             # mixed
             ( :mixed, a, :(==), true) => let
-                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1")
+                codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1)", i)
             end
             ( :mixed, a, :(≤), true) => let
-                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2)", i)
             end
             ( :mixed, a, :(==), false) => let
-                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1, :$_name")
+                codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, :$_name)", i)
             end
             ( :mixed, a, :(≤), false) => let
-                println("### mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)),  $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name)", i)
             end
 
             # dynamic
