@@ -558,31 +558,38 @@ macro def( args... )
             ( :initial, nothing, :(≤) , true) => let
                 codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                println("### initial, $_v1, $_v2")
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1, $_v2)", i)
             end
             ( :initial, nothing, :(==), false) => let
-                codeline = quote constraint!(ocp, :initial, Symbol($(string(_name)))) end
-                println("=== ", codeline)
+                codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                println("### initial, $_v1, :$_name")
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1, :$_name)", i)
             end
             ( :initial, nothing, :(≤), false) => let
-                codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2)), $_name) end
+                codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                println("### initial, $_v1, $_v2, :$_name")
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1, $_v2, :$_name)", i)
             end
 
             ( :initial, a, :(==), true)  => let
-                println("### initial, $a, $_v1")
+                codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1)", i)
             end
             ( :initial, a, :(≤), true)  => let
-                println("### initial, $a, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, $_v2)", i)
             end
             ( :initial, a, :(==), false)  => let
-                println("### initial, $a, $_v1, :$_name")
+                codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, :$_name)", i)
             end
             ( :initial, a, :(≤), false)  => let
-                println("### initial, $a, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, $_v2, :$_name)", i)
             end
 
             # final
