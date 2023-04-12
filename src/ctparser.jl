@@ -495,25 +495,28 @@ macro def( args... )
         #     [ :(==), x, y ]     (for x == y)
         # or  [ :(<=), y, x, z ]  (for x <= y <= z)
         #
-        _type = c.content[1]
-        _expr = c.line  # contains y after unaliasing
-        _name = c.name
+        _type = c.content[1]   # :(==)  or :(<=)
+        _expr = c.line         # contains y after unaliasing
+        _name = c.name         # name::String or nothing
 
         if _type == :(==)
-            _v1 = c.content[3]
-            _v2 = :nothing
+            _v1 = c.content[3] # y  ( from x == y)
+            _v2 = :nothing     #
         elseif _type == :(≤)
-            _v1 = c.content[3]
-            _v2 = c.content[4]
+            _v1 = c.content[3] # x  ( from x <= y <= z)
+            _v2 = c.content[4] # z
         else
-                verbose(_verbose_threshold, 0, "CtParser error: internal error on constraint (", c.line, ")")
-                return :(throw(CtParserException("parsing error (phase 2)")))
+            # COV_EXCL_START
+            # should never happend
+            verbose(_verbose_threshold, 0, "CtParser error: internal error on constraint (", c.line, ")")
+            return :(throw(CtParserException("parsing error (phase 2)")))
+            # COV_EXCL_STOP
         end
-
 
         println("")
         @show c.initial_line
         @show c.line
+        @show c.content
 
         (_ctype, _c ) = constraint_type(_expr,
                                     _time_variable,
@@ -522,11 +525,25 @@ macro def( args... )
                                     _state_variable,
                                     _control_variable)
 
+        # for boundary
         _tuple = (  (Symbol(_time_variable,  "#0"),
                      Symbol(_state_variable, "#0"),
                      Symbol(_time_variable,  "#f"),
                      Symbol(_state_variable, "#f")))
 
+        if _ctype == :dynamics
+            # must modify the function
+            println("DYN_FUN_1 = ", c.content[3])
+            _dynamic_fun = replace_call(
+                replace_call(c.content[3],
+                             _state_variable,
+                             _time_variable,
+                             _state_variable),
+                _control_variable,
+                _time_variable,
+                _control_variable)
+            println("DYN_FUN_2 = ", _dynamic_fun)
+        end
         @match ( _ctype, _c, _type, isnothing(_name)) begin
 
             # initial
@@ -693,12 +710,11 @@ macro def( args... )
 
             # dynamic
             ( :dynamics, a, :(==), true) => let
-                println("### dynamics_1, ($_state_variable, $_control_variable) -> $a  [not yet implemented]")
+                println("### dynamics_1, ($_state_variable, $_control_variable) -> $_dynamic_fun")
             end
             ( :dynamics, a, :(==), false) => let
-                println("### dynamics_2, ($_state_variable, $_control_variable) -> $a, :$_name  [not yet implemented]")
+                println("### dynamics_2, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name")
             end
-
 
             # error may still happend in some case (ex: x'(t) ≤ xxx)
             # this cannot be detected at phase 1
