@@ -22,13 +22,11 @@ u = [100]
 
 # x, u scalar
 F = Fun_dim_usage_each_call((t, x, u) -> x + u)
-be = @benchmark y = F(t, x, u)
-display(be)
+@benchmark F(t, x, u)
 
 # x scalar, u vector
 F = Fun_dim_usage_each_call((t, x, u) -> x + u[1])
-be = @benchmark y = F(t, x, u)
-display(be)
+@benchmark F(t, x, u)
 
 # func with dimension usage handled a priori
 struct Fun_dim_usage_a_priori
@@ -49,13 +47,11 @@ end
 
 # x, u scalar
 F = Fun_dim_usage_a_priori((t, x, u) -> x + u, 1, 1)
-be = @benchmark y = F(t, x, u)
-display(be)
+@benchmark F(t, x, u)
 
 # x scalar, u vector
 F = Fun_dim_usage_a_priori((t, x, u) -> x + u[1], 1, 1)
-be = @benchmark y = F(t, x, u)
-display(be)
+@benchmark F(t, x, u)
 
 # fun with dimension usage handled by parameterization
 struct Fun_dim_usage_parametrization{dim_x, dim_u}
@@ -71,10 +67,18 @@ end
 
 # x, u scalar
 F = Fun_dim_usage_parametrization{1, 1}((t, x, u) -> x + u)
-be = @benchmark y = F(t, x, u)
-display(be)
+@benchmark F(t, x, u)
 
 # x scalar, u vector
 F = Fun_dim_usage_parametrization{1, 1}((t, x, u) -> x + u[1])
-be = @benchmark y = F(t, x, u)
-display(be)
+@benchmark F(t, x, u)
+
+# direct call to the function
+ϕ(t, x, u) = x[1] + u[1]
+@benchmark ϕ(t, x, u)
+
+ψ(t, x, u) = x + u
+@benchmark ψ(t, x[1], u[1])
+
+θ(t, x, u) = x + u
+@benchmark θ(t, x, u)[1]
