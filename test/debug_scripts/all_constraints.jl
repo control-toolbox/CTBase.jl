@@ -164,9 +164,10 @@ end
 # more vars
 x_b  = 10.0
 x_u  = 11.0
-x2_u = 12.0
-x_u  = 13.0
-y_u  = 14.0
+x2_b = 13.0
+x2_u = 14.0
+x_u  = 15.0
+y_u  = 16.0
 
 println("\n=== state")
 @def begin
@@ -176,10 +177,10 @@ println("\n=== state")
     u ∈ R^3, control
 
     x_b ≤ x(t) ≤ x_u
-    x(t) == x_u
+    #x(t) == x_u
     x2_b ≤ x[2](t) ≤ x2_u
-    x[2](t) == x2_u
-    x[2:3](t) == y_u
+    #x[2](t) == x2_u
+    #x[2:3](t) == y_u
     x_u ≤ x[2:3](t) ≤ y_u
     x[1:2](t) + x[3:4](t) == [ -1, 1 ]
     [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ]
@@ -192,10 +193,10 @@ end
     u ∈ R^3, control
 
     x_b ≤ x(t) ≤ x_u                             => state_1
-    x(t) == x_u                                  => state_2
+    #x(t) == x_u                                  => state_2
     x2_b ≤ x[2](t) ≤ x2_u                        => state_3
-    x[2](t) == x2_u                              => state_4
-    x[2:3](t) == y_u                             => state_5
+    #x[2](t) == x2_u                              => state_4
+    #x[2:3](t) == y_u                             => state_5
     x_u ≤ x[2:3](t) ≤ y_u                        => state_6
     x[1:2](t) + x[3:4](t) == [ -1, 1 ]           => state_7
     [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] => state_8

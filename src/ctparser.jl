@@ -719,42 +719,70 @@ macro def( args... )
 
             # state
             ( :state_fun, a, :(==), true) => let
-                println("### state, $_state_variable -> $a, $_v1")
+                codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1)", i)
             end
             ( :state_fun, a, :(≤), true) => let
-                println("### state, $_state_variable -> $a, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, $_v2)", i)
             end
             ( :state_fun, a, :(==), false) => let
-                println("### state, $_state_variable -> $a, $_v1, :$_name")
+                codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, :$_name)", i)
             end
             ( :state_fun, a, :(≤), false) => let
-                println("### state, $_state_variable -> $a, $_v1, $_v2 :$_name")
+                codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, $_v2, :$_name)", i)
             end
 
-            ( :state_range, nothing, :(==), true) => let
-                println("### state, $_v1")
-            end
+            # # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :state_range, nothing, :(==), true) => let
+            #     codeline = quote constraint!(ocp, :state, $(esc(_v1))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :state, $_v1)", i)
+            # end
             ( :state_range, nothing, :(≤), true) => let
-                println("### state, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :state, $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $_v1, $_v2)", i)
             end
-            ( :state_range, nothing, :(==), false) => let
-                println("### state, $_v1, :$_name")
-            end
+            # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :state_range, nothing, :(==), false) => let
+            #     codeline = quote constraint!(ocp, :state, $(esc(_v1)), $(QuoteNode(_name))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :state, $_v1, :$_name)", i)
+            # end
             ( :state_range, nothing, :(≤), false) => let
-                println("### state, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :state, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $_v1, $_v2, :$_name)", i)
             end
 
-            ( :state_range, a, :(==), true) => let
-                println("### state, $a, $_v1")
-            end
+            # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :state_range, a, :(==), true) => let
+            #     codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :state, $a, $_v1)", i)
+            # end
             ( :state_range, a, :(≤), true) => let
-                println("### state, $a, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $a, $_v1, $_v2)", i)
             end
-            ( :state_range, a, :(==), false) => let
-                println("### state, $a, $_v1, :$_name")
-            end
+            # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :state_range, a, :(==), false) => let
+            #     codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :state, $a, $_v1, :$_name)", i)
+            # end
             ( :state_range, a, :(≤), false) => let
-                println("### state, $a, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :state, $a, $_v1, $_v2, :$_name)", i)
             end
 
             # mixed
