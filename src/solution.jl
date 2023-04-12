@@ -18,12 +18,12 @@ $(TYPEDFIELDS)
     state_dimension::Union{Nothing, Dimension}=nothing
     control_dimension::Union{Nothing, Dimension}=nothing
     times::Union{Nothing, TimesDisc}=nothing
-    time_name::String=""
+    time_name::Union{String, Nothing}=nothing
     state::Union{Nothing, Function}=nothing
-    state_names::Vector{String}=Vector{String}()
+    state_names::Union{Vector{String}, Nothing}=nothing
     adjoint::Union{Nothing, Function}=nothing
     control::Union{Nothing, Function}=nothing
-    control_names::Vector{String}=Vector{String}()
+    control_names::Union{Vector{String}, Nothing}=nothing
     objective::Union{Nothing, MyNumber}=nothing
     iterations::Union{Nothing, Integer}=nothing
     stopping::Union{Nothing, Symbol}=nothing # the stopping criterion
