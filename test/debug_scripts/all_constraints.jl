@@ -225,6 +225,7 @@ end
 
 
 println("\n=== dynamics")
+
 @def begin
 
     t ∈ [ t0, tf], time
@@ -234,12 +235,14 @@ println("\n=== dynamics")
     x'(t) == 2x(t) + u(t)^2
     x'(t) == f(x(t), u(t))
 end
+
+
 @def begin
 
     t ∈ [ t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
 
-    x'(t) == 2x(t) + u(t)^2          => dynamics_1
-    x'(t) == f(x(t), u(t))           => dynamics_2
+#    x'(t) == 2x(t) + u(t)^2          => dynamics_1
+#    x'(t) == f(x(t), u(t))           => dynamics_2
 end

@@ -809,10 +809,15 @@ macro def( args... )
 
             # dynamic
             ( :dynamics, a, :(==), true) => let
-                println("### dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun")
+                codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i)
             end
             ( :dynamics, a, :(==), false) => let
-                println("### dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name")
+                println("GEN_CODE: constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)")
+                codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i)
             end
 
             # error may still happend in some case (ex: x'(t) ≤ xxx)
