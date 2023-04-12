@@ -136,11 +136,11 @@ println("\n=== control")
     u ∈ R^3, control
 
     u_b ≤ u(t) ≤ u_u
-    u(t) == u_u
+    #u(t) == u_u
     u2_b ≤ u[2](t) ≤ u2_u
-    u[2](t) == u2_u
+    #u[2](t) == u2_u
     v_b ≤ u[2:3](t) ≤ v_u
-    u[2:3](t) == v_u
+    #u[2:3](t) == v_u
     u[1](t)^2 + u[2](t)^2 == 1
     1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
 end
@@ -151,11 +151,11 @@ end
     u ∈ R^3, control
 
     u_b ≤ u(t) ≤ u_u               => control_1
-    u(t) == u_u                    => control_2
+    #u(t) == u_u                    => control_2
     u2_b ≤ u[2](t) ≤ u2_u          => control_3
-    u[2](t) == u2_u                => control_4
+    #u[2](t) == u2_u                => control_4
     v_b ≤ u[2:3](t) ≤ v_u          => control_5
-    u[2:3](t) == v_u               => control_6
+    #u[2:3](t) == v_u               => control_6
     u[1](t)^2 + u[2](t)^2 == 1     => control_7
     1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  => control_8
 end

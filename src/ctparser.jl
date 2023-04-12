@@ -635,33 +635,6 @@ macro def( args... )
                 _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2, :$_name)", i)
             end
 
-            # final
-            ( :final, nothing, :(==), true) => let
-                println("### final, $_v1")
-            end
-            ( :final, nothing, :(≤) , true) => let
-                println("### final, $_v1, $_v2")
-            end
-            ( :final, nothing, :(==), false) => let
-                println("### final, $_v1, :$_name")
-            end
-            ( :final, nothing, :(≤), false) => let
-                println("### final, $_v1, $_v2, :$_name")
-            end
-
-            ( :final, a, :(==), true)  => let
-                println("### final, $a, $_v1")
-            end
-            ( :final, a, :(≤), true)  => let
-                println("### final, $a, $_v1, $_v2")
-            end
-            ( :final, a, :(==), false)  => let
-                println("### final, $a, $_v1, :$_name")
-            end
-            ( :final, a, :(≤), false)  => let
-                println("### final, $a, $_v1, $_v2, :$_name")
-            end
-
             # boundary
             ( :boundary, a, :(==), true) => let
                 println("### boundary, $_tuple -> $a, $_v1")
@@ -678,42 +651,70 @@ macro def( args... )
 
             # control
             ( :control_fun, a, :(==), true) => let
-                println("### control, $_control_variable -> $a, $_v1")
+                codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1)", i)
             end
             ( :control_fun, a, :(≤), true) => let
-                println("### control, $_control_variable -> $a, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2)", i)
             end
             ( :control_fun, a, :(==), false) => let
-                println("### control, $_control_variable -> $_v1, :$_name")
+                codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, :$_name)", i)
             end
             ( :control_fun, a, :(≤), false) => let
-                println("### control, $_control_variable -> $a, $_v1, , $_v2, :$_name")
+                codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2, :$_name)", i)
             end
 
-            ( :control_range, nothing, :(==), true) => let
-                println("### control, $_v1")
-            end
+            # # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :control_range, nothing, :(==), true) => let
+            #     codeline = quote constraint!(ocp, :control, $(esc(_v1))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :control, $_v1)", i)
+            # end
             ( :control_range, nothing, :(≤), true) => let
-                println("### control, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :control, $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $_v1, $_v2)", i)
             end
-            ( :control_range, nothing, :(==), false) => let
-                println("### control, $_v1, :$_name")
-            end
+            # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :control_range, nothing, :(==), false) => let
+            #     codeline = quote constraint!(ocp, :control, $(esc(_v1)), $(QuoteNode(_name))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :control, $_v1, :$_name)", i)
+            # end
             ( :control_range, nothing, :(≤), false) => let
-                println("### control, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :control, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $_v1, $_v2, :$_name)", i)
             end
 
-            ( :control_range, a, :(==), true) => let
-                println("### control, $a, $_v1")
-            end
+            # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :control_range, a, :(==), true) => let
+            #     codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :control, $a, $_v1)", i)
+            # end
             ( :control_range, a, :(≤), true) => let
-                println("### control, $a, $_v1, $_v2")
+                codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $a, $_v1, $_v2)", i)
             end
-            ( :control_range, a, :(==), false) => let
-                println("### control, $a, $_v1, :$_name")
-            end
+            # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
+            # ( :control_range, a, :(==), false) => let
+            #     codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :control, $a, $_v1, :$_name)", i)
+            # end
             ( :control_range, a, :(≤), false) => let
-                println("### control, $a, $_v1, $_v2, :$_name")
+                codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :control, $a, $_v1, $_v2, :$_name)", i)
             end
 
             # state
