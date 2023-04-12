@@ -13,8 +13,16 @@ using Pkg; Pkg.activate(basename)
 
 using CTBase
 
-t0 = 0.0
-tf = 1.0
+# all used variables must be definedbefore each test
+t0   = 0.0
+tf   = 1.0
+x0   = 11.11
+x02  = 11.111
+x0_b = 11.1111
+x0_u = 11.11111
+y0   = 2.22
+y0_b = 2.222
+y0_u = 2.2222
 
 println("=== initial")
 @def begin
@@ -44,6 +52,14 @@ end
 end
 
 
+# all used variables must be definedbefore each test
+xf   = 11.11
+xf2  = 11.111
+xf_b = 11.1111
+xf_u = 11.11111
+yf   = 2.22
+yf_b = 2.222
+yf_u = 2.2222
 
 println("\n=== final")
 @def begin
@@ -103,6 +119,15 @@ end
 
 end
 
+
+# define more variables
+u_b  = 1.0
+u_u  = 2.0
+u2_b = 3.0
+u2_u = 4.0
+v_b  = 5.0
+v_u  = 6.0
+
 println("\n=== control")
 @def begin
 
@@ -136,6 +161,13 @@ end
 end
 
 
+# more vars
+x_b  = 10.0
+x_u  = 11.0
+x2_u = 12.0
+x_u  = 13.0
+y_u  = 14.0
+
 println("\n=== state")
 @def begin
 
@@ -152,7 +184,7 @@ println("\n=== state")
     x[1:2](t) + x[3:4](t) == [ -1, 1 ]
     [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ]
 end
-println("\n=== state")
+
 @def begin
 
     t ∈ [ t0, tf], time
