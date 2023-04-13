@@ -108,7 +108,7 @@ end
 # WARNING: these two variables **MUST** be removed from final code
 #
 _parsed_code::Array{_code} = []  # memorize all code lines during parsing
-_generated_code::Array{String} = [] # memorize generated code
+#_generated_code::Array{String} = [] # memorize generated code
 
 #
 # remove all LineNumberNode on expression (these lines will break the pattern matching)
@@ -129,13 +129,13 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
 
     # start from scratch (may be modified later)
     global _parsed_code = []
-    global _generated_code = []
+    #global _generated_code = []
 
     #
     # FINAL CODE HERE !
     #
     # _parsed_code = []
-    #_generated_code = []
+    _generated_code::Array{String} = []    # memorize generated code
 
     # pass 1:
     #
@@ -282,6 +282,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
 
     # 1/ create ocp
     push!(_final_code, :(ocp = Model()))
+    push!(_generated_code, "ocp = Model()")
 
     # 2/ call time!
 
@@ -310,7 +311,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
             codeline = quote time!(ocp,:final, $(esc(y))) end
             push!(_final_code, codeline)
             _parsed_code[index].info = "final time definition with $y"
-            _store_code_as_string( "time!(ocp,:final, $y)", index)
+            _store_code_as_string( "time!(ocp,:final, $y)", index, _generated_code)
             _parsed_code[t_index_0].info = "use $x as initial time variable"
             _parsed_code[t_index_0].code = "<none: included in time!() call>"
             @goto after_time
@@ -322,7 +323,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
             codeline = quote time!(ocp,:initial, $(esc(x))) end
             push!(_final_code, codeline)
             _parsed_code[index].info = "initial time definition with $x"
-            _store_code_as_string( "time!(ocp,:initial, $x)", index)
+            _store_code_as_string( "time!(ocp,:initial, $x)", index, _generated_code)
             _parsed_code[t_index_f].info = "use $y as final time variable"
             _parsed_code[t_index_f].code = "<none: included in time!() call>"
             @goto after_time
@@ -333,8 +334,8 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
 
         codeline = quote time!(ocp, [ $(esc(x)), $(esc(y))] ) end
         push!(_final_code, codeline)
-        _parsed_code[index].info = "time definition with [ $x, $y]"
-        _store_code_as_string( "time!(ocp, [ $x, $y])", index)
+        _parsed_code[index].info = "time definition with [$x, $y]"
+        _store_code_as_string( "time!(ocp, [$x, $y])", index, _generated_code)
 
         @label after_time
     else
@@ -350,7 +351,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
         codeline = quote state!(ocp, $(esc(d))) end
         push!(_final_code, codeline)
         _parsed_code[index].info = "state vector ($_state_variable) of dimension $d"
-        _store_code_as_string( "state!(ocp, $d)", index)
+        _store_code_as_string( "state!(ocp, $d)", index, _generated_code)
     end
     (c, index) = _line_of_type( _parsed_code, e_state_scalar)
     if c != nothing
@@ -358,7 +359,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
         codeline = quote state!(ocp, 1) end
         push!(_final_code, codeline)
         _parsed_code[index].info = "state scalar ($_state_variable)"
-        _store_code_as_string( "state!(ocp, 1)", index)
+        _store_code_as_string( "state!(ocp, 1)", index, _generated_code)
     end
 
 
@@ -370,7 +371,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
         codeline = quote control!(ocp, $(esc(d))) end
         push!(_final_code, codeline)
         _parsed_code[index].info = "control vector ($_control_variable) of dimension $d"
-        _store_code_as_string( "control!(ocp, $d)", index)
+        _store_code_as_string( "control!(ocp, $d)", index, _generated_code)
     end
     (c, index) = _line_of_type( _parsed_code, e_control_scalar)
     if c != nothing
@@ -378,7 +379,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
         codeline = quote control!(ocp, 1) end
         push!(_final_code, codeline)
         _parsed_code[index].info = "control scalar ($_control_variable)"
-        _store_code_as_string( "control!(ocp, 1)", index)
+        _store_code_as_string( "control!(ocp, 1)", index, _generated_code)
     end
 
     # 5/ explicit aliases
@@ -504,272 +505,272 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
             ( :initial, nothing, :(==), true) => let
                 codeline = quote constraint!(ocp, :initial, $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :initial, $_v1)", i)
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1)", i, _generated_code)
             end
             ( :initial, nothing, :(≤) , true) => let
                 codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :initial, $_v1, $_v2)", i)
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1, $_v2)", i, _generated_code)
             end
             ( :initial, nothing, :(==), false) => let
                 codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :initial, $_v1, :$_name)", i)
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1, :$_name)", i, _generated_code)
             end
             ( :initial, nothing, :(≤), false) => let
                 codeline = quote constraint!(ocp, :initial, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :initial, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string( "constraint!(ocp, :initial, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             ( :initial, a, :(==), true)  => let
                 codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1)", i)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1)", i, _generated_code)
             end
             ( :initial, a, :(≤), true)  => let
                 codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, $_v2)", i, _generated_code)
             end
             ( :initial, a, :(==), false)  => let
                 codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, :$_name)", i, _generated_code)
             end
             ( :initial, a, :(≤), false)  => let
                 codeline = quote constraint!(ocp, :initial, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :initial, $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # final
             ( :final, nothing, :(==), true) => let
                 codeline = quote constraint!(ocp, :final, $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :final, $_v1)", i)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1)", i, _generated_code)
             end
             ( :final, nothing, :(≤) , true) => let
                 codeline = quote constraint!(ocp, :final, $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :final, $_v1, $_v2)", i)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1, $_v2)", i, _generated_code)
             end
             ( :final, nothing, :(==), false) => let
                 codeline = quote constraint!(ocp, :final, $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :final, $_v1, :$_name)", i)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1, :$_name)", i, _generated_code)
             end
             ( :final, nothing, :(≤), false) => let
                 codeline = quote constraint!(ocp, :final, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string( "constraint!(ocp, :final, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string( "constraint!(ocp, :final, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             ( :final, a, :(==), true)  => let
                 codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :final, $a, $_v1)", i)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1)", i, _generated_code)
             end
             ( :final, a, :(≤), true)  => let
                 codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2)", i, _generated_code)
             end
             ( :final, a, :(==), false)  => let
                 codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, :$_name)", i, _generated_code)
             end
             ( :final, a, :(≤), false)  => let
                 codeline = quote constraint!(ocp, :final, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :final, $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # boundary
             ( :boundary, a, :(==), true) => let
                 # codeline = quote constraint!(ocp, :boundary, $_tuple -> $(esc(a)), $(esc(_v1))) end
                 # push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1)   # not implemented", i)
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1)   # not implemented", i, _generated_code)
             end
             ( :boundary, a, :(≤), true) => let
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2)   # not implemented", i)
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2)   # not implemented", i, _generated_code)
             end
             ( :boundary, a, :(==), false) => let
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, :$_name)   # not implemented", i)
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, :$_name)   # not implemented", i, _generated_code)
             end
             ( :boundary, a, :(≤), false) => let
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2, :$_name)   # not implemented", i)
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2, :$_name)   # not implemented", i, _generated_code)
             end
 
             # control
             ( :control_fun, a, :(==), true) => let
                 codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1)", i)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1)", i, _generated_code)
             end
             ( :control_fun, a, :(≤), true) => let
                 codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2)", i, _generated_code)
             end
             ( :control_fun, a, :(==), false) => let
                 codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, :$_name)", i, _generated_code)
             end
             ( :control_fun, a, :(≤), false) => let
                 codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :control_range, nothing, :(==), true) => let
             #     codeline = quote constraint!(ocp, :control, $(esc(_v1))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :control, $_v1)", i)
+            #     _store_code_as_string("constraint!(ocp, :control, $_v1)", i, _generated_code)
             # end
             ( :control_range, nothing, :(≤), true) => let
                 codeline = quote constraint!(ocp, :control, $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :control, $_v1, $_v2)", i, _generated_code)
             end
             # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :control_range, nothing, :(==), false) => let
             #     codeline = quote constraint!(ocp, :control, $(esc(_v1)), $(QuoteNode(_name))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :control, $_v1, :$_name)", i)
+            #     _store_code_as_string("constraint!(ocp, :control, $_v1, :$_name)", i, _generated_code)
             # end
             ( :control_range, nothing, :(≤), false) => let
                 codeline = quote constraint!(ocp, :control, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :control, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :control_range, a, :(==), true) => let
             #     codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :control, $a, $_v1)", i)
+            #     _store_code_as_string("constraint!(ocp, :control, $a, $_v1)", i, _generated_code)
             # end
             ( :control_range, a, :(≤), true) => let
                 codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :control, $a, $_v1, $_v2)", i, _generated_code)
             end
             # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :control_range, a, :(==), false) => let
             #     codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :control, $a, $_v1, :$_name)", i)
+            #     _store_code_as_string("constraint!(ocp, :control, $a, $_v1, :$_name)", i, _generated_code)
             # end
             ( :control_range, a, :(≤), false) => let
                 codeline = quote constraint!(ocp, :control, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :control, $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :control, $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # state
             ( :state_fun, a, :(==), true) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1)", i)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1)", i, _generated_code)
             end
             ( :state_fun, a, :(≤), true) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, $_v2)", i, _generated_code)
             end
             ( :state_fun, a, :(==), false) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, :$_name)", i, _generated_code)
             end
             ( :state_fun, a, :(≤), false) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :state_range, nothing, :(==), true) => let
             #     codeline = quote constraint!(ocp, :state, $(esc(_v1))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :state, $_v1)", i)
+            #     _store_code_as_string("constraint!(ocp, :state, $_v1)", i, _generated_code)
             # end
             ( :state_range, nothing, :(≤), true) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :state, $_v1, $_v2)", i, _generated_code)
             end
             # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :state_range, nothing, :(==), false) => let
             #     codeline = quote constraint!(ocp, :state, $(esc(_v1)), $(QuoteNode(_name))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :state, $_v1, :$_name)", i)
+            #     _store_code_as_string("constraint!(ocp, :state, $_v1, :$_name)", i, _generated_code)
             # end
             ( :state_range, nothing, :(≤), false) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :state, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :state_range, a, :(==), true) => let
             #     codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :state, $a, $_v1)", i)
+            #     _store_code_as_string("constraint!(ocp, :state, $a, $_v1)", i, _generated_code)
             # end
             ( :state_range, a, :(≤), true) => let
                 codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :state, $a, $_v1, $_v2)", i, _generated_code)
             end
             # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :state_range, a, :(==), false) => let
             #     codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :state, $a, $_v1, :$_name)", i)
+            #     _store_code_as_string("constraint!(ocp, :state, $a, $_v1, :$_name)", i, _generated_code)
             # end
             ( :state_range, a, :(≤), false) => let
                 codeline = quote constraint!(ocp, :state, $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :state, $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :state, $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # mixed
             ( :mixed, a, :(==), true) => let
                 codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1)", i)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1)", i, _generated_code)
             end
             ( :mixed, a, :(≤), true) => let
                 codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1)), $(esc(_v2))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2)", i)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2)", i, _generated_code)
             end
             ( :mixed, a, :(==), false) => let
                 codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, :$_name)", i, _generated_code)
             end
             ( :mixed, a, :(≤), false) => let
                 codeline = quote constraint!(ocp, :mixed, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)),  $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
             # dynamic
             ( :dynamics, a, :(==), true) => let
                 codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i)
+                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i, _generated_code)
             end
             ( :dynamics, a, :(==), false) => let
                 codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i)
+                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i, _generated_code)
             end
 
             # error may still happend in some case (ex: x'(t) ≤ xxx)
@@ -958,12 +959,11 @@ end
 #
 # all these functions **MUST** be removed from final code
 #
-function _store_code_as_string(info::String, index::Integer)
+function _store_code_as_string(info::String, index::Integer, generated_code::Array{String})
     global _parsed_code
-    global _generated_code
 
     _parsed_code[index].code = info
-    push!(_generated_code, info)
+    push!(generated_code, info)
 end
 
 #

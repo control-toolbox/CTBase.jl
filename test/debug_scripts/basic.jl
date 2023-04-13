@@ -42,3 +42,5 @@ end
 # print problem definition
 println("== Basic problem:")
 display(ocp)
+println("== Generated code:")
+print_generated_code(ocp)

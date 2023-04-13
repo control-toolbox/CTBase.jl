@@ -60,9 +60,10 @@ function F1(x)
 end
 
 # print problem definition
-println("== Basic problem:")
+println("== Goddard problem:")
 display(ocp)
 
 #
-print_generated_code()
+println("== Generated code:")
+print_generated_code(ocp)
 #code_debug_info()
