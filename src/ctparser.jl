@@ -143,12 +143,6 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
     # - detect dupplicates
     # - store everything in _parsed_code
     #
-
-    # sanity test (prob.args exists)
-    if ! (prob isa Expr)
-        return :(throw(CtParserException("input must be an Expr")))
-    end
-
     for i ∈ 1:length(prob.args)
         # recursively remove all line nodes (which break in case
         # of imbricated expressions)
