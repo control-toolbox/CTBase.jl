@@ -125,41 +125,7 @@ end
 #
 # define a CT problem
 # -------------------
-macro def( args... )
-
-    # problem to parse is the last argument of this macro
-    # other args are for the macro itself
-    # for the moment:
-    # - syntax_only (boolean, default = false) -> stop just after parsing
-    # useful globals
-
-    # parse macros args
-    _syntax_only = false
-    _verbose_threshold = 0
-    _debug_mode = false
-
-    for i in args[begin:end-1]
-        @when :( syntax_only = true ) = i begin
-            _syntax_only = true
-            continue
-        end
-        @when :( debug = true ) = i begin
-            _debug_mode = true
-            continue
-        end
-        @when :( verbose_threshold = $n ) = i begin
-            n = n > 100 ? 100 : n
-            n = n <   0 ?   0 : n
-            _verbose_threshold = n
-            verbose(_verbose_threshold, 1, "== verbose_threshold = ", n)
-            continue
-        end
-
-        return :(throw(CtParserException("bad option for @def (allowed: syntax_only=true, debug=true, verbose_threshold=n)")))
-    end
-
-    # extract the problem from args
-    prob = args[end]
+function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_threshold::Integer )
 
     # start from scratch (may be modified later)
     global _parsed_code = []
@@ -828,14 +794,51 @@ macro def( args... )
     # x) final line (return the created ocp object)
     push!(_final_code, :(ocp))
 
-    # concatenate all code as a simple block
+    # concatenate all code as a simple block and return it
     e = Expr(:block, _final_code...)
-
-    # and return it
-    :( $e )
 
 end # macro @def
 
+macro def( args... )
+    # parse macros args
+    _syntax_only = false
+    _verbose_threshold = 0
+    _debug_mode = false
+
+    for i in args[begin:end-1]
+        @when :( syntax_only = true ) = i begin
+            _syntax_only = true
+            continue
+        end
+        @when :( debug = true ) = i begin
+            _debug_mode = true
+            continue
+        end
+        @when :( verbose_threshold = $n ) = i begin
+            n = n > 100 ? 100 : n
+            n = n <   0 ?   0 : n
+            _verbose_threshold = n
+            verbose(_verbose_threshold, 1, "== verbose_threshold = ", n)
+            continue
+        end
+
+        return :(throw(CtParserException("bad option for @def (allowed: syntax_only=true, debug=true, verbose_threshold=n)")))
+    end
+
+    # call ctparser on last arg
+    e = args[end]
+
+    if ! (e isa Expr)
+        return :(throw(CtParserException("input must be an Expr")))
+    end
+
+    # delegate work to the parsing function
+    ctparser(e;
+             _syntax_only=_syntax_only,
+             _debug_mode=_debug_mode,
+             _verbose_threshold = _verbose_threshold
+             )
+end
 
 #
 # (internal) find if some types are already parsed
