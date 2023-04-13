@@ -3,7 +3,6 @@
 
 
 using MLStyle         # for parsing
-using MLStyle.AbstractPatterns: literal
 using Printf
 
 export @def
@@ -499,7 +498,6 @@ macro def( args... )
         _expr = c.line         # contains y after unaliasing
         _name = c.name         # name::Symbol or nothing
 
-        @show _name
         if _type == :(==)
             _v1 = c.content[3] # y  ( from x == y)
             _v2 = :nothing     #
@@ -513,11 +511,6 @@ macro def( args... )
             return :(throw(CtParserException("parsing error (phase 2)")))
             # COV_EXCL_STOP
         end
-
-        println("")
-        @show c.initial_line
-        @show c.line
-        @show c.content
 
         (_ctype, _c ) = constraint_type(_expr,
                                     _time_variable,
@@ -534,7 +527,6 @@ macro def( args... )
 
         if _ctype == :dynamics
             # must modify the function
-            println("DYN_FUN_1 = ", c.content[3])
             _dynamic_fun = replace_call(
                 replace_call(c.content[3],
                              _state_variable,
@@ -543,7 +535,6 @@ macro def( args... )
                 _control_variable,
                 _time_variable,
                 _control_variable)
-            println("DYN_FUN_2 = ", _dynamic_fun)
         end
         _parsed_code[i].info = "constraint $_ctype"
 
@@ -637,16 +628,18 @@ macro def( args... )
 
             # boundary
             ( :boundary, a, :(==), true) => let
-                println("### boundary, $_tuple -> $a, $_v1")
+                # codeline = quote constraint!(ocp, :boundary, $_tuple -> $(esc(a)), $(esc(_v1))) end
+                # push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1)   # not implemented", i)
             end
             ( :boundary, a, :(≤), true) => let
-                println("### boundary, $_tuple -> $a, $_v1, $_v2")
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2)   # not implemented", i)
             end
             ( :boundary, a, :(==), false) => let
-                println("### boundary, $_tuple -> $a, $_v1, :$_name]")
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, :$_name)   # not implemented", i)
             end
             ( :boundary, a, :(≤), false) => let
-                println("### boundary, $_tuple -> $a, $_v1, $_v2, :$_name")
+                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2, :$_name)   # not implemented", i)
             end
 
             # control
@@ -814,7 +807,6 @@ macro def( args... )
                 _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i)
             end
             ( :dynamics, a, :(==), false) => let
-                println("GEN_CODE: constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)")
                 codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
                 _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i)
@@ -823,9 +815,6 @@ macro def( args... )
             # error may still happend in some case (ex: x'(t) ≤ xxx)
             # this cannot be detected at phase 1
             _                    => let
-                @show _ctype
-                @show _c
-                println("typeof(_c) = ", typeof(_c))
                 verbose(_verbose_threshold, 0, "CtParser error: cannot parse line (", c.initial_line, ")")
                 return :(throw(CtParserException("parsing error (phase 2)")))
             end

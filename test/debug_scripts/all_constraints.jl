@@ -8,7 +8,6 @@
 
 # find local CTBase
 basename = '/' * joinpath(split(Base.source_path(), '/')[1:end-3])
-println(basename)
 using Pkg; Pkg.activate(basename)
 
 using CTBase
@@ -24,7 +23,7 @@ y0   = 2.22
 y0_b = 2.222
 y0_u = 2.2222
 
-println("=== initial")
+# === initial
 @def begin
 
     t ∈ [ t0, tf], time
@@ -61,7 +60,7 @@ yf   = 2.22
 yf_b = 2.222
 yf_u = 2.2222
 
-println("\n=== final")
+# === final
 @def begin
 
     t ∈ [ t0, tf], time
@@ -89,7 +88,7 @@ end
 end
 
 
-println("\n=== boundary")
+# === boundary
 @def begin
 
     t ∈ [ t0, tf], time
@@ -128,7 +127,6 @@ u2_u = 4.0
 v_b  = 5.0
 v_u  = 6.0
 
-println("\n=== control")
 @def begin
 
     t ∈ [ t0, tf], time
@@ -169,7 +167,7 @@ x2_u = 14.0
 x_u  = 15.0
 y_u  = 16.0
 
-println("\n=== state")
+# === state
 @def begin
 
     t ∈ [ t0, tf], time
@@ -203,7 +201,7 @@ end
 end
 
 
-println("\n=== mixed")
+# === mixed
 @def begin
 
     t ∈ [ t0, tf], time
@@ -224,7 +222,7 @@ end
 end
 
 
-println("\n=== dynamics")
+# === dynamics
 
 @def begin
 
