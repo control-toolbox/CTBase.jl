@@ -294,19 +294,6 @@ function test_ctparser()
     @test_throws CtParserException @def begin
     end
 
-    # t0 = 1.1
-    # ocp = @def begin
-    #     tf ∈ R, variable
-    #     t ∈ [ t0, tf ], time
-    #     x ∈ R^3, state
-    #     u, control
-    #     v = x₂
-    #     m = x₃
-    #     0  ≤ u(t) ≤ 1
-    #     mf ≤ m(t) ≤ m0
-    #     r(tf) -> max
-    # end
-    # @test ocp isa  OptimalControlModel
 
     # macro args tests
     @test @def syntax_only=true  verbose_threshold=10 :( t ∈ [ t0, tf ], time)
@@ -314,5 +301,26 @@ function test_ctparser()
     @test @def syntax_only=true verbose_threshold=1100 :( t ∈ [ t0, tf ], time)
 
     @test_throws CtParserException @def no_such_option=true :( t ∈ [ t0, tf ], time )
+
+
+    # debug function
+    ocp = Model()
+    @test print_generated_code(ocp) == false
+
+    t0 = 1.1
+    m0 = 100.0
+    mf =  10.0
+    ocp = @def begin
+        tf ∈ R, variable
+        t ∈ [ t0, tf ], time
+        x ∈ R^3, state
+        u, control
+        v = x₂
+        m = x₃
+        0  ≤ u(t) ≤ 1
+        mf ≤ m(t) ≤ m0
+    end
+    @test ocp isa  OptimalControlModel
+    @test print_generated_code(ocp) == true
 
 end

@@ -7,10 +7,10 @@ using Printf
 
 export @def
 export CtParserException
+export print_generated_code
 
 # only export then debugging
 export get_parsed_line
-export print_generated_code
 
 
 #
@@ -135,7 +135,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
     # FINAL CODE HERE !
     #
     # _parsed_code = []
-    # _generated_code = []
+    #_generated_code = []
 
     # pass 1:
     #
@@ -785,7 +785,11 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
     (c, index) = _line_of_type( _parsed_code, e_objective_min)
     (c, index) = _line_of_type( _parsed_code, e_objective_max)
 
-    # x) final line (return the created ocp object)
+    # x) final lines. Store ctparser internals into the returned object
+    push!(_final_code, :(ocp.defined_with_macro = true))
+    push!(_final_code, :(ocp.generated_code = $_generated_code))
+
+    # return the created ocp object
     push!(_final_code, :(ocp))
 
     # concatenate all code as a simple block and return it
@@ -923,6 +927,23 @@ function _code_debug_info( _pc::Array{_code} )
     end
 end # code_debug_info
 
+"""
+$(TYPEDSIGNATURES)
+
+Display code substitution made by the @def macro
+"""
+function print_generated_code(ocp::OptimalControlModel)
+    if ocp.defined_with_macro == false
+        println("This OptimalControlModel has not been created with @def parser.")
+        return false
+    else
+        for i ∈ ocp.generated_code
+            println(i)
+        end
+        return true
+    end
+end
+
 
 
 # COV_EXCL_START
@@ -955,21 +976,5 @@ function get_parsed_line( i::Integer )
     end
     return _parsed_code[i]
 end
-
-#
-# print generated code as strings
-#
-function print_generated_code()
-    global _generated_code
-
-    if size(_generated_code)[1] == 0
-        println("=== No code for this definition")
-        return
-    end
-    println("=== Generated code")
-    println("ocp = Model()")
-    println.(_generated_code)
-    return
-end # print_generated_code
 
 # COV_EXCL_STOP
