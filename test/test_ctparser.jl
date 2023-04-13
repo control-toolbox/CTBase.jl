@@ -106,6 +106,8 @@ function test_ctparser()
     # ... up to here: all the remaining are KO
     @test_throws CtParserException @def syntax_only=true :( nothing)
 
+    @test_throws CtParserException @def syntax_only=true :( a == b == c)
+
     @test_throws CtParserException @def syntax_only=true begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
