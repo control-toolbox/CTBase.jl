@@ -623,7 +623,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
                 codeline = quote constraint!(ocp, :control, $(esc(_control_variable)) -> $(esc(a)), $(esc(_v1)), $(esc(_v2)), $(QuoteNode(_name))) end
                 push!(_final_code, codeline)
                 _store_code_as_string("constraint!(ocp, :control, $_control_variable -> $a, $_v1, $_v2, :$_name)", i, _generated_code)
-            end
+           end
 
             # # not allowed:  Please choose in [ :initial, :final ] or check the arguments of the constraint! method.
             # ( :control_range, nothing, :(==), true) => let
@@ -684,7 +684,7 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
             end
             ( :state_fun, a, :(==), false) => let
                 codeline = quote constraint!(ocp, :state, $(esc(_state_variable)) -> $(esc(a)), $(esc(_v1)), $(QuoteNode(_name))) end
-                push!(_final_code, codeline)
+               push!(_final_code, codeline)
                 _store_code_as_string("constraint!(ocp, :state, $_state_variable -> $a, $_v1, :$_name)", i, _generated_code)
             end
             ( :state_fun, a, :(≤), false) => let
@@ -761,22 +761,23 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
                 _store_code_as_string("constraint!(ocp, :mixed, ($_state_variable, $_control_variable) -> $a, $_v1, $_v2, :$_name)", i, _generated_code)
             end
 
-            # dynamic
+            # dynamics
             ( :dynamics, a, :(==), true) => let
                 codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun))) end
                 push!(_final_code, codeline)
                 _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i, _generated_code)
             end
-            ( :dynamics, a, :(==), false) => let
-                codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
-                push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i, _generated_code)
-            end
+            # named dynamics not allowed
+            # ( :dynamics, a, :(==), false) => let
+            #     codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
+            #     push!(_final_code, codeline)
+            #     _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i, _generated_code)
+            # end
 
             # error may still happend in some case (ex: x'(t) ≤ xxx)
             # this cannot be detected at phase 1
             _                    => let
-                verbose(_verbose_threshold, 0, "CtParser error: cannot parse line (", c.initial_line, ")")
+                verbose(_verbose_threshold, 0, "CtParser error: cannot parse line or unallowed expression (", c.initial_line, ")")
                 return :(throw(CtParserException("parsing error (phase 2)")))
             end
         end

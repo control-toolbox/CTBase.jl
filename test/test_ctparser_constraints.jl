@@ -329,12 +329,25 @@ function test_ctparser_constraints()
     @test ocp13.initial_time == t0
     @test ocp13.final_time == tf
 
-    # some syntax are not allowed
+    # some syntax (even parseable) are not allowed
+    # this is the actual exhaustive list
+    @test_throws CtParserException @def begin
+        t ∈ [ t0, tf], time
+        x ∈ R^3, state
+        u ∈ R^3, control
+        x(t) == x_u        => constant_state_not_allowed
+    end
     @test_throws CtParserException @def begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         x(t) == x_u
+    end
+    @test_throws CtParserException @def begin
+        t ∈ [ t0, tf], time
+        x ∈ R^3, state
+        u ∈ R^3, control
+        x[2](t) == x2_u    => constant_state_index_not_allowed
     end
     @test_throws CtParserException @def begin
         t ∈ [ t0, tf], time
@@ -346,7 +359,19 @@ function test_ctparser_constraints()
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
+        x[2:3](t) == y_u    => constant_state_range_not_allowed
+    end
+    @test_throws CtParserException @def begin
+        t ∈ [ t0, tf], time
+        x ∈ R^3, state
+        u ∈ R^3, control
         x[2:3](t) == y_u
+    end
+    @test_throws CtParserException @def begin
+        t ∈ [ t0, tf], time
+        x ∈ R^3, state
+        u ∈ R^3, control
+        u(t) == u_u         => constant_control_not_allowed
     end
     @test_throws CtParserException @def begin
         t ∈ [ t0, tf], time
@@ -358,13 +383,33 @@ function test_ctparser_constraints()
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
+        u[2](t) == u2_u     => constant_control_index_not_allowed
+    end
+    @test_throws CtParserException @def begin
+        t ∈ [ t0, tf], time
+        x ∈ R^3, state
+        u ∈ R^3, control
         u[2](t) == u2_u
     end
     @test_throws CtParserException @def begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
+        u[2:3](t) == v_u    => constant_control_range_not_allowed
+    end
+    @test_throws CtParserException @def begin
+        t ∈ [ t0, tf], time
+        x ∈ R^3, state
+        u ∈ R^3, control
         u[2:3](t) == v_u
+    end
+    @test_throws CtParserException @def begin
+
+        t ∈ [ t0, tf], time
+        x ∈ R, state
+        u ∈ R, control
+
+        x'(t) == f(x(t), u(t))  => named_dynamics_not_allowed  # but allowed if unnamed !
     end
 
 
