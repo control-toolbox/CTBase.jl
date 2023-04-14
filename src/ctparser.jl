@@ -480,11 +480,8 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
                                     _state_variable,
                                     _control_variable)
 
-        # for boundary
-        _tuple = (  (Symbol(_time_variable,  "#0"),
-                     Symbol(_state_variable, "#0"),
-                     Symbol(_time_variable,  "#f"),
-                     Symbol(_state_variable, "#f")))
+        # for boundary code pretty print
+        _tuple = "(var\"$_time_variable#0\", var\"$_state_variable#0\", var\"$_time_variable#f\", var\"$_state_variable#f\")"
 
         if _ctype == :dynamics
             # must modify the function
