@@ -12,16 +12,16 @@ $(EXPORTS)
 module CTBase
 
 # using
+using Reexport
 import Base: show, \, Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-using MLStyle
+@reexport using MLStyle # generated code uses @match and so
 using Parameters # @with_kw: to have default values in struct
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using Printf # to print an OptimalControlModel
-using Reexport
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
