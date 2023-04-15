@@ -12,31 +12,31 @@ Foo
 Foo
 ```
 """
-parse!(__ocp, ocp, e; log=true) = @match e begin
-    :( $v ∈ R^$q, variable ) => p_variable!(__ocp, ocp, v, q; log)
-    :( $v ∈ R   , variable ) => p_variable!(__ocp, ocp, v   ; log)
-    :( $t ∈ [ $t0, $tf ], time ) => p_time!(__ocp, ocp, t, t0, tf; log)
-    :( $x ∈ R^$n, state ) => p_state!(__ocp, ocp, x, n; log)
-    :( $x ∈ R   , state ) => p_state!(__ocp, ocp, x   ; log)
-    :( $u ∈ R^$m, control ) => p_control!(__ocp, ocp, u, m; log)
-    :( $u ∈ R   , control ) => p_control!(__ocp, ocp, u   ; log)
+parse(ocp, e; log=true) = @match e begin
+    :( $v ∈ R^$q, variable ) => p_variable(ocp, v, q; log)
+    :( $v ∈ R   , variable ) => p_variable(ocp, v   ; log)
+    :( $t ∈ [ $t0, $tf ], time ) => p_time(ocp, t, t0, tf; log)
+    :( $x ∈ R^$n, state ) => p_state(ocp, x, n; log)
+    :( $x ∈ R   , state ) => p_state(ocp, x   ; log)
+    :( $u ∈ R^$m, control ) => p_control(ocp, u, m; log)
+    :( $u ∈ R   , control ) => p_control(ocp, u   ; log)
     _ =>
     if e isa LineNumberNode
         e
     elseif (e isa Expr) && (e.head == :block)
-        Expr(:block, map(e -> parse!(__ocp, ocp, e), e.args)...)
+        Expr(:block, map(e -> parse(ocp, e), e.args)...)
     else
         throw("syntax error")
     end
 end
 
-p_variable!(__ocp, ocp, v, q=1; log=false) = begin
+p_variable(ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     __ocp.parsed.vars[v] = q
     LineNumberNode(0, "variable: $v, dim: $q")
 end
 
-p_time!(__ocp, ocp, t, t0, tf; log=false) = begin
+p_time(ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
     __ocp.parsed.t = t
     __ocp.parsed.t0 = t0
@@ -51,13 +51,13 @@ p_time!(__ocp, ocp, t, t0, tf; log=false) = begin
     end
 end
 
-p_state!(__ocp, ocp, x, n=1; log=false) = begin
+p_state(ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     __ocp.parsed.x = x
     :( state!($ocp, $n) ) # debug: add state name
 end
 
-p_control!(__ocp, ocp, u, m=1; log=false) = begin
+p_control(ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     __ocp.parsed.u = u
     :( control!($ocp, $m) ) # debug: add control name
@@ -73,24 +73,8 @@ Foo
 Foo
 ```
 """
-macro __def1(ocp, e)
-    oocp = QuoteNode(ocp)
-    ee = QuoteNode(e)
-    quote parse!($(esc(ocp)), $oocp, $ee; log=true) end
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Foo
-
-# Example
-```jldoctest
-Foo
-```
-"""
 macro def1(ocp, e)
-    esc( quote eval(@__def1 $ocp $e) end )
+    esc( parse(ocp, e; log=true) )
 end
 
 """
@@ -104,6 +88,5 @@ Foo
 ```
 """
 macro def1(e)
-    ocp = Model()
-    esc(quote @def1 $ocp $e; $ocp end)
+    esc( quote ocp = Model(); @def1 ocp $e; ocp end )
 end
