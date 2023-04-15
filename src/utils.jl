@@ -94,9 +94,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Transforms `x` to a Vector{<:MyNumber}.
+Transforms `x` to a Vector{<:ctNumber}.
 """
-function vec2vec(x::Vector{<:Vector{<:MyNumber}})::Vector{<:MyNumber}
+function vec2vec(x::Vector{<:Vector{<:ctNumber}})::Vector{<:ctNumber}
     y = x[1]
     for i in range(2, length(x))
         y = vcat(y, x[i])
@@ -107,9 +107,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Transforms `x` to a Vector{<:Vector{<:MyNumber}}.
+Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 """
-function vec2vec(x::Vector{<:MyNumber}, n::Integer)::Vector{<:Vector{<:MyNumber}}
+function vec2vec(x::Vector{<:ctNumber}, n::Integer)::Vector{<:Vector{<:ctNumber}}
     y = [x[1:n]]
     for i in n+1:n:length(x)-n+1
         y = vcat(y, [x[i:i+n-1]])
@@ -122,31 +122,31 @@ $(TYPEDSIGNATURES)
 
 Equivalent to `vec2vec(x)`
 """
-expand(x::Vector{<:Vector{<:MyNumber}}) = vec2vec(x)
+expand(x::Vector{<:Vector{<:ctNumber}}) = vec2vec(x)
 
 """
 $(TYPEDSIGNATURES)
 
 Returns `x`.
 """
-expand(x::Vector{<:MyNumber}) = x
+expand(x::Vector{<:ctNumber}) = x
 
 """
 $(TYPEDSIGNATURES)
 
 Returns `expand(matrix2vec(x, 1))`
 """
-expand(x::Matrix{<:MyNumber}) = expand(matrix2vec(x, 1))
+expand(x::Matrix{<:ctNumber}) = expand(matrix2vec(x, 1))
 
-# transform a Matrix{<:MyNumber} to a Vector{<:Vector{<:MyNumber}}
+# transform a Matrix{<:ctNumber} to a Vector{<:Vector{<:ctNumber}}
 """
 $(TYPEDSIGNATURES)
 
-Transforms `x` to a Vector{<:Vector{<:MyNumber}}.
+Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 
 **Note.** `dim` ∈ {1, 2} is the dimension along which the matrix is transformed.
 """
-function matrix2vec(x::Matrix{<:MyNumber}, dim::Integer=__matrix_dimension_stock())::Vector{<:Vector{<:MyNumber}}
+function matrix2vec(x::Matrix{<:ctNumber}, dim::Integer=__matrix_dimension_stock())::Vector{<:Vector{<:ctNumber}}
     m, n = size(x)
     y = nothing
     if dim==1

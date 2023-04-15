@@ -1,3 +1,5 @@
+__fun_dimension() = 0
+
 """
 $(TYPEDSIGNATURES)
 

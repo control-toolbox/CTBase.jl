@@ -29,35 +29,45 @@ using Reexport
 """
 Type alias for a real number.
 """
+const ctNumber = Real
 const MyNumber = Real
 """
 Type alias for a vector of real numbers.
 """
+const ctVector = AbstractVector{<:ctNumber}
 const MyVector = AbstractVector{<:MyNumber}
 """
 Type alias for a time.
 """
-const Time = MyNumber
+const Time = ctNumber
+struct _Time
+    value::Time
+    function _Time(value::Time)
+        return new(value)
+    end
+end
 """
 Type alias for a vector of times.
 """
 const Times = AbstractVector{<:Time}
+_Time(times::Times) = _Time.(times)
 """
 Type alias for a grid of times.
 """
-const TimesDisc = Union{MyVector, StepRangeLen}
+const TimesDisc = Union{Times, StepRangeLen}
+_Time(times::StepRangeLen) = _Time.(times)
 """
 Type alias for a state.
 """
-const State = MyVector
+const State = ctVector
 """
 Type alias for an adjoint.
 """
-const Adjoint = MyVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
+const Adjoint = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
 Type alias for a control.
 """
-const Control = MyVector
+const Control = ctVector
 """
 Type alias for a vector of states.
 """
@@ -94,7 +104,7 @@ include("solution.jl")
 include("plot.jl")
 
 # numeric types
-export MyNumber, MyVector, Time, Times, TimesDisc
+export ctNumber, ctVector, Time, Times, TimesDisc
 export States, Adjoints, Controls, State, Adjoint, Dimension, Index
 
 # callback
@@ -110,8 +120,8 @@ export IncorrectArgument, IncorrectOutput, NotImplemented
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
-export MayerFunction, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
-export BoundaryConstraintFunction, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
+export MayerObjective, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
+export BoundaryConstraint, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
 
 # model
 export OptimalControlModel

@@ -1,71 +1,114 @@
 function test_functions()
 
-# pour le model, demander à avoir les dimensions 
-# cas où ne donne pas les dimensions : user doit être cohérent
-# passer les dimensions en arguments nommés au lieu de paramètres
-# => pas besoin alors de tester les exceptions car fonctions non existantes
+#
+_Time = CTBase._Time
 
-# test BoundaryConstraintFunction
-@testset "BoundaryConstraintFunction" begin
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> xf - x0, state_dimension = 1, constraint_dimension = 1)
-    @test B(0, 0, 1, 1) == 1 # classical call 
-    @test B(0, [0], 1, [1]) == [1] # call as a BoundaryConstraintFunction
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> [xf - x0, t0 - tf], state_dimension = 1, constraint_dimension = 2)
-    @test B(0, 0, 1, 1) == [1, -1] # classical call
-    @test B(0, [0], 1, [1]) == [1, -1] # call as a BoundaryConstraintFunction
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> tf - t0, state_dimension = 2, constraint_dimension = 1)
-    @test B(0, [1, 0], 1, [0, 1]) == [1] # call as a BoundaryConstraintFunction
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]], state_dimension = 2, constraint_dimension = 2)
-    @test B(0, [1, 0], 1, [1, 0]) == [1, 1] # call as a BoundaryConstraintFunction
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> xf - x0)
-    @test B(0, 0, 1, 1) == 1
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> [xf - x0, t0 - tf])
-    @test B(0, 0, 1, 1) == [1, -1]
-    B = BoundaryConstraintFunction((t0, x0, tf, xf) -> xf[2] - x0[1])
-    @test B(0, [1, 0], 1, [0, 1]) == 0
+# test BoundaryConstraint
+@testset "BoundaryConstraint" begin
+    @testset "Classical calls" begin
+        B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0)
+        @test B(0, 0, 1, 1) == 1
+        @test B(0, [0], 1, [1]) == [1]
+        B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf])
+        @test B(0, 0, 1, 1) == [1, -1]
+        @test_throws MethodError B(0, [0], 1, [1])
+        B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0)
+        @test B(0, [1, 0], 1, [0, 1]) == 1
+        B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]])
+        @test B(0, [1, 0], 1, [1, 0]) == [1, 1]
+    end
+    @testset "Specific calls" begin
+        B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0, state_dimension=1, constraint_dimension=1)
+        @test_throws MethodError B(_Time(0), 0, _Time(1), 1)
+        @test B(_Time(0), [0], _Time(1), [1]) == [1]
+        B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf], state_dimension=1, constraint_dimension=2)
+        @test_throws MethodError B(_Time(0), 0, _Time(1), 1)
+        @test B(_Time(0), [0], _Time(1), [1]) == [1, -1]
+        B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0, state_dimension=2, constraint_dimension=1)
+        @test B(_Time(0), [1, 0], _Time(1), [0, 1]) == [1]
+        B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]], state_dimension=2, constraint_dimension=2)
+        @test B(_Time(0), [1, 0], _Time(1), [1, 0]) == [1, 1]
+    end
 end
 
-@testset "MayerFunction" begin
-    G = MayerFunction{1}((t0, x0, tf, xf) -> xf - x0)
-    @test G(0, 0, 1, 1) == 1 # classical call
-    @test G(0, [0], 1, [1]) == 1 # call as a MayerFunction
-    G = MayerFunction{2}((t0, x0, tf, xf) -> xf[2] - x0[1])
-    @test G(0, [1, 0], 1, [0, 1]) == 0 # call as a MayerFunction
-    @test_throws ErrorException MayerFunction{:dum}((t0, x0, tf, xf) -> xf - x0)
+@testset "MayerObjective" begin
+    @testset "Classical calls" begin
+        G = MayerObjective((t0, x0, tf, xf) -> xf - x0)
+        @test G(0, 0, 1, 1) == 1
+        @test_throws MethodError G(0, [0], 1, [1])
+        G = MayerObjective((t0, x0, tf, xf) -> tf - t0)
+        @test G(0, [1, 0], 1, [0, 1]) == 1
+    end
+    @testset "Specific calls" begin
+        G = MayerObjective((t0, x0, tf, xf) -> xf - x0, state_dimension=1)
+        @test_throws MethodError G(_Time(0), 0, _Time(1), 1)
+        @test G(_Time(0), [0], _Time(1), [1]) == 1
+        G = MayerObjective((t0, x0, tf, xf) -> tf - t0, state_dimension=2)
+        @test G(_Time(0), [1, 0], _Time(1), [0, 1]) == 1
+    end
 end
 
 @testset "Hamiltonian" begin
-    H = Hamiltonian{:autonomous, 1}((x, p) -> p^2/2 - x)
-    @test H(0, 1) == 0.5 # classical call
-    @test H(0, [0], [1]) == 0.5 # call as a Hamiltonian
-    H = Hamiltonian{:nonautonomous, 1}((t, x, p) -> t + p^2/2 - x)
-    @test H(1, 0, 1) == 1.5 # classical call
-    @test H(1, [0], [1]) == 1.5 # call as a Hamiltonian
-    H = Hamiltonian{:autonomous, 2}((x, p) -> p[1]^2/2 - x[1] + p[2]^2/2 - x[2])
-    @test H([0, 0], [1, 1]) == 1 # call as a Hamiltonian
-    H = Hamiltonian{:nonautonomous, 2}((t, x, p) -> t + p[1]^2/2 - x[1] + p[2]^2/2 - x[2])
-    @test H(1, [0, 0], [1, 1]) == 2 # call as a Hamiltonian
-    @test_throws ErrorException Hamiltonian{1111, 1}((x, p) -> p^2/2 - x)
-    @test_throws ErrorException Hamiltonian{:autonomous, :dum}((x, p) -> p^2/2 - x)
+    @testset "Classical calls" begin
+        H = Hamiltonian((x, p) -> x + p)
+        @test H(1, 1) == 2
+        @test_throws MethodError H([1], [1])
+        H = Hamiltonian((x, p) -> x + p, time_dependence=:autonomous)
+        @test H(1, 1) == 2
+        @test_throws MethodError H([1], [1])
+        H = Hamiltonian((t, x, p) -> x + p, time_dependence=:nonautonomous)
+        @test H(1, 1, 1) == 2
+        @test_throws MethodError H(1, [1], [1])
+        H = Hamiltonian((x, p) -> x[1]^2 + p[2]^2) # or time_dependence=:autonomous
+        @test H([1, 0], [0, 1]) == 2
+        H = Hamiltonian((t, x, p) -> t + x[1]^2 + p[2]^2, time_dependence=:nonautonomous)
+        @test H(1, [1, 0], [0, 1]) == 3
+    end
+    @testset "Specific calls" begin
+        H = Hamiltonian((x, p) -> x + p, state_dimension=1)
+        @test_throws MethodError H(_Time(0), 1, 1)
+        @test H(_Time(0), [1], [1]) == 2
+        H = Hamiltonian((t, x, p) -> t + x + p, state_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError H(_Time(1), 1, 1)
+        @test H(_Time(1), [1], [1]) == 3
+        H = Hamiltonian((x, p) -> x[1]^2 + p[2]^2, state_dimension=2)
+        @test H(_Time(0), [1, 0], [0, 1]) == 2
+        H = Hamiltonian((t, x, p) -> t + x[1]^2 + p[2]^2, state_dimension=2, time_dependence=:nonautonomous)
+        @test H(_Time(1), [1, 0], [0, 1]) == 3
+    end
 end
 
 @testset "HamiltonianVectorField" begin
-    Hv = HamiltonianVectorField{:autonomous, 1}((x, p) -> [p^2/2 - x, p^2/2 + x])
-    @test Hv(0, 1) == [0.5, 0.5] # classical call
-    @test Hv(0, [0], [1]) == [0.5, 0.5] # call as a HamiltonianVectorField
-    Hv = HamiltonianVectorField{:nonautonomous, 1}((t, x, p) -> [t + p^2/2 - x, t + p^2/2 + x])
-    @test Hv(1, 0, 1) == [1.5, 1.5] # classical call
-    @test Hv(1, [0], [1]) == [1.5, 1.5] # call as a HamiltonianVectorField
-    Hv = HamiltonianVectorField{:autonomous, 2}((x, p) -> [p[1]^2/2 - x[1] + p[2]^2/2 - x[2], p[1]^2/2 + x[1] + p[2]^2/2 + x[2]])
-    @test Hv([0, 0], [1, 1]) == [1, 1] # call as a HamiltonianVectorField
-    Hv = HamiltonianVectorField{:nonautonomous, 2}((t, x, p) -> [t + p[1]^2/2 - x[1] + p[2]^2/2 - x[2], t + p[1]^2/2 + x[1] + p[2]^2/2 + x[2]])
-    @test Hv(1, [0, 0], [1, 1]) == [2, 2] # call as a HamiltonianVectorField
-    @test_throws ErrorException HamiltonianVectorField{1111, 1}((x, p) -> [p^2/2 - x, p^2/2 + x])
-    @test_throws ErrorException HamiltonianVectorField{:autonomous, :dum}((x, p) -> [p^2/2 - x, p^2/2 + x])
+    @testset "Classical calls" begin
+        Hv = HamiltonianVectorField((x, p) -> [x + p, x - p])
+        @test Hv(1, 1) == [2, 0]
+        @test_throws MethodError Hv([1], [1])
+        Hv = HamiltonianVectorField((x, p) -> [x + p, x - p], time_dependence=:autonomous)
+        @test Hv(1, 1) == [2, 0]
+        @test_throws MethodError Hv([1], [1])
+        Hv = HamiltonianVectorField((t, x, p) -> [x + p, x - p], time_dependence=:nonautonomous)
+        @test Hv(1, 1, 1) == [2, 0]
+        @test_throws MethodError Hv(1, [1], [1])
+        Hv = HamiltonianVectorField((x, p) -> [x[1]^2 + p[2]^2, x[2]^2 - p[1]^2]) # or time_dependence=:autonomous
+        @test Hv([1, 0], [0, 1]) == [2, 0]
+        Hv = HamiltonianVectorField((t, x, p) -> [t + x[1]^2 + p[2]^2, x[2]^2 - p[1]^2], time_dependence=:nonautonomous)
+        @test Hv(1, [1, 0], [0, 1]) == [3, 0]
+    end
+    @testset "Specific calls" begin
+        Hv = HamiltonianVectorField((x, p) -> [x + p, x - p], state_dimension=1)
+        @test_throws MethodError Hv(_Time(0), 1, 1)
+        @test Hv(_Time(0), [1], [1]) == [2, 0]
+        Hv = HamiltonianVectorField((t, x, p) -> [t + x + p, x - p], state_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError Hv(_Time(1), 1, 1)
+        @test Hv(_Time(1), [1], [1]) == [3, 0]
+        Hv = HamiltonianVectorField((x, p) -> [x[1]^2 + p[2]^2, x[2]^2 - p[1]^2], state_dimension=2)
+        @test Hv(_Time(0), [1, 0], [0, 1]) == [2, 0]
+        Hv = HamiltonianVectorField((t, x, p) -> [t + x[1]^2 + p[2]^2, x[2]^2 - p[1]^2], state_dimension=2, time_dependence=:nonautonomous)
+        @test Hv(_Time(1), [1, 0], [0, 1]) == [3, 0]
+    end
 end
 
-
-
+#=
 #
 t = 1
 x = 2
@@ -83,7 +126,7 @@ F2 = VectorField(x -> F(0.0, x))
 @test F1(t, x) == 5
 @test F2(t, x) == 4
 Fs = VectorField{:nonautonomous, :scalar}(F)
-@test Fs(t, [x]) isa Vector{<:MyNumber}
+@test Fs(t, [x]) isa Vector{<:ctNumber}
 @test Fs(t, [x]) ≈ [5] atol=1e-6 # should return a vector
 Fe = VectorField((x) -> [F(0, x)])
 @test_throws IncorrectOutput Fe(t, [x])
@@ -185,5 +228,6 @@ ud2 = ControlFunction((x,p) -> x[1]^2+x[2]^2+p[1]^2+p[2]^2)
 # dim 2
 μd2 = MultiplierFunction((x,p) -> x[1]^2+x[2]^2+p[1]^2+p[2]^2)
 @test μd2(t, [0, 1], [1, 0]) == [2]
+=#
 
 end

@@ -17,7 +17,7 @@ $(TYPEDFIELDS)
     final_time::Union{Time,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
     lagrange::Union{LagrangeFunction{time_dependence, dimension_usage},Nothing}=nothing
-    mayer::Union{MayerFunction{dimension_usage},Nothing}=nothing
+    mayer::Union{MayerObjective{dimension_usage},Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
     dynamics::Union{DynamicsFunction{time_dependence, dimension_usage},Nothing}=nothing
     dynamics!::Union{Function,Nothing}=nothing
@@ -448,25 +448,25 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, dimension_usa
     constraints = ocp.constraints
     n = ocp.state_dimension
     
-    ξf = Vector{ControlConstraintFunction}(); ξl = Vector{MyNumber}(); ξu = Vector{MyNumber}()
-    ηf = Vector{StateConstraintFunction}(); ηl = Vector{MyNumber}(); ηu = Vector{MyNumber}()
-    ψf = Vector{MixedConstraintFunction}(); ψl = Vector{MyNumber}(); ψu = Vector{MyNumber}()
-    ϕf = Vector{BoundaryConstraintFunction}(); ϕl = Vector{MyNumber}(); ϕu = Vector{MyNumber}()
-    uind = Vector{Int}(); ulb = Vector{MyNumber}(); uub = Vector{MyNumber}()
-    xind = Vector{Int}(); xlb = Vector{MyNumber}(); xub = Vector{MyNumber}()
+    ξf = Vector{ControlConstraintFunction}(); ξl = Vector{ctNumber}(); ξu = Vector{ctNumber}()
+    ηf = Vector{StateConstraintFunction}(); ηl = Vector{ctNumber}(); ηu = Vector{ctNumber}()
+    ψf = Vector{MixedConstraintFunction}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
+    ϕf = Vector{BoundaryConstraint}(); ϕl = Vector{ctNumber}(); ϕu = Vector{ctNumber}()
+    uind = Vector{Int}(); ulb = Vector{ctNumber}(); uub = Vector{ctNumber}()
+    xind = Vector{Int}(); xlb = Vector{ctNumber}(); xub = Vector{ctNumber}()
 
     for (_, c) ∈ constraints
         @match c begin
         (:initial, _, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraintFunction{dimension_usage}((t0, x0, tf, xf) -> f(x0)))
+            push!(ϕf, BoundaryConstraint{dimension_usage}((t0, x0, tf, xf) -> f(x0)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
         (:final, _, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraintFunction{dimension_usage}((t0, x0, tf, xf) -> f(xf)))
+            push!(ϕf, BoundaryConstraint{dimension_usage}((t0, x0, tf, xf) -> f(xf)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
         (:boundary, _, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraintFunction{dimension_usage}((t0, x0, tf, xf) -> f(t0, x0, tf, xf)))
+            push!(ϕf, BoundaryConstraint{dimension_usage}((t0, x0, tf, xf) -> f(t0, x0, tf, xf)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
         (:control, _, f::Function, lb, ub) => begin
@@ -494,25 +494,25 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence, dimension_usa
     end # for
 
     function ξ(t, u)
-        val = Vector{MyNumber}()
+        val = Vector{ctNumber}()
         for i ∈ 1:length(ξf) append!(val, ξf[i](t, u)) end
         return val
     end 
 
     function η(t, x)
-        val = Vector{MyNumber}()
+        val = Vector{ctNumber}()
         for i ∈ 1:length(ηf) append!(val, ηf[i](t, x)) end
         return val
     end 
 
     function ψ(t, x, u)
-        val = Vector{MyNumber}()
+        val = Vector{ctNumber}()
         for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u)) end
         return val
     end 
 
     function ϕ(t0, x0, tf, xf)
-        val = Vector{MyNumber}()
+        val = Vector{ctNumber}()
         for i ∈ 1:length(ϕf) append!(val, ϕf[i](t0, x0, tf, xf)) end
         return val
     end 
@@ -548,7 +548,7 @@ function objective!(ocp::OptimalControlModel{time_dependence, dimension_usage}, 
         ". Please choose in [ :min, :max ]."))
     end
     if type == :mayer
-        setproperty!(ocp, :mayer, MayerFunction{dimension_usage}(f))
+        setproperty!(ocp, :mayer, MayerObjective{dimension_usage}(f))
     elseif type == :lagrange
         setproperty!(ocp, :lagrange, LagrangeFunction{time_dependence, dimension_usage}(f))
     else
@@ -577,7 +577,7 @@ function objective!(ocp::OptimalControlModel{time_dependence, dimension_usage}, 
         ". Please choose in [ :min, :max ]."))
     end
     if type == :bolza
-        setproperty!(ocp, :mayer, MayerFunction{dimension_usage}(g))
+        setproperty!(ocp, :mayer, MayerObjective{dimension_usage}(g))
         setproperty!(ocp, :lagrange, LagrangeFunction{time_dependence, dimension_usage}(f⁰))
     else
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
