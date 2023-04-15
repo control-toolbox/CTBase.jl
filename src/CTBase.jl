@@ -87,6 +87,7 @@ include("model.jl")
 #
 include("ctparser_utils.jl")
 include("ctparser.jl")
+include("onepass.jl")
 #
 include("print.jl")
 include("solution.jl")
@@ -118,6 +119,7 @@ export Model
 export time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
 export isautonomous, isnonautonomous, ismin, ismax
 export nlp_constraints, constraints_labels
+export @def1, @__def1
 
 # solution
 export OptimalControlSolution
