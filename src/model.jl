@@ -45,7 +45,7 @@ $(TYPEDFIELDS)
     defined_with_macro::Bool=false
     generated_code::Array{String}=[]
     # onepass parsing info
-    parsed::Union{ParsingInfo, Nothing}=nothing
+    parsed::ParsingInfo=ParsingInfo()
 end
 
 # Constraint index
