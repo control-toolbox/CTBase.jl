@@ -43,15 +43,22 @@ p_time(ocp, t, t0, tf; log=false) = begin
     tt0 = QuoteNode(t0)
     ttf = QuoteNode(tf)
     code = :( $ocp.parsed.t = $tt )
-    code = Expr(:block, code, :( $ocp.parsed.t0 = $t0 ))
-    code = Expr(:block, code, :( $ocp.parsed.tf = $tf ))
     code = Expr(:block, code, quote
         cond = ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars))
 	println("cond = ", cond) # debug
         @match cond begin
-            (false, false) => time!($ocp, [ $t0, $tf ] , String($tt))
-            (false, true ) => time!($ocp, :initial, $t0, String($tt))
-            (true , false) => time!($ocp, :final  , $tf, String($tt))
+            (false, false) => begin
+                $ocp.parsed.t0 = $t0
+                $ocp.parsed.tf = $tf
+	        time!($ocp, [ $t0, $tf ] , String($tt)) end
+            (false, true ) => begin
+                $ocp.parsed.t0 = $t0
+                $ocp.parsed.tf = nothing
+	        time!($ocp, :initial, $t0, String($tt)) end
+            (true , false) => begin
+                $ocp.parsed.t0 = nothing
+                $ocp.parsed.tf = $tf
+	        time!($ocp, :final  , $tf, String($tt)) end
             _              => throw("both initial and final time cannot be variable")
         end
     end)
