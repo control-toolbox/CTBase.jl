@@ -41,11 +41,13 @@ p_time!(__ocp, ocp, t, t0, tf; log=false) = begin
     __ocp.parsed.t = t
     __ocp.parsed.t0 = t0
     __ocp.parsed.tf = tf
+    tt = QuoteNode(t)
     cond = (t0 ∈ keys(__ocp.parsed.vars), tf ∈ keys(__ocp.parsed.vars))
     @match cond begin
-        (false, false) => :( time!($ocp, [ $t0, $tf ] , String($t)) )
-        (false, true ) => :( time!($ocp, :initial, $t0, String($t)) )
-        (true , false) => :( time!($ocp, :final  , $tf, String($t)) )
+        (false, false) => :( time!($ocp, [ $t0, $tf ] , String($tt)) )
+        (false, true ) => :( time!($ocp, :initial, $t0, String($tt)) )
+        (true , false) => :( time!($ocp, :final  , $tf, String($tt)) )
+        _              => throw("both initial and final time cannot be variable")
     end
 end
 
