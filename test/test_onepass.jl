@@ -42,4 +42,7 @@ o = @def1 begin
 @test o.state_dimension == 3
 @test o.control_dimension == 2
 
+@def1 o r = x[1]
+@test o.parsed.aliases[:r] == :( x[1] )
+
 end

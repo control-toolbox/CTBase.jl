@@ -1,6 +1,6 @@
 # onepass
-# todo: add aliases doing, if they exist, an expansion / replace pass on the e
-# at the beginning of parse
+# todo: unalias expressions (in constraints and cost,
+# not declarations); add default unalias for x₁, etc.
 
 """
 $(TYPEDSIGNATURES)
@@ -20,6 +20,7 @@ parse(ocp, e; log=true) = @match e begin
     :( $x ∈ R   , state ) => p_state(ocp, x   ; log)
     :( $u ∈ R^$m, control ) => p_control(ocp, u, m; log)
     :( $u ∈ R   , control ) => p_control(ocp, u   ; log)
+    :( $a = $e1 ) => p_alias(ocp, a, e1; log)
     _ =>
     if e isa LineNumberNode
         e
@@ -80,6 +81,15 @@ p_control(ocp, u, m=1; log=false) = begin
     code = Expr(:block, code, :( control!($ocp, $m) )) # debug: add control name
     code
 end
+
+p_alias(ocp, a, e; log=false) = begin
+    log && println("alias: $a = $e")
+    aa = QuoteNode(a)
+    ee = QuoteNode(e)
+    code = :( $ocp.parsed.aliases[$aa] = $ee )
+    code
+end
+
 
 """
 $(TYPEDSIGNATURES)

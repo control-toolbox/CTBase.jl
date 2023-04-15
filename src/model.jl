@@ -18,6 +18,7 @@ $(TYPEDEF)
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
+    aliases::Dict{Symbol, Any}=Dict{Symbol, Any}()
 end
 
 """
