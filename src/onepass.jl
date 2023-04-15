@@ -32,18 +32,22 @@ end
 
 p_variable(ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
-    code = :( $ocp.parsed.vars[v] = $q )
+    vv = QuoteNode(v)
+    code = :( $ocp.parsed.vars[$vv] = $q )
     code
 end
 
 p_time(ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
     tt = QuoteNode(t)
-    code = :( $ocp.parsed.t = $t )
+    tt0 = QuoteNode(t0)
+    ttf = QuoteNode(tf)
+    code = :( $ocp.parsed.t = $tt )
     code = Expr(:block, code, :( $ocp.parsed.t0 = $t0 ))
     code = Expr(:block, code, :( $ocp.parsed.tf = $tf ))
     code = Expr(:block, code, quote
-        cond = ($t0 ∈ keys($ocp.parsed.vars), $tf ∈ keys($ocp.parsed.vars))
+        cond = ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars))
+	println("cond = ", cond) # debug
         @match cond begin
             (false, false) => time!($ocp, [ $t0, $tf ] , String($tt))
             (false, true ) => time!($ocp, :initial, $t0, String($tt))
@@ -52,18 +56,21 @@ p_time(ocp, t, t0, tf; log=false) = begin
         end
     end)
     code
+end
 
 p_state(ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
-    code = :( $ocp.parsed.x = $x )
-    code = Expr(:block, state!($ocp, $n)) # debug: add state name
+    xx = QuoteNode(x)
+    code = :( $ocp.parsed.x = $xx )
+    code = Expr(:block, code, :( state!($ocp, $n) )) # debug: add state name
     code
 end
 
 p_control(ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
-    code = :( $ocp.parsed.u = $u )
-    code = Expr(:block, control!($ocp, $m)) # debug: add control name
+    uu = QuoteNode(u)
+    code = :( $ocp.parsed.u = $uu )
+    code = Expr(:block, code, :( control!($ocp, $m) )) # debug: add control name
     code
 end
 

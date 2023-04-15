@@ -1,9 +1,9 @@
 # test onepass
-t0 = 0
-o = @def1 t ∈ [ t0, t0 + 4 ], time
 
 function test_onepass()
 
+t0 = 0
+o = @def1 t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
 @test o.final_time == t0 + 4 
 @test o.parsed.t == :t
