@@ -90,19 +90,27 @@ p_alias(ocp, a, e; log=false) = begin
     :( $ocp.parsed.aliases[$aa] = $ee )
 end
 
-p_dynamics(ocp, y, e; log) = begin
+function genfun2(x, y, body, gs=gensym()) # todo: macro for varargin
+    eval(Expr(:function, Expr(:call, gs, x, y), body))
+    (a, b) -> Base.invokelatest(eval(gs), a, b)
+end
+
+p_dynamics(ocp, y, s, e; log) = begin
     log && println("dynamics: $y'($s) = $e")
     yy = QuoteNode(y)
     ss = QuoteNode(s)
     ee = QuoteNode(e)
-    quote
-        ( $yy ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
-        ( $ss ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
+    quote let
+	x = $yy
+	t = $ss
+        ( x ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
+        ( t ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
 	u = $ocp.parsed.u
-	body = replace_call($ee, $yy, $ss, $yy) 
-	body = replace_call(body, u, $ss, u) 
-	constraint!($ocp, :dynamics, ($yy, u) -> body) 
-    end
+	body = replace_call($ee , x, t, x) 
+	body = replace_call(body, u, t, u) 
+	fun = genfun2(x, u, body)
+	constraint!($ocp, :dynamics, fun)
+    end end
 end
 
 """

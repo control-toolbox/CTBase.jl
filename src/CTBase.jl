@@ -119,7 +119,6 @@ export Model
 export time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
 export isautonomous, isnonautonomous, ismin, ismax
 export nlp_constraints, constraints_labels
-export @def1
 
 # solution
 export OptimalControlSolution
@@ -130,5 +129,8 @@ export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscr
 
 # ctparser_utils
 export replace_call
+
+# onepass
+export @def1, genfun2
 
 end

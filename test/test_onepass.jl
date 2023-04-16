@@ -35,14 +35,20 @@ o = @def1 begin
 @test o.parsed.x == :x
 @test o.parsed.u == :u
 
-@def1 o begin
+o = @def1 begin
+    t ∈ [ 0, 1 ], time
     x ∈ R^3, state
     u ∈ R^2, control
     end
 @test o.state_dimension == 3
 @test o.control_dimension == 2
 
+x = [ 1, 2, 3 ]; u = [ -1, 2 ]
+@def1 o x'(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
+@test o.dynamics(x, u) == [ x[1] + 2u[2], 2x[3], x[1] + u[2] ]
+
 @def1 o r = x[1]
 @test o.parsed.aliases[:r] == :( x[1] )
+# todo: TBC
 
 end
