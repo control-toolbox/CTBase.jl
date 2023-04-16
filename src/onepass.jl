@@ -35,8 +35,7 @@ end
 p_variable(ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     vv = QuoteNode(v)
-    code = :( $ocp.parsed.vars[$vv] = $q )
-    code
+    :( $ocp.parsed.vars[$vv] = $q )
 end
 
 p_time(ocp, t, t0, tf; log=false) = begin
@@ -44,8 +43,8 @@ p_time(ocp, t, t0, tf; log=false) = begin
     tt = QuoteNode(t)
     tt0 = QuoteNode(t0)
     ttf = QuoteNode(tf)
-    code = :( $ocp.parsed.t = $tt )
-    code = Expr(:block, code, quote
+    quote
+        $ocp.parsed.t = $tt )
         cond = ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars))
 	println("cond = ", cond) # debug
         @match cond begin
@@ -61,40 +60,45 @@ p_time(ocp, t, t0, tf; log=false) = begin
                 $ocp.parsed.t0 = nothing
                 $ocp.parsed.tf = $tf
 	        time!($ocp, :final  , $tf, String($tt)) end
-            _              => throw("both initial and final time cannot be variable")
+            _              => throw("parsing error: both initial and final time cannot be variable")
         end
-    end)
-    code
+    end
 end
 
 p_state(ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     xx = QuoteNode(x)
-    code = :( $ocp.parsed.x = $xx )
-    code = Expr(:block, code, :( state!($ocp, $n) )) # debug: add state name
-    code
+    quote
+        $ocp.parsed.x = $xx
+        state!($ocp, $n) # debug: add state name
+    end
 end
 
 p_control(ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     uu = QuoteNode(u)
-    code = :( $ocp.parsed.u = $uu )
-    code = Expr(:block, code, :( control!($ocp, $m) )) # debug: add control name
-    code
+    quote
+        $ocp.parsed.u = $uu
+        control!($ocp, $m) # debug: add control name
+    end
 end
 
 p_alias(ocp, a, e; log=false) = begin
     log && println("alias: $a = $e")
     aa = QuoteNode(a)
     ee = QuoteNode(e)
-    code = :( $ocp.parsed.aliases[$aa] = $ee )
-    code
+    :( $ocp.parsed.aliases[$aa] = $ee )
 end
 
 p_dynamics(ocp, y, e; log) = begin
     log && println("dynamics: $y'($s) = $e")
     yy = QuoteNode(y)
     ss = QuoteNode(s)
+    quote
+        ( $yy ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
+        ( $ss ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
+	($ocp.parsed.x, $ocp.parsed.u) -> $e
+    end
 end
 
 """
