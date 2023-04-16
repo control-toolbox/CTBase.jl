@@ -21,7 +21,7 @@ parse(ocp, e; log=true) = @match e begin
     :( $u ∈ R^$m, control ) => p_control(ocp, u, m; log)
     :( $u ∈ R   , control ) => p_control(ocp, u   ; log)
     :( $a = $e1 ) => p_alias(ocp, a, e1; log)
-    :( $y'($s) == $e1 ) => p_dynamics(ocp, y, s, e1; log)
+    :( $x'($t) == $e1 ) => p_dynamics(ocp, x, t, e1; log)
     _ =>
     if e isa LineNumberNode
         e
@@ -95,19 +95,19 @@ function genfun2(x, y, body, gs=gensym()) # todo: macro for varargin
     (a, b) -> Base.invokelatest(eval(gs), a, b)
 end
 
-p_dynamics(ocp, y, s, e; log) = begin
-    log && println("dynamics: $y'($s) = $e")
-    yy = QuoteNode(y)
-    ss = QuoteNode(s)
+p_dynamics(ocp, x, t, e; log) = begin
+    log && println("dynamics: $x'($t) = $e")
+    xx = QuoteNode(x)
+    tt = QuoteNode(t)
     ee = QuoteNode(e)
-    quote let # should work x = $yy etc. thanks to let
-        ( $yy ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
-        ( $ss ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
-	body = replace_call($ee , $yy, $ss, $yy) 
-	body = replace_call(body, $ocp.parsed.u, $ss, $ocp.parsed.u) 
-	fun = genfun2($yy, $ocp.parsed.u, body)
-	constraint!($ocp, :dynamics, fun)
-    end end
+    quote # debug: let seems to be escaped
+        ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
+        ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
+	constraint!($ocp, :dynamics,
+	    genfun2($xx, $ocp.parsed.u,
+	    replace_call(replace_call($ee, $xx, $tt, $xx),
+	    $ocp.parsed.u, $tt, $ocp.parsed.u)))
+    end
 end
 
 """
