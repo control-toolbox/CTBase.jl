@@ -44,9 +44,8 @@ p_time(ocp, t, t0, tf; log=false) = begin
     tt0 = QuoteNode(t0)
     ttf = QuoteNode(tf)
     quote
-        $ocp.parsed.t = $tt )
+        $ocp.parsed.t = $tt
         cond = ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars))
-	println("cond = ", cond) # debug
         @match cond begin
             (false, false) => begin
                 $ocp.parsed.t0 = $t0
@@ -60,7 +59,8 @@ p_time(ocp, t, t0, tf; log=false) = begin
                 $ocp.parsed.t0 = nothing
                 $ocp.parsed.tf = $tf
 	        time!($ocp, :final  , $tf, String($tt)) end
-            _              => throw("parsing error: both initial and final time cannot be variable")
+            _              => throw("parsing error: both initial and final time " *
+	                            "cannot be variable")
         end
     end
 end
@@ -70,7 +70,7 @@ p_state(ocp, x, n=1; log=false) = begin
     xx = QuoteNode(x)
     quote
         $ocp.parsed.x = $xx
-        state!($ocp, $n) # debug: add state name
+        state!($ocp, $n) # todo: add state name
     end
 end
 
@@ -79,7 +79,7 @@ p_control(ocp, u, m=1; log=false) = begin
     uu = QuoteNode(u)
     quote
         $ocp.parsed.u = $uu
-        control!($ocp, $m) # debug: add control name
+        control!($ocp, $m) # todo: add control name
     end
 end
 
@@ -94,10 +94,14 @@ p_dynamics(ocp, y, e; log) = begin
     log && println("dynamics: $y'($s) = $e")
     yy = QuoteNode(y)
     ss = QuoteNode(s)
+    ee = QuoteNode(e)
     quote
         ( $yy ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
         ( $ss ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
-	($ocp.parsed.x, $ocp.parsed.u) -> $e
+	u = $ocp.parsed.u
+	body = replace_call($ee, $yy, $ss, $yy) 
+	body = replace_call(body, u, $ss, u) 
+	constraint!($ocp, :dynamics, ($yy, u) -> body) 
     end
 end
 

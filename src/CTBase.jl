@@ -128,4 +128,7 @@ export plot
 # utils
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
+# ctparser_utils
+export replace_call
+
 end
