@@ -100,15 +100,12 @@ p_dynamics(ocp, y, s, e; log) = begin
     yy = QuoteNode(y)
     ss = QuoteNode(s)
     ee = QuoteNode(e)
-    quote let
-	x = $yy
-	t = $ss
-        ( x ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
-        ( t ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
-	u = $ocp.parsed.u
-	body = replace_call($ee , x, t, x) 
-	body = replace_call(body, u, t, u) 
-	fun = genfun2(x, u, body)
+    quote let # should work x = $yy etc. thanks to let
+        ( $yy ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
+        ( $ss ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
+	body = replace_call($ee , $yy, $ss, $yy) 
+	body = replace_call(body, $ocp.parsed.u, $ss, $ocp.parsed.u) 
+	fun = genfun2($yy, $ocp.parsed.u, body)
 	constraint!($ocp, :dynamics, fun)
     end end
 end

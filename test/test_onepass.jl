@@ -45,6 +45,8 @@ o = @def1 begin
 
 x = [ 1, 2, 3 ]; u = [ -1, 2 ]
 @def1 o x'(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
+println("x = ", x) # debug
+println("u = ", u) # debug
 @test o.dynamics(x, u) == [ x[1] + 2u[2], 2x[3], x[1] + u[2] ]
 
 @def1 o r = x[1]
