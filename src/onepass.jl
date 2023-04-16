@@ -21,6 +21,7 @@ parse(ocp, e; log=true) = @match e begin
     :( $u ∈ R^$m, control ) => p_control(ocp, u, m; log)
     :( $u ∈ R   , control ) => p_control(ocp, u   ; log)
     :( $a = $e1 ) => p_alias(ocp, a, e1; log)
+    :( $y'($s) == $e1 ) => p_dynamics(ocp, y, s, e1; log)
     _ =>
     if e isa LineNumberNode
         e
@@ -90,6 +91,11 @@ p_alias(ocp, a, e; log=false) = begin
     code
 end
 
+p_dynamics(ocp, y, e; log) = begin
+    log && println("dynamics: $y'($s) = $e")
+    yy = QuoteNode(y)
+    ss = QuoteNode(s)
+end
 
 """
 $(TYPEDSIGNATURES)
