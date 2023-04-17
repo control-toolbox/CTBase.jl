@@ -69,10 +69,13 @@ o = @def1 begin
     u ∈ R, control
     x(t0) == [ -1, 0 ] 
     x(tf) == [  0, 0 ] 
-    x'(t) == A*x(t) + B*u(t)
+    x'(t) == [ 0 1 ; 0 0 ] * x(t) + [ 0 ; 1 ] * u(t)
     ∫( 0.5u(t)^2 ) → min
 end
-# todo: write obj test
+x = [ 1, 2 ]; u = -1 
+@test o.dynamics(x, u) == [ 0 1 ; 0 0 ] * x + [ 0 ; 1 ] * u 
+@test o.lagrange(x, u) == 0.5u^2 
+@test o.criterion == :min
 
 @def1 o r = x[1]
 @test o.parsed.aliases[:r] == :( x[1] )
