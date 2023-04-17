@@ -16,11 +16,10 @@ $(TYPEDFIELDS)
     initial_time::Union{Time,Nothing}=nothing
     final_time::Union{Time,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
-    lagrange::Union{LagrangeFunction{time_dependence, dimension_usage},Nothing}=nothing
+    lagrange::Union{LagrangeObjective{time_dependence, dimension_usage},Nothing}=nothing
     mayer::Union{MayerObjective{dimension_usage},Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
-    dynamics::Union{DynamicsFunction{time_dependence, dimension_usage},Nothing}=nothing
-    dynamics!::Union{Function,Nothing}=nothing
+    dynamics::Union{Dynamics{time_dependence, dimension_usage},Nothing}=nothing
     state_dimension::Union{Dimension,Nothing}=nothing
     state_names::Union{Vector{String}, Nothing}=nothing
     control_dimension::Union{Dimension,Nothing}=nothing
@@ -352,15 +351,14 @@ Provide dynamics (possibly in place).
 # Examples
 ```jldoctest
 julia> constraint!(ocp, :dynamics, f)
-julia> constraint!(ocp, :dynamics!, f!)
 ```
 """
 function constraint!(ocp::OptimalControlModel{time_dependence, dimension_usage}, type::Symbol, f::Function) where {time_dependence, dimension_usage}
-    if type ∈ [ :dynamics, :dynamics! ]
-        setproperty!(ocp, type, DynamicsFunction{time_dependence, dimension_usage}(f))
+    if type ∈ [ :dynamics ]
+        setproperty!(ocp, type, Dynamics{time_dependence, dimension_usage}(f))
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :dynamics, :dynamics! ] or check the arguments of the constraint! method."))
+        ". Please choose in [ :dynamics ] or check the arguments of the constraint! method."))
     end
 end
 
@@ -550,7 +548,7 @@ function objective!(ocp::OptimalControlModel{time_dependence, dimension_usage}, 
     if type == :mayer
         setproperty!(ocp, :mayer, MayerObjective{dimension_usage}(f))
     elseif type == :lagrange
-        setproperty!(ocp, :lagrange, LagrangeFunction{time_dependence, dimension_usage}(f))
+        setproperty!(ocp, :lagrange, LagrangeObjective{time_dependence, dimension_usage}(f))
     else
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
         ". Please choose in [ :mayer, :lagrange ]."))
@@ -578,7 +576,7 @@ function objective!(ocp::OptimalControlModel{time_dependence, dimension_usage}, 
     end
     if type == :bolza
         setproperty!(ocp, :mayer, MayerObjective{dimension_usage}(g))
-        setproperty!(ocp, :lagrange, LagrangeFunction{time_dependence, dimension_usage}(f⁰))
+        setproperty!(ocp, :lagrange, LagrangeObjective{time_dependence, dimension_usage}(f⁰))
     else
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
         ". Please choose :bolza."))

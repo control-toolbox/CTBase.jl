@@ -46,6 +46,18 @@ struct _Time
         return new(value)
     end
 end
++(t1::_Time, t2::_Time)::_Time = _Time(t1.value + t2.value)
+-(t1::_Time, t2::_Time)::_Time = t1.value - t2.value
+*(t1::_Time, t2::_Time)::_Time = _Time(t1.value * t2.value)
+/(t1::_Time, t2::_Time)::_Time = _Time(t1.value / t2.value)
++(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value + t2)
++(t1::ctNumber, t2::_Time)::_Time = _Time(t1 + t2.value)
+-(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value - t2)
+-(t1::ctNumber, t2::_Time)::_Time = _Time(t1 - t2.value)
+*(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value * t2)
+*(t1::ctNumber, t2::_Time)::_Time = _Time(t1 * t2.value)
+/(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value / t2)
+/(t1::ctNumber, t2::_Time)::_Time = _Time(t1 / t2.value)
 """
 Type alias for a vector of times.
 """
@@ -120,7 +132,7 @@ export IncorrectArgument, IncorrectOutput, NotImplemented
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
-export MayerObjective, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
+export MayerObjective, LagrangeObjective, Dynamics, ControlFunction, MultiplierFunction
 export BoundaryConstraint, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
 
 # model

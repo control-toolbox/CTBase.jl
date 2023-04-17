@@ -108,6 +108,128 @@ end
     end
 end
 
+@testset "VectorField" begin
+    @testset "Classical calls" begin
+        V = VectorField(x -> 2x)
+        @test V(1) == 2
+        @test V([1]) == [2]
+        V = VectorField(x -> 2x, time_dependence=:autonomous)
+        @test V(1) == 2
+        @test V([1]) == [2]
+        V = VectorField((t, x) -> t+2x, time_dependence=:nonautonomous)
+        @test V(1, 1) == 3
+        @test_throws MethodError V(1, [1])
+        V = VectorField(x -> [x[1]^2, x[2]^2]) # or time_dependence=:autonomous
+        @test V([1, 0]) == [1, 0]
+        V = VectorField((t, x) -> [t + x[1]^2, x[2]^2], time_dependence=:nonautonomous)
+        @test V(1, [1, 0]) == [2, 0]
+    end
+    @testset "Specific calls" begin
+        V = VectorField(x -> 2x, state_dimension=1)
+        @test_throws MethodError V(_Time(0), 1)
+        @test V(_Time(0), [1]) == [2]
+        V = VectorField((t, x) -> t + x, state_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError V(_Time(1), 1)
+        @test V(_Time(1), [1]) == [2]
+        V = VectorField(x -> [x[1]^2, -x[2]^2], state_dimension=2)
+        @test V(_Time(0), [1, 2]) == [1, -4]
+        V = VectorField((t, x) -> [t + x[1]^2, -x[2]^2], state_dimension=2, time_dependence=:nonautonomous)
+        @test V(_Time(1), [1, 2]) == [2, -4]
+    end
+end
+
+@testset "LagrangeObjective" begin
+    @testset "Classical calls" begin
+        L = LagrangeObjective((x, u) -> x + u)
+        @test L(1, 1) == 2
+        @test_throws MethodError L([1], [1])
+        L = LagrangeObjective((x, u) -> x + u, time_dependence=:autonomous)
+        @test L(1, 1) == 2
+        @test_throws MethodError L([1], [1])
+        L = LagrangeObjective((t, x, u) -> x + u, time_dependence=:nonautonomous)
+        @test L(1, 1, 1) == 2
+        @test_throws MethodError L(1, [1], [1])
+        L = LagrangeObjective((x, u) -> x[1]^2 + u^2) # or time_dependence=:autonomous
+        @test L([1, 0], 1) == 2
+        L = LagrangeObjective((x, u) -> x^2 + u[2]^2) # or time_dependence=:autonomous
+        @test L(1, [0, 1]) == 2
+        L = LagrangeObjective((x, u) -> x[1]^2 + u[2]^2) # or time_dependence=:autonomous
+        @test L([1, 0], [0, 1]) == 2
+        L = LagrangeObjective((t, x, u) -> t + x[1]^2 + u[2]^2, time_dependence=:nonautonomous)
+        @test L(1, [1, 0], [0, 1]) == 3
+    end
+    @testset "Specific calls" begin
+        L = LagrangeObjective((x, u) -> x + u, state_dimension=1, control_dimension=1)
+        @test_throws MethodError L(_Time(0), 1, 1)
+        @test L(_Time(0), [1], [1]) == 2
+        L = LagrangeObjective((t, x, u) -> x + u, state_dimension=1, control_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError L(_Time(1), 1, 1)
+        @test L(_Time(1), [1], [1]) == 2
+        L = LagrangeObjective((x, u) -> x[1]^2 + u, state_dimension=2, control_dimension=1)
+        @test_throws MethodError L(_Time(0), [1, 0], 1)
+        @test L(_Time(0), [1, 0], [1]) == 2
+        L = LagrangeObjective((t, x, u) -> t + x[1]^2 + u, state_dimension=2, control_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError L(_Time(1), [1, 0], 1)
+        @test L(_Time(1), [1, 0], [1]) == 3
+        L = LagrangeObjective((x, u) -> x + u[1], state_dimension=1, control_dimension=2)
+        @test_throws MethodError L(_Time(0), 1, [1, 0])
+        @test L(_Time(0), [1], [1, 0]) == 2
+        L = LagrangeObjective((t, x, u) -> t + x + u[1], state_dimension=1, control_dimension=2, time_dependence=:nonautonomous)
+        @test_throws MethodError L(_Time(1), 1, [1, 0])
+        @test L(_Time(1), [1], [1, 0]) == 3
+        L = LagrangeObjective((x, u) -> x[1]^2 + u[1], state_dimension=2, control_dimension=2)
+        @test L(_Time(0), [1, 0], [1, 0]) == 2
+        L = LagrangeObjective((t, x, u) -> t + x[1]^2 + u[1], state_dimension=2, control_dimension=2, time_dependence=:nonautonomous)
+        @test L(_Time(1), [1, 0], [1, 0]) == 3
+    end
+end
+
+@testset "Dynamics" begin
+    @testset "Classical calls" begin
+        F = Dynamics((x, u) -> x + u)
+        @test F(1, 1) == 2
+        @test F([1], [1]) == [2]
+        F = Dynamics((x, u) -> x + u, time_dependence=:autonomous)
+        @test F(1, 1) == 2
+        @test F([1], [1]) == [2]
+        F = Dynamics((t, x, u) -> x + u, time_dependence=:nonautonomous)
+        @test F(1, 1, 1) == 2
+        @test F(1, [1], [1]) == [2]
+        F = Dynamics((x, u) -> [x[1]^2 + u^2, x[2]]) # or time_dependence=:autonomous
+        @test F([1, 0], 1) == [2, 0]
+        F = Dynamics((x, u) -> x^2 + u[2]^2) # or time_dependence=:autonomous
+        @test F(1, [0, 1]) == 2
+        F = Dynamics((x, u) -> [x[1]^2 + u[2]^2, x[2]]) # or time_dependence=:autonomous
+        @test F([1, 0], [0, 1]) == [2, 0]
+        F = Dynamics((t, x, u) -> [t + x[1]^2 + u[2]^2, x[2]], time_dependence=:nonautonomous)
+        @test F(1, [1, 0], [0, 1]) == [3, 0]
+    end
+    @testset "Specific calls" begin
+        F = Dynamics((x, u) -> x + u, state_dimension=1, control_dimension=1)
+        @test_throws MethodError F(_Time(0), 1, 1)
+        @test F(_Time(0), [1], [1]) == [2]
+        F = Dynamics((t, x, u) -> x + u, state_dimension=1, control_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError F(_Time(1), 1, 1)
+        @test F(_Time(1), [1], [1]) == [2]
+        F = Dynamics((x, u) -> [x[1]^2 + u, x[2]], state_dimension=2, control_dimension=1)
+        @test_throws MethodError F(_Time(0), [1, 0], 1)
+        @test F(_Time(0), [1, 0], [1]) == [2, 0]
+        F = Dynamics((t, x, u) -> [t + x[1]^2 + u, x[2]], state_dimension=2, control_dimension=1, time_dependence=:nonautonomous)
+        @test_throws MethodError F(_Time(1), [1, 0], 1)
+        @test F(_Time(1), [1, 0], [1]) == [3, 0]
+        F = Dynamics((x, u) -> x + u[1], state_dimension=1, control_dimension=2)
+        @test_throws MethodError F(_Time(0), 1, [1, 0])
+        @test F(_Time(0), [1], [1, 0]) == [2]
+        F = Dynamics((t, x, u) -> t + x + u[1], state_dimension=1, control_dimension=2, time_dependence=:nonautonomous)
+        @test_throws MethodError F(_Time(1), 1, [1, 0])
+        @test F(_Time(1), [1], [1, 0]) == [3]
+        F = Dynamics((x, u) -> [x[1]^2 + u[1], x[2]], state_dimension=2, control_dimension=2)
+        @test F(_Time(0), [1, 0], [1, 0]) == [2, 0]
+        F = Dynamics((t, x, u) -> [t + x[1]^2 + u[1], x[2]], state_dimension=2, control_dimension=2, time_dependence=:nonautonomous)
+        @test F(_Time(1), [1, 0], [1, 0]) == [3, 0]
+    end
+end
+
 #=
 #
 t = 1
@@ -119,52 +241,11 @@ f(t, x, u) = t+x+u
 #
 H(t, x, p) = t + x^2+p^2
 
-# VectorField
-F(t, x) = t + x^2
-F1 = VectorField{:nonautonomous}(F)
-F2 = VectorField(x -> F(0.0, x))
-@test F1(t, x) == 5
-@test F2(t, x) == 4
-Fs = VectorField{:nonautonomous, :scalar}(F)
-@test Fs(t, [x]) isa Vector{<:ctNumber}
-@test Fs(t, [x]) ≈ [5] atol=1e-6 # should return a vector
-Fe = VectorField((x) -> [F(0, x)])
-@test_throws IncorrectOutput Fe(t, [x])
-
-# dim 2
-Fd2 = VectorField(x -> x[1]^2+x[2]^2)
-@test Fd2(t, [0, 1]) == 1
-
 #
 whoami(h::Hamiltonian) = 1
 whoami(v::VectorField) = 2
 
 @test whoami(F1) == 2
-
-# LagrangeFunction
-L(t, x, u) = t+x+u
-L1 = LagrangeFunction{:nonautonomous}(L)
-L2 = LagrangeFunction((x, u) -> L(0, x, u))
-@test L1(t, x, u) == 7
-@test L2(t, x, u) == 6
-Ls = LagrangeFunction{:nonautonomous, :scalar}(L)
-@test Ls(t, [x], [u]) == 7
-Le = LagrangeFunction((x, u) -> [L(0, x, u)])
-@test_throws IncorrectOutput Le(t, [x], [u])
-
-# DynamicsFunction
-F1 = DynamicsFunction{:nonautonomous}(f)
-F2 = DynamicsFunction((x, u) -> f(0.0, x, u))
-@test F1(t, x, u) == 7
-@test F2(t, x, u) == 6
-Fs = DynamicsFunction{:nonautonomous, :scalar}(f)
-@test Fs(t, [x], [u]) ≈ [7] atol=1e-6
-Fe = DynamicsFunction{:nonautonomous, :scalar}((t, x, u) -> [f(0, x, u)])
-@test_throws IncorrectOutput Fe(t, [x], [u])
-
-# dim 2
-Fd2 = DynamicsFunction((x, u) -> [x[1]^2+x[2]^2, u])
-@test Fd2(t, [0, 1], [1]) == [1, 1]
 
 # constructor
 makeH(f::Function, u::Function) = (t,x,p) -> f(t, x, u(t, x, p))
