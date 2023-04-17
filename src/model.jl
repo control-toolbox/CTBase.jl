@@ -239,7 +239,7 @@ julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
 julia> constraint!(ocp, :final, Index(1), 0)
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, val, label::Symbol=__constraint_label())
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, val, label::Symbol=__constraint_label())
     if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
 	rg = rg isa Index ? rg.val : rg
         ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
@@ -286,9 +286,10 @@ julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [1, 2])
 julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
+julia> constraint!(ocp, :initial, 1:2:3, [ 0, 0, 0], [1, 2, 1])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
     rg = rg isa Index ? rg.val : rg
     if type ∈ [ :initial, :final ]
         ocp.constraints[label] = (type, :ineq, x -> x[rg], lb, ub)
