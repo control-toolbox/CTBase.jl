@@ -47,6 +47,23 @@ x = [ 1, 2, 3 ]; u = [ -1, 2 ]
 @def1 o x'(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
 @test o.dynamics(x, u) == [ x[1] + 2u[2], 2x[3], x[1] + u[2] ]
 
+t0 = 0
+tf = 1
+o = @def1 begin
+
+    t ∈ [ t0, tf ], time
+    x ∈ R^2, state
+    u ∈ R, control
+
+    x(t0) == [ -1, 0 ] 
+    x(tf) == [  0, 0 ] 
+
+    x'(t) == A*x(t) + B*u(t)
+
+    ∫( 0.5u(t)^2 ) → min
+
+end
+
 @def1 o r = x[1]
 @test o.parsed.aliases[:r] == :( x[1] )
 # todo: TBC

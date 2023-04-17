@@ -23,6 +23,8 @@ parse(ocp, e; log=true) = @match e begin
     :( $a = $e1 ) => p_alias(ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics(ocp, x, t, e1; log)
     :( $e1 == $e2 ) => p_constraint_eq(ocp, e1, e2; log)
+    :( ∫($e1) → min ) => p_objective(ocp, e1, :min; log)
+    :( ∫($e1) → max ) => p_objective(ocp, e1, :max; log)
     _ =>
 
     if e isa LineNumberNode
@@ -49,16 +51,16 @@ p_time(ocp, t, t0, tf; log=false) = begin
         $ocp.parsed.t = $tt
         @match ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars)) begin
             (false, false) => begin
-                $ocp.parsed.t0 = $t0
-                $ocp.parsed.tf = $tf
+                $ocp.parsed.t0 = $tt0
+                $ocp.parsed.tf = $ttf
 	        time!($ocp, [ $t0, $tf ] , String($tt)) end
             (false, true ) => begin
-                $ocp.parsed.t0 = $t0
+                $ocp.parsed.t0 = $tt0
                 $ocp.parsed.tf = nothing
 	        time!($ocp, :initial, $t0, String($tt)) end
             (true , false) => begin
                 $ocp.parsed.t0 = nothing
-                $ocp.parsed.tf = $tf
+                $ocp.parsed.tf = $ttf
 	        time!($ocp, :final  , $tf, String($tt)) end
             _              => throw("parsing error: both initial and final time " *
 	                            "cannot be variable")
@@ -97,7 +99,7 @@ function genfun2(x, y, body, gs=gensym()) # todo: macro for varargin
 end
 
 p_dynamics(ocp, x, t, e; log) = begin
-    log && println("dynamics: $x'($t) = $e")
+    log && println("dynamics: $x'($t) == $e")
     xx = QuoteNode(x)
     tt = QuoteNode(t)
     ee = QuoteNode(e)
@@ -122,15 +124,33 @@ p_constraint_eq(ocp, e1, e2; log) = begin
 	    $ocp.parsed.tf,
 	    $ocp.parsed.x,
 	    $ocp.parsed.u) begin
-	    (:initial, nothing) => constraint!($ocp, :initial, $ee2)
-	    (:initial, val) => constraint!($ocp, :initial, val, $ee2)
-	    (:final, nothing) => constraint!($ocp, :final, $ee2)
-	    (:final, val) => constraint!($ocp, :final, val, $ee2)
+	    (:initial, nothing) => constraint!($ocp, :initial,      $ee2)
+	    (:initial, val    ) => constraint!($ocp, :initial, val, $ee2)
+	    (:final  , nothing) => constraint!($ocp, :final  ,      $ee2)
+	    (:final  , val    ) => constraint!($ocp, :final  , val, $ee2)
 	    _ => throw("syntax error")
 	end
     end
 end
 
+p_objective(ocp, e, type; log) = begin
+    log && println("objective: ∫($e) → $type")
+    ee = QuoteNode(e)
+    ttype = QuoteNode(type)
+    quote
+	objective!($ocp, :lagrange,
+	    genfun2($ocp.parsed.x,
+	    $ocp.parsed.u,
+	    replace_call(replace_call($ee,
+	    $ocp.parsed.x,
+	    $ocp.parsed.t,
+	    $ocp.parsed.x),
+	    $ocp.parsed.u,
+	    $ocp.parsed.t,
+	    $ocp.parsed.u)), $ttype)
+    end
+end
+ 
 """
 $(TYPEDSIGNATURES)
 
