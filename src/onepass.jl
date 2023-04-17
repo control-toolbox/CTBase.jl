@@ -131,16 +131,22 @@ p_objective(ocp, e, type; log) = begin
     ee = QuoteNode(e)
     ttype = QuoteNode(type)
     quote
-	objective!($ocp, :lagrange,
-	    genfun2($ocp.parsed.x, # debug: no closure
-	    $ocp.parsed.u,
+	$ocp.parsed.gs = gensym()
+	eval(Expr(:function, Expr(:call,
+   	    $ocp.parsed.gs,
+	    $ocp.parsed.x,
+	    $ocp.parsed.u),
 	    replace_call(replace_call($ee,
 	    $ocp.parsed.x,
 	    $ocp.parsed.t,
 	    $ocp.parsed.x),
 	    $ocp.parsed.u,
 	    $ocp.parsed.t,
-	    $ocp.parsed.u)), $ttype)
+	    $ocp.parsed.u)))
+	objective!($ocp,
+	    :lagrange,
+	    (a, b) -> Base.invokelatest(eval($ocp.parsed.gs), a, b),
+	    $ttype)
     end
 end
  
