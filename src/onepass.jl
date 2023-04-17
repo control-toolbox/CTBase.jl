@@ -24,6 +24,7 @@ parse(ocp, e; log=true) = @match e begin
     :( $x'($t) == $e1 ) => p_dynamics(ocp, x, t, e1; log)
     :( $e1 == $e2 ) => p_constraint_eq(ocp, e1, e2; log)
     _ =>
+
     if e isa LineNumberNode
         e
     elseif (e isa Expr) && (e.head == :block)
@@ -100,7 +101,7 @@ p_dynamics(ocp, x, t, e; log) = begin
     xx = QuoteNode(x)
     tt = QuoteNode(t)
     ee = QuoteNode(e)
-    quote # debug: let seems to be escaped
+    quote # debug: let seems to be escaped; but vars local to @match seem not...
         ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
         ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
 	constraint!($ocp, :dynamics,
@@ -115,16 +116,16 @@ p_constraint_eq(ocp, e1, e2; log) = begin
     ee1 = QuoteNode(e1)
     ee2 = QuoteNode(e2)
     quote
-        @match constraint_type($ee2,
+        @match constraint_type($ee1,
 	    $ocp.parsed.t,
 	    $ocp.parsed.t0,
 	    $ocp.parsed.tf,
 	    $ocp.parsed.x,
 	    $ocp.parsed.u) begin
 	    (:initial, nothing) => constraint!($ocp, :initial, $ee2)
-	    (:initial, $ocp.parsed._val) => constraint!($ocp, :initial, $ocp.parsed._val, $ee2)
+	    (:initial, val) => constraint!($ocp, :initial, val, $ee2)
 	    (:final, nothing) => constraint!($ocp, :final, $ee2)
-	    (:final, $ocp.parsed._val) => constraint!($ocp, :final, $ocp.parsed._val, $ee2)
+	    (:final, val) => constraint!($ocp, :final, val, $ee2)
 	    _ => throw("syntax error")
 	end
     end

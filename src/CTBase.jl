@@ -128,7 +128,7 @@ export plot
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
 # ctparser_utils
-export replace_call
+export replace_call, constraint_type
 
 # onepass
 export @def1, genfun2
