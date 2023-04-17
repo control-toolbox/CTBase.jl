@@ -22,6 +22,7 @@ parse(ocp, e; log=true) = @match e begin
     :( $u ∈ R   , control ) => p_control(ocp, u   ; log)
     :( $a = $e1 ) => p_alias(ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics(ocp, x, t, e1; log)
+    :( $e1 == $e2 ) => p_constraint_eq(ocp, x, t, e1; log)
     _ =>
     if e isa LineNumberNode
         e
@@ -45,8 +46,7 @@ p_time(ocp, t, t0, tf; log=false) = begin
     ttf = QuoteNode(tf)
     quote
         $ocp.parsed.t = $tt
-        cond = ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars))
-        @match cond begin
+        @match ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars)) begin
             (false, false) => begin
                 $ocp.parsed.t0 = $t0
                 $ocp.parsed.tf = $tf
