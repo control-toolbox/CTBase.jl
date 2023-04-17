@@ -69,11 +69,15 @@ o = @def1 begin
     u ∈ R, control
     x(t0) == [ -1, 0 ] 
     x(tf) == [  0, 0 ] 
-    x'(t) == [ 0 1 ; 0 0 ] * x(t) + [ 0 ; 1 ] * u(t)
+    x'(t) == A * x(t) + B * u(t)
     ∫( 0.5u(t)^2 ) → min
 end
 x = [ 1, 2 ]; u = -1 
-@test o.dynamics(x, u) == [ 0 1 ; 0 0 ] * x + [ 0 ; 1 ] * u 
+A = [ 0 1
+      0 0 ]
+B = [ 0
+      1 ]
+@test o.dynamics(x, u) == A * x + B * u 
 @test o.lagrange(x, u) == 0.5u^2 
 @test o.criterion == :min
 

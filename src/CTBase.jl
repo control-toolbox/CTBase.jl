@@ -131,6 +131,6 @@ export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscr
 export replace_call, constraint_type
 
 # onepass
-export @def1, genfun2
+export @def1
 
 end

@@ -19,8 +19,6 @@ $(TYPEDEF)
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    # internal
-    gs::Union{Symbol, Nothing}=nothing
 end
 
 """

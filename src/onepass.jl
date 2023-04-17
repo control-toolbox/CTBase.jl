@@ -86,23 +86,29 @@ p_alias(ocp, a, e; log=false) = begin
     :( $ocp.parsed.aliases[$aa] = $ee )
 end
 
-function genfun2(x, y, body, gs=gensym()) # todo: macro for varargin
-    eval(Expr(:function, Expr(:call, gs, x, y), body))
-    (a, b) -> Base.invokelatest(eval(gs), a, b)
-end
-
 p_dynamics(ocp, x, t, e; log) = begin
     log && println("dynamics: $x'($t) == $e")
     xx = QuoteNode(x)
     tt = QuoteNode(t)
     ee = QuoteNode(e)
+    gs = QuoteNode(gensym())
     quote # debug: let seems to be escaped; but vars local to @match seem not...
         ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
         ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
-	constraint!($ocp, :dynamics,
-	    genfun2($xx, $ocp.parsed.u, # debug: no closure  
-	    replace_call(replace_call($ee, $xx, $tt, $xx),
-	    $ocp.parsed.u, $tt, $ocp.parsed.u)))
+	eval(Expr(:function, Expr(:call,
+   	    $gs,
+	    $ocp.parsed.x,
+	    $ocp.parsed.u),
+	    replace_call(replace_call($ee,
+	    $ocp.parsed.x,
+	    $ocp.parsed.t,
+	    $ocp.parsed.x),
+	    $ocp.parsed.u,
+	    $ocp.parsed.t,
+	    $ocp.parsed.u)))
+	constraint!($ocp,
+	    :dynamics,
+	    (a, b) -> Base.invokelatest(eval($gs), a, b))
     end
 end
 
@@ -130,10 +136,10 @@ p_objective(ocp, e, type; log) = begin
     log && println("objective: ∫($e) → $type")
     ee = QuoteNode(e)
     ttype = QuoteNode(type)
+    gs = QuoteNode(gensym())
     quote
-	$ocp.parsed.gs = gensym()
 	eval(Expr(:function, Expr(:call,
-   	    $ocp.parsed.gs,
+   	    $gs,
 	    $ocp.parsed.x,
 	    $ocp.parsed.u),
 	    replace_call(replace_call($ee,
@@ -145,7 +151,7 @@ p_objective(ocp, e, type; log) = begin
 	    $ocp.parsed.u)))
 	objective!($ocp,
 	    :lagrange,
-	    (a, b) -> Base.invokelatest(eval($ocp.parsed.gs), a, b),
+	    (a, b) -> Base.invokelatest(eval($gs), a, b),
 	    $ttype)
     end
 end
