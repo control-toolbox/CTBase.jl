@@ -22,7 +22,7 @@ parse(ocp, e; log=true) = @match e begin
     :( $u ∈ R   , control ) => p_control(ocp, u   ; log)
     :( $a = $e1 ) => p_alias(ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics(ocp, x, t, e1; log)
-    :( $e1 == $e2 ) => p_constraint_eq(ocp, x, t, e1; log)
+    :( $e1 == $e2 ) => p_constraint_eq(ocp, e1, e2; log)
     _ =>
     if e isa LineNumberNode
         e
@@ -107,6 +107,26 @@ p_dynamics(ocp, x, t, e; log) = begin
 	    genfun2($xx, $ocp.parsed.u,
 	    replace_call(replace_call($ee, $xx, $tt, $xx),
 	    $ocp.parsed.u, $tt, $ocp.parsed.u)))
+    end
+end
+
+p_constraint_eq(ocp, e1, e2; log) = begin
+    log && println("constraint: $e1 == $e2")
+    ee1 = QuoteNode(e1)
+    ee2 = QuoteNode(e2)
+    quote
+        @match constraint_type($ee2,
+	    $ocp.parsed.t,
+	    $ocp.parsed.t0,
+	    $ocp.parsed.tf,
+	    $ocp.parsed.x,
+	    $ocp.parsed.u) begin
+	    (:initial, nothing) => constraint!($ocp, :initial, $ee2)
+	    (:initial, $ocp.parsed._val) => constraint!($ocp, :initial, $ocp.parsed._val, $ee2)
+	    (:final, nothing) => constraint!($ocp, :final, $ee2)
+	    (:final, $ocp.parsed._val) => constraint!($ocp, :final, $ocp.parsed._val, $ee2)
+	    _ => throw("syntax error")
+	end
     end
 end
 

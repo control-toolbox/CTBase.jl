@@ -12,13 +12,15 @@ $(TYPEDEF)
 
 """
 @with_kw mutable struct ParsingInfo
+    aliases::Dict{Symbol, Any}=Dict{Symbol, Any}()
     vars::Dict{Symbol, Integer}=Dict{Symbol, Integer}()
     t::Union{Symbol, Nothing}=nothing
     t0::Union{Real, Symbol, Expr, Nothing}=nothing
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    aliases::Dict{Symbol, Any}=Dict{Symbol, Any}()
+    # internal stuff
+    _val::Any=nothing # todo: make it precise
 end
 
 """
