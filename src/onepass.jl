@@ -100,7 +100,7 @@ p_dynamics(ocp, x, t, e; log) = begin
         ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
         ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
 	constraint!($ocp, :dynamics,
-	    genfun2($xx, $ocp.parsed.u,
+	    genfun2($xx, $ocp.parsed.u, # debug: no closure  
 	    replace_call(replace_call($ee, $xx, $tt, $xx),
 	    $ocp.parsed.u, $tt, $ocp.parsed.u)))
     end
@@ -132,9 +132,9 @@ p_objective(ocp, e, type; log) = begin
     ttype = QuoteNode(type)
     quote
 	objective!($ocp, :lagrange,
-	    genfun2($ocp.parsed.x,
+	    genfun2($ocp.parsed.x, # debug: no closure
 	    $ocp.parsed.u,
-	    replace_call(replace_call($ee,
+	    replace_call(replace_call($(esc(ee)),
 	    $ocp.parsed.x,
 	    $ocp.parsed.t,
 	    $ocp.parsed.x),
