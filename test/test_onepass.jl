@@ -7,6 +7,8 @@ o = @def1 t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
 @test o.final_time == t0 + 4 
 @test o.parsed.t == :t
+@test o.parsed.t0 == :t0
+@test o.parsed.tf == :(t0 + 4)
 
 o = @def1 begin
     λ ∈ R^2, variable
@@ -23,8 +25,20 @@ o = @def1 begin
     end
 @def1 o t ∈ [ t0, 1 ], time
 @test :t0 ∈ keys(o.parsed.vars)
+@test o.parsed.t0 == :t0
+@test o.parsed.tf == 1
 @test o.initial_time == nothing
 @test o.final_time == 1
+
+o = @def1 begin
+    tf ∈ R, variable
+    end
+@def1 o t ∈ [ 0, tf ], time
+@test :tf ∈ keys(o.parsed.vars)
+@test o.parsed.t0 == t0
+@test o.parsed.tf == :tf
+@test o.initial_time == 0
+@test o.final_time == nothing
 
 @def1 o begin
     x ∈ R, state
@@ -50,19 +64,15 @@ x = [ 1, 2, 3 ]; u = [ -1, 2 ]
 t0 = 0
 tf = 1
 o = @def1 begin
-
     t ∈ [ t0, tf ], time
     x ∈ R^2, state
     u ∈ R, control
-
     x(t0) == [ -1, 0 ] 
     x(tf) == [  0, 0 ] 
-
     x'(t) == A*x(t) + B*u(t)
-
     ∫( 0.5u(t)^2 ) → min
-
 end
+# todo: write obj test
 
 @def1 o r = x[1]
 @test o.parsed.aliases[:r] == :( x[1] )
