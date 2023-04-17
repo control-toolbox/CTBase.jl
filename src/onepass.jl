@@ -134,7 +134,7 @@ p_objective(ocp, e, type; log) = begin
 	objective!($ocp, :lagrange,
 	    genfun2($ocp.parsed.x, # debug: no closure
 	    $ocp.parsed.u,
-	    replace_call(replace_call($(esc(ee)),
+	    replace_call(replace_call($ee,
 	    $ocp.parsed.x,
 	    $ocp.parsed.t,
 	    $ocp.parsed.x),
