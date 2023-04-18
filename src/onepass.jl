@@ -39,7 +39,7 @@ end
 p_variable(ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     vv = QuoteNode(v)
-    :( $ocp.parsed.vars[$vv] = $q )
+    :( $ocp.parsed.vars[$vv] = $(esc(q)) )
 end
 
 p_time(ocp, t, t0, tf; log=false) = begin
@@ -52,9 +52,9 @@ p_time(ocp, t, t0, tf; log=false) = begin
         $ocp.parsed.t0 = $tt0
         $ocp.parsed.tf = $ttf
         @match ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars)) begin
-            (false, false) => time!($ocp, [ $t0, $tf ] , String($tt))
-            (false, true ) => time!($ocp, :initial, $t0, String($tt))
-            (true , false) => time!($ocp, :final  , $tf, String($tt))
+            (false, false) => time!($ocp, [ $(esc(t0)), $(esc(tf)) ] , String($tt))
+            (false, true ) => time!($ocp, :initial, $(esc(t0)), String($tt))
+            (true , false) => time!($ocp, :final  , $(esc(tf)), String($tt))
             _              => throw("parsing error: both initial and final time " *
 	                            "cannot be variable")
         end
@@ -66,7 +66,7 @@ p_state(ocp, x, n=1; log=false) = begin
     xx = QuoteNode(x)
     quote
         $ocp.parsed.x = $xx
-        state!($ocp, $n) # todo: add state name
+        state!($ocp, $(esc(n))) # todo: add state name
     end
 end
 
@@ -75,7 +75,7 @@ p_control(ocp, u, m=1; log=false) = begin
     uu = QuoteNode(u)
     quote
         $ocp.parsed.u = $uu
-        control!($ocp, $m) # todo: add control name
+        control!($ocp, $(esc(m))) # todo: add control name
     end
 end
 
@@ -90,25 +90,16 @@ p_dynamics(ocp, x, t, e; log) = begin
     log && println("dynamics: $x'($t) == $e")
     xx = QuoteNode(x)
     tt = QuoteNode(t)
-    ee = QuoteNode(e)
-    gs = QuoteNode(gensym())
+    gs = gensym()
+    # quote $( replace_call(e, s) ) end
     quote # debug: let seems to be escaped; but vars local to @match seem not...
         ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
         ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
-	eval(Expr(:function, Expr(:call,
-   	    $gs,
-	    $ocp.parsed.x,
-	    $ocp.parsed.u),
-	    replace_call(replace_call($ee,
-	    $ocp.parsed.x,
-	    $ocp.parsed.t,
-	    $ocp.parsed.x),
-	    $ocp.parsed.u,
-	    $ocp.parsed.t,
-	    $ocp.parsed.u)))
-	constraint!($ocp,
-	    :dynamics,
-	    (a, b) -> Base.invokelatest(eval($gs), a, b))
+
+        function $gs($ocp.parsed.x, $ocp.parsed.u)
+	    $(esc( replace_call(e, t) ))
+	end
+	constraint!($ocp, :dynamics, $gs)
     end
 end
 
@@ -123,10 +114,10 @@ p_constraint_eq(ocp, e1, e2; log) = begin
 	    $ocp.parsed.tf,
 	    $ocp.parsed.x,
 	    $ocp.parsed.u) begin
-	    (:initial, nothing) => constraint!($ocp, :initial,      $ee2)
-	    (:initial, val    ) => constraint!($ocp, :initial, val, $ee2)
-	    (:final  , nothing) => constraint!($ocp, :final  ,      $ee2)
-	    (:final  , val    ) => constraint!($ocp, :final  , val, $ee2)
+	    (:initial, nothing) => constraint!($ocp, :initial,      $(esc(e2)))
+	    (:initial, val    ) => constraint!($ocp, :initial, val, $(esc(e2)))
+	    (:final  , nothing) => constraint!($ocp, :final  ,      $(esc(e2)))
+	    (:final  , val    ) => constraint!($ocp, :final  , val, $(esc(e2)))
 	    _ => throw("syntax error")
 	end
     end
@@ -167,7 +158,8 @@ Foo
 ```
 """
 macro def1(ocp, e)
-    esc( parse(ocp, e; log=true) )
+    #esc( parse(ocp, e; log=true) )
+    parse(esc(ocp), e; log=true)
 end
 
 """

@@ -106,6 +106,32 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Replace any call in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `x`, `x[i](t)` or `x[i:j](t)`, resp.
+
+# Example
+```jldoctest
+
+julia> e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(e, :t)
+:(F0(x) + u * F1(x))
+```
+"""
+replace_call(e, t) = begin
+    foo(t) = (h, args...) -> begin
+        ee = Expr(h, args...)
+    @match ee begin
+        :( $x[     ]($tt) ) => (tt == t) ? :( $x[  ]    ) : ee
+        :( $x[$i   ]($tt) ) => (tt == t) ? :( $x[$i]    ) : ee
+        :( $x[$i:$j]($tt) ) => (tt == t) ? :( $x[$i:$j] ) : ee
+        :( $x($tt)        ) => (tt == t) ? :( $x        ) : ee
+        _ => ee
+        end
+    end
+    expr_it(e, foo(t), x -> x)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return true if e contains e1.
 
 # Example
