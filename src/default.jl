@@ -1,4 +1,6 @@
-__fun_dimension() = 0
+__state_dimension() = :N
+__control_dimension() = :M
+__constraint_dimension() = :K
 
 """
 $(TYPEDSIGNATURES)

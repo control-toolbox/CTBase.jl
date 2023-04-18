@@ -37,7 +37,7 @@ and other constraints such as
 
 Let us define the following optimal control problem.
 
-```@example main
+```julia @example main
 using CTBase
 
 ocp = Model()

@@ -12,7 +12,7 @@ $(EXPORTS)
 module CTBase
 
 # using
-import Base: show, \, Base
+import Base: show, \, +, -, *, /, ^, isless, isequal, Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
@@ -40,34 +40,14 @@ const MyVector = AbstractVector{<:MyNumber}
 Type alias for a time.
 """
 const Time = ctNumber
-struct _Time
-    value::Time
-    function _Time(value::Time)
-        return new(value)
-    end
-end
-+(t1::_Time, t2::_Time)::_Time = _Time(t1.value + t2.value)
--(t1::_Time, t2::_Time)::_Time = t1.value - t2.value
-*(t1::_Time, t2::_Time)::_Time = _Time(t1.value * t2.value)
-/(t1::_Time, t2::_Time)::_Time = _Time(t1.value / t2.value)
-+(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value + t2)
-+(t1::ctNumber, t2::_Time)::_Time = _Time(t1 + t2.value)
--(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value - t2)
--(t1::ctNumber, t2::_Time)::_Time = _Time(t1 - t2.value)
-*(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value * t2)
-*(t1::ctNumber, t2::_Time)::_Time = _Time(t1 * t2.value)
-/(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value / t2)
-/(t1::ctNumber, t2::_Time)::_Time = _Time(t1 / t2.value)
 """
 Type alias for a vector of times.
 """
 const Times = AbstractVector{<:Time}
-_Time(times::Times) = _Time.(times)
 """
 Type alias for a grid of times.
 """
 const TimesDisc = Union{Times, StepRangeLen}
-_Time(times::StepRangeLen) = _Time.(times)
 """
 Type alias for a state.
 """
@@ -132,8 +112,8 @@ export IncorrectArgument, IncorrectOutput, NotImplemented
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
-export MayerObjective, LagrangeObjective, Dynamics, ControlFunction, MultiplierFunction
-export BoundaryConstraint, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
+export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
+export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint
 
 # model
 export OptimalControlModel
@@ -148,5 +128,8 @@ export plot
 
 # utils
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
+
+# _Time
+export _Time, +, -, *, /, ^, isless, isequal
 
 end
