@@ -18,13 +18,13 @@ $(TYPEDEF)
     vars::Dict{Symbol, Any}=Dict{Symbol, Any}() # idem
 end
 
-Base.show(io::IO, p::ParsingInfo) = begin
-    println(io, "t  = ", p.t) 
-    println(io, "t0 = ", p.t0) 
-    println(io, "tf = ", p.tf) 
-    println(io, "x  = ", p.x) 
-    println(io, "u  = ", p.u) 
-end
+## Base.show(io::IO, p::ParsingInfo) = begin # debug
+##    println(io, "t  = ", p.t) 
+##    println(io, "t0 = ", p.t0) 
+##    println(io, "tf = ", p.tf) 
+##    println(io, "x  = ", p.x) 
+##    println(io, "u  = ", p.u) 
+## end
 
 """
 $(TYPEDSIGNATURES)
@@ -54,11 +54,8 @@ parse!(p, ocp, e; log=false) = @match e begin
     if e isa LineNumberNode
         e
     elseif (e isa Expr) && (e.head == :block)
-	code = LineNumberNode(0, "start")
-	for ee ∈ e.args
-	    code = Expr(:block, code, parse!(p, ocp, ee; log))
-	end
-        code
+	Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
+	# assumes that map is done sequentially
     else
         throw("syntax error")
     end
@@ -67,7 +64,8 @@ end
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     p.vars[v] = q
-    :( LineNumberNode(1, "variable: $v, dim: $(esc(q))") )
+    vv = QuoteNode(v)
+    :( LineNumberNode(1, "variable: " * string($vv) * ", dim: " * string($q)) )
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
@@ -83,9 +81,9 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     p.tf = tf
     tt = QuoteNode(t)
     @match (t0 ∈ keys(p.vars), tf ∈ keys(p.vars)) begin
-        (false, false) => :( time!($ocp, [ $(esc(t0)), $(esc(tf)) ], String($tt)) )
-        (false, true ) => :( time!($ocp, :initial, $(esc(t0)), String($tt)) )
-        (true , false) => :( time!($ocp, :final  , $(esc(tf)), String($tt)) )
+        (false, false) => :( time!($ocp, [ $t0, $tf ] , string($tt)) )
+        (false, true ) => :( time!($ocp, :initial, $t0, string($tt)) )
+        (true , false) => :( time!($ocp, :final  , $tf, string($tt)) )
         _              => throw("parsing error: both initial and final time " *
 	                        "cannot be variable")
     end
@@ -94,22 +92,22 @@ end
 p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     p.x = x
-    :( state!($ocp, $(esc(n))) ) # todo: add state name
+    :( state!($ocp, $n) ) # todo: add state name
 end
 
 p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     p.u = u
-    :( control!($ocp, $(esc(m))) ) # todo: add control name
+    :( control!($ocp, $m) ) # todo: add control name
 end
 
 p_constraint_eq!(p, ocp, e1, e2; log) = begin
     log && println("constraint: $e1 == $e2")
     @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u) begin
-        (:initial, nothing) => :( constraint!($ocp, :initial,      $(esc(e2))) )
-	(:initial, val    ) => :( constraint!($ocp, :initial, val, $(esc(e2))) )
-	(:final  , nothing) => :( constraint!($ocp, :final  ,      $(esc(e2))) )
-	(:final  , val    ) => :( constraint!($ocp, :final  , val, $(esc(e2))) )
+        (:initial, nothing) => :( constraint!($ocp, :initial,      $e2) )
+	(:initial, val    ) => :( constraint!($ocp, :initial, val, $e2) )
+	(:final  , nothing) => :( constraint!($ocp, :final  ,      $e2) )
+	(:final  , val    ) => :( constraint!($ocp, :final  , val, $e2) )
 	_ => throw("syntax error")
     end
 end
@@ -122,7 +120,7 @@ p_dynamics!(p, ocp, x, t, e; log) = begin
     gs = gensym()
     quote
         function $gs($(p.x), $(p.u))
-	    $(esc(e))
+	    $e
 	end
 	constraint!($ocp, :dynamics, $gs)
     end
@@ -135,7 +133,7 @@ p_objective!(p, ocp, e, type; log) = begin
     gs = gensym()
     quote
         function $gs($(p.x), $(p.u))
-	    $(esc(e))
+	    $e
 	end
 	objective!($ocp, :lagrange, $gs, $ttype)
     end
@@ -152,9 +150,8 @@ Foo
 ```
 """
 macro def1(ocp, e)
-    #esc( parse(ocp, e; log=true) )
     p = ParsingInfo()
-    parse!(p, esc(ocp), e; log=true)
+    esc( parse!(p, ocp, e; log=true) )
 end
 
 """
@@ -168,6 +165,5 @@ Foo
 ```
 """
 macro def1(e)
-    #esc( quote ocp = Model(); @def1 ocp $e; ocp end ) # debug: todo
-    quote ocp = Model(); @def1 ocp $e; ocp end
+    esc( quote ocp = Model(); @def1 ocp $e; ocp end )
 end
