@@ -72,12 +72,21 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     p.t0 = t0
     p.tf = tf
     tt = QuoteNode(t)
+    tt0 = QuoteNode(t0)
+    ttf = QuoteNode(tf)
     @match (t0 ∈ keys(p.vars), tf ∈ keys(p.vars)) begin
         (false, false) => :( time!($ocp, [ $t0, $tf ] , string($tt)) )
-        (false, true ) => :( time!($ocp, :initial, $t0, string($tt)) )
-        (true , false) => :( time!($ocp, :final  , $tf, string($tt)) )
-        _              => throw("parsing error: both initial and final time " *
-	                        "cannot be variable")
+        (false, true ) => begin
+	    (p.vars[tf] ≠ 1) && throw("variable final time must be one dimensional")
+	    :( time!($ocp, :initial, $t0, string($tt)) ) end
+        (true , false) => begin
+	    (p.vars[t0] ≠ 1) && throw("variable initial time must be one dimensional")
+	    :( time!($ocp, :final  , $tf, string($tt)) ) end
+        _              => begin
+	    (p.vars[t0] ≠ 1) && throw("variable initial time must be one dimensional")
+	    (p.vars[tf] ≠ 1) && throw("variable final time must be one dimensional")
+	    :( LineNumberNode(1, "free initial time: " * string($tt0) *
+	                         ", free final time: " * string($ttf)) ) end
     end
 end
 

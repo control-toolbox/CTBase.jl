@@ -30,6 +30,14 @@ o = @def1 begin
 @test o.final_time == nothing
 
 o = @def1 begin
+    s0 ∈ R, variable
+    sf ∈ R, variable
+    s ∈ [ s0, sf ], time
+    end
+@test o.initial_time == nothing
+@test o.final_time == nothing
+
+o = @def1 begin
     x ∈ R, state
     u ∈ R, control
     end
@@ -67,5 +75,22 @@ B = [ 0
 @test o.dynamics(x, u) == A * x + B * u
 @test o.lagrange(x, u) == 0.5u^2 
 @test o.criterion == :min
+
+a = 1
+f(b) = begin # closure of a, local c, and @def1 in function
+    c = 3
+    @def1 begin
+        t ∈ [ a, b ], time
+        x ∈ R, state
+        u ∈ R, control
+        x'(t) == x(t) + u(t) + [ b + c + d ]
+    end
+end
+
+o = f(2)
+d = 4
+x = [ 10 ]
+u = [ 20 ]
+@test o.dynamics(x, u) == x + u + [ 2 + 3 + 4 ]
 
 end
