@@ -39,6 +39,7 @@ parse!(p, ocp, e; log=false) = @match e begin
     :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
     :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
+    :( $e1 == $e2, $num ) => p_constraint_eq!(p, ocp, e1, e2, num; log)
     :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
     :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
     _ =>
@@ -148,9 +149,9 @@ $(TYPEDSIGNATURES)
 Implement def1 macro core.
 
 """
-macro _def1(ocp, e)
+macro _def1(ocp, e, log=false)
     p = ParsingInfo()
-    esc( parse!(p, ocp, e; log=true) )
+    esc( parse!(p, ocp, e; log=log) )
 end
 
 """
@@ -171,6 +172,6 @@ Define an optimal control problem. One pass parsing of the definition.
 end
 ```
 """
-macro def1(e)
-    esc( quote ocp = Model(); @_def1 ocp $e; ocp end )
+macro def1(e, log=false)
+    esc( quote ocp = Model(); @_def1 ocp $e $log; ocp end )
 end
