@@ -39,7 +39,7 @@ parse!(p, ocp, e; log=false) = @match e begin
     :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
     :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
-    :( $e1 == $e2, $num ) => p_constraint_eq!(p, ocp, e1, e2, num; log)
+    :( $e1 == $e2, $label ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
     :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
     :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
     _ =>
@@ -103,18 +103,20 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     :( control!($ocp, $m) ) # todo: add control name
 end
 
-p_constraint_eq!(p, ocp, e1, e2; log) = begin
-    log && println("constraint: $e1 == $e2")
+p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
+    log && println("constraint: $e1 == $e2,    ($label)")
+    (label isa Integer) && ( label = Symbol(:eq, label) )
+    llabel = QuoteNode(label)
     @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u) begin
-        (:initial, nothing) => :( constraint!($ocp, :initial,       $e2) )
-	(:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2) )
-	(:final  , nothing) => :( constraint!($ocp, :final  ,       $e2) )
-	(:final  , val    ) => :( constraint!($ocp, :final  , $val, $e2) )
+        (:initial, nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
+	(:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
+	(:final  , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
+	(:final  , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
 	_ => throw("syntax error")
     end
 end
 
-p_dynamics!(p, ocp, x, t, e; log) = begin
+p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
     ( x ≠ p.x ) && throw("dynamics: wrong state")
     ( t ≠ p.t ) && throw("dynamics: wrong time")
