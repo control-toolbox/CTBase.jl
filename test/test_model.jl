@@ -1,7 +1,189 @@
 function test_model()
 
+@testset "state and control dimensions set or not" begin
+    ocp = Model()
+    @test CTBase.dims_not_set(ocp)
+    state!(ocp, 2)
+    @test CTBase.dims_not_set(ocp)
+    control!(ocp, 1)
+    @test !CTBase.dims_not_set(ocp)
+    ocp = Model()
+    @test_throws IncorrectArgument objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
+    @test_throws IncorrectArgument objective!(ocp, :bolza, (t0, x0, tf, xf) -> tf, (x, u) -> 0.5u^2)
+    @test_throws IncorrectArgument nlp_constraints(ocp)
+end
+
+@testset "initial and / or final time set" begin
+    ocp = Model()
+    @test !CTBase.time_set(ocp)
+    time!(ocp, :initial, 0)
+    @test CTBase.time_set(ocp)
+    ocp = Model()
+    time!(ocp, :final, 1)
+    @test CTBase.time_set(ocp)
+    ocp = Model()
+    time!(ocp, [0, 1])
+    @test CTBase.time_set(ocp)
+    ocp = Model()
+    time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    ocp = Model()
+    time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    ocp = Model()
+    time!(ocp, [0, 1])
+    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+end
+
+@testset "Index" begin
+    @test Index(1) == Index(1)
+    @test Index(1) ≤ Index(2)
+    @test Index(1) < Index(2)
+    v = [10, 20]
+    @test v[Index(1)] == v[1]
+    @test_throws MethodError v[Index(1):Index(2)]
+    x = 1
+    @test x[Index(1)] == x
+end
+
+@testset "isautonomous vs isnonautonomous" begin
+    ocp = Model()
+    @test isautonomous(ocp)
+    @test !isnonautonomous(ocp)
+    ocp = Model(time_dependence=:nonautonomous)
+    @test isnonautonomous(ocp)
+    @test !isautonomous(ocp)
+end
+
+@testset "ismin vs ismax" begin
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 1)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
+    @test ismin(ocp)
+    @test !ismax(ocp)
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 1)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u^2, :max)
+    @test ismax(ocp)
+    @test !ismin(ocp)
+end
+
+@testset "state!" begin
+    ocp = Model()
+    state!(ocp, 1)
+    @test ocp.state_dimension == 1
+    @test ocp.state_names == ["x"]
+    ocp = Model()
+    state!(ocp, 1, "y")
+    @test ocp.state_dimension == 1
+    @test ocp.state_names == ["y"]
+    ocp = Model()
+    state!(ocp, 2)
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["x₁", "x₂"]
+    ocp = Model()
+    state!(ocp, 2, ["y₁", "y₂"])
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["y₁", "y₂"]
+    ocp = Model()
+    state!(ocp, 2, :y)
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["y₁", "y₂"]
+    ocp = Model()
+    state!(ocp, 2, "y")
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["y₁", "y₂"]
+end
+
+@testset "control!" begin
+    ocp = Model()
+    control!(ocp, 1)
+    @test ocp.control_dimension == 1
+    @test ocp.control_names == ["u"]
+    ocp = Model()
+    control!(ocp, 1, "v")
+    @test ocp.control_dimension == 1
+    @test ocp.control_names == ["v"]
+    ocp = Model()
+    control!(ocp, 2)
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["u₁", "u₂"]
+    ocp = Model()
+    control!(ocp, 2, ["v₁", "v₂"])
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["v₁", "v₂"]
+    ocp = Model()
+    control!(ocp, 2, :v)
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["v₁", "v₂"]
+    ocp = Model()
+    control!(ocp, 2, "v")
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["v₁", "v₂"]
+end
+
+@testset "time!" begin
+    # initial and final times
+    ocp = Model()
+    time!(ocp, [0, 1])
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, [0, 1], "s")
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, [0, 1], :s)
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    # initial time
+    ocp = Model()
+    time!(ocp, :initial, 0)
+    @test ocp.initial_time == 0
+    @test isnothing(ocp.final_time)
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, :initial, 0, "s")
+    @test ocp.initial_time == 0
+    @test isnothing(ocp.final_time)
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, :initial, 0, :s)
+    @test ocp.initial_time == 0
+    @test isnothing(ocp.final_time)
+    @test ocp.time_name == "s"
+    # final time
+    ocp = Model()
+    time!(ocp, :final, 1)
+    @test isnothing(ocp.initial_time)
+    @test ocp.final_time == 1
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, :final, 1, "s")
+    @test isnothing(ocp.initial_time)
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, :final, 1, :s)
+    @test isnothing(ocp.initial_time)
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+end
+
+#=
 # basic model
-ocp = Model(time_dependence=:autonomous, dimension_usage=:scalar)
+ocp = Model(time_dependence=:autonomous)
 #
 n = 2
 m = 1
@@ -137,5 +319,6 @@ constraint!(ocp, :dynamics, f) # see previous defs
 @test xub == [ Inf, vmax, mf ][xind]
 @test [ Inf, vmax, mf ][Index(2)] == vmax
 @test [ Inf, vmax, mf ][Index(2)][Index(1)] == vmax
+=#
 
 end

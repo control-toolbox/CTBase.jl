@@ -124,3 +124,24 @@ $(TYPEDSIGNATURES)
 Print the exception.
 """
 Base.showerror(io::IO, e::NotImplemented) = print(io, "NotImplemented: ", e.var)
+
+
+"""
+$(TYPEDEF)
+
+Exception thrown when a call to a function is not authorized.
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct UnauthorizedCall <: CTException
+    var::String
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Print the exception.
+"""
+Base.showerror(io::IO, e::UnauthorizedCall) = print(io, "UnauthorizedCall: ", e.var)

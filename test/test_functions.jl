@@ -68,7 +68,7 @@ end
 end
 
 @testset "Hamiltonian" begin
-    @test_throws ErrorException Hamiltonian((x, p) -> x + p, time_dependence=:dummy)
+    @test_throws InconsistentArgument Hamiltonian((x, p) -> x + p, time_dependence=:dummy)
     @testset "Classical calls" begin
         H = Hamiltonian((x, p) -> x + p)
         @test H(1, 1) == 2
@@ -99,7 +99,7 @@ end
 end
 
 @testset "HamiltonianVectorField" begin
-    @test_throws ErrorException HamiltonianVectorField((x, p) -> [x + p, x - p], time_dependence=:dummy)
+    @test_throws InconsistentArgument HamiltonianVectorField((x, p) -> [x + p, x - p], time_dependence=:dummy)
     @testset "Classical calls" begin
         Hv = HamiltonianVectorField((x, p) -> [x + p, x - p])
         @test Hv(1, 1) == [2, 0]
@@ -130,7 +130,7 @@ end
 end
 
 @testset "VectorField" begin
-    @test_throws ErrorException VectorField(x -> 2x, time_dependence=:dummy)
+    @test_throws InconsistentArgument VectorField(x -> 2x, time_dependence=:dummy)
     @testset "Classical calls" begin
         V = VectorField(x -> 2x)
         @test V(1) == 2
@@ -161,7 +161,7 @@ end
 end
 
 @testset "Lagrange" begin
-    @test_throws ErrorException Lagrange((x, u) -> x + u, time_dependence=:dummy)
+    @test_throws InconsistentArgument Lagrange((x, u) -> x + u, time_dependence=:dummy)
     @testset "Classical calls" begin
         L = Lagrange((x, u) -> x + u, time_dependence=:autonomous)
         @test L(1, 1) == 2
@@ -215,7 +215,7 @@ end
 end
 
 @testset "Dynamics" begin
-    @test_throws ErrorException Dynamics((x, u) -> x + u, time_dependence=:dummy)
+    @test_throws InconsistentArgument Dynamics((x, u) -> x + u, time_dependence=:dummy)
     @testset "Classical calls" begin
         F = Dynamics((x, u) -> x + u)
         @test F(1, 1) == 2
@@ -262,7 +262,7 @@ end
 end
 
 @testset "StateConstraint" begin
-    @test_throws ErrorException StateConstraint(x -> x, time_dependence=:dummy)
+    @test_throws InconsistentArgument StateConstraint(x -> x, time_dependence=:dummy)
     @testset "Classical calls" begin
         S = StateConstraint(x -> x^2) 
         @test S(1) == 1
@@ -310,7 +310,7 @@ end
 end
 
 @testset "ControlConstraint" begin
-    @test_throws ErrorException ControlConstraint(u -> u, time_dependence=:dummy)
+    @test_throws InconsistentArgument ControlConstraint(u -> u, time_dependence=:dummy)
     @testset "Classical calls" begin
         C = ControlConstraint(u -> u^2)
         @test C(1) == 1
@@ -358,7 +358,7 @@ end
 end
 
 @testset "MixedConstraint" begin
-    @test_throws ErrorException MixedConstraint((x, u) -> x, time_dependence=:dummy)
+    @test_throws InconsistentArgument MixedConstraint((x, u) -> x, time_dependence=:dummy)
     @testset "Classical calls" begin
         M = MixedConstraint((x, u) -> x^2 + u^2)
         @test M(1, 1) == 2
@@ -432,7 +432,7 @@ end
 end
 
 @testset "FeedbackControl" begin
-    @test_throws ErrorException FeedbackControl(x -> x^2, time_dependence=:dummy)
+    @test_throws InconsistentArgument FeedbackControl(x -> x^2, time_dependence=:dummy)
     @testset "Classical calls" begin
         u = FeedbackControl(x -> x^2)
         @test u(1) == 1
@@ -453,7 +453,7 @@ end
 end
 
 @testset "ControlLaw" begin
-    @test_throws ErrorException ControlLaw((x, p) -> x^2, time_dependence=:dummy)
+    @test_throws InconsistentArgument ControlLaw((x, p) -> x^2, time_dependence=:dummy)
     @testset "Classical calls" begin
         u = ControlLaw((x, p) -> x^2)
         @test u(1, 1) == 1
@@ -475,7 +475,7 @@ end
 end
 
 @testset "Multiplier" begin
-    @test_throws ErrorException Multiplier((x, p) -> x^2, time_dependence=:dummy)
+    @test_throws InconsistentArgument Multiplier((x, p) -> x^2, time_dependence=:dummy)
     @testset "Classical calls" begin
         μ = Multiplier((x, p) -> x^2)
         @test μ(1, 1) == 1

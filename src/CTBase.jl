@@ -12,7 +12,7 @@ $(EXPORTS)
 module CTBase
 
 # using
-import Base: show, \, +, -, *, /, ^, isless, isequal, Base
+import Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
@@ -108,7 +108,7 @@ export Description, makeDescription, add, getFullDescription, \
 
 # exceptions
 export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
-export IncorrectArgument, IncorrectOutput, NotImplemented
+export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
@@ -130,6 +130,6 @@ export plot
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
 # _Time
-export _Time, +, -, *, /, ^, isless, isequal
+export _Time
 
 end
