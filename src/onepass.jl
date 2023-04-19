@@ -3,6 +3,22 @@
 # not declarations); add default unalias for x₁, etc.
 
 """
+$(TYPEDEF)
+
+**Fields**
+
+"""
+@with_kw mutable struct ParsingInfo
+    aliases::Dict{Symbol, Any}=Dict{Symbol, Any}()
+    vars::Dict{Symbol, Integer}=Dict{Symbol, Integer}()
+    t::Union{Symbol, Nothing}=nothing
+    t0::Union{Real, Symbol, Expr, Nothing}=nothing
+    tf::Union{Real, Symbol, Expr, Nothing}=nothing
+    x::Union{Symbol, Nothing}=nothing
+    u::Union{Symbol, Nothing}=nothing
+end
+
+"""
 $(TYPEDSIGNATURES)
 
 Foo

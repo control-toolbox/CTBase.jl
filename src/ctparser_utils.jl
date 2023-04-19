@@ -106,7 +106,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Replace any call in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `x`, `x[i](t)` or `x[i:j](t)`, resp.
+Replace ANY call in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `x`, `x[i](t)` or `x[i:j](t)`, resp.
 
 # Example
 ```jldoctest
