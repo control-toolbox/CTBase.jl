@@ -1,5 +1,6 @@
 # onepass
-# todo: add aliases for R^n (just write _sup(i))
+# todo: add aliases for R^n (just write _sup(i)) to the default value of
+# p.aliases
 
 """
 $(TYPEDEF)
