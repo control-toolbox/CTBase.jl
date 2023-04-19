@@ -18,6 +18,14 @@ $(TYPEDEF)
     vars::Dict{Symbol, Any}=Dict{Symbol, Any}() # idem
 end
 
+Base.show(io::IO, p::ParsingInfo) = begin
+    println(io, "t  = ", p.t) 
+    println(io, "t0 = ", p.t0) 
+    println(io, "tf = ", p.tf) 
+    println(io, "x  = ", p.x) 
+    println(io, "u  = ", p.u) 
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -76,8 +84,8 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     tt = QuoteNode(t)
     @match (t0 ∈ keys(p.vars), tf ∈ keys(p.vars)) begin
         (false, false) => :( time!($ocp, [ $(esc(t0)), $(esc(tf)) ], String($tt)) )
-        (false, true ) => :( time!($ocp, :initial, $(esc(t0)), String($tt)) :)
-        (true , false) => :( time!($ocp, :final  , $(esc(tf)), String($tt)) :)
+        (false, true ) => :( time!($ocp, :initial, $(esc(t0)), String($tt)) )
+        (true , false) => :( time!($ocp, :final  , $(esc(tf)), String($tt)) )
         _              => throw("parsing error: both initial and final time " *
 	                        "cannot be variable")
     end
@@ -97,7 +105,7 @@ end
 
 p_constraint_eq!(p, ocp, e1, e2; log) = begin
     log && println("constraint: $e1 == $e2")
-    @match constraint_type($e1, p.t, p.t0, p.tf, p.x, p.u) begin
+    @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u) begin
         (:initial, nothing) => :( constraint!($ocp, :initial,      $(esc(e2))) )
 	(:initial, val    ) => :( constraint!($ocp, :initial, val, $(esc(e2))) )
 	(:final  , nothing) => :( constraint!($ocp, :final  ,      $(esc(e2))) )
