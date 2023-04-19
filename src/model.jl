@@ -10,22 +10,6 @@ $(TYPEDEF)
 
 **Fields**
 
-"""
-@with_kw mutable struct ParsingInfo
-    aliases::Dict{Symbol, Any}=Dict{Symbol, Any}()
-    vars::Dict{Symbol, Integer}=Dict{Symbol, Integer}()
-    t::Union{Symbol, Nothing}=nothing
-    t0::Union{Real, Symbol, Expr, Nothing}=nothing
-    tf::Union{Real, Symbol, Expr, Nothing}=nothing
-    x::Union{Symbol, Nothing}=nothing
-    u::Union{Symbol, Nothing}=nothing
-end
-
-"""
-$(TYPEDEF)
-
-**Fields**
-
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModel{time_dependence, dimension_usage} <: AbstractOptimalControlModel
@@ -45,8 +29,6 @@ $(TYPEDFIELDS)
     # store parsing informations inside Model itself
     defined_with_macro::Bool=false
     generated_code::Array{String}=[]
-    # onepass parsing info
-    parsed::ParsingInfo=ParsingInfo()
 end
 
 # Constraint index
