@@ -1,6 +1,6 @@
 # onepass
 # todo: unalias expressions (in constraints and cost, not declarations);
-# add default unalias for x₁, etc.
+# add default unalias for x₁, etc. 
 
 """
 $(TYPEDEF)
