@@ -1,6 +1,5 @@
 # onepass
-# todo: unalias expressions (in constraints and cost, not declarations);
-# add default unalias for x₁, etc. 
+# todo: add aliases for R^n (just write _sup(i))
 
 """
 $(TYPEDEF)
@@ -14,9 +13,11 @@ $(TYPEDEF)
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    aliases::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Any}() # this Any could refined
-    vars::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Any}() # idem
+    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Union{Real, Symbol, Expr}}()
+    vars::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Union{Real, Symbol, Expr}}()
 end
+
+_sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
 
 """
 $(TYPEDSIGNATURES)
@@ -28,14 +29,20 @@ Foo
 Foo
 ```
 """
-parse!(p, ocp, e; log=false) = @match e begin
+parse!(p, ocp, e; log=false) = begin
+    for a ∈ keys(p.aliases)
+        e = subs(e, a, p.aliases[a])
+    end
+    @match e begin
     :( $v ∈ R^$q, variable ) => p_variable!(p, ocp, v, q; log)
     :( $v ∈ R   , variable ) => p_variable!(p, ocp, v   ; log)
     :( $t ∈ [ $t0, $tf ], time ) => p_time!(p, ocp, t, t0, tf; log)
     :( $x ∈ R^$n, state ) => p_state!(p, ocp, x, n; log)
     :( $x ∈ R   , state ) => p_state!(p, ocp, x   ; log)
+    :( $x ∈ R²  , state ) => p_state!(p, ocp, x, 2; log)
     :( $u ∈ R^$m, control ) => p_control!(p, ocp, u, m; log)
     :( $u ∈ R   , control ) => p_control!(p, ocp, u   ; log)
+    :( $u ∈ R²  , control ) => p_control!(p, ocp, u, 2; log)
     :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
     :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
@@ -51,12 +58,13 @@ parse!(p, ocp, e; log=false) = @match e begin
 	# assumes that map is done sequentially
     else
         throw("syntax error")
-    end
+    end end
 end
 
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     p.vars[v] = q
+    (q isa Integer) && for i ∈ 1:q p.aliases[Symbol(v, _sub(i))] = :( $v[$i] ) end
     vv = QuoteNode(v)
     :( LineNumberNode(1, "variable: " * string($vv) * ", dim: " * string($q)) )
 end
@@ -64,7 +72,9 @@ end
 p_alias!(p, ocp, a, e; log=false) = begin
     log && println("alias: $a = $e")
     p.aliases[a] = e
-    :( LineNumberNode(2, "alias: $a = $e") )
+    aa = QuoteNode(a)
+    ee = QuoteNode(e)
+    :( LineNumberNode(2, "alias: " * string($aa) *" = " * string($ee)) )
 end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
@@ -94,12 +104,14 @@ end
 p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     p.x = x
+    (n isa Integer) && for i ∈ 1:n p.aliases[Symbol(x, _sub(i))] = :( $x[$i] ) end
     :( state!($ocp, $n) ) # todo: add state name
 end
 
 p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     p.u = u
+    (m isa Integer) && for i ∈ 1:m p.aliases[Symbol(u, _sub(i))] = :( $u[$i] ) end
     :( control!($ocp, $m) ) # todo: add control name
 end
 
@@ -120,8 +132,7 @@ p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
     ( x ≠ p.x ) && throw("dynamics: wrong state")
     ( t ≠ p.t ) && throw("dynamics: wrong time")
-    e = replace_call(e, p.x, p.t, p.x)
-    e = replace_call(e, p.u, p.t, p.u)
+    e = replace_call(e, p.t)
     gs = gensym()
     quote
         function $gs($(p.x), $(p.u))
@@ -133,8 +144,7 @@ end
 
 p_objective!(p, ocp, e, type; log) = begin
     log && println("objective: ∫($e) → $type")
-    e = replace_call(e, p.x, p.t, p.x)
-    e = replace_call(e, p.u, p.t, p.u)
+    e = replace_call(e, p.t)
     ttype = QuoteNode(type)
     gs = gensym()
     quote

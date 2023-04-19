@@ -17,11 +17,12 @@ import Base: show, \, Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-@reexport using MLStyle # generated code uses @match and so
+@reexport using MLStyle # pattern matching 
 using Parameters # @with_kw: to have default values in struct
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using Printf # to print an OptimalControlModel
+using DataStructures # OrderedDict for aliases
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types

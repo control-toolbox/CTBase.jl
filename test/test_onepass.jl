@@ -29,6 +29,18 @@ o = @def1 begin
 @test o.initial_time == 0
 @test o.final_time == nothing
 
+## @test try @def1 begin
+##     t0 ∈ R^2, variable
+##     t ∈ [ t0, 1 ], time
+##     end
+## catch _ true end
+## 
+## @test try @def1 begin
+##     tf ∈ R^2, variable
+##     t ∈ [ 0, tf ], time
+##     end
+## catch _ true end
+
 o = @def1 begin
     s0 ∈ R, variable
     sf ∈ R, variable
@@ -61,7 +73,7 @@ o = @def1 begin
     t ∈ [ t0, tf ], time
     x ∈ R^2, state
     u ∈ R, control
-    x(t0) == [ -1, 0 ] 
+    x(t0) == [ -1, 0 ], (1) 
     x(tf) == [  0, 0 ] 
     x'(t) == A * x(t) + B * u(t)
     ∫( 0.5u(t)^2 ) → min
@@ -72,6 +84,7 @@ A = [ 0 1
       0 0 ]
 B = [ 0
       1 ]
+@test o.constraint(:eq1)(x) == x
 @test o.dynamics(x, u) == A * x + B * u
 @test o.lagrange(x, u) == 0.5u^2 
 @test o.criterion == :min
