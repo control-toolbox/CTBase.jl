@@ -14,8 +14,8 @@ $(TYPEDEF)
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    aliases::Dict{Symbol, Any}=Dict{Symbol, Any}() # this Any could refined
-    vars::Dict{Symbol, Any}=Dict{Symbol, Any}() # idem
+    aliases::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Any}() # this Any could refined
+    vars::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Any}() # idem
 end
 
 """
