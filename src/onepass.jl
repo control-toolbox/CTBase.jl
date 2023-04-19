@@ -96,9 +96,9 @@ end
 p_constraint_eq!(p, ocp, e1, e2; log) = begin
     log && println("constraint: $e1 == $e2")
     @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u) begin
-        (:initial, nothing) => :( constraint!($ocp, :initial,      $e2) )
+        (:initial, nothing) => :( constraint!($ocp, :initial,       $e2) )
 	(:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2) )
-	(:final  , nothing) => :( constraint!($ocp, :final  ,      $e2) )
+	(:final  , nothing) => :( constraint!($ocp, :final  ,       $e2) )
 	(:final  , val    ) => :( constraint!($ocp, :final  , $val, $e2) )
 	_ => throw("syntax error")
     end
