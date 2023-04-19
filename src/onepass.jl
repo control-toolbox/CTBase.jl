@@ -117,7 +117,8 @@ p_dynamics!(p, ocp, x, t, e; log) = begin
     log && println("dynamics: $x'($t) == $e")
     ( x ≠ p.x ) && throw("dynamics: wrong state")
     ( t ≠ p.t ) && throw("dynamics: wrong time")
-    e = replace_call(e, p.t)
+    e = replace_call(e, p.x, p.t, p.x)
+    e = replace_call(e, p.u, p.t, p.u)
     gs = gensym()
     quote
         function $gs($(p.x), $(p.u))
@@ -129,7 +130,8 @@ end
 
 p_objective!(p, ocp, e, type; log) = begin
     log && println("objective: ∫($e) → $type")
-    e = replace_call(e, p.t)
+    e = replace_call(e, p.x, p.t, p.x)
+    e = replace_call(e, p.u, p.t, p.u)
     ttype = QuoteNode(type)
     gs = gensym()
     quote
