@@ -112,10 +112,14 @@ o = @def1 begin
     r = x₁
     v = x₂
     w = r + 2v
+    r(0) == 0,    (1)
+    v(0) == 1,    (♡)
     x'(t) == [ v(t), w(t)^2 ]
     end 
 x = [ 1, 2 ]
 u = [ 3 ]
+@test constraint(o, :eq1 )(x) == x[1]
+@test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 
 end
