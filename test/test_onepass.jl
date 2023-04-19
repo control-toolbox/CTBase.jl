@@ -84,7 +84,7 @@ A = [ 0 1
       0 0 ]
 B = [ 0
       1 ]
-@test o.constraint(:eq1)(x) == x
+@test constraint(o, :eq1)(x) == x
 @test o.dynamics(x, u) == A * x + B * u
 @test o.lagrange(x, u) == 0.5u^2 
 @test o.criterion == :min

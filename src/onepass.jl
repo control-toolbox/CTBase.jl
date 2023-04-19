@@ -14,7 +14,7 @@ $(TYPEDEF)
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Union{Real, Symbol, Expr}}()
+    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
     vars::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Union{Real, Symbol, Expr}}()
 end
 
