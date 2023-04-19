@@ -42,6 +42,13 @@ p_variable(ocp, v, q=1; log=false) = begin
     :( $ocp.parsed.vars[$vv] = $(esc(q)) )
 end
 
+p_alias(ocp, a, e; log=false) = begin
+    log && println("alias: $a = $e")
+    aa = QuoteNode(a)
+    ee = QuoteNode(e)
+    :( $ocp.parsed.aliases[$aa] = $ee )
+end
+
 p_time(ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
     tt = QuoteNode(t)
@@ -52,7 +59,7 @@ p_time(ocp, t, t0, tf; log=false) = begin
         $ocp.parsed.t0 = $tt0
         $ocp.parsed.tf = $ttf
         @match ($tt0 ∈ keys($ocp.parsed.vars), $ttf ∈ keys($ocp.parsed.vars)) begin
-            (false, false) => time!($ocp, [ $(esc(t0)), $(esc(tf)) ] , String($tt))
+            (false, false) => time!($ocp, [ $(esc(t0)), $(esc(tf)) ], String($tt))
             (false, true ) => time!($ocp, :initial, $(esc(t0)), String($tt))
             (true , false) => time!($ocp, :final  , $(esc(tf)), String($tt))
             _              => throw("parsing error: both initial and final time " *
@@ -79,34 +86,9 @@ p_control(ocp, u, m=1; log=false) = begin
     end
 end
 
-p_alias(ocp, a, e; log=false) = begin
-    log && println("alias: $a = $e")
-    aa = QuoteNode(a)
-    ee = QuoteNode(e)
-    :( $ocp.parsed.aliases[$aa] = $ee )
-end
-
-p_dynamics(ocp, x, t, e; log) = begin
-    log && println("dynamics: $x'($t) == $e")
-    xx = QuoteNode(x)
-    tt = QuoteNode(t)
-    gs = gensym()
-    # quote $( replace_call(e, s) ) end
-    quote # debug: let seems to be escaped; but vars local to @match seem not...
-        ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
-        ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
-
-        function $gs($ocp.parsed.x, $ocp.parsed.u)
-	    $(esc( replace_call(e, t) ))
-	end
-	constraint!($ocp, :dynamics, $gs)
-    end
-end
-
 p_constraint_eq(ocp, e1, e2; log) = begin
     log && println("constraint: $e1 == $e2")
     ee1 = QuoteNode(e1)
-    ee2 = QuoteNode(e2)
     quote
         @match constraint_type($ee1,
 	    $ocp.parsed.t,
@@ -123,27 +105,31 @@ p_constraint_eq(ocp, e1, e2; log) = begin
     end
 end
 
+p_dynamics(ocp, x, t, e; log) = begin
+    log && println("dynamics: $x'($t) == $e")
+    xx = QuoteNode(x)
+    tt = QuoteNode(t)
+    gs = gensym()
+    quote # debug: let seems to be escaped; but vars local to @match seem not...
+        ( $xx ≠ $ocp.parsed.x ) && throw("dynamics: wrong state")
+        ( $tt ≠ $ocp.parsed.t ) && throw("dynamics: wrong time")
+        function $gs($ocp.parsed.x, $ocp.parsed.u)
+	    $( replace_call(esc(e), ocp.parsed.t) )
+	end
+	constraint!($ocp, :dynamics, $gs)
+    end
+end
+
 p_objective(ocp, e, type; log) = begin
     log && println("objective: ∫($e) → $type")
-    ee = QuoteNode(e)
+    e = replace_call(e, :t) # debug
     ttype = QuoteNode(type)
-    gs = QuoteNode(gensym())
+    gs = gensym()
     quote
-	eval(Expr(:function, Expr(:call,
-   	    $gs,
-	    $ocp.parsed.x,
-	    $ocp.parsed.u),
-	    replace_call(replace_call($ee,
-	    $ocp.parsed.x,
-	    $ocp.parsed.t,
-	    $ocp.parsed.x),
-	    $ocp.parsed.u,
-	    $ocp.parsed.t,
-	    $ocp.parsed.u)))
-	objective!($ocp,
-	    :lagrange,
-	    (a, b) -> Base.invokelatest(eval($gs), a, b),
-	    $ttype)
+        function $gs($ocp.parsed.x, $ocp.parsed.u)
+	    $(esc(e))
+	end
+	objective!($ocp, :lagrange, $gs, $ttype)
     end
 end
  
@@ -173,5 +159,6 @@ Foo
 ```
 """
 macro def1(e)
-    esc( quote ocp = Model(); @def1 ocp $e; ocp end )
+    #esc( quote ocp = Model(); @def1 ocp $e; ocp end ) # debug: todo
+    quote ocp = Model(); @def1 ocp $e; ocp end
 end
