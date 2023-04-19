@@ -99,11 +99,23 @@ f(b) = begin # closure of a, local c, and @def1 in function
         x'(t) == x(t) + u(t) + [ b + c + d ]
     end
 end
-
 o = f(2)
 d = 4
 x = [ 10 ]
 u = [ 20 ]
 @test o.dynamics(x, u) == x + u + [ 2 + 3 + 4 ]
+
+o = @def1 begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R², state
+    u ∈ R, control
+    r = x₁
+    v = x₂
+    w = r + 2v
+    x'(t) == [ v(t), w(t)^2 ]
+    end 
+x = [ 1, 2 ]
+u = [ 3 ]
+@test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 
 end
