@@ -18,14 +18,6 @@ $(TYPEDEF)
     vars::Dict{Symbol, Any}=Dict{Symbol, Any}() # idem
 end
 
-## Base.show(io::IO, p::ParsingInfo) = begin # debug
-##    println(io, "t  = ", p.t) 
-##    println(io, "t0 = ", p.t0) 
-##    println(io, "tf = ", p.tf) 
-##    println(io, "x  = ", p.x) 
-##    println(io, "u  = ", p.u) 
-## end
-
 """
 $(TYPEDSIGNATURES)
 
@@ -142,12 +134,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Foo
+Implement def1 macro core.
 
-# Example
-```jldoctest
-Foo
-```
 """
 macro _def1(ocp, e)
     p = ParsingInfo()
@@ -157,11 +145,19 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Foo
+Define an optimal control problem. One pass parsing of the definition.
 
 # Example
 ```jldoctest
-Foo
+@def1 begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R^2, state
+    u ∈ R  , control
+    x(0) == [ 1, 2 ]
+    x(1) == [ 0, 0 ]
+    x'(t) == [ x[2](t), u(t) ]
+    ∫( u(t)^2 ) → min
+end
 ```
 """
 macro def1(e)
