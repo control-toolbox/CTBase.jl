@@ -149,7 +149,7 @@ Foo
 Foo
 ```
 """
-macro def1(ocp, e)
+macro _def1(ocp, e)
     p = ParsingInfo()
     esc( parse!(p, ocp, e; log=true) )
 end
@@ -165,5 +165,5 @@ Foo
 ```
 """
 macro def1(e)
-    esc( quote ocp = Model(); @def1 ocp $e; ocp end )
+    esc( quote ocp = Model(); @_def1 ocp $e; ocp end )
 end
