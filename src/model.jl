@@ -235,6 +235,7 @@ Add an `:initial` or `:final` value constraint on a range of the state.
 
 # Examples
 ```jldoctest
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
 julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
 julia> constraint!(ocp, :final, Index(1), 0)
 ```
@@ -286,7 +287,7 @@ julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [1, 2])
 julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
-julia> constraint!(ocp, :initial, 1:2:3, [ 0, 0, 0], [1, 2, 1])
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0], [1, 2, 1])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
