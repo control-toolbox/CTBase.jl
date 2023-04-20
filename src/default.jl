@@ -25,15 +25,6 @@ __ocp_time_dependence() = :autonomous
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the dimension usage of the Optimal Control Problem.
-The default value is `:scalar`, which means that the usage for all the functions used to define the
-Optimal Control Problem is considered scalar.
-"""
-__ocp_dimension_usage() = :scalar
-
-"""
-$(TYPEDSIGNATURES)
-
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """

@@ -1,3 +1,13 @@
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Used to define typed methods to make specific calls.
+
+"""
 struct _Time
     value::Time
     function _Time(value::Time)
@@ -39,9 +49,6 @@ $(TYPEDEF)
 Abstract type for functions.
 """
 abstract type AbstractCTFunction <: Function end
-
-#
-const abstract_heritance=:AbstractCTFunction
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is of dimension 1
@@ -986,6 +993,17 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if x is scalar
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `Lagrange`, but the function `f` is assumed to return a vector of the same dimension as the state `x`.
+
+"""
 struct Dynamics{time_dependence, state_dimension, control_dimension}
     f::Function
     function Dynamics(f::Function; 
@@ -1045,6 +1063,17 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `VectorField` in the usage, but the dimension of the output of the function `f` is arbitrary.
+
+"""
 struct StateConstraint{time_dependence, state_dimension, constraint_dimension}
     f::Function
     function StateConstraint(f::Function; 
@@ -1108,6 +1137,17 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `VectorField` in the usage, but the dimension of the output of the function `f` is arbitrary.
+
+"""
 struct ControlConstraint{time_dependence, control_dimension, constraint_dimension}
     f::Function
     function ControlConstraint(f::Function; 
@@ -1171,6 +1211,17 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `Lagrange` in the usage, but the dimension of the output of the function `f` is arbitrary.
+
+"""
 struct MixedConstraint{time_dependence, state_dimension, control_dimension, constraint_dimension}
     f::Function
     function MixedConstraint(f::Function; 
@@ -1279,6 +1330,22 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The function `f` must be of the form `f(t, x, args...; kwargs...)` or `f(x, args...; kwargs...)` depending on 
+the time dependence of the optimal control problem.
+
+!!! note
+
+    Only classical usage.
+
+"""
 struct FeedbackControl{time_dependence}
     f::Function
     function FeedbackControl(f::Function; 
@@ -1300,6 +1367,22 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The function `f` must be of the form `f(t, x, p, args...; kwargs...)` or `f(x, p, args...; kwargs...)` depending on 
+the time dependence of the optimal control problem.
+
+!!! note
+
+    Only classical usage.
+
+"""
 struct ControlLaw{time_dependence}
     f::Function
     function ControlLaw(f::Function; 
@@ -1323,6 +1406,22 @@ end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The function `f` must be of the form `f(t, x, p, args...; kwargs...)` or `f(x, p, args...; kwargs...)` depending on 
+the time dependence of the optimal control problem.
+
+!!! note
+
+    Only classical usage.
+
+"""
 struct Multiplier{time_dependence}
     f::Function
     function Multiplier(f::Function; 

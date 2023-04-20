@@ -104,7 +104,7 @@ export CTCallback, CTCallbacks, PrintCallback, StopCallback
 export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # description
-export Description, makeDescription, add, getFullDescription, \
+export Description, makeDescription, add, getFullDescription
 
 # exceptions
 export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
