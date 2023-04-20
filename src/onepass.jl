@@ -14,8 +14,22 @@ $(TYPEDEF)
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
+    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=_init_aliases()
     vars::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Union{Real, Symbol, Expr}}()
+end
+
+_init_aliases() = begin
+    al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
+    al[:R¹] = :( R^1 )
+    al[:R²] = :( R^2 )
+    al[:R³] = :( R^3 )
+    al[:R⁴] = :( R^4 )
+    al[:R⁵] = :( R^5 )
+    al[:R⁶] = :( R^6 )
+    al[:R⁷] = :( R^7 )
+    al[:R⁸] = :( R^8 )
+    al[:R⁹] = :( R^9 )
+    al
 end
 
 _sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
@@ -40,10 +54,8 @@ parse!(p, ocp, e; log=false) = begin
     :( $t ∈ [ $t0, $tf ], time ) => p_time!(p, ocp, t, t0, tf; log)
     :( $x ∈ R^$n, state ) => p_state!(p, ocp, x, n; log)
     :( $x ∈ R   , state ) => p_state!(p, ocp, x   ; log)
-    :( $x ∈ R²  , state ) => p_state!(p, ocp, x, 2; log)
     :( $u ∈ R^$m, control ) => p_control!(p, ocp, u, m; log)
     :( $u ∈ R   , control ) => p_control!(p, ocp, u   ; log)
-    :( $u ∈ R²  , control ) => p_control!(p, ocp, u, 2; log)
     :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
     :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
     :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
