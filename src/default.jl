@@ -69,6 +69,14 @@ __ocp_dimension_usage() = :scalar
 """
 $(TYPEDSIGNATURES)
 
+Used to set the default value of the names of the variables.
+The default value is `["v"]` for a one dimensional variable, and `["v₁", "v₂", ...]` for a multi dimensional variable.
+"""
+__variable_names(q::Dimension) = q==1 ? "v" : [ "v" * ctindices(i) for i ∈ range(1, q)]
+
+"""
+$(TYPEDSIGNATURES)
+
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """

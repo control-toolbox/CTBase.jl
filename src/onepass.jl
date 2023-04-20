@@ -1,6 +1,5 @@
 # onepass
-# todo: add aliases for R^n (just write _sup(i)) to the default value of
-# p.aliases
+# todo: 
 
 """
 $(TYPEDEF)
@@ -9,13 +8,13 @@ $(TYPEDEF)
 
 """
 @with_kw mutable struct ParsingInfo
+    v::Union{Symbol, Nothing}=nothing
     t::Union{Symbol, Nothing}=nothing
     t0::Union{Real, Symbol, Expr, Nothing}=nothing
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
     aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=_init_aliases()
-    vars::Dict{Symbol, Union{Real, Symbol, Expr}}=Dict{Symbol, Union{Real, Symbol, Expr}}()
 end
 
 _init_aliases() = begin
@@ -76,10 +75,9 @@ end
 
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
-    p.vars[v] = q
+    p.v = v
     (q isa Integer) && for i ∈ 1:q p.aliases[Symbol(v, _sub(i))] = :( $v[$i] ) end
-    vv = QuoteNode(v)
-    :( LineNumberNode(1, "variable: " * string($vv) * ", dim: " * string($q)) )
+    :( variable!($ocp, $q) ) # todo: add variable name
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
@@ -90,6 +88,7 @@ p_alias!(p, ocp, a, e; log=false) = begin
     :( LineNumberNode(2, "alias: " * string($aa) *" = " * string($ee)) )
 end
 
+# todo: check vars in p_time! below, and update time! in model.jl
 p_time!(p, ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
     p.t = t 

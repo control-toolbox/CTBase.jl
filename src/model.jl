@@ -13,13 +13,15 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModel{time_dependence, dimension_usage} <: AbstractOptimalControlModel
-    initial_time::Union{Time,Nothing}=nothing
-    final_time::Union{Time,Nothing}=nothing
+    initial_time::Union{Time,Index,Nothing}=nothing
+    final_time::Union{Time,Index,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
     lagrange::Union{LagrangeFunction{time_dependence, dimension_usage},Nothing}=nothing
     mayer::Union{MayerFunction{dimension_usage},Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
     dynamics::Union{DynamicsFunction{time_dependence, dimension_usage},Nothing}=nothing
+    variable_dimension::Union{Dimension,Nothing}=nothing
+    variable_names::Union{Vector{String}, Nothing}=nothing
     dynamics!::Union{Function,Nothing}=nothing
     state_dimension::Union{Dimension,Nothing}=nothing
     state_names::Union{Vector{String}, Nothing}=nothing
@@ -121,6 +123,28 @@ end
 
 # -------------------------------------------------------------------------------------------
 #
+"""
+$(TYPEDSIGNATURES)
+
+Define the variable dimension and possibly the names of each coordinate.
+
+# Examples
+```jldoctest
+julia> variable!(ocp, 1, "v")
+julia> variable!(ocp, 2, [ "v₁", "v₂" ])
+```
+"""
+function variable!(ocp::OptimalControlModel, q::Dimension, names::Union{String, Vector{String}}=__variable_names(q))
+    if q > 1 && length(names) != q
+        throw(InconsistentArgument("the number of variable names must be equal to the variable dimension"))
+    end
+    if q == 1 && names isa Vector{String}
+        throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
+    end
+    ocp.variable_dimension = q
+    ocp.variable_names = q==1 ? [names] : names
+end
+
 """
 $(TYPEDSIGNATURES)
 
