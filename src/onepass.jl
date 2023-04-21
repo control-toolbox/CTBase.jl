@@ -48,29 +48,30 @@ parse!(p, ocp, e; log=false) = begin
         e = subs(e, a, p.aliases[a])
     end
     @match e begin
-    :( $v ∈ R^$q, variable ) => p_variable!(p, ocp, v, q; log)
-    :( $v ∈ R   , variable ) => p_variable!(p, ocp, v   ; log)
-    :( $t ∈ [ $t0, $tf ], time ) => p_time!(p, ocp, t, t0, tf; log)
-    :( $x ∈ R^$n, state ) => p_state!(p, ocp, x, n; log)
-    :( $x ∈ R   , state ) => p_state!(p, ocp, x   ; log)
-    :( $u ∈ R^$m, control ) => p_control!(p, ocp, u, m; log)
-    :( $u ∈ R   , control ) => p_control!(p, ocp, u   ; log)
-    :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
-    :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
-    :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
-    :( $e1 == $e2, $label ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
-    :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
-    :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
-    _ =>
-
-    if e isa LineNumberNode
-        e
-    elseif (e isa Expr) && (e.head == :block)
-	Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
-	# assumes that map is done sequentially
-    else
-        throw("syntax error")
-    end end
+        :( $v ∈ R^$q, variable ) => p_variable!(p, ocp, v, q; log)
+        :( $v ∈ R   , variable ) => p_variable!(p, ocp, v   ; log)
+        :( $t ∈ [ $t0, $tf ], time ) => p_time!(p, ocp, t, t0, tf; log)
+        :( $x ∈ R^$n, state ) => p_state!(p, ocp, x, n; log)
+        :( $x ∈ R   , state ) => p_state!(p, ocp, x   ; log)
+        :( $u ∈ R^$m, control ) => p_control!(p, ocp, u, m; log)
+        :( $u ∈ R   , control ) => p_control!(p, ocp, u   ; log)
+        :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
+        :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
+        :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
+        :( $e1 == $e2, $label ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
+        :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
+        :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
+        _ =>
+    
+        if e isa LineNumberNode
+            e
+        elseif (e isa Expr) && (e.head == :block)
+    	Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
+    	# assumes that map is done sequentially
+        else
+            throw("syntax error")
+        end
+    end
 end
 
 p_variable!(p, ocp, v, q=1; log=false) = begin
@@ -85,10 +86,9 @@ p_alias!(p, ocp, a, e; log=false) = begin
     p.aliases[a] = e
     aa = QuoteNode(a)
     ee = QuoteNode(e)
-    :( LineNumberNode(2, "alias: " * string($aa) *" = " * string($ee)) )
+    :( LineNumberNode(0, "alias: " * string($aa) *" = " * string($ee)) )
 end
 
-# todo: check vars in p_time! below, and update time! in model.jl
 p_time!(p, ocp, t, t0, tf; log=false) = begin
 
     log && println("time: $t, initial time: $t0, final time: $tf")
@@ -98,19 +98,19 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     tt = QuoteNode(t)
     tt0 = QuoteNode(t0)
     ttf = QuoteNode(tf)
-    @match (t0 ∈ keys(p.vars), tf ∈ keys(p.vars)) begin
+    @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, [ $t0, $tf ] , string($tt)) )
-        (false, true ) => begin
-	    (p.vars[tf] ≠ 1) && throw("variable final time must be one dimensional")
-	    :( time!($ocp, :initial, $t0, string($tt)) ) end
-        (true , false) => begin
-	    (p.vars[t0] ≠ 1) && throw("variable initial time must be one dimensional")
-	    :( time!($ocp, :final  , $tf, string($tt)) ) end
-        _              => begin
-	    (p.vars[t0] ≠ 1) && throw("variable initial time must be one dimensional")
-	    (p.vars[tf] ≠ 1) && throw("variable final time must be one dimensional")
-	    :( LineNumberNode(1, "free initial time: " * string($tt0) *
-	                         ", free final time: " * string($ttf)) ) end
+        (true , false) => @match t0 begin
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw("Syntax error")
+	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw("Syntax error")
+	    _            => throw("Syntax error") end
+        (false, true ) => @match tf begin
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(i), string($tt)) ) : throw("Syntax error")
+	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(1), string($tt)) ) : throw("Syntax error")
+	    _            => throw("Syntax error") end
+	_              => @match (t0, tf) begin
+	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index(i), Index(j), string($tt)) ) : throw("Syntax error") 
+	    _ => throw("Syntax error") end
     end
 end
 
