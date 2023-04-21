@@ -7,7 +7,7 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, dimension_usage}) where {time_dependence, dimension_usage}
+function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence}) where {time_dependence}
 
     if  isnothing(ocp.initial_time) &&
         isnothing(ocp.final_time) &&
@@ -16,7 +16,6 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         isnothing(ocp.mayer) && 
         isnothing(ocp.criterion) &&
         isnothing(ocp.dynamics) &&
-        isnothing(ocp.dynamics!) &&
         isnothing(ocp.state_dimension) &&
         isnothing(ocp.state_names)  &&
         isnothing(ocp.control_dimension) &&

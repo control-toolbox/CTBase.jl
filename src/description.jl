@@ -121,4 +121,4 @@ julia> (:a, :b) \\ (:a,)
 (:b,)
 ```
 """
-\(x::Description, y::Description)::Description = Tuple(setdiff(x, y))
+Base.:(\)(x::Description, y::Description)::Description = Tuple(setdiff(x, y))

@@ -1,141 +1,562 @@
 function test_model()
 
-# basic model
-ocp = Model(time_dependence=:autonomous, dimension_usage=:scalar)
-#
-n = 2
-m = 1
-t0 = 0
-tf = 1
-x0 = [-1, 0]
-xf = [ 0, 0]
-#
-state!(ocp, n, ["r", "v"])   # dimension of the state
-control!(ocp, m) # dimension of the control
-time!(ocp, [t0, tf])
-constraint!(ocp, :initial, x0)
-constraint!(ocp, :final  , xf)
-#
-A = [ 0 1
-      0 0 ]
-B = [ 0
-      1 ]
-constraint!(ocp, :dynamics, (x, u) -> A*x + B*u)
-objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2) # default is to minimise
+@testset "state and control dimensions set or not" begin
+    ocp = Model()
+    @test CTBase.dims_not_set(ocp)
+    state!(ocp, 2)
+    @test CTBase.dims_not_set(ocp)
+    control!(ocp, 1)
+    @test !CTBase.dims_not_set(ocp)
+    ocp = Model()
+    @test_throws UnauthorizedCall objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
+    @test_throws UnauthorizedCall objective!(ocp, :bolza, (t0, x0, tf, xf) -> tf, (x, u) -> 0.5u^2)
+    @test_throws UnauthorizedCall nlp_constraints(ocp)
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, 0, 1, :c0)
+    @test_throws UnauthorizedCall constraint!(ocp, :final, 1, 2, :cf)
+    @test_throws UnauthorizedCall constraint!(ocp, :control, 0, 1, :cu)
+    @test_throws UnauthorizedCall constraint!(ocp, :state, 0, 1, :cs)
+end
 
-#
-@test display(ocp) isa Nothing
-@test display(ocp.constraints) isa Nothing
+@testset "initial and / or final time set" begin
+    ocp = Model()
+    @test !CTBase.time_set(ocp)
+    time!(ocp, :initial, 0)
+    @test CTBase.time_set(ocp)
+    ocp = Model()
+    time!(ocp, :final, 1)
+    @test CTBase.time_set(ocp)
+    ocp = Model()
+    time!(ocp, [0, 1])
+    @test CTBase.time_set(ocp)
+    ocp = Model()
+    time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    ocp = Model()
+    time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    ocp = Model()
+    time!(ocp, [0, 1])
+    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
+    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+end
 
-@test_throws IncorrectArgument remove_constraint!(ocp, :dummy_con)
+@testset "Index" begin
+    @test Index(1) == Index(1)
+    @test Index(1) ≤ Index(2)
+    @test Index(1) < Index(2)
+    v = [10, 20]
+    @test v[Index(1)] == v[1]
+    @test_throws MethodError v[Index(1):Index(2)]
+    x = 1
+    @test x[Index(1)] == x
+end
 
-#
-@test isautonomous(ocp)
-@test ocp.dynamics(0.0, [0, 1], 10) ≈ [ 1, 10 ] atol=1e-8
-@test ocp.dynamics(0.0, [0, 1], [ 1 ]) ≈ [ 1, 1 ] atol=1e-8
-@test ocp.lagrange(0.0, [0, 0], 1) ≈ 0.5 atol=1e-8
-@test ocp.lagrange(0.0, [0, 0], [ 1 ]) ≈ 0.5 atol=1e-8
-@test ocp.mayer === nothing
-@test ismin(ocp)
-@test ocp.initial_time == t0
-@test ocp.final_time == tf
-@test ocp.control_dimension == m
-@test ocp.state_dimension == n
+@testset "isautonomous vs isnonautonomous" begin
+    ocp = Model()
+    @test isautonomous(ocp)
+    @test !isnonautonomous(ocp)
+    ocp = Model(time_dependence=:nonautonomous)
+    @test isnonautonomous(ocp)
+    @test !isautonomous(ocp)
+end
 
-# replace the cost
-objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0, (x, u) -> 0.5u^2)
-@test ocp.lagrange(0.0, [0, 0], 1) ≈ 0.5 atol=1e-8
-@test ocp.mayer(0.0, [0, 0], 1, [0, 0]) ≈ 0 atol=1e-8
+@testset "ismin vs ismax" begin
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 1)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
+    @test ismin(ocp)
+    @test !ismax(ocp)
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 1)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u^2, :max)
+    @test ismax(ocp)
+    @test !ismin(ocp)
+end
 
-# -------------------------------------------------------------------------------------------
-# 
-# goddard (version 1, only nonlinear constraint, i.e. no ranges; no vectorial constraints either)
-ocp = Model()
-#
-Cd = 310; Tmax = 3.5; β = 500; b = 2; t0 = 0; r0 = 1; v0 = 0
-vmax = 0.1; m0 = 1; mf = 0.6; x0 = [r0, v0, m0]
-#
-m = 1
-n = 3
-#
-time!(ocp, :initial, t0) # if not provided, final time is free
-state!(ocp, n) # state dim
-control!(ocp, m) # control dim
-constraint!(ocp, :initial, x0)
-constraint!(ocp, :control, u -> u[1], 0, 1)
-constraint!(ocp, :mixed, (x, u) -> x[1], r0, Inf, :state_con1)
-constraint!(ocp, :mixed, (x, u) -> x[2], 0, vmax, :state_con2)
-constraint!(ocp, :mixed, (x, u) -> x[3], m0, mf, :state_con3)
-#
-objective!(ocp, :mayer,  (t0, x0, tf, xf) -> xf[1], :max)
-#
-D(x) = Cd * x[2]^2 * exp(-β*(x[1]-1))
-F0(x) = [ x[2], -D(x)/x[3]-1/x[1]^2, 0 ]
-F1(x) = [ 0, Tmax/x[3], -b*Tmax ]
-f(x, u) = F0(x) + u*F1(x)
-constraint!(ocp, :dynamics, f)
+@testset "state!" begin
+    ocp = Model()
+    state!(ocp, 1)
+    @test ocp.state_dimension == 1
+    @test ocp.state_names == ["x"]
+    ocp = Model()
+    state!(ocp, 1, "y")
+    @test ocp.state_dimension == 1
+    @test ocp.state_names == ["y"]
+    ocp = Model()
+    state!(ocp, 2)
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["x₁", "x₂"]
+    ocp = Model()
+    state!(ocp, 2, ["y₁", "y₂"])
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["y₁", "y₂"]
+    ocp = Model()
+    state!(ocp, 2, :y)
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["y₁", "y₂"]
+    ocp = Model()
+    state!(ocp, 2, "y")
+    @test ocp.state_dimension == 2
+    @test ocp.state_names == ["y₁", "y₂"]
+end
 
-#
-@test isautonomous(ocp)
-@test ocp.lagrange === nothing
-@test ocp.mayer(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
-@test !ismin(ocp)
-@test ocp.initial_time == t0
-@test ocp.final_time === nothing
-@test ocp.control_dimension == m
-@test ocp.state_dimension == n
+@testset "control!" begin
+    ocp = Model()
+    control!(ocp, 1)
+    @test ocp.control_dimension == 1
+    @test ocp.control_names == ["u"]
+    ocp = Model()
+    control!(ocp, 1, "v")
+    @test ocp.control_dimension == 1
+    @test ocp.control_names == ["v"]
+    ocp = Model()
+    control!(ocp, 2)
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["u₁", "u₂"]
+    ocp = Model()
+    control!(ocp, 2, ["v₁", "v₂"])
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["v₁", "v₂"]
+    ocp = Model()
+    control!(ocp, 2, :v)
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["v₁", "v₂"]
+    ocp = Model()
+    control!(ocp, 2, "v")
+    @test ocp.control_dimension == 2
+    @test ocp.control_names == ["v₁", "v₂"]
+end
 
-# -------------------------------------------------------------------------------------------
-# 
-# goddard (version 2, ranges, vectorial constraints)
-ocp = Model()
-Cd = 310; Tmax = 3.5; β = 500; b = 2; t0 = 0; r0 = 1; v0 = 0
-vmax = 0.1; m0 = 1; mf = 0.6; x0 = [r0, v0, m0]
-m = 1
-n = 3
+@testset "time!" begin
+    # initial and final times
+    ocp = Model()
+    time!(ocp, [0, 1])
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, [0, 1], "s")
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, [0, 1], :s)
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    # initial time
+    ocp = Model()
+    time!(ocp, :initial, 0)
+    @test ocp.initial_time == 0
+    @test isnothing(ocp.final_time)
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, :initial, 0, "s")
+    @test ocp.initial_time == 0
+    @test isnothing(ocp.final_time)
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, :initial, 0, :s)
+    @test ocp.initial_time == 0
+    @test isnothing(ocp.final_time)
+    @test ocp.time_name == "s"
+    # final time
+    ocp = Model()
+    time!(ocp, :final, 1)
+    @test isnothing(ocp.initial_time)
+    @test ocp.final_time == 1
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, :final, 1, "s")
+    @test isnothing(ocp.initial_time)
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, :final, 1, :s)
+    @test isnothing(ocp.initial_time)
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+end
 
-time!(ocp, :initial, t0) # if not provided, final time is free
-state!(ocp, n) # state dim
-control!(ocp, m) # control dim
-constraint!(ocp, :initial, x0, :initial_con1)
-constraint!(ocp, :control, 0, 1, :control_con1)
-#constraint!(ocp, :control, Index(1), 0, 1, :control_con1)
-constraint!(ocp, :state, 1:2, [ r0, 0 ], [ Inf, vmax ], :state_con1)
-constraint!(ocp, :state, Index(3), m0, mf, :state_con2)
+@testset "constraint! 1/7" begin
 
-objective!(ocp, :mayer, (t0, x0, tf, xf) -> xf[1], :max)
+    ocp = Model()
 
-constraint!(ocp, :dynamics, f) # see previous defs
+    constraint!(ocp, :initial, 0, :c0)
+    constraint!(ocp, :final, 1, :cf)
+    @test constraint(ocp, :c0)(12) == 12
+    @test constraint(ocp, :cf)(12) == 12
 
-@test isautonomous(ocp)
-@test ocp.lagrange === nothing
-@test ocp.mayer(t0, x0, tf, x0) ≈ x0[1] atol=1e-8
-@test !ismin(ocp)
+    ocp = Model()
+    constraint!(ocp, :initial, [0, 1], :c0)
+    constraint!(ocp, :final, [1, 2], :cf)
+    @test constraint(ocp, :c0)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cf)([12, 13]) == [12, 13]
 
-@test ocp.initial_time == t0
-@test ocp.final_time === nothing
-@test ocp.control_dimension == m
-@test ocp.state_dimension == n
+    # constraint already exists
+    ocp = Model()
+    constraint!(ocp, :initial, 0, :c)
+    @test_throws UnauthorizedCall constraint!(ocp, :final, 0, :c)
 
-@test constraint(ocp, :initial_con1)(x0) == x0 
-@test constraint(ocp, :control_con1)(1) == 1 
-@test constraint(ocp, :state_con1)(x0) == x0[1:2]
-@test constraint(ocp, :state_con2)(x0) == x0[3]
+end
 
-(ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
-@test ξl == [ ]
-@test ξu == [ ]
-@test ηl == [ ]
-@test ηu == [ ]
-@test ψl == [ ] 
-@test ψu == [ ]
-@test ϕl == x0 
-@test ϕu == x0 
-@test ulb == [ 0 ][uind]
-@test uub == [ 1 ][uind]
-@test xlb == [ r0, 0, m0 ][xind]
-@test xub == [ Inf, vmax, mf ][xind]
-@test [ Inf, vmax, mf ][Index(2)] == vmax
-@test [ Inf, vmax, mf ][Index(2)][Index(1)] == vmax
+@testset "constraint! 2/7" begin
+    
+    ocp = Model()
+    x  = 12
+    x0 = 0
+    xf = 1
+    constraint!(ocp, :initial, Index(1), x0, :c0)
+    constraint!(ocp, :final, Index(1), xf, :cf)
+    @test constraint(ocp, :c0)(x) == x
+    @test constraint(ocp, :cf)(x) == x
+
+    ocp = Model()
+    x  = [12, 13]
+    x0 = [0, 1]
+    xf = [1, 2]
+    constraint!(ocp, :initial, Index(2), x0, :c0)
+    constraint!(ocp, :final, Index(2), xf, :cf)
+    @test constraint(ocp, :c0)(x) == x[2]
+    @test constraint(ocp, :cf)(x) == x[2]
+
+    ocp = Model()
+    x  = [12, 13]
+    x0 = [0, 1]
+    xf = [1, 2]
+    constraint!(ocp, :initial, 1:2, x0, :c0)
+    constraint!(ocp, :final, 1:2, xf, :cf)
+    @test constraint(ocp, :c0)(x) == x[1:2]
+    @test constraint(ocp, :cf)(x) == x[1:2]
+
+    # constraint already exists
+    ocp = Model()
+    constraint!(ocp, :initial, Index(1), 0, :c)
+    @test_throws UnauthorizedCall constraint!(ocp, :final, Index(1), 0, :c)
+
+end
+
+@testset "constraint! 3/7" begin
+
+    ocp = Model()
+    state!(ocp, 1)
+    control!(ocp, 1)
+    constraint!(ocp, :initial, 0, 1, :c0)
+    constraint!(ocp, :final, 1, 2, :cf)
+    constraint!(ocp, :control, 0, 1, :cu)
+    constraint!(ocp, :state, 0, 1, :cs)
+    @test constraint(ocp, :c0)(12) == 12
+    @test constraint(ocp, :cf)(12) == 12
+    @test constraint(ocp, :cu)(12) == 12
+    @test constraint(ocp, :cs)(12) == 12
+
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    constraint!(ocp, :initial, [0, 1], [1, 2], :c0)
+    constraint!(ocp, :final, [1, 2], [2, 3], :cf)
+    constraint!(ocp, :control, [0, 1], [1, 2], :cu)
+    constraint!(ocp, :state, [0, 1], [1, 2], :cs)
+    @test constraint(ocp, :c0)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cf)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cu)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cs)([12, 13]) == [12, 13]
+
+    # constraint already exists
+    ocp = Model()
+    state!(ocp, 1)
+    control!(ocp, 1)
+    constraint!(ocp, :initial, 0, 1, :c)
+    @test_throws UnauthorizedCall constraint!(ocp, :final, 0, 1, :c)
+
+end
+
+@testset "constraint! 4/7" begin
+ 
+    ocp = Model()
+    constraint!(ocp, :initial, Index(1), 0, 1, :c0)
+    constraint!(ocp, :final, Index(1), 1, 2, :cf)
+    constraint!(ocp, :control, Index(1), 0, 1, :cu)
+    constraint!(ocp, :state, Index(1), 0, 1, :cs)
+    @test constraint(ocp, :c0)(12) == 12
+    @test constraint(ocp, :cf)(12) == 12
+    @test constraint(ocp, :cu)(12) == 12
+    @test constraint(ocp, :cs)(12) == 12
+
+    ocp = Model()
+    constraint!(ocp, :initial, Index(2), [0, 1], [1, 2], :c0)
+    constraint!(ocp, :final, Index(2), [1, 2], [2, 3], :cf)
+    constraint!(ocp, :control, Index(2), [0, 1], [1, 2], :cu)
+    constraint!(ocp, :state, Index(2), [0, 1], [1, 2], :cs)
+    @test constraint(ocp, :c0)([12, 13]) == 13
+    @test constraint(ocp, :cf)([12, 13]) == 13
+    @test constraint(ocp, :cu)([12, 13]) == 13
+    @test constraint(ocp, :cs)([12, 13]) == 13
+
+    ocp = Model()
+    constraint!(ocp, :initial, 1:2, [0, 1], [1, 2], :c0)
+    constraint!(ocp, :final, 1:2, [1, 2], [2, 3], :cf)
+    constraint!(ocp, :control, 1:2, [0, 1], [1, 2], :cu)
+    constraint!(ocp, :state, 1:2, [0, 1], [1, 2], :cs)
+    @test constraint(ocp, :c0)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cf)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cu)([12, 13]) == [12, 13]
+    @test constraint(ocp, :cs)([12, 13]) == [12, 13]
+
+    # constraint already exists
+    ocp = Model()
+    constraint!(ocp, :initial, Index(1), 0, 1, :c)
+    @test_throws UnauthorizedCall constraint!(ocp, :final, Index(1), 0, 1, :c)
+
+end
+
+@testset "constraint! 5/7" begin
+
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0+tf+xf, 0, :cb)
+    constraint!(ocp, :control, u->u, 0, :cu)
+    constraint!(ocp, :state, x->x, 0, :cs)
+    constraint!(ocp, :mixed, (x,u)->x+u, 1, :cm)
+    @test constraint(ocp, :cb)(12, 13, 14, 15) == 12+13+14+15
+    @test constraint(ocp, :cu)(12) == 12
+    @test constraint(ocp, :cs)(12) == 12
+    @test constraint(ocp, :cm)(12, 13) == 12+13
+
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0[1]+tf+xf[1], 0, :cb)
+    constraint!(ocp, :control, u->u[1], 0, :cu)
+    constraint!(ocp, :state, x->x[1], 0, :cs)
+    constraint!(ocp, :mixed, (x,u)->x[1]+u[1], 1, :cm)
+    @test constraint(ocp, :cb)(12, [13, 14], 15, [16, 17]) == 12+13+15+16
+    @test constraint(ocp, :cu)([12, 13]) == 12
+    @test constraint(ocp, :cs)([12, 13]) == 12
+    @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12+14
+
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+x0[1]+tf+xf[1], t0+x0[2]+tf+xf[2]], 0, :cb)
+    constraint!(ocp, :control, u->u[1:2], 0, :cu)
+    constraint!(ocp, :state, x->x[1:2], 0, :cs)
+    constraint!(ocp, :mixed, (x,u)->[x[1]+u[1], x[2]+u[2]], 1, :cm)
+    @test constraint(ocp, :cb)(12, [13, 14, 15], 16, [17, 18, 19]) == [12+13+16+17, 12+14+16+18]
+    @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
+    @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
+    @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12+15, 13+16]
+    
+    # constraint already exists
+    ocp = Model()
+    constraint!(ocp, :control, u->u, 0, 1, :c)
+    @test_throws UnauthorizedCall constraint!(ocp, :control, u->u, 0, 1, :c)
+
+end
+
+@testset "constraint! 6/7" begin
+
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0+tf+xf, 0, 1, :cb)
+    constraint!(ocp, :control, u->u, 0, 1, :cu)
+    constraint!(ocp, :state, x->x, 0, 1, :cs)
+    constraint!(ocp, :mixed, (x,u)->x+u, 1, 1, :cm)
+    @test constraint(ocp, :cb)(12, 13, 14, 15) == 12+13+14+15
+    @test constraint(ocp, :cu)(12) == 12
+    @test constraint(ocp, :cs)(12) == 12
+    @test constraint(ocp, :cm)(12, 13) == 12+13
+
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0[1]+tf+xf[1], 0, 1, :cb)
+    constraint!(ocp, :control, u->u[1], 0, 1, :cu)
+    constraint!(ocp, :state, x->x[1], 0, 1, :cs)
+    constraint!(ocp, :mixed, (x,u)->x[1]+u[1], 1, 1, :cm)
+    @test constraint(ocp, :cb)(12, [13, 14], 15, [16, 17]) == 12+13+15+16
+    @test constraint(ocp, :cu)([12, 13]) == 12
+    @test constraint(ocp, :cs)([12, 13]) == 12
+    @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12+14
+
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+x0[1]+tf+xf[1], t0+x0[2]+tf+xf[2]], 0, 1, :cb)
+    constraint!(ocp, :control, u->u[1:2], 0, 1, :cu)
+    constraint!(ocp, :state, x->x[1:2], 0, 1, :cs)
+    constraint!(ocp, :mixed, (x,u)->[x[1]+u[1], x[2]+u[2]], 1, 1, :cm)
+    @test constraint(ocp, :cb)(12, [13, 14, 15], 16, [17, 18, 19]) == [12+13+16+17, 12+14+16+18]
+    @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
+    @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
+    @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12+15, 13+16]
+
+end
+
+@testset "constraint! 7/7" begin
+    
+    ocp = Model()
+    state!(ocp, 1)
+    control!(ocp, 1)
+    constraint!(ocp, :dynamics, (x, u) -> x+u)
+    @test ocp.dynamics(1, 2) == 3
+
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    constraint!(ocp, :dynamics, (x, u) -> x[1]+u[1])
+    @test ocp.dynamics([1, 2], [3, 4]) == 4
+
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    constraint!(ocp, :dynamics, (x, u) -> [x[1]+u[1], x[2]+u[2]])
+    @test ocp.dynamics([1, 2], [3, 4]) == [4, 6]
+
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 1)
+    constraint!(ocp, :dynamics, (x, u) -> [x[1]+u, x[2]+u])
+    @test ocp.dynamics([1, 2], 3) == [4, 5]
+
+end
+
+@testset "remove_constraint! and constraints_labels" begin
+    
+    ocp = Model()
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0+tf+xf, 0, 1, :cb)
+    constraint!(ocp, :control, u->u, 0, 1, :cu)
+    k = constraints_labels(ocp)
+    @test :cb ∈ k
+    @test :cu ∈ k
+    remove_constraint!(ocp, :cb)
+    k = constraints_labels(ocp)
+    @test :cb ∉ k
+    @test_throws IncorrectArgument remove_constraint!(ocp, :dummy_con)
+
+end
+
+@testset "nlp_constraints" begin
+    
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 1)
+    constraint!(ocp, :initial, Index(2), 10, :ci)
+    constraint!(ocp, :final, Index(1), 1, :cf)
+    constraint!(ocp, :control, 0, 1, :cu)
+    constraint!(ocp, :state, [0, 1], [1, 2], :cs)
+    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+tf, x0[2]+xf[2]], [0, 1], [1, 2], :cb)
+    constraint!(ocp, :control, u->u, 0, 1, :cuu)
+    constraint!(ocp, :state, x->x, [0, 1], [1, 2], :css)
+    constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
+
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), 
+    (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
+
+    #=
+    println("ξl = ", ξl)
+    println("ξ = ", ξ)
+    println("ξu = ", ξu)
+    println("ηl = ", ηl)
+    println("η = ", η)
+    println("ηu = ", ηu)
+    println("ψl = ", ψl)
+    println("ψ = ", ψ)
+    println("ψu = ", ψu)
+    println("ϕl = ", ϕl)
+    println("ϕ = ", ϕ)
+    println("ϕu = ", ϕu)
+    println("ulb = ", ulb)
+    println("uind = ", uind)
+    println("uub = ", uub)
+    println("xlb = ", xlb)
+    println("xind = ", xind)
+    println("xub = ", xub)
+    =#
+
+    # control
+    @test sort(ξl) == sort([0])
+    @test sort(ξu) == sort([1])
+    @test sort(ξ(_Time(-1), [1])) == sort([1])
+
+    # state
+    @test sort(ηl) == sort([0, 1])
+    @test sort(ηu) == sort([1, 2])
+    @test sort(η(_Time(-1), [1, 1])) == sort([1, 1])
+
+    # mixed
+    @test sort(ψl) == sort([1])
+    @test sort(ψu) == sort([1])
+    @test sort(ψ(_Time(-1), [1, 1], [2])) == sort([3])
+
+    # boundary
+    @test sort(ϕl) == sort([10, 1, 0, 1])
+    @test sort(ϕu) == sort([10, 1, 1, 2])
+    @test sort(ϕ(1, [1, 3], 20, [4, 100])) == sort([3, 4, 21, 103])
+
+    # box constraint
+    @test sort(ulb) == sort([0])
+    @test sort(uind) == sort([1])
+    @test sort(uub) == sort([1])
+    @test sort(xlb) == sort([0, 1])
+    @test sort(xind) == sort([1, 2])
+    @test sort(xub) == sort([1, 2])
+
+end
+
+@testset "objective!" begin
+    
+    ocp = Model()
+    @test_throws UnauthorizedCall objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
+    @test_throws UnauthorizedCall objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0^2)
+    @test_throws UnauthorizedCall objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
+
+    ocp = Model()
+    state!(ocp, 1)
+    control!(ocp, 1)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
+    @test ocp.lagrange(1, 2) == 2
+
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
+    @test ocp.lagrange([1, 2], [3, 4]) == 4.5
+
+    ocp = Model()
+    state!(ocp, 1)
+    control!(ocp, 1)
+    objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0^2)
+    @test ocp.mayer(1, 2, 3, 4) == 2
+
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0[1]^2)
+    @test ocp.mayer(1, [2, 3], 4, [5, 6]) == 2
+
+    ocp = Model()
+    state!(ocp, 1)
+    control!(ocp, 1)
+    objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
+    @test ocp.mayer(1, 2, 3, 4) == 2
+    @test ocp.lagrange(1, 2) == 2
+    
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0.5x0[1]^2, (x, u) -> 0.5u[1]^2)
+    @test ocp.mayer(1, [2, 3], 4, [5, 6]) == 2
+    @test ocp.lagrange([1, 2], [3, 4]) == 4.5
+
+    # replacing the objective
+    ocp = Model()
+    state!(ocp, 2)
+    control!(ocp, 2)
+    objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
+    @test ocp.lagrange([1, 2], [3, 4]) == 4.5
+    @test isnothing(ocp.mayer)
+    objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0[1]^2)
+    @test ocp.mayer(1, [2, 3], 4, [5, 6]) == 2
+    @test isnothing(ocp.lagrange)
+
+end
 
 end
