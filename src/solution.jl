@@ -24,7 +24,7 @@ $(TYPEDFIELDS)
     adjoint::Union{Nothing, Function}=nothing
     control::Union{Nothing, Function}=nothing
     control_names::Union{Vector{String}, Nothing}=nothing
-    objective::Union{Nothing, MyNumber}=nothing
+    objective::Union{Nothing, ctNumber}=nothing
     iterations::Union{Nothing, Integer}=nothing
     stopping::Union{Nothing, Symbol}=nothing # the stopping criterion
     message::Union{Nothing, String}=nothing # the message corresponding to the stopping criterion

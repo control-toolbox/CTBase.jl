@@ -1,131 +1,46 @@
 """
-$(TYPEDSIGNATURES)
+$(TYPEDEF)
 
-Generate callable types, that is functions, handling the time dependence and the dimension usages.
+**Fields**
+
+$(TYPEDFIELDS)
+
+Used to define typed methods to make specific calls.
+
 """
-macro ctfunction_td_sv(expr)
-
-    #dump(expr)
-
-    if !hasproperty(expr, :head) || expr.head != Symbol(:tuple)
-        return :(throw_callable_error())
+struct _Time
+    value::Time
+    function _Time(value::Time)
+        return new(value)
     end
-
-    function_name = expr.args[1]
-    abstract_heritance = expr.args[2]
-
-    esc(quote
-        """
-        $(TYPEDEF)
-
-        **Fields**
-
-        $(TYPEDFIELDS)
-
-        **Constructors**
-        ```julia
-        $(function_name){time_dependence, dimension_usage}(f::Function) where {time_dependence, dimension_usage}
-        $(function_name){time_dependence}(f::Function) where {time_dependence}
-        $(function_name)(f::Function)
-        ```
-
-        !!! warning
-
-            - The parameter `time_dependence` can be `:autonomous` or `:nonautonomous`.
-            - The parameter `dimension_usage` can be `:scalar` or `:vectorial`.
-        """
-        struct $(function_name){time_dependence, dimension_usage} <: $(abstract_heritance)
-            f::Function
-            function $(function_name){time_dependence, dimension_usage}(f::Function) where {time_dependence, dimension_usage}
-                if !(time_dependence ∈ [:autonomous, :nonautonomous]) 
-                    error("usage: $(function_name){time_dependence, dimension_usage}(fun) " *
-                    "with time_dependence ∈ [:autonomous, :nonautonomous]")
-                elseif !(dimension_usage ∈ [:scalar, :vectorial])
-                    error("usage: $(function_name){time_dependence, dimension_usage}(fun) " *
-                    "with dimension_usage ∈ [:scalar, :vectorial]")
-                else
-                    new{time_dependence, dimension_usage}(f)
-                end
-            end
-            function $(function_name){time_dependence}(f::Function) where {time_dependence}
-                if !(time_dependence ∈ [:autonomous, :nonautonomous]) 
-                    error("usage: $(function_name){time_dependence, dimension_usage}(fun) " *
-                    "with time_dependence ∈ [:autonomous, :nonautonomous]")
-                else
-                    new{time_dependence, __fun_dimension_usage()}(f)
-                end
-            end
-            $(function_name)(f::Function) = new{__fun_time_dependence(), __fun_dimension_usage()}(f)
-        end
-        # basic usage
-        function (F::$(function_name))(args...; kwargs...)
-            return F.f(args...; kwargs...)
-        end
-        # handling time dependence
-        function (F::$(function_name){time_dependence, dimension_usage})(t::Time, args...; kwargs...) where {time_dependence, dimension_usage}
-            return time_dependence==:autonomous ? F.f(args...; kwargs...) : F.f(t, args...; kwargs...)
-        end
-    end)
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Generate callable types, that is functions, handling the dimension usage.
-
-**Note:** This macro is used to generate callable types for functions that are not time dependent.
-If the function is time dependent, use the macro `@ctfunction_td_sv` instead.
-"""
-macro ctfunction_sv(expr)
-
-    #dump(expr)
-
-    if !hasproperty(expr, :head) || expr.head != Symbol(:tuple)
-        return :(throw_callable_error())
-    end
-
-    function_name = expr.args[1]
-    abstract_heritance = expr.args[2]
-
-    esc(quote
-        """
-        $(TYPEDEF)
-
-        **Fields**
-
-        $(TYPEDFIELDS)
-
-        **Constructors**
-        ```julia
-        $(function_name){dimension_usage}(f::Function) where {dimension_usage}
-        $(function_name)(f::Function)
-        ```
-
-        !!! warning
-
-            The parameter `dimension_usage` can be `:scalar` or `:vectorial`.
-        """
-        struct $(function_name){dimension_usage} <: $(abstract_heritance)
-            f::Function
-            function $(function_name){dimension_usage}(f::Function) where {dimension_usage}
-                if !(dimension_usage ∈ [:scalar, :vectorial]) 
-                    error("usage: $(function_name){dimension_usage}(fun) " *
-                    "with dimension_usage ∈ [:scalar, :vectorial]")
-                else
-                    new{dimension_usage}(f)
-                end
-            end
-            $(function_name)(f::Function) = new{__fun_dimension_usage()}(f)
-        end
-        # basic usage
-        function (F::$(function_name))(args...; kwargs...)
-            return F.f(args...; kwargs...)
-        end
-    end)
-end
-
-# -------------------------------------------------------------------------------------------
-# Functions
+#_Time(times::Times) = _Time.(times)
+#_Time(times::StepRangeLen) = _Time.(times)
+Base.:(+)(t1::_Time, t2::_Time)::_Time = _Time(t1.value + t2.value)
+Base.:(-)(t1::_Time, t2::_Time)::_Time = _Time(t1.value - t2.value)
+Base.:(*)(t1::_Time, t2::_Time)::_Time = _Time(t1.value * t2.value)
+Base.:(/)(t1::_Time, t2::_Time)::_Time = _Time(t1.value / t2.value)
+Base.:(+)(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value + t2)
+Base.:(+)(t1::ctNumber, t2::_Time)::_Time = _Time(t1 + t2.value)
+Base.:(-)(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value - t2)
+Base.:(-)(t1::ctNumber, t2::_Time)::_Time = _Time(t1 - t2.value)
+Base.:(*)(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value * t2)
+Base.:(*)(t1::ctNumber, t2::_Time)::_Time = _Time(t1 * t2.value)
+Base.:(/)(t1::_Time, t2::ctNumber)::_Time = _Time(t1.value / t2)
+Base.:(/)(t1::ctNumber, t2::_Time)::_Time = _Time(t1 / t2.value)
+Base.:(^)(t::_Time, n::ctNumber)::_Time = _Time(t.value^n)
+Base.:(-)(t::_Time) = _Time(-(t.value))
+Base.show(io::IO, t::_Time) = print(io, t.value)
+Base.show(io::IO, ::MIME"text/plain", t::_Time) = print(io, t.value)
+Base.show(io::IO, ::MIME"text/latex", t::_Time) = print(io, t.value)
+Base.show(io::IO, ::MIME"text/html", t::_Time) = print(io, t.value)
+Base.show(io::IO, ::MIME"text/markdown", t::_Time) = print(io, t.value)
+Base.isless(t1::_Time, t2::_Time) = isless(t1.value, t2.value)
+Base.isless(t1::_Time, t2::ctNumber) = isless(t1.value, t2)
+Base.isless(t1::ctNumber, t2::_Time) = isless(t1, t2.value)
+Base.isequal(t1::_Time, t2::_Time) = isequal(t1.value, t2.value)
+Base.isequal(t1::_Time, t2::ctNumber) = isequal(t1.value, t2)
+Base.isequal(t1::ctNumber, t2::_Time) = isequal(t1, t2.value)
 
 # -------------------------------------------------------------------------------------------
 """
@@ -135,273 +50,1395 @@ Abstract type for functions.
 """
 abstract type AbstractCTFunction <: Function end
 
-#
-const abstract_heritance=:AbstractCTFunction
-
 # -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar is scalar usage and one dimensional output
-function_name=:BoundaryConstraintFunction
-#
-@eval @ctfunction_sv $(function_name), $(abstract_heritance)
-# handling scalar / vectorial usage
-# output: vectorial
-@eval begin
-    function (F::$(function_name){dimension_usage})(t0::Time, 
-        x0::State, tf::Time, xf::State, args...; kwargs...) where {dimension_usage}
-        x_ = (dimension_usage==:scalar && length(x0)==1) ? (t0, x0[1], tf, xf[1]) : (t0, x0, tf, xf)
-        y = F.f(x_..., args...; kwargs...)
-        if dimension_usage==:scalar && !(y isa MyNumber) && length(y)==1
-            throw(IncorrectOutput("A boundary constraint must return a Real (scalar)" *
-            " if the output and usage are scalar."))
-        end
-        return y isa MyNumber ? [y] : y
+# pre-condition: f returns a scalar if the output is of dimension 1
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+!!! warning
+
+    When the state is of dimension 1, consider `x0` and `xf` as a scalar. When the constraint is dimension 1, return a scalar.
+
+## Classical calls
+
+- state dimension: 1
+- constraint dimension: 1
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0)
+julia> B(0, 0, 1, 1)
+1
+julia> B(0, [0], 1, [1])
+1-element Vector{Int64}:
+ 1
+```
+
+- state dimension: 1
+- constraint dimension: 2
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf])
+julia> B(0, 0, 1, 1)
+2-element Vector{Int64}:
+  1
+ -1
+julia> B(0, [0], 1, [1])
+ERROR: MethodError: Cannot `convert` an object of type 
+  Vector{Any} to an object of type 
+  Union{Real, AbstractVector{<:Real}}
+```
+
+- state dimension: 2
+- constraint dimension: 1
+    
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0)
+julia> B(0, [1, 0], 1, [0, 1])
+1
+```
+
+- state dimension: 2
+- constraint dimension: 2
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]])
+julia> B(0, [1, 0], 1, [1, 0])
+2-element Vector{Int64}:
+ 1
+ 1
+```
+
+## Specific calls
+
+When giving a _Time for `t0` and `tf`, the function takes a vector as input for `x0` and
+`xf` and returns a vector as output.
+
+!!! warning
+
+    To use the specific call, you must construct the function with the keywords `state_dimension` and `constraint_dimension`.
+
+- state dimension: 1
+- constraint dimension: 1
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0, 
+    state_dimension=1, constraint_dimension=1)
+julia> B(_Time(0), 0, _Time(1), 1)
+ERROR: MethodError: no method matching (::BoundaryConstraint{1, 1})(::_Time, ::Int64, 
+::_Time, ::Int64)
+julia> B(_Time(0), [0], _Time(1), [1])
+1-element Vector{Int64}:
+ 1
+```
+
+- state dimension: 1
+- constraint dimension: 2
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf], 
+    state_dimension=1, constraint_dimension=2)
+julia> B(_Time(0), 0, _Time(1), 1)
+ERROR: MethodError: no method matching (::BoundaryConstraint{1, 2})(::_Time, ::Int64, 
+::_Time, ::Int64)
+julia> B(_Time(0), [0], _Time(1), [1])
+2-element Vector{Int64}:
+  1
+ -1
+```
+
+- state dimension: 2
+- constraint dimension: 1
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0, 
+    state_dimension=2, constraint_dimension=1)
+julia> B(_Time(0), [1, 0], _Time(1), [0, 1])
+1-element Vector{Int64}:
+ 1
+```
+
+- state dimension: 2
+- constraint dimension: 2
+
+```@example
+julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]], 
+    state_dimension=2, constraint_dimension=2)
+julia> B(_Time(0), [1, 0], _Time(1), [1, 0])
+2-element Vector{Int64}:
+ 1
+ 1
+```
+"""
+struct BoundaryConstraint{state_dimension, constraint_dimension}
+    f::Function
+    function BoundaryConstraint(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
+        constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension())
+        new{state_dimension, constraint_dimension}(f)   # in the case of one dimension is 0, the user must be coherent
+                                                        # that is one dimensional input or output must be scalar
     end
+end
+
+# classical call
+function (F::BoundaryConstraint{N, K})(t0::Time, x0::Union{ctNumber, State}, 
+        tf::Time, xf::Union{ctNumber, State}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, K}
+    return F.f(t0, x0, tf, xf, args...; kwargs...)
+end
+
+# specific calls: inputs and outputs are vectors, except times
+function (F::BoundaryConstraint{1, 1})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector
+    return [F.f(t0.value, x0[1], tf.value, xf[1], args...; kwargs...)]
+end
+function (F::BoundaryConstraint{1, K})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector where K
+    return F.f(t0.value, x0[1], tf.value, xf[1], args...; kwargs...)
+end
+function (F::BoundaryConstraint{N, 1})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector where N
+    return [F.f(t0.value, x0, tf.value, xf, args...; kwargs...)]
+end
+function (F::BoundaryConstraint{N, K})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector where {N, K}
+    return F.f(t0.value, x0, tf.value, xf, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar
-function_name=:MayerFunction
-#
-@eval @ctfunction_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: scalar
-@eval begin
-    function (F::$(function_name){dimension_usage})(t0::Time, 
-        x0::State, tf::Time, xf::State, args...; kwargs...) where {dimension_usage}
-        x_ = (dimension_usage==:scalar && length(x0)==1) ? (t0, x0[1], tf, xf[1]) : (t0, x0, tf, xf)
-        y = F.f(x_..., args...; kwargs...)
-        if !(y isa MyNumber)
-            throw(IncorrectOutput("A Mayer cost must return a Real (scalar)."))
-        end
-        return y
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+!!! warning
+
+    When the state is of dimension 1, consider `x0` and `xf` as a scalar.
+
+## Classical calls
+
+- state dimension: 1
+
+```@example
+julia> G = Mayer((t0, x0, tf, xf) -> xf - x0)
+julia> G(0, 0, 1, 1)
+1
+julia> G(0, [0], 1, [1])
+ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
+```
+
+- state dimension: 2
+
+```@example
+julia> G = Mayer((t0, x0, tf, xf) -> tf - t0)
+julia> G(0, [1, 0], 1, [0, 1])
+1
+```
+
+## Specific calls
+
+When giving a _Time for `t0` and `tf`, the function takes a vector as input for `x0` and
+`xf`.
+
+!!! warning
+
+    To use the specific call, you must construct the function with the keyword `state_dimension`.
+
+- state dimension: 1
+
+```@example
+julia> G = Mayer((t0, x0, tf, xf) -> xf - x0, state_dimension=1)
+julia> G(_Time(0), 0, _Time(1), 1)
+ERROR: MethodError: no method matching (:Mayer{1})(::CTBase._Time, ::Int64, ::CTBase._Time, ::Int64)
+julia> G(_Time(0), [0], _Time(1), [1])
+1
+```
+
+- state dimension: 2
+
+```@example
+julia> G = Mayer((t0, x0, tf, xf) -> tf - t0, state_dimension=2)
+julia> G(_Time(0), [1, 0], _Time(1), [0, 1])
+1
+```
+"""
+struct Mayer{state_dimension}
+    f::Function
+    function Mayer(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension())
+        new{state_dimension}(f)
     end
+end
+
+# classical call
+function (F::Mayer{N})(t0::Time, x0::Union{ctNumber, State}, 
+    tf::Time, xf::Union{ctNumber, State}, args...; kwargs...)::ctNumber where {N}
+    return F.f(t0, x0, tf, xf, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+function (F::Mayer{1})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctNumber
+    return F.f(t0.value, x0[1], tf.value, xf[1], args...; kwargs...)
+end
+function (F::Mayer{N})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctNumber where N
+    return F.f(t0.value, x0, tf.value, xf, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar
-function_name=:Hamiltonian
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: scalar
-@eval begin
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, 
-        x::State, p::Adjoint, args...; kwargs...) where {time_dependence, dimension_usage}
-        args_ = time_dependence==:autonomous ? () : (t, )
-        if dimension_usage==:scalar && length(x)==1
-            args_ = (args_..., x[1], p[1])
-        else
-            args_ = (args_..., x, p)
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The default value for `time_dependence` is `:autonomous`.
+
+!!! warning
+
+    When the state and adjoint are of dimension 1, consider `x` and `p` as scalars.
+
+## Classical calls
+
+- state dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> H = Hamiltonian((x, p) -> x + p)
+julia> H(1, 1)
+2
+julia> H([1], [1])
+ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
+julia> H = Hamiltonian((x, p) -> x + p, time_dependence=:autonomous)
+julia> H(1, 1)
+2
+julia> H([1], [1])
+ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
+```
+
+- state dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> H = Hamiltonian((t, x, p) -> x + p, time_dependence=:nonautonomous)
+julia> H(1, 1, 1)
+2
+julia> H(1, [1], [1])
+ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
+```
+
+- state dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> H = Hamiltonian((x, p) -> x[1]^2 + p[2]^2) # or time_dependence=:autonomous
+julia> H([1, 0], [0, 1])
+2
+```
+
+- state dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> H = Hamiltonian((t, x, p) -> t + x[1]^2 + p[2]^2, time_dependence=:nonautonomous)
+julia> H(1, [1, 0], [0, 1])
+3
+```
+
+## Specific calls
+
+When giving a _Time for `t`, the function takes a vector as input for `x` and `p`.
+
+- state dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> H = Hamiltonian((x, p) -> x + p, state_dimension=1)
+julia> H(_Time(0), 1, 1)
+ERROR: MethodError: no method matching (::Hamiltonian{:autonomous, 1})(::CTBase._Time, ::Int64, ::Int64)
+julia> H(_Time(0), [1], [1])
+2
+```
+
+- state dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> H = Hamiltonian((t, x, p) -> t + x + p, state_dimension=1, time_dependence=:nonautonomous)
+julia> H(_Time(1), 1, 1)
+ERROR: MethodError: no method matching (::Hamiltonian{:nonautonomous, 1})(::CTBase._Time, ::Int64, ::Int64)
+julia> H(_Time(1), [1], [1])
+3
+```
+
+- state dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> H = Hamiltonian((x, p) -> x[1]^2 + p[2]^2, state_dimension=2)
+julia> H(_Time(0), [1, 0], [0, 1])
+2
+```
+
+- state dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> H = Hamiltonian((t, x, p) -> t + x[1]^2 + p[2]^2, state_dimension=2, time_dependence=:nonautonomous)
+julia> H(_Time(1), [1, 0], [0, 1])
+3
+```
+"""
+struct Hamiltonian{time_dependence, state_dimension}
+    f::Function
+    function Hamiltonian(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        y = F.f(args_..., args...; kwargs...)
-        if !(y isa MyNumber)
-            throw(IncorrectOutput("A Hamiltonian function must return a Real (scalar)."))
-        end
-        return y
+        new{time_dependence, state_dimension}(f)
     end
 end
 
-# -------------------------------------------------------------------------------------------
-#
-function_name=:HamiltonianVectorField
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-@eval begin
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, x::State, p::Adjoint, args...; kwargs...) where {time_dependence, dimension_usage}
-        args_ = time_dependence==:autonomous ? () : (t, )
-        if dimension_usage==:scalar && length(x)==1
-            args_ = (args_..., x[1], p[1])
-        else
-            args_ = (args_..., x, p)
+# classical calls
+function (F::Hamiltonian{:nonautonomous, N})(t::Time, x::Union{ctNumber, State}, 
+        p::Union{ctNumber, Adjoint}, args...; kwargs...)::ctNumber where {N}
+    return F.f(t, x, p, args...; kwargs...)
+end
+function (F::Hamiltonian{:autonomous, N})(x::Union{ctNumber, State}, 
+        p::Union{ctNumber, Adjoint}, args...; kwargs...)::ctNumber where {N}
+    return F.f(x, p, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+# state dimension: 1
+function (F::Hamiltonian{:nonautonomous, 1})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctNumber
+    return F.f(t.value, x[1], p[1], args...; kwargs...)
+end
+function (F::Hamiltonian{:autonomous, 1})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctNumber
+    return F.f(x[1], p[1], args...; kwargs...)
+end
+# state dimension: N>1
+function (F::Hamiltonian{:nonautonomous, N})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctNumber where {N}
+    return F.f(t.value, x, p, args...; kwargs...)
+end
+function (F::Hamiltonian{:autonomous, N})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctNumber where {N}
+    return F.f(x, p, args...; kwargs...)
+end
+
+
+#-------------------------------------------------------------------------------------------
+# pre-condition: no
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The default value for `time_dependence` is `:autonomous`.
+
+!!! warning
+
+    When the state and adjoint are of dimension 1, consider `x` and `p` as scalars.
+
+## Classical calls
+
+- state dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((x, p) -> [x + p, x - p])
+julia> Hv(1, 1)
+2-element Vector{Int64}:
+ 2
+ 0
+julia> Hv([1], [1])
+ERROR: MethodError: Cannot `convert` an object of type 
+  Vector{Vector{Int64}} to an object of type 
+  AbstractVector{<:Real}
+julia> Hv = HamiltonianVectorField((x, p) -> [x + p, x - p], time_dependence=:autonomous)
+julia> Hv(1, 1)
+2-element Vector{Int64}:
+ 2
+ 0
+julia> Hv([1], [1])
+ERROR: MethodError: Cannot `convert` an object of type 
+  Vector{Vector{Int64}} to an object of type 
+  AbstractVector{<:Real}
+```
+
+- state dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((t, x, p) -> [x + p, x - p], time_dependence=:nonautonomous)
+julia> Hv(1, 1, 1)
+2-element Vector{Int64}:
+ 2
+ 0
+julia> Hv(1, [1], [1])
+ERROR: MethodError: Cannot `convert` an object of type 
+  Vector{Vector{Int64}} to an object of type 
+  AbstractVector{<:Real}
+```
+
+- state dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2 + p[2]^2, x[2]^2 - p[1]^2]) # or time_dependence=:autonomous
+julia> Hv([1, 0], [0, 1])
+2-element Vector{Int64}:
+ 2
+ 0
+```
+
+- state dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((t, x, p) -> [t + x[1]^2 + p[2]^2, x[2]^2 - p[1]^2], time_dependence=:nonautonomous)
+julia> Hv(1, [1, 0], [0, 1])
+2-element Vector{Int64}:
+ 3
+ 0
+```
+
+## Specific calls
+
+When giving a _Time for `t`, the function takes a vector as input for `x` and `p`.
+
+- state dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((x, p) -> [x + p, x - p], state_dimension=1)
+julia> Hv(_Time(0), 1, 1)
+ERROR: MethodError: no method matching (::HamiltonianVectorField{:autonomous, 1})(::CTBase._Time, ::Int64, ::Int64)
+julia> Hv(_Time(0), [1], [1])
+2-element Vector{Int64}:
+ 2
+ 0
+```
+
+- state dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((t, x, p) -> [t + x + p, x - p], state_dimension=1, time_dependence=:nonautonomous)
+julia> Hv(_Time(1), 1, 1)
+ERROR: MethodError: no method matching (::HamiltonianVectorField{:nonautonomous, 1})(::CTBase._Time, ::Int64, ::Int64)
+julia> Hv(_Time(1), [1], [1])
+2-element Vector{Int64}:
+ 3
+ 0
+```
+
+- state dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2 + p[2]^2, x[2]^2 - p[1]^2], state_dimension=2)
+julia> Hv(_Time(0), [1, 0], [0, 1])
+2-element Vector{Int64}:
+ 2
+ 0
+```
+
+- state dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> Hv = HamiltonianVectorField((t, x, p) -> [t + x[1]^2 + p[2]^2, x[2]^2 - p[1]^2], state_dimension=2, time_dependence=:nonautonomous)
+julia> Hv(_Time(1), [1, 0], [0, 1])
+2-element Vector{Int64}:
+ 3
+ 0
+```
+"""
+struct HamiltonianVectorField{time_dependence, state_dimension}
+    f::Function
+    function HamiltonianVectorField(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        return F.f(args_..., args...; kwargs...)
+        new{time_dependence, state_dimension}(f)
     end
 end
 
+# classical calls
+function (F::HamiltonianVectorField{:nonautonomous, N})(t::Time, x::Union{ctNumber, State}, 
+        p::Union{ctNumber, Adjoint}, args...; kwargs...)::ctVector where {N}
+    return F.f(t, x, p, args...; kwargs...)
+end
+function (F::HamiltonianVectorField{:autonomous, N})(x::Union{ctNumber, State}, 
+        p::Union{ctNumber, Adjoint}, args...; kwargs...)::ctVector where {N}
+    return F.f(x, p, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+# state dimension: 1
+function (F::HamiltonianVectorField{:nonautonomous, 1})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctVector
+    return F.f(t.value, x[1], p[1], args...; kwargs...)
+end
+function (F::HamiltonianVectorField{:autonomous, 1})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctVector
+    return F.f(x[1], p[1], args...; kwargs...)
+end
+# state dimension: N>1
+function (F::HamiltonianVectorField{:nonautonomous, N})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctVector where {N}
+    return F.f(t.value, x, p, args...; kwargs...)
+end
+function (F::HamiltonianVectorField{:autonomous, N})(t::_Time, x::State, p::Adjoint, args...; kwargs...)::ctVector where {N}
+    return F.f(x, p, args...; kwargs...)
+end
+
 # -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar if scalar usage and scalar as input
-function_name=:VectorField
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, 
-        x::State, args...; kwargs...) where {time_dependence, dimension_usage}
-        args_ = time_dependence==:autonomous ? () : (t, )
-        if dimension_usage==:scalar && length(x)==1
-            args_ = (args_..., x[1])
-        else
-            args_ = (args_..., x)
+# pre-condition: f returns a scalar if x is a scalar
+# we authorize Matrix to be returned if x is a matrix, to integrate ode systems on matrices
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The default value for `time_dependence` is `:autonomous`.
+
+!!! warning
+
+    When the state is of dimension 1, consider `x` as a scalar.
+
+## Classical calls
+
+- state dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> V = VectorField(x -> 2x) # or time_dependence=:autonomous
+julia> V(1)
+2
+julia> V([1])
+1-element Vector{Int64}:
+ 2
+```
+
+- state dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> V = VectorField((t, x) -> t+2x, time_dependence=:nonautonomous)
+julia> V(1, 1)
+3
+```
+
+- state dimension: 2
+-  time dependence: autonomous
+
+```@example
+julia> V = VectorField(x -> [x[1]^2, x[2]^2]) # or time_dependence=:autonomous
+julia> V([1, 0])
+2-element Vector{Int64}:
+ 1
+ 0
+```
+
+- state dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> V = VectorField((t, x) -> [t + x[1]^2, x[2]^2], time_dependence=:nonautonomous)
+julia> V(1, [1, 0])
+2-element Vector{Int64}:
+ 2
+ 0
+```
+
+## Specific calls
+
+- state dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> V = VectorField(x -> 2x, state_dimension=1) # or time_dependence=:autonomous
+julia> V(_Time(0), 1)
+ERROR: MethodError: no method matching (::VectorField{:autonomous, 1})(::CTBase._Time, ::Int64)
+julia> V(_Time(0), [1])
+1-element Vector{Int64}:
+ 2
+```
+
+- state dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> V = VectorField((t, x) -> t+2x, state_dimension=1, time_dependence=:nonautonomous)
+julia> V(_Time(0), 1)
+ERROR: MethodError: no method matching (::VectorField{:nonautonomous, 1})(::CTBase._Time, ::Int64)
+julia> V(_Time(1), [1])
+1-element Vector{Int64}:
+ 3
+```
+
+- state dimension: N>1
+- time dependence: autonomous
+
+```@example
+julia> V = VectorField(x -> [x[1]^2, -x[2]^2], state_dimension=2) # or time_dependence=:autonomous
+julia> V(_Time(0), [1, 2])
+2-element Vector{Int64}:
+  1
+ -4
+```
+
+- state dimension: N>1
+- time dependence: nonautonomous
+
+```@example
+julia> V = VectorField((t, x) -> [t + x[1]^2, -x[2]^2], state_dimension=2, time_dependence=:nonautonomous)
+julia> V(_Time(1), [1, 2])
+2-element Vector{Int64}:
+  2
+ -4
+```
+"""
+struct VectorField{time_dependence, state_dimension}
+    f::Function
+    function VectorField(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        y = F.f(args_..., args...; kwargs...)
-        if dimension_usage==:scalar && length(x)==1
-            if !(y isa MyNumber)
-                throw(IncorrectOutput("A VectorField function must return a Real (scalar)" *
-                " if the input and usage are scalar."))
-            end
-            return [y]
-        else
-            return y
-        end
+        new{time_dependence, state_dimension}(f)
     end
+end
+
+# classical calls
+function (F::VectorField{:nonautonomous, N})(t::Time, x::Union{ctNumber, State, Matrix{<:ctNumber}}, 
+    args...; kwargs...)::Union{ctNumber, ctVector, Matrix{<:ctNumber}} where {N}
+    return F.f(t, x, args...; kwargs...)
+end
+function (F::VectorField{:autonomous, N})(x::Union{ctNumber, State, Matrix{<:ctNumber}}, 
+    args...; kwargs...)::Union{ctNumber, ctVector, Matrix{<:ctNumber}} where {N}
+    return F.f(x, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+# state dimension: 1
+function (F::VectorField{:nonautonomous, 1})(t::_Time, x::State, args...; kwargs...)::ctVector
+    return [F.f(t.value, x[1], args...; kwargs...)]
+end
+function (F::VectorField{:autonomous, 1})(t::_Time, x::State, args...; kwargs...)::ctVector
+    return [F.f(x[1], args...; kwargs...)]
+end
+# state dimension: N>1
+function (F::VectorField{:nonautonomous, N})(t::_Time, x::State, args...; kwargs...)::ctVector where {N}
+    return F.f(t.value, x, args...; kwargs...)
+end
+function (F::VectorField{:autonomous, N})(t::_Time, x::State, args...; kwargs...)::ctVector where {N}
+    return F.f(x, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar
-function_name=:LagrangeFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: scalar
-@eval begin
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, 
-        x::State, u::Control, args...; kwargs...) where {time_dependence, dimension_usage}
-        t_ = time_dependence==:autonomous ? () : (t, )
-        x_ = (dimension_usage==:scalar && length(x)==1) ? (x[1], ) : (x, )
-        u_ = (dimension_usage==:scalar && length(u)==1) ? (u[1], ) : (u, )
-        y = F.f(t_..., x_..., u_..., args...; kwargs...)
-        if !(y isa MyNumber)
-            throw(IncorrectOutput("A Lagrange cost must return a Real (scalar)."))
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The default value for `time_dependence` is `:autonomous`.
+
+!!! warning
+
+    When the state is of dimension 1, consider `x` as a scalar. Same for the control.
+
+## Classical calls
+
+- state dimension: 1
+- control dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x + u) # or time_dependence=:autonomous
+julia> L(1, 1)
+2
+julia> L([1], [1])
+ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
+```
+
+- state dimension: 1
+- control dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> x + u, time_dependence=:nonautonomous)
+julia> L(1, 1, 1)
+2
+julia> L(1, [1], [1])
+ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
+```
+
+- state dimension: 2
+- control dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x[1]^2 + u^2) # or time_dependence=:autonomous
+julia> L([1, 2], 1)
+2
+```
+
+- state dimension: 2
+- control dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> x[1]^2 + u^2, time_dependence=:nonautonomous)
+julia> L(1, [1, 2], 1)
+2
+```
+
+- state dimension: 1
+- control dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x^2 + u[2]^2) # or time_dependence=:autonomous
+julia> L(1, [1, 2])
+5
+```
+
+- state dimension: 1
+- control dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> t + x^2 + u[2]^2, time_dependence=:nonautonomous)
+julia> L(1, 1, [1, 2])
+6
+```
+
+- state dimension: 2
+- control dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x[1]^2 + u[2]^2) # or time_dependence=:autonomous
+julia> L([1, 2], [1, 2])
+5
+```
+
+- state dimension: 2
+- control dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> t + x[1]^2 + u[2]^2, time_dependence=:nonautonomous)
+julia> L(1, [1, 2], [1, 2])
+6
+```
+
+## Specific calls
+
+- state dimension: 1
+- control dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x + u, state_dimension=1, control_dimension=1) # or time_dependence=:autonomous
+julia> L(_Time(1), 1, 1)
+ERROR: MethodError: no method matching (::Lagrange{:autonomous, 0, 0})(::CTBase._Time, ::Int64, ::Int64)
+julia> L(_Time(1), [1], [1])
+2
+```
+
+- state dimension: 1
+- control dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> t + x + u, state_dimension=1, control_dimension=1, time_dependence=:nonautonomous)
+julia> L(_Time(1), 1, 1)
+ERROR: MethodError: no method matching (::Lagrange{:nonautonomous, 0, 0})(::CTBase._Time, ::Int64, ::Int64)
+julia> L(_Time(1), [1], [1])
+3
+```
+
+- state dimension: 2
+- control dimension: 1
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x[1]^2 + u^2, state_dimension=2, control_dimension=1) # or time_dependence=:autonomous
+julia> L(_Time(1), [1, 2], 1)
+ERROR: MethodError: no method matching (::Lagrange{:autonomous, 0, 0})(::CTBase._Time, ::Vector{Int64}, ::Int64)
+julia> L(_Time(1), [1, 2], [1])
+2
+```
+
+- state dimension: 2
+- control dimension: 1
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> t + x[1]^2 + u^2, state_dimension=2, control_dimension=1, time_dependence=:nonautonomous)
+julia> L(_Time(1), [1, 2], 1)
+ERROR: MethodError: no method matching (::Lagrange{:nonautonomous, 0, 0})(::CTBase._Time, ::Vector{Int64}, ::Int64)
+julia> L(_Time(1), [1, 2], [1])
+3
+```
+
+- state dimension: 1
+- control dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x^2 + u[2]^2, state_dimension=1, control_dimension=2) # or time_dependence=:autonomous
+julia> L(_Time(1), 1, [1, 2])
+ERROR: MethodError: no method matching (::Lagrange{:autonomous, 0, 0})(::CTBase._Time, ::Int64, ::Vector{Int64})
+julia> L(_Time(1), [1], [1, 2])
+5
+```
+
+- state dimension: 1
+- control dimension: 2
+- time dependence: nonautonomous
+
+```@example
+julia> L = Lagrange((t, x, u) -> t + x^2 + u[2]^2, state_dimension=1, control_dimension=2, time_dependence=:nonautonomous)
+julia> L(_Time(1), 1, [1, 2])
+ERROR: MethodError: no method matching (::Lagrange{:nonautonomous, 0, 0})(::CTBase._Time, ::Int64, ::Vector{Int64})
+julia> L(_Time(1), [1], [1, 2])
+6
+```
+
+- state dimension: 2
+- control dimension: 2
+- time dependence: autonomous
+
+```@example
+julia> L = Lagrange((x, u) -> x[1]^2 + u[2]^2, state_dimension=2, control_dimension=2) # or time_dependence=:autonomous
+julia> L(_Time(1), [1, 2], [1, 2])
+5
+```
+"""
+struct Lagrange{time_dependence, state_dimension, control_dimension}
+    f::Function
+    function Lagrange(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(),
+        control_dimension::Union{Symbol,Dimension}=__control_dimension(),
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        return y
+        new{time_dependence, state_dimension, control_dimension}(f)
     end
 end
 
-# -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar if scalar usage and x scalar as input
-function_name=:DynamicsFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin
-     function (F::$(function_name){time_dependence, dimension_usage})(t::Time, 
-        x::State, u::Control, args...; kwargs...) where {time_dependence, dimension_usage}
-        t_ = time_dependence==:autonomous ? () : (t, )
-        x_ = (dimension_usage==:scalar && length(x)==1) ? (x[1], ) : (x, )
-        u_ = (dimension_usage==:scalar && length(u)==1) ? (u[1], ) : (u, )
-        y = F.f(t_..., x_..., u_..., args...; kwargs...)
-        if dimension_usage==:scalar && length(x)==1
-            if !(y isa MyNumber)
-                throw(IncorrectOutput("A Dynamics function must return a Real (scalar)" *
-                " if the input x and the usage are scalar."))
-            end
-            return [y]
-        else
-            return y
-        end
-    end
+# classical calls
+function (F::Lagrange{:nonautonomous, N, M})(t::Time, x::Union{ctNumber, State}, 
+    u::Union{ctNumber, Control}, args...; kwargs...)::ctNumber where {N, M}
+    return F.f(t, x, u, args...; kwargs...)
+end
+function (F::Lagrange{:autonomous, N, M})(x::Union{ctNumber, State}, 
+    u::Union{ctNumber, Control}, args...; kwargs...)::ctNumber where {N, M}
+    return F.f(x, u, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+# state dimension: 1
+# control dimension: 1
+function (F::Lagrange{:nonautonomous, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber
+    return F.f(t.value, x[1], u[1], args...; kwargs...)
+end
+function (F::Lagrange{:autonomous, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber
+    return F.f(x[1], u[1], args...; kwargs...)
+end
+# state dimension: N>1
+# control dimension: 1
+function (F::Lagrange{:nonautonomous, N, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber where {N}
+    return F.f(t.value, x, u[1], args...; kwargs...)
+end
+function (F::Lagrange{:autonomous, N, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber where {N}
+    return F.f(x, u[1], args...; kwargs...)
+end
+# state dimension: 1
+# control dimension: M>1
+function (F::Lagrange{:nonautonomous, 1, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber where {M}
+    return F.f(t.value, x[1], u, args...; kwargs...)
+end
+function (F::Lagrange{:autonomous, 1, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber where {M}
+    return F.f(x[1], u, args...; kwargs...)
+end
+# state dimension: N>1
+# control dimension: M>1
+function (F::Lagrange{:nonautonomous, N, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber where {N, M}
+    return F.f(t.value, x, u, args...; kwargs...)
+end
+function (F::Lagrange{:autonomous, N, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctNumber where {N, M}
+    return F.f(x, u, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar is scalar usage and one dimensional output
-function_name=:StateConstraintFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, x::State, args...; kwargs...) where {time_dependence, dimension_usage}
-        t_ = time_dependence==:autonomous ? () : (t, )
-        x_ = (dimension_usage==:scalar && length(x)==1) ? (x[1], ) : (x, )
-        y = F.f(t_..., x_..., args...; kwargs...)
-        if dimension_usage==:scalar && !(y isa MyNumber) && length(y)==1
-            throw(IncorrectOutput("A state constraint must return a Real (scalar)" *
-            " if the output and usage are scalar."))
+# pre-condition: f returns a scalar if x is scalar
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `Lagrange`, but the function `f` is assumed to return a vector of the same dimension as the state `x`.
+
+"""
+struct Dynamics{time_dependence, state_dimension, control_dimension}
+    f::Function
+    function Dynamics(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(),
+        control_dimension::Union{Symbol,Dimension}=__control_dimension(),
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        return y isa MyNumber ? [y] : y
+        new{time_dependence, state_dimension, control_dimension}(f)
     end
 end
 
-# -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar is scalar usage and one dimensional output
-function_name=:ControlConstraintFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin 
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, u::Control, args...; kwargs...) where {time_dependence, dimension_usage}
-        t_ = time_dependence==:autonomous ? () : (t, )
-        u_ = (dimension_usage==:scalar && length(u)==1) ? (u[1], ) : (u, )
-        y = F.f(t_..., u_..., args...; kwargs...)
-        if dimension_usage==:scalar && !(y isa MyNumber) && length(y)==1
-            throw(IncorrectOutput("A control constraint must return a Real (scalar)" *
-            " if the output and usage are scalar."))
-        end
-        return y isa MyNumber ? [y] : y
-    end
+# classical calls
+function (F::Dynamics{:nonautonomous, N, M})(t::Time, x::Union{ctNumber, State}, 
+    u::Union{ctNumber, Control}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, M}
+    return F.f(t, x, u, args...; kwargs...)
+end
+function (F::Dynamics{:autonomous, N, M})(x::Union{ctNumber, State}, 
+    u::Union{ctNumber, Control}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, M}
+    return F.f(x, u, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times. output is a vector
+# state dimension: 1
+# control dimension: 1
+function (F::Dynamics{:nonautonomous, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector
+    return [F.f(t.value, x[1], u[1], args...; kwargs...)]
+end
+function (F::Dynamics{:autonomous, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector
+    return [F.f(x[1], u[1], args...; kwargs...)]
+end
+# state dimension: N>1
+# control dimension: 1
+function (F::Dynamics{:nonautonomous, N, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N}
+    return F.f(t.value, x, u[1], args...; kwargs...)
+end
+function (F::Dynamics{:autonomous, N, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N}
+    return F.f(x, u[1], args...; kwargs...)
+end
+# state dimension: 1
+# control dimension: M>1
+function (F::Dynamics{:nonautonomous, 1, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {M}
+    return [F.f(t.value, x[1], u, args...; kwargs...)]
+end
+function (F::Dynamics{:autonomous, 1, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {M}
+    return [F.f(x[1], u, args...; kwargs...)]
+end
+# state dimension: N>1
+# control dimension: M>1
+function (F::Dynamics{:nonautonomous, N, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, M}
+    return F.f(t.value, x, u, args...; kwargs...)
+end
+function (F::Dynamics{:autonomous, N, M})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, M}
+    return F.f(x, u, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar is scalar usage and one dimensional output
-function_name=:MixedConstraintFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin 
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, x::State, u::Control, args...; kwargs...) where {time_dependence, dimension_usage}
-        t_ = time_dependence==:autonomous ? () : (t, )
-        x_ = (dimension_usage==:scalar && length(x)==1) ? (x[1], ) : (x, )
-        u_ = (dimension_usage==:scalar && length(u)==1) ? (u[1], ) : (u, )
-        y = F.f(t_..., x_..., u_..., args...; kwargs...)
-        if dimension_usage==:scalar && !(y isa MyNumber) && length(y)==1
-            throw(IncorrectOutput("A mixed state/control constraint must return a Real (scalar)" *
-            " if the output and usage are scalar."))
+# pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `VectorField` in the usage, but the dimension of the output of the function `f` is arbitrary.
+
+"""
+struct StateConstraint{time_dependence, state_dimension, constraint_dimension}
+    f::Function
+    function StateConstraint(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(),
+        constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension(),
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        return y isa MyNumber ? [y] : y
+        new{time_dependence, state_dimension, constraint_dimension}(f)
     end
 end
 
-# -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar is scalar usage and one dimensional output
-function_name=:ControlFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin 
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, 
-        x::State, p::Adjoint, args...; kwargs...) where {time_dependence, dimension_usage}
-        args_ = time_dependence==:autonomous ? () : (t, )
-        if dimension_usage==:scalar && length(x)==1
-            args_ = (args_..., x[1], p[1])
-        else
-            args_ = (args_..., x, p)
-        end
-        y = F.f(args_..., args...; kwargs...)
-        if dimension_usage==:scalar && !(y isa MyNumber) && length(y)==1
-            throw(IncorrectOutput("A control function must return a Real (scalar)" *
-            " if the output and usage are scalar."))
-        end
-        return y isa MyNumber ? [y] : y
-    end
+# classical calls
+function (F::StateConstraint{:nonautonomous, N, K})(t::Time, x::Union{ctNumber, State}, 
+    args...; kwargs...)::Union{ctNumber, ctVector} where {N, K}
+    return F.f(t, x, args...; kwargs...)
+end
+function (F::StateConstraint{:autonomous, N, K})(x::Union{ctNumber, State}, 
+    args...; kwargs...)::Union{ctNumber, ctVector} where {N, K}
+    return F.f(x, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+
+# state dimension: 1
+# constraint dimension: 1
+function (F::StateConstraint{:nonautonomous, 1, 1})(t::_Time, x::State, args...; kwargs...)::ctVector
+    return [F.f(t.value, x[1], args...; kwargs...)]
+end
+function (F::StateConstraint{:autonomous, 1, 1})(t::_Time, x::State, args...; kwargs...)::ctVector
+    return [F.f(x[1], args...; kwargs...)]
+end
+
+# state dimension: N>1
+# constraint dimension: 1
+function (F::StateConstraint{:nonautonomous, N, 1})(t::_Time, x::State, args...; kwargs...)::ctVector where {N}
+    return [F.f(t.value, x, args...; kwargs...)]
+end
+function (F::StateConstraint{:autonomous, N, 1})(t::_Time, x::State, args...; kwargs...)::ctVector where {N}
+    return [F.f(x, args...; kwargs...)]
+end
+
+# state dimension: 1
+# constraint dimension: K>1
+function (F::StateConstraint{:nonautonomous, 1, K})(t::_Time, x::State, args...; kwargs...)::ctVector where {K}
+    return F.f(t.value, x[1], args...; kwargs...)
+end
+function (F::StateConstraint{:autonomous, 1, K})(t::_Time, x::State, args...; kwargs...)::ctVector where {K}
+    return F.f(x[1], args...; kwargs...)
+end
+
+# state dimension: N>1
+# constraint dimension: K>1
+function (F::StateConstraint{:nonautonomous, N, K})(t::_Time, x::State, args...; kwargs...)::ctVector where {N, K}
+    return F.f(t.value, x, args...; kwargs...)
+end
+function (F::StateConstraint{:autonomous, N, K})(t::_Time, x::State, args...; kwargs...)::ctVector where {N, K}
+    return F.f(x, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
-# pre-condition: f returns a scalar is scalar usage and one dimensional output
-function_name=:MultiplierFunction
-#
-@eval @ctfunction_td_sv $(function_name), $(abstract_heritance)
-# handling time dependence and scalar / vectorial usage
-# output: vectorial
-@eval begin 
-    function (F::$(function_name){time_dependence, dimension_usage})(t::Time, 
-        x::State, p::Adjoint, args...; kwargs...) where {time_dependence, dimension_usage}
-        args_ = time_dependence==:autonomous ? () : (t, )
-        if dimension_usage==:scalar && length(x)==1
-            args_ = (args_..., x[1], p[1])
-        else
-            args_ = (args_..., x, p)
+# pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `VectorField` in the usage, but the dimension of the output of the function `f` is arbitrary.
+
+"""
+struct ControlConstraint{time_dependence, control_dimension, constraint_dimension}
+    f::Function
+    function ControlConstraint(f::Function; 
+        control_dimension::Union{Symbol,Dimension}=__control_dimension(),
+        constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension(),
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
         end
-        y = F.f(args_..., args...; kwargs...)
-        if dimension_usage==:scalar && !(y isa MyNumber) && length(y)==1
-            throw(IncorrectOutput("A multiplier function must return a Real (scalar)" *
-            " if the output and usage are scalar."))
-        end
-        return y isa MyNumber ? [y] : y
+        new{time_dependence, control_dimension, constraint_dimension}(f)
     end
+end
+
+# classical calls
+function (F::ControlConstraint{:nonautonomous, M, K})(t::Time, u::Union{ctNumber, Control}, 
+    args...; kwargs...)::Union{ctNumber, ctVector} where {M, K}
+    return F.f(t, u, args...; kwargs...)
+end
+function (F::ControlConstraint{:autonomous, M, K})(u::Union{ctNumber, Control}, 
+    args...; kwargs...)::Union{ctNumber, ctVector} where {M, K}
+    return F.f(u, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+
+# control dimension: 1
+# constraint dimension: 1
+function (F::ControlConstraint{:nonautonomous, 1, 1})(t::_Time, u::Control, args...; kwargs...)::ctVector
+    return [F.f(t.value, u[1], args...; kwargs...)]
+end
+function (F::ControlConstraint{:autonomous, 1, 1})(t::_Time, u::Control, args...; kwargs...)::ctVector
+    return [F.f(u[1], args...; kwargs...)]
+end
+
+# control dimension: M>1
+# constraint dimension: 1
+function (F::ControlConstraint{:nonautonomous, M, 1})(t::_Time, u::Control, args...; kwargs...)::ctVector where {M}
+    return [F.f(t.value, u, args...; kwargs...)]
+end
+function (F::ControlConstraint{:autonomous, M, 1})(t::_Time, u::Control, args...; kwargs...)::ctVector where {M}
+    return [F.f(u, args...; kwargs...)]
+end
+
+# control dimension: 1
+# constraint dimension: K>1
+function (F::ControlConstraint{:nonautonomous, 1, K})(t::_Time, u::Control, args...; kwargs...)::ctVector where {K}
+    return F.f(t.value, u[1], args...; kwargs...)
+end
+function (F::ControlConstraint{:autonomous, 1, K})(t::_Time, u::Control, args...; kwargs...)::ctVector where {K}
+    return F.f(u[1], args...; kwargs...)
+end
+
+# control dimension: M>1
+# constraint dimension: K>1
+function (F::ControlConstraint{:nonautonomous, M, K})(t::_Time, u::Control, args...; kwargs...)::ctVector where {M, K}
+    return F.f(t.value, u, args...; kwargs...)
+end
+function (F::ControlConstraint{:autonomous, M, K})(t::_Time, u::Control, args...; kwargs...)::ctVector where {M, K}
+    return F.f(u, args...; kwargs...)
+end
+
+# -------------------------------------------------------------------------------------------
+# pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+Similar to `Lagrange` in the usage, but the dimension of the output of the function `f` is arbitrary.
+
+"""
+struct MixedConstraint{time_dependence, state_dimension, control_dimension, constraint_dimension}
+    f::Function
+    function MixedConstraint(f::Function; 
+        state_dimension::Union{Symbol,Dimension}=__state_dimension(),
+        control_dimension::Union{Symbol,Dimension}=__control_dimension(),
+        constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension(),
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
+        end
+        new{time_dependence, state_dimension, control_dimension, constraint_dimension}(f)
+    end
+end
+
+# classical calls
+function (F::MixedConstraint{:nonautonomous, N, M, K})(t::Time, x::Union{ctNumber, State},
+    u::Union{ctNumber, Control}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, M, K}
+    return F.f(t, x, u, args...; kwargs...)
+end
+function (F::MixedConstraint{:autonomous, N, M, K})(x::Union{ctNumber, State},
+    u::Union{ctNumber, Control}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, M, K}
+    return F.f(x, u, args...; kwargs...)
+end
+
+# specific calls: inputs are vectors, except times
+
+# state dimension: 1
+# control dimension: 1
+# constraint dimension: 1
+function (F::MixedConstraint{:nonautonomous, 1, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector
+    return [F.f(t.value, x[1], u[1], args...; kwargs...)]
+end
+function (F::MixedConstraint{:autonomous, 1, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector
+    return [F.f(x[1], u[1], args...; kwargs...)]
+end
+
+# state dimension: N>1
+# control dimension: 1
+# constraint dimension: 1
+function (F::MixedConstraint{:nonautonomous, N, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N}
+    return [F.f(t.value, x, u[1], args...; kwargs...)]
+end
+function (F::MixedConstraint{:autonomous, N, 1, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N}
+    return [F.f(x, u[1], args...; kwargs...)]
+end
+
+# state dimension: 1
+# control dimension: M>1
+# constraint dimension: 1
+function (F::MixedConstraint{:nonautonomous, 1, M, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {M}
+    return [F.f(t.value, x[1], u, args...; kwargs...)]
+end
+function (F::MixedConstraint{:autonomous, 1, M, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {M}
+    return [F.f(x[1], u, args...; kwargs...)]
+end
+
+# state dimension: N>1
+# control dimension: M>1
+# constraint dimension: 1
+function (F::MixedConstraint{:nonautonomous, N, M, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, M}
+    return [F.f(t.value, x, u, args...; kwargs...)]
+end
+function (F::MixedConstraint{:autonomous, N, M, 1})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, M}
+    return [F.f(x, u, args...; kwargs...)]
+end
+
+# state dimension: 1
+# control dimension: 1
+# constraint dimension: K>1
+function (F::MixedConstraint{:nonautonomous, 1, 1, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {K}
+    return F.f(t.value, x[1], u[1], args...; kwargs...)
+end
+function (F::MixedConstraint{:autonomous, 1, 1, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {K}
+    return F.f(x[1], u[1], args...; kwargs...)
+end
+
+# state dimension: N>1
+# control dimension: 1
+# constraint dimension: K>1
+function (F::MixedConstraint{:nonautonomous, N, 1, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, K}
+    return F.f(t.value, x, u[1], args...; kwargs...)
+end
+function (F::MixedConstraint{:autonomous, N, 1, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, K}
+    return F.f(x, u[1], args...; kwargs...)
+end
+
+# state dimension: 1
+# control dimension: M>1
+# constraint dimension: K>1
+function (F::MixedConstraint{:nonautonomous, 1, M, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {M, K}
+    return F.f(t.value, x[1], u, args...; kwargs...)
+end
+function (F::MixedConstraint{:autonomous, 1, M, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {M, K}
+    return F.f(x[1], u, args...; kwargs...)
+end
+
+# state dimension: N>1
+# control dimension: M>1
+# constraint dimension: K>1
+function (F::MixedConstraint{:nonautonomous, N, M, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, M, K}
+    return F.f(t.value, x, u, args...; kwargs...)
+end
+function (F::MixedConstraint{:autonomous, N, M, K})(t::_Time, x::State, u::Control, args...; kwargs...)::ctVector where {N, M, K}
+    return F.f(x, u, args...; kwargs...)
+end
+
+# -------------------------------------------------------------------------------------------
+# pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The function `f` must be of the form `f(t, x, args...; kwargs...)` or `f(x, args...; kwargs...)` depending on 
+the time dependence of the optimal control problem.
+
+!!! note
+
+    Only classical usage.
+
+"""
+struct FeedbackControl{time_dependence}
+    f::Function
+    function FeedbackControl(f::Function; 
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
+        end
+        new{time_dependence}(f)
+    end
+end
+
+# classical calls
+function (F::FeedbackControl{:nonautonomous})(t::Time, x::Union{ctNumber, State}, args...; kwargs...)::Union{ctNumber, ctVector}
+    return F.f(t, x, args...; kwargs...)
+end
+function (F::FeedbackControl{:autonomous})(x::Union{ctNumber, State}, args...; kwargs...)::Union{ctNumber, ctVector}
+    return F.f(x, args...; kwargs...)
+end
+
+# -------------------------------------------------------------------------------------------
+# pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The function `f` must be of the form `f(t, x, p, args...; kwargs...)` or `f(x, p, args...; kwargs...)` depending on 
+the time dependence of the optimal control problem.
+
+!!! note
+
+    Only classical usage.
+
+"""
+struct ControlLaw{time_dependence}
+    f::Function
+    function ControlLaw(f::Function; 
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
+        end
+        new{time_dependence}(f)
+    end
+end
+
+# classical calls
+function (F::ControlLaw{:nonautonomous})(t::Time, x::Union{ctNumber, State},
+    p::Union{ctNumber, Adjoint}, args...; kwargs...)::Union{ctNumber, ctVector}
+    return F.f(t, x, p, args...; kwargs...)
+end
+function (F::ControlLaw{:autonomous})(x::Union{ctNumber, State},
+    p::Union{ctNumber, Adjoint}, args...; kwargs...)::Union{ctNumber, ctVector}
+    return F.f(x, p, args...; kwargs...)
+end
+
+# -------------------------------------------------------------------------------------------
+# pre-condition: f returns a scalar if the output is one dimensional
+"""
+
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The function `f` must be of the form `f(t, x, p, args...; kwargs...)` or `f(x, p, args...; kwargs...)` depending on 
+the time dependence of the optimal control problem.
+
+!!! note
+
+    Only classical usage.
+
+"""
+struct Multiplier{time_dependence}
+    f::Function
+    function Multiplier(f::Function; 
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
+        if time_dependence ∉ [:autonomous, :nonautonomous]
+            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
+        end
+        new{time_dependence}(f)
+    end
+end
+
+# classical calls
+function (F::Multiplier{:nonautonomous})(t::Time, x::Union{ctNumber, State},
+    p::Union{ctNumber, Adjoint}, args...; kwargs...)::Union{ctNumber, ctVector}
+    return F.f(t, x, p, args...; kwargs...)
+end
+function (F::Multiplier{:autonomous})(x::Union{ctNumber, State},
+    p::Union{ctNumber, Adjoint}, args...; kwargs...)::Union{ctNumber, ctVector}
+    return F.f(x, p, args...; kwargs...)
 end
