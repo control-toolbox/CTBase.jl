@@ -16,6 +16,7 @@ import Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
+using Reexport
 @reexport using MLStyle # pattern matching 
 using Parameters # @with_kw: to have default values in struct
 using Plots
