@@ -101,16 +101,16 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, [ $t0, $tf ] , string($tt)) )
         (true , false) => @match t0 begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw("Syntax error")
-	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw("Syntax error")
-	    _            => throw("Syntax error") end
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw("syntax error")
+	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw("syntax error")
+	    _            => throw("syntax error") end
         (false, true ) => @match tf begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(i), string($tt)) ) : throw("Syntax error")
-	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(1), string($tt)) ) : throw("Syntax error")
-	    _            => throw("Syntax error") end
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(i), string($tt)) ) : throw("syntax error")
+	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(1), string($tt)) ) : throw("syntax error")
+	    _            => throw("syntax error") end
 	_              => @match (t0, tf) begin
-	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index(i), Index(j), string($tt)) ) : throw("Syntax error") 
-	    _ => throw("Syntax error") end
+	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index(i), Index(j), string($tt)) ) : throw("syntax error") 
+	    _ => throw("syntax error") end
     end
 end
 

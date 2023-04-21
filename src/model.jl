@@ -1,5 +1,23 @@
 # --------------------------------------------------------------------------------------------------
 # Abstract Optimal control model
+
+# Index (for variable, state and control)
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+mutable struct Index
+    val::Integer
+    Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
+end
+Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
+Base.to_index(i::Index) = i.val
+Base.getindex(x::AbstractArray, i::Index) = x[i.val]
+Base.getindex(x::Real, i::Index) = x[i.val]
+
 """
 $(TYPEDEF)
 """
@@ -32,23 +50,6 @@ $(TYPEDFIELDS)
     defined_with_macro::Bool=false
     generated_code::Array{String}=[]
 end
-
-# Constraint index
-"""
-$(TYPEDEF)
-
-**Fields**
-
-$(TYPEDFIELDS)
-"""
-mutable struct Index
-    val::Integer
-    Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
-end
-Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
-Base.to_index(i::Index) = i.val
-Base.getindex(x::AbstractArray, i::Index) = x[i.val]
-Base.getindex(x::Real, i::Index) = x[i.val]
 
 """
 $(TYPEDSIGNATURES)
@@ -194,24 +195,61 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Fix initial (resp. final) time, the final (resp. initial) time being variable (free),
-when type is `:initial`. And conversely when type is `:final`.
+Fix initial time, final time is free and given by the variable at the provided index.
 
 # Examples
 ```jldoctest
-julia> time!(ocp, :initial, 0, "t")
-julia> time!(ocp, :final, 1, "t")
+julia> time!(ocp, 0, Index(2), "t")
 ```
 """
-function time!(ocp::OptimalControlModel, type::Symbol, time::Time, name::String=__time_name())
-    type_ = Symbol(type, :_time)
-    if type_ ∈ [ :initial_time, :final_time ]
-        setproperty!(ocp, type_, time)
-        ocp.time_name = name
-    else
-        throw(IncorrectArgument("the following type of time is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final ]."))
-    end
+function time!(ocp::OptimalControlModel, t0::Time, ind::Index, name::String=__time_name())
+    i = ind.val
+    (i < 1) && throw(IncorrectArgument("index of variable must be positive"))
+    (i > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    ocp.initial_time = t0
+    ocp.final_time = ind
+    ocp.time_name = name
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Fix final time, initial time is free and given by the variable at the provided index.
+
+# Examples
+```jldoctest
+julia> time!(ocp, Index(2), 1, "t")
+```
+"""
+function time!(ocp::OptimalControlModel, ind::Index, tf::Time, name::String=__time_name())
+    i = ind.val
+    (i < 1) && throw(IncorrectArgument("index of variable must be positive"))
+    (i > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    ocp.initial_time = ind
+    ocp.final_time = tf
+    ocp.time_name = name
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Initial and final times are free and given by the variable at the provided indices.
+
+# Examples
+```jldoctest
+julia> time!(ocp, Index(2), Index(3), "t")
+```
+"""
+function time!(ocp::OptimalControlModel, ind0::Index, indf::Index, name::String=__time_name())
+    j0 = ind0.val
+    (j0 < 1) && throw(IncorrectArgument("index of variable must be positive"))
+    (j0 > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    jf = indf.val
+    (jf < 1) && throw(IncorrectArgument("index of variable must be positive"))
+    (jf > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    ocp.initial_time = ind0
+    ocp.final_time = indf
+    ocp.time_name = name
 end
 
 """
