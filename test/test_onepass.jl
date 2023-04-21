@@ -115,11 +115,13 @@ o = @def1 begin
     r(0) == 0,    (1)
     v(0) == 1,    (♡)
     x'(t) == [ v(t), w(t)^2 ]
+    ∫( u(t)^2 + x₁(t) ) → min
     end 
 x = [ 1, 2 ]
-u = [ 3 ]
+u = 3 
 @test constraint(o, :eq1 )(x) == x[1]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
+@test o.lagrange(x, u) == u^2 + x[1] 
 
 end

@@ -1,3 +1,7 @@
+__state_dimension() = :N
+__control_dimension() = :M
+__constraint_dimension() = :K
+
 """
 $(TYPEDSIGNATURES)
 
@@ -7,45 +11,6 @@ The default value is `:autonomous`, which means that the functions are considere
 The other possible time dependence is `:nonautonomous`, which means that the functions are considered time dependent.
 """
 __fun_time_dependence() = :autonomous
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the dimension usage of the functions.
-
-The default value is `:scalar`, which means that the usage of the functions is considered scalar.
-The other possible usage is `:vectorial`.
-
-# Example
-
-If `x` is for instance a vector of dimension 2 and `u` a scalar, then the following usage 
-is considered scalar:
-
-```jldoctest
-f(x, u) = x[1] + u
-```
-
-If `x` and `u` are for instance both scalar, then the following usage is considered scalar:
-
-```jldoctest
-f(x, u) = x + u
-```
-
-If `x` is for instance a vector of dimension 2 and `u` a vector of dimension 3, then the following usage
-is also considered scalar:
-
-```jldoctest
-f(x, u) = x[1] + u[1]
-```
-
-A vectorial usage is the following. For instance, if `x` is a vector of dimension 2 and `u` a scalar, 
-then the following usage is considered vectorial:
-
-```jldoctest
-f(x, u) = x[1] + u[1]
-```
-"""
-__fun_dimension_usage() = :scalar
 
 """
 $(TYPEDSIGNATURES)
@@ -60,6 +25,7 @@ __ocp_time_dependence() = :autonomous
 """
 $(TYPEDSIGNATURES)
 
+<<<<<<< HEAD
 Used to set the default value of the dimension usage of the Optimal Control Problem.
 The default value is `:scalar`, which means that the usage for all the functions used to define the
 Optimal Control Problem is considered scalar.
@@ -77,6 +43,8 @@ __variable_names(q::Dimension) = q==1 ? "v" : [ "v" * ctindices(i) for i ∈ ran
 """
 $(TYPEDSIGNATURES)
 
+=======
+>>>>>>> parser
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
