@@ -90,6 +90,7 @@ end
 
 # todo: check vars in p_time! below, and update time! in model.jl
 p_time!(p, ocp, t, t0, tf; log=false) = begin
+
     log && println("time: $t, initial time: $t0, final time: $tf")
     p.t = t 
     p.t0 = t0
