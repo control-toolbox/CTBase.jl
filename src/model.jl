@@ -425,11 +425,12 @@ Add an `:initial` or `:final` value constraint on a range of the state.
 # Examples
 
 ```jldoctest
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
 julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
 julia> constraint!(ocp, :final, Index(2), 0)
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, val, label::Symbol=__constraint_label())
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, val, label::Symbol=__constraint_label())
 
     # check if the constraint named label already exists
     if label ∈ constraints_labels(ocp)
@@ -501,9 +502,10 @@ julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [1, 2])
 julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0], [1, 2, 1])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, UnitRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
+function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
 
     # check if the constraint named label already exists
     if label ∈ constraints_labels(ocp)

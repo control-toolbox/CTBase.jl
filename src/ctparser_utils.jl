@@ -94,6 +94,7 @@ replace_call(e, x, t, y) = begin
 	    :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
 	    :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
 	    :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
+        :( $xx[$i:$p:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$p:$j] ) : ee
 	    :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
 	    _ => ee
         end
@@ -104,7 +105,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return true if e contains an `x(t)`, `x[i](t)` or `x[i:j](t)` call.
+Return true if e contains an `x(t)`, `x[i](t)`, `x[i:j](t)` or  `x[i:p:j](t)` call.
 
 # Example
 ```jldoctest
@@ -124,10 +125,11 @@ has(e, x, t) = begin
 	if :yes ∈ args
 	    :yes
 	else @match ee begin
-            :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :yes : ee
-            :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
-            :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
-            :( $xx($tt)        ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx[        ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx[$i      ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx[$i:$j   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx[$i:$p:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
+            :( $xx($tt)           ) => (xx == x && tt == t) ? :yes : ee
             _ => ee end
         end
     end
@@ -146,6 +148,9 @@ Return the type constraint among
 ```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
+julia> constraint_type(:( x[1:2:5](0) ), t, t0, tf, x, u)
+(:initial, 1:2:5)
+
 julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u)
 (:initial, 1:2)
 
@@ -154,6 +159,9 @@ julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u)
 
 julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u)
 (:boundary, :(2 * var"x#0"[1] ^ 2))
+
+julia> constraint_type(:( x[1:2:5](tf) ), t, t0, tf, x, u)
+(:final, 1:2:5)
 
 julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u)
 (:final, 1:2)
@@ -167,6 +175,9 @@ julia> constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u)
 julia> constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u)
 (:boundary, :(var"x#f"[1] - var"x#0"[2]))
 
+julia> constraint_type(:( u[1:2:5](t) ), t, t0, tf, x, u)
+(:control_range, 1:2:5)
+
 julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u)
 (:control_range, 1:2)
 
@@ -175,6 +186,9 @@ julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u)
 
 julia> constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u)
 (:control_fun, :(2 * u[1] ^ 2))
+
+julia> constraint_type(:( x[1:2:5](t) ), t, t0, tf, x, u)
+(:state_range, 1:2:5)
 
 julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u)
 (:state_range, 1:2)
@@ -195,24 +209,28 @@ julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
 constraint_type(e, t, t0, tf, x, u) =
     @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf) ] begin
         [ true , false, false, false, false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : :other
-            :( $y[$i   ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : :other
+            :( $y[$i:$p:$j]($s) ) => (y == x && s == t0) ? (:initial, i:p:j   ) : :other
+            :( $y[$i:$j   ]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : :other
+            :( $y[$i      ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : :other
 	    _                  => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
         [ false, true , false, false, false, false ] => @match e begin 
-            :( $y[$i:$j]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : :other
-            :( $y[$i   ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : :other
+            :( $y[$i:$p:$j]($s) ) => (y == x && s == tf) ? (:final, i:p:j   ) : :other
+            :( $y[$i:$j   ]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : :other
+            :( $y[$i      ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : :other
 	    _                  => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false ] => begin
 	    ee = replace_call(e , x, t0, Symbol(x, "#0")) 
 	    ee = replace_call(ee, x, tf, Symbol(x, "#f")) 
 	    (:boundary, ee) end
         [ false, false, true , false, false, false ] => @match e begin
-            :( $v[$i:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : :other
-            :( $v[$i   ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : :other
+            :( $v[$i:$p:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:p:j   ) : :other
+            :( $v[$i:$j   ]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : :other
+            :( $v[$i      ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : :other
 	    _                  => (:control_fun, replace_call(e, u, t, u)) end                
         [ false, false, false, true , false, false ] => @match e begin
-            :( $y[$i:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : :other
-            :( $y[$i   ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : :other
+            :( $y[$i:$p:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:p:j   ) : :other
+            :( $y[$i:$j   ]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : :other
+            :( $y[$i      ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : :other
 	    _                  => (:state_fun  , replace_call(e, x, t, x)) end                
         [ false, false, true , true , false, false ] => begin
 	    ee = replace_call(e , u, t, u)
