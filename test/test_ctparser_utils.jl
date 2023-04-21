@@ -46,24 +46,36 @@ e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test !has(:x, :y)
 
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u
+<<<<<<< HEAD
 @test constraint_type(:( x'(t)              ), t, t0, tf, x, u) == (:dynamics, nothing)
 @test constraint_type(:( y'(t)              ), t, t0, tf, x, u) == (:other, nothing)
 @test constraint_type(:( x'(s)              ), t, t0, tf, x, u) == (:other, nothing)
 @test constraint_type(:( x(0)'              ), t, t0, tf, x, u) == (:boundary, :(var"x#0"'))
 @test constraint_type(:( x(t)'              ), t, t0, tf, x, u) == (:state_fun, :(x'))
 @test constraint_type(:( x(0)               ), t, t0, tf, x, u) == (:initial, nothing)
+=======
+@test constraint_type(:( x[1:2:5](0)          ), t, t0, tf, x, u) == (:initial, 1:2:5)
+@test constraint_type(:( x[1:2](0)          ), t, t0, tf, x, u) == (:initial, 1:2)
+>>>>>>> main
 @test constraint_type(:( x[1](0)            ), t, t0, tf, x, u) == (:initial, Index(1))
 @test constraint_type(:( x[1:2](0)          ), t, t0, tf, x, u) == (:initial, 1:2)
 @test constraint_type(:( 2x[1](0)^2         ), t, t0, tf, x, u) == (:boundary, :(2 * var"x#0"[1] ^ 2))
+<<<<<<< HEAD
 @test constraint_type(:( x(tf)              ), t, t0, tf, x, u) == (:final, nothing)
+=======
+@test constraint_type(:( x[1:2:5](tf)         ), t, t0, tf, x, u) == (:final, 1:2:5)
+@test constraint_type(:( x[1:2](tf)         ), t, t0, tf, x, u) == (:final, 1:2)
+>>>>>>> main
 @test constraint_type(:( x[1](tf)           ), t, t0, tf, x, u) == (:final, Index(1))
 @test constraint_type(:( x[1:2](tf)         ), t, t0, tf, x, u) == (:final, 1:2)
 @test constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u) == (:boundary, :(var"x#f"[1] - var"x#0"[2]))
 @test constraint_type(:( 2x[1](tf)^2        ), t, t0, tf, x, u) == (:boundary, :(2 * var"x#f"[1] ^ 2))
+@test constraint_type(:( u[1:2:5](t)          ), t, t0, tf, x, u) == (:control_range, 1:2:5)
 @test constraint_type(:( u[1:2](t)          ), t, t0, tf, x, u) == (:control_range, 1:2)
 @test constraint_type(:( u[1](t)            ), t, t0, tf, x, u) == (:control_range, Index(1))
 @test constraint_type(:( u(t)               ), t, t0, tf, x, u) == (:control_range, nothing)
 @test constraint_type(:( 2u[1](t)^2         ), t, t0, tf, x, u) == (:control_fun, :(2 * u[1] ^ 2))
+@test constraint_type(:( x[1:2:5](t)          ), t, t0, tf, x, u) == (:state_range, 1:2:5)
 @test constraint_type(:( x[1:2](t)          ), t, t0, tf, x, u) == (:state_range, 1:2)
 @test constraint_type(:( x[1](t)            ), t, t0, tf, x, u) == (:state_range, Index(1))
 @test constraint_type(:( x(t)               ), t, t0, tf, x, u) == (:state_range, nothing)
@@ -97,5 +109,6 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u
 @test input_line_type(:(d ≤  e ≤  f , (n)) )          == (CTBase.e_named_constraint, [:n, :(≤),  :e, :d, :f])
 @test input_line_type(:(d ≤  e ≤  f))                 == (CTBase.e_constraint,       [    :(≤),  :e, :d, :f])
 @test input_line_type(:(e))                           == (:other, [])
+
 
 end

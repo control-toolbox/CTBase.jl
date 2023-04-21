@@ -12,8 +12,7 @@ $(EXPORTS)
 module CTBase
 
 # using
-using Reexport
-import Base: show, \, Base
+import Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
@@ -30,15 +29,17 @@ using DataStructures # OrderedDict for aliases
 """
 Type alias for a real number.
 """
+const ctNumber = Real
 const MyNumber = Real
 """
 Type alias for a vector of real numbers.
 """
+const ctVector = AbstractVector{<:ctNumber}
 const MyVector = AbstractVector{<:MyNumber}
 """
 Type alias for a time.
 """
-const Time = MyNumber
+const Time = ctNumber
 """
 Type alias for a vector of times.
 """
@@ -46,19 +47,19 @@ const Times = AbstractVector{<:Time}
 """
 Type alias for a grid of times.
 """
-const TimesDisc = Union{MyVector, StepRangeLen}
+const TimesDisc = Union{Times, StepRangeLen}
 """
 Type alias for a state.
 """
-const State = MyVector
+const State = ctVector
 """
 Type alias for an adjoint.
 """
-const Adjoint = MyVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
+const Adjoint = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
 Type alias for a control.
 """
-const Control = MyVector
+const Control = ctVector
 """
 Type alias for a vector of states.
 """
@@ -95,7 +96,7 @@ include("solution.jl")
 include("plot.jl")
 
 # numeric types
-export MyNumber, MyVector, Time, Times, TimesDisc
+export ctNumber, ctVector, Time, Times, TimesDisc
 export States, Adjoints, Controls, State, Adjoint, Dimension, Index
 
 # callback
@@ -103,16 +104,16 @@ export CTCallback, CTCallbacks, PrintCallback, StopCallback
 export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # description
-export Description, makeDescription, add, getFullDescription, \
+export Description, makeDescription, add, getFullDescription
 
 # exceptions
 export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
-export IncorrectArgument, IncorrectOutput, NotImplemented
+export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
-export MayerFunction, LagrangeFunction, DynamicsFunction, ControlFunction, MultiplierFunction
-export BoundaryConstraintFunction, StateConstraintFunction, ControlConstraintFunction, MixedConstraintFunction
+export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
+export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint
 
 # model
 export OptimalControlModel
@@ -133,5 +134,8 @@ export replace_call, constraint_type
 
 # onepass
 export @def1, @_def1
+
+# _Time
+export _Time
 
 end
