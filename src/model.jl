@@ -140,11 +140,11 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 ```
 """
 function variable!(ocp::OptimalControlModel, q::Dimension, names::Union{String, Vector{String}}=__variable_names(q))
-    (q > 1 )&& (names isa Vector{String}) && (length(names) ≠ q) && throw(InconsistentArgument("the number of variables names must be equal to the state dimension"))
+    (q > 1) && (names isa Vector{String}) && (length(names) ≠ q) && throw(InconsistentArgument("the number of variables names must be equal to the state dimension"))
     (q == 1) && (names isa Vector{String}) && throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
     (q > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, q)])
     ocp.variable_dimension = q
-    ocp.variable_names = (q == 1)? [names] : names
+    ocp.variable_names = (q == 1) ? [names] : names
 end
 
 function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol)
@@ -256,12 +256,12 @@ julia> ocp.control_names
 function control!(ocp::OptimalControlModel, m::Dimension, names::Union{String, Vector{String}}=__control_names(m))
     (m > 1) && (names isa Vector{String}) && (length(names) != m) && throw(InconsistentArgument("the number of control names must be equal to the control dimension"))
     (m == 1) && (names isa Vector{String}) && throw(InconsistentArgument("if the control dimension is 1, then, the argument names must be a String"))
-    end
     (m > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, m)])
     ocp.control_dimension = m
     ocp.control_names = (m == 1) ? [names] : names
     nothing
 end
+
 function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol)
     control!(ocp, m, string(name))
 end

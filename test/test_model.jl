@@ -1,4 +1,4 @@
-function test_model()
+function test_model() # 30 55 185
 
 @testset "variable" begin
     ocp = Model()
@@ -27,7 +27,7 @@ function test_model()
     ocp = Model()
     variable!(ocp, 2, [ "vv1", "vv2" ])
     @test ocp.variable_dimension == 2
-    @test ocp.variables_names == [ "vv1", "vv2" ]
+    @test ocp.variable_names == [ "vv1", "vv2" ]
 
     ocp = Model()
     variable!(ocp, 2, :vv)
@@ -58,15 +58,20 @@ end
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
     @test CTBase.time_set(ocp)
+
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
     @test CTBase.time_set(ocp)
+    
     ocp = Model()
     time!(ocp, 0, 1)
     @test CTBase.time_set(ocp)
+
+    ocp = Model()
     time!(ocp, [0, 1])
     @test CTBase.time_set(ocp)
+
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
@@ -74,6 +79,7 @@ end
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     @test_throws UnauthorizedCall time!(ocp, 0, 1)
+
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
@@ -81,12 +87,14 @@ end
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     @test_throws UnauthorizedCall time!(ocp, 0, 1)
+
     ocp = Model()
     time!(ocp, [0, 1])
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
-ocp = Model()
+
+    ocp = Model()
     time!(ocp, 0, 1)
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
@@ -108,6 +116,7 @@ end
     ocp = Model()
     @test isautonomous(ocp)
     @test !isnonautonomous(ocp)
+
     ocp = Model(time_dependence=:nonautonomous)
     @test isnonautonomous(ocp)
     @test !isautonomous(ocp)
@@ -120,6 +129,7 @@ end
     objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
     @test ismin(ocp)
     @test !ismax(ocp)
+
     ocp = Model()
     state!(ocp, 2)
     control!(ocp, 1)
@@ -133,22 +143,27 @@ end
     state!(ocp, 1)
     @test ocp.state_dimension == 1
     @test ocp.state_names == ["x"]
+
     ocp = Model()
     state!(ocp, 1, "y")
     @test ocp.state_dimension == 1
     @test ocp.state_names == ["y"]
+
     ocp = Model()
     state!(ocp, 2)
     @test ocp.state_dimension == 2
     @test ocp.state_names == ["x₁", "x₂"]
+
     ocp = Model()
     state!(ocp, 2, ["y₁", "y₂"])
     @test ocp.state_dimension == 2
     @test ocp.state_names == ["y₁", "y₂"]
+
     ocp = Model()
     state!(ocp, 2, :y)
     @test ocp.state_dimension == 2
     @test ocp.state_names == ["y₁", "y₂"]
+
     ocp = Model()
     state!(ocp, 2, "y")
     @test ocp.state_dimension == 2
@@ -160,22 +175,27 @@ end
     control!(ocp, 1)
     @test ocp.control_dimension == 1
     @test ocp.control_names == ["u"]
+
     ocp = Model()
     control!(ocp, 1, "v")
     @test ocp.control_dimension == 1
     @test ocp.control_names == ["v"]
+
     ocp = Model()
     control!(ocp, 2)
     @test ocp.control_dimension == 2
     @test ocp.control_names == ["u₁", "u₂"]
+
     ocp = Model()
     control!(ocp, 2, ["v₁", "v₂"])
     @test ocp.control_dimension == 2
     @test ocp.control_names == ["v₁", "v₂"]
+
     ocp = Model()
     control!(ocp, 2, :v)
     @test ocp.control_dimension == 2
     @test ocp.control_names == ["v₁", "v₂"]
+
     ocp = Model()
     control!(ocp, 2, "v")
     @test ocp.control_dimension == 2
@@ -189,32 +209,38 @@ end
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
+
     ocp = Model()
     time!(ocp, 0, 1, "s")
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
+    
     ocp = Model()
     time!(ocp, 0, 1, :s)
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
+
     # initial and final times (bis)
     ocp = Model()
     time!(ocp, [0, 1])
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
+
     ocp = Model()
     time!(ocp, [0, 1], "s")
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
+
     ocp = Model()
     time!(ocp, [0, 1], :s)
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
+
     # initial time
     ocp = Model()
     variable!(ocp, 1)
@@ -222,18 +248,21 @@ end
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "t"
+    
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, 0, Index(1), "s")
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
+
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, 0, Index(1), :s)
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
+    
     # final time
     ocp = Model()
     variable!(ocp, 1)
@@ -241,13 +270,16 @@ end
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
+
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, Index(1), 1, "s")
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
+
     ocp = Model()
+    variable!(ocp, 1)
     time!(ocp, Index(1), 1, :s)
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
