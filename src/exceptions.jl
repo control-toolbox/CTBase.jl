@@ -125,7 +125,6 @@ Print the exception.
 """
 Base.showerror(io::IO, e::NotImplemented) = print(io, "NotImplemented: ", e.var)
 
-
 """
 $(TYPEDEF)
 
@@ -145,3 +144,22 @@ $(TYPEDSIGNATURES)
 Print the exception.
 """
 Base.showerror(io::IO, e::UnauthorizedCall) = print(io, "UnauthorizedCall: ", e.var)
+"""
+$(TYPEDEF)
+
+Exception thrown for syntax error during abstract parsing.
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct SyntaxError <: CTException
+    var::String
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Print the exception.
+"""
+Base.showerror(io::IO, e::SyntaxError) = print(io, "SyntaxError: ", e.var)

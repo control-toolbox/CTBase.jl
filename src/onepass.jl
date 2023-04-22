@@ -69,7 +69,7 @@ parse!(p, ocp, e; log=false) = begin
     	Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
     	# assumes that map is done sequentially
         else
-            throw("syntax error")
+            throw(SyntaxError("unknown syntax"))
         end
     end
 end
@@ -101,16 +101,16 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, [ $t0, $tf ] , string($tt)) )
         (true , false) => @match t0 begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw("syntax error")
-	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw("syntax error")
-	    _            => throw("syntax error") end
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    _            => throw(SyntaxError("bad time declaration")) end
         (false, true ) => @match tf begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(i), string($tt)) ) : throw("syntax error")
-	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(1), string($tt)) ) : throw("syntax error")
-	    _            => throw("syntax error") end
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(i), string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(1), string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    _            => throw(SyntaxError("bad time declaration")) end
 	_              => @match (t0, tf) begin
-	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index(i), Index(j), string($tt)) ) : throw("syntax error") 
-	    _ => throw("syntax error") end
+	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index(i), Index(j), string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    _ => throw(SyntaxError("bad time declaration")) end
     end
 end
 
@@ -137,14 +137,14 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
 	(:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
 	(:final  , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
 	(:final  , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
-	_ => throw("syntax error")
+	_ => throw(SyntaxError("bad constraint declaration"))
     end
 end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
-    ( x ≠ p.x ) && throw("dynamics: wrong state")
-    ( t ≠ p.t ) && throw("dynamics: wrong time")
+    ( x ≠ p.x ) && throw(SyntaxError("wrong state for dynamics"))
+    ( t ≠ p.t ) && throw(SyntaxError("wrong time for dynamics"))
     e = replace_call(e, p.t)
     gs = gensym()
     quote

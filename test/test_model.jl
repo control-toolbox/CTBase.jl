@@ -1,5 +1,29 @@
 function test_model()
 
+@testset "variable" begin
+    ocp = Model()
+    variable!(ocp, 1)
+    @test ocp.variable_dimension == 1
+    
+    ocp = Model()
+    variable!(ocp, 1, "vv")
+    @test ocp.variable_dimension == 1
+    @test ocp.variable_names = "vv"
+    
+    oocp = Model()
+    variable!(ocp, 2)
+    @test ocp.variable_dimension == 2
+    
+    oocp = Model()
+    variable!(ocp, 2, "vv")
+    @test ocp.variable_dimension == [ "vv₁", "vv₂" ]
+    
+    ocp = Model()
+    variable!(ocp, 2, [ "vv1", "vv2" ])
+    @test ocp.variable_dimension == 2
+    @test ocp.variables_names == [ "vv1", "vv2" ]
+end
+
 @testset "state and control dimensions set or not" begin
     ocp = Model()
     @test !CTBase.dims_set(ocp)
@@ -20,28 +44,32 @@ end
 @testset "initial and / or final time set" begin
     ocp = Model()
     @test !CTBase.time_set(ocp)
-    time!(ocp, :initial, 0)
+    variable!(ocp, 1)
+    time!(ocp, 0, Index(1))
     @test CTBase.time_set(ocp)
     ocp = Model()
-    time!(ocp, :final, 1)
+    variable!(ocp, 1)
+    time!(ocp, Index(1), 1)
     @test CTBase.time_set(ocp)
     ocp = Model()
     time!(ocp, [0, 1])
     @test CTBase.time_set(ocp)
     ocp = Model()
-    time!(ocp, :initial, 0)
+    variable!(ocp, 1)
+    time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, :initial, 0)
     @test_throws UnauthorizedCall time!(ocp, :final, 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     ocp = Model()
-    time!(ocp, :final, 1)
-    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
-    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    variable!(ocp, 1)
+    time!(ocp, Index(1), 1)
+    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     ocp = Model()
     time!(ocp, [0, 1])
-    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
-    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
 end
 
@@ -153,34 +181,39 @@ end
     @test ocp.time_name == "s"
     # initial time
     ocp = Model()
-    time!(ocp, :initial, 0)
+    variable!(ocp, 1)
+    time!(ocp, 0, Index(1))
     @test ocp.initial_time == 0
     @test isnothing(ocp.final_time)
     @test ocp.time_name == "t"
     ocp = Model()
-    time!(ocp, :initial, 0, "s")
+    variable!(ocp, 1)
+    time!(ocp, 0, Index(1), "s")
     @test ocp.initial_time == 0
     @test isnothing(ocp.final_time)
     @test ocp.time_name == "s"
     ocp = Model()
-    time!(ocp, :initial, 0, :s)
+    variable!(ocp, 1)
+    time!(ocp, 0, Index(1), :s)
     @test ocp.initial_time == 0
     @test isnothing(ocp.final_time)
     @test ocp.time_name == "s"
     # final time
     ocp = Model()
-    time!(ocp, :final, 1)
+    variable!(ocp, 1)
+    time!(ocp, Index(1), 1)
     @test isnothing(ocp.initial_time)
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
     ocp = Model()
-    time!(ocp, :final, 1, "s")
-    @test isnothing(ocp.initial_time)
+    variable!(ocp, 1)
+    time!(ocp, Index(1), 1, "s")
+    @test ocp.initia_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
     ocp = Model()
-    time!(ocp, :final, 1, :s)
-    @test isnothing(ocp.initial_time)
+    time!(ocp, Index(1), 1, :s)
+    @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
 end

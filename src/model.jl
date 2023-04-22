@@ -17,8 +17,6 @@ Base.to_index(i::Index) = i.val
 Base.getindex(x::AbstractArray, i::Index) = x[i.val]
 Base.getindex(x::Real, i::Index) = x[i.val]
 Base.isless(i::Index, j::Index) = i.val ≤ j.val
-Base.isless(i::Index, j::Integer) = i.val ≤ j
-Base.isless(i::Integer, j::Index) = i ≤ j.val
 
 # Abstract Optimal control model
 """
@@ -37,13 +35,12 @@ $(TYPEDFIELDS)
     initial_time::Union{Time,Index,Nothing}=nothing
     final_time::Union{Time,Index,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
-    lagrange::Union{LagrangeFunction{time_dependence, dimension_usage},Nothing}=nothing
-    mayer::Union{MayerFunction{dimension_usage},Nothing}=nothing
+    lagrange::Union{Lagrange,Nothing}=nothing
+    mayer::Union{Mayer,Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
-    dynamics::Union{DynamicsFunction{time_dependence, dimension_usage},Nothing}=nothing
+    dynamics::Union{Dynamics,Nothing}=nothing
     variable_dimension::Union{Dimension,Nothing}=nothing
     variable_names::Union{Vector{String}, Nothing}=nothing
-    dynamics!::Union{Function,Nothing}=nothing
     state_dimension::Union{Dimension,Nothing}=nothing
     state_names::Union{Vector{String}, Nothing}=nothing
     control_dimension::Union{Dimension, Nothing}=nothing
@@ -143,14 +140,14 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 ```
 """
 function variable!(ocp::OptimalControlModel, q::Dimension, names::Union{String, Vector{String}}=__variable_names(q))
-    if q > 1 && length(names) != q
-        throw(InconsistentArgument("the number of variable names must be equal to the variable dimension"))
-    end
-    if q == 1 && names isa Vector{String}
-        throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
-    end
+    (q > 1) && (length(names) != q) && throw(InconsistentArgument("the number of variable names must be equal to the variable dimension"))
+    (q == 1)&& (names isa Vector{String}) && throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
     ocp.variable_dimension = q
     ocp.variable_names = q==1 ? [names] : names
+end
+
+function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol)
+    variable!(ocp, q, string(name))
 end
 
 """
@@ -298,8 +295,7 @@ julia> time!(ocp, 0, Index(2), "t")
 """
 function time!(ocp::OptimalControlModel, t0::Time, indf::Index, name::String=__time_name())
     time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    (indf < 1) && throw(IncorrectArgument("index of variable must be positive"))
-    (indf > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = t0
     ocp.final_time = indf
     ocp.time_name = name
@@ -321,13 +317,11 @@ julia> time!(ocp, Index(2), 1, "t")
 """
 function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::String=__time_name())
     time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    (ind0 < 1) && throw(IncorrectArgument("index of variable must be positive"))
-    (ind0 > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = ind
     ocp.final_time = tf
     ocp.time_name = name
 end
-j
 
 function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::Symbol)
     time!(ocp, ind0, tf, string(name))
@@ -345,12 +339,8 @@ julia> time!(ocp, Index(2), Index(3), "t")
 """
 function time!(ocp::OptimalControlModel, ind0::Index, indf::Index, name::String=__time_name())
     time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    j0 = ind0.val
-    (j0 < 1) && throw(IncorrectArgument("index of variable must be positive"))
-    (j0 > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
-    jf = indf.val
-    (jf < 1) && throw(IncorrectArgument("index of variable must be positive"))
-    (jf > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+    (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
+    (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = ind0
     ocp.final_time = indf
     ocp.time_name = name
