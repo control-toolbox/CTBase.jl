@@ -1,5 +1,4 @@
 # --------------------------------------------------------------------------------------------------
-# Abstract Optimal control model
 
 # Index (for variable, state and control)
 """
@@ -17,7 +16,11 @@ Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the def
 Base.to_index(i::Index) = i.val
 Base.getindex(x::AbstractArray, i::Index) = x[i.val]
 Base.getindex(x::Real, i::Index) = x[i.val]
+Base.isless(i::Index, j::Index) = i.val ≤ j.val
+Base.isless(i::Index, j::Integer) = i.val ≤ j
+Base.isless(i::Integer, j::Index) = i ≤ j.val
 
+# Abstract Optimal control model
 """
 $(TYPEDEF)
 """
@@ -30,8 +33,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-<<<<<<< HEAD
-@with_kw mutable struct OptimalControlModel{time_dependence, dimension_usage} <: AbstractOptimalControlModel
+@with_kw mutable struct OptimalControlModel{time_dependence} <: AbstractOptimalControlModel
     initial_time::Union{Time,Index,Nothing}=nothing
     final_time::Union{Time,Index,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
@@ -43,17 +45,6 @@ $(TYPEDFIELDS)
     variable_names::Union{Vector{String}, Nothing}=nothing
     dynamics!::Union{Function,Nothing}=nothing
     state_dimension::Union{Dimension,Nothing}=nothing
-=======
-@with_kw mutable struct OptimalControlModel{time_dependence} <: AbstractOptimalControlModel
-    initial_time::Union{Time, Nothing}=nothing
-    final_time::Union{Time, Nothing}=nothing
-    time_name::Union{String, Nothing}=nothing
-    lagrange::Union{Lagrange, Nothing}=nothing
-    mayer::Union{Mayer, Nothing}=nothing
-    criterion::Union{Symbol, Nothing}=nothing
-    dynamics::Union{Dynamics, Nothing}=nothing
-    state_dimension::Union{Dimension, Nothing}=nothing
->>>>>>> parser
     state_names::Union{Vector{String}, Nothing}=nothing
     control_dimension::Union{Dimension, Nothing}=nothing
     control_names::Union{Vector{String}, Nothing}=nothing
@@ -63,32 +54,11 @@ $(TYPEDFIELDS)
     generated_code::Array{String}=[]
 end
 
-<<<<<<< HEAD
-=======
 #
 dims_not_set(ocp) = isnothing(ocp.state_dimension) || isnothing(ocp.control_dimension)
 #
 time_set(ocp) = !isnothing(ocp.initial_time) || !isnothing(ocp.final_time)
 
-# Constraint index
-"""
-$(TYPEDEF)
-
-**Fields**
-
-$(TYPEDFIELDS)
-"""
-mutable struct Index
-    val::Integer
-    Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
-end
-Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
-Base.to_index(i::Index) = i.val
-Base.getindex(x::AbstractArray, i::Index) = x[i.val]
-Base.getindex(x::Real, i::Index) = x[i.val]
-Base.isless(i::Index, j::Index) = i.val ≤ j.val
-
->>>>>>> parser
 """
 $(TYPEDSIGNATURES)
 
@@ -323,17 +293,19 @@ Fix initial time, final time is free and given by the variable at the provided i
 # Examples
 
 ```jldoctest
-<<<<<<< HEAD
 julia> time!(ocp, 0, Index(2), "t")
 ```
 """
-function time!(ocp::OptimalControlModel, t0::Time, ind::Index, name::String=__time_name())
-    i = ind.val
-    (i < 1) && throw(IncorrectArgument("index of variable must be positive"))
-    (i > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+function time!(ocp::OptimalControlModel, t0::Time, indf::Index, name::String=__time_name())
+    (indf < 1) && throw(IncorrectArgument("index of variable must be positive"))
+    (indf > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
     ocp.initial_time = t0
-    ocp.final_time = ind
+    ocp.final_time = indf
     ocp.time_name = name
+end
+
+function time!(ocp::OptimalControlModel, t0::Time, indf::Index, name::Symbol)
+    time!(ocp, t0, indf, string(name))
 end
 
 """
@@ -346,13 +318,17 @@ Fix final time, initial time is free and given by the variable at the provided i
 julia> time!(ocp, Index(2), 1, "t")
 ```
 """
-function time!(ocp::OptimalControlModel, ind::Index, tf::Time, name::String=__time_name())
-    i = ind.val
-    (i < 1) && throw(IncorrectArgument("index of variable must be positive"))
-    (i > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
+function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::String=__time_name())
+    (ind0 < 1) && throw(IncorrectArgument("index of variable must be positive"))
+    (ind0 > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
     ocp.initial_time = ind
     ocp.final_time = tf
     ocp.time_name = name
+end
+j
+
+function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::Symbol)
+    time!(ocp, ind0, tf, string(name))
 end
 
 """
@@ -375,75 +351,16 @@ function time!(ocp::OptimalControlModel, ind0::Index, indf::Index, name::String=
     ocp.initial_time = ind0
     ocp.final_time = indf
     ocp.time_name = name
-=======
-julia> time!(ocp, :initial, 0)
-julia> ocp.initial_time
-0
-julia> ocp.time_name
-"t"
-
-julia> time!(ocp, :initial, 0, "s")
-julia> ocp.initial_time
-0
-julia> ocp.time_name
-"s"
-
-julia> time!(ocp, :initial, 0, :s)
-julia> ocp.initial_time
-0
-julia> ocp.time_name
-"s"
-
-julia> time!(ocp, :final, 1)
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"t"
-
-julia> time!(ocp, :final, 1, "s")
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"s"
-
-julia> time!(ocp, :final, 1, :s)
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"s"
-```
-"""
-function time!(ocp::OptimalControlModel, type::Symbol, time::Time, name::String=__time_name())
-
-    # check if the time as already been set
-    if time_set(ocp)
-        throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    end
-
-    # set the time
-    type_ = Symbol(type, :_time)
-    if type_ ∈ [ :initial_time, :final_time ]
-        setproperty!(ocp, type_, time)
-        ocp.time_name = name
-    else
-        throw(IncorrectArgument("the following type of time is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final ]."))
-    end
-    nothing
 end
-function time!(ocp::OptimalControlModel, type::Symbol, time::Time, name::Symbol)
-    time!(ocp, type, time, string(name))
->>>>>>> parser
+
+function time!(ocp::OptimalControlModel, ind0::Index, indf::Index, name::Symbol)
+    time!(ocp, ind0, indf, string(name))
 end
 
 """
 $(TYPEDSIGNATURES)
 
 Fix initial and final times to `times[1]` and `times[2]`, respectively.
-
-!!! note
-
-    You can use time! once to set either the initial or the final time, or both.
 
 # Examples
 
@@ -474,12 +391,6 @@ julia> ocp.time_name
 ```
 """
 function time!(ocp::OptimalControlModel, times::Times, name::String=__time_name())
-    
-    # check if the time as already been set
-    if time_set(ocp)
-        throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    end
-
     # check consistency
     if length(times) != 2
         throw(IncorrectArgument("times must be of dimension 2"))
@@ -491,6 +402,7 @@ function time!(ocp::OptimalControlModel, times::Times, name::String=__time_name(
     ocp.time_name = name
     nothing
 end
+
 function time!(ocp::OptimalControlModel, times::Times, name::Symbol)
     time!(ocp, times, string(name))
 end
