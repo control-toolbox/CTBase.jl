@@ -318,7 +318,7 @@ julia> time!(ocp, Index(2), 1, "t")
 function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::String=__time_name())
     time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
-    ocp.initial_time = ind
+    ocp.initial_time = ind0
     ocp.final_time = tf
     ocp.time_name = name
 end

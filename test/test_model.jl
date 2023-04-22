@@ -8,7 +8,12 @@ function test_model()
     ocp = Model()
     variable!(ocp, 1, "vv")
     @test ocp.variable_dimension == 1
-    @test ocp.variable_names = "vv"
+    @test ocp.variable_names == [ "vv" ]
+    
+    ocp = Model()
+    variable!(ocp, 1, :vv)
+    @test ocp.variable_dimension == 1
+    @test ocp.variable_names ==[ "vv" ]
     
     oocp = Model()
     variable!(ocp, 2)
@@ -16,12 +21,18 @@ function test_model()
     
     oocp = Model()
     variable!(ocp, 2, "vv")
-    @test ocp.variable_dimension == [ "vv₁", "vv₂" ]
+    @test ocp.variable_dimension == 2
+    @test ocp.variable_names == [ "vv₁", "vv₂" ]
     
     ocp = Model()
     variable!(ocp, 2, [ "vv1", "vv2" ])
     @test ocp.variable_dimension == 2
     @test ocp.variables_names == [ "vv1", "vv2" ]
+
+    oocp = Model()
+    variable!(ocp, 2, :vv)
+    @test ocp.variable_dimension == 2
+    @test ocp.variable_names == [ "vv₁", "vv₂" ]
 end
 
 @testset "state and control dimensions set or not" begin
@@ -57,8 +68,8 @@ end
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, :initial, 0)
-    @test_throws UnauthorizedCall time!(ocp, :final, 1)
+    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     ocp = Model()
     variable!(ocp, 1)
@@ -184,31 +195,31 @@ end
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
     @test ocp.initial_time == 0
-    @test isnothing(ocp.final_time)
+    @test ocp.final_time == Index(1)
     @test ocp.time_name == "t"
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, 0, Index(1), "s")
     @test ocp.initial_time == 0
-    @test isnothing(ocp.final_time)
+    @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, 0, Index(1), :s)
     @test ocp.initial_time == 0
-    @test isnothing(ocp.final_time)
+    @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
     # final time
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
-    @test isnothing(ocp.initial_time)
+    @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, Index(1), 1, "s")
-    @test ocp.initia_time == Index(1)
+    @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
     ocp = Model()

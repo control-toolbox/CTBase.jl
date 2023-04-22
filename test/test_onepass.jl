@@ -9,17 +9,17 @@ o = @def1 t ∈ [ t0, t0 + 4 ], time
 
 o = @def1 begin
     λ ∈ R^2, variable
-    tf ∈ R, variable
+    tf = λ[2]
     t ∈ [ 0, tf ], time
     end
 @test o.initial_time == 0
-@test o.final_time == nothing
+@test o.final_time == Index(2) 
 
 o = @def1 begin
     t0 ∈ R, variable
     t ∈ [ t0, 1 ], time
     end
-@test o.initial_time == nothing
+@test o.initial_time == Index(1)
 @test o.final_time == 1
 
 o = @def1 begin
@@ -27,15 +27,14 @@ o = @def1 begin
     t ∈ [ 0, tf ], time
     end
 @test o.initial_time == 0
-@test o.final_time == nothing
+@test o.final_time == Index(1)
 
 o = @def1 begin
-    s0 ∈ R, variable
-    sf ∈ R, variable
-    s ∈ [ s0, sf ], time
+    v ∈ R², variable
+    s ∈ [ v[1], v[2] ], time
     end
-@test o.initial_time == nothing
-@test o.final_time == nothing
+@test o.initial_time == Index(1)
+@test o.final_time == Index(2)
 
 o = @def1 begin
     x ∈ R, state
