@@ -15,11 +15,11 @@ function test_model()
     @test ocp.variable_dimension == 1
     @test ocp.variable_names ==[ "vv" ]
     
-    oocp = Model()
+    ocp = Model()
     variable!(ocp, 2)
     @test ocp.variable_dimension == 2
     
-    oocp = Model()
+    ocp = Model()
     variable!(ocp, 2, "vv")
     @test ocp.variable_dimension == 2
     @test ocp.variable_names == [ "vv₁", "vv₂" ]
@@ -29,7 +29,7 @@ function test_model()
     @test ocp.variable_dimension == 2
     @test ocp.variables_names == [ "vv1", "vv2" ]
 
-    oocp = Model()
+    ocp = Model()
     variable!(ocp, 2, :vv)
     @test ocp.variable_dimension == 2
     @test ocp.variable_names == [ "vv₁", "vv₂" ]
@@ -63,6 +63,8 @@ end
     time!(ocp, Index(1), 1)
     @test CTBase.time_set(ocp)
     ocp = Model()
+    time!(ocp, 0, 1)
+    @test CTBase.time_set(ocp)
     time!(ocp, [0, 1])
     @test CTBase.time_set(ocp)
     ocp = Model()
@@ -71,14 +73,21 @@ end
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    @test_throws UnauthorizedCall time!(ocp, 0, 1)
     ocp = Model()
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    @test_throws UnauthorizedCall time!(ocp, 0, 1)
     ocp = Model()
     time!(ocp, [0, 1])
+    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
+    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+ocp = Model()
+    time!(ocp, 0, 1)
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
@@ -175,6 +184,22 @@ end
 
 @testset "time!" begin
     # initial and final times
+    ocp = Model()
+    time!(ocp, 0, 1)
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "t"
+    ocp = Model()
+    time!(ocp, 0, 1, "s")
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    ocp = Model()
+    time!(ocp, 0, 1, :s)
+    @test ocp.initial_time == 0
+    @test ocp.final_time == 1
+    @test ocp.time_name == "s"
+    # initial and final times (bis)
     ocp = Model()
     time!(ocp, [0, 1])
     @test ocp.initial_time == 0

@@ -99,7 +99,7 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     tt0 = QuoteNode(t0)
     ttf = QuoteNode(tf)
     @match (has(t0, p.v), has(tf, p.v)) begin
-        (false, false) => :( time!($ocp, [ $t0, $tf ] , string($tt)) )
+        (false, false) => :( time!($ocp, $t0, $tf, string($tt)) )
         (true , false) => @match t0 begin
 	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw(SyntaxError("bad time declaration"))
 	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw(SyntaxError("bad time declaration"))

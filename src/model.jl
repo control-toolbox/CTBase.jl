@@ -140,10 +140,11 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 ```
 """
 function variable!(ocp::OptimalControlModel, q::Dimension, names::Union{String, Vector{String}}=__variable_names(q))
-    (q > 1) && (length(names) != q) && throw(InconsistentArgument("the number of variable names must be equal to the variable dimension"))
-    (q == 1)&& (names isa Vector{String}) && throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
+    (q > 1 )&& (names isa Vector{String}) && (length(names) ≠ q) && throw(InconsistentArgument("the number of variables names must be equal to the state dimension"))
+    (q == 1) && (names isa Vector{String}) && throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
+    (q > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, q)])
     ocp.variable_dimension = q
-    ocp.variable_names = q==1 ? [names] : names
+    ocp.variable_names = (q == 1)? [names] : names
 end
 
 function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol)
@@ -196,17 +197,11 @@ julia> ocp.state_names
 ```
 """
 function state!(ocp::OptimalControlModel, n::Dimension, names::Union{String, Vector{String}}=__state_names(n))
-    if n > 1 && names isa Vector{String} && length(names) != n
-        throw(InconsistentArgument("the number of state names must be equal to the state dimension"))
-    end
-    if n == 1 && names isa Vector{String}
-        throw(InconsistentArgument("if the state dimension is 1, then, the argument names must be a String"))
-    end
-    if n > 1 && names isa String
-        names = [ names * ctindices(i) for i ∈ range(1, n)]
-    end
+    (n > 1 )&& (names isa Vector{String}) && (length(names) ≠ n) && throw(InconsistentArgument("the number of state names must be equal to the state dimension"))
+    (n == 1) && (names isa Vector{String}) && throw(InconsistentArgument("if the state dimension is 1, then, the argument names must be a String"))
+    (n > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, n)])
     ocp.state_dimension = n
-    ocp.state_names = n==1 ? [names] : names
+    ocp.state_names = (n == 1) ? [names] : names
     nothing
 end
 function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
@@ -259,17 +254,12 @@ julia> ocp.control_names
 ```
 """
 function control!(ocp::OptimalControlModel, m::Dimension, names::Union{String, Vector{String}}=__control_names(m))
-    if m > 1 && names isa Vector{String} && length(names) != m
-        throw(InconsistentArgument("the number of control names must be equal to the control dimension"))
+    (m > 1) && (names isa Vector{String}) && (length(names) != m) && throw(InconsistentArgument("the number of control names must be equal to the control dimension"))
+    (m == 1) && (names isa Vector{String}) && throw(InconsistentArgument("if the control dimension is 1, then, the argument names must be a String"))
     end
-    if m == 1 && names isa Vector{String}
-        throw(InconsistentArgument("if the control dimension is 1, then, the argument names must be a String"))
-    end
-    if m > 1 && names isa String
-        names = [ names * ctindices(i) for i ∈ range(1, m)]
-    end
+    (m > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, m)])
     ocp.control_dimension = m
-    ocp.control_names = m==1 ? [names] : names
+    ocp.control_names = (m == 1) ? [names] : names
     nothing
 end
 function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol)
@@ -384,15 +374,56 @@ julia> ocp.time_name
 ```
 """
 function time!(ocp::OptimalControlModel, times::Times, name::String=__time_name())
-    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (length(times) != 2) && throw(IncorrectArgument("times must be of dimension 2"))
-    ocp.initial_time=times[1]
-    ocp.final_time=times[2]
-    ocp.time_name = name
+    time!(ocp, times[1], times[2], name)
 end
 
 function time!(ocp::OptimalControlModel, times::Times, name::Symbol)
     time!(ocp, times, string(name))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Fix initial and final times to `times[1]` and `times[2]`, respectively.
+
+# Examples
+
+```jldoctest
+julia> time!(ocp, 0, 1)
+julia> ocp.initial_time
+0
+julia> ocp.final_time
+1
+julia> ocp.time_name
+"t"
+
+julia> time!(ocp, 0, 1, "s")
+julia> ocp.initial_time
+0
+julia> ocp.final_time
+1
+julia> ocp.time_name
+"s"
+
+julia> time!(ocp, 0, 1, :s)
+julia> ocp.initial_time
+0
+julia> ocp.final_time
+1
+julia> ocp.time_name
+"s"
+```
+"""
+function time!(ocp::OptimalControlModel, t0::Time, tf::Time, name::String=__time_name())
+    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    ocp.initial_time=t0
+    ocp.final_time=tf
+    ocp.time_name = name
+end
+
+function time!(ocp::OptimalControlModel, t0::Time, tf::Time, name::Symbol)
+    time!(ocp, t0, tf, string(name))
 end
 
 # -------------------------------------------------------------------------------------------
