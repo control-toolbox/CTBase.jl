@@ -55,9 +55,9 @@ $(TYPEDFIELDS)
 end
 
 #
-dims_not_set(ocp) = isnothing(ocp.state_dimension) || isnothing(ocp.control_dimension)
+dims_set(ocp) = !isnothing(ocp.state_dimension) && !isnothing(ocp.control_dimension)
 #
-time_set(ocp) = !isnothing(ocp.initial_time) || !isnothing(ocp.final_time)
+time_set(ocp) = !isnothing(ocp.initial_time) && !isnothing(ocp.final_time)
 
 """
 $(TYPEDSIGNATURES)
@@ -297,6 +297,7 @@ julia> time!(ocp, 0, Index(2), "t")
 ```
 """
 function time!(ocp::OptimalControlModel, t0::Time, indf::Index, name::String=__time_name())
+    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (indf < 1) && throw(IncorrectArgument("index of variable must be positive"))
     (indf > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
     ocp.initial_time = t0
@@ -319,6 +320,7 @@ julia> time!(ocp, Index(2), 1, "t")
 ```
 """
 function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::String=__time_name())
+    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0 < 1) && throw(IncorrectArgument("index of variable must be positive"))
     (ind0 > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
     ocp.initial_time = ind
@@ -342,6 +344,7 @@ julia> time!(ocp, Index(2), Index(3), "t")
 ```
 """
 function time!(ocp::OptimalControlModel, ind0::Index, indf::Index, name::String=__time_name())
+    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     j0 = ind0.val
     (j0 < 1) && throw(IncorrectArgument("index of variable must be positive"))
     (j0 > ocp.state_dimension) && throw(IncorrectArgument("index of variable must be positive"))
@@ -391,16 +394,11 @@ julia> ocp.time_name
 ```
 """
 function time!(ocp::OptimalControlModel, times::Times, name::String=__time_name())
-    # check consistency
-    if length(times) != 2
-        throw(IncorrectArgument("times must be of dimension 2"))
-    end
-
-    # set the time
+    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    (length(times) != 2) && throw(IncorrectArgument("times must be of dimension 2"))
     ocp.initial_time=times[1]
     ocp.final_time=times[2]
     ocp.time_name = name
-    nothing
 end
 
 function time!(ocp::OptimalControlModel, times::Times, name::Symbol)
@@ -496,9 +494,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
     end
 
     # check if the dimensions of the state and control are set
-    if dims_not_set(ocp)
-        throw(UnauthorizedCall("the dimensions of the state and control must be set before adding the dynamics."))
-    end
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and control must be set before adding the dynamics."))
     n = ocp.state_dimension
     m = ocp.control_dimension
 
@@ -647,9 +643,7 @@ julia> constraint!(ocp, :dynamics, f)
 function constraint!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f::Function) where {time_dependence}
 
     # check if the dimensions of the state and control are set
-    if dims_not_set(ocp)
-        throw(UnauthorizedCall("the dimensions of the state and control must be set before adding the dynamics."))
-    end
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and control must be set before adding the dynamics."))
     n = ocp.state_dimension
     m = ocp.control_dimension
 
@@ -769,17 +763,11 @@ julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
 """
 function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence}
  
-    if dims_not_set(ocp)
-        throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
-    end
-
-    #
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
     n = ocp.state_dimension
     m = ocp.control_dimension
-    #
     constraints = ocp.constraints
-    
-    #
+
     ξf = Vector{ControlConstraint}(); ξl = Vector{ctNumber}(); ξu = Vector{ctNumber}()
     ηf = Vector{StateConstraint}(); ηl = Vector{ctNumber}(); ηu = Vector{ctNumber}()
     ψf = Vector{MixedConstraint}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
@@ -877,9 +865,7 @@ julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u[1]^2)
 """
 function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f::Function, criterion::Symbol=__criterion_type()) where {time_dependence}
 
-    if dims_not_set(ocp)
-        throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
-    end
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
     n = ocp.state_dimension
     m = ocp.control_dimension
 
@@ -926,9 +912,7 @@ julia> objective!(ocp, :bolza, (t0, x0, tf, xf) -> tf, (x, u) -> x[1]^2 + u[1]^2
 """
 function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, g::Function, f⁰::Function, criterion::Symbol=__criterion_type()) where {time_dependence}
 
-    if dims_not_set(ocp)
-        throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
-    end
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
     n = ocp.state_dimension
     m = ocp.control_dimension
 
