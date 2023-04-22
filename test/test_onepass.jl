@@ -29,18 +29,6 @@ o = @def1 begin
 @test o.initial_time == 0
 @test o.final_time == nothing
 
-## @test try @def1 begin
-##     t0 ∈ R^2, variable
-##     t ∈ [ t0, 1 ], time
-##     end
-## catch _ true end
-## 
-## @test try @def1 begin
-##     tf ∈ R^2, variable
-##     t ∈ [ 0, tf ], time
-##     end
-## catch _ true end
-
 o = @def1 begin
     s0 ∈ R, variable
     sf ∈ R, variable
