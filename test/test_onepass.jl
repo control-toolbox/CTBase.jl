@@ -1,4 +1,5 @@
 # test onepass
+# todo: test variable
 
 function test_onepass()
 
@@ -6,15 +7,15 @@ t0 = 0
 o = @def1 t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
 @test o.final_time == t0 + 4 
-
+ 
 o = @def1 begin
     λ ∈ R^2, variable
-    tf = λ[2]
+    tf = λ₂
     t ∈ [ 0, tf ], time
     end
 @test o.initial_time == 0
 @test o.final_time == Index(2) 
-
+ 
 o = @def1 begin
     t0 ∈ R, variable
     t ∈ [ t0, 1 ], time
@@ -38,9 +39,9 @@ o = @def1 begin
 
 o = @def1 begin
     v ∈ R², variable
-    t0 = v₁
-    tf = v₂
-    s ∈ [ t0, tf ], time
+    s0 = v₁
+    sf = v₂
+    s ∈ [ s0, sf ], time
     end
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
@@ -60,7 +61,8 @@ o = @def1 begin
     end
 @test o.state_dimension == 3
 @test o.control_dimension == 2
-x = [ 1, 2, 3 ]; u = [ -1, 2 ]
+x = [ 1, 2, 3 ]
+u = [ -1, 2 ]
 @test o.dynamics(x, u) == [ x[1] + 2u[2], 2x[3], x[1] + u[2] ]
 
 t0 = 0
@@ -119,5 +121,5 @@ u = 3
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1] 
-
+ 
 end

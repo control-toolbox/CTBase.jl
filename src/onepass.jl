@@ -108,7 +108,7 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
 	    :( $v1     ) =>  ((v1 == p.v) && (1 == p.v_dim)) ? :( time!($ocp, $t0, Index(1), $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _            => throw(SyntaxError("bad time declaration")) end
 	_              => @match (t0, tf) begin
-	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : throw(SyntaxError("bad time declaration"))
+	    (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _ => throw(SyntaxError("bad time declaration")) end
     end
 end
