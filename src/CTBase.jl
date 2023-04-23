@@ -86,6 +86,7 @@ include("functions.jl")
 include("default.jl")
 include("utils.jl")
 include("model.jl")
+include("differential_geometry.jl")
 #
 include("ctparser_utils.jl")
 #include("ctparser.jl")

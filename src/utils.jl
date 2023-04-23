@@ -81,6 +81,7 @@ $(TYPEDSIGNATURES)
 Returns the Jacobian of `f` at `x`.
 """
 ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)
+ctjacobian(X::VectorField, x) = ctjacobian(X.f, x)
 
 """
 $(TYPEDSIGNATURES)
@@ -161,30 +162,4 @@ function matrix2vec(x::Matrix{<:ctNumber}, dim::Integer=__matrix_dimension_stock
         end
     end
     return y
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Lie derivative of `f` along `X`.
-"""
-function Ad(X, f)
-    return x -> ctgradient(f, x)'*X(x)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Returns the Poisson bracket of `f` and `g`.
-"""
-function Poisson(f, g)
-    function fg(x, p)
-        n = size(x, 1)
-        ff = z -> f(z[1:n], z[n+1:2n])
-        gg = z -> g(z[1:n], z[n+1:2n])
-        df = ctgradient(ff, [ x ; p ])
-        dg = ctgradient(gg, [ x ; p ])
-        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
-    end
-    return fg
 end
