@@ -1,5 +1,4 @@
 # onepass
-# todo: 
 
 """
 $(TYPEDEF)
@@ -9,6 +8,7 @@ $(TYPEDEF)
 """
 @with_kw mutable struct ParsingInfo
     v::Union{Symbol, Nothing}=nothing
+    v_dim::Union{Integer, Nothing}=nothing
     t::Union{Symbol, Nothing}=nothing
     t0::Union{Real, Symbol, Expr, Nothing}=nothing
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
@@ -77,8 +77,10 @@ end
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     p.v = v
+    p.v_dim = q
+    vv = QuoteNode(v)
     (q isa Integer) && for i ∈ 1:q p.aliases[Symbol(v, _sub(i))] = :( $v[$i] ) end
-    :( variable!($ocp, $q) ) # todo: add variable name
+    :( variable!($ocp, $q, $vv) )
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
@@ -90,26 +92,23 @@ p_alias!(p, ocp, a, e; log=false) = begin
 end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
-
     log && println("time: $t, initial time: $t0, final time: $tf")
     p.t = t 
     p.t0 = t0
     p.tf = tf
     tt = QuoteNode(t)
-    tt0 = QuoteNode(t0)
-    ttf = QuoteNode(tf)
     @match (has(t0, p.v), has(tf, p.v)) begin
-        (false, false) => :( time!($ocp, $t0, $tf, string($tt)) )
+        (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index(i), tf, string($tt)) ) : throw(SyntaxError("bad time declaration"))
-	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, Index(1), tf, string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1     ) =>  ((v1 == p.v) && (1 == p.v_dim)) ? :( time!($ocp, Index(1), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _            => throw(SyntaxError("bad time declaration")) end
         (false, true ) => @match tf begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(i), string($tt)) ) : throw(SyntaxError("bad time declaration"))
-	    :( $v1     ) =>  (v1 == p.v) ? :( time!($ocp, t0, Index(1), string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1     ) =>  ((v1 == p.v) && (1 == p.v_dim)) ? :( time!($ocp, $t0, Index(1), $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _            => throw(SyntaxError("bad time declaration")) end
 	_              => @match (t0, tf) begin
-	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index(i), Index(j), string($tt)) ) : throw(SyntaxError("bad time declaration"))
+	    (:( $v1[$i], $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _ => throw(SyntaxError("bad time declaration")) end
     end
 end
@@ -117,15 +116,17 @@ end
 p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     p.x = x
+    xx = QuoteNode(x)
     (n isa Integer) && for i ∈ 1:n p.aliases[Symbol(x, _sub(i))] = :( $x[$i] ) end
-    :( state!($ocp, $n) ) # todo: add state name
+    :( state!($ocp, $n, $xx) )
 end
 
 p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     p.u = u
+    uu = QuoteNode(u)
     (m isa Integer) && for i ∈ 1:m p.aliases[Symbol(u, _sub(i))] = :( $u[$i] ) end
-    :( control!($ocp, $m) ) # todo: add control name
+    :( control!($ocp, $m, $uu) )
 end
 
 p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin

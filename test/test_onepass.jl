@@ -37,6 +37,15 @@ o = @def1 begin
 @test o.final_time == Index(2)
 
 o = @def1 begin
+    v ∈ R², variable
+    t0 = v₁
+    tf = v₂
+    s ∈ [ t0, tf ], time
+    end
+@test o.initial_time == Index(1)
+@test o.final_time == Index(2)
+
+o = @def1 begin
     x ∈ R, state
     u ∈ R, control
     end
@@ -83,14 +92,14 @@ f(b) = begin # closure of a, local c, and @def1 in function
         t ∈ [ a, b ], time
         x ∈ R, state
         u ∈ R, control
-        x'(t) == x(t) + u(t) + [ b + c + d ]
+        x'(t) == x(t) + u(t) + b + c + d
     end
 end
 o = f(2)
 d = 4
-x = [ 10 ]
-u = [ 20 ]
-@test o.dynamics(x, u) == x + u + [ 2 + 3 + 4 ]
+x = 10 
+u = 20 
+@test o.dynamics(x, u) == x + u + 2 + 3 + 4
 
 o = @def1 begin
     t ∈ [ 0, 1 ], time
