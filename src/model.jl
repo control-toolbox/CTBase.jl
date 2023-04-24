@@ -28,9 +28,9 @@ $(TYPEDFIELDS)
 end
 
 #
-dims_not_set(ocp) = isnothing(ocp.state_dimension) || isnothing(ocp.control_dimension)
+dims_not_set(ocp)::Bool = isnothing(ocp.state_dimension) || isnothing(ocp.control_dimension)
 #
-time_set(ocp) = !isnothing(ocp.initial_time) || !isnothing(ocp.final_time)
+time_set(ocp)::Bool = !isnothing(ocp.initial_time) || !isnothing(ocp.final_time)
 
 # Constraint index
 """
@@ -44,53 +44,55 @@ mutable struct Index
     val::Integer
     Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
 end
-Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
-Base.to_index(i::Index) = i.val
+Base.:(==)(i::Index, j::Index)::Bool = i.val == j.val # needed, as this is not the default behaviour for composite types
+Base.to_index(i::Index)::Integer = i.val
 Base.getindex(x::AbstractArray, i::Index) = x[i.val]
-Base.getindex(x::Real, i::Index) = x[i.val]
-Base.isless(i::Index, j::Index) = i.val ≤ j.val
+Base.getindex(x::Real, i::Index)::Real = x[i.val]
+Base.isless(i::Index, j::Index)::Bool = i.val ≤ j.val
 
 """
 $(TYPEDSIGNATURES)
 
 Returns :nonautonomous == time_dependence
 """
-isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
+isnonautonomous(time_dependence::Symbol)::Bool = :nonautonomous == time_dependence
 
 """
 $(TYPEDSIGNATURES)
 
 Returns !isnonautonomous(time_dependence)
 """
-isautonomous(time_dependence::Symbol) = !isnonautonomous(time_dependence)
+isautonomous(time_dependence::Symbol)::Bool = !isnonautonomous(time_dependence)
 
 """
 $(TYPEDSIGNATURES)
 
 Returns `true` if the model has been defined as nonautonomous.
 """
-isnonautonomous(ocp::OptimalControlModel{time_dependence}) where {time_dependence} = isnonautonomous(time_dependence)
+function isnonautonomous(ocp::OptimalControlModel{time_dependence})::Bool where {time_dependence} 
+    return isnonautonomous(time_dependence)
+end
 
 """
 $(TYPEDSIGNATURES)
 
 Returns `true` if the model has been defined as autonomous.
 """
-isautonomous(ocp::OptimalControlModel) = !isnonautonomous(ocp)
+isautonomous(ocp::OptimalControlModel)::Bool = !isnonautonomous(ocp)
 
 """
 $(TYPEDSIGNATURES)
 
 Returns `true` if the criterion type of `ocp` is `:min`.
 """
-ismin(ocp::OptimalControlModel) = ocp.criterion == :min
+ismin(ocp::OptimalControlModel)::Bool = ocp.criterion == :min
 
 """
 $(TYPEDSIGNATURES)
 
 Returns `true` if the criterion type of `ocp` is `:max`.
 """
-ismax(ocp::OptimalControlModel) = !ismin(ocp)
+ismax(ocp::OptimalControlModel)::Bool = !ismin(ocp)
 
 """
 $(TYPEDSIGNATURES)
@@ -113,10 +115,8 @@ julia> ocp = Model(time_dependence=:nonautonomous)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; time_dependence=__ocp_time_dependence())
-    if time_dependence ∉ [:autonomous, :nonautonomous]
-        throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-    end
+function Model(; time_dependence=__ocp_time_dependence())::OptimalControlModel
+    check_time_dependence(time_dependence)
     return OptimalControlModel{time_dependence}()
 end
 
@@ -316,6 +316,7 @@ function time!(ocp::OptimalControlModel, type::Symbol, time::Time, name::String=
         throw(IncorrectArgument("the following type of time is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ]."))
     end
+    #
     nothing
 end
 function time!(ocp::OptimalControlModel, type::Symbol, time::Time, name::Symbol)
@@ -414,7 +415,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
     end
-
+    #
+    nothing
 end
 
 """
@@ -445,7 +447,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, Or
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
     end
-
+    #
+    nothing
 end
 
 """
@@ -487,7 +490,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :control, :state ] or check the arguments of the constraint! method."))
     end
-
+    #
+    nothing
 end
 
 """
@@ -522,7 +526,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, Or
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :contol, :state ] or check the arguments of the constraint! method."))
     end
-
+    #
+    nothing
 end
 
 """
@@ -560,7 +565,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val, l
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
     end
-
+    #
+    nothing
 end
 
 """
@@ -598,7 +604,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
     end
-    
+    #
+    nothing
 end
 
 """
@@ -634,7 +641,8 @@ function constraint!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f:
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :dynamics ] or check the arguments of the constraint! method."))
     end
-
+    #
+    nothing
 end
 
 """
@@ -654,6 +662,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
+    nothing
 end
 
 """
@@ -881,6 +890,8 @@ function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f::
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
         ". Please choose in [ :mayer, :lagrange ]."))
     end
+    #
+    nothing
 end
 
 """
@@ -929,4 +940,6 @@ function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, g::
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
         ". Please choose :bolza."))
     end
+    #
+    nothing
 end

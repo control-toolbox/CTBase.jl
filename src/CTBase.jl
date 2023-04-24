@@ -79,6 +79,7 @@ const Dimension = Integer
 
 #
 include("exceptions.jl")
+include("checking.jl")
 include("description.jl")
 include("callbacks.jl")
 include("functions.jl")
@@ -110,6 +111,9 @@ export Description, makeDescription, add, getFullDescription
 # exceptions
 export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
+
+# checking
+export check_time_dependence
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField

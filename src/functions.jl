@@ -397,9 +397,7 @@ struct Hamiltonian{time_dependence, state_dimension}
     function Hamiltonian(f::Function; 
         state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, state_dimension}(f)
     end
 end
@@ -567,9 +565,7 @@ struct HamiltonianVectorField{time_dependence, state_dimension}
     function HamiltonianVectorField(f::Function; 
         state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, state_dimension}(f)
     end
 end
@@ -712,13 +708,13 @@ julia> V(_Time(1), [1, 2])
 """
 struct VectorField{time_dependence, state_dimension}
     f::Function
-    function VectorField(f::Function; 
+    label::Symbol
+    function VectorField(f::Function;
         state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
-        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
-        new{time_dependence, state_dimension}(f)
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
+        label::Symbol=__fun_label(:VF))
+        check_time_dependence(time_dependence)
+        new{time_dependence, state_dimension}(f, label)
     end
 end
 
@@ -940,9 +936,7 @@ struct Lagrange{time_dependence, state_dimension, control_dimension}
         state_dimension::Union{Symbol,Dimension}=__state_dimension(),
         control_dimension::Union{Symbol,Dimension}=__control_dimension(),
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, state_dimension, control_dimension}(f)
     end
 end
@@ -1010,9 +1004,7 @@ struct Dynamics{time_dependence, state_dimension, control_dimension}
         state_dimension::Union{Symbol,Dimension}=__state_dimension(),
         control_dimension::Union{Symbol,Dimension}=__control_dimension(),
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, state_dimension, control_dimension}(f)
     end
 end
@@ -1080,9 +1072,7 @@ struct StateConstraint{time_dependence, state_dimension, constraint_dimension}
         state_dimension::Union{Symbol,Dimension}=__state_dimension(),
         constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension(),
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, state_dimension, constraint_dimension}(f)
     end
 end
@@ -1154,9 +1144,7 @@ struct ControlConstraint{time_dependence, control_dimension, constraint_dimensio
         control_dimension::Union{Symbol,Dimension}=__control_dimension(),
         constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension(),
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, control_dimension, constraint_dimension}(f)
     end
 end
@@ -1229,9 +1217,7 @@ struct MixedConstraint{time_dependence, state_dimension, control_dimension, cons
         control_dimension::Union{Symbol,Dimension}=__control_dimension(),
         constraint_dimension::Union{Symbol,Dimension}=__constraint_dimension(),
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence, state_dimension, control_dimension, constraint_dimension}(f)
     end
 end
@@ -1350,9 +1336,7 @@ struct FeedbackControl{time_dependence}
     f::Function
     function FeedbackControl(f::Function; 
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence}(f)
     end
 end
@@ -1387,9 +1371,7 @@ struct ControlLaw{time_dependence}
     f::Function
     function ControlLaw(f::Function; 
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence}(f)
     end
 end
@@ -1426,9 +1408,7 @@ struct Multiplier{time_dependence}
     f::Function
     function Multiplier(f::Function; 
         time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
-        if time_dependence ∉ [:autonomous, :nonautonomous]
-            throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-        end
+        check_time_dependence(time_dependence)
         new{time_dependence}(f)
     end
 end
