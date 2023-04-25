@@ -227,7 +227,7 @@ together with the appropriate value (range, updated expression...)
 
 # Example
 ```jldoctest
-julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u
+julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 
 julia> constraint_type(:( x'(t) ), t, t0, tf, x, u)
 (:dynamics, nothing)
@@ -312,6 +312,23 @@ julia> constraint_type(:( 2u[1](t)^2 * x(t) ), t, t0, tf, x, u)
 
 julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
 (:other, nothing)
+
+julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u, v)
+(:other, nothing)
+
+julia> constraint_type(:( 2u[1](t)^2 * x(t) + v ), t, t0, tf, x, u, v)
+(:mixed, :((2 * u[1] ^ 2) * x + v))
+julia> constraint_type(:( v[1:2:10] ), t, t0, tf, x, u, v)
+(:variable_range, 1:2:9)
+
+julia> constraint_type(:( v[1:10] ), t, t0, tf, x, u, v)
+(:variable_range, 1:10)
+
+julia> constraint_type(:( v[2] ), t, t0, tf, x, u, v)
+(:variable_range, Index(2))
+
+julia> constraint_type(:( v ), t, t0, tf, x, u, v)
+(:variable_range, nothing)
 ```
 """
 constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v 
@@ -354,8 +371,8 @@ constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v
             :( $w[$i:$p:$j]     ) => (w == v) ? (:variable_range, i:p:j   ) : :other
             :( $w[$i:$j   ]     ) => (w == v) ? (:variable_range, i:j     ) : :other
             :( $w[$i      ]     ) => (w == v) ? (:variable_range, Index(i)) : :other
-            :( $w               ) => (w == v) ? (:variable_range, nothing ) : :other
-	    _                     => (:variable_fun, e) end                
+            :( $w               ) => (w == v) ? (:variable_range, nothing ) : (:variable_fun, e)
+	    _                     => :other end                
         _ => (:other, nothing) end
     end
 
