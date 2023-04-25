@@ -7,13 +7,13 @@ $(TYPEDEF)
 
 """
 @with_kw mutable struct ParsingInfo
-    v::Union{Symbol, Nothing}=nothing
-    v_dim::Union{Integer, Nothing}=nothing
     t::Union{Symbol, Nothing}=nothing
     t0::Union{Real, Symbol, Expr, Nothing}=nothing
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
+    v::Union{Symbol, Nothing}=nothing
+    v_dim::Integer=0
     aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=_init_aliases()
 end
 
@@ -133,7 +133,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     log && println("constraint: $e1 == $e2,    ($label)")
     (label isa Integer) && ( label = Symbol(:eq, label) )
     llabel = QuoteNode(label)
-    @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u) begin
+    @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial, nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
 	(:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
 	(:final  , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )

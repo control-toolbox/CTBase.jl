@@ -227,7 +227,7 @@ together with the appropriate value (range, updated expression...)
 
 # Example
 ```jldoctest
-julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
+julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u
 
 julia> constraint_type(:( x'(t) ), t, t0, tf, x, u)
 (:dynamics, nothing)
@@ -314,42 +314,48 @@ julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
 (:other, nothing)
 ```
 """
-constraint_type(e, t, t0, tf, x, u) =
+constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v 
     if @match e begin :( $y'($s) ) => y == x && s == t; _ => false end
-        (:dynamics, nothing)
-    else @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf) ] begin
-        [ true , false, false, false, false, false ] => @match e begin
+        (:dynamics, nothing) # todo: remove (not needed by onepass)
+    else @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf), has(e, v) ] begin
+        [ true , false, false, false, false, false, _ ] => @match e begin
             :( $y[$i:$p:$j]($s) ) => (y == x && s == t0) ? (:initial, i:p:j   ) : :other
             :( $y[$i:$j   ]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : :other
             :( $y[$i      ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : :other
             :( $y($s)           ) => (y == x && s == t0) ? (:initial, nothing ) : :other
 	    _                     => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
-        [ false, true , false, false, false, false ] => @match e begin 
+        [ false, true , false, false, false, false, _ ] => @match e begin 
             :( $y[$i:$p:$j]($s) ) => (y == x && s == tf) ? (:final, i:p:j   ) : :other
             :( $y[$i:$j   ]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : :other
             :( $y[$i      ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : :other
             :( $y($s) )           => (y == x && s == tf) ? (:final, nothing ) : :other
 	    _                     => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
-        [ true , true , false, false, false, false ] => begin
+        [ true , true , false, false, false, false, _ ] => begin
             ee = replace_call(e , x, t0, Symbol(x, "#0"))
             ee = replace_call(ee, x, tf, Symbol(x, "#f"))
             (:boundary, ee) end
-        [ false, false, true , false, false, false ] => @match e begin
+        [ false, false, true , false, false, false, _ ] => @match e begin
             :( $v[$i:$p:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:p:j   ) : :other
             :( $v[$i:$j   ]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : :other
             :( $v[$i      ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : :other
             :( $v($s)           ) => (v == u && s == t ) ? (:control_range, nothing ) : :other
 	    _                     => (:control_fun, replace_call(e, u, t, u)) end                
-        [ false, false, false, true , false, false ] => @match e begin
+        [ false, false, false, true , false, false, _ ] => @match e begin
             :( $y[$i:$p:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:p:j   ) : :other
             :( $y[$i:$j   ]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : :other
             :( $y[$i      ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : :other
             :( $y($s)           ) => (y == x && s == t ) ? (:state_range, nothing ) : :other
 	    _                     => (:state_fun, replace_call(e, x, t, x)) end                
-        [ false, false, true , true , false, false ] => begin
+        [ false, false, true , true , false, false, _ ] => begin
             ee = replace_call(e , u, t, u)
             ee = replace_call(ee, x, t, x)
             (:mixed, ee) end
+        [ false, false, false, false, false, false, true ] => @match e begin
+            :( $w[$i:$p:$j]     ) => (w == v) ? (:variable_range, i:p:j   ) : :other
+            :( $w[$i:$j   ]     ) => (w == v) ? (:variable_range, i:j     ) : :other
+            :( $w[$i      ]     ) => (w == v) ? (:variable_range, Index(i)) : :other
+            :( $w               ) => (w == v) ? (:variable_range, nothing ) : :other
+	    _                     => (:variable_fun, e) end                
         _ => (:other, nothing) end
     end
 
