@@ -329,6 +329,11 @@ julia> constraint_type(:( v[2] ), t, t0, tf, x, u, v)
 
 julia> constraint_type(:( v ), t, t0, tf, x, u, v)
 (:variable_range, nothing)
+
+julia> constraint_type(:( v^2  + 1 ), t, t0, tf, x, u, v)(:variable_fun, :(v ^ 2 + 1))
+
+julia> constraint_type(:( v[2]^2 + 1 ), t, t0, tf, x, u, v)
+(:variable_fun, :(v[2] ^ 2 + 1))
 ```
 """
 constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v 
