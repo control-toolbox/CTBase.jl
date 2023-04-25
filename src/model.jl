@@ -120,7 +120,7 @@ julia> ocp = Model(time_dependence=:nonautonomous)
 
 """
 function Model(; time_dependence=__ocp_time_dependence())
-    if time_dependence ∉ [:autonomous, :nonautonomous]
+    if time_dependence ∉ [ :autonomous, :nonautonomous ]
         throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
     end
     return OptimalControlModel{time_dependence}()
@@ -348,7 +348,7 @@ Fix initial and final times to `times[1]` and `times[2]`, respectively.
 # Examples
 
 ```jldoctest
-julia> time!(ocp, [0, 1])
+julia> time!(ocp, [ 0, 1 ])
 julia> ocp.initial_time
 0
 julia> ocp.final_time
@@ -356,7 +356,7 @@ julia> ocp.final_time
 julia> ocp.time_name
 "t"
 
-julia> time!(ocp, [0, 1], "s")
+julia> time!(ocp, [ 0, 1 ], "s")
 julia> ocp.initial_time
 0
 julia> ocp.final_time
@@ -364,7 +364,7 @@ julia> ocp.final_time
 julia> ocp.time_name
 "s"
 
-julia> time!(ocp, [0, 1], :s)
+julia> time!(ocp, [ 0, 1 ], :s)
 julia> ocp.initial_time
 0
 julia> ocp.final_time
@@ -441,8 +441,8 @@ julia> constraint!(ocp, :initial, 0)
 julia> constraint!(ocp, :final, 1)
 
 # state dimension: 2
-julia> constraint!(ocp, :initial, [ 0, 0])
-julia> constraint!(ocp, :final, [ 0, 0])
+julia> constraint!(ocp, :initial, [ 0, 0 ])
+julia> constraint!(ocp, :final, [ 0, 0 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=__constraint_label())
@@ -541,11 +541,11 @@ Add an `:initial`, `:final`, `:control` or `:state` box constraint on a range.
 # Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [1, 2])
+julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
 julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
-julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [1, 2])
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0], [1, 2, 1])
+julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
@@ -576,16 +576,16 @@ Add a `:boundary`, `:control`, `:state` or `:mixed` value functional constraint.
 # Examples
 
 ```@example
-julia> constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+tf, x0[3]+xf[2]], [ 0, 0 ])
+julia> constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [ t0+tf, x0[3]+xf[2]], [ 0, 0 ])
 
 # autonomous ocp
 julia> constraint!(ocp, :control, u -> 2u, 1)
-julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0])
+julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ])
 julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0)
 
 # nonautonomous ocp
 julia> constraint!(ocp, :control, (t, u) -> 2u, 1)
-julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0])
+julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ])
 julia> constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0)
 ```
 """
@@ -614,16 +614,16 @@ Add a `:boundary`, `:control`, `:state` or `:mixed` box functional constraint.
 # Examples
 
 ```@example
-julia> constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+tf, x0[3]+xf[2]], [ 0, 0 ], [ 1, 1 ])
+julia> constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [ t0+tf, x0[3]+xf[2]], [ 0, 0 ], [ 1, 1 ])
 
 # autonomous ocp
 julia> constraint!(ocp, :control, u -> 2u, 0, 1)
-julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0], [ 1, 2, 1 ])
+julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0, 1)
 
 # nonautonomous ocp
 julia> constraint!(ocp, :control, (t, u) -> 2u, 0, 1)
-julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0], [ 1, 2, 1 ])
+julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0, 1)
 ```
 """
