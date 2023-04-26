@@ -15,10 +15,10 @@ $(TYPEDEF)
     u::Union{Symbol, Nothing}=nothing
     v::Union{Symbol, Nothing}=nothing
     v_dim::Integer=0
-    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=_init_aliases()
+    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=__init_aliases()
 end
 
-_init_aliases() = begin
+__init_aliases() = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
     al[:R¹] = :( R^1 )
     al[:R²] = :( R^2 )
@@ -32,7 +32,7 @@ _init_aliases() = begin
     al
 end
 
-_sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
+__sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
 
 """
 $(TYPEDSIGNATURES)
@@ -80,7 +80,7 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     p.v = v
     p.v_dim = q
     vv = QuoteNode(v)
-    q isa Integer && for i ∈ 1:q p.aliases[Symbol(v, _sub(i))] = :( $v[$i] ) end
+    q isa Integer && for i ∈ 1:q p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
     :( variable!($ocp, $q, $vv) )
 end
 
@@ -118,7 +118,7 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     p.x = x
     xx = QuoteNode(x)
-    n isa Integer && for i ∈ 1:n p.aliases[Symbol(x, _sub(i))] = :( $x[$i] ) end
+    n isa Integer && for i ∈ 1:n p.aliases[Symbol(x, __sub(i))] = :( $x[$i] ) end
     :( state!($ocp, $n, $xx) )
 end
 
@@ -126,7 +126,7 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     p.u = u
     uu = QuoteNode(u)
-    m isa Integer && for i ∈ 1:m p.aliases[Symbol(u, _sub(i))] = :( $u[$i] ) end
+    m isa Integer && for i ∈ 1:m p.aliases[Symbol(u, __sub(i))] = :( $u[$i] ) end
     :( control!($ocp, $m, $uu) )
 end
 
@@ -140,6 +140,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
 	(:final   , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
 	(:final   , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
 	(:boundary, ee1    ) => begin
+            gs = gensym()
 	    x0 = Symbol(p.x, "#0")
 	    xf = Symbol(p.x, "#f")
 	    if isnothing(p.v)
@@ -181,6 +182,7 @@ p_dynamics!(p, ocp, x, t, e; log=false) = begin
     	    end
     	constraint!($ocp, :dynamics, $gs)
         end
+    end
 end
 
 p_objective!(p, ocp, e, type; log) = begin
@@ -188,11 +190,20 @@ p_objective!(p, ocp, e, type; log) = begin
     e = replace_call(e, p.t)
     ttype = QuoteNode(type)
     gs = gensym()
-    quote
-        function $gs($(p.x), $(p.u))
-	    $e
-	end
-	objective!($ocp, :lagrange, $gs, $ttype)
+    if isnothing(p.v)
+        quote
+            function $gs($(p.x), $(p.u))
+	        $e
+	    end
+	    objective!($ocp, :lagrange, $gs, $ttype)
+        end
+    else
+        quote
+            function $gs($(p.x), $(p.u), $(p.v))
+	        $e
+	    end
+	    objective!($ocp, :lagrange, $gs, $ttype)
+        end
     end
 end
  

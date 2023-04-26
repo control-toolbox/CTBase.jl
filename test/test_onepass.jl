@@ -122,4 +122,67 @@ u = 3
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1] 
  
+o = @def1 begin
+    z ∈ R², variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R², state
+    u ∈ R, control
+    r = x₁
+    v = x₂
+    w = r + 2v
+    r(0) == 0,    (1)
+    v(0) == 1,    (♡)
+    x'(t) == [ v(t), w(t)^2 + z₁ ]
+    ∫( u(t)^2 + z₂ * x₁(t) ) → min
+    end 
+x = [ 1, 2 ]
+u = 3 
+z = [ 4, 5 ]
+@test constraint(o, :eq1 )(x) == x[1]
+@test constraint(o, Symbol("♡"))(x) == x[2]
+@test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
+@test o.lagrange(x, u, z) == u^2 + z[2] * x[1] 
+ 
+o = @def1 begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R², state
+    u ∈ R, control
+    r = x₁
+    v = x₂
+    r(0)^2 + v(1) == 0,    (1)
+    v(0) == 1,             (♡)
+    x'(t) == [ v(t), r(t)^2 ]
+    ∫( u(t)^2 + x₁(t) ) → min
+    end 
+x0 = [ 2, 3 ] 
+xf = [ 4, 5 ] 
+x = [ 1, 2 ]
+u = 3 
+@test constraint(o, :eq1 )(x0, xf) == x0[1]^2 + xf[2]
+@test constraint(o, Symbol("♡"))(x0) == x0[2]
+@test o.dynamics(x, u) == [ x[2], x[1]^2 ]
+@test o.lagrange(x, u) == u^2 + x[1] 
+ 
+o = @def1 begin
+    z ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R², state
+    u ∈ R, control
+    r = x₁
+    v = x₂
+    r(0) - z == 0,    (1)
+    v(0) == 1,        (♡)
+    x'(t) == [ v(t), r(t)^2 + z ]
+    ∫( u(t)^2 + z * x₁(t) ) → min
+    end 
+x0 = [ 2, 3 ] 
+xf = [ 4, 5 ] 
+x = [ 1, 2 ]
+u = 3 
+z = 4
+@test constraint(o, :eq1 )(x0, xf, z) == x0[1] - z
+@test constraint(o, Symbol("♡"))(x0) == x0[2]
+@test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
+@test o.lagrange(x, u, z) == u^2 + z * x[1] 
+ 
 end
