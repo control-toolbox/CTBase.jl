@@ -59,49 +59,56 @@ time_set(ocp) = !isnothing(ocp.initial_time) && !isnothing(ocp.final_time)
 """
 $(TYPEDSIGNATURES)
 
-Returns :nonautonomous == time_dependence
+Return :nonautonomous == time_dependence
 """
 isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
 
 """
 $(TYPEDSIGNATURES)
 
-Returns !isnonautonomous(time_dependence)
+Return !isnonautonomous(time_dependence)
 """
 isautonomous(time_dependence::Symbol) = !isnonautonomous(time_dependence)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the model has been defined as nonautonomous.
+Return `true` if the model has been defined as nonautonomous.
 """
 isnonautonomous(ocp::OptimalControlModel{time_dependence}) where {time_dependence} = isnonautonomous(time_dependence)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the model has been defined as autonomous.
+Return `true` if the model has been defined as autonomous.
 """
 isautonomous(ocp::OptimalControlModel) = !isnonautonomous(ocp)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the criterion type of `ocp` is `:min`.
+Return `true` if the criterion type of `ocp` is `:min`.
 """
 ismin(ocp::OptimalControlModel) = ocp.criterion == :min
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the criterion type of `ocp` is `:max`.
+Return `true` if the criterion type of `ocp` is `:max`.
 """
 ismax(ocp::OptimalControlModel) = !ismin(ocp)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns a new `OptimalControlModel` instance, that is a model of an optimal control problem.
+Return `true` if a variable has been declared.
+"""
+hasvariable(ocp::OptimalControlModel) = !isnothing(ocp.variable_dimension)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:
 
@@ -140,7 +147,7 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 ```
 """
 function variable!(ocp::OptimalControlModel, q::Dimension, names::Union{String, Vector{String}}=__variable_names(q))
-    (q > 1) && (names isa Vector{String}) && (length(names) ≠ q) && throw(InconsistentArgument("the number of variables names must be equal to the state dimension"))
+    (q > 1) && (names isa Vector{String}) && (length(names) ≠ q) && throw(InconsistentArgument("the number of variables names must be equal to the variable dimension"))
     (q == 1) && (names isa Vector{String}) && throw(InconsistentArgument("if the variable dimension is 1, then, the argument names must be a String"))
     (q > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, q)])
     ocp.variable_dimension = q
@@ -700,7 +707,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns the labels of the constraints as a `Base.keys`.
+Return the labels of the constraints as a `Base.keys`.
 
 # Example
 

@@ -1,4 +1,5 @@
 # onepass
+# todo: eq / ineq (type = variable)
 
 """
 $(TYPEDEF)
@@ -57,7 +58,7 @@ parse!(p, ocp, e; log=false) = begin
         :( $u ∈ R   , control ) => p_control!(p, ocp, u   ; log)
         :( $a = $e1 ) => p_alias!(p, ocp, a, e1; log)
         :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
-        :( $e1 == $e2 ) => p_constraint_eq!(p, ocp, e1, e2; log)
+        :( $e1 == $e2         ) => p_constraint_eq!(p, ocp, e1, e2; log)
         :( $e1 == $e2, $label ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
         :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
@@ -65,7 +66,7 @@ parse!(p, ocp, e; log=false) = begin
     
         if e isa LineNumberNode
             e
-        elseif (e isa Expr) && (e.head == :block)
+        elseif e isa Expr && e.head == :block
     	Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
     	# assumes that map is done sequentially
         else
@@ -79,7 +80,7 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     p.v = v
     p.v_dim = q
     vv = QuoteNode(v)
-    (q isa Integer) && for i ∈ 1:q p.aliases[Symbol(v, _sub(i))] = :( $v[$i] ) end
+    q isa Integer && for i ∈ 1:q p.aliases[Symbol(v, _sub(i))] = :( $v[$i] ) end
     :( variable!($ocp, $q, $vv) )
 end
 
@@ -101,11 +102,11 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
 	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
-	    :( $v1     ) =>  ((v1 == p.v) && (1 == p.v_dim)) ? :( time!($ocp, Index(1), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, Index(1), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _            => throw(SyntaxError("bad time declaration")) end
         (false, true ) => @match tf begin
 	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : throw(SyntaxError("bad time declaration"))
-	    :( $v1     ) =>  ((v1 == p.v) && (1 == p.v_dim)) ? :( time!($ocp, $t0, Index(1), $tt) ) : throw(SyntaxError("bad time declaration"))
+	    :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, $t0, Index(1), $tt) ) : throw(SyntaxError("bad time declaration"))
 	    _            => throw(SyntaxError("bad time declaration")) end
 	_              => @match (t0, tf) begin
 	    (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : throw(SyntaxError("bad time declaration"))
@@ -117,7 +118,7 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     p.x = x
     xx = QuoteNode(x)
-    (n isa Integer) && for i ∈ 1:n p.aliases[Symbol(x, _sub(i))] = :( $x[$i] ) end
+    n isa Integer && for i ∈ 1:n p.aliases[Symbol(x, _sub(i))] = :( $x[$i] ) end
     :( state!($ocp, $n, $xx) )
 end
 
@@ -125,35 +126,61 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     p.u = u
     uu = QuoteNode(u)
-    (m isa Integer) && for i ∈ 1:m p.aliases[Symbol(u, _sub(i))] = :( $u[$i] ) end
+    m isa Integer && for i ∈ 1:m p.aliases[Symbol(u, _sub(i))] = :( $u[$i] ) end
     :( control!($ocp, $m, $uu) )
 end
 
 p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     log && println("constraint: $e1 == $e2,    ($label)")
-    (label isa Integer) && ( label = Symbol(:eq, label) )
+    label isa Integer && ( label = Symbol(:eq, label) )
     llabel = QuoteNode(label)
     @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
-        (:initial, nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
-	(:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
-	(:final  , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
-	(:final  , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
+        (:initial , nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
+	(:initial , val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
+	(:final   , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
+	(:final   , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
+	(:boundary, ee1    ) => begin
+	    x0 = Symbol(p.x, "#0")
+	    xf = Symbol(p.x, "#f")
+	    if isnothing(p.v)
+	        quote
+                    function $gs($x0, $xf)
+	                $ee1
+	            end
+	            constraint!($ocp, :boundary, $gs, $e2, $llabel)
+		end
+	    else
+	        quote
+                    function $gs($x0, $xf, $(p.v))
+	                $ee1
+	            end
+	            constraint!($ocp, :boundary, $gs, $e2, $llabel)
+		end
+	    end end
 	_ => throw(SyntaxError("bad constraint declaration"))
     end
 end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
-    ( x ≠ p.x ) && throw(SyntaxError("wrong state for dynamics"))
-    ( t ≠ p.t ) && throw(SyntaxError("wrong time for dynamics"))
+    x ≠ p.x && throw(SyntaxError("wrong state for dynamics"))
+    t ≠ p.t && throw(SyntaxError("wrong time for dynamics"))
     e = replace_call(e, p.t)
     gs = gensym()
-    quote
-        function $gs($(p.x), $(p.u))
-	    $e
-	end
-	constraint!($ocp, :dynamics, $gs)
-    end
+    if isnothing(p.v)
+        quote
+            function $gs($(p.x), $(p.u))
+    	        $e
+    	    end
+    	constraint!($ocp, :dynamics, $gs)
+        end
+    else
+        quote
+            function $gs($(p.x), $(p.u), $(p.v))
+    	        $e
+    	    end
+    	constraint!($ocp, :dynamics, $gs)
+        end
 end
 
 p_objective!(p, ocp, e, type; log) = begin
