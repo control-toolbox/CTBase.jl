@@ -185,4 +185,4 @@ z = 4
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1] 
  
-end
+end 
