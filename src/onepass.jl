@@ -172,12 +172,21 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         # (:state_range, val    ) => :( constraint!($ocp, :state, $val, $e2, $llabel) )
         (:state_fun, ee1) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
             quote
                 function $gs($(args...))
                     $ee1
                 end
                 constraint!($ocp, :state, $gs, $e2, $llabel)
+            end end
+        (:mixed, ee1) => begin
+            gs = gensym()
+            args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee1
+                end
+                constraint!($ocp, :mixed, $gs, $e2, $llabel)
             end end
         _ => throw(SyntaxError("bad constraint declaration"))
     end
@@ -218,12 +227,21 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:state_range, val    ) => :( constraint!($ocp, :state, $val, $e1, $e3, $llabel) )
         (:state_fun, ee2) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
             quote
                 function $gs($(args...))
                     $ee2
                 end
                 constraint!($ocp, :state, $gs, $e1, $e3, $llabel)
+            end end
+        (:mixed, ee2) => begin
+            gs = gensym()
+            args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee2
+                end
+                constraint!($ocp, :mixed, $gs, $e1, $e3, $llabel)
             end end
         _ => throw(SyntaxError("bad constraint declaration"))
     end

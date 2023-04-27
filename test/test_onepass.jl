@@ -217,27 +217,69 @@ o = @def1 begin
     u ∈ R^m, control
     r = x₁
     v = x₂
-    0 ≤ r(t) ≤ 1,                 (1)
-    0 ≤ x(t) ≤ 1,                 (2)
-    0 ≤ x[1:2](t) ≤ 1,            (3)
-    0 ≤ x[1:2:4](t) ≤ 1,          (4)
-    0 ≤ v(t)^2 ≤ 1,               (5)
-    0 ≤ u(t) ≤ 1,                 (6)
-    0 ≤ u[1:2](t) ≤ 1,            (7)
-    0 ≤ u[1:2:4](t) ≤ 1,          (8)
-    0 ≤ u₂(t)^2 ≤ 1,               (9)
+    0 ≤ r(t) ≤ 1,                      (1)
+    zeros(n) ≤ x(t) ≤ ones(n),         (2)
+    [ 0, 0 ] ≤ x[1:2](t) ≤ [ 1, 1 ],   (3)
+    [ 0, 0 ] ≤ x[1:2:4](t) ≤ [ 1, 1 ], (4)
+    0 ≤ v(t)^2 ≤ 1,                    (5)
+    zeros(m) ≤ u(t) ≤ ones(m),         (6)
+    [ 0, 0 ] ≤ u[1:2](t) ≤ [ 1, 1 ],   (7)
+    [ 0, 0 ] ≤ u[1:2:4](t) ≤ [ 1, 1 ], (8)
+    0 ≤ u₂(t)^2 ≤ 1,                   (9)
+    u₁(t) * x[1:2](t) == 1,           (10)
+    0 ≤ u₁(t) * x[1:2](t).^3 ≤ 1,     (11)
     end 
 x = Vector{Float64}(1:n)
-u = Vector{Float64}(1:m)
+u = 2 * Vector{Float64}(1:m)
 
-@test constraint(o, :eq1)(x) == x[1] 
-@test constraint(o, :eq2)(x) == x
-@test constraint(o, :eq3)(x) == x[1:2]
-@test constraint(o, :eq4)(x) == x[1:2:4]
-@test constraint(o, :eq5)(x) == x[2]^2
-@test constraint(o, :eq6)(u) == u
-@test constraint(o, :eq7)(u) == u[1:2]
-@test constraint(o, :eq8)(u) == u[1:2:4]
-@test constraint(o, :eq9)(u) == u[2]^2
+@test constraint(o, :eq1 )(x) == x[1] 
+@test constraint(o, :eq2 )(x) == x
+@test constraint(o, :eq3 )(x) == x[1:2]
+@test constraint(o, :eq4 )(x) == x[1:2:4]
+@test constraint(o, :eq5 )(x) == x[2]^2
+@test constraint(o, :eq6 )(u) == u
+@test constraint(o, :eq7 )(u) == u[1:2]
+@test constraint(o, :eq8 )(u) == u[1:2:4]
+@test constraint(o, :eq9 )(u) == u[2]^2
+@test constraint(o, :eq10)(x, u) == u[1] * x[1:2]
+@test constraint(o, :eq11)(x, u) == u[1] * x[1:2].^3
+
+n = 11
+m = 6
+o = @def1 begin
+    z ∈ R^2, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R^n, state
+    u ∈ R^m, control
+    r = x₁
+    v = x₂
+    0 ≤ r(t) ≤ 1,                      (1)
+    zeros(n) ≤ x(t) ≤ ones(n),         (2)
+    [ 0, 0 ] ≤ x[1:2](t) - [ z₁, 1 ] ≤ [ 1, 1 ], (3)
+    [ 0, 0 ] ≤ x[1:2:4](t) ≤ [ 1, 1 ],  (4)
+    0 ≤ v(t)^2 ≤ 1,                    (5)
+    zeros(m) ≤ u(t) ≤ ones(m),         (6)
+    [ 0, 0 ] ≤ u[1:2](t) ≤ [ 1, 1 ],   (7)
+    [ 0, 0 ] ≤ u[1:2:4](t) ≤ [ 1, 1 ], (8)
+    0 ≤ u₂(t)^2 ≤ 1,                   (9)
+    u₁(t) * x[1:2](t) + z + f() == 1, (10)
+    0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1, (11)
+    end 
+f() = [ 1, 1 ]
+z = 3 * Vector{Float64}(1:2)
+x = Vector{Float64}(1:n)
+u = 2 * Vector{Float64}(1:m)
+
+@test constraint(o, :eq1 )(x   ) == x[1] 
+@test constraint(o, :eq2 )(x   ) == x
+@test constraint(o, :eq3 )(x, z) == x[1:2] - [ z[1], 1 ]
+@test constraint(o, :eq4 )(x   ) == x[1:2:4]
+@test constraint(o, :eq5 )(x, z) == x[2]^2
+@test constraint(o, :eq6 )(u   ) == u
+@test constraint(o, :eq7 )(u   ) == u[1:2]
+@test constraint(o, :eq8 )(u   ) == u[1:2:4]
+@test constraint(o, :eq9 )(u, z) == u[2]^2
+@test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
+@test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
  
 end 
