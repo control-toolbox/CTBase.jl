@@ -1,5 +1,5 @@
 # onepass
-# todo: eq / ineq (type = variable); label "2x"
+# todo: eq / ineq (type = variable); label "2x"; remove v_dim (and test at exec?)
 
 """
 $(TYPEDEF)
@@ -64,10 +64,11 @@ parse!(p, ocp, e; log=false) = begin
         :( $e1 <= $e2 <= $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
         :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
-        :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
-        :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
+        :( ∫($e1) → min ) => p_lagrange!(p, ocp, e1, :min; log)
+        :( ∫($e1) → max ) => p_lagrange!(p, ocp, e1, :max; log)
+        :( $e1 → min ) => p_mayer!(p, ocp, e1, :min; log)
+        :( $e1 → max ) => p_mayer!(p, ocp, e1, :max; log)
         _ =>
-
             if e isa LineNumberNode
                 e
             elseif e isa Expr && e.head == :block
@@ -262,7 +263,7 @@ p_dynamics!(p, ocp, x, t, e; log=false) = begin
     end
 end
 
-p_objective!(p, ocp, e, type; log) = begin
+p_lagrange!(p, ocp, e, type; log) = begin
     log && println("objective: ∫($e) → $type")
     e = replace_call(e, p.t)
     ttype = QuoteNode(type)
