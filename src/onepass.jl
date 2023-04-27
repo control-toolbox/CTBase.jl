@@ -221,7 +221,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :mixed, $gs, $e2, $llabel)
             end end
-        _ => return onepass_throw("bad constraint declaration")
+        _ => return onepass_throw("bad constraint declaration ($e1 == $e2)")
     end
 end
 
@@ -276,7 +276,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :mixed, $gs, $e1, $e3, $llabel)
             end end
-        _ => return onepass_throw("bad constraint declaration")
+        _ => return onepass_throw("bad constraint declaration ($e1 ≤ $e2 ≤ $e3)")
     end
 end
 
@@ -301,6 +301,7 @@ p_objective!(p, ocp, e, type; log) = begin
     ttype = QuoteNode(type)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+    #println("DEBUG objective: ∫($e) → $type / $gs / $args")
     quote
         function $gs($(args...))
             $e
