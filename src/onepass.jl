@@ -83,13 +83,23 @@ parse!(p, ocp, e; log=false) = begin
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
                 # assumes that map is done sequentially
             else
-                :(throw(SyntaxError("unknown syntax")))
+                return onepass_throw("unknown syntax")
             end
     end
 end
 
+onepass_throw(s) = begin
+    println("CTParser error: " * s)
+    :(throw(CTBase.SyntaxError($s)))
+end
+
+
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
+
+    !(v isa Symbol)  && return onepass_throw("forbidden variable name: $v")
+    !(q isa Integer) && return onepass_throw("forbidden variable dimension: $q")
+
     p.v = v
     p.v_dim = q
     vv = QuoteNode(v)
@@ -100,18 +110,20 @@ end
 
 p_alias!(p, ocp, a, e; log=false) = begin
     log && println("alias: $a = $e")
+
+    !(a isa Symbol) && return onepass_throw("forbidden alias name: $a")
+
     aa = QuoteNode(a)
     ee = QuoteNode(e)
-    if !(a isa Symbol)
-        :(throw(CTBase.SyntaxError("forbidden alias (): " * string($aa)*" = " * string($ee))))
-    else
-        p.aliases[a] = e
-        :( LineNumberNode(0, "alias: " * string($aa) *" = " * string($ee)) )
-    end
+    p.aliases[a] = e
+    :( LineNumberNode(0, "alias: " * string($aa) *" = " * string($ee)) )
 end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
+
+    !(t isa Symbol) && return onepass_throw("forbidden time variable name: $t")
+
     p.t = t
     p.t0 = t0
     p.tf = tf
@@ -119,21 +131,25 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
-            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : :(throw(SyntaxError("bad time declaration")))
-            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, Index(1), $tf, $tt) ) : :(throw(SyntaxError("bad time declaration")))
-            _            => :(throw(SyntaxError("bad time declaration"))) end
+            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : ( return onepass_throw("bad time declaration"))
+            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, Index(1), $tf, $tt) ) : (return onepass_throw("bad time declaration"))
+            _            => return onepass_throw("bad time declaration") end
         (false, true ) => @match tf begin
-            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : :(throw(SyntaxError("bad time declaration")))
-            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, $t0, Index(1), $tt) ) : :(throw(SyntaxError("bad time declaration")))
-            _            => :(throw(SyntaxError("bad time declaration"))) end
+            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : ( return onepass_throw("bad time declaration"))
+            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, $t0, Index(1), $tt) ) : ( return onepass_throw("bad time declaration"))
+            _            => return onepass_throw("bad time declaration") end
         _              => @match (t0, tf) begin
-            (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : :(throw(SyntaxError("bad time declaration")))
-            _ => :(throw(SyntaxError("bad time declaration"))) end
+            (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : ( return onepass_throw("bad time declaration"))
+            _ => return onepass_throw("bad time declaration") end
     end
 end
 
 p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
+
+    !(x isa Symbol)  && return onepass_throw("forbidden state name: $x")
+    !(n isa Integer) && return onepass_throw("forbidden state dimension: $n")
+
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
@@ -143,6 +159,10 @@ end
 
 p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
+
+    !(u isa Symbol)  && return onepass_throw("forbidden control name: $u")
+    !(m isa Integer) && return onepass_throw("forbidden control dimension: $m")
+
     p.u = u
     uu = QuoteNode(u)
     mm =  m isa Integer ? m : 9
@@ -201,7 +221,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :mixed, $gs, $e2, $llabel)
             end end
-        _ => :(throw(SyntaxError("bad constraint declaration")))
+        _ => return onepass_throw("bad constraint declaration")
     end
 end
 
@@ -256,14 +276,14 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :mixed, $gs, $e1, $e3, $llabel)
             end end
-        _ => :(throw(SyntaxError("bad constraint declaration")))
+        _ => return onepass_throw("bad constraint declaration")
     end
 end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
-    x ≠ p.x && :(throw(SyntaxError("wrong state for dynamics")))
-    t ≠ p.t && :(throw(SyntaxError("wrong time for dynamics")))
+    x ≠ p.x && return onepass_throw("wrong state for dynamics")
+    t ≠ p.t && return onepass_throw("wrong time for dynamics")
     e = replace_call(e, p.t)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
