@@ -60,18 +60,22 @@ parse!(p, ocp, e; log=false) = begin
         :( $x'($t) == $e1 ) => p_dynamics!(p, ocp, x, t, e1; log)
         :( $e1 == $e2         ) => p_constraint_eq!(p, ocp, e1, e2; log)
         :( $e1 == $e2, $label ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
+        :( $e1 <= $e2 <= $e3  )        => p_constraint_ineq!(p, ocp, e1, e2, e3; log)
+        :( $e1 <= $e2 <= $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
+        :( $e1 ≤  $e2 ≤  $e3  )        => p_constraint_ineq!(p, ocp, e1, e2, e3; log)
+        :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
         :( ∫($e1) → min ) => p_objective!(p, ocp, e1, :min; log)
         :( ∫($e1) → max ) => p_objective!(p, ocp, e1, :max; log)
         _ =>
-    
-        if e isa LineNumberNode
-            e
-        elseif e isa Expr && e.head == :block
-    	Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
-    	# assumes that map is done sequentially
-        else
-            throw(SyntaxError("unknown syntax"))
-        end
+
+            if e isa LineNumberNode
+                e
+            elseif e isa Expr && e.head == :block
+                Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
+                # assumes that map is done sequentially
+            else
+                throw(SyntaxError("unknown syntax"))
+            end
     end
 end
 
@@ -94,23 +98,23 @@ end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
-    p.t = t 
+    p.t = t
     p.t0 = t0
     p.tf = tf
     tt = QuoteNode(t)
     @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
-	    :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, Index(1), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
-	    _            => throw(SyntaxError("bad time declaration")) end
+            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
+            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, Index(1), $tf, $tt) ) : throw(SyntaxError("bad time declaration"))
+            _            => throw(SyntaxError("bad time declaration")) end
         (false, true ) => @match tf begin
-	    :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : throw(SyntaxError("bad time declaration"))
-	    :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, $t0, Index(1), $tt) ) : throw(SyntaxError("bad time declaration"))
-	    _            => throw(SyntaxError("bad time declaration")) end
-	_              => @match (t0, tf) begin
-	    (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : throw(SyntaxError("bad time declaration"))
-	    _ => throw(SyntaxError("bad time declaration")) end
+            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : throw(SyntaxError("bad time declaration"))
+            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, $t0, Index(1), $tt) ) : throw(SyntaxError("bad time declaration"))
+            _            => throw(SyntaxError("bad time declaration")) end
+        _              => @match (t0, tf) begin
+            (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : throw(SyntaxError("bad time declaration"))
+            _ => throw(SyntaxError("bad time declaration")) end
     end
 end
 
@@ -136,30 +140,33 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     llabel = QuoteNode(label)
     @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial , nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
-	(:initial , val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
-	(:final   , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
-	(:final   , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
-	(:boundary, ee1    ) => begin
+        (:initial , val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
+        (:final   , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
+        (:final   , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
+        (:boundary, ee1    ) => begin
             gs = gensym()
-	    x0 = Symbol(p.x, "#0")
-	    xf = Symbol(p.x, "#f")
-	    if isnothing(p.v)
-	        quote
+            x0 = Symbol(p.x, "#0")
+            xf = Symbol(p.x, "#f")
+            if isnothing(p.v)
+                quote
                     function $gs($x0, $xf)
-	                $ee1
-	            end
-	            constraint!($ocp, :boundary, $gs, $e2, $llabel)
-		end
-	    else
-	        quote
+                        $ee1
+                    end
+                    constraint!($ocp, :boundary, $gs, $e2, $llabel)
+                end
+            else
+                quote
                     function $gs($x0, $xf, $(p.v))
-	                $ee1
-	            end
-	            constraint!($ocp, :boundary, $gs, $e2, $llabel)
-		end
-	    end end
-	_ => throw(SyntaxError("bad constraint declaration"))
+                        $ee1
+                    end
+                    constraint!($ocp, :boundary, $gs, $e2, $llabel)
+                end
+            end end
+        _ => throw(SyntaxError("bad constraint declaration"))
     end
+end
+
+p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
 end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
@@ -171,16 +178,16 @@ p_dynamics!(p, ocp, x, t, e; log=false) = begin
     if isnothing(p.v)
         quote
             function $gs($(p.x), $(p.u))
-    	        $e
-    	    end
-    	constraint!($ocp, :dynamics, $gs)
+                $e
+            end
+            constraint!($ocp, :dynamics, $gs)
         end
     else
         quote
             function $gs($(p.x), $(p.u), $(p.v))
-    	        $e
-    	    end
-    	constraint!($ocp, :dynamics, $gs)
+                $e
+            end
+            constraint!($ocp, :dynamics, $gs)
         end
     end
 end
@@ -193,20 +200,20 @@ p_objective!(p, ocp, e, type; log) = begin
     if isnothing(p.v)
         quote
             function $gs($(p.x), $(p.u))
-	        $e
-	    end
-	    objective!($ocp, :lagrange, $gs, $ttype)
+                $e
+            end
+            objective!($ocp, :lagrange, $gs, $ttype)
         end
     else
         quote
             function $gs($(p.x), $(p.u), $(p.v))
-	        $e
-	    end
-	    objective!($ocp, :lagrange, $gs, $ttype)
+                $e
+            end
+            objective!($ocp, :lagrange, $gs, $ttype)
         end
     end
 end
- 
+
 """
 $(TYPEDSIGNATURES)
 
