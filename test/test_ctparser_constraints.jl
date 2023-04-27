@@ -115,7 +115,7 @@ function test_ctparser_constraints()
     # === boundary
     t0   = 0.4
     tf   = 1.4
-    n    = 7
+    n    = 2
     ocp5 = @def begin
 
         t ∈ [ t0, tf], time
