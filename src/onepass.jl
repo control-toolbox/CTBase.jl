@@ -147,7 +147,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
-	    args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+        args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
             quote
                 function $gs($(args...))
                     $ee1
@@ -159,6 +159,27 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
 end
 
 p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
+    log && println("constraint: $e1 ≤ $e2 ≤ $e3,    ($label)")
+    label isa Integer && ( label = Symbol(:eq, label) )
+    llabel = QuoteNode(label)
+    @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
+        (:initial , nothing) => :( constraint!($ocp, :initial,       $e2, $e3, $llabel) )
+        (:initial , val    ) => :( constraint!($ocp, :initial, $val, $e2, $e3, $llabel) )
+        (:final   , nothing) => :( constraint!($ocp, :final  ,       $e2, $e3, $llabel) )
+        (:final   , val    ) => :( constraint!($ocp, :final  , $val, $e2, $e3, $llabel) )
+        (:boundary, ee1    ) => begin
+            gs = gensym()
+            x0 = Symbol(p.x, "#0")
+            xf = Symbol(p.x, "#f")
+        args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee1
+                end
+                constraint!($ocp, :boundary, $gs, $e2, $e3, $llabel)
+            end end
+        _ => throw(SyntaxError("bad constraint declaration"))
+    end
 end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
