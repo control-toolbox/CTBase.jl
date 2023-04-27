@@ -98,7 +98,7 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
 
     !(v isa Symbol)  && return onepass_throw("forbidden variable name: $v")
-    !(q isa Integer) && return onepass_throw("forbidden variable dimension: $q")
+    !( (q isa Symbol) || (q isa Integer)) && return onepass_throw("forbidden variable dimension: $q")
 
     p.v = v
     p.v_dim = q
@@ -148,7 +148,7 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
 
     !(x isa Symbol)  && return onepass_throw("forbidden state name: $x")
-    !(n isa Integer) && return onepass_throw("forbidden state dimension: $n")
+    !( (n isa Symbol) || (n isa Integer)) && return onepass_throw("forbidden state dimension: $n")
 
     p.x = x
     xx = QuoteNode(x)
@@ -161,7 +161,7 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
 
     !(u isa Symbol)  && return onepass_throw("forbidden control name: $u")
-    !(m isa Integer) && return onepass_throw("forbidden control dimension: $m")
+    !( (m isa Symbol) || (m isa Integer)) && return onepass_throw("forbidden control dimension: $m")
 
     p.u = u
     uu = QuoteNode(u)
