@@ -184,6 +184,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
             args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
@@ -195,6 +196,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:control_fun, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
@@ -206,6 +208,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:state_fun, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
@@ -215,6 +218,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:mixed, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
@@ -239,6 +243,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
             args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -250,6 +255,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:control_fun, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -261,6 +267,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:state_fun, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -270,6 +277,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:mixed, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -287,6 +295,7 @@ p_dynamics!(p, ocp, x, t, e; log=false) = begin
     e = replace_call(e, p.t)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+    (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse dynamics ($x'($t) == $e)")
     quote
         function $gs($(args...))
             $e
@@ -301,7 +310,9 @@ p_objective!(p, ocp, e, type; log) = begin
     ttype = QuoteNode(type)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-    #println("DEBUG objective: ∫($e) → $type / $gs / $args")
+
+    (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse objective (∫($e) → $type)")
+    println("DEBUG ARGS: $args /", typeof(args))
     quote
         function $gs($(args...))
             $e
