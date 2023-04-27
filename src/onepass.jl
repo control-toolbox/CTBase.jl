@@ -1,5 +1,5 @@
 # onepass
-# todo: eq / ineq (type = variable)
+# todo: eq / ineq (type = variable); label "2x"
 
 """
 $(TYPEDEF)
@@ -147,20 +147,12 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
-            if isnothing(p.v)
-                quote
-                    function $gs($x0, $xf)
-                        $ee1
-                    end
-                    constraint!($ocp, :boundary, $gs, $e2, $llabel)
+	    args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee1
                 end
-            else
-                quote
-                    function $gs($x0, $xf, $(p.v))
-                        $ee1
-                    end
-                    constraint!($ocp, :boundary, $gs, $e2, $llabel)
-                end
+                constraint!($ocp, :boundary, $gs, $e2, $llabel)
             end end
         _ => throw(SyntaxError("bad constraint declaration"))
     end
@@ -175,20 +167,12 @@ p_dynamics!(p, ocp, x, t, e; log=false) = begin
     t ≠ p.t && throw(SyntaxError("wrong time for dynamics"))
     e = replace_call(e, p.t)
     gs = gensym()
-    if isnothing(p.v)
-        quote
-            function $gs($(p.x), $(p.u))
-                $e
-            end
-            constraint!($ocp, :dynamics, $gs)
+    args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+    quote
+        function $gs($(args...))
+            $e
         end
-    else
-        quote
-            function $gs($(p.x), $(p.u), $(p.v))
-                $e
-            end
-            constraint!($ocp, :dynamics, $gs)
-        end
+        constraint!($ocp, :dynamics, $gs)
     end
 end
 
@@ -197,20 +181,12 @@ p_objective!(p, ocp, e, type; log) = begin
     e = replace_call(e, p.t)
     ttype = QuoteNode(type)
     gs = gensym()
-    if isnothing(p.v)
-        quote
-            function $gs($(p.x), $(p.u))
-                $e
-            end
-            objective!($ocp, :lagrange, $gs, $ttype)
+    args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+    quote
+        function $gs($(args...))
+            $e
         end
-    else
-        quote
-            function $gs($(p.x), $(p.u), $(p.v))
-                $e
-            end
-            objective!($ocp, :lagrange, $gs, $ttype)
-        end
+        objective!($ocp, :lagrange, $gs, $ttype)
     end
 end
 
