@@ -231,7 +231,6 @@ o = @def1 begin
     end 
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
-
 @test constraint(o, :eq1 )(x) == x[1] 
 @test constraint(o, :eq2 )(x) == x
 @test constraint(o, :eq3 )(x) == x[1:2]
@@ -269,7 +268,6 @@ f() = [ 1, 1 ]
 z = 3 * Vector{Float64}(1:2)
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
-
 @test constraint(o, :eq1 )(x   ) == x[1] 
 @test constraint(o, :eq2 )(x   ) == x
 @test constraint(o, :eq3 )(x, z) == x[1:2] - [ z[1], 1 ]
@@ -281,5 +279,47 @@ u = 2 * Vector{Float64}(1:m)
 @test constraint(o, :eq9 )(u, z) == u[2]^2
 @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
 @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
- 
+
+o = @def1 begin
+    s ∈ [ 0, 1 ], time
+    y ∈ R^4, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    r(0) + v(1) → min
 end 
+y0 = [ 1, 2, 3, 4 ]
+yf = 2 * [ 1, 2, 3, 4 ]
+@test ismin(o)
+@test o.mayer(y0, yf) == y0[3] + yf[4]
+
+
+o = @def1 begin
+    s ∈ [ 0, 1 ], time
+    y ∈ R^4, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    r(0) + v(1) → max
+end 
+y0 = [ 1, 2, 3, 4 ]
+yf = 2 * [ 1, 2, 3, 4 ]
+@test ismax(o)
+@test o.mayer(y0, yf) == y0[3] + yf[4]
+
+o = @def1 begin
+    z ∈ R^2, variable
+    s ∈ [ 0, z₁ ], time
+    y ∈ R^4, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    r(0) + v(z₁) + z₂ → min
+end 
+z = [ 5, 6 ]
+y0 = [ 1, 2, 3, 4 ]
+yf = 2 * [ 1, 2, 3, 4 ]
+@test ismin(o)
+@test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
+
+end

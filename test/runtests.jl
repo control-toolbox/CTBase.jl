@@ -15,8 +15,8 @@ const input_line_type = CTBase.input_line_type
     for name ∈ (
         :callbacks,
         :ctparser_utils,
-        :ctparser,
-        :ctparser_constraints,
+        #:ctparser,
+        #:ctparser_constraints,
 	:onepass,
         :default,
         :descriptions,

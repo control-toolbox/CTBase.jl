@@ -1,5 +1,5 @@
 # onepass
-# todo: label "2x"; remove v_dim (test at exec with throw in quoted code)
+# todo: label "2x"; remove v_dim (test at exec with throw in quoted code); keep x[n], state? keep x, state? (same for control and variable)
 
 """
 $(TYPEDEF)
@@ -304,6 +304,24 @@ p_lagrange!(p, ocp, e, type; log) = begin
             $e
         end
         objective!($ocp, :lagrange, $gs, $ttype)
+    end
+end
+
+p_mayer!(p, ocp, e, type; log) = begin
+    log && println("objective: $e → $type")
+    gs = gensym()
+    x0 = Symbol(p.x, "#0")
+    xf = Symbol(p.x, "#f")
+    ee = replace_call(e , p.x, p.t0, x0)
+    ee = replace_call(ee, p.x, p.tf, xf)
+    ttype = QuoteNode(type)
+    args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+    (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse objective ($e → $type") # todo: not enough (p.x alone could be nothing)
+    quote
+        function $gs($(args...))
+            $ee
+        end
+        objective!($ocp, :mayer, $gs, $ttype)
     end
 end
 
