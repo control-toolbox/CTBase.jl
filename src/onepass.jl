@@ -84,7 +84,8 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     p.v = v
     p.v_dim = q
     vv = QuoteNode(v)
-    q isa Integer && for i ∈ 1:q p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
+    qq = q isa Integer ? q : 9
+    for i ∈ 1:qq p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
     :( variable!($ocp, $q, $vv) )
 end
 
@@ -122,7 +123,8 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     p.x = x
     xx = QuoteNode(x)
-    n isa Integer && for i ∈ 1:n p.aliases[Symbol(x, __sub(i))] = :( $x[$i] ) end
+    nn = n isa Integer ? n : 9
+    for i ∈ 1:nn p.aliases[Symbol(x, __sub(i))] = :( $x[$i] ) end
     :( state!($ocp, $n, $xx) )
 end
 
@@ -130,7 +132,8 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     p.u = u
     uu = QuoteNode(u)
-    m isa Integer && for i ∈ 1:m p.aliases[Symbol(u, __sub(i))] = :( $u[$i] ) end
+    mm =  m isa Integer ? m : 9
+    for i ∈ 1:mm p.aliases[Symbol(u, __sub(i))] = :( $u[$i] ) end
     :( control!($ocp, $m, $uu) )
 end
 
@@ -147,12 +150,34 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
-        args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+            args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
             quote
                 function $gs($(args...))
                     $ee1
                 end
                 constraint!($ocp, :boundary, $gs, $e2, $llabel)
+            end end
+        # (:control_range, nothing) => :( constraint!($ocp, :control,       $e2, $llabel) )
+        # (:control_range, val    ) => :( constraint!($ocp, :control, $val, $e2, $llabel) )
+        (:control_fun, ee1) => begin
+            gs = gensym()
+            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee1
+                end
+                constraint!($ocp, :control, $gs, $e2, $llabel)
+            end end
+        # (:state_range, nothing) => :( constraint!($ocp, :state,       $e2, $llabel) )
+        # (:state_range, val    ) => :( constraint!($ocp, :state, $val, $e2, $llabel) )
+        (:state_fun, ee1) => begin
+            gs = gensym()
+            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee1
+                end
+                constraint!($ocp, :state, $gs, $e2, $llabel)
             end end
         _ => throw(SyntaxError("bad constraint declaration"))
     end
@@ -171,12 +196,34 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
-        args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+            args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
             quote
                 function $gs($(args...))
                     $ee2
                 end
                 constraint!($ocp, :boundary, $gs, $e1, $e3, $llabel)
+            end end
+        (:control_range, nothing) => :( constraint!($ocp, :control,       $e1, $e3, $llabel) )
+        (:control_range, val    ) => :( constraint!($ocp, :control, $val, $e1, $e3, $llabel) )
+        (:control_fun, ee2) => begin
+            gs = gensym()
+            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee2
+                end
+                constraint!($ocp, :control, $gs, $e1, $e3, $llabel)
+            end end
+        (:state_range, nothing) => :( constraint!($ocp, :state,       $e1, $e3, $llabel) )
+        (:state_range, val    ) => :( constraint!($ocp, :state, $val, $e1, $e3, $llabel) )
+        (:state_fun, ee2) => begin
+            gs = gensym()
+            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            quote
+                function $gs($(args...))
+                    $ee2
+                end
+                constraint!($ocp, :state, $gs, $e1, $e3, $llabel)
             end end
         _ => throw(SyntaxError("bad constraint declaration"))
     end

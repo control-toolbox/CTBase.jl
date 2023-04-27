@@ -117,7 +117,7 @@ o = @def1 begin
     end 
 x = [ 1, 2 ]
 u = 3 
-@test constraint(o, :eq1 )(x) == x[1]
+@test constraint(o, :eq1)(x) == x[1]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1] 
@@ -138,7 +138,7 @@ o = @def1 begin
 x = [ 1, 2 ]
 u = 3 
 z = [ 4, 5 ]
-@test constraint(o, :eq1 )(x) == x[1]
+@test constraint(o, :eq1)(x) == x[1]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
 @test o.lagrange(x, u, z) == u^2 + z[2] * x[1] 
@@ -158,7 +158,7 @@ x0 = [ 2, 3 ]
 xf = [ 4, 5 ] 
 x = [ 1, 2 ]
 u = 3 
-@test constraint(o, :eq1 )(x0, xf) == x0[1]^2 + xf[2]
+@test constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
 @test constraint(o, Symbol("♡"))(x0) == x0[2]
 @test o.dynamics(x, u) == [ x[2], x[1]^2 ]
 @test o.lagrange(x, u) == u^2 + x[1] 
@@ -180,7 +180,7 @@ xf = [ 4, 5 ]
 x = [ 1, 2 ]
 u = 3 
 z = 4
-@test constraint(o, :eq1 )(x0, xf, z) == x0[1] - z
+@test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
 @test constraint(o, Symbol("♡"))(x0) == x0[2]
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1] 
@@ -203,10 +203,41 @@ xf = [ 4, 5 ]
 x = [ 1, 2 ]
 u = 3 
 z = 4
-@test constraint(o, :eq1 )(x0, xf, z) == x0[1] - z
-@test constraint(o, :eq2 )(x0, xf, z) == xf[2]^2
+@test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+@test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
 @test constraint(o, Symbol("♡"))(x0) == x0
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1] 
+
+n = 11
+m = 6
+o = @def1 begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R^n, state
+    u ∈ R^m, control
+    r = x₁
+    v = x₂
+    0 ≤ r(t) ≤ 1,                 (1)
+    0 ≤ x(t) ≤ 1,                 (2)
+    0 ≤ x[1:2](t) ≤ 1,            (3)
+    0 ≤ x[1:2:4](t) ≤ 1,          (4)
+    0 ≤ v(t)^2 ≤ 1,               (5)
+    0 ≤ u(t) ≤ 1,                 (6)
+    0 ≤ u[1:2](t) ≤ 1,            (7)
+    0 ≤ u[1:2:4](t) ≤ 1,          (8)
+    0 ≤ u₂(t)^2 ≤ 1,               (9)
+    end 
+x = Vector{Float64}(1:n)
+u = Vector{Float64}(1:m)
+
+@test constraint(o, :eq1)(x) == x[1] 
+@test constraint(o, :eq2)(x) == x
+@test constraint(o, :eq3)(x) == x[1:2]
+@test constraint(o, :eq4)(x) == x[1:2:4]
+@test constraint(o, :eq5)(x) == x[2]^2
+@test constraint(o, :eq6)(u) == u
+@test constraint(o, :eq7)(u) == u[1:2]
+@test constraint(o, :eq8)(u) == u[1:2:4]
+@test constraint(o, :eq9)(u) == u[2]^2
  
 end 
