@@ -5,26 +5,125 @@
 
 function test_ctparser()
 
-    # phase 1: only syntax checking and dupplicate detection
-
-    # all the followings are OK....
-    # variables
-    @test @def1 tf ∈ R, variable
-
-    @test @def1 tf, variable
+    # phase 1: minimal problems, to check all possible syntaxes
 
     # time
-    @test @def1 t ∈ [ t0, tf ], time
+    ocp = @def1 t ∈ [ 0.0 , 1.0 ], time ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == 0.0
+    @test ocp.final_time   == 1.0
+
+    t0 = 3.0
+    ocp = @def1 begin
+        tf ∈ R, variable
+        t ∈ [ t0, tf ], time
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == Index(1)
+
+    tf = 3.14
+    ocp = @def1 begin
+        t0 ∈ R, variable
+        t ∈ [ t0, tf ], time
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == Index(1)
+    @test ocp.final_time   == tf
 
     # control
-    @test @def1 u, control
-    @test @def1 u[4], control
-    @test @def1 u ∈ R^3, control
+    t0 = 1.0; tf = 1.1
+    ocp = @def1 begin
+        t ∈ [ t0, tf ], time
+        u, control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == 1
+    @test ocp.control_names[1] == "u"
+
+    t0 = 2.0; tf = 2.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        v[4], control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == 4
+    @test ocp.control_names[1] == "v₁"
+
+    t0 = 3.0; tf = 3.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        w ∈ R^3, control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == 3
+    @test ocp.control_names[1] == "w₁"
+
+    t0 = 4.0; tf = 4.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        a ∈ R, control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == 1
+    @test ocp.control_names[1] == "a"
+
+
+    t0 = 5.0; tf = 5.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        b ∈ R¹, control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == 1
+    @test ocp.control_names[1] == "b"
+
+
+    t0 = 6.0; tf = 6.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        u ∈ R⁹, control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == 9
+    @test ocp.control_names[1] == "u₁"
+
+
     n = 3
-    @test @def1 u ∈ R^n, control
-    @test @def1 u ∈ R, control
-    n = 3
-    @test @def1 y ∈ R^n, control
+    t0 = 7.0; tf = 7.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        u ∈ R^n, control
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.control_dimension == n
+    @test ocp.control_names[1] == "u₁"
+
+
+    return
+
+    # template
+    t0 = .0; tf = .1
+    ocp = @def1 begin
+        t ∈ [ t0, tf ], time
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
 
     # state
     @test @def1 y, state
@@ -37,8 +136,8 @@ function test_ctparser()
     # objective
     # @test @def1 r(t) → max
     # @test @def1 r(t) → min
-    #@test @def1 ∫( 0.5u(t)^2 ) → max
-    #@test @def1 ∫( 0.5u(t)^2 ) → min
+    @test @def1 ∫( 0.5u(t)^2 ) → max
+    @test @def1 ∫( 0.5u(t)^2 ) → min
 
     # alias
     @test @def1 r = x[1]
