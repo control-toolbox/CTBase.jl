@@ -324,181 +324,26 @@ function test_ctparser()
     @test ocp.state_names   == ["x₁", "x₂"]
     @test ocp.state_dimension == 2
 
-    return
-
-    # template
-    t0 = .0; tf = .1
-    ocp = @def1 begin
-        t ∈ [ t0, tf ], time
-        x[3], state
-        u[3], control
-    end ;
-    @test ocp isa OptimalControlModel
-
     # ... up to here: all the remaining are KO
     # @test_throws SyntaxError @def1  nothing true
 
     # @test_throws SyntaxError @def1  a == b == c true
 
-    @test_throws SyntaxError @def1 begin
+    # this one is detected by the generated code
+    @test_throws CTException @def1 begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
     end
-
-    # bad time expression
-    ## debug:
-    ## @test_throws SyntaxError @def1 begin
-    ##     t0, variable
-    ##     tf, variable
-    ##     t ∈ [ t0, tf ], time
-    ## end
-
-    # multiple controls
-    @test_throws SyntaxError @def1 begin
-        u, control
-        v, control
-    end
-
-    @test_throws SyntaxError @def1 begin
-        u, control
-        w ∈ R^3, control
-    end
-
-    @test_throws SyntaxError @def1 begin
-        u[4], control
-        w ∈ R^3, control
-    end
-
-    @test_throws SyntaxError @def1 begin
-        w ∈ R^3, control
-        u, control
-    end
-
-    @test_throws SyntaxError @def1 begin
-        w ∈ R^3, control
-        u[4], control
-    end
-
-    @test_throws SyntaxError @def1 begin
-        w ∈ R^3, control
-        u ∈ R, control
-    end
-
-    # multiple states
-    @test_throws SyntaxError @def1 begin
-        u, state
-        v, state
-    end
-
-    @test_throws SyntaxError @def1 begin
-        u, state
-        x ∈ R^3, state
-    end
-
-    @test_throws SyntaxError @def1 begin
-        x ∈ R^3, state
-        u, state
-    end
-
-    @test_throws SyntaxError @def1 begin
-        x ∈ R^3, state
-        u[4], state
-    end
-
-    @test_throws SyntaxError @def1 begin
-        u, state
-        x ∈ R, state
-    end
-
-    @test_throws SyntaxError @def1 begin
-        x ∈ R, state
-        u, state
-    end
-
-    # multiple variables
-    @test_throws SyntaxError @def1 begin
-        tf, variable
-        tf, variable
-    end
-
-    @test_throws SyntaxError @def1 begin
-        tf  ∈ R, variable
-        tf, variable
-    end
-
-    @test_throws SyntaxError @def1 begin
-        tf, variable
-        tf  ∈ R, variable
-    end
-
-    # multiple objectives
-    # @test_throws SyntaxError @def1 begin
-    #      r(t)  → min
-    #      x(t)  → max
-    # end
-    # @test_throws SyntaxError @def1 begin
-    #      x(t)  → max
-    #      r(t)  → min
-    # end
 
     # multiple aliases
-    @test_throws SyntaxError @def1 begin
-        x[2], state
-        x₂ = x₃
-    end
-
-    # multiple constraints
-    x = Vector{Float64}(1:20)
-    t0 = 0.0
-    t1 = 1.0
-    @test @def1 begin
+    t0 = .0; tf = .1
+    ocp = @def1 begin
         t ∈ [ t0, tf ], time
-        r ∈ R, state
-        c ∈ R, control
-
-        r(t0) == x[1]
-        r(tf) == x[2]
-    end
-
-    # phase 2: now we can test more seriously
-
-    # ocp5 = @def1 begin
-    #     t ∈ [ t5_0, tf5_f ], time
-    # end ;
-    # @test ocp5 isa  OptimalControlModel
-
-    # t6_0 = 0 ## debug: t0 ∈ R, variable
-    # ocp_6 = @def1 begin
-    #     t ∈ [ t6_0, t6_f ], time
-    # end ;
-    # @test ocp6 isa  OptimalControlModel
-
-    # t7_0 = 1.1
-    # t7_f = 2.2
-    # ## debug: tf ∈ R, variable
-    # ocp7 = @def1 begin
-    #     t ∈ [ t7_0, t7_f ], time
-    # end ;
-    # @test ocp7 isa  OptimalControlModel
-
-    # debug function
-    # ocp = Model()
-    # @test print_generated_code(ocp) == false
-
-    # t0 = 1.1
-    # m0 = 100.0
-    # mf =  10.0
-    # tf = 1 ## debug: tf ∈ R, variable
-    # ocp = @def1 begin
-    #     t ∈ [ t0, tf ], time
-    #     x ∈ R^3, state
-    #     u, control
-    #     v = x₂
-    #     m = x₃
-    #     0  ≤ u(t) ≤ 1
-    #     mf ≤ m(t) ≤ m0
-    # end
-    # @test ocp isa  OptimalControlModel
-    # @test print_generated_code(ocp) == true
+        x[3], state
+        u[3], control
+        ∫( 0.5u(t)^2 ) → max
+        ∫( 0.5u(t)^2 ) → min
+    end ;
+    @test ocp isa OptimalControlModel
 
 end
