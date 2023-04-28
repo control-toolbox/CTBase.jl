@@ -324,6 +324,34 @@ function test_ctparser()
     @test ocp.state_names   == ["x₁", "x₂"]
     @test ocp.state_dimension == 2
 
+    # dyslexic definition:  t -> u -> x -> t
+    u0 = 9.0; uf = 9.1
+    z0 = 1.0; z1 = 2.0
+    k0 = 2.0; kmax = sqrt(2)
+    b0 = 3.0; bf = 1.1
+
+    ocp = @def1 begin
+        u ∈ [ u0, uf ], time
+        t ∈ R^2, state
+        x ∈ R^2, control
+
+        b = t₂
+
+        t(u0) == [ z0, k0, b0 ]
+        0  ≤ x(u) ≤ 1
+        z0 ≤ t(u)[1] ≤ z1
+        0  ≤ t₂(u) ≤ kmax
+        bf ≤ b(u) ≤ b0
+    end
+    @test ocp isa OptimalControlModel
+    @test ocp.time_name == "u"
+    @test ocp.initial_time == u0
+    @test ocp.final_time   == uf
+    @test ocp.control_names == ["x₁", "x₂"]
+    @test ocp.control_dimension == 2
+    @test ocp.state_names   == [ "t₁", "t₂"]
+    @test ocp.state_dimension == 2
+
 
     # error detections (this can be tricky -> need more work)
 
