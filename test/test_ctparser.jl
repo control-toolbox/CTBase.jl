@@ -31,6 +31,89 @@ function test_ctparser()
     @test ocp.initial_time == Index(1)
     @test ocp.final_time   == tf
 
+    # state
+    t0 = 1.0; tf = 1.1
+    ocp = @def1 begin
+        t ∈ [ t0, tf ], time
+        u, state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == 1
+    @test ocp.state_names[1] == "u"
+
+    t0 = 2.0; tf = 2.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        v[4], state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == 4
+    @test ocp.state_names[1] == "v₁"
+
+    t0 = 3.0; tf = 3.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        w ∈ R^3, state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == 3
+    @test ocp.state_names[1] == "w₁"
+
+    t0 = 4.0; tf = 4.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        a ∈ R, state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == 1
+    @test ocp.state_names[1] == "a"
+
+
+    t0 = 5.0; tf = 5.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        b ∈ R¹, state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == 1
+    @test ocp.state_names[1] == "b"
+
+
+    t0 = 6.0; tf = 6.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        u ∈ R⁹, state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == 9
+    @test ocp.state_names[1] == "u₁"
+
+
+    n = 3
+    t0 = 7.0; tf = 7.1
+    ocp = @def1 begin
+        t ∈ [ t0 , tf ], time
+        u ∈ R^n, state
+    end ;
+    @test ocp isa OptimalControlModel
+    @test ocp.initial_time == t0
+    @test ocp.final_time   == tf
+    @test ocp.state_dimension == n
+    @test ocp.state_names[1] == "u₁"
+
+
     # control
     t0 = 1.0; tf = 1.1
     ocp = @def1 begin
