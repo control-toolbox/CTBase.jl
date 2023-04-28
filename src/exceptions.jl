@@ -153,7 +153,7 @@ Exception thrown for syntax error during abstract parsing.
 
 $(TYPEDFIELDS)
 """
-struct SyntaxError <: CTException
+struct ParsingError <: CTException
     var::String
 end
 
@@ -162,4 +162,4 @@ $(TYPEDSIGNATURES)
 
 Print the exception.
 """
-Base.showerror(io::IO, e::SyntaxError) = print(io, "SyntaxError: ", e.var)
+Base.showerror(io::IO, e::ParsingError) = print(io, "ParsingError: ", e.var)

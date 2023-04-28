@@ -36,7 +36,7 @@ $(TYPEDFIELDS)
     final_time::Union{Time,Index,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
     lagrange::Union{Lagrange,Nothing}=nothing
-    mayer::Union{Mayer,Nothing}=nothing
+    mayer::Union{Function,Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
     dynamics::Union{Dynamics,Nothing}=nothing
     variable_dimension::Union{Dimension,Nothing}=nothing
@@ -914,7 +914,7 @@ function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f::
 
     # set the objective
     if type == :mayer
-        setproperty!(ocp, :mayer, Mayer(f, state_dimension=n))
+        setproperty!(ocp, :mayer, f)
     elseif type == :lagrange
         setproperty!(ocp, :lagrange, Lagrange(f, time_dependence=time_dependence, state_dimension=n, control_dimension=m))
     else
@@ -961,7 +961,7 @@ function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, g::
 
     # set the objective
     if type == :bolza
-        setproperty!(ocp, :mayer, Mayer(g, state_dimension=n))
+        setproperty!(ocp, :mayer, g)
         setproperty!(ocp, :lagrange, Lagrange(f⁰, time_dependence=time_dependence, state_dimension=n, control_dimension=m))
     else
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
