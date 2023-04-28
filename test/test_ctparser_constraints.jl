@@ -1,5 +1,5 @@
 #
-# test all constraints on @def macro
+# test all constraints on @def1 macro
 #
 # ref: https://github.com/control-toolbox/CTBase.jl/issues/9
 #
@@ -19,7 +19,7 @@ function test_ctparser_constraints()
     t0   = 0.0
     tf   = 1.0
     n    = 3
-    ocp1 = @def begin
+    ocp1 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
@@ -37,20 +37,19 @@ function test_ctparser_constraints()
     @test ocp1.initial_time == t0
     @test ocp1.final_time == tf
 
-
     t0   = 0.1
     tf   = 1.1
     n    = 4
-    ocp2 = @def begin
+    ocp2 = @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x(t0) == x0                => initial_1
-        x[2](t0) == x02            => initial_2
-        x[2:3](t0) == y0           => initial_3
-        x0_b ≤ x(t0) ≤ x0_u        => initial_4
-        y0_b ≤ x[2:3](t0) ≤ y0_u   => initial_5
+        x(t0) == x0                , initial_1
+        x[2](t0) == x02            , initial_2
+        x[2:3](t0) == y0           , initial_3
+        x0_b ≤ x(t0) ≤ x0_u        , initial_4
+        y0_b ≤ x[2:3](t0) ≤ y0_u   , initial_5
     end
     @test ocp2 isa OptimalControlModel
     @test ocp2.state_dimension == n
@@ -72,7 +71,7 @@ function test_ctparser_constraints()
     t0   = 0.2
     tf   = 1.2
     n    = 5
-    ocp3 = @def begin
+    ocp3 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
@@ -93,17 +92,17 @@ function test_ctparser_constraints()
     t0   = 0.3
     tf   = 1.3
     n    = 6
-    ocp4 = @def begin
+    ocp4 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x(tf) == xf                => final_1
-        xf_b ≤ x(tf) ≤ xf_u        => final_2
-        x[2](tf) == xf2            => final_3
-        x[2:3](tf) == yf           => final_4
-        yf_b ≤ x[2:3](tf) ≤ yf_u   => final_5
+        x(tf) == xf                , final_1
+        xf_b ≤ x(tf) ≤ xf_u        , final_2
+        x[2](tf) == xf2            , final_3
+        x[2:3](tf) == yf           , final_4
+        yf_b ≤ x[2:3](tf) ≤ yf_u   , final_5
     end
     @test ocp4 isa OptimalControlModel
     @test ocp4.state_dimension == n
@@ -116,7 +115,7 @@ function test_ctparser_constraints()
     t0   = 0.4
     tf   = 1.4
     n    = 7
-    ocp5 = @def begin
+    ocp5 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
@@ -139,18 +138,18 @@ function test_ctparser_constraints()
     t0   = 0.5
     tf   = 1.5
     n    = 8
-    ocp6 = @def begin
+    ocp6 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x(tf) - tf*x(t0) == [ 0, 1 ]            => boundary_1
-        [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]  => boundary_2
-        x[2](t0)^2 == 1                         => boundary_3
-        1 ≤ x[2](t0)^2 ≤ 2                      => boundary_4
-        x[2](tf)^2 == 1                         => boundary_5
-        1 ≤ x[2](tf)^2 ≤ 2                      => boundary_6
+        x(tf) - tf*x(t0) == [ 0, 1 ]            , boundary_1
+        [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]  , boundary_2
+        x[2](t0)^2 == 1                         , boundary_3
+        1 ≤ x[2](t0)^2 ≤ 2                      , boundary_4
+        x[2](tf)^2 == 1                         , boundary_5
+        1 ≤ x[2](tf)^2 ≤ 2                      , boundary_6
 
     end
     @test ocp6 isa OptimalControlModel
@@ -171,7 +170,7 @@ function test_ctparser_constraints()
     t0   = 0.6
     tf   = 1.6
     n    = 9
-    ocp7 = @def begin
+    ocp7 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
@@ -195,20 +194,20 @@ function test_ctparser_constraints()
     t0   = 0.7
     tf   = 1.7
     n    = 3
-    ocp8 = @def begin
+    ocp8 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        u_b ≤ u(t) ≤ u_u               => control_1
-        #u(t) == u_u                    => control_2
-        u2_b ≤ u[2](t) ≤ u2_u          => control_3
-        #u[2](t) == u2_u                => control_4
-        v_b ≤ u[2:3](t) ≤ v_u          => control_5
-        #u[2:3](t) == v_u               => control_6
-        u[1](t)^2 + u[2](t)^2 == 1     => control_7
-        1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  => control_8
+        u_b ≤ u(t) ≤ u_u               , control_1
+        #u(t) == u_u                    , control_2
+        u2_b ≤ u[2](t) ≤ u2_u          , control_3
+        #u[2](t) == u2_u                , control_4
+        v_b ≤ u[2:3](t) ≤ v_u          , control_5
+        #u[2:3](t) == v_u               , control_6
+        u[1](t)^2 + u[2](t)^2 == 1     , control_7
+        1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  , control_8
     end
     @test ocp8 isa OptimalControlModel
     @test ocp8.state_dimension == n
@@ -229,7 +228,7 @@ function test_ctparser_constraints()
     t0   = 0.8
     tf   = 1.8
     n    = 10
-    ocp9 = @def begin
+    ocp9 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
@@ -253,20 +252,20 @@ function test_ctparser_constraints()
     t0   = 0.9
     tf   = 1.9
     n    = 11
-    ocp10 = @def begin
+    ocp10 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x_b ≤ x(t) ≤ x_u                             => state_1
-        #x(t) == x_u                                  => state_2
-        x2_b ≤ x[2](t) ≤ x2_u                        => state_3
-        #x[2](t) == x2_u                              => state_4
-        #x[2:3](t) == y_u                             => state_5
-        x_u ≤ x[2:3](t) ≤ y_u                        => state_6
-        x[1:2](t) + x[3:4](t) == [ -1, 1 ]           => state_7
-        [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] => state_8
+        x_b ≤ x(t) ≤ x_u                             , state_1
+        #x(t) == x_u                                  , state_2
+        x2_b ≤ x[2](t) ≤ x2_u                        , state_3
+        #x[2](t) == x2_u                              , state_4
+        #x[2:3](t) == y_u                             , state_5
+        x_u ≤ x[2:3](t) ≤ y_u                        , state_6
+        x[1:2](t) + x[3:4](t) == [ -1, 1 ]           , state_7
+        [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] , state_8
     end
     @test ocp10 isa OptimalControlModel
     @test ocp10.state_dimension == n
@@ -279,7 +278,7 @@ function test_ctparser_constraints()
     t0   = 0.111
     tf   = 1.111
     n    = 12
-    ocp11 = @def begin
+    ocp11 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
@@ -294,14 +293,14 @@ function test_ctparser_constraints()
     @test ocp11.initial_time == t0
     @test ocp11.final_time == tf
 
-    ocp12 = @def begin
+    ocp12 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        u[2](t) * x[1:2](t) == [ -1, 1 ]                       => mixed_1
-        [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]             => mixed_2
+        u[2](t) * x[1:2](t) == [ -1, 1 ]                       , mixed_1
+        [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]             , mixed_2
     end
     @test ocp12 isa OptimalControlModel
     @test ocp12.state_dimension == n
@@ -314,7 +313,7 @@ function test_ctparser_constraints()
 
     t0   = 0.112
     tf   = 1.112
-    ocp13 = @def begin
+    ocp13 = @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R, state
@@ -331,85 +330,85 @@ function test_ctparser_constraints()
 
     # some syntax (even parseable) are not allowed
     # this is the actual exhaustive list
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
-        x(t) == x_u        => constant_state_not_allowed
+        x(t) == x_u        , constant_state_not_allowed
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         x(t) == x_u
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
-        x[2](t) == x2_u    => constant_state_index_not_allowed
+        x[2](t) == x2_u    , constant_state_index_not_allowed
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2](t) == x2_u
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
-        x[2:3](t) == y_u    => constant_state_range_not_allowed
+        x[2:3](t) == y_u    , constant_state_range_not_allowed
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2:3](t) == y_u
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
-        u(t) == u_u         => constant_control_not_allowed
+        u(t) == u_u         , constant_control_not_allowed
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         u(t) == u_u
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
-        u[2](t) == u2_u     => constant_control_index_not_allowed
+        u[2](t) == u2_u     , constant_control_index_not_allowed
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2](t) == u2_u
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
-        u[2:3](t) == v_u    => constant_control_range_not_allowed
+        u[2:3](t) == v_u    , constant_control_range_not_allowed
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2:3](t) == v_u
     end
-    @test_throws CtParserException @def begin
+    @test_throws SyntaxError @def1 begin
 
         t ∈ [ t0, tf], time
         x ∈ R, state
         u ∈ R, control
 
-        x'(t) == f(x(t), u(t))  => named_dynamics_not_allowed  # but allowed if unnamed !
+        x'(t) == f(x(t), u(t))  , named_dynamics_not_allowed  # but allowed if unnamed !
     end
 
 

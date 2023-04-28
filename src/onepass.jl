@@ -81,14 +81,14 @@ parse!(p, ocp, e; log=false) = begin
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
                 # assumes that map is done sequentially
             else
-                return onepass_throw("unknown syntax")
+                return onepass_throw("unknown syntax ($e)")
             end
     end
 end
 
 onepass_throw(s) = begin
     println("Parsing error: " * s)
-    :( throw(ParsingError($s)) )
+    :( throw(CTBase.SyntaxError($s)) )
 end
 
 p_variable!(p, ocp, v, q=1; log=false) = begin
@@ -298,7 +298,6 @@ p_lagrange!(p, ocp, e, type; log) = begin
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
     (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse objective (∫($e) → $type)")
-    println("DEBUG ARGS: $args /", typeof(args))
     quote
         function $gs($(args...))
             $e
