@@ -324,26 +324,36 @@ function test_ctparser()
     @test ocp.state_names   == ["x₁", "x₂"]
     @test ocp.state_dimension == 2
 
-    # ... up to here: all the remaining are KO
-    # @test_throws SyntaxError @def1  nothing true
 
-    # @test_throws SyntaxError @def1  a == b == c true
+    # error detections (this can be tricky -> need more work)
 
-    # this one is detected by the generated code
+    # this one is detected by the generated code (and not the parser)
     @test_throws CTException @def1 begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
     end
 
-    # multiple aliases
-    t0 = .0; tf = .1
-    ocp = @def1 begin
+    # illegal constraint name (1bis), detected by the parser
+    t0 = 9.0; tf = 9.1
+    r0 = 1.0; v0 = 2.0; m0 = 3.0
+    @test_throws SyntaxError @def1 begin
         t ∈ [ t0, tf ], time
-        x[3], state
-        u[3], control
-        ∫( 0.5u(t)^2 ) → max
-        ∫( 0.5u(t)^2 ) → min
-    end ;
-    @test ocp isa OptimalControlModel
+        x ∈ R^2, state
+        u ∈ R^2, control
 
+        0  ≤ u(t) ≤ 1          , (1bis)
+    end ;
+
+    # t0 is unknown in the x(t0) constraint, detected by the parser
+    r0 = 1.0; v0 = 2.0; m0 = 3.0
+    @test_throws SyntaxError @def1 begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R^2, state
+        u ∈ R^2, control
+
+        x(t0) == [ r0, v0, m0 ], (1)
+        0  ≤ u(t) ≤ 1          , (1bis)
+    end ;
+
+    #
 end
