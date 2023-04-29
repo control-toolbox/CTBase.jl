@@ -46,11 +46,10 @@ e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test !has(:x, :y)
 
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
-@test constraint_type(:( x'(t)                 ), t, t0, tf, x, u, v) == (:dynamics, nothing)
 @test constraint_type(:( y'(t)                 ), t, t0, tf, x, u, v) ==  :other
 @test constraint_type(:( x'(s)                 ), t, t0, tf, x, u, v) ==  :other
 @test constraint_type(:( x(0)'                 ), t, t0, tf, x, u, v) == (:boundary, :(var"x#0"'))
-@test constraint_type(:( x'(0)                 ), t, t0, tf, x, u, v) ==  :other
+@test constraint_type(:( x'(0)                 ), t, t0, tf, x, u, v) == (:boundary, :(var"x#0"'))
 @test constraint_type(:( x(t)'                 ), t, t0, tf, x, u, v) == (:state_fun, :(x'))
 @test constraint_type(:( x(0)                  ), t, t0, tf, x, u, v) == (:initial, nothing)
 @test constraint_type(:( x[1:2:5](0)           ), t, t0, tf, x, u, v) == (:initial, 1:2:5)
@@ -76,9 +75,7 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 @test constraint_type(:( x(t)                  ), t, t0, tf, x, u, v) == (:state_range, nothing)
 @test constraint_type(:( 2x[1](t)^2            ), t, t0, tf, x, u, v) == (:state_fun, :(2 * x[1] ^ 2))
 @test constraint_type(:( 2u[1](t)^2 * x(t)     ), t, t0, tf, x, u, v) == (:mixed, :((2 * u[1] ^ 2) * x))
-@test constraint_type(:( 2u[1](t)^2 * x(t)     ), t, t0, tf, x, u   ) == (:mixed, :((2 * u[1] ^ 2) * x))
 @test constraint_type(:( 2u[1](0)^2 * x(t)     ), t, t0, tf, x, u, v) ==  :other
-@test constraint_type(:( 2u[1](0)^2 * x(t)     ), t, t0, tf, x, u   ) ==  :other
 @test constraint_type(:( 2u[1](t)^2 * x(t) + v ), t, t0, tf, x, u, v) == (:mixed, :((2 * u[1] ^ 2) * x + v))
 @test constraint_type(:( v[1:2:10]             ), t, t0, tf, x, u, v) == (:variable_range, 1:2:9)
 @test constraint_type(:( v[1:10]               ), t, t0, tf, x, u, v) == (:variable_range, 1:10)

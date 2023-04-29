@@ -196,92 +196,92 @@ together with the appropriate value (range, updated expression...)
 ```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 
-julia> constraint_type(:( x'(t) ), t, t0, tf, x, u)
+julia> constraint_type(:( x'(t) ), t, t0, tf, x, u, v)
 (:dynamics, nothing)
 
-julia> constraint_type(:( y'(t) ), t, t0, tf, x, u)
-(:other, nothing)
+julia> constraint_type(:( y'(t) ), t, t0, tf, x, u, v)
+:other
 
-julia> constraint_type(:( x'(s) ), t, t0, tf, x, u)
-(:other, nothing)
+julia> constraint_type(:( x'(s) ), t, t0, tf, x, u, v)
+:other
 
-julia> constraint_type(:( x(0)' ), t, t0, tf, x, u)
+julia> constraint_type(:( x(0)' ), t, t0, tf, x, u, v)
 (:boundary, :(var"x#0"'))
 
-julia> constraint_type(:( x(t)' ), t, t0, tf, x, u)
+julia> constraint_type(:( x(t)' ), t, t0, tf, x, u, v)
 (:state_fun, :(x'))
 
-julia> constraint_type(:( x(0) ), t, t0, tf, x, u)
+julia> constraint_type(:( x(0) ), t, t0, tf, x, u, v)
 (:initial, nothing)
 
-julia> constraint_type(:( x[1:2:5](0) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1:2:5](0) ), t, t0, tf, x, u, v)
 (:initial, 1:2:5)
 
-julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u, v)
 (:initial, 1:2)
 
-julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u, v)
 (:initial, Index(1))
 
-julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u)
+julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u, v)
 (:boundary, :(2 * var"x#0"[1] ^ 2))
 
-julia> constraint_type(:( x(tf) ), t, t0, tf, x, u)
+julia> constraint_type(:( x(tf) ), t, t0, tf, x, u, v)
 (:final, nothing)
 j
-julia> constraint_type(:( x[1:2:5](tf) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1:2:5](tf) ), t, t0, tf, x, u, v)
 (:final, 1:2:5)
 
-julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u, v)
 (:final, 1:2)
 
-julia> constraint_type(:( x[1](tf) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1](tf) ), t, t0, tf, x, u, v)
 (:final, Index(1))
 
-julia> constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u)
+julia> constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u, v)
 (:boundary, :(2 * var"x#f"[1] ^ 2))
 
-julia> constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u, v)
 (:boundary, :(var"x#f"[1] - var"x#0"[2]))
 
-julia> constraint_type(:( u[1:2:5](t) ), t, t0, tf, x, u)
+julia> constraint_type(:( u[1:2:5](t) ), t, t0, tf, x, u, v)
 (:control_range, 1:2:5)
 
-julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u)
+julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u, v)
 (:control_range, 1:2)
 
-julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u)
+julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u, v)
 (:control_range, Index(1))
 
-julia> constraint_type(:( u(t) ), t, t0, tf, x, u)
+julia> constraint_type(:( u(t) ), t, t0, tf, x, u, v)
 (:control_range, nothing)
 
-julia> constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u)
+julia> constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u, v)
 (:control_fun, :(2 * u[1] ^ 2))
 
-julia> constraint_type(:( x[1:2:5](t) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1:2:5](t) ), t, t0, tf, x, u, v)
 (:state_range, 1:2:5)
 
-julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u, v)
 (:state_range, 1:2)
 
-julia> constraint_type(:( x[1](t) ), t, t0, tf, x, u)
+julia> constraint_type(:( x[1](t) ), t, t0, tf, x, u, v)
 (:state_range, Index(1))
 
-julia> constraint_type(:( x(t) ), t, t0, tf, x, u)
+julia> constraint_type(:( x(t) ), t, t0, tf, x, u, v)
 (:state_range, nothing)
 
-julia> constraint_type(:( 2x[1](t)^2 ), t, t0, tf, x, u)
+julia> constraint_type(:( 2x[1](t)^2 ), t, t0, tf, x, u, v)
 (:state_fun, :(2 * x[1] ^ 2))
 
-julia> constraint_type(:( 2u[1](t)^2 * x(t) ), t, t0, tf, x, u)
+julia> constraint_type(:( 2u[1](t)^2 * x(t) ), t, t0, tf, x, u, v)
 (:mixed, :((2 * u[1] ^ 2) * x))
 
-julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u)
-(:other, nothing)
+julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u, v)
+:other
 
 julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u, v)
-(:other, nothing)
+:other
 
 julia> constraint_type(:( 2u[1](t)^2 * x(t) + v ), t, t0, tf, x, u, v)
 (:mixed, :((2 * u[1] ^ 2) * x + v))
@@ -303,47 +303,60 @@ julia> constraint_type(:( v[2]^2 + 1 ), t, t0, tf, x, u, v)
 (:variable_fun, :(v[2] ^ 2 + 1))
 ```
 """
-constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v 
-    if @match e begin :( $y'($s) ) => y == x && s == t; _ => false end
-        (:dynamics, nothing) # todo: remove (not needed by onepass)
-    else @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf), has(e, v) ] begin
+constraint_type(e, t, t0, tf, x, u, v) =
+    @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf), has(e, v) ] begin
         [ true , false, false, false, false, false, _ ] => @match e begin
-            :( $y[$i:$p:$j]($s) ) => (y == x && s == t0) ? (:initial, i:p:j   ) : :other
-            :( $y[$i:$j   ]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) : :other
-            :( $y[$i      ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) : :other
-            :( $y($s)           ) => (y == x && s == t0) ? (:initial, nothing ) : :other
+            :( $y[$i:$p:$j]($s) ) => (y == x && s == t0) ? (:initial, i:p:j   ) : 
+	                             (:boundary, replace_call(e, x, t0, Symbol(x, "#0")))
+            :( $y[$i:$j   ]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) :
+	                             (:boundary, replace_call(e, x, t0, Symbol(x, "#0")))
+            :( $y[$i      ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) :
+	                             (:boundary, replace_call(e, x, t0, Symbol(x, "#0")))
+            :( $y($s)           ) => (y == x && s == t0) ? (:initial, nothing ) : 
+	                             (:boundary, replace_call(e, x, t0, Symbol(x, "#0")))
 	    _                     => (:boundary, replace_call(e, x, t0, Symbol(x, "#0"))) end
         [ false, true , false, false, false, false, _ ] => @match e begin 
-            :( $y[$i:$p:$j]($s) ) => (y == x && s == tf) ? (:final, i:p:j   ) : :other
-            :( $y[$i:$j   ]($s) ) => (y == x && s == tf) ? (:final, i:j     ) : :other
-            :( $y[$i      ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) : :other
-            :( $y($s) )           => (y == x && s == tf) ? (:final, nothing ) : :other
+            :( $y[$i:$p:$j]($s) ) => (y == x && s == tf) ? (:final, i:p:j   ) :
+	                             (:boundary, replace_call(e, x, tf, Symbol(x, "#f")))
+            :( $y[$i:$j   ]($s) ) => (y == x && s == tf) ? (:final, i:j     ) :
+	                             (:boundary, replace_call(e, x, tf, Symbol(x, "#f")))
+            :( $y[$i      ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) :
+	                             (:boundary, replace_call(e, x, tf, Symbol(x, "#f")))
+            :( $y($s) )           => (y == x && s == tf) ? (:final, nothing ) :
+	                             (:boundary, replace_call(e, x, tf, Symbol(x, "#f")))
 	    _                     => (:boundary, replace_call(e, x, tf, Symbol(x, "#f"))) end
         [ true , true , false, false, false, false, _ ] => begin
-            ee = replace_call(e , x, t0, Symbol(x, "#0"))
-            ee = replace_call(ee, x, tf, Symbol(x, "#f"))
-            (:boundary, ee) end
+            e = replace_call(e, x, t0, Symbol(x, "#0"))
+            e = replace_call(e, x, tf, Symbol(x, "#f"))
+            (:boundary, e) end
         [ false, false, true , false, false, false, _ ] => @match e begin
-            :( $v[$i:$p:$j]($s) ) => (v == u && s == t ) ? (:control_range, i:p:j   ) : :other
-            :( $v[$i:$j   ]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : :other
-            :( $v[$i      ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : :other
-            :( $v($s)           ) => (v == u && s == t ) ? (:control_range, nothing ) : :other
+            :( $c[$i:$p:$j]($s) ) => (c == u && s == t ) ? (:control_range, i:p:j   ) :
+	                             (:control_fun, replace_call(e, u, t, u))
+            :( $c[$i:$j   ]($s) ) => (c == u && s == t ) ? (:control_range, i:j     ) :
+	                             (:control_fun, replace_call(e, u, t, u))
+            :( $c[$i      ]($s) ) => (c == u && s == t ) ? (:control_range, Index(i)) :
+	                             (:control_fun, replace_call(e, u, t, u))
+            :( $c($s)           ) => (c == u && s == t ) ? (:control_range, nothing ) :
+	                             (:control_fun, replace_call(e, u, t, u))
 	    _                     => (:control_fun, replace_call(e, u, t, u)) end
         [ false, false, false, true , false, false, _ ] => @match e begin
-            :( $y[$i:$p:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:p:j   ) : :other
-            :( $y[$i:$j   ]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : :other
-            :( $y[$i      ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) : :other
-            :( $y($s)           ) => (y == x && s == t ) ? (:state_range, nothing ) : :other
-	    _                     => (:state_fun, replace_call(e, x, t, x)) end                
+            :( $y[$i:$p:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:p:j   ) :
+	                             (:state_fun, replace_call(e, x, t, x))
+            :( $y[$i:$j   ]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) :
+	                             (:state_fun, replace_call(e, x, t, x))
+            :( $y[$i      ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) :
+	                             (:state_fun, replace_call(e, x, t, x))
+            :( $y($s)           ) => (y == x && s == t ) ? (:state_range, nothing ) :
+	                             (:state_fun, replace_call(e, x, t, x))
+	    _                     => (:state_fun, replace_call(e, x, t, x)) end
         [ false, false, true , true , false, false, _ ] => begin
-            ee = replace_call(e , u, t, u)
-            ee = replace_call(ee, x, t, x)
-            (:mixed, ee) end
+            e = replace_call(e, u, t, u)
+            e = replace_call(e, x, t, x)
+            (:mixed, e) end
         [ false, false, false, false, false, false, true ] => @match e begin
-            :( $w[$i:$p:$j]     ) => (w == v) ? (:variable_range, i:p:j   ) : :other
-            :( $w[$i:$j   ]     ) => (w == v) ? (:variable_range, i:j     ) : :other
-            :( $w[$i      ]     ) => (w == v) ? (:variable_range, Index(i)) : :other
-            :( $w               ) => (w == v) ? (:variable_range, nothing ) : (:variable_fun, e)
-	    _                     => :other end                
-        _ => :other end
+            :( $w[$i:$p:$j]     ) => (w == v) ? (:variable_range, i:p:j   ) : (:variable_fun, e)
+            :( $w[$i:$j   ]     ) => (w == v) ? (:variable_range, i:j     ) : (:variable_fun, e)
+            :( $w[$i      ]     ) => (w == v) ? (:variable_range, Index(i)) : (:variable_fun, e)
+            _                     => (e == v) ? (:variable_range, nothing ) : (:variable_fun, e) end
+        _ => :other
     end
