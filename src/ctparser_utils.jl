@@ -93,11 +93,7 @@ replace_call(e, x, t, y) = begin
     foo(x, t, y) = (h, args...) -> begin
         ee = Expr(h, args...)
 	@match ee begin
-	    :( $xx[     ]($tt) ) => (xx == x && tt == t) ? :( $y[  ]    ) : ee
-	    :( $xx[$i   ]($tt) ) => (xx == x && tt == t) ? :( $y[$i]    ) : ee
-	    :( $xx[$i:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$j] ) : ee
-            :( $xx[$i:$p:$j]($tt) ) => (xx == x && tt == t) ? :( $y[$i:$p:$j] ) : ee
-	    :( $xx($tt)        ) => (xx == x && tt == t) ? :( $y        ) : ee
+	    :( $eee($tt) ) => (tt == t && has(eee, x)) ? subs(eee, x, y) : ee
 	    _ => ee
         end
     end
@@ -116,7 +112,7 @@ julia> e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(e, :t)
 :(F0(x) + u * F1(x))
 ```
 """
-replace_call(e, t) = begin
+_replace_call(e, t) = begin
     foo(t) = (h, args...) -> begin
         ee = Expr(h, args...)
     @match ee begin
