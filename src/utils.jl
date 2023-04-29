@@ -73,7 +73,34 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-ctgradient(f::Function, x) = ForwardDiff.gradient(f, x)
+function ctgradient(f::Function, x::ctNumber)
+    return ForwardDiff.gradient(x -> f(x[1]), [x])[1]
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the gradient of `f` at `x`.
+"""
+function ctgradient(f::Function, x)
+    return ForwardDiff.gradient(f, x)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the gradient of `X` at `x`.
+"""
+ctgradient(X::VectorField, x) = ctgradient(X.f, x)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the Jacobian of `f` at `x`.
+"""
+function ctjacobian(f::Function, x::ctNumber) 
+    return ForwardDiff.jacobian(x -> f(x[1]), [x])
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -81,6 +108,12 @@ $(TYPEDSIGNATURES)
 Return the Jacobian of `f` at `x`.
 """
 ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the Jacobian of `X` at `x`.
+"""
 ctjacobian(X::VectorField, x) = ctjacobian(X.f, x)
 
 """

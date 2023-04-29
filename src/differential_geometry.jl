@@ -91,13 +91,23 @@ end
 
 # ---------------------------------------------------------------------------
 # Lie derivative of a vector field
-function Ad(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::Function where {sd}
-    return x -> ctjacobian(Y, x)*X(x)
+function Ad(X::VectorField{:autonomous, 1}, Y::VectorField{:autonomous, 1})::VectorField{:autonomous, 1}
+    return VectorField(x -> ctgradient(Y, x)*X(x), 
+        time_dependence=:autonomous, state_dimension=1, label=Symbol(:Ad, :(_), X.label, :(_), Y.label))
 end
-function Ad(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::Function where {sd}
-    return (t, x) -> ctjacobian(y -> Y(t, y), x)*X(t, x)
+function Ad(X::VectorField{:nonautonomous, 1}, Y::VectorField{:nonautonomous, 1})::VectorField{:nonautonomous, 1}
+    return VectorField((t, x) -> ctgradient(y -> Y(t, y), x)*X(t, x),
+        time_dependence=:nonautonomous, state_dimension=1, label=Symbol(:Ad, :(_), X.label, :(_), Y.label))
 end
-function ⋅(X::VectorField{td, sd}, Y::VectorField{td, sd})::Function where {td, sd}
+function Ad(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
+    return VectorField(x -> x isa ctNumber ? ctgradient(Y, x)*X(x) : ctjacobian(Y, x)*X(x),
+        time_dependence=:autonomous, state_dimension=sd, label=Symbol(:Ad, :(_), X.label, :(_), Y.label))
+end
+function Ad(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
+    return VectorField((t, x) -> x isa ctNumber ? ctgradient(y -> Y(t, y), x)*X(t, x) : ctjacobian(y -> Y(t, y), x)*X(t, x),
+        time_dependence=:nonautonomous, state_dimension=sd, label=Symbol(:Ad, :(_), X.label, :(_), Y.label))
+end
+function ⋅(X::VectorField{td, sd}, Y::VectorField{td, sd})::VectorField{td, sd} where {td, sd}
     return Ad(X, Y)
 end
 

@@ -5,38 +5,6 @@ include("../src/differential_geometry.jl")
 # ---------------------------------------------------------------------------
 function test_differential_geometry()
 
-    @testset "Lie derivative of a scalar function" begin
-    
-        # autonomous, dim 2
-        X = VectorField(x -> [x[2], -x[1]])
-        f = x -> x[1]^2 + x[2]^2
-        Test.@test Ad(X, f)([1, 2]) == 0
-        Test.@test (X⋅f)([1, 2]) == Ad(X, f)([1, 2])
-
-        # autonomous, dim 1
-        X = VectorField(x -> 2x)
-        f = x -> x^2
-        Test.@test Ad(X, f)(1) == 4
-        Test.@test (X⋅f)(1) == Ad(X, f)(1)
-    
-        # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
-        f = (t, x) -> t + x[1]^2 + x[2]^2
-        Test.@test Ad(X, f)(1, [1, 2]) == 2
-        Test.@test (X⋅f)(1, [1, 2]) == Ad(X, f)(1, [1, 2])
-    
-    end
-
-    @testset "Lie derivative of a vector field" begin
-        
-        # autonomous, dim 2
-        X = VectorField(x -> [x[2], -x[1]])
-        Y = VectorField(x -> [x[1], x[2]])
-        Test.@test Ad(X, Y)([1, 2]) == [2, -1]
-        Test.@test (X⋅Y)([1, 2]) == Ad(X, Y)([1, 2])
-
-    end
-
     @testset "Lifts" begin
         
         @testset "from VectorFields" begin
@@ -114,6 +82,106 @@ function test_differential_geometry()
         end
     
     end # tests for Lift
+
+    @testset "Lie derivative of a scalar function" begin
+    
+        # autonomous, dim 2
+        X = VectorField(x -> [x[2], -x[1]])
+        f = x -> x[1]^2 + x[2]^2
+        Test.@test Ad(X, f)([1, 2]) == 0
+        Test.@test (X⋅f)([1, 2]) == Ad(X, f)([1, 2])
+
+        # autonomous, dim 1
+        X = VectorField(x -> 2x)
+        f = x -> x^2
+        Test.@test Ad(X, f)(1) == 4
+        Test.@test (X⋅f)(1) == Ad(X, f)(1)
+    
+        # nonautonomous, dim 2
+        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
+        f = (t, x) -> t + x[1]^2 + x[2]^2
+        Test.@test Ad(X, f)(1, [1, 2]) == 2
+        Test.@test (X⋅f)(1, [1, 2]) == Ad(X, f)(1, [1, 2])
+
+        # nonautonomous, dim 1
+        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
+        f = (t, x) -> t + x^2
+        Test.@test Ad(X, f)(1, 1) == 6
+        Test.@test (X⋅f)(1, 1) == Ad(X, f)(1, 1)
+    
+    end
+
+    @testset "Lie derivative of a vector field" begin
+        
+        # autonomous, dim 2
+        X = VectorField(x -> [x[2], -x[1]])
+        Y = VectorField(x -> [x[1], x[2]])
+        Test.@test Ad(X, Y)([1, 2]) == [2, -1]
+        Test.@test (X⋅Y)([1, 2]) == Ad(X, Y)([1, 2])
+
+        # autonomous, dim 1, with state_dimension
+        X = VectorField(x -> 2x, state_dimension=1)
+        Y = VectorField(x -> 3x, state_dimension=1)
+        Test.@test Ad(X, Y)(1) == 6
+        Test.@test (X⋅Y)(1) == Ad(X, Y)(1)
+
+        # autonomous, dim 1
+        X = VectorField(x -> 2x)
+        Y = VectorField(x -> 3x)
+        Test.@test Ad(X, Y)(1) == 6
+        Test.@test (X⋅Y)(1) == Ad(X, Y)(1)
+
+        # nonautonomous, dim 2
+        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
+        Y = VectorField((t, x) -> [t + x[1], x[2]], time_dependence=:nonautonomous)
+        Test.@test Ad(X, Y)(1, [1, 2]) == [3, -1]
+        Test.@test (X⋅Y)(1, [1, 2]) == Ad(X, Y)(1, [1, 2])
+
+        # nonautonomous, dim 1, with state_dimension
+        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous, state_dimension=1)
+        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous, state_dimension=1)
+        Test.@test Ad(X, Y)(1, 1) == 9
+        Test.@test (X⋅Y)(1, 1) == Ad(X, Y)(1, 1)
+
+        # nonautonomous, dim 1
+        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
+        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
+        Test.@test Ad(X, Y)(1, 1) == 9
+        Test.@test (X⋅Y)(1, 1) == Ad(X, Y)(1, 1)
+
+    end
+
+    @testset "Lie derivatives of higher order" begin
+        
+        # autonomous, dim 2
+        X = VectorField(x -> [x[2], -2x[1]])
+        Y = VectorField(x -> [x[1], 3x[2]])
+        f = x -> x[1]^2 + 2x[2]^2
+        Test.@test (X⋅Y⋅f)([1, 2]) == ((X⋅Y)⋅f)([1, 2])
+        Test.@test (X⋅Y⋅f)([1, 2]) == Ad(Ad(X, Y), f)([1, 2])
+
+        # autonomous, dim 1
+        X = VectorField(x -> 2x)
+        Y = VectorField(x -> 3x)
+        f = x -> x^2
+        Test.@test (X⋅Y⋅f)(1) == ((X⋅Y)⋅f)(1)
+        Test.@test (X⋅Y⋅f)(1) == Ad(Ad(X, Y), f)(1)
+
+        # nonautonomous, dim 2
+        X = VectorField((t, x) -> [t + x[2], -2x[1]], time_dependence=:nonautonomous)
+        Y = VectorField((t, x) -> [t + x[1], 3x[2]], time_dependence=:nonautonomous)
+        f = (t, x) -> t + x[1]^2 + x[2]^2
+        Test.@test (X⋅Y⋅f)(1, [1, 2]) == ((X⋅Y)⋅f)(1, [1, 2])
+        Test.@test (X⋅Y⋅f)(1, [1, 2]) == Ad(Ad(X, Y), f)(1, [1, 2])
+
+        # nonautonomous, dim 1
+        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
+        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
+        f = (t, x) -> t + x^2
+        Test.@test (X⋅Y⋅f)(1, 1) == ((X⋅Y)⋅f)(1, 1)
+        Test.@test (X⋅Y⋅f)(1, 1) == Ad(Ad(X, Y), f)(1, 1)
+
+    end
 
     @testset "Lie bracket - minimal order" begin
         
