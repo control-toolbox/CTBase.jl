@@ -1,4 +1,5 @@
 # ctparser_utils
+# todo: superpower has(e, x, t)? (as replace_call) x...(t0)...(t0) OK (!), not x...(t0)...(t) or like
 
 """
 $(TYPEDSIGNATURES)
@@ -98,33 +99,6 @@ replace_call(e, x, t, y) = begin
         end
     end
     expr_it(e, foo(x, t, y), x -> x)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Replace ANY call in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `x`, `x[i](t)` or `x[i:j](t)`, resp.
-
-# Example
-```jldoctest
-
-julia> e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(e, :t)
-:(F0(x) + u * F1(x))
-```
-"""
-_replace_call(e, t) = begin
-    foo(t) = (h, args...) -> begin
-        ee = Expr(h, args...)
-    @match ee begin
-        :( $x[     ]($tt)    ) => (tt == t) ? :( $x[  ]    ) : ee
-        :( $x[$i   ]($tt)    ) => (tt == t) ? :( $x[$i]    ) : ee
-        :( $x[$i:$j]($tt)    ) => (tt == t) ? :( $x[$i:$j] ) : ee
-        :( $x[$i:$p:$j]($tt) ) => (tt == t) ? :( $x[$i:$p:$j] ) : ee
-        :( $x($tt)           ) => (tt == t) ? :( $x        ) : ee
-        _ => ee
-        end
-    end
-    expr_it(e, foo(t), x -> x)
 end
 
 """
