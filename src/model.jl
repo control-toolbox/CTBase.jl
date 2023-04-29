@@ -53,49 +53,49 @@ Base.isless(i::Index, j::Index) = i.val ≤ j.val
 """
 $(TYPEDSIGNATURES)
 
-Returns :nonautonomous == time_dependence
+Return :nonautonomous == time_dependence
 """
 isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
 
 """
 $(TYPEDSIGNATURES)
 
-Returns !isnonautonomous(time_dependence)
+Return !isnonautonomous(time_dependence)
 """
 isautonomous(time_dependence::Symbol) = !isnonautonomous(time_dependence)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the model has been defined as nonautonomous.
+Return `true` if the model has been defined as nonautonomous.
 """
 isnonautonomous(ocp::OptimalControlModel{time_dependence}) where {time_dependence} = isnonautonomous(time_dependence)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the model has been defined as autonomous.
+Return `true` if the model has been defined as autonomous.
 """
 isautonomous(ocp::OptimalControlModel) = !isnonautonomous(ocp)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the criterion type of `ocp` is `:min`.
+Return `true` if the criterion type of `ocp` is `:min`.
 """
 ismin(ocp::OptimalControlModel) = ocp.criterion == :min
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `true` if the criterion type of `ocp` is `:max`.
+Return `true` if the criterion type of `ocp` is `:max`.
 """
 ismax(ocp::OptimalControlModel) = !ismin(ocp)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns a new `OptimalControlModel` instance, that is a model of an optimal control problem.
+Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:
 
@@ -659,7 +659,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns the labels of the constraints as a `Base.keys`.
+Return the labels of the constraints as a `Base.keys`.
 
 # Example
 
