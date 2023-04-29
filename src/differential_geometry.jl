@@ -78,29 +78,36 @@ function Lift(Xs::Function...; time_dependence::Symbol=CTBase.__fun_time_depende
 end
 
 # ---------------------------------------------------------------------------
-# Lie derivative
-function Lie(X::VectorField{:autonomous, sd}, f::Function)::Function where {sd}
+# Lie derivative of a scalar function
+function Ad(X::VectorField{:autonomous, sd}, f::Function)::Function where {sd}
     return x -> ctgradient(f, x)'*X(x)
 end
-function Lie(X::VectorField{:nonautonomous, sd}, f::Function)::Function where {sd}
+function Ad(X::VectorField{:nonautonomous, sd}, f::Function)::Function where {sd}
     return (t, x) -> ctgradient(y -> f(t, y), x)'*X(t, x)
 end
 function ⋅(X::VectorField{td, sd}, f::Function)::Function where {td, sd}
-    return Lie(X, f)
+    return Ad(X, f)
+end
+
+# ---------------------------------------------------------------------------
+# Lie derivative of a vector field
+function Ad(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::Function where {sd}
+    return x -> ctjacobian(Y, x)*X(x)
+end
+function Ad(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::Function where {sd}
+    return (t, x) -> ctjacobian(y -> Y(t, y), x)*X(t, x)
+end
+function ⋅(X::VectorField{td, sd}, Y::VectorField{td, sd})::Function where {td, sd}
+    return Ad(X, Y)
 end
 
 # ---------------------------------------------------------------------------
 # Lie bracket of order 1
 function Lie(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
-    return VectorField(x -> (ctjacobian(Y, x)*X(x)-ctjacobian(X, x)*Y(x)), 
-                time_dependence=:autonomous, state_dimension=sd, label=Symbol(X.label, Y.label))
+    return VectorField(x -> (X⋅Y)(x)-(Y⋅X)(x), time_dependence=:autonomous, state_dimension=sd, label=Symbol(X.label, Y.label))
 end
 function Lie(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
-    return VectorField((t, x) -> (ctjacobian(y -> Y(t, y), x)*X(t, x)-ctjacobian(y -> X(t, y), x)*Y(t, x)), 
-                time_dependence=:nonautonomous, state_dimension=sd, label=Symbol(X.label, Y.label))
-end
-function ⋅(X::VectorField{td, sd}, Y::VectorField{td, sd})::VectorField{td, sd} where {td, sd}
-    return Lie(X, Y)
+    return VectorField((t, x) -> (X⋅Y)(t, x)-(Y⋅X)(t, x), time_dependence=:nonautonomous, state_dimension=sd, label=Symbol(X.label, Y.label))
 end
 
 # Multiple lie brackets of any order

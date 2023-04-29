@@ -5,20 +5,36 @@ include("../src/differential_geometry.jl")
 # ---------------------------------------------------------------------------
 function test_differential_geometry()
 
-    @testset "Lie derivative" begin
+    @testset "Lie derivative of a scalar function" begin
     
-        # autonomous
+        # autonomous, dim 2
         X = VectorField(x -> [x[2], -x[1]])
         f = x -> x[1]^2 + x[2]^2
-        Test.@test Lie(X, f)([1, 2]) == 0
-        Test.@test (X⋅f)([1, 2]) == Lie(X, f)([1, 2])
+        Test.@test Ad(X, f)([1, 2]) == 0
+        Test.@test (X⋅f)([1, 2]) == Ad(X, f)([1, 2])
+
+        # autonomous, dim 1
+        X = VectorField(x -> 2x)
+        f = x -> x^2
+        Test.@test Ad(X, f)(1) == 4
+        Test.@test (X⋅f)(1) == Ad(X, f)(1)
     
-        # nonautonomous
+        # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
-        Test.@test Lie(X, f)(1, [1, 2]) == 2
-        Test.@test (X⋅f)(1, [1, 2]) == Lie(X, f)(1, [1, 2])
+        Test.@test Ad(X, f)(1, [1, 2]) == 2
+        Test.@test (X⋅f)(1, [1, 2]) == Ad(X, f)(1, [1, 2])
     
+    end
+
+    @testset "Lie derivative of a vector field" begin
+        
+        # autonomous, dim 2
+        X = VectorField(x -> [x[2], -x[1]])
+        Y = VectorField(x -> [x[1], x[2]])
+        Test.@test Ad(X, Y)([1, 2]) == [2, -1]
+        Test.@test (X⋅Y)([1, 2]) == Ad(X, Y)([1, 2])
+
     end
 
     @testset "Lifts" begin
@@ -105,14 +121,12 @@ function test_differential_geometry()
             X = VectorField(x -> [x[2], -x[1]])
             Y = VectorField(x -> [x[2], -x[1]])
             Test.@test Lie(X, Y)([1, 2]) == [0, 0]
-            Test.@test (X⋅Y)([1, 2]) == Lie(X, Y)([1, 2])
         end
 
         @testset "nonautonomous case" begin
             X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
             Y = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
             Test.@test Lie(X, Y)(1, [1, 2]) == [0, 0]
-            Test.@test (X⋅Y)(1, [1, 2]) == Lie(X, Y)(1, [1, 2])
         end
 
         @testset "mri example" begin
@@ -202,14 +216,6 @@ function test_differential_geometry()
         Test.@test F022_(x) ≈ [-2*δ*x[1], 0, 2*δ*x[3]-γ] atol=1e-6
         Test.@test F010_(x) ≈ [0, -γ*(γ-2*Γ)+δ^2*x[3], -δ^2*x[2]] atol=1e-6
         Test.@test F020_(x) ≈ [γ*(γ-2*Γ)-δ^2*x[3], 0, δ^2*x[1]] atol=1e-6
-
-        # length 3 with cdot
-        F120 = ((F1 ⋅ F2) ⋅ F0)
-        Test.@test F120(x) ≈ F120_(x) atol=1e-6
-
-        # length 3 with cdot and no parenthesis
-        F120 = F1 ⋅ F2 ⋅ F0
-        Test.@test F120(x) ≈ F120_(x) atol=1e-6
 
         # multiple Lie brackets of any length
         F01, F02, F12 = Lie(F0, F1, F2, orders=((1,2), (1, 3), (2, 3)))
