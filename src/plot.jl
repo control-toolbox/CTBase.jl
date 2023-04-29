@@ -195,7 +195,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns `x` and `y` for the plot of the optimal control solution `sol` 
+Return `x` and `y` for the plot of the optimal control solution `sol` 
 corresponding respectively to the argument `xx` and the argument `yy`.
 
 **Notes.**
