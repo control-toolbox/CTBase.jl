@@ -1,6 +1,5 @@
 # onepass
 # todo:
-# - args not nothing (also: test try catch on this...)
 # - add tests on nested begin end
 
 """
@@ -193,7 +192,6 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
             args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse equality contraint", p.lnum, p.line) # todo: not enough (p.x alone could be nothing)
             quote
                 function $gs($(args...))
                     $ee1
@@ -203,7 +201,6 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:control_fun, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse equality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee1
@@ -213,7 +210,6 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:state_fun, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse equality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee1
@@ -223,7 +219,6 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:mixed, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse equality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee1
@@ -250,7 +245,6 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
             args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse inequality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee2
@@ -262,7 +256,6 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:control_fun, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse inequality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee2
@@ -274,7 +267,6 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:state_fun, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse inequality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee2
@@ -284,7 +276,6 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:mixed, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse inequality contraint", p.lnum, p.line)
             quote
                 function $gs($(args...))
                     $ee2
@@ -298,12 +289,15 @@ end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
+    isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.u) && __throw("control not yet declared", p.lnum, p.line)
+    isnothing(p.t) && __throw("time not yet declared", p.lnum, p.line)
     x ≠ p.x && return __throw("wrong state for dynamics", p.lnum, p.line)
     t ≠ p.t && return __throw("wrong time for dynamics", p.lnum, p.line)
-    e = replace_call(e, p.t)
+    e = replace_call(e, p.x, p.t, p.x)
+    e = replace_call(e, p.u, p.t, p.u)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-    (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse dynamics", p.lnum, p.line)
     __wrap(quote
         function $gs($(args...))
             $e
@@ -314,11 +308,14 @@ end
 
 p_lagrange!(p, ocp, e, type; log=false) = begin
     log && println("objective: ∫($e) → $type")
-    e = replace_call(e, p.t)
+    isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.u) && __throw("control not yet declared", p.lnum, p.line)
+    isnothing(p.t) && __throw("time not yet declared", p.lnum, p.line)
+    e = replace_call(e, p.x, p.t, p.x)
+    e = replace_call(e, p.u, p.t, p.u)
     ttype = QuoteNode(type)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-    (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse objective", p.lnum, p.line)
     __wrap(quote
         function $gs($(args...))
             $e
@@ -329,17 +326,19 @@ end
 
 p_mayer!(p, ocp, e, type; log=false) = begin
     log && println("objective: $e → $type")
+    isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.t0) && __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.tf) && __throw("time not yet declared", p.lnum, p.line)
     gs = gensym()
     x0 = Symbol(p.x, "#0")
     xf = Symbol(p.x, "#f")
-    ee = replace_call(e , p.x, p.t0, x0)
-    ee = replace_call(ee, p.x, p.tf, xf)
+    e = replace_call(e, p.x, p.t0, x0)
+    e = replace_call(e, p.x, p.tf, xf)
     ttype = QuoteNode(type)
     args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
-    (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse objective", p.lnum, p.line) # todo: not enough (p.x alone could be nothing)
     __wrap(quote
         function $gs($(args...))
-            $ee
+            $e
         end
         objective!($ocp, :mayer, $gs, $ttype)
     end, p.lnum, p.line)
