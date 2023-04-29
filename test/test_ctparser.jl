@@ -50,7 +50,7 @@ function test_ctparser()
     t0 = 2.0; tf = 2.1
     ocp = @def1 begin
         t ∈ [ t0 , tf ], time
-        v[4], state
+        v ∈ R^4, state
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
@@ -140,7 +140,7 @@ function test_ctparser()
     t0 = 2.0; tf = 2.1
     ocp = @def1 begin
         t ∈ [ t0 , tf ], time
-        v[4], control
+        v ∈ R^4, control
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
@@ -227,7 +227,7 @@ function test_ctparser()
     t0 = .0; tf = .1
     ocp = @def1 begin
         t ∈ [ t0, tf ], time
-        a[3], variable
+        a ∈ R³, variable
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.variable_dimension == 3
@@ -237,8 +237,8 @@ function test_ctparser()
     t0 = .0; tf = .1
     ocp = @def1 begin
         t ∈ [ t0, tf ], time
-        x[3], state
-        u[3], control
+        x ∈ R^3, state
+        u ∈ R^3, control
 
         r = x[1]
         v = x₂
@@ -257,8 +257,8 @@ function test_ctparser()
     t0 = .0; tf = .1
     ocp = @def1 begin
         t ∈ [ t0, tf ], time
-        x[3], state
-        u[3], control
+        x ∈ R^3, state
+        u ∈ R^3, control
         ∫( 0.5u(t)^2 ) → min
     end ;
     @test ocp isa OptimalControlModel
@@ -266,8 +266,8 @@ function test_ctparser()
     t0 = .0; tf = .1
     ocp = @def1 begin
         t ∈ [ t0, tf ], time
-        x[3], state
-        u[3], control
+        x ∈ R^3, state
+        u ∈ R^3, control
         ∫( 0.5u(t)^2 ) → max
     end ;
     @test ocp isa OptimalControlModel
@@ -364,7 +364,7 @@ function test_ctparser()
     # illegal constraint name (1bis), detected by the parser
     t0 = 9.0; tf = 9.1
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws SyntaxError @def1 begin
+    @test_throws ParsingError @def1 begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -374,7 +374,7 @@ function test_ctparser()
 
     # t0 is unknown in the x(t0) constraint, detected by the parser
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws SyntaxError @def1 begin
+    @test_throws ParsingError @def1 begin
         t ∈ [ 0, 1 ], time
         x ∈ R^2, state
         u ∈ R^2, control

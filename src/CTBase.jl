@@ -108,7 +108,7 @@ export get_priority_print_callbacks, get_priority_stop_callbacks
 export Description, makeDescription, add, getFullDescription
 
 # exceptions
-export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+export CTException, ParsingError, AmbiguousDescription, InconsistentArgument, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # functions

@@ -46,6 +46,31 @@ o = @def1 begin
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
+@test_throws IncorrectArgument @def1 begin
+    t0 ∈ R², variable
+    t ∈ [ t0, 1 ], time
+    end
+
+@test_throws IncorrectArgument @def1 begin
+    tf ∈ R², variable
+    t ∈ [ 0, tf ], time
+    end
+
+@test_throws ParsingError @def1 begin
+    v, variable
+    t ∈ [ 0, tf[v] ], time
+    end
+
+@test_throws ParsingError @def1 begin
+    v, variable
+    t ∈ [ t0[v], 1 ], time
+    end
+
+@test_throws ParsingError @def1 begin
+    v, variable
+    t ∈ [ t0[v], tf[v+1] ], time
+    end
+
 o = @def1 begin
     x ∈ R, state
     u ∈ R, control

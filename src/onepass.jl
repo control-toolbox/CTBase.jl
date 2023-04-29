@@ -1,5 +1,7 @@
 # onepass
-# todo: label "2x"; remove v_dim (test at exec with throw in quoted code); keep x[n], state? keep x, state? (same for control and variable)
+# todo:
+# error message with line + try catch on gened code
+# try catch on macro body
 
 """
 $(TYPEDEF)
@@ -14,7 +16,6 @@ $(TYPEDEF)
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
     v::Union{Symbol, Nothing}=nothing
-    v_dim::Integer=0
     aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=__init_aliases()
 end
 
@@ -50,24 +51,21 @@ parse!(p, ocp, e; log=false) = begin
     end
     @match e begin
         :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; log)
-        :( $v[$q]   , variable       ) => p_variable!(p, ocp, v, q; log)
         :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; log)
         :( $v       , variable       ) => p_variable!(p, ocp, v   ; log)
         :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; log)
         :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; log)
-        :( $x[$n]   , state          ) => p_state!(p, ocp, x, n; log)
         :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; log)
         :( $x       , state          ) => p_state!(p, ocp, x   ; log)
         :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; log)
-        :( $u[$m]   , control        ) => p_control!(p, ocp, u, m; log)
         :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
         :( $u       , control        ) => p_control!(p, ocp, u   ; log)
         :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
         :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1; log)
         :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2; log)
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
-        :( $e1 <= $e2 <= $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
-        :( $e1 <= $e2 <= $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
+        :( $e1 <= $e2 <= $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log) # todo: remove
+        :( $e1 <= $e2 <= $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log) # todo: remove
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
         :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
         :( ∫($e1) → min              ) => p_lagrange!(p, ocp, e1, :min; log)
@@ -78,34 +76,31 @@ parse!(p, ocp, e; log=false) = begin
             if e isa LineNumberNode
                 e
             elseif e isa Expr && e.head == :block
-                Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
-                # assumes that map is done sequentially
+                Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...) # !!! assumes that map is done sequentially
             else
-                return onepass_throw("unknown syntax ($e)")
+                __throw("unknown syntax ($e)")
             end
     end
 end
 
-onepass_throw(s) = begin
+__throw(s) = begin
     println("Parsing error: " * s)
-    :( throw(CTBase.SyntaxError($s)) )
+    :( throw(ParsingError($s)) )
 end
 
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
-    !(v isa Symbol) && return onepass_throw("forbidden variable name: $v")
-    !(q isa Integer) && return onepass_throw("forbidden variable dimension: $q")
+    !(v isa Symbol) && return __throw("forbidden variable name: $v")
     p.v = v
-    p.v_dim = q # todo: remove...
     vv = QuoteNode(v)
-    qq = q isa Integer ? q : 9 # todo: meaning full only when q Expr will be allowed
+    qq = q isa Integer ? q : 9
     for i ∈ 1:qq p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
     :( variable!($ocp, $q, $vv) )
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
     log && println("alias: $a = $e")
-    !(a isa Symbol) && return onepass_throw("forbidden alias name: $a")
+    !(a isa Symbol) && return __throw("forbidden alias name: $a")
     aa = QuoteNode(a)
     ee = QuoteNode(e)
     p.aliases[a] = e
@@ -114,7 +109,7 @@ end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
-    !(t isa Symbol) && return onepass_throw("forbidden time name: $t")
+    !(t isa Symbol) && return __throw("forbidden time name: $t")
     p.t = t
     p.t0 = t0
     p.tf = tf
@@ -122,22 +117,33 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
-            :( $v1[$i] ) => (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : ( return onepass_throw("bad time declaration"))
-            :( $v1     ) => (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, Index(1), $tf, $tt) ) : (return onepass_throw("bad time declaration"))
-            _            => return onepass_throw("bad time declaration") end
+            :( $v1[$i] ) => (v1 == p.v) ? :( time!($ocp, Index($i), $tf, $tt) ) : __throw("bad time declaration")
+            :( $v1     ) => (v1 == p.v) ?
+	        quote
+		    ($ocp.variable_dimension ≠ 1) &&
+		        throw(IncorrectArgument("variable must be of dimension one for a time"))
+	            time!($ocp, Index(1), $tf, $tt)
+		end : __throw("bad time declaration")
+            _            => __throw("bad time declaration") end
         (false, true ) => @match tf begin
-            :( $v1[$i] ) =>  (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : ( return onepass_throw("bad time declaration"))
-            :( $v1     ) =>  (v1 == p.v && 1 == p.v_dim) ? :( time!($ocp, $t0, Index(1), $tt) ) : ( return onepass_throw("bad time declaration"))
-            _            => return onepass_throw("bad time declaration") end
+            :( $v1[$i] ) => (v1 == p.v) ? :( time!($ocp, $t0, Index($i), $tt) ) : __throw("bad time declaration")
+            :( $v1     ) => (v1 == p.v) ?
+	        quote
+		    ($ocp.variable_dimension ≠ 1) &&
+		        throw(IncorrectArgument("variable must be of dimension one for a time"))
+	            time!($ocp, $t0, Index(1), $tt)
+		end : __throw("bad time declaration")
+            _            => __throw("bad time declaration") end
         _              => @match (t0, tf) begin
-            (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ? :( time!($ocp, Index($i), Index($j), $tt) ) : ( return onepass_throw("bad time declaration"))
-            _ => return onepass_throw("bad time declaration") end
+            (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ?
+	        :( time!($ocp, Index($i), Index($j), $tt) ) : __throw("bad time declaration")
+            _ => __throw("bad time declaration") end
     end
 end
 
 p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
-    !(x isa Symbol)  && return onepass_throw("forbidden state name: $x")
+    !(x isa Symbol)  && return __throw("forbidden state name: $x")
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
@@ -147,7 +153,7 @@ end
 
 p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
-    !(u isa Symbol)  && return onepass_throw("forbidden control name: $u")
+    !(u isa Symbol)  && return __throw("forbidden control name: $u")
     p.u = u
     uu = QuoteNode(u)
     mm =  m isa Integer ? m : 9
@@ -158,7 +164,7 @@ end
 p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     log && println("constraint: $e1 == $e2,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
-    !(label isa Symbol) && return onepass_throw("forbidden label: $label")
+    !(label isa Symbol) && return __throw("forbidden label: $label")
     llabel = QuoteNode(label)
     @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial , nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
@@ -170,7 +176,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
             args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2") # todo: not enough (p.x alone could be nothing)
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 == $e2") # todo: not enough (p.x alone could be nothing)
             quote
                 function $gs($(args...))
                     $ee1
@@ -182,7 +188,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:control_fun, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
@@ -194,7 +200,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:state_fun, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
@@ -204,21 +210,21 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
         (:mixed, ee1) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 == $e2")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 == $e2")
             quote
                 function $gs($(args...))
                     $ee1
                 end
                 constraint!($ocp, :mixed, $gs, $e2, $llabel)
             end end
-        _ => return onepass_throw("bad constraint declaration ($e1 == $e2)")
+        _ => __throw("bad constraint declaration ($e1 == $e2)")
     end
 end
 
 p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     log && println("constraint: $e1 ≤ $e2 ≤ $e3,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
-    !(label isa Symbol) && return onepass_throw("forbidden label: $label")
+    !(label isa Symbol) && return __throw("forbidden label: $label")
     llabel = QuoteNode(label)
     @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial , nothing) => :( constraint!($ocp, :initial,       $e1, $e3, $llabel) )
@@ -230,7 +236,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
             args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -242,7 +248,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:control_fun, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -254,7 +260,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:state_fun, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
@@ -264,25 +270,25 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:mixed, ee2) => begin
             gs = gensym()
             args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-            (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
+            (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse contraint ($e1 ≤ $e2 ≤ $e3")
             quote
                 function $gs($(args...))
                     $ee2
                 end
                 constraint!($ocp, :mixed, $gs, $e1, $e3, $llabel)
             end end
-        _ => return onepass_throw("bad constraint declaration ($e1 ≤ $e2 ≤ $e3)")
+        _ => __throw("bad constraint declaration ($e1 ≤ $e2 ≤ $e3)")
     end
 end
 
 p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
-    x ≠ p.x && return onepass_throw("wrong state for dynamics")
-    t ≠ p.t && return onepass_throw("wrong time for dynamics")
+    x ≠ p.x && return __throw("wrong state for dynamics")
+    t ≠ p.t && return __throw("wrong time for dynamics")
     e = replace_call(e, p.t)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-    (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse dynamics ($x'($t) == $e)")
+    (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse dynamics ($x'($t) == $e)")
     quote
         function $gs($(args...))
             $e
@@ -297,7 +303,7 @@ p_lagrange!(p, ocp, e, type; log) = begin
     ttype = QuoteNode(type)
     gs = gensym()
     args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
-    (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse objective (∫($e) → $type)")
+    (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse objective (∫($e) → $type)")
     quote
         function $gs($(args...))
             $e
@@ -315,7 +321,7 @@ p_mayer!(p, ocp, e, type; log) = begin
     ee = replace_call(ee, p.x, p.tf, xf)
     ttype = QuoteNode(type)
     args = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
-    (typeof(args) == Vector{Nothing}) && return onepass_throw("not enough context to parse objective ($e → $type") # todo: not enough (p.x alone could be nothing)
+    (typeof(args) == Vector{Nothing}) && return __throw("not enough context to parse objective ($e → $type") # todo: not enough (p.x alone could be nothing)
     quote
         function $gs($(args...))
             $ee
