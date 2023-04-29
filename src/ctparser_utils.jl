@@ -361,7 +361,7 @@ constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v
             :( $v[$i:$j   ]($s) ) => (v == u && s == t ) ? (:control_range, i:j     ) : :other
             :( $v[$i      ]($s) ) => (v == u && s == t ) ? (:control_range, Index(i)) : :other
             :( $v($s)           ) => (v == u && s == t ) ? (:control_range, nothing ) : :other
-	    _                     => (:control_fun, replace_call(e, u, t, u)) end                
+	    _                     => (:control_fun, replace_call(e, u, t, u)) end
         [ false, false, false, true , false, false, _ ] => @match e begin
             :( $y[$i:$p:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:p:j   ) : :other
             :( $y[$i:$j   ]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) : :other

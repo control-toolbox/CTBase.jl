@@ -1,6 +1,8 @@
 # onepass
 # todo:
+# - !!! forbid complex alias (w = x₁ + x₂) not dealt with properly for boundary (ok with (t))
 # - add tests on nested begin end
+# - add tests on exceptions (parsing and semantics/runtime)
 
 """
 $(TYPEDEF)
@@ -116,6 +118,7 @@ p_alias!(p, ocp, a, e; log=false) = begin
     !(a isa Symbol) && return __throw("forbidden alias name: $a", p.lnum, p.line)
     aa = QuoteNode(a)
     ee = QuoteNode(e)
+    # todo: e must be symbol[i:p:j]; update test (w = x + y like...)
     p.aliases[a] = e
     __wrap(:( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) ), p.lnum, p.line)
 end
