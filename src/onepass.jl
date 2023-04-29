@@ -1,6 +1,7 @@
 # onepass
-# todo: args not nothing (also: test try catch on this...)
-# error message with line + try catch on gened code
+# todo:
+# - args not nothing (also: test try catch on this...)
+# - add tests on nested begin end
 
 """
 $(TYPEDEF)
@@ -17,6 +18,7 @@ $(TYPEDEF)
     v::Union{Symbol, Nothing}=nothing
     aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=__init_aliases()
     lnum::Integer=0
+    line::String=""
 end
 
 __init_aliases() = begin
@@ -47,39 +49,40 @@ Foo
 """
 parse!(p, ocp, e; log=false) = begin
     p.lnum = p.lnum + 1
-    line = string(e)
+    p.line = string(e)
     for a ∈ keys(p.aliases)
         e = subs(e, a, p.aliases[a])
     end
     @match e begin
-        :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; line=line, log)
-        :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; line=line, log)
-        :( $v       , variable       ) => p_variable!(p, ocp, v   ; line=line, log)
-        :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; line=line, log)
-        :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; line=line, log)
-        :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; line=line, log)
-        :( $x       , state          ) => p_state!(p, ocp, x   ; line=line, log)
-        :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; line=line, log)
-        :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; line=line, log)
-        :( $u       , control        ) => p_control!(p, ocp, u   ; line=line, log)
-        :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; line=line, log)
-        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1; line=line, log)
-        :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2; line=line, log)
-        :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; line=line, log)
-        :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; line=line, log)
-        :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; line=line, log)
-        :( ∫($e1) → min              ) => p_lagrange!(p, ocp, e1, :min; line=line, log)
-        :( ∫($e1) → max              ) => p_lagrange!(p, ocp, e1, :max; line=line, log)
-        :( $e1 → min                 ) => p_mayer!(p, ocp, e1, :min; line=line, log)
-        :( $e1 → max                 ) => p_mayer!(p, ocp, e1, :max; line=line, log)
-        _ =>
-            if e isa LineNumberNode
+        :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; log)
+        :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; log)
+        :( $v       , variable       ) => p_variable!(p, ocp, v   ; log)
+        :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; log)
+        :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; log)
+        :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; log)
+        :( $x       , state          ) => p_state!(p, ocp, x   ; log)
+        :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; log)
+        :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
+        :( $u       , control        ) => p_control!(p, ocp, u   ; log)
+        :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
+        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1; log)
+        :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2; log)
+        :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
+        :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
+        :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
+        :( ∫($e1) → min              ) => p_lagrange!(p, ocp, e1, :min; log)
+        :( ∫($e1) → max              ) => p_lagrange!(p, ocp, e1, :max; log)
+        :( $e1 → min                 ) => p_mayer!(p, ocp, e1, :min; log)
+        :( $e1 → max                 ) => p_mayer!(p, ocp, e1, :max; log)
+        _ => begin
+	    p.lnum = p.lnum - 1
+	    if e isa LineNumberNode
                 e
             elseif e isa Expr && e.head == :block
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...) # !!! assumes that map is done sequentially
             else
                 __throw("unknown syntax ($e)")
-            end
+            end end
     end
 end
 
@@ -97,26 +100,26 @@ __wrap(e, n, line) = quote
     end
 end
 
-p_variable!(p, ocp, v, q=1; line, log=false) = begin
+p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
     !(v isa Symbol) && return __throw("forbidden variable name: $v")
     p.v = v
     vv = QuoteNode(v)
     qq = q isa Integer ? q : 9
     for i ∈ 1:qq p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
-    __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, line)
+    __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
 end
 
-p_alias!(p, ocp, a, e; line, log=false) = begin
+p_alias!(p, ocp, a, e; log=false) = begin
     log && println("alias: $a = $e")
     !(a isa Symbol) && return __throw("forbidden alias name: $a")
     aa = QuoteNode(a)
     ee = QuoteNode(e)
     p.aliases[a] = e
-    __wrap(:( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) ), p.lnum, line)
+    __wrap(:( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) ), p.lnum, p.line)
 end
 
-p_time!(p, ocp, t, t0, tf; line, log=false) = begin
+p_time!(p, ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
     !(t isa Symbol) && return __throw("forbidden time name: $t")
     p.t = t
@@ -150,30 +153,30 @@ p_time!(p, ocp, t, t0, tf; line, log=false) = begin
 	        :( time!($ocp, Index($i), Index($j), $tt) ) : __throw("bad time declaration")
             _ => __throw("bad time declaration") end
     end
-    __wrap(code, p.lnum, line)
+    __wrap(code, p.lnum, p.line)
 end
 
-p_state!(p, ocp, x, n=1; line, log=false) = begin
+p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
     !(x isa Symbol)  && return __throw("forbidden state name: $x")
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
     for i ∈ 1:nn p.aliases[Symbol(x, __sub(i))] = :( $x[$i] ) end
-    __wrap(:( state!($ocp, $n, $xx) ), p.lnum, line)
+    __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
 end
 
-p_control!(p, ocp, u, m=1; line, log=false) = begin
+p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
     !(u isa Symbol)  && return __throw("forbidden control name: $u")
     p.u = u
     uu = QuoteNode(u)
     mm =  m isa Integer ? m : 9
     for i ∈ 1:mm p.aliases[Symbol(u, __sub(i))] = :( $u[$i] ) end
-    __wrap(:( control!($ocp, $m, $uu) ), p.lnum, line)
+    __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
 end
 
-p_constraint_eq!(p, ocp, e1, e2, label=gensym(); line, log=false) = begin
+p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     log && println("constraint: $e1 == $e2,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
     !(label isa Symbol) && return __throw("forbidden label: $label")
@@ -227,10 +230,10 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); line, log=false) = begin
             end end
         _ => __throw("bad constraint declaration ($e1 == $e2)")
     end
-    __wrap(code, p.lnum, line)
+    __wrap(code, p.lnum, p.line)
 end
 
-p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); line, log=false) = begin
+p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     log && println("constraint: $e1 ≤ $e2 ≤ $e3,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
     !(label isa Symbol) && return __throw("forbidden label: $label")
@@ -288,10 +291,10 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); line, log=false) = begin
             end end
         _ => __throw("bad constraint declaration ($e1 ≤ $e2 ≤ $e3)")
     end
-    __wrap(code, p.lnum, line)
+    __wrap(code, p.lnum, p.line)
 end
 
-p_dynamics!(p, ocp, x, t, e; line, log=false) = begin
+p_dynamics!(p, ocp, x, t, e; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
     x ≠ p.x && return __throw("wrong state for dynamics")
     t ≠ p.t && return __throw("wrong time for dynamics")
@@ -304,10 +307,10 @@ p_dynamics!(p, ocp, x, t, e; line, log=false) = begin
             $e
         end
         constraint!($ocp, :dynamics, $gs)
-    end, p.lnum, line)
+    end, p.lnum, p.line)
 end
 
-p_lagrange!(p, ocp, e, type; line, log=false) = begin
+p_lagrange!(p, ocp, e, type; log=false) = begin
     log && println("objective: ∫($e) → $type")
     e = replace_call(e, p.t)
     ttype = QuoteNode(type)
@@ -319,10 +322,10 @@ p_lagrange!(p, ocp, e, type; line, log=false) = begin
             $e
         end
         objective!($ocp, :lagrange, $gs, $ttype)
-    end, p.lnum, line)
+    end, p.lnum, p.line)
 end
 
-p_mayer!(p, ocp, e, type; line, log=false) = begin
+p_mayer!(p, ocp, e, type; log=false) = begin
     log && println("objective: $e → $type")
     gs = gensym()
     x0 = Symbol(p.x, "#0")
@@ -337,7 +340,7 @@ p_mayer!(p, ocp, e, type; line, log=false) = begin
             $ee
         end
         objective!($ocp, :mayer, $gs, $ttype)
-    end, p.lnum, line)
+    end, p.lnum, p.line)
 end
 
 """
