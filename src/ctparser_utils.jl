@@ -157,7 +157,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return true if e contains an `x(t)`, `x[i](t)`, `x[i:j](t)` or  `x[i:p:j](t)` call.
+Return true if e contains an `(...x...)(t)` call.
 
 # Example
 ```jldoctest
@@ -177,10 +177,7 @@ has(e, x, t) = begin
 	if :yes ∈ args
 	    :yes
 	else @match ee begin
-            :( $xx[$i      ]($tt) ) => (xx == x && tt == t) ? :yes : ee
-            :( $xx[$i:$j   ]($tt) ) => (xx == x && tt == t) ? :yes : ee
-            :( $xx[$i:$p:$j]($tt) ) => (xx == x && tt == t) ? :yes : ee
-            :( $xx($tt)           ) => (xx == x && tt == t) ? :yes : ee
+            :( $eee($tt) ) => (tt == t && has(eee, x)) ? :yes : ee
             _ => ee end
         end
     end
@@ -348,5 +345,5 @@ constraint_type(e, t, t0, tf, x, u, v=nothing) = # todo: no default value for v
             :( $w[$i      ]     ) => (w == v) ? (:variable_range, Index(i)) : :other
             :( $w               ) => (w == v) ? (:variable_range, nothing ) : (:variable_fun, e)
 	    _                     => :other end                
-        _ => (:other, nothing) end
+        _ => :other end
     end
