@@ -132,7 +132,7 @@ export OptimalControlSolution
 export plot
 
 # utils
-export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
+export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
 # _Time
 export _Time

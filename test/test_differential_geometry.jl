@@ -1,204 +1,6 @@
 using Test
 using CTBase
-
-# ---------------------------------------------------------------------------
-abstract type AbstractHamiltonian end
-
-# ---------------------------------------------------------------------------
-# HamiltonianLift
-struct HamiltonianLift{time_dependence} <: AbstractHamiltonian
-    X::VectorField
-    function HamiltonianLift(X::VectorField{time_dependence, state_dimension}) where {time_dependence, state_dimension}
-        new{time_dependence}(X)
-    end
-end
-
-# classical calls
-function (H::HamiltonianLift{:nonautonomous})(t::Time, x::ctNumber, p::ctNumber, args...; kwargs...)::ctNumber
-    return p'*H.X(t, x, args...; kwargs...)
-end
-function (H::HamiltonianLift{:autonomous})(x::ctNumber, p::ctNumber, args...; kwargs...)::ctNumber
-    return p'*H.X(x, args...; kwargs...)
-end
-function (H::HamiltonianLift{:nonautonomous})(t::Time, x::State, p::Adjoint, args...; kwargs...)::ctNumber
-    return p'*H.X(t, x, args...; kwargs...)
-end
-function (H::HamiltonianLift{:autonomous})(x::State, p::Adjoint, args...; kwargs...)::ctNumber
-    return p'*H.X(x, args...; kwargs...)
-end
-
-# ---------------------------------------------------------------------------
-# Lift
-#
-# single lift
-function Lift(X::VectorField)::HamiltonianLift
-    return HamiltonianLift(X)
-end
-function Lift(X::Function; time_dependence::Symbol=CTBase.__fun_time_dependence())::HamiltonianLift
-    #
-    check_time_dependence(time_dependence)
-    #
-    return HamiltonianLift(VectorField(X, time_dependence=time_dependence))
-end
-#
-# multiple lifts
-function Lift(Xs::VectorField...)::Tuple{Vararg{HamiltonianLift}}
-    return Tuple(Lift(X) for X ∈ Xs)
-end
-function Lift(Xs::Function...; time_dependence::Symbol=CTBase.__fun_time_dependence())::Tuple{Vararg{HamiltonianLift}}
-    #
-    check_time_dependence(time_dependence)
-    #
-    return Tuple(Lift(X, time_dependence=time_dependence) for X ∈ Xs)
-end
-
-# ---------------------------------------------------------------------------
-# Lie derivative
-function Lie(X::VectorField{:autonomous, sd}, f::Function)::Function where {sd}
-    return x -> ctgradient(f, x)'*X(x)
-end
-function Lie(X::VectorField{:nonautonomous, sd}, f::Function)::Function where {sd}
-    return (t, x) -> ctgradient(y -> f(t, y), x)'*X(t, x)
-end
-function ⋅(X::VectorField{td, sd}, f::Function)::Function where {td, sd}
-    return Lie(X, f)
-end
-
-# ---------------------------------------------------------------------------
-# Lie bracket of order 1
-function Lie(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
-    return VectorField(x -> (ctjacobian(Y, x)*X(x)-ctjacobian(X, x)*Y(x)), time_dependence=:autonomous, state_dimension=sd)
-end
-function Lie(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
-    return VectorField((t, x) -> (ctjacobian(y -> Y(t, y), x)*X(t, x)-ctjacobian(y -> X(t, y), x)*Y(t, x)), time_dependence=:nonautonomous, state_dimension=sd)
-end
-function ⋅(X::VectorField{td, sd}, Y::VectorField{td, sd})::VectorField{td, sd} where {td, sd}
-    return Lie(X, Y)
-end
-
-# Multiple lie brackets of any order
-const Order = Tuple{Vararg{Integer}}
-const Orders = Tuple{Vararg{Order}}
-const OrderLabels = Tuple{Vararg{Symbol}}
-const OrdersLabels = Tuple{Vararg{OrderLabels}}
-
-#
-__fun_order(Xs::VectorField) = Tuple(1:length(Xs))
-
-#
-function Lie_order(Xs::VectorField{td, sd}...; order::Order=__fun_order(Xs))::VectorField{td, sd} where {td, sd}
-
-    # check length of Xs
-    length(Xs) < 2 && throw(IncorrectArgument("Xs must have at least two elements"))
-
-    # check length of order
-    length(order) < 2 && throw(IncorrectArgument("order must have at least two elements"))
-    
-    # check if the elements of order are contained in 1:length(Xs)
-    for o ∈ order
-        o < 1 && throw(IncorrectArgument("order must contain only positive integers"))
-        o > length(Xs) && throw(IncorrectArgument("order must contain only integers less than or equal to the length of Xs"))
-    end
-
-    # 
-    if length(order) == 2
-        return Lie(Xs[order[1]], Xs[order[2]])
-    else
-        return Lie(Lie(Xs..., order=order[1:end-1]), Xs[order[end]])
-    end
-
-end
-
-#
-__fun_order_labels(Xs::VectorField...) = Tuple([X.label for X ∈ Xs])
-
-#
-function Lie_order_labels(Xs::VectorField{td, sd}...; order::OrderLabels=__fun_order_labels(Xs))::VectorField{td, sd} where {td, sd}
-
-    # check length of Xs
-    length(Xs) < 2 && throw(IncorrectArgument("Xs must have at least two elements"))
-
-    # check length of order
-    length(order) < 2 && throw(IncorrectArgument("order must have at least two elements"))
-    
-    # check if the elements of order are contained in the labels of Xs
-    Xs_labels = [X.label for X ∈ Xs]
-    for o ∈ order
-        o ∉ Xs_labels && throw(IncorrectArgument("order must contain only labels of Xs"))
-    end
-
-    # check if the lables of Xs are unique
-    length(Xs_labels) != length(unique(Xs_labels)) && throw(IncorrectArgument("the labels of Xs must be unique"))
-
-    # 
-    if length(order) == 2
-        # get indices of order[1] and order[2] in Xs_labels
-        i1 = findfirst(o -> o == order[1], Xs_labels)
-        i2 = findfirst(o -> o == order[2], Xs_labels)
-        # return Lie bracket
-        return Lie(Xs[i1], Xs[i2])
-    else
-        # get indices of order[end] in Xs_labels
-        iend = findfirst(o -> o == order[end], Xs_labels)
-        # return Lie bracket
-        return Lie(Lie(Xs..., order=order[1:end-1]), Xs[iend])
-    end
-
-end
-
-#
-function Lie_orders(Xs::VectorField{td, sd}...; orders::Orders=(__fun_order(Xs),))::Tuple{Vararg{VectorField{td, sd}}} where {td, sd}
-
-    # check length of Xs
-    length(Xs) < 2 && throw(IncorrectArgument("Xs must have at least two elements"))
-
-    # 
-    Ls = Vector{VectorField{td, sd}}()
-    for order ∈ orders
-        push!(Ls, Lie(Xs..., order=order))
-    end
-    return Tuple(Ls)
-        
-end
-
-function Lie_orders_labels(Xs::VectorField{td, sd}...; orders::OrdersLabels=(__fun_order_labels(Xs),))::Tuple{Vararg{VectorField{td, sd}}} where {td, sd}
-
-    # check length of Xs
-    length(Xs) < 2 && throw(IncorrectArgument("Xs must have at least two elements"))
-
-    # 
-    Ls = Vector{VectorField{td, sd}}()
-    for order ∈ orders
-        push!(Ls, Lie(Xs..., order=order))
-    end
-    return Tuple(Ls)
-        
-end
-
-#
-function Lie(Xs::VectorField{td, sd}...; 
-    orders::Union{Nothing, Orders, OrdersLabels}=nothing, 
-    order::Union{Nothing, Order, OrderLabels}=nothing) where {td, sd}
-    
-    # check if only one of orders and order is specified
-    (!isnothing(order) && !isnothing(orders)) && throw(IncorrectArgument("only one of orders and order can be specified"))
-
-    if orders ≠ nothing # orders is specified
-        if orders isa OrdersLabels # orders is a tuple of order labels
-            return Lie_orders_labels(Xs..., orders=orders)
-        else # orders is a tuple of orders
-            return Lie_orders(Xs..., orders=orders)
-        end
-    elseif order ≠ nothing # order is specified
-        if order isa OrderLabels # order is a tuple of order labels
-            return Lie_order_labels(Xs..., order=order)
-        else # order is a tuple of orders
-            return Lie_order(Xs..., order=order)
-        end
-    else
-        return Lie_order(Xs...)
-    end
-end
+include("../src/differential_geometry.jl")
 
 # ---------------------------------------------------------------------------
 function test_differential_geometry()
@@ -228,6 +30,8 @@ function test_differential_geometry()
             H = Lift(X)
             Test.@test H(1, 1) == 2
             Test.@test H([1, 2], [3, 4]) == 22
+            Test.@test_throws MethodError H([1, 2], 1)
+            Test.@test_throws MethodError H(1, [1, 2])
     
             # multiple VectorFields
             X1 = VectorField(x -> 2x)
@@ -286,12 +90,16 @@ function test_differential_geometry()
             Test.@test H1(1, [1, 2], [3, 4]) == 22
             Test.@test H2(1, 1, 1) == 3
             Test.@test H2(1, [1, 2], [3, 4]) == 33
+
+            # exceptions
+            Test.@test_throws IncorrectArgument Lift(X1, time_dependence=:dummy)
+            Test.@test_throws IncorrectArgument Lift(X1, X2, time_dependence=:dummy)
     
         end
     
     end # tests for Lift
 
-    @testset "Lie bracket - order 1" begin
+    @testset "Lie bracket - minimal order" begin
         
         @testset "autonomous case" begin
             X = VectorField(x -> [x[2], -x[1]])
@@ -321,6 +129,18 @@ function test_differential_geometry()
             Test.@test F01(x) ≈ -[0, γ-δ*x[3], -δ*x[2]] atol=1e-6
             Test.@test F02(x) ≈ -[-γ+δ*x[3], 0, δ*x[1]] atol=1e-6
             Test.@test F12(x) ≈ -[-x[2], x[1], 0] atol=1e-6
+        end
+
+        @testset "exceptions" begin
+            X = VectorField(x -> [x[2], -x[1]])
+            Y = VectorField(x -> [x[2], -x[1]])
+            Test.@test_throws TypeError Lie(X, Y, order=0)
+            Test.@test_throws TypeError Lie(X, Y, order=1.5)
+            Test.@test_throws TypeError Lie(X, Y, order=(1, 1.5))
+            Test.@test_throws IncorrectArgument Lie(X, order=(1, 1))
+            Test.@test_throws IncorrectArgument Lie(X, Y, order=(1,))
+            Test.@test_throws IncorrectArgument Lie(X, Y, order=(1, 0))
+            Test.@test_throws IncorrectArgument Lie(X, Y, order=(1, 2, 3))            
         end
 
     end # tests for Lie bracket - order 1
@@ -424,6 +244,7 @@ function test_differential_geometry()
         Test.@test F01(x) ≈ F01_(x) atol=1e-6
         Test.@test F02(x) ≈ F02_(x) atol=1e-6
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
+        Test.@test F01.label == :F0F1
 
         # length 3
         F120_ = Lie(F12, F0, order=(1,2))
@@ -435,6 +256,7 @@ function test_differential_geometry()
         Test.@test F120(x) ≈ F120_(x) atol=1e-6
         Test.@test F121(x) ≈ F121_(x) atol=1e-6
         Test.@test F122(x) ≈ F122_(x) atol=1e-6
+        Test.@test F120.label == :F1F2F0
 
         # multiple Lie brackets of any length
         F01, F02, F12 = Lie(F0, F1, F2, orders=((:F0, :F1), (:F0, :F2), (:F1, :F2)))
@@ -446,6 +268,12 @@ function test_differential_geometry()
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
         Test.@test F121(x) ≈ F121_(x) atol=1e-6
         Test.@test F122(x) ≈ F122_(x) atol=1e-6
+
+        # exceptions
+        @test_throws IncorrectArgument Lie(F0, F1, order=(:F0, :F1, :F2))
+        @test_throws IncorrectArgument Lie(F0, order=(:F0,))
+        @test_throws IncorrectArgument Lie(F0, F1, order=(:F0,))
+        @test_throws IncorrectArgument Lie(F1, F1, order=(:F0, :F1))
 
     end
 
