@@ -337,8 +337,12 @@ Implement def1 macro core.
 
 """
 macro _def1(ocp, e, log=false)
-    p = ParsingInfo()
-    esc( parse!(p, ocp, e; log=log) )
+    try
+        p = ParsingInfo()
+        esc( parse!(p, ocp, e; log=log) )
+    catch ex
+        :( throw($ex) ) # can be catched by user 
+    end
 end
 
 """
