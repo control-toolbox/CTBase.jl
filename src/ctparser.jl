@@ -946,7 +946,63 @@ function print_generated_code(ocp::OptimalControlModel)
     end
 end
 
+# type of input lines
+@enum _ctparser_line_type e_time e_state_scalar e_state_vector e_control_scalar e_control_vector e_constraint e_named_constraint e_alias e_objective_min e_objective_max e_variable
 
+"""
+$(TYPEDSIGNATURES)
+
+Figure the type of parsed line passed as argument
+
+Returns a tuple (_type, Array{Any} )
+
+Example:
+"""
+input_line_type(e) =
+    @match e begin
+        :($t ∈ [ $a, $b ], time)   => (e_time, [t, a, b])
+        :($s ∈ R^$d, state )       => (e_state_vector, [s, d])
+        :($s ∈ R², state )         => (e_state_vector, [s, 2])
+        :($s ∈ R³, state )         => (e_state_vector, [s, 3])
+        :($s ∈ R⁴, state )         => (e_state_vector, [s, 4])
+        :($s ∈ R⁵, state )         => (e_state_vector, [s, 5])
+        :($s ∈ R⁶, state )         => (e_state_vector, [s, 6])
+        :($s ∈ R⁷, state )         => (e_state_vector, [s, 7])
+        :($s ∈ R⁸, state )         => (e_state_vector, [s, 8])
+        :($s ∈ R⁹, state )         => (e_state_vector, [s, 9])
+        :($s[$d], state )          => (e_state_vector, [s, d])
+        :($s ∈ R, state )          => (e_state_scalar, [s])
+        :($s, state )              => (e_state_scalar, [s])
+        :($s ∈ R^$d, control )     => (e_control_vector, [s, d])
+        :($s ∈ R², control )       => (e_control_vector, [s, 2])
+        :($s ∈ R³, control )       => (e_control_vector, [s, 3])
+        :($s ∈ R⁴, control )       => (e_control_vector, [s, 4])
+        :($s ∈ R⁵, control )       => (e_control_vector, [s, 5])
+        :($s ∈ R⁶, control )       => (e_control_vector, [s, 6])
+        :($s ∈ R⁷, control )       => (e_control_vector, [s, 7])
+        :($s ∈ R⁸, control )       => (e_control_vector, [s, 8])
+        :($s ∈ R⁹, control )       => (e_control_vector, [s, 9])
+        :($s[$d], control )        => (e_control_vector, [s, d])
+        :($s ∈ R, control )        => (e_control_scalar, [s])
+        :($s, control )            => (e_control_scalar, [s])
+        :($t ∈ R, variable )       => (e_variable, [t])
+        :($t, variable )           => (e_variable, [t])
+        :($a = $b)                 => (e_alias, [a, b])
+        :($a -> begin min end)     => (e_objective_min, [a]) # debug: not allowed, remove
+        :($a → min)                => (e_objective_min, [a])
+        :($a -> begin max end)     => (e_objective_max, [a]) # debug: not allowed, remove
+        :($a → max)                => (e_objective_max, [a])
+        :($x == $y => ($n))        => (e_named_constraint, [n, :(==), x, y])
+        :($x <= $y <= $z => ($n))  => (e_named_constraint, [n, :(≤),  y, x, z])
+        :($x ≤  $y ≤  $z => ($n))  => (e_named_constraint, [n, :(≤),  y, x, z])
+        :($x == $y , ($n))         => (e_named_constraint, [n, :(==), x, y])
+        :($x <= $y <= $z, ($n))    => (e_named_constraint, [n, :(≤),  y, x, z])
+        :($x ≤  $y ≤  $z, ($n))    => (e_named_constraint, [n, :(≤),  y, x, z])
+        :($x == $y)                => (e_constraint,       [:(==),    x, y])
+        :($x <= $y <= $z)          => (e_constraint,       [:(≤),     y, x, z])
+        :($x ≤  $y ≤  $z)          => (e_constraint,       [:(≤),     y, x, z])
+        _                          => (:other , [])
+    end
 
 # COV_EXCL_START
 
