@@ -269,6 +269,6 @@ macro Lie(expr::Symbol)
     sequence = Tuple([parse(Integer, c) for c ∈ v[2:end]])
     vfs = Tuple([Symbol(:F, n) for n ∈ unique(sequence)])
     code = quote
-        $expr = Lie($vfs..., sequence=$sequence)
+        $expr = Lie($(vfs...), sequence=$sequence)
     end
 end
