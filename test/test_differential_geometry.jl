@@ -83,118 +83,128 @@ function test_differential_geometry()
     
     end # tests for Lift
 
-    @testset "Lie derivative of a scalar function" begin
+    @testset "Directional derivative of a scalar function" begin
     
         # autonomous, dim 2
         X = VectorField(x -> [x[2], -x[1]])
         f = x -> x[1]^2 + x[2]^2
-        Test.@test Ad(X, f)([1, 2]) == 0
-        Test.@test (X⋅f)([1, 2]) == Ad(X, f)([1, 2])
+        Test.@test Der(X, f)([1, 2]) == 0
+        Test.@test (X⋅f)([1, 2]) == Der(X, f)([1, 2])
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
         f = x -> x^2
-        Test.@test Ad(X, f)(1) == 4
-        Test.@test (X⋅f)(1) == Ad(X, f)(1)
+        Test.@test Der(X, f)(1) == 4
+        Test.@test (X⋅f)(1) == Der(X, f)(1)
     
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
-        Test.@test Ad(X, f)(1, [1, 2]) == 2
-        Test.@test (X⋅f)(1, [1, 2]) == Ad(X, f)(1, [1, 2])
+        Test.@test Der(X, f)(1, [1, 2]) == 2
+        Test.@test (X⋅f)(1, [1, 2]) == Der(X, f)(1, [1, 2])
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
         f = (t, x) -> t + x^2
-        Test.@test Ad(X, f)(1, 1) == 6
-        Test.@test (X⋅f)(1, 1) == Ad(X, f)(1, 1)
+        Test.@test Der(X, f)(1, 1) == 6
+        Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
     
     end
 
-    @testset "Lie derivative of a vector field" begin
+    @testset "Directional derivative of a vector field" begin
         
         # autonomous, dim 2
         X = VectorField(x -> [x[2], -x[1]])
         Y = VectorField(x -> [x[1], x[2]])
-        Test.@test Ad(X, Y)([1, 2]) == [2, -1]
-        Test.@test (X⋅Y)([1, 2]) == Ad(X, Y)([1, 2])
+        Test.@test Der(X, Y)([1, 2]) == [2, -1]
+        Test.@test (X⋅Y)([1, 2]) == Der(X, Y)([1, 2])
 
         # autonomous, dim 1, with state_dimension
         X = VectorField(x -> 2x, state_dimension=1)
         Y = VectorField(x -> 3x, state_dimension=1)
-        Test.@test Ad(X, Y)(1) == 6
-        Test.@test (X⋅Y)(1) == Ad(X, Y)(1)
+        Test.@test Der(X, Y)(1) == 6
+        Test.@test (X⋅Y)(1) == Der(X, Y)(1)
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
         Y = VectorField(x -> 3x)
-        Test.@test Ad(X, Y)(1) == 6
-        Test.@test (X⋅Y)(1) == Ad(X, Y)(1)
+        Test.@test Der(X, Y)(1) == 6
+        Test.@test (X⋅Y)(1) == Der(X, Y)(1)
 
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
         Y = VectorField((t, x) -> [t + x[1], x[2]], time_dependence=:nonautonomous)
-        Test.@test Ad(X, Y)(1, [1, 2]) == [3, -1]
-        Test.@test (X⋅Y)(1, [1, 2]) == Ad(X, Y)(1, [1, 2])
+        Test.@test Der(X, Y)(1, [1, 2]) == [3, -1]
+        Test.@test (X⋅Y)(1, [1, 2]) == Der(X, Y)(1, [1, 2])
 
         # nonautonomous, dim 1, with state_dimension
         X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous, state_dimension=1)
         Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous, state_dimension=1)
-        Test.@test Ad(X, Y)(1, 1) == 9
-        Test.@test (X⋅Y)(1, 1) == Ad(X, Y)(1, 1)
+        Test.@test Der(X, Y)(1, 1) == 9
+        Test.@test (X⋅Y)(1, 1) == Der(X, Y)(1, 1)
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
         Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
-        Test.@test Ad(X, Y)(1, 1) == 9
-        Test.@test (X⋅Y)(1, 1) == Ad(X, Y)(1, 1)
+        Test.@test Der(X, Y)(1, 1) == 9
+        Test.@test (X⋅Y)(1, 1) == Der(X, Y)(1, 1)
 
     end
 
-    @testset "Lie derivatives of higher order" begin
+    @testset "Composition of directional derivatives" begin
         
         # autonomous, dim 2
         X = VectorField(x -> [x[2], -2x[1]])
         Y = VectorField(x -> [x[1], 3x[2]])
         f = x -> x[1]^2 + 2x[2]^2
         Test.@test (X⋅Y⋅f)([1, 2]) == ((X⋅Y)⋅f)([1, 2])
-        Test.@test (X⋅Y⋅f)([1, 2]) == Ad(Ad(X, Y), f)([1, 2])
+        Test.@test (X⋅Y⋅f)([1, 2]) == Der(Der(X, Y), f)([1, 2])
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
         Y = VectorField(x -> 3x)
         f = x -> x^2
         Test.@test (X⋅Y⋅f)(1) == ((X⋅Y)⋅f)(1)
-        Test.@test (X⋅Y⋅f)(1) == Ad(Ad(X, Y), f)(1)
+        Test.@test (X⋅Y⋅f)(1) == Der(Der(X, Y), f)(1)
 
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -2x[1]], time_dependence=:nonautonomous)
         Y = VectorField((t, x) -> [t + x[1], 3x[2]], time_dependence=:nonautonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
         Test.@test (X⋅Y⋅f)(1, [1, 2]) == ((X⋅Y)⋅f)(1, [1, 2])
-        Test.@test (X⋅Y⋅f)(1, [1, 2]) == Ad(Ad(X, Y), f)(1, [1, 2])
+        Test.@test (X⋅Y⋅f)(1, [1, 2]) == Der(Der(X, Y), f)(1, [1, 2])
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
         Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
         f = (t, x) -> t + x^2
         Test.@test (X⋅Y⋅f)(1, 1) == ((X⋅Y)⋅f)(1, 1)
-        Test.@test (X⋅Y⋅f)(1, 1) == Ad(Ad(X, Y), f)(1, 1)
+        Test.@test (X⋅Y⋅f)(1, 1) == Der(Der(X, Y), f)(1, 1)
 
     end
 
-    @testset "Lie bracket - minimal order" begin
+    @testset "Lie bracket - length 2" begin
         
         @testset "autonomous case" begin
-            X = VectorField(x -> [x[2], -x[1]])
-            Y = VectorField(x -> [x[2], -x[1]])
-            Test.@test Lie(X, Y)([1, 2]) == [0, 0]
+            f = x -> [x[2], 2x[1]]
+            g = x -> [3x[2], -x[1]]
+            X = VectorField(f)
+            Y = VectorField(g)
+            Test.@test Lie(X, Y)([1, 2]) == [7, -14]
+            Test.@test Lie(X, Y)([1, 2]) == ad(X, Y)([1, 2])
+            Test.@test Lie(X, Y)([1, 2]) == Lie(f, g)([1, 2])
+            Test.@test Lie(X, Y)([1, 2]) == ad(f, g)([1, 2])
         end
 
         @testset "nonautonomous case" begin
-            X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
-            Y = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
-            Test.@test Lie(X, Y)(1, [1, 2]) == [0, 0]
+            f = (t, x) -> [t + x[2], -2x[1]]
+            g = (t, x) -> [t + 3x[2], -x[1]]
+            X = VectorField(f, time_dependence=:nonautonomous)
+            Y = VectorField(g, time_dependence=:nonautonomous)
+            Test.@test Lie(X, Y)(1, [1, 2]) == [-5,11]
+            Test.@test Lie(X, Y)(1, [1, 2]) == ad(X, Y)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, time_dependence=:nonautonomous)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, time_dependence=:nonautonomous)(1, [1, 2])
         end
 
         @testset "mri example" begin
@@ -216,18 +226,18 @@ function test_differential_geometry()
         @testset "exceptions" begin
             X = VectorField(x -> [x[2], -x[1]])
             Y = VectorField(x -> [x[2], -x[1]])
-            Test.@test_throws TypeError Lie(X, Y, order=0)
-            Test.@test_throws TypeError Lie(X, Y, order=1.5)
-            Test.@test_throws TypeError Lie(X, Y, order=(1, 1.5))
-            Test.@test_throws IncorrectArgument Lie(X, order=(1, 1))
-            Test.@test_throws IncorrectArgument Lie(X, Y, order=(1,))
-            Test.@test_throws IncorrectArgument Lie(X, Y, order=(1, 0))
-            Test.@test_throws IncorrectArgument Lie(X, Y, order=(1, 2, 3))            
+            Test.@test_throws TypeError Lie(X, Y, sequence=0)
+            Test.@test_throws TypeError Lie(X, Y, sequence=1.5)
+            Test.@test_throws TypeError Lie(X, Y, sequence=(1, 1.5))
+            Test.@test_throws IncorrectArgument Lie(X, sequence=(1, 1))
+            Test.@test_throws IncorrectArgument Lie(X, Y, sequence=(1,))
+            Test.@test_throws IncorrectArgument Lie(X, Y, sequence=(1, 0))
+            Test.@test_throws IncorrectArgument Lie(X, Y, sequence=(1, 2, 3))            
         end
 
-    end # tests for Lie bracket - order 1
+    end # tests for Lie bracket - sequence 1
 
-    @testset "multiple Lie brackets of any order" begin
+    @testset "multiple Lie brackets of any sequence" begin
 
         x = [1, 2, 3]
         Γ = 2
@@ -241,31 +251,31 @@ function test_differential_geometry()
         F01_ = Lie(F0, F1)
         F02_ = Lie(F0, F2)
         F12_ = Lie(F1, F2)
-        F01 = Lie(F0, F1, order=(1,2))
-        F02 = Lie(F0, F2, order=(1,2))
-        F12 = Lie(F1, F2, order=(1,2))
+        F01 = Lie(F0, F1, sequence=(1,2))
+        F02 = Lie(F0, F2, sequence=(1,2))
+        F12 = Lie(F1, F2, sequence=(1,2))
         Test.@test F01(x) ≈ F01_(x) atol=1e-6
         Test.@test F02(x) ≈ F02_(x) atol=1e-6
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
         
         # length 3
-        F120_ = Lie(F12, F0, order=(1,2))
-        F121_ = Lie(F12, F1, order=(1,2))
-        F122_ = Lie(F12, F2, order=(1,2))
-        F011_ = Lie(F01, F1, order=(1,2))
-        F012_ = Lie(F01, F2, order=(1,2))
-        F022_ = Lie(F02, F2, order=(1,2))
-        F010_ = Lie(F01, F0, order=(1,2))
-        F020_ = Lie(F02, F0, order=(1,2))
+        F120_ = Lie(F12, F0, sequence=(1,2))
+        F121_ = Lie(F12, F1, sequence=(1,2))
+        F122_ = Lie(F12, F2, sequence=(1,2))
+        F011_ = Lie(F01, F1, sequence=(1,2))
+        F012_ = Lie(F01, F2, sequence=(1,2))
+        F022_ = Lie(F02, F2, sequence=(1,2))
+        F010_ = Lie(F01, F0, sequence=(1,2))
+        F020_ = Lie(F02, F0, sequence=(1,2))
 
-        F120 = Lie(F0, F1, F2, order=(2,3,1))
-        F121 = Lie(F1, F2, order=(1,2,1))
-        F122 = Lie(F1, F2, order=(1,2,2))
-        F011 = Lie(F0, F1, order=(1,2,2))
-        F012 = Lie(F0, F1, F2, order=(1,2,3))
-        F022 = Lie(F0, F2, order=(1,2,2))
-        F010 = Lie(F0, F1, order=(1,2,1))
-        F020 = Lie(F0, F2, order=(1,2,1))
+        F120 = Lie(F0, F1, F2, sequence=(2,3,1))
+        F121 = Lie(F1, F2, sequence=(1,2,1))
+        F122 = Lie(F1, F2, sequence=(1,2,2))
+        F011 = Lie(F0, F1, sequence=(1,2,2))
+        F012 = Lie(F0, F1, F2, sequence=(1,2,3))
+        F022 = Lie(F0, F2, sequence=(1,2,2))
+        F010 = Lie(F0, F1, sequence=(1,2,1))
+        F020 = Lie(F0, F2, sequence=(1,2,1))
 
         Test.@test F120(x) ≈ F120_(x) atol=1e-6
         Test.@test F121(x) ≈ F121_(x) atol=1e-6
@@ -286,19 +296,19 @@ function test_differential_geometry()
         Test.@test F020_(x) ≈ [γ*(γ-2*Γ)-δ^2*x[3], 0, δ^2*x[1]] atol=1e-6
 
         # multiple Lie brackets of any length
-        F01, F02, F12 = Lie(F0, F1, F2, orders=((1,2), (1, 3), (2, 3)))
+        F01, F02, F12 = Lie(F0, F1, F2, sequences=((1,2), (1, 3), (2, 3)))
         Test.@test F01(x) ≈ F01_(x) atol=1e-6
         Test.@test F02(x) ≈ F02_(x) atol=1e-6
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
 
-        F12, F121, F122 = Lie(F1, F2, orders=((1,2), (1,2,1), (1, 2, 2)))
+        F12, F121, F122 = Lie(F1, F2, sequences=((1,2), (1,2,1), (1, 2, 2)))
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
         Test.@test F121(x) ≈ F121_(x) atol=1e-6
         Test.@test F122(x) ≈ F122_(x) atol=1e-6
 
     end
 
-    @testset "multiple Lie brackets of any order - with labels" begin
+    @testset "multiple Lie brackets of any sequence - with labels" begin
         
         x = [1, 2, 3]
         Γ = 2
@@ -312,42 +322,42 @@ function test_differential_geometry()
         F01_ = Lie(F0, F1)
         F02_ = Lie(F0, F2)
         F12_ = Lie(F1, F2)
-        F01 = Lie(F0, F1, order=(:F0, :F1))
-        F02 = Lie(F0, F2, order=(:F0, :F2))
-        F12 = Lie(F1, F2, order=(:F1, :F2))
+        F01 = Lie(F0, F1, sequence=(:F0, :F1))
+        F02 = Lie(F0, F2, sequence=(:F0, :F2))
+        F12 = Lie(F1, F2, sequence=(:F1, :F2))
         Test.@test F01(x) ≈ F01_(x) atol=1e-6
         Test.@test F02(x) ≈ F02_(x) atol=1e-6
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
         Test.@test F01.label == :F0F1
 
         # length 3
-        F120_ = Lie(F12, F0, order=(1,2))
-        F121_ = Lie(F12, F1, order=(1,2))
-        F122_ = Lie(F12, F2, order=(1,2))
-        F120 = Lie(F0, F1, F2, order=(:F1, :F2, :F0))
-        F121 = Lie(F1, F2, order=(:F1, :F2, :F1))
-        F122 = Lie(F1, F2, order=(:F1, :F2, :F2))
+        F120_ = Lie(F12, F0, sequence=(1,2))
+        F121_ = Lie(F12, F1, sequence=(1,2))
+        F122_ = Lie(F12, F2, sequence=(1,2))
+        F120 = Lie(F0, F1, F2, sequence=(:F1, :F2, :F0))
+        F121 = Lie(F1, F2, sequence=(:F1, :F2, :F1))
+        F122 = Lie(F1, F2, sequence=(:F1, :F2, :F2))
         Test.@test F120(x) ≈ F120_(x) atol=1e-6
         Test.@test F121(x) ≈ F121_(x) atol=1e-6
         Test.@test F122(x) ≈ F122_(x) atol=1e-6
         Test.@test F120.label == :F1F2F0
 
         # multiple Lie brackets of any length
-        F01, F02, F12 = Lie(F0, F1, F2, orders=((:F0, :F1), (:F0, :F2), (:F1, :F2)))
+        F01, F02, F12 = Lie(F0, F1, F2, sequences=((:F0, :F1), (:F0, :F2), (:F1, :F2)))
         Test.@test F01(x) ≈ F01_(x) atol=1e-6
         Test.@test F02(x) ≈ F02_(x) atol=1e-6
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
 
-        F12, F121, F122 = Lie(F1, F2, orders=((:F1, :F2), (:F1, :F2, :F1), (:F1, :F2, :F2)))
+        F12, F121, F122 = Lie(F1, F2, sequences=((:F1, :F2), (:F1, :F2, :F1), (:F1, :F2, :F2)))
         Test.@test F12(x) ≈ F12_(x) atol=1e-6
         Test.@test F121(x) ≈ F121_(x) atol=1e-6
         Test.@test F122(x) ≈ F122_(x) atol=1e-6
 
         # exceptions
-        @test_throws IncorrectArgument Lie(F0, F1, order=(:F0, :F1, :F2))
-        @test_throws IncorrectArgument Lie(F0, order=(:F0,))
-        @test_throws IncorrectArgument Lie(F0, F1, order=(:F0,))
-        @test_throws IncorrectArgument Lie(F1, F1, order=(:F0, :F1))
+        @test_throws IncorrectArgument Lie(F0, F1, sequence=(:F0, :F1, :F2))
+        @test_throws IncorrectArgument Lie(F0, sequence=(:F0,))
+        @test_throws IncorrectArgument Lie(F0, F1, sequence=(:F0,))
+        @test_throws IncorrectArgument Lie(F1, F1, sequence=(:F0, :F1))
 
     end
 
