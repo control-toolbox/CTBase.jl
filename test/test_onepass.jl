@@ -167,6 +167,20 @@ z = [ 4, 5 ]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
 @test o.lagrange(x, u, z) == u^2 + z[2] * x[1] 
+
+o = @def1 begin
+    tf, variable
+    t ∈ [ 0, tf ], time
+    x ∈ R², state
+    r = x₁
+    v = x₂
+    w = r¹ + 2v³
+    r(0) + w(tf) - tf² == 0,    (1)
+    end 
+tf = 2
+x0 = [ 1, 2 ]
+xf = [ 3, 4 ]
+@test constraint(o, :eq1)(x0, xf, tf) == x0[1] + ( xf[1] + 2xf[2]^3 ) - tf^2
  
 o = @def1 begin
     t ∈ [ 0, 1 ], time
