@@ -1,5 +1,4 @@
 # test onepass
-# todo: test variable
 
 function test_onepass()
 

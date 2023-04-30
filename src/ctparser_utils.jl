@@ -1,5 +1,4 @@
 # ctparser_utils
-# todo:
 
 """
 $(TYPEDSIGNATURES)
