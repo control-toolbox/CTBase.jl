@@ -1,6 +1,8 @@
 # onepass
 # todo:
-# - test complex alias (w = x₁ + x₂) for boundary (ok with (t)), etc.
+# - for dynamics, lagrange, mayer: x(t), u(t) -> xt = x#t, ut = u#t
+# - idem for control_fun, state_fun and mixed in constraint_type
+# - test x...(t0)...(t0), x...(t0)...(t), x...(t)...(t): not OK 
 # - add tests on nested begin end
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
@@ -109,7 +111,7 @@ end
 
 p_variable!(p, ocp, v, q=1; log=false) = begin
     log && println("variable: $v, dim: $q")
-    !(v isa Symbol) && return __throw("forbidden variable name: $v", p.lnum, p.line)
+    v isa Symbol || return __throw("forbidden variable name: $v", p.lnum, p.line)
     p.v = v
     vv = QuoteNode(v)
     qq = q isa Integer ? q : 9
@@ -120,7 +122,7 @@ end
 
 p_alias!(p, ocp, a, e; log=false) = begin
     log && println("alias: $a = $e")
-    !(a isa Symbol) && return __throw("forbidden alias name: $a", p.lnum, p.line)
+    a isa Symbol || return __throw("forbidden alias name: $a", p.lnum, p.line)
     aa = QuoteNode(a)
     ee = QuoteNode(e)
     for i ∈ 1:9 p.aliases[Symbol(a, __sup(i))] = :( $a^$i  ) end
@@ -130,7 +132,7 @@ end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
     log && println("time: $t, initial time: $t0, final time: $tf")
-    !(t isa Symbol) && return __throw("forbidden time name: $t", p.lnum, p.line)
+    t isa Symbol || return __throw("forbidden time name: $t", p.lnum, p.line)
     p.t = t
     p.t0 = t0
     p.tf = tf
@@ -167,7 +169,7 @@ end
 
 p_state!(p, ocp, x, n=1; log=false) = begin
     log && println("state: $x, dim: $n")
-    !(x isa Symbol)  && return __throw("forbidden state name: $x", p.lnum, p.line)
+    x isa Symbol || return __throw("forbidden state name: $x", p.lnum, p.line)
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
@@ -178,7 +180,7 @@ end
 
 p_control!(p, ocp, u, m=1; log=false) = begin
     log && println("control: $u, dim: $m")
-    !(u isa Symbol)  && return __throw("forbidden control name: $u", p.lnum, p.line)
+    u isa Symbol || return __throw("forbidden control name: $u", p.lnum, p.line)
     p.u = u
     uu = QuoteNode(u)
     mm =  m isa Integer ? m : 9
@@ -190,7 +192,7 @@ end
 p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     log && println("constraint: $e1 == $e2,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
-    !(label isa Symbol) && return __throw("forbidden label: $label", p.lnum, p.line)
+    label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial , nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
@@ -243,7 +245,7 @@ end
 p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     log && println("constraint: $e1 ≤ $e2 ≤ $e3,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
-    !(label isa Symbol) && return __throw("forbidden label: $label", p.lnum, p.line)
+    label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial , nothing) => :( constraint!($ocp, :initial,       $e1, $e3, $llabel) )

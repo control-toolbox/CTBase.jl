@@ -361,4 +361,23 @@ yf = 2 * [ 1, 2, 3, 4 ]
 @test ismin(o)
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
+o = @def1 begin
+    z ∈ R², variable
+    s ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    aa = y₁ + w² + v³ + z₂ 
+    y'(s) == [ aa(s), r²(s), 0, 0 ]
+    r(0) + v(z₁) + z₂ → min
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+y0 = y
+yf = 3y0
+w = 7
+@test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
+@test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
+
 end

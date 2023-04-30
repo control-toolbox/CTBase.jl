@@ -1,5 +1,5 @@
 # ctparser_utils
-# todo: superpower has(e, x, t)? (as replace_call) x...(t0)...(t0) OK (!), not x...(t0)...(t) or like
+# todo:
 
 """
 $(TYPEDSIGNATURES)
@@ -64,7 +64,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Replace calls in e such as `x(t)`, `x[i](t)` or `x[i:j](t)` by `y`, `y[i](t)` or `y[i:j](t)`, resp.
+Replace calls in e of the form `(...x...)(t)` by `(...y...)(t)`.
 
 # Example
 ```jldoctest
@@ -188,16 +188,13 @@ end
 $(TYPEDSIGNATURES)
 
 Return the type constraint among
-`:dynamics`, `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`,
+`:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`,
 `:state_range`, `:state_fun`, `:mixed` (`:other` otherwise),
 together with the appropriate value (range, updated expression...)
 
 # Example
 ```jldoctest
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
-
-julia> constraint_type(:( x'(t) ), t, t0, tf, x, u, v)
-(:dynamics, nothing)
 
 julia> constraint_type(:( y'(t) ), t, t0, tf, x, u, v)
 :other
@@ -285,6 +282,7 @@ julia> constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u, v)
 
 julia> constraint_type(:( 2u[1](t)^2 * x(t) + v ), t, t0, tf, x, u, v)
 (:mixed, :((2 * u[1] ^ 2) * x + v))
+
 julia> constraint_type(:( v[1:2:10] ), t, t0, tf, x, u, v)
 (:variable_range, 1:2:9)
 
