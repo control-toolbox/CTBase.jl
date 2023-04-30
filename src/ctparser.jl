@@ -480,11 +480,12 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
                                     _state_variable,
                                     _control_variable)
 
-        # for boundary
-        _tuple = (  (Symbol(_time_variable,  "#0"),
-                     Symbol(_state_variable, "#0"),
-                     Symbol(_time_variable,  "#f"),
-                     Symbol(_state_variable, "#f")))
+        # for boundary arguments:  pretty print / code
+        _pprt_tuple = "(var\"$_time_variable#0\", var\"$_state_variable#0\", var\"$_time_variable#f\", var\"$_state_variable#f\")"
+        _code_tuple = ( Symbol(_time_variable,  "#0"),
+                        Symbol(_state_variable, "#0"),
+                        Symbol(_time_variable,  "#f"),
+                        Symbol(_state_variable, "#f"))
 
         if _ctype == :dynamics
             # must modify the function
@@ -589,18 +590,26 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
 
             # boundary
             ( :boundary, a, :(==), true) => let
-                # codeline = quote constraint!(ocp, :boundary, $_tuple -> $(esc(a)), $(esc(_v1))) end
-                # push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1)   # not implemented", i, _generated_code)
+                #_lambda = Expr( :->, _code_tuple, a)
+                _lambda = :((Symbol("t#0"), Symbol("x#0"), Symbol("t#f"), Symbol("x#f"))->var"x#f" - tf * var"x#0") |> remove_line_number_node
+                println("=== dump a")
+                Meta.dump(a)
+                println("=== dump lambda")
+                Meta.dump(_lambda)
+                _lambda = :( (QuoteNode(Symbol("t#0")), QuoteNode(Symbol("x#0")), QuoteNode(Symbol("t#f")), QuoteNode(Symbol("x#f")))->var"x#f" - tf * var"x#0") |> remove_line_number_node
+                Meta.dump(_lambda)
+                codeline = quote constraint!(ocp, :boundary, $(esc(_lambda)), $(esc(_v1))) end
+                push!(_final_code, codeline)
+                _store_code_as_string("constraint!(ocp, :boundary, $_pprt_tuple -> $a, $_v1)   # not implemented", i, _generated_code)
             end
             ( :boundary, a, :(≤), true) => let
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2)   # not implemented", i, _generated_code)
+                _store_code_as_string("constraint!(ocp, :boundary, $_pprt_tuple -> $a, $_v1, $_v2)   # not implemented", i, _generated_code)
             end
             ( :boundary, a, :(==), false) => let
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, :$_name)   # not implemented", i, _generated_code)
+                _store_code_as_string("constraint!(ocp, :boundary, $_pprt_tuple -> $a, $_v1, :$_name)   # not implemented", i, _generated_code)
             end
             ( :boundary, a, :(≤), false) => let
-                _store_code_as_string("constraint!(ocp, :boundary, $_tuple -> $a, $_v1, $_v2, :$_name)   # not implemented", i, _generated_code)
+                _store_code_as_string("constraint!(ocp, :boundary, $_pprt_tuple -> $a, $_v1, $_v2, :$_name)   # not implemented", i, _generated_code)
             end
 
             # control
