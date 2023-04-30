@@ -293,10 +293,10 @@ end
 
 p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
-    !isnothing(label) && __throw("dynamics cannot be labelled", p.lnum, p.line)
-    isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
-    isnothing(p.u) && __throw("control not yet declared", p.lnum, p.line)
-    isnothing(p.t) && __throw("time not yet declared", p.lnum, p.line)
+    isnothing(label) || return __throw("dynamics cannot be labelled", p.lnum, p.line)
+    isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
+    isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
     x ≠ p.x && return __throw("wrong state for dynamics", p.lnum, p.line)
     t ≠ p.t && return __throw("wrong time for dynamics", p.lnum, p.line)
     e = replace_call(e, p.x, p.t, p.x)
@@ -313,9 +313,9 @@ end
 
 p_lagrange!(p, ocp, e, type; log=false) = begin
     log && println("objective: ∫($e) → $type")
-    isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
-    isnothing(p.u) && __throw("control not yet declared", p.lnum, p.line)
-    isnothing(p.t) && __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
+    isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
     e = replace_call(e, p.x, p.t, p.x)
     e = replace_call(e, p.u, p.t, p.u)
     ttype = QuoteNode(type)
@@ -331,9 +331,9 @@ end
 
 p_mayer!(p, ocp, e, type; log=false) = begin
     log && println("objective: $e → $type")
-    isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
-    isnothing(p.t0) && __throw("time not yet declared", p.lnum, p.line)
-    isnothing(p.tf) && __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
     gs = gensym()
     x0 = Symbol(p.x, "#0")
     xf = Symbol(p.x, "#f")
