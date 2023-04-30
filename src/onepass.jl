@@ -82,8 +82,9 @@ parse!(p, ocp, e; log=false) = begin
         :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
         :( $u       , control        ) => p_control!(p, ocp, u   ; log)
         :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
-        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1; log)
-        :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2; log)
+        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log)
+        :( $x'($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log)
+        :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2       ; log)
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
         :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
@@ -290,8 +291,9 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     __wrap(code, p.lnum, p.line)
 end
 
-p_dynamics!(p, ocp, x, t, e; log=false) = begin
+p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     log && println("dynamics: $x'($t) == $e")
+    !isnothing(label) && __throw("dynamics cannot be labelled", p.lnum, p.line)
     isnothing(p.x) && __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.u) && __throw("control not yet declared", p.lnum, p.line)
     isnothing(p.t) && __throw("time not yet declared", p.lnum, p.line)
