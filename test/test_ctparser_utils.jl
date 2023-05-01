@@ -30,6 +30,16 @@ e = :( F0(x(t)) + u(t)*F1(x(t)) )
 e = :( 0.5u(t)^2  )
 @test replace_call(e, u, t, u) == :(0.5 * u ^ 2)
 
+t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
+e = :( (x^2 + u[1])(t) )
+@test replace_call(e, [ x, u ], t , [ :xx, :uu ]) == :(xx ^ 2 + uu[1])
+
+e = :( ((x^2)(t) + u[1])(t) )
+@test replace_call(e, [ x, u ], t , [ :xx, :uu ]) == :(xx ^ 2 + uu[1])
+
+e = :( ((x^2)(t0) + u[1])(t) )
+@test replace_call(e, [ x, u ], t , [ :xx, :uu ]) == :((xx ^ 2)(t0) + uu[1])
+
 e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 @test has(e, :x, :t)
 @test has(e, :u, :t)

@@ -100,6 +100,26 @@ replace_call(e, x::Symbol, t, y) = begin
     expr_it(e, foo(x, t, y), x -> x)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Replace calls in e of the form `(...x1...x2...)(t)` by `(...y1...y2...)(t)` for all symbols `x1`, `x2`... in the vector `x`.
+
+# Example
+```jldoctest
+
+julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
+
+julia> e = :( (x^2 + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu ])
+:(xx ^ 2 + uu[1])
+
+julia> e = :( ((x^2)(t) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu ])
+:(xx ^ 2 + uu[1])
+
+julia> e = :( ((x^2)(t0) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu ])
+:((xx ^ 2)(t0) + uu[1])
+```
+"""
 replace_call(e, x::Vector{Symbol}, t, y) = begin
     @assert length(x) == length(y)
     foo(x, t, y) = (h, args...) -> begin

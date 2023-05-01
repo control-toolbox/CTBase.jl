@@ -379,4 +379,93 @@ w = 7
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
+o = @def1 begin
+    z ∈ R², variable
+    s ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    aa = y₁(s) + v³ + z₂ 
+    y'(s) == [ aa(s) + (w^2)(s), r²(s), 0, 0 ]
+    r(0) + v(z₁) + z₂ → min
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+y0 = y
+yf = 3y0
+w = 7
+@test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
+@test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
+
+o = @def1 begin
+    z ∈ R², variable
+    s ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    aa = y₁(s) + v³ + z₂ 
+    y'(s) == [ aa(s) + w^2, r²(s), 0, 0 ]
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+y0 = y
+yf = 3y0
+ww = 9
+@test o.dynamics(y, ww, z) ≠ [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
+
+o = @def1 begin
+    z ∈ R², variable
+    s ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w, control
+    r = y₃
+    v = y₄
+    aa = y₁ + v³ + z₂ 
+    aa(0) + y₂(z₁) → min
+end 
+z = [ 5, 6 ]
+y0 = y
+yf = 3y0
+@test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
+
+o = @def1 begin
+    z ∈ R², variable
+    __t ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w, control
+    r = y₃
+    v = y₄
+    aa = y₁(__t) + v³ + z₂ 
+    y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
+    aa(0) + y₂(z₁) → min
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+y0 = y
+yf = 3y0
+w = 11
+@test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
+@test_throws MethodError o.mayer(y0, yf, z)
+
+o = @def1 begin
+    z ∈ R², variable
+    __t ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w, control
+    r = y₃
+    v = y₄
+    aa = y₁(0) + v³ + z₂ 
+    y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
+    aa(0) + y₂(z₁) → min
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+y0 = y
+yf = 3y0
+w = 11
+@test_throws MethodError o.dynamics(y, w, z)
+@test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
+
 end
