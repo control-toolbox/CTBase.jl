@@ -447,7 +447,7 @@ y0 = y
 yf = 3y0
 w = 11
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
-@test_throws MethodError o.mayer(y0, yf, z)
+@test_throws UndefVarError o.mayer(y0, yf, z)
 
 o = @def1 begin
     z ∈ R², variable
