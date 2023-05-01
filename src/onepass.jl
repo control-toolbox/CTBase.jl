@@ -1,7 +1,5 @@
 # onepass
 # todo:
-# - test x...(t0)...(t0), x...(t0)...(t), x...(t)...(t): not OK 
-# - add tests on nested begin end
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
 # - add assert for pre/post conditions and invariants
