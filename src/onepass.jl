@@ -6,6 +6,7 @@
 # - add tests on nested begin end
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
+# - add assert for pre/post conditions and invariants
 
 """
 $(TYPEDEF)
@@ -14,12 +15,12 @@ $(TYPEDEF)
 
 """
 @with_kw mutable struct ParsingInfo
+    v::Union{Symbol, Nothing}=nothing
     t::Union{Symbol, Nothing}=nothing
     t0::Union{Real, Symbol, Expr, Nothing}=nothing
     tf::Union{Real, Symbol, Expr, Nothing}=nothing
     x::Union{Symbol, Nothing}=nothing
     u::Union{Symbol, Nothing}=nothing
-    v::Union{Symbol, Nothing}=nothing
     aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}}=__init_aliases()
     lnum::Integer=0
     line::String=""
@@ -41,7 +42,10 @@ end
 
 __sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
 
-__sup(i) = [ '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹' ][i]
+__sup(i) = begin
+    @assert i ∈ 1:9
+    [ '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹' ][i]
+end
 
 __throw(ex, n, line) = begin
     quote
@@ -307,10 +311,12 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
     x ≠ p.x && return __throw("wrong state for dynamics", p.lnum, p.line)
     t ≠ p.t && return __throw("wrong time for dynamics", p.lnum, p.line)
-    e = replace_call(e, p.x, p.t, p.x)
-    e = replace_call(e, p.u, p.t, p.u)
+    xt = Symbol(p.x, "#t")
+    ut = Symbol(p.u, "#t")
+    e = replace_call(e, p.x, p.t, xt)
+    e = replace_call(e, p.u, p.t, ut)
     gs = gensym()
-    args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+    args = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
     __wrap(quote
         function $gs($(args...))
             $e

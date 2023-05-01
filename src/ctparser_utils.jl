@@ -89,7 +89,7 @@ julia> e = :( 0.5u(t)^2  ); replace_call(e, u, t, u)
 :(0.5 * u ^ 2)
 ```
 """
-replace_call(e, x, t, y) = begin
+replace_call(e, x::Symbol, t, y) = begin
     foo(x, t, y) = (h, args...) -> begin
         ee = Expr(h, args...)
 	@match ee begin
