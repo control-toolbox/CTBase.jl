@@ -426,6 +426,36 @@ o = @def1 begin
     w ∈ R, control
     r = y₃
     v = y₄
+    aa = y₁
+    y'(s) == [ aa(s), r²(s) + w(s) + z₁, 0, 0 ]
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+w = 9
+@test o.dynamics(y, w, z) == [ y[1], y[3]^2 + w + z[1], 0, 0 ]
+
+o = @def1 begin
+    z ∈ R², variable
+    __s ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
+    aa = y₁(__s)
+    y'(s) == [ aa(__s), r²(__s) + w(__s) + z₁, 0, 0 ]
+end 
+z = [ 5, 6 ]
+y = [ 1, 2, 3, 4 ]
+w = 9
+@test_throws UndefVarError o.dynamics(y, w, z)
+
+o = @def1 begin
+    z ∈ R², variable
+    s ∈ [ 0, z₁ ], time
+    y ∈ R⁴, state
+    w ∈ R, control
+    r = y₃
+    v = y₄
     aa = y₁(s) + v³ + z₂ 
     y'(s) == [ aa(s) + w^2, r²(s), 0, 0 ]
 end 
