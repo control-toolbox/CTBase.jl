@@ -1,7 +1,5 @@
 # onepass
 # todo:
-# - for dynamics, lagrange, mayer: x(t), u(t) -> xt = x#t, ut = u#t
-# - idem for control_fun, state_fun and mixed in constraint_type
 # - test x...(t0)...(t0), x...(t0)...(t), x...(t)...(t): not OK 
 # - add tests on nested begin end
 # - tests exceptions (parsing and semantics/runtime)
@@ -216,7 +214,8 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             end end
         (:control_fun, ee1) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            ut = Symbol(p.u, "#t")
+            args = isnothing(p.v) ? [ ut ] : [ ut, p.v ]
             quote
                 function $gs($(args...))
                     $ee1
@@ -225,7 +224,8 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             end end
         (:state_fun, ee1) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
+            xt = Symbol(p.x, "#t")
+            args = isnothing(p.v) ? [ xt ] : [ xt, p.v ]
             quote
                 function $gs($(args...))
                     $ee1
@@ -234,7 +234,9 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
             end end
         (:mixed, ee1) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+            xt = Symbol(p.x, "#t")
+            ut = Symbol(p.u, "#t")
+            args = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
             quote
                 function $gs($(args...))
                     $ee1
@@ -271,7 +273,8 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:control_range, val    ) => :( constraint!($ocp, :control, $val, $e1, $e3, $llabel) )
         (:control_fun, ee2) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.u ] : [ p.u, p.v ]
+            ut = Symbol(p.u, "#t")
+            args = isnothing(p.v) ? [ ut ] : [ ut, p.v ]
             quote
                 function $gs($(args...))
                     $ee2
@@ -282,7 +285,8 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:state_range, val    ) => :( constraint!($ocp, :state, $val, $e1, $e3, $llabel) )
         (:state_fun, ee2) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.x ] : [ p.x, p.v ]
+            xt = Symbol(p.x, "#t")
+            args = isnothing(p.v) ? [ xt ] : [ xt, p.v ]
             quote
                 function $gs($(args...))
                     $ee2
@@ -291,7 +295,9 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             end end
         (:mixed, ee2) => begin
             gs = gensym()
-            args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+            xt = Symbol(p.x, "#t")
+            ut = Symbol(p.u, "#t")
+            args = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
             quote
                 function $gs($(args...))
                     $ee2
@@ -313,8 +319,7 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     t ≠ p.t && return __throw("wrong time for dynamics", p.lnum, p.line)
     xt = Symbol(p.x, "#t")
     ut = Symbol(p.u, "#t")
-    e = replace_call(e, p.x, p.t, xt)
-    e = replace_call(e, p.u, p.t, ut)
+    e = replace_call(e, [ p.x, p.u ], p.t, [ xt, ut ])
     gs = gensym()
     args = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
     __wrap(quote
@@ -330,11 +335,12 @@ p_lagrange!(p, ocp, e, type; log=false) = begin
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
-    e = replace_call(e, p.x, p.t, p.x)
-    e = replace_call(e, p.u, p.t, p.u)
+    xt = Symbol(p.x, "#t")
+    ut = Symbol(p.u, "#t")
+    e = replace_call(e, [ p.x, p.u ], p.t, [ xt, ut ])
     ttype = QuoteNode(type)
     gs = gensym()
-    args = isnothing(p.v) ? [ p.x, p.u ] : [ p.x, p.u, p.v ]
+    args = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
     __wrap(quote
         function $gs($(args...))
             $e
