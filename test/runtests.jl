@@ -14,8 +14,7 @@ const constraint_type = CTBase.constraint_type
     for name ∈ (
         :callbacks,
         :ctparser_utils,
-        :ctparser,
-        :ctparser_constraints,
+        #:ctparser,
         :onepass,
         :default,
         :descriptions,
