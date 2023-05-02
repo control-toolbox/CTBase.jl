@@ -101,13 +101,6 @@ ismax(ocp::OptimalControlModel) = !ismin(ocp)
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if a variable has been declared.
-"""
-hasvariable(ocp::OptimalControlModel) = !isnothing(ocp.variable_dimension)
-
-"""
-$(TYPEDSIGNATURES)
-
 Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:
@@ -648,7 +641,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
     end
-    
+
 end
 
 """
@@ -755,12 +748,12 @@ function constraint(ocp::OptimalControlModel{:nonautonomous}, label::Symbol)
     @match con begin
         (:initial , _, f::Function, _, _) => return f
         (:final   , _, f::Function, _, _) => return f
-        (:boundary, _, f::Function, _, _) => return f 
-        (:control , _, f::Function, _, _) => return f 
+        (:boundary, _, f::Function, _, _) => return f
+        (:control , _, f::Function, _, _) => return f
         (:control , _, rg         , _, _) => return (t, u) -> u[rg]
-        (:state   , _, f::Function, _, _) => return f 
+        (:state   , _, f::Function, _, _) => return f
         (:state   , _, rg         , _, _) => return (t, x) -> x[rg]
-        (:mixed   , _, f::Function, _, _) => return f 
+        (:mixed   , _, f::Function, _, _) => return f
         _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
              ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed ]."))
     end
@@ -790,7 +783,7 @@ julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
 ```
 """
 function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence}
- 
+
     !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
     n = ocp.state_dimension
     m = ocp.control_dimension
@@ -821,7 +814,7 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
             push!(ξf, ControlConstraint(f, time_dependence=time_dependence, control_dimension=m, constraint_dimension=length(lb)))
             append!(ξl, lb)
             append!(ξu, ub) end
-        (:control, _, rg, lb, ub) => begin 
+        (:control, _, rg, lb, ub) => begin
             append!(uind, rg)
             append!(ulb, lb)
             append!(uub, ub) end
@@ -879,7 +872,7 @@ Set the criterion to the function `f`. Type can be `:mayer` or `:lagrange`. Crit
 !!! note
 
     - The dimensions of the state and control must be set before adding the dynamics.
-    
+
 # Examples
 
 ```jldoctest

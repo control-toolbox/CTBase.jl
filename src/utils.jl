@@ -1,7 +1,7 @@
 """
 $(TYPEDSIGNATURES)
 
-Returns `i` ∈ [0, 9] as a subscript.
+Return `i` ∈ [0, 9] as a subscript.
 """
 function ctindice(i::Integer)::Char
     if i < 0 || i > 9
@@ -13,7 +13,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns `i` > 0 as a subscript.
+Return `i` > 0 as a subscript.
 """
 function ctindices(i::Integer)::String
     if i < 0
@@ -29,7 +29,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns `i` ∈ [0, 9] as an upperscript.
+Return `i` ∈ [0, 9] as an upperscript.
 """
 function ctupperscript(i::Integer)::Char
     if i < 0 || i > 9
@@ -55,7 +55,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns `i` > 0 as an upperscript.
+Return `i` > 0 as an upperscript.
 """
 function ctupperscripts(i::Integer)::String
     if i < 0
@@ -71,21 +71,21 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns the gradient of `f` at `x`.
+Return the gradient of `f` at `x`.
 """
 ctgradient(f::Function, x) = ForwardDiff.gradient(f, x)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns the Jacobian of `f` at `x`.
+Return the Jacobian of `f` at `x`.
 """
 ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)
 
 """
 $(TYPEDSIGNATURES)
 
-Returns the interpolation of `f` at `x`.
+Return the interpolation of `f` at `x`.
 """
 function ctinterpolate(x, f) # default for interpolation of the initialization
     return Interpolations.linear_interpolation(x, f, extrapolation_bc=Interpolations.Line())
@@ -127,14 +127,14 @@ expand(x::Vector{<:Vector{<:ctNumber}}) = vec2vec(x)
 """
 $(TYPEDSIGNATURES)
 
-Returns `x`.
+Return `x`.
 """
 expand(x::Vector{<:ctNumber}) = x
 
 """
 $(TYPEDSIGNATURES)
 
-Returns `expand(matrix2vec(x, 1))`
+Return `expand(matrix2vec(x, 1))`
 """
 expand(x::Matrix{<:ctNumber}) = expand(matrix2vec(x, 1))
 
@@ -175,7 +175,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns the Poisson bracket of `f` and `g`.
+Return the Poisson bracket of `f` and `g`.
 """
 function Poisson(f, g)
     function fg(x, p)

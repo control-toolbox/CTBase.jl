@@ -37,7 +37,7 @@ makeDescription(desc::DescVarArg)::Description = Tuple(desc) # create a descript
 """
 $(TYPEDSIGNATURES)
 
-Returns the description.
+Return the description.
 
 # Example
 ```jldoctest
@@ -50,7 +50,7 @@ makeDescription(desc::Description)::Description = desc
 """
 $(TYPEDSIGNATURES)
 
-Returns a tuple containing only the description `y`.
+Return a tuple containing only the description `y`.
 
 # Example
 ```jldoctest
@@ -84,7 +84,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns a complete description from an incomplete description `desc` and 
+Return a complete description from an incomplete description `desc` and 
 a list of complete descriptions `desc_list`. If several complete descriptions are possible, 
 then the first one is returned.
 
@@ -113,7 +113,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Returns the difference between the description `x` and the description `y`.
+Return the difference between the description `x` and the description `y`.
 
 # Example
 ```jldoctest
