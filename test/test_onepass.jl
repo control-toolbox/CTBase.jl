@@ -1317,6 +1317,4 @@ w = 11
         x'(t) == f(x(t), u(t))  , named_dynamics_not_allowed  # but allowed if unnamed !
     end
 
-#end
-
 end
