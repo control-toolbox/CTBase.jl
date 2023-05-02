@@ -263,12 +263,35 @@ function Lie(Xs::VectorField{td, sd}...;
     end
 end
 
-macro Lie(expr::Symbol)
+function _Lie_sequence(expr::Symbol)
     v = split(string(expr))[1]
     @assert v[1] == 'F'
-    sequence = Tuple([parse(Integer, c) for c ∈ v[2:end]])
-    vfs = Tuple([Symbol(:F, n) for n ∈ unique(sequence)])
+    uni = sort(unique(v[2:end]))
+    vfs = Tuple([Symbol(:F, n) for n ∈ uni])
+    seq = [parse(Integer, c) for c ∈ v[2:end]]
+    sequence = Tuple([findfirst(v->v==s, parse.(Integer, uni)) for s ∈ seq])
     code = quote
         $expr = Lie($(vfs...), sequence=$sequence)
     end
+    return code
+end
+
+macro Lie(expr::Symbol)
+    v = split(string(expr))[1]
+    @assert v[1] == 'F'
+    uni = sort(unique(v[2:end]))
+    vfs = Tuple([Symbol(:F, n) for n ∈ uni])
+    seq = [parse(Integer, c) for c ∈ v[2:end]]
+    sequence = Tuple([findfirst(v->v==s, parse.(Integer, uni)) for s ∈ seq])
+    code = quote
+        $expr = Lie($(vfs...), sequence=$sequence)
+    end
+    return esc(code)
+end
+
+macro Lie(expr::Expr)
+    @assert hasproperty(expr, :head)
+    @assert expr.head == :vect
+    @assert length(expr.args) == 2
+    return postwalk( x -> @capture(x, [a_, b_]) ? :(Lie($a, $b)) : x, expr)
 end

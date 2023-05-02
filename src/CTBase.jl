@@ -22,6 +22,7 @@ using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using Printf # to print an OptimalControlModel
 using Reexport
+using MacroTools: @capture, postwalk
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types

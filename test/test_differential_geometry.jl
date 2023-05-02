@@ -1,5 +1,6 @@
 using Test
 using CTBase
+using MacroTools: postwalk
 include("../src/differential_geometry.jl")
 
 # ---------------------------------------------------------------------------
@@ -237,7 +238,7 @@ function test_differential_geometry()
 
     end # tests for Lie bracket - sequence 1
 
-    @testset "multiple Lie brackets of any sequence" begin
+    @testset "multiple Lie brackets of any length" begin
 
         x = [1, 2, 3]
         Γ = 2
@@ -251,12 +252,16 @@ function test_differential_geometry()
         F01_ = Lie(F0, F1)
         F02_ = Lie(F0, F2)
         F12_ = Lie(F1, F2)
+        #
+        @Lie F01 # macro
+        Test.@test F01(x) ≈ F01_(x) atol=1e-6   
+        #
         F01 = Lie(F0, F1, sequence=(1,2))
         F02 = Lie(F0, F2, sequence=(1,2))
         F12 = Lie(F1, F2, sequence=(1,2))
         Test.@test F01(x) ≈ F01_(x) atol=1e-6
         Test.@test F02(x) ≈ F02_(x) atol=1e-6
-        Test.@test F12(x) ≈ F12_(x) atol=1e-6
+        Test.@test F12(x) ≈ F12_(x) atol=1e-6     
         
         # length 3
         F120_ = Lie(F12, F0, sequence=(1,2))
@@ -308,7 +313,7 @@ function test_differential_geometry()
 
     end
 
-    @testset "multiple Lie brackets of any sequence - with labels" begin
+    @testset "multiple Lie brackets of any length - with labels" begin
         
         x = [1, 2, 3]
         Γ = 2
