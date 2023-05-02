@@ -1,21 +1,21 @@
 #
 # remark: all tests are independant
 #         and define unrelated problems
-#         (@def1 enforces this)
+#         (@def0 enforces this)
 
 function test_ctparser()
 
     # phase 1: minimal problems, to check all possible syntaxes
 
     # time
-    ocp = @def1 t ∈ [ 0.0 , 1.0 ], time ;
+    ocp = @def0 t ∈ [ 0.0 , 1.0 ], time ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
     @test ocp.initial_time == 0.0
     @test ocp.final_time   == 1.0
 
     t0 = 3.0
-    ocp = @def1 begin
+    ocp = @def0 begin
         tf ∈ R, variable
         t ∈ [ t0, tf ], time
     end ;
@@ -25,7 +25,7 @@ function test_ctparser()
     @test ocp.final_time   == Index(1)
 
     tf = 3.14
-    ocp = @def1 begin
+    ocp = @def0 begin
         t0 ∈ R, variable
         t ∈ [ t0, tf ], time
     end ;
@@ -36,7 +36,7 @@ function test_ctparser()
 
     # state
     t0 = 1.0; tf = 1.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         u, state
     end ;
@@ -48,7 +48,7 @@ function test_ctparser()
     @test ocp.state_names == [ "u" ]
 
     t0 = 2.0; tf = 2.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         v ∈ R^4, state
     end ;
@@ -60,7 +60,7 @@ function test_ctparser()
     @test ocp.state_names == [ "v₁", "v₂", "v₃", "v₄"]
 
     t0 = 3.0; tf = 3.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         w ∈ R^3, state
     end ;
@@ -72,7 +72,7 @@ function test_ctparser()
     @test ocp.state_names ==  [ "w₁", "w₂", "w₃"]
 
     t0 = 4.0; tf = 4.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         a ∈ R, state
     end ;
@@ -85,7 +85,7 @@ function test_ctparser()
 
 
     t0 = 5.0; tf = 5.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         b ∈ R¹, state
     end ;
@@ -98,7 +98,7 @@ function test_ctparser()
 
 
     t0 = 6.0; tf = 6.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         u ∈ R⁹, state
     end ;
@@ -112,7 +112,7 @@ function test_ctparser()
 
     n = 3
     t0 = 7.0; tf = 7.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         u ∈ R^n, state
     end ;
@@ -126,7 +126,7 @@ function test_ctparser()
 
     # control
     t0 = 1.0; tf = 1.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         u, control
     end ;
@@ -138,7 +138,7 @@ function test_ctparser()
     @test ocp.control_names == [ "u" ]
 
     t0 = 2.0; tf = 2.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         v ∈ R^4, control
     end ;
@@ -150,7 +150,7 @@ function test_ctparser()
     @test ocp.control_names == [ "v₁", "v₂", "v₃", "v₄"]
 
     t0 = 3.0; tf = 3.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         w ∈ R^3, control
     end ;
@@ -162,7 +162,7 @@ function test_ctparser()
     @test ocp.control_names ==  [ "w₁", "w₂", "w₃"]
 
     t0 = 4.0; tf = 4.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         a ∈ R, control
     end ;
@@ -175,7 +175,7 @@ function test_ctparser()
 
 
     t0 = 5.0; tf = 5.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         b ∈ R¹, control
     end ;
@@ -188,7 +188,7 @@ function test_ctparser()
 
 
     t0 = 6.0; tf = 6.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         u ∈ R⁹, control
     end ;
@@ -202,7 +202,7 @@ function test_ctparser()
 
     n = 3
     t0 = 7.0; tf = 7.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0 , tf ], time
         u ∈ R^n, control
     end ;
@@ -216,7 +216,7 @@ function test_ctparser()
 
     # variables
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         a, variable
     end ;
@@ -225,7 +225,7 @@ function test_ctparser()
     @test ocp.variable_names == [ "a" ]
 
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         a ∈ R³, variable
     end ;
@@ -235,7 +235,7 @@ function test_ctparser()
 
     # alias
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -255,7 +255,7 @@ function test_ctparser()
 
     # objectives
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -264,7 +264,7 @@ function test_ctparser()
     @test ocp isa OptimalControlModel
 
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -280,7 +280,7 @@ function test_ctparser()
     r0 = 1.0; r1 = 2.0
     v0 = 2.0; vmax = sqrt(2)
     m0 = 3.0; mf = 1.1
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -302,7 +302,7 @@ function test_ctparser()
     @test ocp.state_names   == ["x₁", "x₂"]
     @test ocp.state_dimension == 2
 
-    ocp = @def1 begin
+    ocp = @def0 begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -330,7 +330,7 @@ function test_ctparser()
     k0 = 2.0; kmax = sqrt(2)
     b0 = 3.0; bf = 1.1
 
-    ocp = @def1 begin
+    ocp = @def0 begin
         u ∈ [ u0, uf ], time
         t ∈ R^2, state
         x ∈ R^2, control
@@ -356,7 +356,7 @@ function test_ctparser()
     # error detections (this can be tricky -> need more work)
 
     # this one is detected by the generated code (and not the parser)
-    @test_throws CTException @def1 begin
+    @test_throws CTException @def0 begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
     end
@@ -364,7 +364,7 @@ function test_ctparser()
     # illegal constraint name (1bis), detected by the parser
     t0 = 9.0; tf = 9.1
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def0 begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -374,7 +374,7 @@ function test_ctparser()
 
     # t0 is unknown in the x(t0) constraint, detected by the parser
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def0 begin
         t ∈ [ 0, 1 ], time
         x ∈ R^2, state
         u ∈ R^2, control

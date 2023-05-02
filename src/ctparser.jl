@@ -5,7 +5,7 @@
 using MLStyle         # for parsing
 using Printf
 
-export @def
+export @def0
 export CtParserException
 export print_generated_code
 
@@ -20,7 +20,7 @@ export get_parsed_line
 # Parser exception (to normalize error output)
 mutable struct CtParserException <: Exception
     msg::String
-    CtParserException(msg::String) = new("@def parsing error: " * msg )
+    CtParserException(msg::String) = new("@def0 parsing error: " * msg )
 end
 
 # type of input lines
@@ -806,9 +806,9 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
     # concatenate all code as a simple block and return it
     e = Expr(:block, _final_code...)
 
-end # macro @def
+end # macro @def0
 
-macro def( args... )
+macro def0( args... )
     # parse macros args
     _syntax_only = false
     _verbose_threshold = 0
@@ -831,7 +831,7 @@ macro def( args... )
             continue
         end
 
-        return :(throw(CtParserException("bad option for @def (allowed: syntax_only=true, debug=true, verbose_threshold=n)")))
+        return :(throw(CtParserException("bad option for @def0 (allowed: syntax_only=true, debug=true, verbose_threshold=n)")))
     end
 
     # call ctparser on last arg
@@ -910,7 +910,7 @@ end # function verbose
 
 #
 # (internal) print informations on each parsed lines
-# activated when debug flag is passed to the macro @def
+# activated when debug flag is passed to the macro @def0
 #
 function _code_debug_info( _pc::Array{_code} )
     # COV_EXCL_START
@@ -941,11 +941,11 @@ end # code_debug_info
 """
 $(TYPEDSIGNATURES)
 
-Display code substitution made by the @def macro
+Display code substitution made by the @def0 macro
 """
 function print_generated_code(ocp::OptimalControlModel)
     if ocp.defined_with_macro == false
-        println("This OptimalControlModel has not been created with @def parser.")
+        println("This OptimalControlModel has not been created with @def0 parser.")
         return false
     else
         for i ∈ ocp.generated_code

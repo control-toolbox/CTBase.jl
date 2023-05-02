@@ -17,7 +17,7 @@ using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using Reexport
-@reexport using MLStyle # pattern matching 
+@reexport using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
@@ -134,7 +134,7 @@ export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscr
 export replace_call, constraint_type
 
 # onepass
-export @def1, @_def1
+export @def, @_def
 
 # _Time
 export _Time
