@@ -1,4 +1,6 @@
 # test onepass
+# todo:
+# - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 function test_onepass()
 

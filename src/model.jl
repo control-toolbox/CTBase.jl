@@ -1,4 +1,7 @@
 # --------------------------------------------------------------------------------------------------
+# todo:
+# - constraints!: add :variable for every kind of constraint
+# - update nlp_constraints accordingly
 
 # Index (for variable, state and control)
 """

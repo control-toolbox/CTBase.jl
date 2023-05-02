@@ -3,6 +3,8 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
 # - add assert for pre/post conditions and invariants
+# - add single sided inequalities
+# - add reverse inequalities (≥)
 
 """
 $(TYPEDEF)
