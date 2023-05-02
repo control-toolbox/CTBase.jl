@@ -93,10 +93,18 @@ parse!(p, ocp, e; log=false) = begin
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
         :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
-        :( ∫($e1) → min              ) => p_lagrange!(p, ocp, e1, :min; log)
-        :( ∫($e1) → max              ) => p_lagrange!(p, ocp, e1, :max; log)
-        :( $e1 → min                 ) => p_mayer!(p, ocp, e1, :min; log)
-        :( $e1 → max                 ) => p_mayer!(p, ocp, e1, :max; log)
+        :(       ∫($e1) → min        ) => p_lagrange!(p, ocp, e1, :min; log)
+        :(       ∫($e1) → max        ) => p_lagrange!(p, ocp, e1, :max; log)
+        :( $e1 + ∫($e2) → min        ) => p_bolza!(p, ocp,      e1,      e2  , :min; log)
+        :( $e1 - ∫($e2) → min        ) => p_bolza!(p, ocp,      e1, :( -$e2 ), :min; log)
+        :( $e1 + ∫($e2) → max        ) => p_bolza!(p, ocp,      e1,      e2  , :max; log)
+        :( $e1 - ∫($e2) → max        ) => p_bolza!(p, ocp,      e1, :( -$e2 ), :max; log)
+        :( ∫($e2) + $e1 → min        ) => p_bolza!(p, ocp,      e1,      e2  , :min; log)
+        :( ∫($e2) - $e1 → min        ) => p_bolza!(p, ocp, :( -$e1 ),    e2  , :min; log)
+        :( ∫($e2) + $e1 → max        ) => p_bolza!(p, ocp,      e1,      e2  , :max; log)
+        :( ∫($e2) - $e1 → max        ) => p_bolza!(p, ocp, :( -$e1 ),    e2  , :max; log)
+        :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
+        :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
         _ => begin
         p.lnum = p.lnum - 1
         if e isa LineNumberNode
@@ -364,6 +372,36 @@ p_mayer!(p, ocp, e, type; log=false) = begin
             $e
         end
         objective!($ocp, :mayer, $gs, $ttype)
+    end, p.lnum, p.line)
+end
+
+p_bolza!(p, ocp, e1, e2, type; log=false) = begin
+    log && println("objective: $e1 + ∫($e2) → $type")
+    isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
+    isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
+    gs1 = gensym()
+    x0 = Symbol(p.x, "#0")
+    xf = Symbol(p.x, "#f")
+    e1 = replace_call(e1, p.x, p.t0, x0)
+    e1 = replace_call(e1, p.x, p.tf, xf)
+    args1 = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+    gs2 = gensym()
+    xt = Symbol(p.x, "#t")
+    ut = Symbol(p.u, "#t")
+    e2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
+    args2 = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
+    ttype = QuoteNode(type)
+    __wrap(quote
+        function $gs1($(args1...))
+            $e1
+        end
+        function $gs2($(args2...))
+            $e2
+        end
+        objective!($ocp, :bolza, $gs1, $gs2, $ttype)
     end, p.lnum, p.line)
 end
 
