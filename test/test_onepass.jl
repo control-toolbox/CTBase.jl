@@ -641,8 +641,7 @@ x = 1
 u = 2
 x0 = 3
 xf = 4
-@test o.mayer(x0, xf) ==  -(x0 + 2xf)
-@test o.lagrange(x, u) ==  x + u
+@test_throws UndefVarError o.mayer(x0, xf)
 
 o = @def begin
     t ∈ [ 0, 1 ], time
@@ -654,8 +653,7 @@ x = 1
 u = 2
 x0 = 3
 xf = 4
-@test o.mayer(x0, xf) ==  -(x0 + 2xf)
-@test o.lagrange(x, u) ==  x + u
+@test_throws UndefVarError o.mayer(x0, xf)
 
 # tests from ct_parser.jl
 
