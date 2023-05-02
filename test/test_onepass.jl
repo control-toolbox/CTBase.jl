@@ -3,11 +3,11 @@
 function test_onepass()
 
 t0 = 0
-o = @def1 t ∈ [ t0, t0 + 4 ], time
+o = @def t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
 @test o.final_time == t0 + 4
 
-o = @def1 begin
+o = @def begin
     λ ∈ R^2, variable
     tf = λ₂
     t ∈ [ 0, tf ], time
@@ -15,28 +15,28 @@ o = @def1 begin
 @test o.initial_time == 0
 @test o.final_time == Index(2)
 
-o = @def1 begin
+o = @def begin
     t0 ∈ R, variable
     t ∈ [ t0, 1 ], time
     end
 @test o.initial_time == Index(1)
 @test o.final_time == 1
 
-o = @def1 begin
+o = @def begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
     end
 @test o.initial_time == 0
 @test o.final_time == Index(1)
 
-o = @def1 begin
+o = @def begin
     v ∈ R², variable
     s ∈ [ v[1], v[2] ], time
     end
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
-o = @def1 begin
+o = @def begin
     v ∈ R², variable
     s0 = v₁
     sf = v₂
@@ -45,39 +45,39 @@ o = @def1 begin
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
-@test_throws IncorrectArgument @def1 begin
+@test_throws IncorrectArgument @def begin
     t0 ∈ R², variable
     t ∈ [ t0, 1 ], time
     end
 
-@test_throws IncorrectArgument @def1 begin
+@test_throws IncorrectArgument @def begin
     tf ∈ R², variable
     t ∈ [ 0, tf ], time
     end
 
-@test_throws ParsingError @def1 begin
+@test_throws ParsingError @def begin
     v, variable
     t ∈ [ 0, tf[v] ], time
     end
 
-@test_throws ParsingError @def1 begin
+@test_throws ParsingError @def begin
     v, variable
     t ∈ [ t0[v], 1 ], time
     end
 
-@test_throws ParsingError @def1 begin
+@test_throws ParsingError @def begin
     v, variable
     t ∈ [ t0[v], tf[v+1] ], time
     end
 
-o = @def1 begin
+o = @def begin
     x ∈ R, state
     u ∈ R, control
     end
 @test o.state_dimension == 1
 @test o.control_dimension == 1
 
-o = @def1 begin
+o = @def begin
     t ∈ [ 0, 1 ], time
     x ∈ R^3, state
     u ∈ R^2, control
@@ -91,7 +91,7 @@ u = [ -1, 2 ]
 
 t0 = 0
 tf = 1
-o = @def1 begin
+o = @def begin
     t ∈ [ t0, tf ], time
     x ∈ R^2, state
     u ∈ R, control
@@ -112,9 +112,9 @@ B = [ 0
 @test o.criterion == :min
 
 a = 1
-f(b) = begin # closure of a, local c, and @def1 in function
+f(b) = begin # closure of a, local c, and @def in function
     c = 3
-    @def1 begin
+    @def begin
         t ∈ [ a, b ], time
         x ∈ R, state
         u ∈ R, control
@@ -127,7 +127,7 @@ x = 10
 u = 20
 @test o.dynamics(x, u) == x + u + 2 + 3 + 4
 
-o = @def1 begin
+o = @def begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
     u ∈ R, control
@@ -148,7 +148,7 @@ u = 3
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
-o = @def1 begin
+o = @def begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
     u ∈ R, control
@@ -167,7 +167,7 @@ u = 3
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -188,7 +188,7 @@ z = [ 4, 5 ]
 @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
 @test o.lagrange(x, u, z) == u^2 + z[2] * x[1]
 
-o = @def1 begin
+o = @def begin
     tf, variable
     t ∈ [ 0, tf ], time
     x ∈ R², state
@@ -202,7 +202,7 @@ x0 = [ 1, 2 ]
 xf = [ 3, 4 ]
 @test constraint(o, :eq1)(x0, xf, tf) == x0[1] + ( xf[1] + 2xf[2]^3 ) - tf^2
 
-o = @def1 begin
+o = @def begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
     u ∈ R, control
@@ -222,7 +222,7 @@ u = 3
 @test o.dynamics(x, u) == [ x[2], x[1]^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
-o = @def1 begin
+o = @def begin
     z ∈ R, variable
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -244,7 +244,7 @@ z = 4
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
-o = @def1 begin
+o = @def begin
     z ∈ R, variable
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -270,7 +270,7 @@ z = 4
 
 n = 11
 m = 6
-o = @def1 begin
+o = @def begin
     t ∈ [ 0, 1 ], time
     x ∈ R^n, state
     u ∈ R^m, control
@@ -304,7 +304,7 @@ u = 2 * Vector{Float64}(1:m)
 
 n = 11
 m = 6
-o = @def1 begin
+o = @def begin
     z ∈ R^2, variable
     t ∈ [ 0, 1 ], time
     x ∈ R^n, state
@@ -339,7 +339,7 @@ u = 2 * Vector{Float64}(1:m)
 @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
 @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
 
-o = @def1 begin
+o = @def begin
     s ∈ [ 0, 1 ], time
     y ∈ R^4, state
     w ∈ R, control
@@ -353,7 +353,7 @@ yf = 2 * [ 1, 2, 3, 4 ]
 @test o.mayer(y0, yf) == y0[3] + yf[4]
 
 
-o = @def1 begin
+o = @def begin
     s ∈ [ 0, 1 ], time
     y ∈ R^4, state
     w ∈ R, control
@@ -366,7 +366,7 @@ yf = 2 * [ 1, 2, 3, 4 ]
 @test ismax(o)
 @test o.mayer(y0, yf) == y0[3] + yf[4]
 
-o = @def1 begin
+o = @def begin
     z ∈ R^2, variable
     s ∈ [ 0, z₁ ], time
     y ∈ R^4, state
@@ -381,7 +381,7 @@ yf = 2 * [ 1, 2, 3, 4 ]
 @test ismin(o)
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -400,7 +400,7 @@ w = 7
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -419,7 +419,7 @@ w = 7
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -434,7 +434,7 @@ y = [ 1, 2, 3, 4 ]
 w = 9
 @test o.dynamics(y, w, z) == [ y[1], y[3]^2 + w + z[1], 0, 0 ]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     __s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -449,7 +449,7 @@ y = [ 1, 2, 3, 4 ]
 w = 9
 @test_throws UndefVarError o.dynamics(y, w, z)
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -466,7 +466,7 @@ yf = 3y0
 ww = 9
 @test o.dynamics(y, ww, z) == [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -481,7 +481,7 @@ y0 = y
 yf = 3y0
 @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     __t ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -500,7 +500,7 @@ w = 11
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test_throws UndefVarError o.mayer(y0, yf, z)
 
-o = @def1 begin
+o = @def begin
     z ∈ R², variable
     __t ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -526,14 +526,14 @@ w = 11
     # phase 1: minimal problems, to check all possible syntaxes
 
     # time
-    ocp = @def1 t ∈ [ 0.0 , 1.0 ], time ;
+    ocp = @def t ∈ [ 0.0 , 1.0 ], time ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
     @test ocp.initial_time == 0.0
     @test ocp.final_time   == 1.0
 
     t0 = 3.0
-    ocp = @def1 begin
+    ocp = @def begin
         tf ∈ R, variable
         t ∈ [ t0, tf ], time
     end ;
@@ -543,7 +543,7 @@ w = 11
     @test ocp.final_time   == Index(1)
 
     tf = 3.14
-    ocp = @def1 begin
+    ocp = @def begin
         t0 ∈ R, variable
         t ∈ [ t0, tf ], time
     end ;
@@ -554,7 +554,7 @@ w = 11
 
     # state
     t0 = 1.0; tf = 1.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         u, state
     end ;
@@ -566,7 +566,7 @@ w = 11
     @test ocp.state_names == [ "u" ]
 
     t0 = 2.0; tf = 2.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         v ∈ R^4, state
     end ;
@@ -578,7 +578,7 @@ w = 11
     @test ocp.state_names == [ "v₁", "v₂", "v₃", "v₄"]
 
     t0 = 3.0; tf = 3.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         w ∈ R^3, state
     end ;
@@ -590,7 +590,7 @@ w = 11
     @test ocp.state_names ==  [ "w₁", "w₂", "w₃"]
 
     t0 = 4.0; tf = 4.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         a ∈ R, state
     end ;
@@ -603,7 +603,7 @@ w = 11
 
 
     t0 = 5.0; tf = 5.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         b ∈ R¹, state
     end ;
@@ -616,7 +616,7 @@ w = 11
 
 
     t0 = 6.0; tf = 6.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         u ∈ R⁹, state
     end ;
@@ -630,7 +630,7 @@ w = 11
 
     n = 3
     t0 = 7.0; tf = 7.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         u ∈ R^n, state
     end ;
@@ -644,7 +644,7 @@ w = 11
 
     # control
     t0 = 1.0; tf = 1.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         u, control
     end ;
@@ -656,7 +656,7 @@ w = 11
     @test ocp.control_names == [ "u" ]
 
     t0 = 2.0; tf = 2.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         v ∈ R^4, control
     end ;
@@ -668,7 +668,7 @@ w = 11
     @test ocp.control_names == [ "v₁", "v₂", "v₃", "v₄"]
 
     t0 = 3.0; tf = 3.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         w ∈ R^3, control
     end ;
@@ -680,7 +680,7 @@ w = 11
     @test ocp.control_names ==  [ "w₁", "w₂", "w₃"]
 
     t0 = 4.0; tf = 4.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         a ∈ R, control
     end ;
@@ -693,7 +693,7 @@ w = 11
 
 
     t0 = 5.0; tf = 5.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         b ∈ R¹, control
     end ;
@@ -706,7 +706,7 @@ w = 11
 
 
     t0 = 6.0; tf = 6.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         u ∈ R⁹, control
     end ;
@@ -720,7 +720,7 @@ w = 11
 
     n = 3
     t0 = 7.0; tf = 7.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0 , tf ], time
         u ∈ R^n, control
     end ;
@@ -734,7 +734,7 @@ w = 11
 
     # variables
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         a, variable
     end ;
@@ -743,7 +743,7 @@ w = 11
     @test ocp.variable_names == [ "a" ]
 
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         a ∈ R³, variable
     end ;
@@ -753,7 +753,7 @@ w = 11
 
     # alias
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -773,7 +773,7 @@ w = 11
 
     # objectives
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -782,7 +782,7 @@ w = 11
     @test ocp isa OptimalControlModel
 
     t0 = .0; tf = .1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -798,7 +798,7 @@ w = 11
     r0 = 1.0; r1 = 2.0
     v0 = 2.0; vmax = sqrt(2)
     m0 = 3.0; mf = 1.1
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -820,7 +820,7 @@ w = 11
     @test ocp.state_names   == ["x₁", "x₂"]
     @test ocp.state_dimension == 2
 
-    ocp = @def1 begin
+    ocp = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -848,7 +848,7 @@ w = 11
     k0 = 2.0; kmax = sqrt(2)
     b0 = 3.0; bf = 1.1
 
-    ocp = @def1 begin
+    ocp = @def begin
         u ∈ [ u0, uf ], time
         t ∈ R^2, state
         x ∈ R^2, control
@@ -874,7 +874,7 @@ w = 11
     # error detections (this can be tricky -> need more work)
 
     # this one is detected by the generated code (and not the parser)
-    @test_throws CTException @def1 begin
+    @test_throws CTException @def begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
     end
@@ -882,7 +882,7 @@ w = 11
     # illegal constraint name (1bis), detected by the parser
     t0 = 9.0; tf = 9.1
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -892,7 +892,7 @@ w = 11
 
     # t0 is unknown in the x(t0) constraint, detected by the parser
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -907,7 +907,7 @@ w = 11
 # old tests from test_ctparser_constraints.jl
 
 #
-# test all constraints on @def1 macro
+# test all constraints on @def macro
 #
 # ref: https://github.com/control-toolbox/CTBase.jl/issues/9
 #
@@ -927,7 +927,7 @@ w = 11
     t0   = 0.0
     tf   = 1.0
     n    = 3
-    ocp1 = @def1 begin
+    ocp1 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -948,7 +948,7 @@ w = 11
     t0   = 0.1
     tf   = 1.1
     n    = 4
-    ocp2 = @def1 begin
+    ocp2 = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
@@ -979,7 +979,7 @@ w = 11
     t0   = 0.2
     tf   = 1.2
     n    = 5
-    ocp3 = @def1 begin
+    ocp3 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1000,7 +1000,7 @@ w = 11
     t0   = 0.3
     tf   = 1.3
     n    = 6
-    ocp4 = @def1 begin
+    ocp4 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1023,7 +1023,7 @@ w = 11
     t0   = 0.4
     tf   = 1.4
     n    = 7
-    ocp5 = @def1 begin
+    ocp5 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1046,7 +1046,7 @@ w = 11
     t0   = 0.5
     tf   = 1.5
     n    = 8
-    ocp6 = @def1 begin
+    ocp6 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1078,7 +1078,7 @@ w = 11
     t0   = 0.6
     tf   = 1.6
     n    = 9
-    ocp7 = @def1 begin
+    ocp7 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1102,7 +1102,7 @@ w = 11
     t0   = 0.7
     tf   = 1.7
     n    = 3
-    ocp8 = @def1 begin
+    ocp8 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1136,7 +1136,7 @@ w = 11
     t0   = 0.8
     tf   = 1.8
     n    = 10
-    ocp9 = @def1 begin
+    ocp9 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1160,7 +1160,7 @@ w = 11
     t0   = 0.9
     tf   = 1.9
     n    = 11
-    ocp10 = @def1 begin
+    ocp10 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1186,7 +1186,7 @@ w = 11
     t0   = 0.111
     tf   = 1.111
     n    = 12
-    ocp11 = @def1 begin
+    ocp11 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1201,7 +1201,7 @@ w = 11
     @test ocp11.initial_time == t0
     @test ocp11.final_time == tf
 
-    ocp12 = @def1 begin
+    ocp12 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1221,7 +1221,7 @@ w = 11
 
     t0   = 0.112
     tf   = 1.112
-    ocp13 = @def1 begin
+    ocp13 = @def begin
 
         t ∈ [ t0, tf ], time
         x ∈ R, state
@@ -1238,79 +1238,79 @@ w = 11
 
     # some syntax (even parseable) are not allowed
     # this is the actual exhaustive list
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x(t) == x_u        , constant_state_not_allowed
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x(t) == x_u
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2](t) == x2_u    , constant_state_index_not_allowed
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2](t) == x2_u
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2:3](t) == y_u    , constant_state_range_not_allowed
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2:3](t) == y_u
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u(t) == u_u         , constant_control_not_allowed
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u(t) == u_u
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2](t) == u2_u     , constant_control_index_not_allowed
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2](t) == u2_u
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2:3](t) == v_u    , constant_control_range_not_allowed
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2:3](t) == v_u
     end
-    @test_throws ParsingError @def1 begin
+    @test_throws ParsingError @def begin
         t ∈ [ t0, tf ], time
         x ∈ R, state
         u ∈ R, control

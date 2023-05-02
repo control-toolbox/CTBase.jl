@@ -54,7 +54,7 @@ __wrap(e, n, line) = quote
     try
         $e
     catch ex
-	println("Line ", $n, ": ", $line)
+    println("Line ", $n, ": ", $line)
         throw(ex)
     end
 end
@@ -98,8 +98,8 @@ parse!(p, ocp, e; log=false) = begin
         :( $e1 → min                 ) => p_mayer!(p, ocp, e1, :min; log)
         :( $e1 → max                 ) => p_mayer!(p, ocp, e1, :max; log)
         _ => begin
-	    p.lnum = p.lnum - 1
-	    if e isa LineNumberNode
+        p.lnum = p.lnum - 1
+        if e isa LineNumberNode
                 e
             elseif e isa Expr && e.head == :block
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...) # !!! assumes that map is done sequentially
@@ -141,27 +141,27 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
             :( $v1[$i] ) => (v1 == p.v) ?
-	        :( time!($ocp, Index($i), $tf, $tt) ) : __throw("bad time declaration", p.lnum, p.line)
+            :( time!($ocp, Index($i), $tf, $tt) ) : __throw("bad time declaration", p.lnum, p.line)
             :( $v1     ) => (v1 == p.v) ?
-	        quote
-		    ($ocp.variable_dimension ≠ 1) &&
-		        throw(IncorrectArgument("variable must be of dimension one for a time"))
-	            time!($ocp, Index(1), $tf, $tt)
-		end : __throw("bad time declaration", p.lnum, p.line)
+            quote
+            ($ocp.variable_dimension ≠ 1) &&
+                throw(IncorrectArgument("variable must be of dimension one for a time"))
+                time!($ocp, Index(1), $tf, $tt)
+        end : __throw("bad time declaration", p.lnum, p.line)
             _            => __throw("bad time declaration", p.lnum, p.line) end
         (false, true ) => @match tf begin
             :( $v1[$i] ) => (v1 == p.v) ?
-	        :( time!($ocp, $t0, Index($i), $tt) ) : __throw("bad time declaration", p.lnum, p.line)
+            :( time!($ocp, $t0, Index($i), $tt) ) : __throw("bad time declaration", p.lnum, p.line)
             :( $v1     ) => (v1 == p.v) ?
-	        quote
-		    ($ocp.variable_dimension ≠ 1) &&
-		        throw(IncorrectArgument("variable must be of dimension one for a time"))
-	            time!($ocp, $t0, Index(1), $tt)
-		end : __throw("bad time declaration", p.lnum, p.line)
+            quote
+            ($ocp.variable_dimension ≠ 1) &&
+                throw(IncorrectArgument("variable must be of dimension one for a time"))
+                time!($ocp, $t0, Index(1), $tt)
+        end : __throw("bad time declaration", p.lnum, p.line)
             _            => __throw("bad time declaration", p.lnum, p.line) end
         _              => @match (t0, tf) begin
             (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ?
-	        :( time!($ocp, Index($i), Index($j), $tt) ) : __throw("bad time declaration", p.lnum, p.line)
+            :( time!($ocp, Index($i), Index($j), $tt) ) : __throw("bad time declaration", p.lnum, p.line)
             _ => __throw("bad time declaration", p.lnum, p.line) end
     end
     __wrap(code, p.lnum, p.line)
@@ -370,15 +370,15 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Implement def1 macro core.
+Implement def macro core.
 
 """
-macro _def1(ocp, e, log=false)
+macro _def(ocp, e, log=false)
     try
         p = ParsingInfo()
         esc( parse!(p, ocp, e; log=log) )
     catch ex
-        :( throw($ex) ) # can be catched by user 
+        :( throw($ex) ) # can be catched by user
     end
 end
 
@@ -389,7 +389,7 @@ Define an optimal control problem. One pass parsing of the definition.
 
 # Example
 ```jldoctest
-@def1 begin
+@def begin
     t ∈ [ 0, 1 ], time
     x ∈ R^2, state
     u ∈ R  , control
@@ -400,6 +400,6 @@ Define an optimal control problem. One pass parsing of the definition.
 end
 ```
 """
-macro def1(e, log=false)
-    esc( quote ocp = Model(); @_def1 ocp $e $log; ocp end )
+macro def(e, log=false)
+    esc( quote ocp = Model(); @_def ocp $e $log; ocp end )
 end
