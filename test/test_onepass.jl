@@ -5,16 +5,16 @@ function test_onepass()
 t0 = 0
 o = @def1 t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
-@test o.final_time == t0 + 4 
- 
+@test o.final_time == t0 + 4
+
 o = @def1 begin
     λ ∈ R^2, variable
     tf = λ₂
     t ∈ [ 0, tf ], time
     end
 @test o.initial_time == 0
-@test o.final_time == Index(2) 
- 
+@test o.final_time == Index(2)
+
 o = @def1 begin
     t0 ∈ R, variable
     t ∈ [ t0, 1 ], time
@@ -95,20 +95,20 @@ o = @def1 begin
     t ∈ [ t0, tf ], time
     x ∈ R^2, state
     u ∈ R, control
-    x(t0) == [ -1, 0 ], (1) 
-    x(tf) == [  0, 0 ] 
+    x(t0) == [ -1, 0 ], (1)
+    x(tf) == [  0, 0 ]
     x'(t) == A * x(t) + B * u(t)
     ∫( 0.5u(t)^2 ) → min
 end
 x = [ 1, 2 ]
-u = -1 
+u = -1
 A = [ 0 1
       0 0 ]
 B = [ 0
       1 ]
 @test constraint(o, :eq1)(x) == x
 @test o.dynamics(x, u) == A * x + B * u
-@test o.lagrange(x, u) == 0.5u^2 
+@test o.lagrange(x, u) == 0.5u^2
 @test o.criterion == :min
 
 a = 1
@@ -123,8 +123,8 @@ f(b) = begin # closure of a, local c, and @def1 in function
 end
 o = f(2)
 d = 4
-x = 10 
-u = 20 
+x = 10
+u = 20
 @test o.dynamics(x, u) == x + u + 2 + 3 + 4
 
 o = @def1 begin
@@ -140,14 +140,14 @@ o = @def1 begin
     v(0) == 1,    (♡)
     x'(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end 
+    end
 x = [ 1, 2 ]
-u = 3 
+u = 3
 @test constraint(o, :eq1)(x) == x[1]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
-@test o.lagrange(x, u) == u^2 + x[1] 
- 
+@test o.lagrange(x, u) == u^2 + x[1]
+
 o = @def1 begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -159,14 +159,14 @@ o = @def1 begin
     v(0) == 1,    (♡)
     x'(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end 
+    end
 x = [ 1, 2 ]
-u = 3 
+u = 3
 @test constraint(o, :eq1)(x) == x[1]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
-@test o.lagrange(x, u) == u^2 + x[1] 
- 
+@test o.lagrange(x, u) == u^2 + x[1]
+
 o = @def1 begin
     z ∈ R², variable
     t ∈ [ 0, 1 ], time
@@ -179,14 +179,14 @@ o = @def1 begin
     v(0) == 1,    (♡)
     x'(t) == [ v(t), w(t)^2 + z₁ ]
     ∫( u(t)^2 + z₂ * x₁(t) ) → min
-    end 
+    end
 x = [ 1, 2 ]
-u = 3 
+u = 3
 z = [ 4, 5 ]
 @test constraint(o, :eq1)(x) == x[1]
 @test constraint(o, Symbol("♡"))(x) == x[2]
 @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
-@test o.lagrange(x, u, z) == u^2 + z[2] * x[1] 
+@test o.lagrange(x, u, z) == u^2 + z[2] * x[1]
 
 o = @def1 begin
     tf, variable
@@ -196,12 +196,12 @@ o = @def1 begin
     v = x₂
     w = r¹ + 2v³
     r(0) + w(tf) - tf² == 0,    (1)
-    end 
+    end
 tf = 2
 x0 = [ 1, 2 ]
 xf = [ 3, 4 ]
 @test constraint(o, :eq1)(x0, xf, tf) == x0[1] + ( xf[1] + 2xf[2]^3 ) - tf^2
- 
+
 o = @def1 begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -212,16 +212,16 @@ o = @def1 begin
     v(0) == 1,             (♡)
     x'(t) == [ v(t), r(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end 
-x0 = [ 2, 3 ] 
-xf = [ 4, 5 ] 
+    end
+x0 = [ 2, 3 ]
+xf = [ 4, 5 ]
 x = [ 1, 2 ]
-u = 3 
+u = 3
 @test constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
 @test constraint(o, Symbol("♡"))(x0) == x0[2]
 @test o.dynamics(x, u) == [ x[2], x[1]^2 ]
-@test o.lagrange(x, u) == u^2 + x[1] 
- 
+@test o.lagrange(x, u) == u^2 + x[1]
+
 o = @def1 begin
     z ∈ R, variable
     t ∈ [ 0, 1 ], time
@@ -233,17 +233,17 @@ o = @def1 begin
     v(0) == 1,        (♡)
     x'(t) == [ v(t), r(t)^2 + z ]
     ∫( u(t)^2 + z * x₁(t) ) → min
-    end 
-x0 = [ 2, 3 ] 
-xf = [ 4, 5 ] 
+    end
+x0 = [ 2, 3 ]
+xf = [ 4, 5 ]
 x = [ 1, 2 ]
-u = 3 
+u = 3
 z = 4
 @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
 @test constraint(o, Symbol("♡"))(x0) == x0[2]
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
-@test o.lagrange(x, u, z) == u^2 + z * x[1] 
- 
+@test o.lagrange(x, u, z) == u^2 + z * x[1]
+
 o = @def1 begin
     z ∈ R, variable
     t ∈ [ 0, 1 ], time
@@ -256,17 +256,17 @@ o = @def1 begin
     [ 0, 0 ] ≤ x(0) ≤ [ 1, 1 ],  (♡)
     x'(t) == [ v(t), r(t)^2 + z ]
     ∫( u(t)^2 + z * x₁(t) ) → min
-    end 
-x0 = [ 2, 3 ] 
-xf = [ 4, 5 ] 
+    end
+x0 = [ 2, 3 ]
+xf = [ 4, 5 ]
 x = [ 1, 2 ]
-u = 3 
+u = 3
 z = 4
 @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
 @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
 @test constraint(o, Symbol("♡"))(x0) == x0
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
-@test o.lagrange(x, u, z) == u^2 + z * x[1] 
+@test o.lagrange(x, u, z) == u^2 + z * x[1]
 
 n = 11
 m = 6
@@ -287,10 +287,10 @@ o = @def1 begin
     0 ≤ u₂(t)^2 ≤ 1,                   (9)
     u₁(t) * x[1:2](t) == 1,           (10)
     0 ≤ u₁(t) * x[1:2](t).^3 ≤ 1,     (11)
-    end 
+    end
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
-@test constraint(o, :eq1 )(x) == x[1] 
+@test constraint(o, :eq1 )(x) == x[1]
 @test constraint(o, :eq2 )(x) == x
 @test constraint(o, :eq3 )(x) == x[1:2]
 @test constraint(o, :eq4 )(x) == x[1:2:4]
@@ -322,12 +322,12 @@ o = @def1 begin
     0 ≤ u₂(t)^2 ≤ 1,                   (9)
     u₁(t) * x[1:2](t) + z + f() == 1, (10)
     0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1, (11)
-    end 
+    end
 f() = [ 1, 1 ]
 z = 3 * Vector{Float64}(1:2)
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
-@test constraint(o, :eq1 )(x   ) == x[1] 
+@test constraint(o, :eq1 )(x   ) == x[1]
 @test constraint(o, :eq2 )(x   ) == x
 @test constraint(o, :eq3 )(x, z) == x[1:2] - [ z[1], 1 ]
 @test constraint(o, :eq4 )(x   ) == x[1:2:4]
@@ -346,7 +346,7 @@ o = @def1 begin
     r = y₃
     v = y₄
     r(0) + v(1) → min
-end 
+end
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
 @test ismin(o)
@@ -360,7 +360,7 @@ o = @def1 begin
     r = y₃
     v = y₄
     r(0) + v(1) → max
-end 
+end
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
 @test ismax(o)
@@ -374,7 +374,7 @@ o = @def1 begin
     r = y₃
     v = y₄
     r(0) + v(z₁) + z₂ → min
-end 
+end
 z = [ 5, 6 ]
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
@@ -388,10 +388,10 @@ o = @def1 begin
     w ∈ R, control
     r = y₃
     v = y₄
-    aa = y₁ + w² + v³ + z₂ 
+    aa = y₁ + w² + v³ + z₂
     y'(s) == [ aa(s), r²(s), 0, 0 ]
     r(0) + v(z₁) + z₂ → min
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
@@ -407,10 +407,10 @@ o = @def1 begin
     w ∈ R, control
     r = y₃
     v = y₄
-    aa = y₁(s) + v³ + z₂ 
+    aa = y₁(s) + v³ + z₂
     y'(s) == [ aa(s) + (w^2)(s), r²(s), 0, 0 ]
     r(0) + v(z₁) + z₂ → min
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
@@ -428,7 +428,7 @@ o = @def1 begin
     v = y₄
     aa = y₁
     y'(s) == [ aa(s), r²(s) + w(s) + z₁, 0, 0 ]
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 w = 9
@@ -443,7 +443,7 @@ o = @def1 begin
     v = y₄
     aa = y₁(__s)
     y'(__s) == [ aa(__s), r²(__s) + w(__s) + z₁, 0, 0 ]
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 w = 9
@@ -456,15 +456,15 @@ o = @def1 begin
     w ∈ R, control
     r = y₃
     v = y₄
-    aa = y₁(s) + v³ + z₂ 
+    aa = y₁(s) + v³ + z₂
     y'(s) == [ aa(s) + w^2, r²(s), 0, 0 ]
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
 yf = 3y0
 ww = 9
-@test o.dynamics(y, ww, z) ≠ [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
+@test o.dynamics(y, ww, z) == [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 
 o = @def1 begin
     z ∈ R², variable
@@ -473,9 +473,9 @@ o = @def1 begin
     w, control
     r = y₃
     v = y₄
-    aa = y₁ + v³ + z₂ 
+    aa = y₁ + v³ + z₂
     aa(0) + y₂(z₁) → min
-end 
+end
 z = [ 5, 6 ]
 y0 = y
 yf = 3y0
@@ -488,10 +488,10 @@ o = @def1 begin
     w, control
     r = y₃
     v = y₄
-    aa = y₁(__t) + v³ + z₂ 
+    aa = y₁(__t) + v³ + z₂
     y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
     aa(0) + y₂(z₁) → min
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
@@ -507,10 +507,10 @@ o = @def1 begin
     w, control
     r = y₃
     v = y₄
-    aa = y₁(0) + v³ + z₂ 
+    aa = y₁(0) + v³ + z₂
     y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
     aa(0) + y₂(z₁) → min
-end 
+end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
