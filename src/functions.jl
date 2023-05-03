@@ -708,13 +708,11 @@ julia> V(_Time(1), [1, 2])
 """
 struct VectorField{time_dependence, state_dimension}
     f::Function
-    label::Symbol
     function VectorField(f::Function;
         state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
-        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-        label::Symbol=__fun_label(:VF))
+        time_dependence::Union{Nothing,Symbol}=__fun_time_dependence())
         check_time_dependence(time_dependence)
-        new{time_dependence, state_dimension}(f, label)
+        new{time_dependence, state_dimension}(f)
     end
 end
 

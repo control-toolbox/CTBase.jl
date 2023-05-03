@@ -63,8 +63,6 @@ A unique value is given to each constraint using the `gensym` function and prefi
 """
 __constraint_label() = gensym(:unamed)
 
-__fun_label(prefix::Symbol=:fun) = gensym(prefix)
-
 """
 $(TYPEDSIGNATURES)
 
