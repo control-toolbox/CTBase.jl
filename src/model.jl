@@ -104,6 +104,13 @@ ismax(ocp::OptimalControlModel) = !ismin(ocp)
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if a variable has been declared.
+"""
+hasvariable(ocp::OptimalControlModel) = !isnothing(ocp.variable_dimension)
+
+"""
+$(TYPEDSIGNATURES)
+
 Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:

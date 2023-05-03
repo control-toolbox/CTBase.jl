@@ -7,6 +7,7 @@ function test_model() # 30 55 185
     
     ocp = Model()
     variable!(ocp, 1, "vv")
+    @test hasvariable(ocp)
     @test ocp.variable_dimension == 1
     @test ocp.variable_names == [ "vv" ]
     
