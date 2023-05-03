@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - use sup / sub scripts
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
 # - add assert for pre/post conditions and invariants
