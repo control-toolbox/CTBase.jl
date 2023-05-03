@@ -71,34 +71,32 @@ function Lie(X::VectorField{td, sd}, f::Function)::Function where {td, sd}
 end
 
 # ---------------------------------------------------------------------------
-# Directional derivative of a vector field
-function Der(X::VectorField{:autonomous, 1}, Y::VectorField{:autonomous, 1})::VectorField{:autonomous, 1}
+# "Directional derivative" of a vector field: internal and only used to compute
+# efficiently the Lie bracket of two vector fields
+function ⅋(X::VectorField{:autonomous, 1}, Y::VectorField{:autonomous, 1})::VectorField{:autonomous, 1}
     return VectorField(x -> ctgradient(Y, x)*X(x), 
         time_dependence=:autonomous, state_dimension=1)
 end
-function Der(X::VectorField{:nonautonomous, 1}, Y::VectorField{:nonautonomous, 1})::VectorField{:nonautonomous, 1}
+function ⅋(X::VectorField{:nonautonomous, 1}, Y::VectorField{:nonautonomous, 1})::VectorField{:nonautonomous, 1}
     return VectorField((t, x) -> ctgradient(y -> Y(t, y), x)*X(t, x),
         time_dependence=:nonautonomous, state_dimension=1)
 end
-function Der(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
+function ⅋(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
     return VectorField(x -> x isa ctNumber ? ctgradient(Y, x)*X(x) : ctjacobian(Y, x)*X(x),
         time_dependence=:autonomous, state_dimension=sd)
 end
-function Der(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
+function ⅋(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
     return VectorField((t, x) -> x isa ctNumber ? ctgradient(y -> Y(t, y), x)*X(t, x) : ctjacobian(y -> Y(t, y), x)*X(t, x),
         time_dependence=:nonautonomous, state_dimension=sd)
-end
-function ⋅(X::VectorField{td, sd}, Y::VectorField{td, sd})::VectorField{td, sd} where {td, sd}
-    return Der(X, Y)
 end
 
 # ---------------------------------------------------------------------------
 # Lie bracket of two vector fields: [X, Y] = Lie(X, Y)= ad(X, Y)
 function Lie(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
-    return VectorField(x -> (X⋅Y)(x)-(Y⋅X)(x), time_dependence=:autonomous, state_dimension=sd)
+    return VectorField(x -> (X⅋Y)(x)-(Y⅋X)(x), time_dependence=:autonomous, state_dimension=sd)
 end
 function Lie(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
-    return VectorField((t, x) -> (X⋅Y)(t, x)-(Y⋅X)(t, x), time_dependence=:nonautonomous, state_dimension=sd)
+    return VectorField((t, x) -> (X⅋Y)(t, x)-(Y⅋X)(t, x), time_dependence=:nonautonomous, state_dimension=sd)
 end
 function ad(X::VectorField{td, sd}, Y::VectorField{td, sd})::VectorField{td, sd} where {td, sd}
     return Lie(X, Y)

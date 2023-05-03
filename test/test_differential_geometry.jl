@@ -117,70 +117,32 @@ function test_differential_geometry()
         # autonomous, dim 2
         X = VectorField(x -> [x[2], -x[1]])
         Y = VectorField(x -> [x[1], x[2]])
-        Test.@test Der(X, Y)([1, 2]) == [2, -1]
-        Test.@test (X⋅Y)([1, 2]) == Der(X, Y)([1, 2])
+        Test.@test ⅋(X, Y)([1, 2]) == [2, -1]
 
         # autonomous, dim 1, with state_dimension
         X = VectorField(x -> 2x, state_dimension=1)
         Y = VectorField(x -> 3x, state_dimension=1)
-        Test.@test Der(X, Y)(1) == 6
-        Test.@test (X⋅Y)(1) == Der(X, Y)(1)
+        Test.@test ⅋(X, Y)(1) == 6
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
         Y = VectorField(x -> 3x)
-        Test.@test Der(X, Y)(1) == 6
-        Test.@test (X⋅Y)(1) == Der(X, Y)(1)
+        Test.@test ⅋(X, Y)(1) == 6
 
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
         Y = VectorField((t, x) -> [t + x[1], x[2]], time_dependence=:nonautonomous)
-        Test.@test Der(X, Y)(1, [1, 2]) == [3, -1]
-        Test.@test (X⋅Y)(1, [1, 2]) == Der(X, Y)(1, [1, 2])
+        Test.@test ⅋(X, Y)(1, [1, 2]) == [3, -1]
 
         # nonautonomous, dim 1, with state_dimension
         X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous, state_dimension=1)
         Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous, state_dimension=1)
-        Test.@test Der(X, Y)(1, 1) == 9
-        Test.@test (X⋅Y)(1, 1) == Der(X, Y)(1, 1)
+        Test.@test ⅋(X, Y)(1, 1) == 9
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
         Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
-        Test.@test Der(X, Y)(1, 1) == 9
-        Test.@test (X⋅Y)(1, 1) == Der(X, Y)(1, 1)
-
-    end
-
-    @testset "Composition of directional derivatives" begin
-        
-        # autonomous, dim 2
-        X = VectorField(x -> [x[2], -2x[1]])
-        Y = VectorField(x -> [x[1], 3x[2]])
-        f = x -> x[1]^2 + 2x[2]^2
-        Test.@test (X⋅Y⋅f)([1, 2]) == ((X⋅Y)⋅f)([1, 2])
-        Test.@test (X⋅Y⋅f)([1, 2]) == Der(Der(X, Y), f)([1, 2])
-
-        # autonomous, dim 1
-        X = VectorField(x -> 2x)
-        Y = VectorField(x -> 3x)
-        f = x -> x^2
-        Test.@test (X⋅Y⋅f)(1) == ((X⋅Y)⋅f)(1)
-        Test.@test (X⋅Y⋅f)(1) == Der(Der(X, Y), f)(1)
-
-        # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -2x[1]], time_dependence=:nonautonomous)
-        Y = VectorField((t, x) -> [t + x[1], 3x[2]], time_dependence=:nonautonomous)
-        f = (t, x) -> t + x[1]^2 + x[2]^2
-        Test.@test (X⋅Y⋅f)(1, [1, 2]) == ((X⋅Y)⋅f)(1, [1, 2])
-        Test.@test (X⋅Y⋅f)(1, [1, 2]) == Der(Der(X, Y), f)(1, [1, 2])
-
-        # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
-        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
-        f = (t, x) -> t + x^2
-        Test.@test (X⋅Y⋅f)(1, 1) == ((X⋅Y)⋅f)(1, 1)
-        Test.@test (X⋅Y⋅f)(1, 1) == Der(Der(X, Y), f)(1, 1)
+        Test.@test ⅋(X, Y)(1, 1) == 9
 
     end
 
@@ -222,6 +184,18 @@ function test_differential_geometry()
             Test.@test F01(x) ≈ -[0, γ-δ*x[3], -δ*x[2]] atol=1e-6
             Test.@test F02(x) ≈ -[-γ+δ*x[3], 0, δ*x[1]] atol=1e-6
             Test.@test F12(x) ≈ -[-x[2], x[1], 0] atol=1e-6
+        end
+
+        @testset "intrinsic definition" begin
+
+            X = VectorField(x -> [x[2]^2, -2x[1]*x[2]])
+            Y = VectorField(x -> [x[1]*(1+x[2]), 3x[2]^3])
+            f = x -> x[1]^4 + 2x[2]^3
+            x = [1, 2]
+
+            # check real intrinsic order 2 definition of Lie bracket
+            Test.@test ((@Lie [ X, Y ])⋅f)(x) == ((X⋅(Y⋅f))(x) - (Y⋅(X⋅f))(x))
+
         end
 
         @testset "exceptions" begin
