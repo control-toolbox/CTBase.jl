@@ -287,7 +287,7 @@ end
     @test ocp.time_name == "s"
 end
 
-@testset "constraint! 1/7" begin
+@testset "constraint! 1" begin
 
     ocp = Model()
 
@@ -309,7 +309,7 @@ end
 
 end
 
-@testset "constraint! 2/7" begin
+@testset "constraint! 2" begin
     
     ocp = Model()
     x  = 12
@@ -345,7 +345,7 @@ end
 
 end
 
-@testset "constraint! 3/7" begin
+@testset "constraint! 3" begin
 
     ocp = Model()
     state!(ocp, 1)
@@ -380,7 +380,7 @@ end
 
 end
 
-@testset "constraint! 4/7" begin
+@testset "constraint! 4" begin
  
     ocp = Model()
     constraint!(ocp, :initial, Index(1), 0, 1, :c0)
@@ -419,34 +419,34 @@ end
 
 end
 
-@testset "constraint! 5/7" begin
+@testset "constraint! 5" begin
 
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0+tf+xf, 0, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, :cb)
     constraint!(ocp, :control, u->u, 0, :cu)
     constraint!(ocp, :state, x->x, 0, :cs)
     constraint!(ocp, :mixed, (x,u)->x+u, 1, :cm)
-    @test constraint(ocp, :cb)(12, 13, 14, 15) == 12+13+14+15
+    @test constraint(ocp, :cb)(12, 13) == 12+13
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
     @test constraint(ocp, :cm)(12, 13) == 12+13
 
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0[1]+tf+xf[1], 0, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> x0[1]+xf[1], 0, :cb)
     constraint!(ocp, :control, u->u[1], 0, :cu)
     constraint!(ocp, :state, x->x[1], 0, :cs)
     constraint!(ocp, :mixed, (x,u)->x[1]+u[1], 1, :cm)
-    @test constraint(ocp, :cb)(12, [13, 14], 15, [16, 17]) == 12+13+15+16
+    @test constraint(ocp, :cb)([13, 14], [16, 17]) == 13+16
     @test constraint(ocp, :cu)([12, 13]) == 12
     @test constraint(ocp, :cs)([12, 13]) == 12
     @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12+14
 
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+x0[1]+tf+xf[1], t0+x0[2]+tf+xf[2]], 0, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> [x0[1]+xf[1], x0[2]+xf[2]], 0, :cb)
     constraint!(ocp, :control, u->u[1:2], 0, :cu)
     constraint!(ocp, :state, x->x[1:2], 0, :cs)
     constraint!(ocp, :mixed, (x,u)->[x[1]+u[1], x[2]+u[2]], 1, :cm)
-    @test constraint(ocp, :cb)(12, [13, 14, 15], 16, [17, 18, 19]) == [12+13+16+17, 12+14+16+18]
+    @test constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13+17, 14+18]
     @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
     @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12+15, 13+16]
@@ -458,41 +458,93 @@ end
 
 end
 
-@testset "constraint! 6/7" begin
+@testset "constraint! 6" begin
 
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0+tf+xf, 0, 1, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, 1, :cb)
     constraint!(ocp, :control, u->u, 0, 1, :cu)
     constraint!(ocp, :state, x->x, 0, 1, :cs)
     constraint!(ocp, :mixed, (x,u)->x+u, 1, 1, :cm)
-    @test constraint(ocp, :cb)(12, 13, 14, 15) == 12+13+14+15
+    @test constraint(ocp, :cb)(12, 13) == 12+13
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
     @test constraint(ocp, :cm)(12, 13) == 12+13
 
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0[1]+tf+xf[1], 0, 1, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> x0[1]+xf[1], 0, 1, :cb)
     constraint!(ocp, :control, u->u[1], 0, 1, :cu)
     constraint!(ocp, :state, x->x[1], 0, 1, :cs)
     constraint!(ocp, :mixed, (x,u)->x[1]+u[1], 1, 1, :cm)
-    @test constraint(ocp, :cb)(12, [13, 14], 15, [16, 17]) == 12+13+15+16
+    @test constraint(ocp, :cb)([13, 14], [16, 17]) == 13+16
     @test constraint(ocp, :cu)([12, 13]) == 12
     @test constraint(ocp, :cs)([12, 13]) == 12
     @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12+14
 
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+x0[1]+tf+xf[1], t0+x0[2]+tf+xf[2]], 0, 1, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> [x0[1]+xf[1], x0[2]+xf[2]], 0, 1, :cb)
     constraint!(ocp, :control, u->u[1:2], 0, 1, :cu)
     constraint!(ocp, :state, x->x[1:2], 0, 1, :cs)
     constraint!(ocp, :mixed, (x,u)->[x[1]+u[1], x[2]+u[2]], 1, 1, :cm)
-    @test constraint(ocp, :cb)(12, [13, 14, 15], 16, [17, 18, 19]) == [12+13+16+17, 12+14+16+18]
+    @test constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13+17, 14+18]
     @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
     @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12+15, 13+16]
 
 end
 
-@testset "constraint! 7/7" begin
+@testset "constraint! 7" begin
+
+    x = 1
+    u = 2
+    v = [ 3, 4, 5, 6 ]
+    x0 = 7
+    xf = 8
+    ocp = Model()
+    variable!(ocp, 4)
+    constraint!(ocp, :boundary, (x0, xf, v) -> x0 + xf + v[1], 0, 1, :cb)
+    constraint!(ocp, :control, (u, v) -> u + v[1], 0, 1, :cu)
+    constraint!(ocp, :state, (x, v) -> x + v[1], 0, 1, :cs)
+    constraint!(ocp, :mixed, (x, u, v) -> x + u + v[1], 1, 1, :cm)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], :eq1)
+    constraint!(ocp, :variable, Index(1), 0, :eq2)
+    constraint!(ocp, :variable, 1:2, [ 0, 0 ], :eq3)
+    constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], :eq4)
+    constraint!(ocp, :variable, v -> v.^2, [ 0, 0, 0, 0 ], :eq5)
+    @test constraint(ocp, :cb)(x0, xf, v) == x0 + xf + v[1]
+    @test constraint(ocp, :cu)(u, v) == u + v[1]
+    @test constraint(ocp, :cs)(x, v) == x + v[1]
+    @test constraint(ocp, :cm)(x, u, v) == x + u + v[1]
+    @test constraint(ocp, :eq1)(v) == v
+    @test constraint(ocp, :eq2)(v) == v[1]
+    @test constraint(ocp, :eq3)(v) == v[1:2]
+    @test constraint(ocp, :eq4)(v) == v[1:2:4]
+    @test constraint(ocp, :eq5)(v) == v.^2
+
+end
+
+@testset "constraint! 8" begin
+
+    x = 1
+    u = 2
+    v = [ 3, 4, 5, 6 ]
+    x0 = 7
+    xf = 8
+    ocp = Model()
+    variable!(ocp, 4)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], :eq1)
+    constraint!(ocp, :variable, Index(1), 0, 1, :eq2)
+    constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ], :eq3)
+    constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], [ -1, 1 ], :eq4)
+    constraint!(ocp, :variable, v -> v.^2, [ 0, 0, 0, 0 ], [ 1, 0, 1, 0 ], :eq5)
+    @test constraint(ocp, :eq1)(v) == v
+    @test constraint(ocp, :eq2)(v) == v[1]
+    @test constraint(ocp, :eq3)(v) == v[1:2]
+    @test constraint(ocp, :eq4)(v) == v[1:2:4]
+    @test constraint(ocp, :eq5)(v) == v.^2
+
+end
+
+@testset "constraint! 9" begin
     
     ocp = Model()
     state!(ocp, 1)
@@ -523,7 +575,7 @@ end
 @testset "remove_constraint! and constraints_labels" begin
     
     ocp = Model()
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> t0+x0+tf+xf, 0, 1, :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, 1, :cb)
     constraint!(ocp, :control, u->u, 0, 1, :cu)
     k = constraints_labels(ocp)
     @test :cb ∈ k
@@ -544,7 +596,7 @@ end
     constraint!(ocp, :final, Index(1), 1, :cf)
     constraint!(ocp, :control, 0, 1, :cu)
     constraint!(ocp, :state, [0, 1], [1, 2], :cs)
-    constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [t0+tf, x0[2]+xf[2]], [0, 1], [1, 2], :cb)
+    constraint!(ocp, :boundary, (x0, xf) -> x0[2]+xf[2], 0, 1, :cb)
     constraint!(ocp, :control, u->u, 0, 1, :cuu)
     constraint!(ocp, :state, x->x, [0, 1], [1, 2], :css)
     constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
@@ -589,9 +641,12 @@ end
     @test sort(ψ(_Time(-1), [1, 1], [2])) == sort([3])
 
     # boundary
-    @test sort(ϕl) == sort([10, 1, 0, 1])
-    @test sort(ϕu) == sort([10, 1, 1, 2])
-    @test sort(ϕ(1, [1, 3], 20, [4, 100])) == sort([3, 4, 21, 103])
+    #constraint!(ocp, :initial, Index(2), 10, :ci)
+    #constraint!(ocp, :final, Index(1), 1, :cf)
+    #constraint!(ocp, :boundary, (x0, xf) -> x0[2]+xf[2], 0, 1, :cb)
+    @test sort(ϕl) == sort([10, 1, 0])
+    @test sort(ϕu) == sort([10, 1, 1])
+    @test sort(ϕ([1, 3], [4, 100])) == sort([3, 4, 103])
 
     # box constraint
     @test sort(ulb) == sort([0])

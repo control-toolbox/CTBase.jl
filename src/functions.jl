@@ -69,10 +69,10 @@ $(TYPEDFIELDS)
 - constraint dimension: 1
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0)
-julia> B(0, 0, 1, 1)
+julia> B = BoundaryConstraint((x0, xf) -> xf - x0)
+julia> B(0, 1)
 1
-julia> B(0, [0], 1, [1])
+julia> B([0], [1])
 1-element Vector{Int64}:
  1
 ```
@@ -81,12 +81,12 @@ julia> B(0, [0], 1, [1])
 - constraint dimension: 2
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf])
-julia> B(0, 0, 1, 1)
+julia> B = BoundaryConstraint((x0, xf) -> [xf - x0, x0 + xf])
+julia> B(0, 1)
 2-element Vector{Int64}:
   1
- -1
-julia> B(0, [0], 1, [1])
+  1
+julia> B([0], [1])
 ERROR: MethodError: Cannot `convert` an object of type 
   Vector{Any} to an object of type 
   Union{Real, AbstractVector{<:Real}}
@@ -96,8 +96,8 @@ ERROR: MethodError: Cannot `convert` an object of type
 - constraint dimension: 1
     
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0)
-julia> B(0, [1, 0], 1, [0, 1])
+julia> B = BoundaryConstraint((x0, xf) -> xf[1] - x0[1])
+julia> B([1, 0], [0, 1])
 1
 ```
 
@@ -105,8 +105,8 @@ julia> B(0, [1, 0], 1, [0, 1])
 - constraint dimension: 2
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]])
-julia> B(0, [1, 0], 1, [1, 0])
+julia> B = BoundaryConstraint((x0, xf) -> [x0[1] + xf[2], xf[1] - x0[2]])
+julia> B([1, 0], [1, 0])
 2-element Vector{Int64}:
  1
  1
@@ -184,23 +184,23 @@ struct BoundaryConstraint{state_dimension, constraint_dimension}
 end
 
 # classical call
-function (F::BoundaryConstraint{N, K})(t0::Time, x0::Union{ctNumber, State}, 
-        tf::Time, xf::Union{ctNumber, State}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, K}
-    return F.f(t0, x0, tf, xf, args...; kwargs...)
+function (F::BoundaryConstraint{N, K})(x0::Union{ctNumber, State}, 
+        xf::Union{ctNumber, State}, args...; kwargs...)::Union{ctNumber, ctVector} where {N, K}
+    return F.f(x0, xf, args...; kwargs...)
 end
 
 # specific calls: inputs and outputs are vectors, except times
-function (F::BoundaryConstraint{1, 1})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector
-    return [F.f(t0.value, x0[1], tf.value, xf[1], args...; kwargs...)]
+function (F::BoundaryConstraint{1, 1})(x0::State, xf::State, args...; kwargs...)::ctVector
+    return [F.f(x0[1], xf[1], args...; kwargs...)]
 end
-function (F::BoundaryConstraint{1, K})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector where K
-    return F.f(t0.value, x0[1], tf.value, xf[1], args...; kwargs...)
+function (F::BoundaryConstraint{1, K})(x0::State, xf::State, args...; kwargs...)::ctVector where K
+    return F.f(x0[1], xf[1], args...; kwargs...)
 end
-function (F::BoundaryConstraint{N, 1})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector where N
-    return [F.f(t0.value, x0, tf.value, xf, args...; kwargs...)]
+function (F::BoundaryConstraint{N, 1})(x0::State, xf::State, args...; kwargs...)::ctVector where N
+    return [F.f(x0, xf, args...; kwargs...)]
 end
-function (F::BoundaryConstraint{N, K})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctVector where {N, K}
-    return F.f(t0.value, x0, tf.value, xf, args...; kwargs...)
+function (F::BoundaryConstraint{N, K})(x0::State, xf::State, args...; kwargs...)::ctVector where {N, K}
+    return F.f(x0, xf, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
@@ -272,17 +272,17 @@ struct Mayer{state_dimension}
 end
 
 # classical call
-function (F::Mayer{N})(t0::Time, x0::Union{ctNumber, State}, 
-    tf::Time, xf::Union{ctNumber, State}, args...; kwargs...)::ctNumber where {N}
-    return F.f(t0, x0, tf, xf, args...; kwargs...)
+function (F::Mayer{N})(x0::Union{ctNumber, State}, 
+    xf::Union{ctNumber, State}, args...; kwargs...)::ctNumber where {N}
+    return F.f(x0, xf, args...; kwargs...)
 end
 
 # specific calls: inputs are vectors, except times
-function (F::Mayer{1})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctNumber
-    return F.f(t0.value, x0[1], tf.value, xf[1], args...; kwargs...)
+function (F::Mayer{1})(x0::State, xf::State, args...; kwargs...)::ctNumber
+    return F.f(x0[1], xf[1], args...; kwargs...)
 end
-function (F::Mayer{N})(t0::_Time, x0::State, tf::_Time, xf::State, args...; kwargs...)::ctNumber where N
-    return F.f(t0.value, x0, tf.value, xf, args...; kwargs...)
+function (F::Mayer{N})(x0::State, xf::State, args...; kwargs...)::ctNumber where N
+    return F.f(x0, xf, args...; kwargs...)
 end
 
 # -------------------------------------------------------------------------------------------
