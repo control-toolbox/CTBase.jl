@@ -32,22 +32,6 @@ $(TYPEDFIELDS)
     infos::Dict{Symbol, Any}=Dict{Symbol, Any}()
 end
 
-#= # getters
-state_dimension(sol::OptimalControlSolution) = sol.state_dimension
-control_dimension(sol::OptimalControlSolution) = sol.control_dimension
-time_steps(sol::OptimalControlSolution) = sol.times
-time_steps_length(sol::OptimalControlSolution) = length(time(sol))
-state(sol::OptimalControlSolution) = sol.state
-state_names(sol::OptimalControlSolution) = sol.state_names
-control(sol::OptimalControlSolution) = sol.control
-control_names(sol::OptimalControlSolution) = sol.control_names
-adjoint(sol::OptimalControlSolution) = sol.adjoint
-objective(sol::OptimalControlSolution) = sol.objective
-iterations(sol::OptimalControlSolution) = sol.iterations   
-success(sol::OptimalControlSolution) = sol.success
-message(sol::OptimalControlSolution) = sol.message
-stopping(sol::OptimalControlSolution) = sol.stopping =#
-
 # we get an error when a solution is printed so I add this function
 # which has to be put in the package CTBase and has to be completed
 """
