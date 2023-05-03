@@ -27,23 +27,8 @@ end
 
 __init_aliases() = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
-    al[:R¹] = :( R^1 )
-    al[:R²] = :( R^2 )
-    al[:R³] = :( R^3 )
-    al[:R⁴] = :( R^4 )
-    al[:R⁵] = :( R^5 )
-    al[:R⁶] = :( R^6 )
-    al[:R⁷] = :( R^7 )
-    al[:R⁸] = :( R^8 )
-    al[:R⁹] = :( R^9 )
+    for i ∈ 1:9  al[Symbol(:R, ctupperscripts(i))] = :( R^$i  ) end
     al
-end
-
-__sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
-
-__sup(i) = begin
-    @assert i ∈ 1:9
-    [ '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹' ][i]
 end
 
 __throw(ex, n, line) = begin
@@ -126,8 +111,8 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     p.v = v
     vv = QuoteNode(v)
     qq = q isa Integer ? q : 9
-    for i ∈ 1:qq p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
-    for i ∈ 1:9  p.aliases[Symbol(v, __sup(i))] = :( $v^$i  ) end
+    for i ∈ 1:qq p.aliases[Symbol(v, ctindices(i))] = :( $v[$i] ) end
+    for i ∈ 1:9  p.aliases[Symbol(v, ctupperscripts(i))] = :( $v^$i  ) end
     __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
 end
 
@@ -136,7 +121,7 @@ p_alias!(p, ocp, a, e; log=false) = begin
     a isa Symbol || return __throw("forbidden alias name: $a", p.lnum, p.line)
     aa = QuoteNode(a)
     ee = QuoteNode(e)
-    for i ∈ 1:9 p.aliases[Symbol(a, __sup(i))] = :( $a^$i  ) end
+    for i ∈ 1:9 p.aliases[Symbol(a, ctupperscripts(i))] = :( $a^$i  ) end
     p.aliases[a] = e
     __wrap(:( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) ), p.lnum, p.line)
 end
@@ -184,8 +169,8 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
-    for i ∈ 1:nn p.aliases[Symbol(x, __sub(i))] = :( $x[$i] ) end
-    for i ∈ 1:9  p.aliases[Symbol(x, __sup(i))] = :( $x^$i  ) end
+    for i ∈ 1:nn p.aliases[Symbol(x, ctindices(i))] = :( $x[$i] ) end
+    for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
     __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
 end
 
@@ -195,8 +180,8 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     p.u = u
     uu = QuoteNode(u)
     mm =  m isa Integer ? m : 9
-    for i ∈ 1:mm p.aliases[Symbol(u, __sub(i))] = :( $u[$i] ) end
-    for i ∈ 1:9  p.aliases[Symbol(u, __sup(i))] = :( $u^$i  ) end
+    for i ∈ 1:mm p.aliases[Symbol(u, ctindices(i))] = :( $u[$i] ) end
+    for i ∈ 1:9  p.aliases[Symbol(u, ctupperscripts(i))] = :( $u^$i  ) end
     __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
 end
 
