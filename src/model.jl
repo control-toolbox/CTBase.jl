@@ -1,7 +1,5 @@
 # --------------------------------------------------------------------------------------------------
 # todo:
-# - constraint!: add :variable for every kind of constraint
-# - update nlp_constraints accordingly
 # - remove @_def ?
 # - add second pass for autonomous check
 
@@ -717,177 +715,6 @@ function constraint!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f:
 
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Remove a labeled constraint.
-
-# Example
-
-```jldoctest
-julia> remove_constraint!(ocp, :con)
-```
-"""
-function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
-    if !haskey(ocp.constraints, label)
-        throw(IncorrectArgument("the following constraint does not exist: " * String(label) *
-        ". Please check the list of constraints: ocp.constraints."))
-    end
-    delete!(ocp.constraints, label)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the labels of the constraints as a `Base.keys`.
-
-# Example
-
-```@example
-julia> constraints_labels(ocp)
-```
-"""
-function constraints_labels(ocp::OptimalControlModel)
-    return keys(ocp.constraints)
-end
-
-#
-"""
-$(TYPEDSIGNATURES)
-
-Retrieve a labeled constraint. The result is a function associated with the constraint
-computation (not taking into account provided value / bounds).
-
-# Example
-
-```jldoctest
-julia> constraint!(ocp, :initial, 0, :c0)
-julia> c = constraint(ocp, :c0)
-julia> c(1)
-1
-```
-"""
-function constraint(ocp::OptimalControlModel, label::Symbol)
-    con = ocp.constraints[label]
-    @match con begin
-        (:initial , f::Function, _, _) => return f
-        (:final   , f::Function, _, _) => return f
-        (:boundary, f::Function, _, _) => return f
-        (:control , f::Function, _, _) => return f
-        (:control , rg         , _, _) => return u -> u[rg]
-        (:state   , f::Function, _, _) => return f
-        (:state   , rg         , _, _) => return x -> x[rg]
-        (:mixed   , f::Function, _, _) => return f
-        (:variable, f::Function, _, _) => return f
-        (:variable, rg         , _, _) => return v -> v[rg]
-        _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-             ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed, :variable ]."))
-    end
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return a 6-tuple of tuples:
-
-- `(ξl, ξ, ξu)` are control constraints
-- `(ηl, η, ηu)` are state constraints
-- `(ψl, ψ, ψu)` are mixed constraints
-- `(ϕl, ϕ, ϕu)` are boundary constraints
-- `(ulb, uind, uub)` are control linear constraints of a subset of indices
-- `(xlb, xind, xub)` are state linear constraints of a subset of indices
-
-!!! note
-
-    - The dimensions of the state and control must be set before calling `nlp_constraints`.
-
-# Example
-
-```jldoctest
-julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
-    (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
-```
-"""
-function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence}
-
-    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
-    n = ocp.state_dimension
-    m = ocp.control_dimension
-    constraints = ocp.constraints
-
-    ξf = Vector{ControlConstraint}(); ξl = Vector{ctNumber}(); ξu = Vector{ctNumber}()
-    ηf = Vector{StateConstraint}(); ηl = Vector{ctNumber}(); ηu = Vector{ctNumber}()
-    ψf = Vector{MixedConstraint}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
-    ϕf = Vector{BoundaryConstraint}(); ϕl = Vector{ctNumber}(); ϕu = Vector{ctNumber}()
-    uind = Vector{Int}(); ulb = Vector{ctNumber}(); uub = Vector{ctNumber}()
-    xind = Vector{Int}(); xlb = Vector{ctNumber}(); xub = Vector{ctNumber}()
-
-    for (_, c) ∈ constraints
-        @match c begin
-        (:initial, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0), state_dimension=n, constraint_dimension=length(lb)))
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:final, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraint((x0, xf) -> f(xf), state_dimension=n, constraint_dimension=length(lb)))
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:boundary, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0, xf), state_dimension=n, constraint_dimension=length(lb)))
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:control, f::Function, lb, ub) => begin
-            push!(ξf, ControlConstraint(f, time_dependence=time_dependence, control_dimension=m, constraint_dimension=length(lb)))
-            append!(ξl, lb)
-            append!(ξu, ub) end
-        (:control, rg, lb, ub) => begin
-            append!(uind, rg)
-            append!(ulb, lb)
-            append!(uub, ub) end
-        (:state, f::Function, lb, ub) => begin
-            push!(ηf, StateConstraint(f, time_dependence=time_dependence, state_dimension=n, constraint_dimension=length(lb)))
-            append!(ηl, lb)
-            append!(ηu, ub) end
-        (:state, rg, lb, ub) => begin
-            append!(xind, rg)
-            append!(xlb, lb)
-            append!(xub, ub) end
-        (:mixed, f, lb, ub) => begin
-            push!(ψf, MixedConstraint(f, time_dependence=time_dependence, state_dimension=n, control_dimension=m, constraint_dimension=length(lb)))
-            append!(ψl, lb)
-            append!(ψu, ub) end
-        _ => throw(NotImplemented("dealing with this kind of constraint is not implemented"))
-    end # match
-    end # for
-
-    function ξ(t, u)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ξf) append!(val, ξf[i](t, u)) end
-        return val
-    end
-
-    function η(t, x)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ηf) append!(val, ηf[i](t, x)) end
-        return val
-    end
-
-    function ψ(t, x, u)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u)) end
-        return val
-    end
-
-    function ϕ(x0, xf)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf)) end
-        return val
-    end
-
-    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub)
-
-end
-
 # -------------------------------------------------------------------------------------------
 #
 """
@@ -986,4 +813,192 @@ function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, g::
         throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
         ". Please choose :bolza."))
     end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Remove a labeled constraint.
+
+# Example
+
+```jldoctest
+julia> remove_constraint!(ocp, :con)
+```
+"""
+function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
+    if !haskey(ocp.constraints, label)
+        throw(IncorrectArgument("the following constraint does not exist: " * String(label) *
+        ". Please check the list of constraints: ocp.constraints."))
+    end
+    delete!(ocp.constraints, label)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the labels of the constraints as a `Base.keys`.
+
+# Example
+
+```@example
+julia> constraints_labels(ocp)
+```
+"""
+function constraints_labels(ocp::OptimalControlModel)
+    return keys(ocp.constraints)
+end
+
+#
+"""
+$(TYPEDSIGNATURES)
+
+Retrieve a labeled constraint. The result is a function associated with the constraint
+computation (not taking into account provided value / bounds).
+
+# Example
+
+```jldoctest
+julia> constraint!(ocp, :initial, 0, :c0)
+julia> c = constraint(ocp, :c0)
+julia> c(1)
+1
+```
+"""
+function constraint(ocp::OptimalControlModel, label::Symbol)
+    con = ocp.constraints[label]
+    @match con begin
+        (:initial , f::Function, _, _) => return f
+        (:final   , f::Function, _, _) => return f
+        (:boundary, f::Function, _, _) => return f
+        (:control , f::Function, _, _) => return f
+        (:control , rg         , _, _) => return u -> u[rg]
+        (:state   , f::Function, _, _) => return f
+        (:state   , rg         , _, _) => return x -> x[rg]
+        (:mixed   , f::Function, _, _) => return f
+        (:variable, f::Function, _, _) => return f
+        (:variable, rg         , _, _) => return v -> v[rg]
+        _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+             ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed, :variable ]."))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return a 6-tuple of tuples:
+
+- `(ξl, ξ, ξu)` are control constraints
+- `(ηl, η, ηu)` are state constraints
+- `(ψl, ψ, ψu)` are mixed constraints
+- `(ϕl, ϕ, ϕu)` are boundary constraints
+- `(θl, θ, θu)` are variable constraints
+- `(ulb, uind, uub)` are control linear constraints of a subset of indices
+- `(xlb, xind, xub)` are state linear constraints of a subset of indices
+- `(vlb, vind, vub)` are variable linear constraints of a subset of indices
+
+!!! note
+
+    - The dimensions of the state and control must be set before calling `nlp_constraints`.
+
+# Example
+
+```jldoctest
+julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
+    (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
+```
+"""
+function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence}
+
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
+    n = ocp.state_dimension
+    m = ocp.control_dimension
+    constraints = ocp.constraints
+
+    ξf = Vector{ControlConstraint}(); ξl = Vector{ctNumber}(); ξu = Vector{ctNumber}()
+    ηf = Vector{StateConstraint}(); ηl = Vector{ctNumber}(); ηu = Vector{ctNumber}()
+    ψf = Vector{MixedConstraint}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
+    ϕf = Vector{BoundaryConstraint}(); ϕl = Vector{ctNumber}(); ϕu = Vector{ctNumber}()
+    θf = Vector{VariableConstraint}(); θl = Vector{ctNumber}(); θu = Vector{ctNumber}()
+    uind = Vector{Int}(); ulb = Vector{ctNumber}(); uub = Vector{ctNumber}()
+    xind = Vector{Int}(); xlb = Vector{ctNumber}(); xub = Vector{ctNumber}()
+    vind = Vector{Int}(); vlb = Vector{ctNumber}(); vub = Vector{ctNumber}()
+
+    for (_, c) ∈ constraints
+        @match c begin
+        (:initial, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0), state_dimension=n, constraint_dimension=length(lb)))
+            append!(ϕl, lb)
+            append!(ϕu, ub) end
+        (:final, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraint((x0, xf) -> f(xf), state_dimension=n, constraint_dimension=length(lb)))
+            append!(ϕl, lb)
+            append!(ϕu, ub) end
+        (:boundary, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0, xf), state_dimension=n, constraint_dimension=length(lb)))
+            append!(ϕl, lb)
+            append!(ϕu, ub) end
+        (:control, f::Function, lb, ub) => begin
+            push!(ξf, ControlConstraint(f, time_dependence=time_dependence, control_dimension=m, constraint_dimension=length(lb)))
+            append!(ξl, lb)
+            append!(ξu, ub) end
+        (:control, rg, lb, ub) => begin
+            append!(uind, rg)
+            append!(ulb, lb)
+            append!(uub, ub) end
+        (:state, f::Function, lb, ub) => begin
+            push!(ηf, StateConstraint(f, time_dependence=time_dependence, state_dimension=n, constraint_dimension=length(lb)))
+            append!(ηl, lb)
+            append!(ηu, ub) end
+        (:state, rg, lb, ub) => begin
+            append!(xind, rg)
+            append!(xlb, lb)
+            append!(xub, ub) end
+        (:mixed, f, lb, ub) => begin
+            push!(ψf, MixedConstraint(f, time_dependence=time_dependence, state_dimension=n, control_dimension=m, constraint_dimension=length(lb)))
+            append!(ψl, lb)
+            append!(ψu, ub) end
+        (:variable, f::Function, lb, ub) => begin
+            push!(θf, VariableConstraint(f))
+            append!(θl, lb)
+            append!(θu, ub) end
+        (:variable, rg, lb, ub) => begin
+            append!(vind, rg)
+            append!(vlb, lb)
+            append!(vub, ub) end
+        _ => throw(NotImplemented("dealing with this kind of constraint is not implemented")) end
+    end
+
+    function ξ(t, u, v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(ξf) append!(val, ξf[i](t, u)) end
+        return val
+    end
+
+    function η(t, x, v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(ηf) append!(val, ηf[i](t, x)) end
+        return val
+    end
+
+    function ψ(t, x, u, v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u)) end
+        return val
+    end
+
+    function θ(v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
+        return val
+    end
+
+    function ϕ(x0, xf, v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf)) end
+        return val
+    end
+
+    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub)
+
 end

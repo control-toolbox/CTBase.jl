@@ -589,7 +589,7 @@ end
 
 end
 
-@testset "nlp_constraints" begin
+@testset "nlp_constraints without variable" begin
     
     ocp = Model()
     state!(ocp, 2)
@@ -603,8 +603,10 @@ end
     constraint!(ocp, :state, x->x, [0, 1], [1, 2], :css)
     constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
 
-    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), 
-    (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
+    (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub) = nlp_constraints(ocp)
+
+    v = [ ]
 
     #=
     println("ξl = ", ξl)
@@ -618,7 +620,7 @@ end
     println("ψu = ", ψu)
     println("ϕl = ", ϕl)
     println("ϕ = ", ϕ)
-    println("ϕu = ", ϕu)
+    pξlrintln("ϕu = ", ϕu)
     println("ulb = ", ulb)
     println("uind = ", uind)
     println("uub = ", uub)
@@ -630,25 +632,22 @@ end
     # control
     @test sort(ξl) == sort([0])
     @test sort(ξu) == sort([1])
-    @test sort(ξ(_Time(-1), [1])) == sort([1])
+    @test sort(ξ(-1, [1], v)) == sort([1])
 
     # state
     @test sort(ηl) == sort([0, 1])
     @test sort(ηu) == sort([1, 2])
-    @test sort(η(_Time(-1), [1, 1])) == sort([1, 1])
+    @test sort(η(-1, [1, 1], v)) == sort([1, 1])
 
     # mixed
     @test sort(ψl) == sort([1])
     @test sort(ψu) == sort([1])
-    @test sort(ψ(_Time(-1), [1, 1], [2])) == sort([3])
+    @test sort(ψ(-1, [1, 1], [2], v)) == sort([3])
 
     # boundary
-    #constraint!(ocp, :initial, Index(2), 10, :ci)
-    #constraint!(ocp, :final, Index(1), 1, :cf)
-    #constraint!(ocp, :boundary, (x0, xf) -> x0[2]+xf[2], 0, 1, :cb)
     @test sort(ϕl) == sort([10, 1, 0])
     @test sort(ϕu) == sort([10, 1, 1])
-    @test sort(ϕ([1, 3], [4, 100])) == sort([3, 4, 103])
+    @test sort(ϕ([1, 3], [4, 100], v)) == sort([3, 4, 103])
 
     # box constraint
     @test sort(ulb) == sort([0])
@@ -657,6 +656,76 @@ end
     @test sort(xlb) == sort([0, 1])
     @test sort(xind) == sort([1, 2])
     @test sort(xub) == sort([1, 2])
+
+    # variable
+    @test sort(vlb) == sort([ ])
+    @test sort(vind) == sort([ ])
+    @test sort(vub) == sort([ ])
+    @test sort(θl) == sort([ ])
+    @test sort(θu) == sort([ ])
+    @test sort(θ(v)) == sort([ ])
+
+end
+
+@testset "nlp_constraints with variable" begin
+    
+    ocp = Model()
+    variable!(ocp, 4)
+    state!(ocp, 2)
+    control!(ocp, 1)
+    constraint!(ocp, :initial, Index(2), 10, :ci)
+    constraint!(ocp, :final, Index(1), 1, :cf)
+    constraint!(ocp, :control, 0, 1, :cu)
+    constraint!(ocp, :state, [0, 1], [1, 2], :cs)
+    constraint!(ocp, :boundary, (x0, xf, v) -> x0[2]+xf[2]+v[1], 0, 1, :cb)
+    constraint!(ocp, :control, (u, v) -> u+v[2], 0, 1, :cuu)
+    constraint!(ocp, :state, (x, v) -> x+v[1:2], [0, 1], [1, 2], :css)
+    constraint!(ocp, :mixed, (x, u, v) -> x[1]+u+v[2], 1, 1, :cm)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 5, 5, 5, 5 ], :cv1)
+    constraint!(ocp, :variable, 1:2, [ 1, 2 ], [ 3, 4 ], :cv2)
+    constraint!(ocp, :variable, Index(3), 2, 3, :cv3)
+    constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)
+
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
+    (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub) = nlp_constraints(ocp)
+
+    v = [ 1, 2, 3, 4 ]
+
+    # control
+    @test sort(ξl) == sort([0])
+    @test sort(ξu) == sort([1])
+    @test sort(ξ(-1, [1], v)) == sort([ 1+v[2] ])
+
+    # state
+    @test sort(ηl) == sort([0, 1])
+    @test sort(ηu) == sort([1, 2])
+    @test sort(η(-1, [1, 1], v)) == sort([1, 1]+v[1:2])
+
+    # mixed
+    @test sort(ψl) == sort([1])
+    @test sort(ψu) == sort([1])
+    @test sort(ψ(-1, [1, 1], [2], v)) == sort([ 3+v[2] ])
+
+    # boundary
+    @test sort(ϕl) == sort([10, 1, 0])
+    @test sort(ϕu) == sort([10, 1, 1])
+    @test sort(ϕ([1, 3], [4, 100], v)) == sort([ 3, 4, 103+v[1] ])
+
+    # box constraint
+    @test sort(ulb) == sort([0])
+    @test sort(uind) == sort([1])
+    @test sort(uub) == sort([1])
+    @test sort(xlb) == sort([0, 1])
+    @test sort(xind) == sort([1, 2])
+    @test sort(xub) == sort([1, 2])
+
+    # variable
+    @test sort(vlb) == sort([ 0, 0, 0, 0, 1, 2, 2 ])
+    @test sort(vind) == sort([ 1, 2, 3, 4, 1, 2, 3 ])
+    @test sort(vub) == sort([ 5, 5, 5, 5, 3, 4, 3 ])
+    @test sort(θl) == sort([ 0 ])
+    @test sort(θu) == sort([ 1 ])
+    @test sort(θ(v)) == sort([ v[3]^2 ])
 
 end
 

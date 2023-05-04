@@ -1314,6 +1314,18 @@ function (F::MixedConstraint{:autonomous, N, M, K})(t::_Time, x::State, u::Contr
 end
 
 # -------------------------------------------------------------------------------------------
+struct VariableConstraint
+    f::Function
+    function VariableConstraint(f::Function)
+        new(f)
+    end
+end
+
+function (F::VariableConstraint)(v::Union{ctNumber, Variable}, args...; kwargs...)
+    return F.f(v, args...; kwargs...)
+end
+
+# -------------------------------------------------------------------------------------------
 # pre-condition: f returns a scalar if the output is one dimensional
 """
 
