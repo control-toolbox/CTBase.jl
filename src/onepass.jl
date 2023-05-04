@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - don't __wrap any __throw (use return __throw; check p_time...)
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
 # - add assert for pre/post conditions and invariants
@@ -55,7 +56,7 @@ __wrap(e, n, line) = quote
     try
         $e
     catch ex
-    println("Line ", $n, ": ", $line)
+        println("Line ", $n, ": ", $line)
         throw(ex)
     end
 end
@@ -247,7 +248,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :mixed, $gs, $e2, $llabel)
             end end
-        _ => __throw("bad constraint declaration", p.lnum, p.line)
+        _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end
     __wrap(code, p.lnum, p.line)
 end
@@ -308,7 +309,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :mixed, $gs, $e1, $e3, $llabel)
             end end
-        _ => __throw("bad constraint declaration", p.lnum, p.line)
+        _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end
     __wrap(code, p.lnum, p.line)
 end
@@ -395,7 +396,11 @@ end
 macro def(ocp, e, log=false)
     try
         p = ParsingInfo()
-        code = :( $ocp = Model() )
+	parse!(p, ocp, e; log=log)
+	__t_dep(p) ? println("time dependent") : println("time independent") # debug
+	__v_dep(p) ? println("variable dependent") : println("variable independent") # debug
+        p = ParsingInfo()
+        code = :( $ocp = Model() ) # debug: create with proper type
         code = Expr(:block, code, parse!(p, ocp, e; log=log))
         code = Expr(:block, code, :( $ocp )) 
         esc( code )
