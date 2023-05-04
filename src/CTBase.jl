@@ -138,7 +138,7 @@ export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscr
 export replace_call, constraint_type
 
 # onepass
-export @def, @_def
+export @def
 
 # _Time
 export _Time
