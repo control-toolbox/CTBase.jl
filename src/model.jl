@@ -928,6 +928,7 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
     for (_, c) ∈ constraints
         @match c begin
         (:initial, f, lb, ub) => begin
+	    # todo: cast function before, in constraint!
             push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0), state_dimension=n, constraint_dimension=length(lb)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
