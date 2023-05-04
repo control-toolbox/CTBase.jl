@@ -62,6 +62,10 @@ Type alias for a control.
 """
 const Control = ctVector
 """
+Type alias for a variable.
+"""
+const Variable = ctVector
+"""
 Type alias for a vector of states.
 """
 const States = Vector{<:State}
@@ -98,7 +102,7 @@ include("plot.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Adjoints, Controls, State, Adjoint, Dimension, Index
+export States, Adjoints, Controls, State, Adjoint, Control, Variable, Dimension, Index
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
@@ -114,13 +118,13 @@ export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
-export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint
+export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
 
 # model
 export OptimalControlModel
 export Model
 export variable!, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
-export isautonomous, isnonautonomous, ismin, ismax
+export isautonomous, isnonautonomous, ismin, ismax, hasvariable
 export nlp_constraints, constraints_labels
 
 # solution
