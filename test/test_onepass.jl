@@ -114,12 +114,13 @@ B = [ 0
 a = 1
 f(b) = begin # closure of a, local c, and @def in function
     c = 3
-    @def begin
+    @def ocp begin
         t ∈ [ a, b ], time
         x ∈ R, state
         u ∈ R, control
         x'(t) == x(t) + u(t) + b + c + d
     end
+    ocp
 end
 o = f(2)
 d = 4
