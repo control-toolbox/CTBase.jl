@@ -59,9 +59,9 @@ time_set(ocp) = !isnothing(ocp.initial_time) && !isnothing(ocp.final_time)
 """
 $(TYPEDSIGNATURES)
 
-Return :nonautonomous == time_dependence
+Return :t_dep == time_dependence
 """
-isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
+isnonautonomous(time_dependence::Symbol) = :t_dep == time_dependence
 
 """
 $(TYPEDSIGNATURES)
@@ -112,13 +112,13 @@ Return a new `OptimalControlModel` instance, that is a model of an optimal contr
 
 The model is defined by the following optional keyword argument:
 
-- `time_dependence`: either `:autonomous` or `:nonautonomous`. Default is `:autonomous`.
+- `time_dependence`: either `:t_indep` or `:t_dep`. Default is `:t_indep`.
 
 # Examples
 
 ```jldoctest
 julia> ocp = Model()
-julia> ocp = Model(time_dependence=:nonautonomous)
+julia> ocp = Model(time_dependence=:t_dep)
 ```
 
 !!! note
@@ -126,11 +126,12 @@ julia> ocp = Model(time_dependence=:nonautonomous)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; time_dependence=__ocp_time_dependence())
-    if time_dependence ∉ [ :autonomous, :nonautonomous ]
-        throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-    end
-    return OptimalControlModel{time_dependence}()
+function Model(; time_dependence=__ocp_time_dependence(), variable_dependence=__ocp_variable_dependence())
+    time_dependence ∉ [ :t_indep, :t_dep ] &&
+        throw(InconsistentArgument("time_dependence must be either :t_indep or :t_dep"))
+    variable_dependence ∉ [ :v_indep, :v_dep ] &&
+        throw(InconsistentArgument("variable_dependence must be either :v_indep or :v_dep"))
+    return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
 # -------------------------------------------------------------------------------------------
