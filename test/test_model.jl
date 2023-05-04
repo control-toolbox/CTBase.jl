@@ -531,6 +531,8 @@ end
     xf = 8
     ocp = Model()
     variable!(ocp, 4)
+    state!(ocp, 1)
+    control!(ocp, 1)
     constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], :eq1)
     constraint!(ocp, :variable, Index(1), 0, 1, :eq2)
     constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ], :eq3)

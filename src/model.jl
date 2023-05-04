@@ -532,7 +532,6 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
     !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and control must be set before adding such a constraint."))
     n = ocp.state_dimension
     m = ocp.control_dimension
-    q = ocp.variable_dimension
 
     # set the constraint
     if type ∈ [ :initial, :final ]
@@ -542,6 +541,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
     elseif type == :state
         ocp.constraints[label] = (type, n == 1 ? 1 : 1:n, lb, ub)
     elseif type == :variable
+        q = ocp.variable_dimension
+        isnothing(q) && throw(UnauthorizedCall("the dimension of the variable must be set before adding such a constraint."))
         ocp.constraints[label] = (type, q == 1 ? 1 : 1:q, lb, ub)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
