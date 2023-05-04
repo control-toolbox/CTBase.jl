@@ -102,7 +102,8 @@ parse!(p, ocp, e; log=false) = begin
         if e isa LineNumberNode
                 e
             elseif e isa Expr && e.head == :block
-                Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...) # !!! assumes that map is done sequentially
+		# !!! assumes that map is done sequentially for side effects on p
+                Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
             else
                 __throw("unknown syntax", p.lnum, p.line)
             end end
@@ -400,6 +401,19 @@ Define an optimal control problem. One pass parsing of the definition.
 end
 ```
 """
+#macro def(e, log=false)
+#    esc( quote ocp = Model(); @_def ocp $e $log end )
+#end
+
+# if necessary: @def o ... and $o = Model(), etc.
 macro def(e, log=false)
-    esc( quote ocp = Model(); @_def ocp $e $log; ocp end )
+    try
+	ocp = Model()
+        p = ParsingInfo()
+        code = parse!(p, ocp, e; log=log)
+        code = Expr(:block, code, :( $ocp ))
+        esc( code )
+    catch ex
+        :( throw($ex) ) # can be catched by user
+    end
 end
