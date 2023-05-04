@@ -371,26 +371,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Implement def macro core.
-
-"""
-macro _def(ocp, e, log=false)
-    try
-        p = ParsingInfo()
-        esc( parse!(p, ocp, e; log=log) )
-    catch ex
-        :( throw($ex) ) # can be catched by user
-    end
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Define an optimal control problem. One pass parsing of the definition.
 
 # Example
 ```jldoctest
-@def begin
+@def ocp begin
     t ∈ [ 0, 1 ], time
     x ∈ R^2, state
     u ∈ R  , control
@@ -401,17 +386,12 @@ Define an optimal control problem. One pass parsing of the definition.
 end
 ```
 """
-#macro def(e, log=false)
-#    esc( quote ocp = Model(); @_def ocp $e $log end )
-#end
-
-# if necessary: @def o ... and $o = Model(), etc.
-macro def(e, log=false)
+macro def(ocp, e, log=false)
     try
-	ocp = Model()
         p = ParsingInfo()
-        code = parse!(p, ocp, e; log=log)
-        code = Expr(:block, code, :( $ocp ))
+        code = :( $ocp = Model() )
+        code = Expr(:block, code, parse!(p, ocp, e; log=log))
+        code = Expr(:block, code, :( $ocp )) 
         esc( code )
     catch ex
         :( throw($ex) ) # can be catched by user
