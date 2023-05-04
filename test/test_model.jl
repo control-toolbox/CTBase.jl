@@ -501,19 +501,13 @@ end
     xf = 8
     ocp = Model()
     variable!(ocp, 4)
-    constraint!(ocp, :boundary, (x0, xf, v) -> x0 + xf + v[1], 0, 1, :cb)
-    constraint!(ocp, :control, (u, v) -> u + v[1], 0, 1, :cu)
-    constraint!(ocp, :state, (x, v) -> x + v[1], 0, 1, :cs)
-    constraint!(ocp, :mixed, (x, u, v) -> x + u + v[1], 1, 1, :cm)
-    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], :eq1)
-    constraint!(ocp, :variable, Index(1), 0, :eq2)
-    constraint!(ocp, :variable, 1:2, [ 0, 0 ], :eq3)
-    constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], :eq4)
-    constraint!(ocp, :variable, v -> v.^2, [ 0, 0, 0, 0 ], :eq5)
-    @test constraint(ocp, :cb)(x0, xf, v) == x0 + xf + v[1]
-    @test constraint(ocp, :cu)(u, v) == u + v[1]
-    @test constraint(ocp, :cs)(x, v) == x + v[1]
-    @test constraint(ocp, :cm)(x, u, v) == x + u + v[1]
+    state!(ocp, 1)
+    control!(ocp, 1)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], :eq1)
+    constraint!(ocp, :variable, Index(1), 0, 1, :eq2)
+    constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ], :eq3)
+    constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], [ -1, 1 ], :eq4)
+    constraint!(ocp, :variable, v -> v.^2, [ 0, 0, 0, 0 ], [ 1, 0, 1, 0 ], :eq5)
     @test constraint(ocp, :eq1)(v) == v
     @test constraint(ocp, :eq2)(v) == v[1]
     @test constraint(ocp, :eq3)(v) == v[1:2]
@@ -531,13 +525,19 @@ end
     xf = 8
     ocp = Model()
     variable!(ocp, 4)
-    state!(ocp, 1)
-    control!(ocp, 1)
-    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], :eq1)
-    constraint!(ocp, :variable, Index(1), 0, 1, :eq2)
-    constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ], :eq3)
-    constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], [ -1, 1 ], :eq4)
-    constraint!(ocp, :variable, v -> v.^2, [ 0, 0, 0, 0 ], [ 1, 0, 1, 0 ], :eq5)
+    constraint!(ocp, :boundary, (x0, xf, v) -> x0 + xf + v[1], 0, 1, :cb)
+    constraint!(ocp, :control, (u, v) -> u + v[1], 0, 1, :cu)
+    constraint!(ocp, :state, (x, v) -> x + v[1], 0, 1, :cs)
+    constraint!(ocp, :mixed, (x, u, v) -> x + u + v[1], 1, 1, :cm)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], :eq1)
+    constraint!(ocp, :variable, Index(1), 0, :eq2)
+    constraint!(ocp, :variable, 1:2, [ 0, 0 ], :eq3)
+    constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], :eq4)
+    constraint!(ocp, :variable, v -> v.^2, [ 0, 0, 0, 0 ], :eq5)
+    @test constraint(ocp, :cb)(x0, xf, v) == x0 + xf + v[1]
+    @test constraint(ocp, :cu)(u, v) == u + v[1]
+    @test constraint(ocp, :cs)(x, v) == x + v[1]
+    @test constraint(ocp, :cm)(x, u, v) == x + u + v[1]
     @test constraint(ocp, :eq1)(v) == v
     @test constraint(ocp, :eq2)(v) == v[1]
     @test constraint(ocp, :eq3)(v) == v[1:2]
