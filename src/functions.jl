@@ -125,7 +125,7 @@ When giving a _Time for `t0` and `tf`, the function takes a vector as input for 
 - constraint dimension: 1
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0, 
+julia> B = BoundaryConstraint((x0, xf) -> xf - x0, 
     state_dimension=1, constraint_dimension=1)
 julia> B(_Time(0), 0, _Time(1), 1)
 ERROR: MethodError: no method matching (::BoundaryConstraint{1, 1})(::_Time, ::Int64, 
@@ -139,35 +139,25 @@ julia> B(_Time(0), [0], _Time(1), [1])
 - constraint dimension: 2
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf], 
+julia> B = BoundaryConstraint(x0, xf) -> [xf - x0, x0 + xf], 
     state_dimension=1, constraint_dimension=2)
-julia> B(_Time(0), 0, _Time(1), 1)
-ERROR: MethodError: no method matching (::BoundaryConstraint{1, 2})(::_Time, ::Int64, 
-::_Time, ::Int64)
-julia> B(_Time(0), [0], _Time(1), [1])
-2-element Vector{Int64}:
-  1
- -1
 ```
 
 - state dimension: 2
 - constraint dimension: 1
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0, 
+julia> B = BoundaryConstraint((x0, xf) -> xf[1] - x0[1], 
     state_dimension=2, constraint_dimension=1)
-julia> B(_Time(0), [1, 0], _Time(1), [0, 1])
-1-element Vector{Int64}:
- 1
 ```
 
 - state dimension: 2
 - constraint dimension: 2
 
 ```@example
-julia> B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]], 
+julia> B = BoundaryConstraint((x0, xf) -> [xf[2], xf[1] - x0[2]], 
     state_dimension=2, constraint_dimension=2)
-julia> B(_Time(0), [1, 0], _Time(1), [1, 0])
+julia> B([1, 0], [1, 0])
 2-element Vector{Int64}:
  1
  1
@@ -221,18 +211,16 @@ $(TYPEDFIELDS)
 - state dimension: 1
 
 ```@example
-julia> G = Mayer((t0, x0, tf, xf) -> xf - x0)
-julia> G(0, 0, 1, 1)
+julia> G = Mayer((x0, xf) -> xf - x0)
+julia> G(0, 1)
 1
-julia> G(0, [0], 1, [1])
-ERROR: MethodError: Cannot `convert` an object of type Vector{Int64} to an object of type Real
 ```
 
 - state dimension: 2
 
 ```@example
-julia> G = Mayer((t0, x0, tf, xf) -> tf - t0)
-julia> G(0, [1, 0], 1, [0, 1])
+julia> G = Mayer((x0, xf) -> xf[1] - x0[2])
+julia> G([1, 0], [0, 1])
 1
 ```
 
@@ -248,19 +236,16 @@ When giving a _Time for `t0` and `tf`, the function takes a vector as input for 
 - state dimension: 1
 
 ```@example
-julia> G = Mayer((t0, x0, tf, xf) -> xf - x0, state_dimension=1)
-julia> G(_Time(0), 0, _Time(1), 1)
-ERROR: MethodError: no method matching (:Mayer{1})(::CTBase._Time, ::Int64, ::CTBase._Time, ::Int64)
-julia> G(_Time(0), [0], _Time(1), [1])
+julia> G = Mayer((x0, xf) -> xf - x0, state_dimension=1)
 1
 ```
 
 - state dimension: 2
 
 ```@example
-julia> G = Mayer((t0, x0, tf, xf) -> tf - t0, state_dimension=2)
-julia> G(_Time(0), [1, 0], _Time(1), [0, 1])
-1
+julia> G = Mayer((x0, xf) -> xf[1] - x0[1], state_dimension=2)
+julia> G[1, 0], [0, 1])
+-1
 ```
 """
 struct Mayer{state_dimension}
