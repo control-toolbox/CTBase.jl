@@ -424,10 +424,9 @@ macro def(ocp, e, log=false)
 	parse!(p, ocp, e; log=log)
 	__t_dep(p) ? println("time dependent") : println("time independent") # debug
 	__v_dep(p) ? println("variable dependent") : println("variable independent") # debug
-        p = ParsingInfo()
-        code = :( $ocp = Model() ) # debug: create with proper type
-        code = Expr(:block, code, parse!(p, ocp, e; log=log))
-        code = Expr(:block, code, :( $ocp )) 
+        # match __t_dep, __v_dep to call Model properly... 
+        init = :( $ocp = Model() )
+        code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
     catch ex
         :( throw($ex) ) # can be catched by user
