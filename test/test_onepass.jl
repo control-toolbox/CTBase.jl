@@ -448,7 +448,7 @@ end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 w = 9
-@test_throws UndefVarError o.dynamics(y, w, z)
+@test_throws MethodError o.dynamics(y, w, z)
 
 @def o begin
     z ∈ R², variable
@@ -458,13 +458,13 @@ w = 9
     r = y₃
     v = y₄
     aa = y₁(s) + v³ + z₂
-    y'(s) == [ aa(s) + w^2, r²(s), 0, 0 ]
+    y'(s) == [ aa(s) + w(s)^2, r²(s), 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
 yf = 3y0
-ww = 9
+ww = 19
 @test o.dynamics(y, ww, z) == [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 
 @def o begin
