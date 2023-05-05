@@ -70,14 +70,14 @@ parse!(p, ocp, e; log=false) = begin
     @match e begin
         :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; log)
         :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; log)
-        :( $v       , variable       ) => p_variable!(p, ocp, v   ; log)
+        :( $v       , variable       ) => p_variable!(p, ocp, v   ; log) # todo: remove
         :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; log)
         :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; log)
         :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; log)
-        :( $x       , state          ) => p_state!(p, ocp, x   ; log)
+        :( $x       , state          ) => p_state!(p, ocp, x   ; log) # todo: remove
         :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; log)
         :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
-        :( $u       , control        ) => p_control!(p, ocp, u   ; log)
+        :( $u       , control        ) => p_control!(p, ocp, u   ; log) # todo: remove
         :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
         :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( $x'($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log)
