@@ -34,7 +34,8 @@ const ctNumber = Real
 """
 Type alias for a vector of real numbers.
 """
-const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}}
+#const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # pb for []
+const ctVector = Union{ctNumber, AbstractVector{<:Any}}
 """
 Type alias for a time.
 """
@@ -84,24 +85,33 @@ Type alias for a dimension.
 """
 const Dimension = Integer
 
-#
+# independent files
 include("exceptions.jl")
 include("description.jl")
 include("callbacks.jl")
-include("checking.jl")
-include("functions.jl")
-#
 include("default.jl")
 include("utils.jl")
-include("model.jl")
-#
+
+# types
+include("functions_types.jl")
+include("model_type.jl")
+include("solution.jl")
+
+# checking
+include("checking.jl")
+
+# display
+include("print.jl")
+include("plot.jl")
+
+# model and functions methods
+include("functions_methods.jl")
+include("model_methods.jl")
+
+# parser
 include("ctparser_utils.jl")
 #include("ctparser.jl")
 include("onepass.jl")
-#
-include("print.jl")
-include("solution.jl")
-include("plot.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
@@ -115,7 +125,7 @@ export get_priority_print_callbacks, get_priority_stop_callbacks
 export Description, makeDescription, add, getFullDescription
 
 # exceptions
-export CTException, ParsingError, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # functions
@@ -127,7 +137,7 @@ export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, 
 export OptimalControlModel
 export Model
 export variable!, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
-export is_time_independent, is_time_dependent, ismin, ismax, is_variable_dependent
+export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
 
 # solution

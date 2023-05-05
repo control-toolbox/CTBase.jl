@@ -4,7 +4,7 @@ e = AmbiguousDescription((:e,))
 @test_throws ErrorException error(e)
 @test typeof(sprint(showerror, e)) == String
 
-e = InconsistentArgument("e")
+e = IncorrectArgument("e")
 @test_throws ErrorException error(e)
 @test typeof(sprint(showerror, e)) == String
 

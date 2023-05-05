@@ -10,15 +10,6 @@ function check_criterion(criterion::Symbol)
     criterion ∉ [:min, :max] && throw(IncorrectArgument("criterion must be either :min or :max"))
 end
 
-macro check(s::Symbol)
-    s ∉ [:time_dependence, :variable_dependence, :criterion] && 
-        throw(IncorrectArgument("s must belongs to [:time_dependence, :variable_dependence, criterion]"))
-    s == :time_dependence && return esc(quote check_time_dependence($s) end)
-    s == :variable_dependence && return esc(quote check_variable_dependence($s) end)
-    s == :criterion && return esc(quote check_criterion($s) end)
-end
-
-# --------------------------------------------------------------------
 function check_state_set(ocp::OptimalControlModel)
     state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before. Use state!."))
 end
@@ -31,20 +22,25 @@ function check_time_set(ocp::OptimalControlModel)
     time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
 end
 
-function check_variable_set(ocp::OptimalControlModel)
+function check_variable_set(ocp::OptimalControlModel{td, :v_dep}) where {td}
     variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before. Use variable!."))
 end
 
-macro check(o::Symbol, s::Symbol)
-    s ∉ [:state, :control, :time, :variable, :set] && throw(IncorrectArgument("s must be either :state, :control, :time or :variable"))
-    s == :state && return esc(quote check_state_set($o) end)
-    s == :control && return esc(quote check_control_set($o) end)
-    s == :time && return esc(quote check_time_set($o) end)
-    s == :variable && return esc(quote check_variable_set($o) end) 
-    s == :set && return esc(quote begin
-        check_state_set($o)
-        check_control_set($o)
-        check_time_set($o)
-        check_variable_set($o)
-    end end)
+function check_variable_set(ocp::OptimalControlModel{td, :v_indep}) where {td}
+    nothing
+end
+
+function check_all_set(ocp::OptimalControlModel)
+    check_state_set(ocp)
+    check_control_set(ocp)
+    check_time_set(ocp)
+    check_variable_set(ocp)
+end
+
+macro check(s::Symbol)
+    s == :time_dependence && return esc(quote check_time_dependence($s) end)
+    s == :variable_dependence && return esc(quote check_variable_dependence($s) end)
+    s == :criterion && return esc(quote check_criterion($s) end)
+    s == :ocp && return esc(quote check_all_set($s) end)
+    error("s must be either :time_dependence, :variable_dependence or :criterion")
 end
