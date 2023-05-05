@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------------------------------------
-# Display: text/html ?  
+# Display: text/html ?
 # Base.show, Base.print
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
 """
@@ -13,7 +13,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         isnothing(ocp.final_time) &&
         isnothing(ocp.time_name) &&
         isnothing(ocp.lagrange) &&
-        isnothing(ocp.mayer) && 
+        isnothing(ocp.mayer) &&
         isnothing(ocp.criterion) &&
         isnothing(ocp.dynamics) &&
         isnothing(ocp.state_dimension) &&
@@ -24,11 +24,18 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         return
     end
 
+    try
+        nlp_constraints(ocp)
+    catch
+        printstyled(io, "Empty optimal control problem (the dimensions of the state and/or control are not set)", bold=true)
+        return
+    end
+
     # dimensions
     dimx = isnothing(ocp.state_dimension) ? "n" : ocp.state_dimension
     dimu = isnothing(ocp.control_dimension) ? "m" : ocp.control_dimension
 
-    # 
+    #
     printstyled(io, "Optimal control problem of the form:\n", bold=true)
     println(io, "")
 
@@ -62,8 +69,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
 
     # Lagrange
     if !isnothing(ocp.lagrange)
-        isnonautonomous(ocp) ? 
-        println(io, '\u222B', " f⁰(" * t_name * ", x(" * t_name * "), u(" * t_name * ")) d" * t_name * ", over [" * t_name * "0, " * t_name * "f]") : 
+        isnonautonomous(ocp) ?
+        println(io, '\u222B', " f⁰(" * t_name * ", x(" * t_name * "), u(" * t_name * ")) d" * t_name * ", over [" * t_name * "0, " * t_name * "f]") :
         println(io, '\u222B', " f⁰(x(" * t_name * "), u(" * t_name * ")) d" * t_name * ", over [" * t_name * "0, " * t_name * "f]")
     else
         println(io, "")
@@ -75,8 +82,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     println(io, "")
 
     # dynamics
-    isnonautonomous(ocp) ? 
-    println(io, "        x", '\u0307', "(" * t_name * ") = f(" * t_name * ", x(" * t_name * "), u(" * t_name * ")), " * t_name * " in [" * t_name * "0, " * t_name * "f] a.e.,") : 
+    isnonautonomous(ocp) ?
+    println(io, "        x", '\u0307', "(" * t_name * ") = f(" * t_name * ", x(" * t_name * "), u(" * t_name * ")), " * t_name * " in [" * t_name * "0, " * t_name * "f] a.e.,") :
     println(io, "        x", '\u0307', "(" * t_name * ") = f(x(" * t_name * "), u(" * t_name * ")), " * t_name * " in [" * t_name * "0, " * t_name * "f] a.e.,")
     println(io, "")
 
@@ -85,21 +92,21 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     has_constraints = false
     if !isempty(ξl) || !isempty(ulb)
         has_constraints = true
-        isnonautonomous(ocp) ? 
+        isnonautonomous(ocp) ?
         println(io, "        ξl ≤ ξ(" * t_name * ", u(" * t_name * ")) ≤ ξu, ") :
-        println(io, "        ξl ≤ ξ(u(" * t_name * ")) ≤ ξu, ") 
+        println(io, "        ξl ≤ ξ(u(" * t_name * ")) ≤ ξu, ")
     end
     if !isempty(ηl) || !isempty(xlb)
         has_constraints = true
-        isnonautonomous(ocp) ? 
+        isnonautonomous(ocp) ?
         println(io, "        ηl ≤ η(" * t_name * ", x(" * t_name * ")) ≤ ηu, ") :
-        println(io, "        ηl ≤ η(x(" * t_name * ")) ≤ ηu, ") 
+        println(io, "        ηl ≤ η(x(" * t_name * ")) ≤ ηu, ")
     end
     if !isempty(ψl)
         has_constraints = true
-        isnonautonomous(ocp) ? 
+        isnonautonomous(ocp) ?
         println(io, "        ψl ≤ ψ(" * t_name * ", x(" * t_name * "), u(" * t_name * ")) ≤ ψu, ") :
-        println(io, "        ψl ≤ ψ(x(" * t_name * "), u(" * t_name * ")) ≤ ψu, ") 
+        println(io, "        ψl ≤ ψ(x(" * t_name * "), u(" * t_name * ")) ≤ ψu, ")
     end
     if !isempty(ϕl)
         has_constraints = true
