@@ -1,5 +1,7 @@
 # onepass
 # todo:
+# - add update of p.t_dep
+# _ onepass! correct Model after parse!
 # - don't __wrap any __throw (use return __throw; check p_time...)
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
