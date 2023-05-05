@@ -419,6 +419,7 @@ Define an optimal control problem. One pass parsing of the definition.
     t ∈ [ 0, tf ], time
     x ∈ R², state
     u ∈ R, control
+    -1 ≤ u(t) ≤ 1
     x(0) == [ 1, 2 ]
     x(tf) == [ 0, 0 ]
     x'(t) == [ x₂(t), u(t) ]
@@ -428,13 +429,15 @@ end
 """
 macro def(ocp, e, log=false)
     try
-        p = ParsingInfo()
+        p0 = ParsingInfo()
+	parse!(p0, ocp, e; log=false)
+        p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	code = parse!(p, ocp, e; log=log)
 	init = @match (__t_dep(p), __v_dep(p)) begin
 	    (false, false) => :( $ocp = Model() )
-	    (true , false) => :( $ocp = Model() ) # debug ; time_dependence=:t_dep) )
-	    (false, true ) => :( $ocp = Model() ) # debug ; variable_dependence=:v_dep) )
-	    _              => :( $ocp = Model() ) # debug ; time_dependence=:t_dep, variable_dependence=:v_dep) )
+	    (true , false) => :( $ocp = Model(time_dependence=:t_dep) )
+	    (false, true ) => :( $ocp = Model(variable_dependence=:v_dep) )
+	    _              => :( $ocp = Model(time_dependence=:t_dep, variable_dependence=:v_dep) )
 	end
         code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
