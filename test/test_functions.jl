@@ -25,28 +25,28 @@ end
 # test BoundaryConstraint
 @testset "BoundaryConstraint" begin
     @testset "Classical calls" begin
-        B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0)
-        @test B(0, 0, 1, 1) == 1
-        @test B(0, [0], 1, [1]) == [1]
-        B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf])
-        @test B(0, 0, 1, 1) == [1, -1]
-        @test_throws MethodError B(0, [0], 1, [1])
-        B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0)
-        @test B(0, [1, 0], 1, [0, 1]) == 1
-        B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]])
-        @test B(0, [1, 0], 1, [1, 0]) == [1, 1]
+        B = BoundaryConstraint((x0, xf) -> xf - x0)
+        @test B(0, 1) == 1
+        @test B([0], [1]) == [1]
+        B = BoundaryConstraint((x0, xf) -> [xf - x0, x0 + xf])
+        @test B(0, 1) == [1, 1]
+        @test_throws MethodError B([0], [1])
+        B = BoundaryConstraint((x0, xf) -> xf - x0)
+        @test B([1, 0], [0, 1]) == [ -1, 1 ]
+        B = BoundaryConstraint((x0, xf) -> [x0[1], xf[1] - x0[2]])
+        @test B([1, 0], [1, 0]) == [1, 1]
     end
     @testset "Specific calls" begin
-        B = BoundaryConstraint((t0, x0, tf, xf) -> xf - x0, state_dimension=1, constraint_dimension=1)
-        @test_throws MethodError B(_Time(0), 0, _Time(1), 1)
-        @test B(_Time(0), [0], _Time(1), [1]) == [1]
-        B = BoundaryConstraint((t0, x0, tf, xf) -> [xf - x0, t0 - tf], state_dimension=1, constraint_dimension=2)
-        @test_throws MethodError B(_Time(0), 0, _Time(1), 1)
-        @test B(_Time(0), [0], _Time(1), [1]) == [1, -1]
-        B = BoundaryConstraint((t0, x0, tf, xf) -> tf - t0, state_dimension=2, constraint_dimension=1)
-        @test B(_Time(0), [1, 0], _Time(1), [0, 1]) == [1]
-        B = BoundaryConstraint((t0, x0, tf, xf) -> [tf - t0, xf[1] - x0[2]], state_dimension=2, constraint_dimension=2)
-        @test B(_Time(0), [1, 0], _Time(1), [1, 0]) == [1, 1]
+        B = BoundaryConstraint((x0, xf) -> xf - x0, state_dimension=1, constraint_dimension=1)
+        @test_throws MethodError B(0, 1)
+        @test B([0], [1]) == [1]
+        B = BoundaryConstraint((x0, xf) -> [xf - x0, x0 - xf], state_dimension=1, constraint_dimension=2)
+        @test_throws MethodError B(0, 1)
+        @test B([0], [1]) == [1, -1]
+        B = BoundaryConstraint((x0, xf) -> xf[1] - x0[1], state_dimension=2, constraint_dimension=1)
+        @test B([1, 0], [0, 1]) == [-1]
+        B = BoundaryConstraint((x0, xf) -> [xf[1] + x0[1], xf[1] - x0[2]], state_dimension=2, constraint_dimension=2)
+        @test B([1, 0], [1, 0]) == [1, 1]
     end
 end
 

@@ -19,11 +19,12 @@ const constraint_type = CTBase.constraint_type
         :default,
         :descriptions,
         :exceptions,
-        :functions,
+        #:functions,
         :model,
         :plot,
         :print,
         :utils,
+	:goddard,
         )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

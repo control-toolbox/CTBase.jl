@@ -230,7 +230,7 @@ $(TYPEDSIGNATURES)
 
 Return the type constraint among
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`,
-`:state_range`, `:state_fun`, `:mixed` (`:other` otherwise),
+`:state_range`, `:state_fun`, `:mixed`, `:variable_range`, `:variable_fun` (`:other` otherwise),
 together with the appropriate value (range, updated expression...)
 
 # Example
@@ -336,7 +336,8 @@ julia> constraint_type(:( v[2] ), t, t0, tf, x, u, v)
 julia> constraint_type(:( v ), t, t0, tf, x, u, v)
 (:variable_range, nothing)
 
-julia> constraint_type(:( v^2  + 1 ), t, t0, tf, x, u, v)(:variable_fun, :(v ^ 2 + 1))
+julia> constraint_type(:( v^2  + 1 ), t, t0, tf, x, u, v)
+(:variable_fun, :(v ^ 2 + 1))
 
 julia> constraint_type(:( v[2]^2 + 1 ), t, t0, tf, x, u, v)
 (:variable_fun, :(v[2] ^ 2 + 1))

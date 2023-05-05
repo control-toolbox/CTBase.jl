@@ -1,4 +1,6 @@
 # test onepass
+# todo:
+# - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 function test_onepass()
 
@@ -520,9 +522,143 @@ w = 11
 @test_throws MethodError o.dynamics(y, w, z)
 @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
-# old tests from ct_parser.jl
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) + ∫(x(t) + u(t)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
 
-#function test_ctparser()
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) - ∫(x(t) + u(t)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  -(x + u)
+@test o.criterion == :min
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) + ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) - ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  -(x + u)
+@test o.criterion == :max
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) + (x(0) + 2x(1)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) - (x(0) + 2x(1)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  -(x0 + 2xf)
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) + (x(0) + 2x(1)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) - (x(0) + 2x(1)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  -(x0 + 2xf)
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    x(0) + 2x(1) + ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test_throws UndefVarError o.mayer(x0, xf)
+
+o = @def begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) - x(0) + 2x(1) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test_throws UndefVarError o.mayer(x0, xf)
+
+# tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes
 

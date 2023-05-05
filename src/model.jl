@@ -1,4 +1,7 @@
 # --------------------------------------------------------------------------------------------------
+# todo:
+# - remove @_def ?
+# - add second pass for autonomous check
 
 # Index (for variable, state and control)
 """
@@ -46,9 +49,6 @@ $(TYPEDFIELDS)
     control_dimension::Union{Dimension, Nothing}=nothing
     control_names::Union{Vector{String}, Nothing}=nothing
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
-    # store parsing informations inside Model itself
-    defined_with_macro::Bool=false
-    generated_code::Array{String}=[]
 end
 
 #
@@ -59,9 +59,9 @@ time_set(ocp) = !isnothing(ocp.initial_time) && !isnothing(ocp.final_time)
 """
 $(TYPEDSIGNATURES)
 
-Return :nonautonomous == time_dependence
+Return :t_dep == time_dependence
 """
-isnonautonomous(time_dependence::Symbol) = :nonautonomous == time_dependence
+isnonautonomous(time_dependence::Symbol) = :t_dep == time_dependence
 
 """
 $(TYPEDSIGNATURES)
@@ -101,17 +101,24 @@ ismax(ocp::OptimalControlModel) = !ismin(ocp)
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if a variable has been declared.
+"""
+hasvariable(ocp::OptimalControlModel) = !isnothing(ocp.variable_dimension)
+
+"""
+$(TYPEDSIGNATURES)
+
 Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:
 
-- `time_dependence`: either `:autonomous` or `:nonautonomous`. Default is `:autonomous`.
+- `time_dependence`: either `:t_indep` or `:t_dep`. Default is `:t_indep`.
 
 # Examples
 
 ```jldoctest
 julia> ocp = Model()
-julia> ocp = Model(time_dependence=:nonautonomous)
+julia> ocp = Model(time_dependence=:t_dep)
 ```
 
 !!! note
@@ -119,11 +126,12 @@ julia> ocp = Model(time_dependence=:nonautonomous)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; time_dependence=__ocp_time_dependence())
-    if time_dependence ∉ [ :autonomous, :nonautonomous ]
-        throw(InconsistentArgument("time_dependence must be either :autonomous or :nonautonomous"))
-    end
-    return OptimalControlModel{time_dependence}()
+function Model(; time_dependence=__ocp_time_dependence(), variable_dependence=__ocp_variable_dependence())
+    time_dependence ∉ [ :t_indep, :t_dep ] &&
+        throw(InconsistentArgument("time_dependence must be either :t_indep or :t_dep"))
+    variable_dependence ∉ [ :v_indep, :v_dep ] &&
+        throw(InconsistentArgument("variable_dependence must be either :v_indep or :v_dep"))
+    return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
 # -------------------------------------------------------------------------------------------
@@ -431,18 +439,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial` or `:final` value constraint on the state.
+Add an `:initial` or `:final` value constraint on the state, or a `:variable` value.
 
 # Examples
 
 ```jldoctest
-# state dimension: 1
-julia> constraint!(ocp, :initial, 0)
-julia> constraint!(ocp, :final, 1)
-
-# state dimension: 2
 julia> constraint!(ocp, :initial, [ 0, 0 ])
-julia> constraint!(ocp, :final, [ 0, 0 ])
+julia> constraint!(ocp, :final, [ 1, 2 ])
+julia> constraint!(ocp, :variable, [ 3, 0, 1 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=__constraint_label())
@@ -454,10 +458,13 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val, label::Symbol=
 
     # set the constraint
     if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
-        ocp.constraints[label] = (type, :eq, x -> x, val, val)
+        ocp.constraints[label] = (type, x -> x, val, val)
+    elseif type == :variable
+        q = ocp.variable_dimension
+        ocp.constraints[label] = (type, q == 1 ? 1 : 1:q, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
+        ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
     end
 
 end
@@ -465,7 +472,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial` or `:final` value constraint on a range of the state.
+Add an `:initial` or `:final` value constraint on a range of the state, or a value constraint on a range of the
+`:variable`.
 
 # Examples
 
@@ -473,6 +481,7 @@ Add an `:initial` or `:final` value constraint on a range of the state.
 julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
 julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
 julia> constraint!(ocp, :final, Index(2), 0)
+julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, val, label::Symbol=__constraint_label())
@@ -483,9 +492,11 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, Or
     end
 
     # set the constraint
-    if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
     rg = rg isa Index ? rg.val : rg
-        ocp.constraints[label] = (type, :eq, x -> x[rg], val, val)
+    if type ∈ [ :initial, :final ] # not allowed for :control or :state (does not make sense)
+        ocp.constraints[label] = (type, x -> x[rg], val, val)
+    elseif type == :variable
+        ocp.constraints[label] = (type, rg, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final ] or check the arguments of the constraint! method."))
@@ -496,7 +507,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an :initial, :final, :control or :state box constraint (whole range).
+Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint (whole range).
 
 # Examples
 
@@ -505,6 +516,7 @@ julia> constraint!(ocp, :initial, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :final, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :control, [ 0, 0 ], [ 2, 3 ])
 julia> constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, 0, 1)
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symbol=__constraint_label())
@@ -514,18 +526,23 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb, ub, label::Symb
         throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
     end
 
+    # todo: continue here
     # check if the dimensions of the state and control are set
-    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and control must be set before adding the dynamics."))
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and control must be set before adding such a constraint."))
     n = ocp.state_dimension
     m = ocp.control_dimension
 
     # set the constraint
     if type ∈ [ :initial, :final ]
-        ocp.constraints[label] = (type, :ineq, x -> x, lb, ub)
+        ocp.constraints[label] = (type, x -> x, lb, ub)
     elseif type == :control
-        ocp.constraints[label] = (type, :ineq, m == 1 ? 1 : 1:m, lb, ub)
+        ocp.constraints[label] = (type, m == 1 ? 1 : 1:m, lb, ub)
     elseif type == :state
-        ocp.constraints[label] = (type, :ineq, n == 1 ? 1 : 1:n, lb, ub)
+        ocp.constraints[label] = (type, n == 1 ? 1 : 1:n, lb, ub)
+    elseif type == :variable
+        q = ocp.variable_dimension
+        isnothing(q) && throw(UnauthorizedCall("the dimension of the variable must be set before adding such a constraint."))
+        ocp.constraints[label] = (type, q == 1 ? 1 : 1:q, lb, ub)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :control, :state ] or check the arguments of the constraint! method."))
@@ -536,7 +553,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial`, `:final`, `:control` or `:state` box constraint on a range.
+Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range.
 
 # Examples
 
@@ -546,6 +563,7 @@ julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
 julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, OrdinalRange{<:Integer}}, lb, ub, label::Symbol=__constraint_label())
@@ -558,9 +576,9 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, rg::Union{Index, Or
     # set the constraint
     rg = rg isa Index ? rg.val : rg
     if type ∈ [ :initial, :final ]
-        ocp.constraints[label] = (type, :ineq, x -> x[rg], lb, ub)
-    elseif type ∈ [ :control, :state ]
-        ocp.constraints[label] = (type, :ineq, rg, lb, ub)
+        ocp.constraints[label] = (type, x -> x[rg], lb, ub)
+    elseif type ∈ [ :control, :state, :variable ]
+        ocp.constraints[label] = (type, rg, lb, ub)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :contol, :state ] or check the arguments of the constraint! method."))
@@ -571,12 +589,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a `:boundary`, `:control`, `:state` or `:mixed` value functional constraint.
+Add a `:boundary`, `:control`, `:state`, `:mixed` or `:variable` value functional constraint.
 
 # Examples
 
 ```@example
-julia> constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [ t0+tf, x0[3]+xf[2]], [ 0, 0 ])
+julia> constraint!(ocp, :boundary, (x0, xf) -> x0[3]+xf[2], 0)
 
 # autonomous ocp
 julia> constraint!(ocp, :control, u -> 2u, 1)
@@ -587,6 +605,16 @@ julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0)
 julia> constraint!(ocp, :control, (t, u) -> 2u, 1)
 julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ])
 julia> constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0)
+
+# autonomous ocp with variable
+julia> constraint!(ocp, :control, (u, v) -> 2u*v[1], 1)
+julia> constraint!(ocp, :state, (x, v) -> x-v[2], [ 0, 0, 0 ])
+julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u+v[1], 0)
+
+# nonautonomous ocp with variable
+julia> constraint!(ocp, :control, (t, u, v) -> 2u-t*v[2], 1)
+julia> constraint!(ocp, :state, (t, x, v) -> x-t+v[1], [ 0, 0, 0 ])
+julia> constraint!(ocp, :mixed, (t, x, u, v) -> x[1]-u*v[1], 0)
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val, label::Symbol=__constraint_label())
@@ -597,8 +625,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val, l
     end
 
     # set the constraint
-    if type ∈ [ :boundary, :control, :state, :mixed ]
-        ocp.constraints[label] = (type, :eq, f, val, val)
+    if type ∈ [ :boundary, :control, :state, :mixed, :variable ]
+        ocp.constraints[label] = (type, f, val, val)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
@@ -609,12 +637,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a `:boundary`, `:control`, `:state` or `:mixed` box functional constraint.
+Add a `:boundary`, `:control`, `:state`, `:mixed` or `:variable` box functional constraint.
 
 # Examples
 
 ```@example
-julia> constraint!(ocp, :boundary, (t0, x0, tf, xf) -> [ t0+tf, x0[3]+xf[2]], [ 0, 0 ], [ 1, 1 ])
+julia> constraint!(ocp, :boundary, (x0, xf) -> x0[3]+xf[2], 0, 1)
 
 # autonomous ocp
 julia> constraint!(ocp, :control, u -> 2u, 0, 1)
@@ -625,6 +653,16 @@ julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0, 1)
 julia> constraint!(ocp, :control, (t, u) -> 2u, 0, 1)
 julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0, 1)
+
+# autonomous ocp with variable
+julia> constraint!(ocp, :control, (u, v) -> 2u*v[1], 0, 1)
+julia> constraint!(ocp, :state, (x, v) -> x-v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed, (x, u, v) -> x[1]-v[2]*u, 0, 1)
+
+# nonautonomous ocp with variable
+julia> constraint!(ocp, :control, (t, u, v) -> 2u+v[2], 0, 1)
+julia> constraint!(ocp, :state, (t, x, v) -> x-t*v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed, (t, x, u, v) -> x[1]*v[2]-u, 0, 1)
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub, label::Symbol=__constraint_label())
@@ -635,8 +673,8 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, lb, ub
     end
 
     # set the constraint
-    if type ∈ [ :boundary, :control, :state, :mixed ]
-        ocp.constraints[label] = (type, :ineq, f, lb, ub)
+    if type ∈ [ :boundary, :control, :state, :mixed, :variable ]
+        ocp.constraints[label] = (type, f, lb, ub)
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
@@ -676,6 +714,106 @@ function constraint!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f:
         ". Please choose in [ :dynamics ] or check the arguments of the constraint! method."))
     end
 
+end
+
+# -------------------------------------------------------------------------------------------
+#
+"""
+$(TYPEDSIGNATURES)
+
+Set the criterion to the function `f`. Type can be `:mayer` or `:lagrange`. Criterion is `:min` or `:max`.
+
+!!! note
+
+    - The dimensions of the state and control must be set before adding the objective.
+
+# Examples
+
+```jldoctest
+julia> objective!(ocp, :mayer, (x0, xf) -> x0[1] + xf[2])
+julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u[1]^2)
+```
+
+!!! warning
+
+    If you set twice the objective, only the last one will be taken into account.
+"""
+function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f::Function, criterion::Symbol=__criterion_type()) where {time_dependence}
+
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
+    n = ocp.state_dimension
+    m = ocp.control_dimension
+
+    # reset the objective
+    if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
+        println("warning: The objective is already set. It will be replaced by the new one.")
+    end
+    setproperty!(ocp, :mayer, nothing)
+    setproperty!(ocp, :lagrange, nothing)
+
+    # check the validity of the criterion
+    if criterion ∈ [ :min, :max ]
+        ocp.criterion = criterion
+    else
+        throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
+        ". Please choose in [ :min, :max ]."))
+    end
+
+    # set the objective
+    if type == :mayer
+        setproperty!(ocp, :mayer, f)
+    elseif type == :lagrange
+        setproperty!(ocp, :lagrange, Lagrange(f, time_dependence=time_dependence, state_dimension=n, control_dimension=m))
+    else
+        throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
+        ". Please choose in [ :mayer, :lagrange ]."))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Set the criterion to the function `g` and `f⁰`. Type can be `:bolza`. Criterion is `:min` or `:max`.
+
+!!! note
+
+    - The dimensions of the state and control must be set before adding the objective.
+
+# Example
+
+```jldoctest
+julia> objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u[1]^2)
+```
+"""
+function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, g::Function, f⁰::Function, criterion::Symbol=__criterion_type()) where {time_dependence}
+
+    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
+    n = ocp.state_dimension
+    m = ocp.control_dimension
+
+    # reset the objective
+    if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
+        println("warning: The objective is already set. It will be replaced by the new one.")
+    end
+    setproperty!(ocp, :mayer, nothing)
+    setproperty!(ocp, :lagrange, nothing)
+
+    # check the validity of the criterion
+    if criterion ∈ [ :min, :max ]
+        ocp.criterion = criterion
+    else
+        throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
+        ". Please choose in [ :min, :max ]."))
+    end
+
+    # set the objective
+    if type == :bolza
+        setproperty!(ocp, :mayer, g)
+        setproperty!(ocp, :lagrange, Lagrange(f⁰, time_dependence=time_dependence, state_dimension=n, control_dimension=m))
+    else
+        throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
+        ". Please choose :bolza."))
+    end
 end
 
 """
@@ -728,34 +866,21 @@ julia> c(1)
 1
 ```
 """
-function constraint(ocp::OptimalControlModel{:autonomous}, label::Symbol)
+function constraint(ocp::OptimalControlModel, label::Symbol)
     con = ocp.constraints[label]
     @match con begin
-        (:initial , _, f::Function, _, _) => return f
-        (:final   , _, f::Function, _, _) => return f
-        (:boundary, _, f::Function, _, _) => return f
-        (:control , _, f::Function, _, _) => return f
-        (:control , _, rg         , _, _) => return u -> u[rg]
-        (:state   , _, f::Function, _, _) => return f
-        (:state   , _, rg         , _, _) => return x -> x[rg]
-        (:mixed   , _, f::Function, _, _) => return f
+        (:initial , f::Function, _, _) => return f
+        (:final   , f::Function, _, _) => return f
+        (:boundary, f::Function, _, _) => return f
+        (:control , f::Function, _, _) => return f
+        (:control , rg         , _, _) => return u -> u[rg]
+        (:state   , f::Function, _, _) => return f
+        (:state   , rg         , _, _) => return x -> x[rg]
+        (:mixed   , f::Function, _, _) => return f
+        (:variable, f::Function, _, _) => return f
+        (:variable, rg         , _, _) => return v -> v[rg]
         _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-             ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed ]."))
-    end
-end
-function constraint(ocp::OptimalControlModel{:nonautonomous}, label::Symbol)
-    con = ocp.constraints[label]
-    @match con begin
-        (:initial , _, f::Function, _, _) => return f
-        (:final   , _, f::Function, _, _) => return f
-        (:boundary, _, f::Function, _, _) => return f
-        (:control , _, f::Function, _, _) => return f
-        (:control , _, rg         , _, _) => return (t, u) -> u[rg]
-        (:state   , _, f::Function, _, _) => return f
-        (:state   , _, rg         , _, _) => return (t, x) -> x[rg]
-        (:mixed   , _, f::Function, _, _) => return f
-        _ => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-             ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed ]."))
+             ". Please choose within [ :initial, :final, :boundary, :control, :state, :mixed, :variable ]."))
     end
 end
 
@@ -768,8 +893,10 @@ Return a 6-tuple of tuples:
 - `(ηl, η, ηu)` are state constraints
 - `(ψl, ψ, ψu)` are mixed constraints
 - `(ϕl, ϕ, ϕu)` are boundary constraints
+- `(θl, θ, θu)` are variable constraints
 - `(ulb, uind, uub)` are control linear constraints of a subset of indices
 - `(xlb, xind, xub)` are state linear constraints of a subset of indices
+- `(vlb, vind, vub)` are variable linear constraints of a subset of indices
 
 !!! note
 
@@ -793,171 +920,87 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
     ηf = Vector{StateConstraint}(); ηl = Vector{ctNumber}(); ηu = Vector{ctNumber}()
     ψf = Vector{MixedConstraint}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
     ϕf = Vector{BoundaryConstraint}(); ϕl = Vector{ctNumber}(); ϕu = Vector{ctNumber}()
+    θf = Vector{VariableConstraint}(); θl = Vector{ctNumber}(); θu = Vector{ctNumber}()
     uind = Vector{Int}(); ulb = Vector{ctNumber}(); uub = Vector{ctNumber}()
     xind = Vector{Int}(); xlb = Vector{ctNumber}(); xub = Vector{ctNumber}()
+    vind = Vector{Int}(); vlb = Vector{ctNumber}(); vub = Vector{ctNumber}()
 
     for (_, c) ∈ constraints
         @match c begin
-        (:initial, _, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraint((t0, x0, tf, xf) -> f(x0), state_dimension=n, constraint_dimension=length(lb)))
+        (:initial, f, lb, ub) => begin
+	    # todo: cast function before, in constraint!
+            push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0), state_dimension=n, constraint_dimension=length(lb)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
-        (:final, _, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraint((t0, x0, tf, xf) -> f(xf), state_dimension=n, constraint_dimension=length(lb)))
+        (:final, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraint((x0, xf) -> f(xf), state_dimension=n, constraint_dimension=length(lb)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
-        (:boundary, _, f, lb, ub) => begin
-            push!(ϕf, BoundaryConstraint((t0, x0, tf, xf) -> f(t0, x0, tf, xf), state_dimension=n, constraint_dimension=length(lb)))
+        (:boundary, f, lb, ub) => begin
+            push!(ϕf, BoundaryConstraint((x0, xf) -> f(x0, xf), state_dimension=n, constraint_dimension=length(lb)))
             append!(ϕl, lb)
             append!(ϕu, ub) end
-        (:control, _, f::Function, lb, ub) => begin
+        (:control, f::Function, lb, ub) => begin
             push!(ξf, ControlConstraint(f, time_dependence=time_dependence, control_dimension=m, constraint_dimension=length(lb)))
             append!(ξl, lb)
             append!(ξu, ub) end
-        (:control, _, rg, lb, ub) => begin
+        (:control, rg, lb, ub) => begin
             append!(uind, rg)
             append!(ulb, lb)
             append!(uub, ub) end
-        (:state, _, f::Function, lb, ub) => begin
+        (:state, f::Function, lb, ub) => begin
             push!(ηf, StateConstraint(f, time_dependence=time_dependence, state_dimension=n, constraint_dimension=length(lb)))
             append!(ηl, lb)
             append!(ηu, ub) end
-        (:state, _, rg, lb, ub) => begin
+        (:state, rg, lb, ub) => begin
             append!(xind, rg)
             append!(xlb, lb)
             append!(xub, ub) end
-        (:mixed, _, f, lb, ub) => begin
+        (:mixed, f, lb, ub) => begin
             push!(ψf, MixedConstraint(f, time_dependence=time_dependence, state_dimension=n, control_dimension=m, constraint_dimension=length(lb)))
             append!(ψl, lb)
             append!(ψu, ub) end
-        _ => throw(NotImplemented("dealing with this kind of constraint is not implemented"))
-    end # match
-    end # for
+        (:variable, f::Function, lb, ub) => begin
+            push!(θf, VariableConstraint(f))
+            append!(θl, lb)
+            append!(θu, ub) end
+        (:variable, rg, lb, ub) => begin
+            append!(vind, rg)
+            append!(vlb, lb)
+            append!(vub, ub) end
+        _ => throw(NotImplemented("dealing with this kind of constraint is not implemented")) end
+    end
 
-    function ξ(t, u)
+    function ξ(t, u, v)
         val = Vector{ctNumber}()
         for i ∈ 1:length(ξf) append!(val, ξf[i](t, u)) end
         return val
     end
 
-    function η(t, x)
+    function η(t, x, v)
         val = Vector{ctNumber}()
         for i ∈ 1:length(ηf) append!(val, ηf[i](t, x)) end
         return val
     end
 
-    function ψ(t, x, u)
+    function ψ(t, x, u, v)
         val = Vector{ctNumber}()
         for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u)) end
         return val
     end
 
-    function ϕ(t0, x0, tf, xf)
+    function θ(v)
         val = Vector{ctNumber}()
-        for i ∈ 1:length(ϕf) append!(val, ϕf[i](t0, x0, tf, xf)) end
+        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
         return val
     end
 
-    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub)
-
-end
-
-# -------------------------------------------------------------------------------------------
-#
-"""
-$(TYPEDSIGNATURES)
-
-Set the criterion to the function `f`. Type can be `:mayer` or `:lagrange`. Criterion is `:min` or `:max`.
-
-!!! note
-
-    - The dimensions of the state and control must be set before adding the dynamics.
-
-# Examples
-
-```jldoctest
-julia> objective!(ocp, :mayer, (t0, x0, tf, xf) -> tf)
-julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u[1]^2)
-```
-
-!!! warning
-
-    If you set twice the objective, only the last one will be taken into account.
-"""
-function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, f::Function, criterion::Symbol=__criterion_type()) where {time_dependence}
-
-    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
-    n = ocp.state_dimension
-    m = ocp.control_dimension
-
-    # reset the objective
-    if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
-        println("warning: The objective is already set. It will be replaced by the new one.")
-    end
-    setproperty!(ocp, :mayer, nothing)
-    setproperty!(ocp, :lagrange, nothing)
-
-    # check the validity of the criterion
-    if criterion ∈ [ :min, :max ]
-        ocp.criterion = criterion
-    else
-        throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
-        ". Please choose in [ :min, :max ]."))
+    function ϕ(x0, xf, v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf)) end
+        return val
     end
 
-    # set the objective
-    if type == :mayer
-        setproperty!(ocp, :mayer, f)
-    elseif type == :lagrange
-        setproperty!(ocp, :lagrange, Lagrange(f, time_dependence=time_dependence, state_dimension=n, control_dimension=m))
-    else
-        throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
-        ". Please choose in [ :mayer, :lagrange ]."))
-    end
-end
+    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub)
 
-"""
-$(TYPEDSIGNATURES)
-
-Set the criterion to the function `g` and `f⁰`. Type can be `:bolza`. Criterion is `:min` or `:max`.
-
-!!! note
-
-    - The dimensions of the state and control must be set before adding the dynamics.
-
-# Example
-
-```jldoctest
-julia> objective!(ocp, :bolza, (t0, x0, tf, xf) -> tf, (x, u) -> x[1]^2 + u[1]^2)
-```
-"""
-function objective!(ocp::OptimalControlModel{time_dependence}, type::Symbol, g::Function, f⁰::Function, criterion::Symbol=__criterion_type()) where {time_dependence}
-
-    !dims_set(ocp) && throw(UnauthorizedCall("the dimensions of the state and/or control are not set. Please use state! and control! methods."))
-    n = ocp.state_dimension
-    m = ocp.control_dimension
-
-    # reset the objective
-    if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
-        println("warning: The objective is already set. It will be replaced by the new one.")
-    end
-    setproperty!(ocp, :mayer, nothing)
-    setproperty!(ocp, :lagrange, nothing)
-
-    # check the validity of the criterion
-    if criterion ∈ [ :min, :max ]
-        ocp.criterion = criterion
-    else
-        throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
-        ". Please choose in [ :min, :max ]."))
-    end
-
-    # set the objective
-    if type == :bolza
-        setproperty!(ocp, :mayer, g)
-        setproperty!(ocp, :lagrange, Lagrange(f⁰, time_dependence=time_dependence, state_dimension=n, control_dimension=m))
-    else
-        throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
-        ". Please choose :bolza."))
-    end
 end

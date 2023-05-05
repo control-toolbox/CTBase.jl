@@ -6,6 +6,8 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add constraints on variable
 # - add assert for pre/post conditions and invariants
+# - add single sided inequalities
+# - add reverse inequalities (≥)
 
 """
 $(TYPEDEF)
@@ -28,23 +30,8 @@ end
 
 __init_aliases() = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
-    al[:R¹] = :( R^1 )
-    al[:R²] = :( R^2 )
-    al[:R³] = :( R^3 )
-    al[:R⁴] = :( R^4 )
-    al[:R⁵] = :( R^5 )
-    al[:R⁶] = :( R^6 )
-    al[:R⁷] = :( R^7 )
-    al[:R⁸] = :( R^8 )
-    al[:R⁹] = :( R^9 )
+    for i ∈ 1:9  al[Symbol(:R, ctupperscripts(i))] = :( R^$i  ) end
     al
-end
-
-__sub(i) = join(Char(0x2080 + d) for d in reverse!(digits(i)))
-
-__sup(i) = begin
-    @assert i ∈ 1:9
-    [ '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹' ][i]
 end
 
 __throw(ex, n, line) = begin
@@ -101,10 +88,18 @@ parse!(p, ocp, e; log=false) = begin
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
         :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint_ineq!(p, ocp, e1, e2, e3,label; log)
-        :( ∫($e1) → min              ) => p_lagrange!(p, ocp, e1, :min; log)
-        :( ∫($e1) → max              ) => p_lagrange!(p, ocp, e1, :max; log)
-        :( $e1 → min                 ) => p_mayer!(p, ocp, e1, :min; log)
-        :( $e1 → max                 ) => p_mayer!(p, ocp, e1, :max; log)
+        :(       ∫($e1) → min        ) => p_lagrange!(p, ocp, e1, :min; log)
+        :(       ∫($e1) → max        ) => p_lagrange!(p, ocp, e1, :max; log)
+        :( $e1 + ∫($e2) → min        ) => p_bolza!(p, ocp,      e1,      e2  , :min; log)
+        :( $e1 - ∫($e2) → min        ) => p_bolza!(p, ocp,      e1, :( -$e2 ), :min; log)
+        :( $e1 + ∫($e2) → max        ) => p_bolza!(p, ocp,      e1,      e2  , :max; log)
+        :( $e1 - ∫($e2) → max        ) => p_bolza!(p, ocp,      e1, :( -$e2 ), :max; log)
+        :( ∫($e2) + $e1 → min        ) => p_bolza!(p, ocp,      e1,      e2  , :min; log)
+        :( ∫($e2) - $e1 → min        ) => p_bolza!(p, ocp, :( -$e1 ),    e2  , :min; log)
+        :( ∫($e2) + $e1 → max        ) => p_bolza!(p, ocp,      e1,      e2  , :max; log)
+        :( ∫($e2) - $e1 → max        ) => p_bolza!(p, ocp, :( -$e1 ),    e2  , :max; log)
+        :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
+        :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
         _ => begin
         p.lnum = p.lnum - 1
         if e isa LineNumberNode
@@ -124,8 +119,8 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     p.v = v
     vv = QuoteNode(v)
     qq = q isa Integer ? q : 9
-    for i ∈ 1:qq p.aliases[Symbol(v, __sub(i))] = :( $v[$i] ) end
-    for i ∈ 1:9  p.aliases[Symbol(v, __sup(i))] = :( $v^$i  ) end
+    for i ∈ 1:qq p.aliases[Symbol(v, ctindices(i))] = :( $v[$i] ) end
+    for i ∈ 1:9  p.aliases[Symbol(v, ctupperscripts(i))] = :( $v^$i  ) end
     __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
 end
 
@@ -134,7 +129,7 @@ p_alias!(p, ocp, a, e; log=false) = begin
     a isa Symbol || return __throw("forbidden alias name: $a", p.lnum, p.line)
     aa = QuoteNode(a)
     ee = QuoteNode(e)
-    for i ∈ 1:9 p.aliases[Symbol(a, __sup(i))] = :( $a^$i  ) end
+    for i ∈ 1:9 p.aliases[Symbol(a, ctupperscripts(i))] = :( $a^$i  ) end
     p.aliases[a] = e
     __wrap(:( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) ), p.lnum, p.line)
 end
@@ -182,8 +177,8 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
-    for i ∈ 1:nn p.aliases[Symbol(x, __sub(i))] = :( $x[$i] ) end
-    for i ∈ 1:9  p.aliases[Symbol(x, __sup(i))] = :( $x^$i  ) end
+    for i ∈ 1:nn p.aliases[Symbol(x, ctindices(i))] = :( $x[$i] ) end
+    for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
     __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
 end
 
@@ -193,8 +188,8 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     p.u = u
     uu = QuoteNode(u)
     mm =  m isa Integer ? m : 9
-    for i ∈ 1:mm p.aliases[Symbol(u, __sub(i))] = :( $u[$i] ) end
-    for i ∈ 1:9  p.aliases[Symbol(u, __sup(i))] = :( $u^$i  ) end
+    for i ∈ 1:mm p.aliases[Symbol(u, ctindices(i))] = :( $u[$i] ) end
+    for i ∈ 1:9  p.aliases[Symbol(u, ctupperscripts(i))] = :( $u^$i  ) end
     __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
 end
 
@@ -377,6 +372,36 @@ p_mayer!(p, ocp, e, type; log=false) = begin
     end, p.lnum, p.line)
 end
 
+p_bolza!(p, ocp, e1, e2, type; log=false) = begin
+    log && println("objective: $e1 + ∫($e2) → $type")
+    isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
+    isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
+    isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
+    isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
+    gs1 = gensym()
+    x0 = Symbol(p.x, "#0")
+    xf = Symbol(p.x, "#f")
+    e1 = replace_call(e1, p.x, p.t0, x0)
+    e1 = replace_call(e1, p.x, p.tf, xf)
+    args1 = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+    gs2 = gensym()
+    xt = Symbol(p.x, "#t")
+    ut = Symbol(p.u, "#t")
+    e2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
+    args2 = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
+    ttype = QuoteNode(type)
+    __wrap(quote
+        function $gs1($(args1...))
+            $e1
+        end
+        function $gs2($(args2...))
+            $e2
+        end
+        objective!($ocp, :bolza, $gs1, $gs2, $ttype)
+    end, p.lnum, p.line)
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -401,10 +426,9 @@ macro def(ocp, e, log=false)
 	parse!(p, ocp, e; log=log)
 	__t_dep(p) ? println("time dependent") : println("time independent") # debug
 	__v_dep(p) ? println("variable dependent") : println("variable independent") # debug
-        p = ParsingInfo()
-        code = :( $ocp = Model() ) # debug: create with proper type
-        code = Expr(:block, code, parse!(p, ocp, e; log=log))
-        code = Expr(:block, code, :( $ocp )) 
+        # match __t_dep, __v_dep to call Model properly... 
+        init = :( $ocp = Model() )
+        code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
     catch ex
         :( throw($ex) ) # can be catched by user
