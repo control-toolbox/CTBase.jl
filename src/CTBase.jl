@@ -92,7 +92,7 @@ include("callback.jl")
 include("default.jl")
 include("utils.jl")
 #
-include("type.jl")
+include("types.jl")
 #
 include("checking.jl")
 #
