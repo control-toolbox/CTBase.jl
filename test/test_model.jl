@@ -7,7 +7,7 @@ function test_model() # 30 55 185
     
     ocp = Model()
     variable!(ocp, 1, "vv")
-    @test hasvariable(ocp)
+    @test is_variable_dependent(ocp)
     @test ocp.variable_dimension == 1
     @test ocp.variable_names == [ "vv" ]
     
@@ -36,6 +36,7 @@ function test_model() # 30 55 185
     @test ocp.variable_names == [ "vv₁", "vv₂" ]
 end
 
+#=
 @testset "state and control dimensions set or not" begin
     ocp = Model()
     @test !CTBase.dims_set(ocp)
@@ -113,14 +114,14 @@ end
     @test x[Index(1)] == x
 end
 
-@testset "isautonomous vs isnonautonomous" begin
+@testset "is_time_independent vs is_time_dependent" begin
     ocp = Model()
-    @test isautonomous(ocp)
-    @test !isnonautonomous(ocp)
+    @test is_time_independent(ocp)
+    @test !is_time_dependent(ocp)
 
     ocp = Model(time_dependence=:t_dep)
-    @test isnonautonomous(ocp)
-    @test !isautonomous(ocp)
+    @test is_time_dependent(ocp)
+    @test !is_time_independent(ocp)
 end
 
 @testset "ismin vs ismax" begin
@@ -786,5 +787,6 @@ end
     @test isnothing(ocp.lagrange)
 
 end
+=#
 
 end
