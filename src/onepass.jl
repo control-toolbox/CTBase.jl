@@ -1,13 +1,10 @@
 # onepass
 # todo:
-# - add update of p.t_dep
-# _ onepass! correct Model after parse!
 # - don't __wrap any __throw (use return __throw; check p_time...)
-# - tests exceptions (parsing and semantics/runtime)
-# - add constraints on variable
-# - add assert for pre/post conditions and invariants
 # - add single sided inequalities
 # - add reverse inequalities (≥)
+# - tests exceptions (parsing and semantics/runtime)
+# - add assert for pre/post conditions and invariants
 
 """
 $(TYPEDEF)
@@ -215,6 +212,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 constraint!($ocp, :boundary, $gs, $e2, $llabel)
             end end
         (:control_fun, ee1) => begin
+            p.t_dep = p.t_dep || has(ee1, p.t)
             gs = gensym()
             ut = Symbol(p.u, "#t")
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
@@ -225,6 +223,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 constraint!($ocp, :control, $gs, $e2, $llabel)
             end end
         (:state_fun, ee1) => begin
+            p.t_dep = p.t_dep || has(ee1, p.t)
             gs = gensym()
             xt = Symbol(p.x, "#t")
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
@@ -235,6 +234,7 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 constraint!($ocp, :state, $gs, $e2, $llabel)
             end end
         (:mixed, ee1) => begin
+            p.t_dep = p.t_dep || has(ee1, p.t)
             gs = gensym()
             xt = Symbol(p.x, "#t")
             ut = Symbol(p.u, "#t")
@@ -274,6 +274,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:control_range, nothing) => :( constraint!($ocp, :control,       $e1, $e3, $llabel) )
         (:control_range, val    ) => :( constraint!($ocp, :control, $val, $e1, $e3, $llabel) )
         (:control_fun, ee2) => begin
+            p.t_dep = p.t_dep || has(ee2, p.t)
             gs = gensym()
             ut = Symbol(p.u, "#t")
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
@@ -286,6 +287,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:state_range, nothing) => :( constraint!($ocp, :state,       $e1, $e3, $llabel) )
         (:state_range, val    ) => :( constraint!($ocp, :state, $val, $e1, $e3, $llabel) )
         (:state_fun, ee2) => begin
+            p.t_dep = p.t_dep || has(ee2, p.t)
             gs = gensym()
             xt = Symbol(p.x, "#t")
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
@@ -296,6 +298,7 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :state, $gs, $e1, $e3, $llabel)
             end end
         (:mixed, ee2) => begin
+            p.t_dep = p.t_dep || has(ee2, p.t)
             gs = gensym()
             xt = Symbol(p.x, "#t")
             ut = Symbol(p.u, "#t")
@@ -341,6 +344,7 @@ p_lagrange!(p, ocp, e, type; log=false) = begin
     xt = Symbol(p.x, "#t")
     ut = Symbol(p.u, "#t")
     e = replace_call(e, [ p.x, p.u ], p.t, [ xt, ut ])
+    p.t_dep = p.t_dep || has(e, p.t)
     ttype = QuoteNode(type)
     gs = gensym()
     args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
@@ -384,12 +388,13 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
     xf = Symbol(p.x, "#f")
     e1 = replace_call(e1, p.x, p.t0, x0)
     e1 = replace_call(e1, p.x, p.tf, xf)
-    args1 = isnothing(p.v) ? [ x0, xf ] : [ x0, xf, p.v ]
+    args1 = [ x0, xf ]; __v_dep(p) && push!(args1, p.v)
     gs2 = gensym()
     xt = Symbol(p.x, "#t")
     ut = Symbol(p.u, "#t")
     e2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
-    args2 = isnothing(p.v) ? [ xt, ut ] : [ xt, ut, p.v ]
+    p.t_dep = p.t_dep || has(e2, p.t)
+    args2 = [ ]; __t_dep(p) && push!(args2, p.t); push!(args2, xt, ut); __v_dep(p) && push!(args2, p.v)
     ttype = QuoteNode(type)
     __wrap(quote
         function $gs1($(args1...))
@@ -410,27 +415,30 @@ Define an optimal control problem. One pass parsing of the definition.
 # Example
 ```jldoctest
 @def ocp begin
-    t ∈ [ 0, 1 ], time
-    x ∈ R^2, state
-    u ∈ R  , control
+    tf ∈ R, variable
+    t ∈ [ 0, tf ], time
+    x ∈ R², state
+    u ∈ R, control
     x(0) == [ 1, 2 ]
-    x(1) == [ 0, 0 ]
-    x'(t) == [ x[2](t), u(t) ]
-    ∫( u(t)^2 ) → min
+    x(tf) == [ 0, 0 ]
+    x'(t) == [ x₂(t), u(t) ]
+    tf → min
 end
 ```
 """
 macro def(ocp, e, log=false)
     try
         p = ParsingInfo()
-	parse!(p, ocp, e; log=log)
-	__t_dep(p) ? println("time dependent") : println("time independent") # debug
-	__v_dep(p) ? println("variable dependent") : println("variable independent") # debug
-        # match __t_dep, __v_dep to call Model properly... 
-        init = :( $ocp = Model() )
+	code = parse!(p, ocp, e; log=log)
+	init = @match (__t_dep(p), __v_dep(p)) begin
+	    (false, false) => :( $ocp = Model() )
+	    (true , false) => :( $ocp = Model() ) # debug ; time_dependence=:t_dep) )
+	    (false, true ) => :( $ocp = Model() ) # debug ; variable_dependence=:v_dep) )
+	    (true , true ) => :( $ocp = Model() ) # debug ; time_dependence=:t_dep, variable_dependence=:v_dep) )
+	end
         code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
     catch ex
-        :( throw($ex) ) # can be catched by user
+        :( throw($ex) ) # can be caught by user
     end
 end
