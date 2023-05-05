@@ -434,7 +434,7 @@ macro def(ocp, e, log=false)
 	    (false, false) => :( $ocp = Model() )
 	    (true , false) => :( $ocp = Model() ) # debug ; time_dependence=:t_dep) )
 	    (false, true ) => :( $ocp = Model() ) # debug ; variable_dependence=:v_dep) )
-	    (true , true ) => :( $ocp = Model() ) # debug ; time_dependence=:t_dep, variable_dependence=:v_dep) )
+	    _              => :( $ocp = Model() ) # debug ; time_dependence=:t_dep, variable_dependence=:v_dep) )
 	end
         code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
