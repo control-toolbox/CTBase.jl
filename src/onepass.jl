@@ -1,6 +1,7 @@
 # onepass
 # todo:
 # - don't __wrap any __throw (use return __throw; check p_time...)
+# - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
 # - add single sided inequalities
 # - add reverse inequalities (≥)
 # - tests exceptions (parsing and semantics/runtime)
@@ -420,9 +421,15 @@ Define an optimal control problem. One pass parsing of the definition.
     x ∈ R², state
     u ∈ R, control
     -1 ≤ u(t) ≤ 1
-    x(0) == [ 1, 2 ]
-    x(tf) == [ 0, 0 ]
-    x'(t) == [ x₂(t), u(t) ]
+    q = x₁
+    v = x₂
+    q̇ = v
+    v̇ = u
+    q(0)  == 1,    (1)
+    v(0)  == 2,    (2)
+    q(tf) == 0
+    v(tf) == 0
+    x'(t) == [ q̇(t), v̇(t) ]
     tf → min
 end
 ```
