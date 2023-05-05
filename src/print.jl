@@ -1,4 +1,7 @@
 # --------------------------------------------------------------------------------------------------
+# model
+#
+#
 # Display: text/html ?  
 # Base.show, Base.print
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
@@ -7,7 +10,7 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence}) where {time_dependence}
+function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
 
     if  isnothing(ocp.initial_time) &&
         isnothing(ocp.final_time) &&
@@ -166,4 +169,18 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         println(io, "    Besides, ", s)
     end
 
+end
+
+# --------------------------------------------------------------------------------------------------
+# solution
+#
+# we get an error when a solution is printed so I add this function
+# which has to be put in the package CTBase and has to be completed
+"""
+$(TYPEDSIGNATURES)
+
+Prints the solution.
+"""
+function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
+    nothing
 end

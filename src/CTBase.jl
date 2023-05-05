@@ -85,30 +85,23 @@ Type alias for a dimension.
 """
 const Dimension = Integer
 
-# independent files
-include("exceptions.jl")
+#
+include("exception.jl")
 include("description.jl")
-include("callbacks.jl")
+include("callback.jl")
 include("default.jl")
 include("utils.jl")
-
-# types
-include("functions_types.jl")
-include("model_type.jl")
-include("solution.jl")
-
-# checking
+#
+include("type.jl")
+#
 include("checking.jl")
-
-# display
+#
 include("print.jl")
 include("plot.jl")
-
-# model and functions methods
-include("functions_methods.jl")
-include("model_methods.jl")
-
-# parser
+#
+include("function.jl")
+include("model.jl")
+#
 include("ctparser_utils.jl")
 #include("ctparser.jl")
 include("onepass.jl")

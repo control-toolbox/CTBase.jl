@@ -1,6 +1,5 @@
 function test_model() # 30 55 185
 
-#=
 @testset "variable" begin
     ocp = Model(variable_dependence=:v_indep)
     @test_throws UnauthorizedCall variable!(ocp, 1)
@@ -430,8 +429,6 @@ end
 
 end
 
-=#
-
 @testset "constraint! 1" begin
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
@@ -454,7 +451,6 @@ end
 
 end
 
-#=
 @testset "constraint! 2" begin
     
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
@@ -463,8 +459,8 @@ end
     xf = 1
     constraint!(ocp, :initial, Index(1), x0, :c0)
     constraint!(ocp, :final, Index(1), xf, :cf)
-    @test constraint(ocp, :c0)(x) == x
-    @test constraint(ocp, :cf)(x) == x
+    @test constraint(ocp, :c0)(x, []) == x
+    @test constraint(ocp, :cf)([], x) == x
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     x  = [12, 13]
@@ -479,8 +475,8 @@ end
     xf = [1, 2]
     constraint!(ocp, :initial, 1:2, x0, :c0)
     constraint!(ocp, :final, 1:2, xf, :cf)
-    @test constraint(ocp, :c0)(x) == x[1:2]
-    @test constraint(ocp, :cf)(x) == x[1:2]
+    @test constraint(ocp, :c0)(x, []) == x[1:2]
+    @test constraint(ocp, :cf)([], x) == x[1:2]
 
     # constraint already exists
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
@@ -496,8 +492,8 @@ end
     constraint!(ocp, :final, 1, 2, :cf)
     constraint!(ocp, :control, 0, 1, :cu)
     constraint!(ocp, :state, 0, 1, :cs)
-    @test constraint(ocp, :c0)(12) == 12
-    @test constraint(ocp, :cf)(12) == 12
+    @test constraint(ocp, :c0)(12, []) == 12
+    @test constraint(ocp, :cf)([] ,12) == 12
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
@@ -506,8 +502,8 @@ end
     constraint!(ocp, :final, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, [0, 1], [1, 2], :cu)
     constraint!(ocp, :state, [0, 1], [1, 2], :cs)
-    @test constraint(ocp, :c0)([12, 13]) == [12, 13]
-    @test constraint(ocp, :cf)([12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
+    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
     @test constraint(ocp, :cu)([12, 13]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
@@ -525,8 +521,8 @@ end
     constraint!(ocp, :final, Index(1), 1, 2, :cf)
     constraint!(ocp, :control, Index(1), 0, 1, :cu)
     constraint!(ocp, :state, Index(1), 0, 1, :cs)
-    @test constraint(ocp, :c0)(12) == 12
-    @test constraint(ocp, :cf)(12) == 12
+    @test constraint(ocp, :c0)(12, []) == 12
+    @test constraint(ocp, :cf)([], 12) == 12
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
@@ -541,8 +537,8 @@ end
     constraint!(ocp, :final, 1:2, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, 1:2, [0, 1], [1, 2], :cu)
     constraint!(ocp, :state, 1:2, [0, 1], [1, 2], :cs)
-    @test constraint(ocp, :c0)([12, 13]) == [12, 13]
-    @test constraint(ocp, :cf)([12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
+    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
     @test constraint(ocp, :cu)([12, 13]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
@@ -760,7 +756,7 @@ end
     # control
     @test sort(ξl) == sort([0])
     @test sort(ξu) == sort([1])
-    @test sort(ξ(-1, [1], v)) == sort([1])
+    @test sort(ξ(-1, 1, v)) == sort([1])
 
     # state
     @test sort(ηl) == sort([0, 1])
@@ -770,7 +766,7 @@ end
     # mixed
     @test sort(ψl) == sort([1])
     @test sort(ψu) == sort([1])
-    @test sort(ψ(-1, [1, 1], [2], v)) == sort([3])
+    @test sort(ψ(-1, [1, 1], 2, v)) == sort([3])
 
     # boundary
     @test sort(ϕl) == sort([10, 1, 0])
@@ -823,7 +819,7 @@ end
     # control
     @test sort(ξl) == sort([0])
     @test sort(ξu) == sort([1])
-    @test sort(ξ(-1, [1], v)) == sort([ 1+v[2] ])
+    @test sort(ξ(-1, 1, v)) == sort([ 1+v[2] ])
 
     # state
     @test sort(ηl) == sort([0, 1])
@@ -833,7 +829,7 @@ end
     # mixed
     @test sort(ψl) == sort([1])
     @test sort(ψu) == sort([1])
-    @test sort(ψ(-1, [1, 1], [2], v)) == sort([ 3+v[2] ])
+    @test sort(ψ(-1, [1, 1], 2, v)) == sort([ 3+v[2] ])
 
     # boundary
     @test sort(ϕl) == sort([10, 1, 0])
@@ -883,30 +879,30 @@ end
     time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
-    objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0^2)
-    @test ocp.mayer(1, 2, 3, 4) == 2
+    objective!(ocp, :mayer, (x0, xf) -> 0.5x0^2)
+    @test ocp.mayer(2, 3) == 2
 
     ocp = Model()
     time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
-    objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0[1]^2)
-    @test ocp.mayer(1, [2, 3], 4, [5, 6]) == 2
+    objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
+    @test ocp.mayer([2, 3], [5, 6]) == 2
 
     ocp = Model()
     time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
-    objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
-    @test ocp.mayer(1, 2, 3, 4) == 2
+    objective!(ocp, :bolza, (x0, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
+    @test ocp.mayer(2, 3) == 2
     @test ocp.lagrange(1, 2) == 2
     
     ocp = Model()
     time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
-    objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0.5x0[1]^2, (x, u) -> 0.5u[1]^2)
-    @test ocp.mayer(1, [2, 3], 4, [5, 6]) == 2
+    objective!(ocp, :bolza, (x0, xf) -> 0.5x0[1]^2, (x, u) -> 0.5u[1]^2)
+    @test ocp.mayer([2, 3], [5, 6]) == 2
     @test ocp.lagrange([1, 2], [3, 4]) == 4.5
 
     # replacing the objective
@@ -917,12 +913,10 @@ end
     objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
     @test ocp.lagrange([1, 2], [3, 4]) == 4.5
     @test isnothing(ocp.mayer)
-    objective!(ocp, :mayer, (t0, x0, tf, xf) -> 0.5x0[1]^2)
-    @test ocp.mayer(1, [2, 3], 4, [5, 6]) == 2
+    objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
+    @test ocp.mayer([2, 3], [5, 6]) == 2
     @test isnothing(ocp.lagrange)
 
 end
-
-=#
 
 end
