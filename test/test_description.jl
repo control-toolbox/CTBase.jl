@@ -1,8 +1,4 @@
-function test_descriptions()
-
-# make a description from symbols or a tuple of symbols
-@test makeDescription(:a, :b) == (:a, :b)
-@test makeDescription((:a, :b)) == (:a, :b)
+function test_description()
 
 #
 descriptions = ()

@@ -352,7 +352,7 @@ u = 2 * Vector{Float64}(1:m)
 end
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
-@test ismin(o)
+@test is_min(o)
 @test o.mayer(y0, yf) == y0[3] + yf[4]
 
 
@@ -366,7 +366,7 @@ yf = 2 * [ 1, 2, 3, 4 ]
 end
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
-@test ismax(o)
+@test is_max(o)
 @test o.mayer(y0, yf) == y0[3] + yf[4]
 
 @def o begin
@@ -381,7 +381,7 @@ end
 z = [ 5, 6 ]
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
-@test ismin(o)
+@test is_min(o)
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
 @def o begin

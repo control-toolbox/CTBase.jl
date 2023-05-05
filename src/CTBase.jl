@@ -31,12 +31,11 @@ using DataStructures # OrderedDict for aliases
 Type alias for a real number.
 """
 const ctNumber = Real
-const MyNumber = Real
 """
 Type alias for a vector of real numbers.
 """
-const ctVector = AbstractVector{<:ctNumber}
-const MyVector = AbstractVector{<:MyNumber}
+#const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # pb for []
+const ctVector = Union{ctNumber, AbstractVector{<:Any}}
 """
 Type alias for a time.
 """
@@ -56,7 +55,7 @@ const State = ctVector
 """
 Type alias for an adjoint.
 """
-const Adjoint = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
+const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
 Type alias for a control.
 """
@@ -66,13 +65,17 @@ Type alias for a variable.
 """
 const Variable = ctVector
 """
+Type alias for an empty variable.
+"""
+const EmptyVariable = Vector{Any}
+"""
 Type alias for a vector of states.
 """
 const States = Vector{<:State}
 """
 Type alias for a vector of adjoints.
 """
-const Adjoints = Vector{<:Adjoint}
+const Costates = Vector{<:Costate}
 """
 Type alias for a vector of controls.
 """
@@ -83,26 +86,29 @@ Type alias for a dimension.
 const Dimension = Integer
 
 #
-include("exceptions.jl")
+include("exception.jl")
 include("description.jl")
-include("callbacks.jl")
-include("functions.jl")
-#
+include("callback.jl")
 include("default.jl")
 include("utils.jl")
+#
+include("type.jl")
+#
+include("checking.jl")
+#
+include("print.jl")
+include("plot.jl")
+#
+include("function.jl")
 include("model.jl")
 #
 include("ctparser_utils.jl")
 #include("ctparser.jl")
 include("onepass.jl")
-#
-include("print.jl")
-include("solution.jl")
-include("plot.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Adjoints, Controls, State, Adjoint, Control, Variable, Dimension, Index
+export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
@@ -112,7 +118,7 @@ export get_priority_print_callbacks, get_priority_stop_callbacks
 export Description, makeDescription, add, getFullDescription
 
 # exceptions
-export CTException, ParsingError, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # functions
@@ -124,7 +130,7 @@ export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, 
 export OptimalControlModel
 export Model
 export variable!, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
-export isautonomous, isnonautonomous, ismin, ismax, hasvariable
+export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
 
 # solution
@@ -139,8 +145,5 @@ export replace_call, constraint_type
 
 # onepass
 export @def
-
-# _Time
-export _Time
 
 end
