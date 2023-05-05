@@ -31,12 +31,10 @@ using DataStructures # OrderedDict for aliases
 Type alias for a real number.
 """
 const ctNumber = Real
-const MyNumber = Real
 """
 Type alias for a vector of real numbers.
 """
-const ctVector = AbstractVector{<:ctNumber}
-const MyVector = AbstractVector{<:MyNumber}
+const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}}
 """
 Type alias for a time.
 """
@@ -56,7 +54,7 @@ const State = ctVector
 """
 Type alias for an adjoint.
 """
-const Adjoint = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
+const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
 Type alias for a control.
 """
@@ -66,13 +64,17 @@ Type alias for a variable.
 """
 const Variable = ctVector
 """
+Type alias for an empty variable.
+"""
+const EmptyVariable = Vector{Any}
+"""
 Type alias for a vector of states.
 """
 const States = Vector{<:State}
 """
 Type alias for a vector of adjoints.
 """
-const Adjoints = Vector{<:Adjoint}
+const Costates = Vector{<:Costate}
 """
 Type alias for a vector of controls.
 """
@@ -86,6 +88,7 @@ const Dimension = Integer
 include("exceptions.jl")
 include("description.jl")
 include("callbacks.jl")
+include("checking.jl")
 include("functions.jl")
 #
 include("default.jl")
@@ -102,7 +105,7 @@ include("plot.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Adjoints, Controls, State, Adjoint, Control, Variable, Dimension, Index
+export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
@@ -139,8 +142,5 @@ export replace_call, constraint_type
 
 # onepass
 export @def, @_def
-
-# _Time
-export _Time
 
 end

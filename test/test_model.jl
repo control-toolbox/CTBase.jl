@@ -118,7 +118,7 @@ end
     @test isautonomous(ocp)
     @test !isnonautonomous(ocp)
 
-    ocp = Model(time_dependence=:nonautonomous)
+    ocp = Model(time_dependence=:t_dep)
     @test isnonautonomous(ocp)
     @test !isautonomous(ocp)
 end
