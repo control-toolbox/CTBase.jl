@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
 # - don't __wrap any __throw (use return __throw; check p_time...)
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
 # - 0 ≤ tf ≤ Inf not parsing!? (tf variable)
