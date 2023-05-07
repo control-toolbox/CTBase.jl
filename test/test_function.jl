@@ -1,10 +1,12 @@
 function test_function()
 
+∅ = Vector{Real}()
+
 @testset "BoundaryConstraint" begin
     @test_throws IncorrectArgument BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], variable_dependence=:dummy)
     B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], variable_dependence=:v_indep)
     @test B([0, 0], [1, 1]) == [1, 2]
-    @test B([0, 0], [1, 1], []) == [1, 2]
+    @test B([0, 0], [1, 1], ∅) == [1, 2]
     B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable_dependence=:v_dep)
     @test B([0, 0], [1, 1], [1, 2, 3]) == [4, 1]
 end
@@ -15,7 +17,7 @@ end
     @test_throws MethodError G([0, 0], [1, 1])
     G = Mayer((x0, xf) -> xf[2]-x0[1], variable_dependence=:v_indep)
     @test G([0, 0], [1, 1]) == 1
-    @test G([0, 0], [1, 1], []) == 1
+    @test G([0, 0], [1, 1], ∅) == 1
     G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable_dependence=:v_dep)
     @test G([0, 0], [1, 1], [1, 2, 3]) == 4
 end

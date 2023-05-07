@@ -1,5 +1,7 @@
 function test_model() # 30 55 185
 
+∅ = Vector{Real}()
+
 @testset "variable" begin
     ocp = Model(variable_dependence=:v_indep)
     @test_throws UnauthorizedCall variable!(ocp, 1)
@@ -435,14 +437,14 @@ end
     @test_throws IncorrectArgument constraint!(ocp, :initial, [0, 1], :c0)
     constraint!(ocp, :initial, 0, :c0)
     constraint!(ocp, :final, 1, :cf)
-    @test constraint(ocp, :c0)(12, []) == 12
-    @test constraint(ocp, :cf)([], 12) == 12
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅, 12) == 12
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :initial, [0, 1], :c0)
     constraint!(ocp, :final, [1, 2], :cf)
-    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
-    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+    @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
 
     # constraint already exists
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
@@ -459,8 +461,8 @@ end
     xf = 1
     constraint!(ocp, :initial, Index(1), x0, :c0)
     constraint!(ocp, :final, Index(1), xf, :cf)
-    @test constraint(ocp, :c0)(x, []) == x
-    @test constraint(ocp, :cf)([], x) == x
+    @test constraint(ocp, :c0)(x, ∅) == x
+    @test constraint(ocp, :cf)(∅, x) == x
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     x  = [12, 13]
@@ -475,8 +477,8 @@ end
     xf = [1, 2]
     constraint!(ocp, :initial, 1:2, x0, :c0)
     constraint!(ocp, :final, 1:2, xf, :cf)
-    @test constraint(ocp, :c0)(x, []) == x[1:2]
-    @test constraint(ocp, :cf)([], x) == x[1:2]
+    @test constraint(ocp, :c0)(x, ∅) == x[1:2]
+    @test constraint(ocp, :cf)(∅, x) == x[1:2]
 
     # constraint already exists
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
@@ -492,8 +494,8 @@ end
     constraint!(ocp, :final, 1, 2, :cf)
     constraint!(ocp, :control, 0, 1, :cu)
     constraint!(ocp, :state, 0, 1, :cs)
-    @test constraint(ocp, :c0)(12, []) == 12
-    @test constraint(ocp, :cf)([] ,12) == 12
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅ ,12) == 12
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
@@ -502,8 +504,8 @@ end
     constraint!(ocp, :final, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, [0, 1], [1, 2], :cu)
     constraint!(ocp, :state, [0, 1], [1, 2], :cs)
-    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
-    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+    @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
     @test constraint(ocp, :cu)([12, 13]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
@@ -521,8 +523,8 @@ end
     constraint!(ocp, :final, Index(1), 1, 2, :cf)
     constraint!(ocp, :control, Index(1), 0, 1, :cu)
     constraint!(ocp, :state, Index(1), 0, 1, :cs)
-    @test constraint(ocp, :c0)(12, []) == 12
-    @test constraint(ocp, :cf)([], 12) == 12
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅, 12) == 12
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
@@ -537,8 +539,8 @@ end
     constraint!(ocp, :final, 1:2, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, 1:2, [0, 1], [1, 2], :cu)
     constraint!(ocp, :state, 1:2, [0, 1], [1, 2], :cs)
-    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
-    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+    @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
     @test constraint(ocp, :cu)([12, 13]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
