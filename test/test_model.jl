@@ -140,23 +140,23 @@ end
 
 @testset "initial and / or final time already set" begin
     ocp = Model(variable_dependence=:v_dep)
-    @test !CTBase.time_set(ocp)
+    @test !CTBase.__time_set(ocp)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
-    @test CTBase.time_set(ocp)
+    @test CTBase.__time_set(ocp)
 
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
-    @test CTBase.time_set(ocp)
+    @test CTBase.__time_set(ocp)
     
     ocp = Model()
     time!(ocp, 0, 1)
-    @test CTBase.time_set(ocp)
+    @test CTBase.__time_set(ocp)
 
     ocp = Model()
     time!(ocp, [0, 1])
-    @test CTBase.time_set(ocp)
+    @test CTBase.__time_set(ocp)
 
     ocp = Model()
     @test_throws MethodError time!(ocp, 0, Index(1))

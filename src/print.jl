@@ -11,25 +11,41 @@ Print the optimal control problem.
 """
 function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
 
-    if  isnothing(ocp.initial_time) &&
-        isnothing(ocp.final_time) &&
-        isnothing(ocp.time_name) &&
-        isnothing(ocp.lagrange) &&
-        isnothing(ocp.mayer) &&
-        isnothing(ocp.criterion) &&
-        isnothing(ocp.dynamics) &&
-        isnothing(ocp.state_dimension) &&
-        isnothing(ocp.state_names)  &&
-        isnothing(ocp.control_dimension) &&
-        isnothing(ocp.control_names)
-        printstyled(io, "Empty optimal control problem", bold=true)
+    # check if the problem is empty
+    if __isempty(ocp) 
+        printstyled(io, "Empty optimal control problem", bold=true) 
+        return
+    end
+
+    # check if the problem is complete: times, state, control, dynamics and variable (if Variable)
+    is_incomplete = false
+    if  __time_not_set(ocp) || 
+        __state_not_set(ocp) || 
+        __control_not_set(ocp) || 
+        __dynamics_not_set(ocp) ||
+        __objective_not_set(ocp) ||
+        (__variable_not_set(ocp) && vd == :v_dep)
+        printstyled(io, "Incomplete optimal control problem\n", bold=true)
+        is_incomplete = true
+    end
+
+    if is_incomplete
+        txt = " - times     " * (__time_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - state     " * (__state_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - control   " * (__control_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - dynamics  " * (__dynamics_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - objective " * (__objective_not_set(ocp) ? "❌" : "✅") * "\n"
+        print(io, txt)
+        if vd == :v_dep
+            print(io, " - variable  " * (__variable_not_set(ocp) ? "❌" : "✅") * "\n")
+        end
         return
     end
 
     try
         nlp_constraints(ocp)
     catch
-        printstyled(io, "Empty optimal control problem (the dimensions of the state and/or control are not set)", bold=true)
+        printstyled(io, "Internal error", bold=true)
         return
     end
 

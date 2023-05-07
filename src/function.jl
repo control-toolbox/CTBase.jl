@@ -1,6 +1,6 @@
 # --------------------------------------------------------------------------------------------------
 function BoundaryConstraint(f::Function; variable_dependence::Symbol=__fun_variable_dependence())
-    @check(variable_dependence)
+    @__check(variable_dependence)
     return BoundaryConstraint{variable_dependence}(f)
 end
 
@@ -18,7 +18,7 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function Mayer(f::Function; variable_dependence::Symbol=__fun_variable_dependence())
-    @check(variable_dependence)
+    @__check(variable_dependence)
     return Mayer{variable_dependence}(f)
 end
 
@@ -38,8 +38,8 @@ end
 function Hamiltonian(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Hamiltonian{time_dependence, variable_dependence}(f)
 end
 
@@ -75,8 +75,8 @@ end
 function HamiltonianVectorField(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -112,8 +112,8 @@ end
 function VectorField(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return VectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -149,8 +149,8 @@ end
 function Lagrange(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
@@ -186,8 +186,8 @@ end
 function Dynamics(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Dynamics{time_dependence, variable_dependence}(f)
 end
 
@@ -223,8 +223,8 @@ end
 function StateConstraint(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return StateConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -260,8 +260,8 @@ end
 function ControlConstraint(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -297,8 +297,8 @@ end
 function MixedConstraint(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -339,8 +339,8 @@ end
 function FeedbackControl(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
@@ -376,8 +376,8 @@ end
 function ControlLaw(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
@@ -413,8 +413,8 @@ end
 function Multiplier(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 

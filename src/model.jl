@@ -20,8 +20,8 @@ julia> ocp = Model(time_dependence=:t_dep)
 
 """
 function Model(; time_dependence::Symbol=__ocp_time_dependence(), variable_dependence::Symbol=__ocp_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
@@ -225,8 +225,8 @@ julia> time!(ocp, 0, Index(2), "t")
 ```
 """
 function time!(ocp::OptimalControlModel{td, :v_dep}, t0::Time, indf::Index, name::String=__time_name()) where {td}
-    check_variable_set(ocp)
-    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __check_variable_set(ocp)
+    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = t0
     ocp.final_time = indf
@@ -249,8 +249,8 @@ julia> time!(ocp, Index(2), 1, "t")
 ```
 """
 function time!(ocp::OptimalControlModel{td, :v_dep}, ind0::Index, tf::Time, name::String=__time_name()) where {td}
-    check_variable_set(ocp)
-    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __check_variable_set(ocp)
+    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = ind0
     ocp.final_time = tf
@@ -273,8 +273,8 @@ julia> time!(ocp, Index(2), Index(3), "t")
 ```
 """
 function time!(ocp::OptimalControlModel{td, :v_dep}, ind0::Index, indf::Index, name::String=__time_name()) where {td}
-    check_variable_set(ocp)
-    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __check_variable_set(ocp)
+    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = ind0
@@ -363,7 +363,7 @@ julia> ocp.time_name
 ```
 """
 function time!(ocp::OptimalControlModel, t0::Time, tf::Time, name::String=__time_name())
-    time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     ocp.initial_time=t0
     ocp.final_time=tf
     ocp.time_name = name
@@ -398,7 +398,7 @@ julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
 function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label()) where {td, vd}
 
     # we check if the dimensions and times have been set just to force the user to set them before
-    @check(ocp)
+    @__check(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -468,7 +468,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
     # we use the constraint! defined before
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
         ", you cannot use constraint! function with type=:variable."))
 
@@ -523,7 +523,7 @@ function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeCo
         label::Symbol=__constraint_label()) where {td, vd}
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -610,7 +610,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb::ctVector, ub::c
         label::Symbol=__constraint_label()) # we use the constraint! defined before
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -691,7 +691,7 @@ function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function
         lb::ctVector, ub::ctVector, label::Symbol=__constraint_label()) where {td, vd}
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -786,7 +786,7 @@ julia> constraint!(ocp, :dynamics, f)
 function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function) where {td, vd}
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
 
     # set the dynamics
     if type ∈ [ :dynamics ]
@@ -826,7 +826,7 @@ function objective!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function,
         criterion::Symbol=__criterion_type()) where {td, vd}
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
 
     # reset the objective
     if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
@@ -836,7 +836,7 @@ function objective!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function,
     ocp.lagrange = nothing
 
     # check the validity of the criterion
-    @check(criterion)
+    @__check(criterion)
     ocp.criterion = criterion
 
     # set the objective
@@ -874,7 +874,7 @@ function objective!(ocp::OptimalControlModel{td, vd}, type::Symbol, g::Function,
         criterion::Symbol=__criterion_type()) where {td, vd}
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
 
     # reset the objective
     if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
@@ -884,7 +884,7 @@ function objective!(ocp::OptimalControlModel{td, vd}, type::Symbol, g::Function,
     ocp.lagrange = nothing
 
     # check the validity of the criterion
-    @check(criterion)
+    @__check(criterion)
     ocp.criterion = criterion
 
     # set the objective
@@ -1009,7 +1009,7 @@ julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
 function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence}
 
     # we check if the dimensions and times have been set
-    @check(ocp)
+    @__check(ocp)
     
     #
     constraints = ocp.constraints

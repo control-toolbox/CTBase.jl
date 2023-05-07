@@ -463,11 +463,27 @@ $(TYPEDFIELDS)
 end
 
 # used for checkings
-state_not_set(ocp::OptimalControlModel) = isnothing(ocp.state_dimension)
-control_not_set(ocp::OptimalControlModel) = isnothing(ocp.control_dimension)
-variable_not_set(ocp::OptimalControlModel) = isnothing(ocp.variable_dimension)
-time_not_set(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && isnothing(ocp.final_time)
-time_set(ocp::OptimalControlModel) = !time_not_set(ocp)
+__state_not_set(ocp::OptimalControlModel) = isnothing(ocp.state_dimension) && isnothing(ocp.state_names)
+__control_not_set(ocp::OptimalControlModel) = isnothing(ocp.control_dimension) && isnothing(ocp.control_names)
+__variable_not_set(ocp::OptimalControlModel) = isnothing(ocp.variable_dimension) && isnothing(ocp.variable_names)
+__time_not_set(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && isnothing(ocp.final_time) && isnothing(ocp.time_name)
+__time_set(ocp::OptimalControlModel) = !__time_not_set(ocp)
+__dynamics_not_set(ocp::OptimalControlModel) = isnothing(ocp.dynamics)
+__objective_not_set(ocp::OptimalControlModel) = isnothing(ocp.lagrange) && isnothing(ocp.mayer) && isnothing(ocp.criterion)
+__isempty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && 
+    isnothing(ocp.final_time) && 
+    isnothing(ocp.time_name) && 
+    isnothing(ocp.lagrange) && 
+    isnothing(ocp.mayer) && 
+    isnothing(ocp.criterion) && 
+    isnothing(ocp.dynamics) && 
+    isnothing(ocp.state_dimension) && 
+    isnothing(ocp.state_names) && 
+    isnothing(ocp.control_dimension) && 
+    isnothing(ocp.control_names) && 
+    isnothing(ocp.variable_dimension) && 
+    isnothing(ocp.variable_names) && 
+    isempty(ocp.constraints)
 
 # --------------------------------------------------------------------------------------------------
 # solution
