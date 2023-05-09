@@ -188,6 +188,11 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
 
 end
 
+function Base.show(io::IO, ocp::OptimalControlModel)
+    print(io, typeof(ocp))
+    #show(io, MIME("text/plain"), ocp)
+end
+
 # --------------------------------------------------------------------------------------------------
 # solution
 #
@@ -200,4 +205,9 @@ Prints the solution.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
     nothing
+end
+
+function Base.show(io::IO, sol::OptimalControlSolution)
+    print(io, typeof(sol))
+    #show(io, MIME("text/plain"), sol)
 end

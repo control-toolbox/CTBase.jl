@@ -512,18 +512,23 @@ function __is_objective_not_set(ocp::OptimalControlModel)
     return isnothing(ocp.criterion)
 end
 __is_empty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && 
+    isnothing(ocp.initial_time_name) &&
     isnothing(ocp.final_time) && 
+    isnothing(ocp.final_time_name) &&
     isnothing(ocp.time_name) && 
     isnothing(ocp.lagrange) && 
     isnothing(ocp.mayer) && 
     isnothing(ocp.criterion) && 
     isnothing(ocp.dynamics) && 
     isnothing(ocp.state_dimension) && 
-    isnothing(ocp.state_names) && 
+    isnothing(ocp.state_name) &&
+    isnothing(ocp.state_components_names) &&
     isnothing(ocp.control_dimension) && 
-    isnothing(ocp.control_names) && 
+    isnothing(ocp.control_name) &&
+    isnothing(ocp.control_components_names) &&
     isnothing(ocp.variable_dimension) && 
-    isnothing(ocp.variable_names) && 
+    isnothing(ocp.variable_name) &&
+    isnothing(ocp.variable_components_names) &&
     isempty(ocp.constraints)
 __is_initial_time_free(ocp) = ocp.initial_time isa Index
 __is_final_time_free(ocp) = ocp.final_time isa Index
