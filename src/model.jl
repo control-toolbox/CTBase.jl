@@ -72,7 +72,7 @@ is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
 """
 $(TYPEDSIGNATURES)
 
-Define the variable dimension and possibly the names of each coordinate.
+Define the variable dimension and possibly the names of each component.
 
 # Examples
 ```jldoctest
@@ -80,13 +80,21 @@ julia> variable!(ocp, 1, "v")
 julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 ```
 """
-function variable!(ocp::OptimalControlModel, q::Dimension, names::Union{String, Vector{String}}=__variable_names(q))
+function variable!(ocp::OptimalControlModel, q::Dimension, name::Union{String, Vector{String}}=__variable_name(q))
+    # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
-    (q  > 1) && (names isa Vector{String}) && (length(names) ≠ q) && throw(IncorrectArgument("the number of variables names must be equal to the variable dimension"))
-    (q == 1) && (names isa Vector{String}) && throw(IncorrectArgument("if the variable dimension is 1, then, the argument names must be a String"))
-    (q  > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, q)])
+    (q  > 1) && (name isa Vector{String}) && (length(name) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
+    (q == 1) && (name isa Vector{String}) && throw(IncorrectArgument("if the variable dimension is 1, then, the argument name must be a String"))
+    # set the variable dimension and names
+    components_names = nothing
+    if (q  > 1) 
+        components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, q)] : name
+    else
+        components_names = [name] # name is a String
+    end
     ocp.variable_dimension = q
-    ocp.variable_names = (q == 1) ? [names] : names
+    ocp.variable_components_names = components_names
+    ocp.variable_name = name isa String ? name : "v"
     nothing # to force to return nothing
 end
 
@@ -97,7 +105,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Define the state dimension and possibly the names of each coordinate.
+Define the state dimension and possibly the names of each component.
 
 # Examples
 
@@ -105,46 +113,54 @@ Define the state dimension and possibly the names of each coordinate.
 julia> state!(ocp, 1)
 julia> ocp.state_dimension
 1
-julia> ocp.state_names
+julia> ocp.state_components_names
 ["x"]
 
 julia> state!(ocp, 1, "y")
 julia> ocp.state_dimension
 1
-julia> ocp.state_names
+julia> ocp.state_components_names
 ["y"]
 
 julia> state!(ocp, 2)
 julia> ocp.state_dimension
 2
-julia> ocp.state_names
+julia> ocp.state_components_names
 ["x₁", "x₂"]
 
 julia> state!(ocp, 2, [ "y₁", "y₂" ])
 julia> ocp.state_dimension
 2
-julia> ocp.state_names
+julia> ocp.state_components_names
 ["y₁", "y₂"]
 
 julia> state!(ocp, 2, :y)
 julia> ocp.state_dimension
 2
-julia> ocp.state_names
+julia> ocp.state_components_names
 ["y₁", "y₂"]
 
 julia> state!(ocp, 2, "y")
 julia> ocp.state_dimension
 2
-julia> ocp.state_names
+julia> ocp.state_components_names
 ["y₁", "y₂"]
 ```
 """
-function state!(ocp::OptimalControlModel, n::Dimension, names::Union{String, Vector{String}}=__state_names(n))
-    (n  > 1) && (names isa Vector{String}) && (length(names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
-    (n == 1) && (names isa Vector{String}) && throw(IncorrectArgument("if the state dimension is 1, then, the argument names must be a String"))
-    (n  > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, n)])
+function state!(ocp::OptimalControlModel, n::Dimension, name::Union{String, Vector{String}}=__state_name(n))
+    # checkings
+    (n  > 1) && (name isa Vector{String}) && (length(name) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    (n == 1) && (name isa Vector{String}) && throw(IncorrectArgument("if the state dimension is 1, then, the argument name must be a String"))
+    # set the state dimension and names
+    components_names = nothing
+    if (n  > 1) 
+        components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, n)] : name
+    else
+        components_names = [name] # name is a String
+    end
     ocp.state_dimension = n
-    ocp.state_names = (n == 1) ? [names] : names
+    ocp.state_components_names = components_names
+    ocp.state_name = name isa String ? name : "x"
     nothing # to force to return nothing
 end
 function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
@@ -162,46 +178,54 @@ Define the control dimension and possibly the names of each coordinate.
 julia> control!(ocp, 1)
 julia> ocp.control_dimension
 1
-julia> ocp.control_names
+julia> ocp.control_components_names
 ["u"]
 
 julia> control!(ocp, 1, "v")
 julia> ocp.control_dimension
 1
-julia> ocp.control_names
+julia> ocp.control_components_names
 ["v"]
 
 julia> control!(ocp, 2)
 julia> ocp.control_dimension
 2
-julia> ocp.control_names
+julia> ocp.control_components_names
 ["u₁", "u₂"]
 
 julia> control!(ocp, 2, [ "v₁", "v₂" ])
 julia> ocp.control_dimension
 2
-julia> ocp.control_names
+julia> ocp.control_components_names
 ["v₁", "v₂"]
 
 julia> control!(ocp, 2, :v)
 julia> ocp.control_dimension
 2
-julia> ocp.control_names
+julia> ocp.control_components_names
 ["v₁", "v₂"]
 
 julia> control!(ocp, 2, "v")
 julia> ocp.control_dimension
 2
-julia> ocp.control_names
+julia> ocp.control_components_names
 ["v₁", "v₂"]
 ```
 """
-function control!(ocp::OptimalControlModel, m::Dimension, names::Union{String, Vector{String}}=__control_names(m))
-    (m  > 1) && (names isa Vector{String}) && (length(names) != m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
-    (m == 1) && (names isa Vector{String}) && throw(IncorrectArgument("if the control dimension is 1, then, the argument names must be a String"))
-    (m  > 1) && (names isa String) && (names = [ names * ctindices(i) for i ∈ range(1, m)])
+function control!(ocp::OptimalControlModel, m::Dimension, name::Union{String, Vector{String}}=__control_name(m))
+    # checkings
+    (m  > 1) && (name isa Vector{String}) && (length(name) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
+    (m == 1) && (name isa Vector{String}) && throw(IncorrectArgument("if the control dimension is 1, then, the argument name must be a String"))
+    # set the control dimension and names
+    components_names = nothing
+    if (m  > 1) 
+        components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, m)] : name
+    else
+        components_names = [name] # name is a String
+    end
     ocp.control_dimension = m
-    ocp.control_names = (m == 1) ? [names] : names
+    ocp.control_components_names = components_names
+    ocp.control_name = name isa String ? name : "u"
     nothing # to force to return nothing
 end
 
@@ -226,11 +250,13 @@ julia> time!(ocp, 0, Index(2), "t")
 """
 function time!(ocp::OptimalControlModel{td, :v_dep}, t0::Time, indf::Index, name::String=__time_name()) where {td}
     __check_variable_set(ocp)
-    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = t0
     ocp.final_time = indf
     ocp.time_name = name
+    ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
+    ocp.final_time_name = ocp.variable_components_names[indf]
     nothing # to force to return nothing
 end
 
@@ -250,11 +276,13 @@ julia> time!(ocp, Index(2), 1, "t")
 """
 function time!(ocp::OptimalControlModel{td, :v_dep}, ind0::Index, tf::Time, name::String=__time_name()) where {td}
     __check_variable_set(ocp)
-    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = ind0
     ocp.final_time = tf
     ocp.time_name = name
+    ocp.initial_time_name = ocp.variable_components_names[ind0]
+    ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits=2))
     nothing # to force to return nothing
 end
 
@@ -274,12 +302,14 @@ julia> time!(ocp, Index(2), Index(3), "t")
 """
 function time!(ocp::OptimalControlModel{td, :v_dep}, ind0::Index, indf::Index, name::String=__time_name()) where {td}
     __check_variable_set(ocp)
-    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
     ocp.initial_time = ind0
     ocp.final_time = indf
     ocp.time_name = name
+    ocp.initial_time_name = ocp.variable_components_names[ind0]
+    ocp.final_time_name = ocp.variable_components_names[indf]
     nothing # to force to return nothing
 end
 
@@ -363,10 +393,12 @@ julia> ocp.time_name
 ```
 """
 function time!(ocp::OptimalControlModel, t0::Time, tf::Time, name::String=__time_name())
-    __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     ocp.initial_time=t0
     ocp.final_time=tf
     ocp.time_name = name
+    ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
+    ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits=2))
     nothing # to force to return nothing
 end
 

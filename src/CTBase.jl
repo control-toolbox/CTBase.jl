@@ -52,7 +52,7 @@ Type alias for a state.
 """
 const State = ctVector
 """
-Type alias for an adjoint.
+Type alias for an costate.
 """
 const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
@@ -72,7 +72,7 @@ Type alias for a vector of states.
 """
 const States = AbstractVector{<:State}
 """
-Type alias for a vector of adjoints.
+Type alias for a vector of costates.
 """
 const Costates = AbstractVector{<:Costate}
 """

@@ -12,32 +12,32 @@ Print the optimal control problem.
 function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
 
     # check if the problem is empty
-    if __isempty(ocp) 
+    if __is_empty(ocp) 
         printstyled(io, "Empty optimal control problem", bold=true) 
         return
     end
 
     # check if the problem is complete: times, state, control, dynamics and variable (if Variable)
     is_incomplete = false
-    if  __time_not_set(ocp) || 
-        __state_not_set(ocp) || 
-        __control_not_set(ocp) || 
-        __dynamics_not_set(ocp) ||
-        __objective_not_set(ocp) ||
-        (__variable_not_set(ocp) && vd == :v_dep)
+    if  __is_time_not_set(ocp) || 
+        __is_state_not_set(ocp) || 
+        __is_control_not_set(ocp) || 
+        __is_dynamics_not_set(ocp) ||
+        __is_objective_not_set(ocp) ||
+        (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
         printstyled(io, "Incomplete optimal control problem\n", bold=true)
         is_incomplete = true
     end
 
     if is_incomplete
-        txt = " - times     " * (__time_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - state     " * (__state_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - control   " * (__control_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - dynamics  " * (__dynamics_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - objective " * (__objective_not_set(ocp) ? "❌" : "✅") * "\n"
+        txt = " - times     " * (__is_time_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - state     " * (__is_state_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - control   " * (__is_control_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - dynamics  " * (__is_dynamics_not_set(ocp) ? "❌" : "✅") * "\n" *
+              " - objective " * (__is_objective_not_set(ocp) ? "❌" : "✅") * "\n"
         print(io, txt)
-        if vd == :v_dep
-            print(io, " - variable  " * (__variable_not_set(ocp) ? "❌" : "✅") * "\n")
+        if is_variable_dependent(ocp)
+            print(io, " - variable  " * (__is_variable_not_set(ocp) ? "❌" : "✅") * "\n")
         end
         return
     end
@@ -49,47 +49,48 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         return
     end
 
+    # the problem is complete!
+
     # dimensions
-    dimx = isnothing(ocp.state_dimension) ? "n" : ocp.state_dimension
-    dimu = isnothing(ocp.control_dimension) ? "m" : ocp.control_dimension
+    x_dim = ocp.state_dimension
+    u_dim = ocp.control_dimension
+    v_dim = is_variable_dependent(ocp) ? ocp.variable_dimension : -1
+
+    # names
+    t_name = ocp.time_name
+    t0_name = ocp.initial_time_name
+    tf_name = ocp.final_time_name
+    x_name = ocp.state_name
+    u_name = ocp.control_name
+    v_name = is_variable_dependent(ocp) ? ocp.variable_name : ""
+    xi_names = ocp.state_components_names
+    ui_names = ocp.control_components_names
+    vi_names = is_variable_dependent(ocp) ? ocp.variable_components_names : []
+
+    # dependences
+    t_ = is_time_dependent(ocp) ? t_name * ", " : ""
+    _v = is_variable_dependent(ocp) ? ", " * v_name : ""
+
+    # other names
+    bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
+    mixed_args_names = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
+    state_args_names = t_ * x_name * "(" * t_name * ")" * _v
+    control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
     #
     printstyled(io, "Optimal control problem of the form:\n", bold=true)
     println(io, "")
 
-    is_t0_free = __is_initial_time_free(ocp)
-    is_tf_free = __is_final_time_free(ocp)
-
-    # time name
-    t_name = isnothing(ocp.time_name) ? "t" : ocp.time_name
-
-    # construct J
-    sJ = "J("
-    is_t0_free ? sJ = sJ * t_name * "0, " : nothing
-    is_tf_free ? sJ = sJ * t_name * "f, " : nothing
-    sJ = sJ * "x, u)"
-    printstyled(io, "    minimize  ", color=:blue); print(io, sJ * " = ")
+    # J
+    printstyled(io, "    minimize  ", color=:blue); print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
 
     # Mayer
-    if !isnothing(ocp.mayer)
-        sg = "g("
-        is_t0_free ? sg = sg * t_name * "0, " : nothing
-        sg = sg * "x(" * t_name * "0), "
-        is_tf_free ? sg = sg * t_name * "f, " : nothing
-        sg = sg * "x(" * t_name * "f))"
-        print(io, sg)
-    end
-
-    #
-    if !isnothing(ocp.mayer) && !isnothing(ocp.lagrange)
-        print(io, " +")
-    end
+    !isnothing(ocp.mayer) && print(io, "g(" *  bounds_args_names * ")")
+    (!isnothing(ocp.mayer) && !isnothing(ocp.lagrange)) && print(io, " +")
 
     # Lagrange
     if !isnothing(ocp.lagrange)
-        is_time_dependent(ocp) ? 
-        println(io, '\u222B', " f⁰(" * t_name * ", x(" * t_name * "), u(" * t_name * ")) d" * t_name * ", over [" * t_name * "0, " * t_name * "f]") : 
-        println(io, '\u222B', " f⁰(x(" * t_name * "), u(" * t_name * ")) d" * t_name * ", over [" * t_name * "0, " * t_name * "f]")
+        println(io, '\u222B', " f⁰(" * mixed_args_names * ") d" * t_name * ", over [" * t0_name * ", " * tf_name * "]")
     else
         println(io, "")
     end
@@ -100,9 +101,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     println(io, "")
 
     # dynamics
-    is_time_dependent(ocp) ? 
-    println(io, "        x", '\u0307', "(" * t_name * ") = f(" * t_name * ", x(" * t_name * "), u(" * t_name * ")), " * t_name * " in [" * t_name * "0, " * t_name * "f] a.e.,") : 
-    println(io, "        x", '\u0307', "(" * t_name * ") = f(x(" * t_name * "), u(" * t_name * ")), " * t_name * " in [" * t_name * "0, " * t_name * "f] a.e.,")
+    println(io, "        " * x_name, '\u0307', "(" * t_name * ") = f(" * mixed_args_names * "), " * t_name * " in [" * t0_name * ", " * tf_name * "] a.e.,")
     println(io, "")
 
     # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
@@ -110,85 +109,81 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     has_constraints = false
     if !isempty(ξl) || !isempty(ulb)
         has_constraints = true
-        is_time_dependent(ocp) ? 
-        println(io, "        ξl ≤ ξ(" * t_name * ", u(" * t_name * ")) ≤ ξu, ") :
-        println(io, "        ξl ≤ ξ(u(" * t_name * ")) ≤ ξu, ")
+        println(io, "        ξl ≤ ξ(" * control_args_names * ") ≤ ξu, ")
     end
     if !isempty(ηl) || !isempty(xlb)
         has_constraints = true
-        is_time_dependent(ocp) ? 
-        println(io, "        ηl ≤ η(" * t_name * ", x(" * t_name * ")) ≤ ηu, ") :
-        println(io, "        ηl ≤ η(x(" * t_name * ")) ≤ ηu, ")
+        println(io, "        ηl ≤ η(" * state_args_names * ") ≤ ηu, ")
     end
     if !isempty(ψl)
         has_constraints = true
-        is_time_dependent(ocp) ? 
-        println(io, "        ψl ≤ ψ(" * t_name * ", x(" * t_name * "), u(" * t_name * ")) ≤ ψu, ") :
-        println(io, "        ψl ≤ ψ(x(" * t_name * "), u(" * t_name * ")) ≤ ψu, ")
+        println(io, "        ψl ≤ ψ(" * mixed_args_names * ") ≤ ψu, ")
     end
     if !isempty(ϕl)
         has_constraints = true
-        sϕ = "ϕ("
-        is_t0_free ? sϕ = sϕ * t_name * "0, " : nothing
-        sϕ = sϕ * "x(" * t_name * "0), "
-        is_tf_free ? sϕ = sϕ * t_name * "f, " : nothing
-        sϕ = sϕ * "x(" * t_name * "f))"
-        println(io, "        ϕl ≤ ", sϕ, " ≤ ϕu, ")
+        println(io, "        ϕl ≤ ϕ(" * bounds_args_names * ") ≤ ϕu, ")
     end
     has_constraints ? println(io, "") : nothing
-    x_space = "R" * (dimx isa Integer ? (dimx == 1 ? "" : ctupperscripts(dimx)) : Base.string("^", dimx))
-    u_space = "R" * (dimu isa Integer ? (dimu == 1 ? "" : ctupperscripts(dimu)) : Base.string("^", dimu))
-    state_name = "x(" * t_name * ")"
-    if !isnothing(ocp.state_names) && dimx isa Integer && dimx > 1 && dimx == length(ocp.state_names)
-        state_name = state_name * " = ("
-        for i ∈ 1:dimx
-            state_name = state_name * ocp.state_names[i] * "(" * t_name * ")"
-            if i < dimx
-                state_name = state_name * ", "
+
+    # spaces
+    x_space = "R" * (x_dim == 1 ? "" : ctupperscripts(x_dim))
+    u_space = "R" * (u_dim == 1 ? "" : ctupperscripts(u_dim))
+
+    # state name and space
+    if x_dim == 1
+        x_name_space = x_name * "(" * t_name * ")"
+    else
+        x_name_space = x_name * "(" * t_name * ")"
+        if ocp.state_components_names != [ x_name * ctindices(i) for i ∈ range(1, x_dim) ]
+            x_name_space *= " = (" 
+            for i ∈ 1:x_dim
+                x_name_space *= ocp.state_components_names[i] * "(" * t_name * ")"
+                i < x_dim && (x_name_space *= ", ")
+            end
+            x_name_space *= ")"
+        end
+    end
+    x_name_space *= " ∈ " * x_space
+
+    # control name and space
+    if u_dim == 1
+        u_name_space = u_name * "(" * t_name * ")"
+    else
+        u_name_space = u_name * "(" * t_name * ")"
+        if ocp.control_components_names != [ u_name * ctindices(i) for i ∈ range(1, u_dim) ]
+            u_name_space *= " = (" 
+            for i ∈ 1:u_dim
+                u_name_space *= ocp.control_components_names[i] * "(" * t_name * ")"
+                i < u_dim && (u_name_space *= ", ")
+            end
+            u_name_space *= ")"
+        end
+    end
+    u_name_space *= " ∈ " * u_space
+
+    if is_variable_dependent(ocp)
+        # space
+        v_space = "R" * (v_dim == 1 ? "" : ctupperscripts(v_dim))
+        # variable name and space
+        if v_dim == 1
+            v_name_space = v_name
+        else
+            v_name_space = v_name
+            if ocp.variable_components_names != [ v_name * ctindices(i) for i ∈ range(1, v_dim) ]
+                v_name_space *= " = (" 
+                for i ∈ 1:v_dim
+                    v_name_space *= ocp.variable_components_names[i]
+                    i < v_dim && (v_name_space *= ", ")
+                end
+                v_name_space *= ")"
             end
         end
-        state_name = state_name * ")"
-    elseif !isnothing(ocp.state_names) && dimx isa Integer && dimx == 1 && dimx == length(ocp.state_names)
-        if ocp.state_names[1] != "x"
-            state_name = state_name * " = " * ocp.state_names[1] * "(" * t_name * ")"
-        end
-    end
-    control_name = "u(" * t_name * ")"
-    if !isnothing(ocp.control_names) && dimu isa Integer && dimu > 1 && dimu == length(ocp.control_names)
-        control_name = control_name * " = ("
-        for i ∈ 1:dimu
-            control_name = control_name * ocp.control_names[i] * "(" * t_name * ")"
-            if i < dimu
-                control_name = control_name * ", "
-            end
-        end
-        control_name = control_name * ")"
-    elseif !isnothing(ocp.control_names) && dimu isa Integer && dimu == 1 && dimu == length(ocp.control_names)
-        if ocp.control_names[1] != "u"
-            control_name = control_name * " = " * ocp.control_names[1] * "(" * t_name * ")"
-        end
-    end
-    print(io, "    where ", state_name," ∈ ", x_space)
-    print(io, " and ", control_name," ∈ ", u_space, ".")
-    println(io, "")
-    println(io, "")
-    nb_fixed = 0
-    s = ""
-    if !is_t0_free # t0 is fixed
-        s = s * t_name * "0"
-        nb_fixed += 1
-    end
-    if !is_tf_free # tf is fixed
-        s == "" ? s = s * t_name * "f" : s = s * ", " * t_name * "f"
-        nb_fixed += 1
-    end
-    if nb_fixed > 1
-        s = s * " are fixed."
-    elseif nb_fixed == 1
-        s = s * " is fixed."
-    end
-    if nb_fixed > 0
-        println(io, "    Besides, ", s)
+        v_name_space *= " ∈ " * v_space
+        # print
+        print(io, "    where ", x_name_space, ", ", u_name_space, " and ", v_name_space, ".\n")
+    else
+        # print
+        print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
     end
 
 end
