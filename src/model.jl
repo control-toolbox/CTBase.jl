@@ -561,13 +561,13 @@ function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeCo
     # set the constraint
     if type == :initial
         B = nothing
-        (td, vd) == (:t_indep, :v_indep) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
-        (td, vd) == (:t_indep, :v_dep)   && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
+        (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
+        (vd ==   :v_dep) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
         ocp.constraints[label] = (type, B, lb, ub)
     elseif type == :final
         B = nothing
-        (td, vd) == (:t_indep, :v_indep) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
-        (td, vd) == (:t_indep, :v_dep)   && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
+        (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
+        (vd ==   :v_dep) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
         ocp.constraints[label] = (type, B, lb, ub)
     elseif type == :control
         ocp.constraints[label] = (type, rg, lb, ub)
