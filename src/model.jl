@@ -377,129 +377,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial` or `:final` value constraint on a range of the state, or a value constraint on a range of the
-`:variable`.
-
-!!! note
-
-    - The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:q if the constraint is on the variable.
-    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
-    - The times must be set before. Use time!.
-
-# Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
-julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
-julia> constraint!(ocp, :final, Index(2), 0)
-julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
-```
-"""
-function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label()) where {td, vd}
-
-    # we check if the dimensions and times have been set just to force the user to set them before
-    @__check(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
-    ", you cannot use constraint! function with type=:variable."))
-
-    # check if the constraint named label already exists
-    if label ∈ constraints_labels(ocp)
-        throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    end
-
-    # check if rg and val are consistent
-    (length(rg) != length(val)) && throw(IncorrectArgument("the range `rg`` and the value `val` must have the same dimension"))
-
-    # dimensions
-    n = ocp.state_dimension
-    q = ocp.variable_dimension
-
-    # check if the range is valid
-    if type == :initial        
-        !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the initial state constraint must be contained in 1:$n"))
-    elseif type == :final
-        !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the final state constraint must be contained in 1:$n"))
-    elseif type == :variable
-        !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range $rg of the variable constraint must be contained in 1:$q"))
-    end
-
-    # set the constraint
-    if type == :initial # not allowed for :control or :state (does not make sense)
-        B = nothing
-        (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
-        (vd == :v_dep  ) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
-        ocp.constraints[label] = (type, B, val, val)
-    elseif type == :final
-        B = nothing
-        (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
-        (vd == :v_dep  ) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
-        ocp.constraints[label] = (type, B, val, val)
-    elseif type == :variable
-        ocp.constraints[label] = (type, rg, val, val)
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
-    end
-
-    nothing # to force to return nothing
-
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Add an `:initial` or `:final` value constraint on the state, or a `:variable` value.
-
-!!! note
-
-    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
-    - The times must be set before. Use time!.
-    - When an element is of dimension 1, consider it as a scalar.
-
-# Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial, [ 0, 0 ])
-julia> constraint!(ocp, :final, 2) # if the state is of dimension 1
-julia> constraint!(ocp, :variable, [ 3, 0, 1 ])
-```
-"""
-function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, label::Symbol=__constraint_label())
-    # we use the constraint! defined before
-
-    # we check if the dimensions and times have been set
-    @__check(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
-        ", you cannot use constraint! function with type=:variable."))
-
-    #
-    rg = nothing
-
-    # dimensions
-    n = ocp.state_dimension
-    q = ocp.variable_dimension
-
-    #
-    if type ∈ [:initial, :final]  # not allowed for :control or :state (does not make sense)
-        rg = n == 1 ? Index(1) : 1:n 
-        # check if rg and val are consistent
-        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $n"))
-    elseif type == :variable
-        rg = q == 1 ? Index(1) : 1:q
-        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $q"))
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
-    end
-
-    #
-    constraint!(ocp, type, rg, val, label)
-
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range.
 
 !!! note
@@ -584,6 +461,131 @@ function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeCo
 
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Add an `:initial` or `:final` value constraint on a range of the state, or a value constraint on a range of the
+`:variable`.
+
+!!! note
+
+    - The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:q if the constraint is on the variable.
+    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
+    - The times must be set before. Use time!.
+
+# Examples
+
+```jldoctest
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
+julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
+julia> constraint!(ocp, :final, Index(2), 0)
+julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
+```
+"""
+function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label()) where {td, vd}
+
+    # we check if the dimensions and times have been set just to force the user to set them before
+    @__check(ocp)
+    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
+    ", you cannot use constraint! function with type=:variable."))
+
+    # check if the constraint named label already exists
+    if label ∈ constraints_labels(ocp)
+        throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
+    end
+
+    # check if rg and val are consistent
+    (length(rg) != length(val)) && throw(IncorrectArgument("the range `rg`` and the value `val` must have the same dimension"))
+
+    # dimensions
+    n = ocp.state_dimension
+    q = ocp.variable_dimension
+
+    # check if the range is valid
+    if type == :initial        
+        !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the initial state constraint must be contained in 1:$n"))
+    elseif type == :final
+        !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the final state constraint must be contained in 1:$n"))
+    elseif type == :variable
+        !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range $rg of the variable constraint must be contained in 1:$q"))
+    end
+
+    # # set the constraint
+    # if type == :initial # not allowed for :control or :state (does not make sense)
+    #     B = nothing
+    #     (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
+    #     (vd == :v_dep  ) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
+    #     ocp.constraints[label] = (type, B, val, val)
+    # elseif type == :final
+    #     B = nothing
+    #     (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
+    #     (vd == :v_dep  ) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
+    #     ocp.constraints[label] = (type, B, val, val)
+    # elseif type == :variable
+    #     ocp.constraints[label] = (type, rg, val, val)
+    # else
+    #     throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+    #     ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
+    # end
+
+    # nothing # to force to return nothing
+
+    #
+    constraint!(ocp, type, rg, val, val, label)
+
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Add an `:initial` or `:final` value constraint on the state, or a `:variable` value.
+
+!!! note
+
+    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
+    - The times must be set before. Use time!.
+    - When an element is of dimension 1, consider it as a scalar.
+
+# Examples
+
+```jldoctest
+julia> constraint!(ocp, :initial, [ 0, 0 ])
+julia> constraint!(ocp, :final, 2) # if the state is of dimension 1
+julia> constraint!(ocp, :variable, [ 3, 0, 1 ])
+```
+"""
+function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, label::Symbol=__constraint_label())
+    # we use the constraint! defined before
+
+    # we check if the dimensions and times have been set
+    @__check(ocp)
+    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
+        ", you cannot use constraint! function with type=:variable."))
+
+    #
+    rg = nothing
+
+    # dimensions
+    n = ocp.state_dimension
+    q = ocp.variable_dimension
+
+    #
+    if type ∈ [:initial, :final]  # not allowed for :control or :state (does not make sense)
+        rg = n == 1 ? Index(1) : 1:n 
+        # check if rg and val are consistent
+        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $n"))
+    elseif type == :variable
+        rg = q == 1 ? Index(1) : 1:q
+        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $q"))
+    else
+        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+        ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
+    end
+
+    #
+    constraint!(ocp, type, rg, val, label)
+
+end
 
 """
 $(TYPEDSIGNATURES)
