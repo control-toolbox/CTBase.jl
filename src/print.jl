@@ -57,16 +57,16 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     printstyled(io, "Optimal control problem of the form:\n", bold=true)
     println(io, "")
 
-    is_t0_free = isnothing(ocp.initial_time)
-    is_tf_free = isnothing(ocp.final_time)
+    is_t0_free = __is_initial_time_free(ocp)
+    is_tf_free = __is_final_time_free(ocp)
 
     # time name
     t_name = isnothing(ocp.time_name) ? "t" : ocp.time_name
 
     # construct J
     sJ = "J("
-    is_t0_free ? sJ = sJ * "t0, " : nothing
-    is_tf_free ? sJ = sJ * "tf, " : nothing
+    is_t0_free ? sJ = sJ * t_name * "0, " : nothing
+    is_tf_free ? sJ = sJ * t_name * "f, " : nothing
     sJ = sJ * "x, u)"
     printstyled(io, "    minimize  ", color=:blue); print(io, sJ * " = ")
 

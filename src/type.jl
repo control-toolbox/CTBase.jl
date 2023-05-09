@@ -484,6 +484,8 @@ __isempty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) &&
     isnothing(ocp.variable_dimension) && 
     isnothing(ocp.variable_names) && 
     isempty(ocp.constraints)
+__is_initial_time_free(ocp) = ocp.initial_time isa Index
+__is_final_time_free(ocp) = ocp.final_time isa Index
 
 # --------------------------------------------------------------------------------------------------
 # solution
