@@ -434,11 +434,11 @@ Define an optimal control problem. One pass parsing of the definition.
     v = x₂
     q̇ = v
     v̇ = u
-    q(0)  == 1,    (1)
-    v(0)  == 2,    (2)
+    q(0) == 1,    (1)
+    v(0) == 2,    (2)
     q(tf) == 0
     v(tf) == 0
-    x'(t) == [ q̇(t), v̇(t) ]
+    ẋ(t) == [ q̇(t), v̇(t) ]
     tf → min
 end
 ```

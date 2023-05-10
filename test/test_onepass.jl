@@ -13,28 +13,28 @@ t0 = 0
     λ ∈ R^2, variable
     tf = λ₂
     t ∈ [ 0, tf ], time
-    end
+end
 @test o.initial_time == 0
 @test o.final_time == Index(2)
 
 @def o begin
     t0 ∈ R, variable
     t ∈ [ t0, 1 ], time
-    end
+end
 @test o.initial_time == Index(1)
 @test o.final_time == 1
 
 @def o begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
-    end
+end
 @test o.initial_time == 0
 @test o.final_time == Index(1)
 
 @def o begin
     v ∈ R², variable
     s ∈ [ v[1], v[2] ], time
-    end
+end
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
@@ -43,39 +43,39 @@ t0 = 0
     s0 = v₁
     sf = v₂
     s ∈ [ s0, sf ], time
-    end
+end
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
 @test_throws IncorrectArgument @def o begin
     t0 ∈ R², variable
     t ∈ [ t0, 1 ], time
-    end
+end
 
 @test_throws IncorrectArgument @def o begin
     tf ∈ R², variable
     t ∈ [ 0, tf ], time
-    end
+end
 
 @test_throws ParsingError @def o begin
     v, variable
     t ∈ [ 0, tf[v] ], time
-    end
+end
 
 @test_throws ParsingError @def o begin
     v, variable
     t ∈ [ t0[v], 1 ], time
-    end
+end
 
 @test_throws ParsingError @def o begin
     v, variable
     t ∈ [ t0[v], tf[v+1] ], time
-    end
+end
 
 @def o begin
     x ∈ R, state
     u ∈ R, control
-    end
+end
 @test o.state_dimension == 1
 @test o.control_dimension == 1
 
@@ -83,8 +83,8 @@ t0 = 0
     t ∈ [ 0, 1 ], time
     x ∈ R^3, state
     u ∈ R^2, control
-    x'(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
-    end
+    ẋ(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
+end
 @test o.state_dimension == 3
 @test o.control_dimension == 2
 x = [ 1, 2, 3 ]
@@ -99,16 +99,18 @@ tf = 1
     u ∈ R, control
     x(t0) == [ -1, 0 ], (1)
     x(tf) == [  0, 0 ]
-    x'(t) == A * x(t) + B * u(t)
+    ẋ(t) == A * x(t) + B * u(t)
     ∫( 0.5u(t)^2 ) → min
 end
 x = [ 1, 2 ]
+x0 = 2 * x
+xf = 3 * x
 u = -1
 A = [ 0 1
       0 0 ]
 B = [ 0
       1 ]
-@test constraint(o, :eq1)(x) == x
+@test constraint(o, :eq1)(x0, xf) == x0
 @test o.dynamics(x, u) == A * x + B * u
 @test o.lagrange(x, u) == 0.5u^2
 @test o.criterion == :min
@@ -120,8 +122,8 @@ f(b) = begin # closure of a, local c, and @def in function
         t ∈ [ a, b ], time
         x ∈ R, state
         u ∈ R, control
-        x'(t) == x(t) + u(t) + b + c + d
-    end
+        ẋ(t) == x(t) + u(t) + b + c + d
+end
     ocp
 end
 o = f(2)
@@ -139,15 +141,17 @@ u = 20
         v = x₂
         w = r + 2v
         r(0) == 0,    (1)
-    end
+end
     v(0) == 1,    (♡)
-    x'(t) == [ v(t), w(t)^2 ]
+    ẋ(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end
+end
 x = [ 1, 2 ]
+x0 = 2 * x
+xf = 3 * x
 u = 3
-@test constraint(o, :eq1)(x) == x[1]
-@test constraint(o, Symbol("♡"))(x) == x[2]
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
@@ -160,13 +164,15 @@ u = 3
     w = r + 2v
     r(0) == 0,    (1)
     v(0) == 1,    (♡)
-    x'(t) == [ v(t), w(t)^2 ]
+    ẋ(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end
+end
 x = [ 1, 2 ]
+x0  = 2 * x
+xf  = 3 * x
 u = 3
-@test constraint(o, :eq1)(x) == x[1]
-@test constraint(o, Symbol("♡"))(x) == x[2]
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
@@ -180,14 +186,16 @@ u = 3
     w = r + 2v
     r(0) == 0,    (1)
     v(0) == 1,    (♡)
-    x'(t) == [ v(t), w(t)^2 + z₁ ]
+    ẋ(t) == [ v(t), w(t)^2 + z₁ ]
     ∫( u(t)^2 + z₂ * x₁(t) ) → min
-    end
+end
 x = [ 1, 2 ]
+x0 = 2 * [ 1, 2 ]
+xf = 3 * [ 1, 2 ]
 u = 3
 z = [ 4, 5 ]
-@test constraint(o, :eq1)(x) == x[1]
-@test constraint(o, Symbol("♡"))(x) == x[2]
+@test constraint(o, :eq1)(x0, xf, z) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
 @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
 @test o.lagrange(x, u, z) == u^2 + z[2] * x[1]
 
@@ -195,11 +203,12 @@ z = [ 4, 5 ]
     tf, variable
     t ∈ [ 0, tf ], time
     x ∈ R², state
+    u ∈ R, control
     r = x₁
     v = x₂
     w = r¹ + 2v³
     r(0) + w(tf) - tf² == 0,    (1)
-    end
+end
 tf = 2
 x0 = [ 1, 2 ]
 xf = [ 3, 4 ]
@@ -213,9 +222,9 @@ xf = [ 3, 4 ]
     v = x₂
     r(0)^2 + v(1) == 0,    (1)
     v(0) == 1,             (♡)
-    x'(t) == [ v(t), r(t)^2 ]
+    ẋ(t) == [ v(t), r(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end
+end
 x0 = [ 2, 3 ]
 xf = [ 4, 5 ]
 x = [ 1, 2 ]
@@ -234,9 +243,9 @@ u = 3
     v = x₂
     r(0) - z == 0,    (1)
     v(0) == 1,        (♡)
-    x'(t) == [ v(t), r(t)^2 + z ]
+    ẋ(t) == [ v(t), r(t)^2 + z ]
     ∫( u(t)^2 + z * x₁(t) ) → min
-    end
+end
 x0 = [ 2, 3 ]
 xf = [ 4, 5 ]
 x = [ 1, 2 ]
@@ -257,9 +266,9 @@ z = 4
     0 ≤ r(0) - z ≤ 1,            (1)
     0 ≤ v(1)^2 ≤ 1,              (2)
     [ 0, 0 ] ≤ x(0) ≤ [ 1, 1 ],  (♡)
-    x'(t) == [ v(t), r(t)^2 + z ]
+    ẋ(t) == [ v(t), r(t)^2 + z ]
     ∫( u(t)^2 + z * x₁(t) ) → min
-    end
+end
 x0 = [ 2, 3 ]
 xf = [ 4, 5 ]
 x = [ 1, 2 ]
@@ -290,7 +299,7 @@ m = 6
     0 ≤ u₂(t)^2 ≤ 1,                   (9)
     u₁(t) * x[1:2](t) == 1,           (10)
     0 ≤ u₁(t) * x[1:2](t).^3 ≤ 1,     (11)
-    end
+end
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
 @test constraint(o, :eq1 )(x) == x[1]
@@ -325,7 +334,7 @@ m = 6
     0 ≤ u₂(t)^2 ≤ 1,                   (9)
     u₁(t) * x[1:2](t) + z + f() == 1, (10)
     0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1, (11)
-    end
+end
 f() = [ 1, 1 ]
 z = 3 * Vector{Float64}(1:2)
 x = Vector{Float64}(1:n)
@@ -392,7 +401,7 @@ yf = 2 * [ 1, 2, 3, 4 ]
     r = y₃
     v = y₄
     aa = y₁ + w² + v³ + z₂
-    y'(s) == [ aa(s), r²(s), 0, 0 ]
+    ẏ(s) == [ aa(s), r²(s), 0, 0 ]
     r(0) + v(z₁) + z₂ → min
 end
 z = [ 5, 6 ]
@@ -411,7 +420,7 @@ w = 7
     r = y₃
     v = y₄
     aa = y₁(s) + v³ + z₂
-    y'(s) == [ aa(s) + (w^2)(s), r²(s), 0, 0 ]
+    ẏ(s) == [ aa(s) + (w^2)(s), r²(s), 0, 0 ]
     r(0) + v(z₁) + z₂ → min
 end
 z = [ 5, 6 ]
@@ -430,7 +439,7 @@ w = 7
     r = y₃
     v = y₄
     aa = y₁
-    y'(s) == [ aa(s), r²(s) + w(s) + z₁, 0, 0 ]
+    ẏ(s) == [ aa(s), r²(s) + w(s) + z₁, 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
@@ -445,7 +454,7 @@ w = 9
     r = y₃
     v = y₄
     aa = y₁(__s)
-    y'(__s) == [ aa(__s), r²(__s) + w(__s) + z₁, 0, 0 ]
+    ẏ(__s) == [ aa(__s), r²(__s) + w(__s) + z₁, 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
@@ -460,7 +469,7 @@ w = 9
     r = y₃
     v = y₄
     aa = y₁(s) + v³ + z₂
-    y'(s) == [ aa(s) + w(s)^2, r²(s), 0, 0 ]
+    ẏ(s) == [ aa(s) + w(s)^2, r²(s), 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
@@ -492,7 +501,7 @@ yf = 3y0
     r = y₃
     v = y₄
     aa = y₁(__t) + v³ + z₂
-    y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
+    ẏ(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
     aa(0) + y₂(z₁) → min
 end
 z = [ 5, 6 ]
@@ -511,7 +520,7 @@ w = 11
     r = y₃
     v = y₄
     aa = y₁(0) + v³ + z₂
-    y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
+    ẏ(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
     aa(0) + y₂(z₁) → min
 end
 z = [ 5, 6 ]
@@ -522,7 +531,7 @@ w = 11
 @test_throws MethodError o.dynamics(y, w, z)
 @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -536,7 +545,7 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :min
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -550,7 +559,7 @@ xf = 4
 @test o.lagrange(x, u) ==  -(x + u)
 @test o.criterion == :min
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -564,7 +573,7 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :max
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -578,7 +587,7 @@ xf = 4
 @test o.lagrange(x, u) ==  -(x + u)
 @test o.criterion == :max
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -592,7 +601,7 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :min
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -606,7 +615,7 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :min
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -620,7 +629,7 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :max
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -634,7 +643,7 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :max
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -646,7 +655,7 @@ x0 = 3
 xf = 4
 @test_throws UndefVarError o.mayer(x0, xf)
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
@@ -1364,8 +1373,8 @@ xf = 4
         x ∈ R, state
         u ∈ R, control
 
-        x'(t) == 2x(t) + u(t)^2
-        x'(t) == f(x(t), u(t))
+        ẋ(t) == 2x(t) + u(t)^2
+        ẋ(t) == f(x(t), u(t))
     end
     @test ocp13 isa OptimalControlModel
     @test ocp13.state_dimension   == 1
@@ -1451,7 +1460,7 @@ xf = 4
         t ∈ [ t0, tf ], time
         x ∈ R, state
         u ∈ R, control
-        x'(t) == f(x(t), u(t))  , named_dynamics_not_allowed  # but allowed if unnamed !
+        ẋ(t) == f(x(t), u(t))  , named_dynamics_not_allowed  # but allowed if unnamed !
     end
 
 end

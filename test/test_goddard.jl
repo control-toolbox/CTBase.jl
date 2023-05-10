@@ -33,8 +33,7 @@ x0 = [ r0, v0, m0 ]
 
     D = Cd * v² * exp(-β * (r - 1))
 
-    x'(t) == [ v(t), -D(t)/m(t) - 1/r²(t), 0 ] + 
-      u(t) * [ 0, Tmax/m(t), -b * Tmax ]
+    ẋ(t) == [ v(t), -D(t)/m(t) - 1/r²(t), 0 ] + u(t) * [ 0, Tmax/m(t), -b * Tmax ]
  
     r(tf) → max
     

@@ -18,7 +18,6 @@ const constraint_type = CTBase.constraint_type
         :callback,
         :ctparser_utils,
         #:ctparser,
-        :onepass,
         :default,
         :description,
         :exception,
@@ -27,8 +26,9 @@ const constraint_type = CTBase.constraint_type
         :plot,
         :print,
         :utils,
-	    :goddard,
         =#
+        :onepass,
+	:goddard,
         )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
