@@ -435,9 +435,9 @@ macro def(ocp, e, log=false)
 	code = parse!(p, ocp, e; log=log)
 	init = @match (__t_dep(p), __v_dep(p)) begin
 	    (false, false) => :( $ocp = Model() )
-	    (true , false) => :( $ocp = Model(time_dependence=:t_dep) )
-	    (false, true ) => :( $ocp = Model(variable_dependence=:v_dep) )
-	    _              => :( $ocp = Model(time_dependence=:t_dep, variable_dependence=:v_dep) )
+	    (true , false) => :( $ocp = Model(time_dependence=NonAutonomous) )
+	    (false, true ) => :( $ocp = Model(variable_dependence=Variable) )
+	    _              => :( $ocp = Model(time_dependence=NonAutonomous, variable_dependence=Variable) )
 	end
         code = Expr(:block, init, code, :( $ocp )) 
         esc( code )

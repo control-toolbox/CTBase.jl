@@ -1,9 +1,9 @@
-function __check_time_dependence(time_dependence::Symbol)
-    time_dependence ∉ [:t_indep, :t_dep] && throw(IncorrectArgument("time_dependence must be either :t_indep or :t_dep"))
+function __check_time_dependence(time_dependence::DataType)
+    time_dependence ∉ [Autonomous, NonAutonomous] && throw(IncorrectArgument("time_dependence must be either Autonomous or NonAutonomous"))
 end
 
-function __check_variable_dependence(variable_dependence::Symbol)
-    variable_dependence ∉ [:v_indep, :v_dep] && throw(IncorrectArgument("variable_dependence must be either :v_indep or :v_dep"))
+function __check_variable_dependence(variable_dependence::DataType)
+    variable_dependence ∉ [NonVariable, Variable] && throw(IncorrectArgument("variable_dependence must be either NonVariable or Variable"))
 end
 
 function __check_criterion(criterion::Symbol)
@@ -22,11 +22,11 @@ function __check___time_set(ocp::OptimalControlModel)
     __time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
 end
 
-function __check_variable_set(ocp::OptimalControlModel{td, :v_dep}) where {td}
+function __check_variable_set(ocp::OptimalControlModel{td, Variable}) where {td}
     __variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before. Use variable!."))
 end
 
-function __check_variable_set(ocp::OptimalControlModel{td, :v_indep}) where {td}
+function __check_variable_set(ocp::OptimalControlModel{td, NonVariable}) where {td}
     nothing
 end
 
@@ -43,4 +43,10 @@ macro __check(s::Symbol)
     s == :criterion && return esc(quote __check_criterion($s) end)
     s == :ocp && return esc(quote __check_all_set($s) end)
     error("s must be either :time_dependence, :variable_dependence or :criterion")
+end
+
+macro __check(s::DataType)
+    eval(s) <: VariableDependence && return esc(quote __check_variable_dependence($s) end)
+    eval(s) <: TimeDependence && return esc(quote __check_time_dependence($s) end)
+    error("s must be either VariableDependence or TimeDependence")
 end

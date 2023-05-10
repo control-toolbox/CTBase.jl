@@ -5,13 +5,13 @@ Return a new `OptimalControlModel` instance, that is a model of an optimal contr
 
 The model is defined by the following optional keyword argument:
 
-- `time_dependence`: either `:t_indep` or `:t_dep`. Default is `:t_indep`.
+- `time_dependence`: either `Autonomous` or `NonAutonomous`. Default is `Autonomous`.
 
 # Examples
 
 ```jldoctest
 julia> ocp = Model()
-julia> ocp = Model(time_dependence=:t_dep)
+julia> ocp = Model(time_dependence=NonAutonomous)
 ```
 
 !!! note
@@ -19,7 +19,7 @@ julia> ocp = Model(time_dependence=:t_dep)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; time_dependence::Symbol=__ocp_time_dependence(), variable_dependence::Symbol=__ocp_variable_dependence())
+function Model(; time_dependence::DataType=__ocp_time_dependence(), variable_dependence::DataType=__ocp_variable_dependence())
     @__check(time_dependence)
     @__check(variable_dependence)
     return OptimalControlModel{time_dependence, variable_dependence}()
@@ -30,8 +30,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined as time dependent.
 """
-is_time_dependent(ocp::OptimalControlModel{:t_dep, vd}) where {vd} = true
-is_time_dependent(ocp::OptimalControlModel{:t_indep, vd}) where {vd} = false
+is_time_dependent(ocp::OptimalControlModel{NonAutonomous, vd}) where {vd <: VariableDependence} = true
+is_time_dependent(ocp::OptimalControlModel{Autonomous, vd}) where {vd <: VariableDependence} = false
 
 """
 $(TYPEDSIGNATURES)
@@ -59,8 +59,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined as variable dependent.
 """
-is_variable_dependent(ocp::OptimalControlModel{td, :v_dep}) where {td} = true
-is_variable_dependent(ocp::OptimalControlModel{td, :v_indep}) where {td} = false
+is_variable_dependent(ocp::OptimalControlModel{td, Variable}) where {td <: TimeDependence} = true
+is_variable_dependent(ocp::OptimalControlModel{td, NonVariable}) where {td <: TimeDependence} = false
 
 """
 $(TYPEDSIGNATURES)
@@ -224,7 +224,7 @@ Fix initial time, final time is free and given by the variable at the provided i
 julia> time!(ocp, 0, Index(2), "t")
 ```
 """
-function time!(ocp::OptimalControlModel{td, :v_dep}, t0::Time, indf::Index, name::String=__time_name()) where {td}
+function time!(ocp::OptimalControlModel{td, Variable}, t0::Time, indf::Index, name::String=__time_name()) where {td <: TimeDependence}
     __check_variable_set(ocp)
     __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
@@ -248,7 +248,7 @@ Fix final time, initial time is free and given by the variable at the provided i
 julia> time!(ocp, Index(2), 1, "t")
 ```
 """
-function time!(ocp::OptimalControlModel{td, :v_dep}, ind0::Index, tf::Time, name::String=__time_name()) where {td}
+function time!(ocp::OptimalControlModel{td, Variable}, ind0::Index, tf::Time, name::String=__time_name()) where {td <: TimeDependence}
     __check_variable_set(ocp)
     __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
@@ -272,7 +272,7 @@ Initial and final times are free and given by the variable at the provided indic
 julia> time!(ocp, Index(2), Index(3), "t")
 ```
 """
-function time!(ocp::OptimalControlModel{td, :v_dep}, ind0::Index, indf::Index, name::String=__time_name()) where {td}
+function time!(ocp::OptimalControlModel{td, Variable}, ind0::Index, indf::Index, name::String=__time_name()) where {td <: TimeDependence}
     __check_variable_set(ocp)
     __time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
@@ -397,7 +397,7 @@ julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeConstraint, lb::ctVector, ub::ctVector, 
-        label::Symbol=__constraint_label()) where {td, vd}
+        label::Symbol=__constraint_label()) where {td <: TimeDependence, vd <: VariableDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)
@@ -438,13 +438,13 @@ function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeCo
     # set the constraint
     if type == :initial
         B = nothing
-        (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
-        (vd ==   :v_dep) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
+        (vd == NonVariable) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
+        (vd ==   Variable) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
         ocp.constraints[label] = (type, B, lb, ub)
     elseif type == :final
         B = nothing
-        (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
-        (vd ==   :v_dep) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
+        (vd == NonVariable) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
+        (vd ==   Variable) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
         ocp.constraints[label] = (type, B, lb, ub)
     elseif type == :control
         ocp.constraints[label] = (type, rg, lb, ub)
@@ -482,7 +482,7 @@ julia> constraint!(ocp, :final, Index(2), 0)
 julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label()) where {td, vd}
+function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label()) where {td <: TimeDependence, vd<:VariableDependence}
 
     # we check if the dimensions and times have been set just to force the user to set them before
     @__check(ocp)
@@ -513,13 +513,13 @@ function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, rg::RangeCo
     # # set the constraint
     # if type == :initial # not allowed for :control or :state (does not make sense)
     #     B = nothing
-    #     (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
-    #     (vd == :v_dep  ) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
+    #     (vd == NonVariable) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], variable_dependence=vd))
+    #     (vd == Variable  ) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], variable_dependence=vd))
     #     ocp.constraints[label] = (type, B, val, val)
     # elseif type == :final
     #     B = nothing
-    #     (vd == :v_indep) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
-    #     (vd == :v_dep  ) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
+    #     (vd == NonVariable) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], variable_dependence=vd))
+    #     (vd == Variable  ) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], variable_dependence=vd))
     #     ocp.constraints[label] = (type, B, val, val)
     # elseif type == :variable
     #     ocp.constraints[label] = (type, rg, val, val)
@@ -785,7 +785,7 @@ Set the dynamics.
 julia> constraint!(ocp, :dynamics, f)
 ```
 """
-function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function) where {td, vd}
+function constraint!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function) where {td <: TimeDependence, vd <: VariableDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)
@@ -825,7 +825,7 @@ julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u^2) # the control is of di
     If you set twice the objective, only the last one will be taken into account.
 """
 function objective!(ocp::OptimalControlModel{td, vd}, type::Symbol, f::Function, 
-        criterion::Symbol=__criterion_type()) where {td, vd}
+        criterion::Symbol=__criterion_type()) where {td <: TimeDependence, vd <: VariableDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)
@@ -873,7 +873,7 @@ julia> objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u^2
 ```
 """
 function objective!(ocp::OptimalControlModel{td, vd}, type::Symbol, g::Function, f⁰::Function, 
-        criterion::Symbol=__criterion_type()) where {td, vd}
+        criterion::Symbol=__criterion_type()) where {td <: TimeDependence, vd <: VariableDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)
@@ -952,7 +952,7 @@ julia> c(1)
 1
 ```
 """
-function constraint(ocp::OptimalControlModel{td, vd}, label::Symbol) where {td, vd}
+function constraint(ocp::OptimalControlModel{td, vd}, label::Symbol) where {td <: TimeDependence, vd <: VariableDependence}
     con = ocp.constraints[label]
     @match con begin
         (:initial , f::BoundaryConstraint, _, _) => return f
@@ -961,19 +961,19 @@ function constraint(ocp::OptimalControlModel{td, vd}, label::Symbol) where {td, 
         (:control , f::ControlConstraint,  _, _) => return f
         (:control , rg,   _, _) => begin
             C = nothing
-            (td, vd) == (:t_indep, :v_indep) && (C = ControlConstraint(u         -> u[rg], time_dependence=td, variable_dependence=vd))
-            (td, vd) == (:t_indep, :v_dep)   && (C = ControlConstraint((u, v)    -> u[rg], time_dependence=td, variable_dependence=vd))
-            (td, vd) == (:t_dep, :v_indep)   && (C = ControlConstraint((t, u)    -> u[rg], time_dependence=td, variable_dependence=vd))
-            (td, vd) == (:t_dep, :v_dep)     && (C = ControlConstraint((t, u, v) -> u[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (Autonomous, NonVariable) && (C = ControlConstraint(u         -> u[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (Autonomous, Variable)   && (C = ControlConstraint((u, v)    -> u[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (NonAutonomous, NonVariable)   && (C = ControlConstraint((t, u)    -> u[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (NonAutonomous, Variable)     && (C = ControlConstraint((t, u, v) -> u[rg], time_dependence=td, variable_dependence=vd))
             return C
         end
         (:state   , f::StateConstraint,    _, _) => return f
         (:state   , rg,   _, _) => begin
             S = nothing
-            (td, vd) == (:t_indep, :v_indep) && (S = StateConstraint(x         -> x[rg], time_dependence=td, variable_dependence=vd))
-            (td, vd) == (:t_indep, :v_dep)   && (S = StateConstraint((x, v)    -> x[rg], time_dependence=td, variable_dependence=vd))
-            (td, vd) == (:t_dep, :v_indep)   && (S = StateConstraint((t, x)    -> x[rg], time_dependence=td, variable_dependence=vd))
-            (td, vd) == (:t_dep, :v_dep)     && (S = StateConstraint((t, x, v) -> x[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (Autonomous, NonVariable) && (S = StateConstraint(x         -> x[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (Autonomous, Variable)   && (S = StateConstraint((x, v)    -> x[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (NonAutonomous, NonVariable)   && (S = StateConstraint((t, x)    -> x[rg], time_dependence=td, variable_dependence=vd))
+            (td, vd) == (NonAutonomous, Variable)     && (S = StateConstraint((t, x, v) -> x[rg], time_dependence=td, variable_dependence=vd))
             return S
         end
         (:mixed   , f::MixedConstraint,    _, _) => return f
@@ -1008,7 +1008,7 @@ julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
     (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
 ```
 """
-function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence}
+function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence <: TimeDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)

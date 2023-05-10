@@ -1,11 +1,11 @@
 function test_default()
 
     @testset "Default value of the time dependence of the functions" begin
-        @test CTBase.__fun_time_dependence() == :t_indep
+        @test CTBase.__fun_time_dependence() == Autonomous
     end
 
     @testset "Default value of the time dependence of the Optimal Control Problem" begin
-        @test CTBase.__ocp_time_dependence() == :t_indep
+        @test CTBase.__ocp_time_dependence() == Autonomous
     end
 
     @testset "Default value of the state names of the Optimal Control Problem" begin

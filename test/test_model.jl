@@ -3,43 +3,43 @@ function test_model() # 30 55 185
 ∅ = Vector{Real}()
 
 @testset "variable" begin
-    ocp = Model(variable_dependence=:v_indep)
+    ocp = Model(variable_dependence=NonVariable)
     @test_throws UnauthorizedCall variable!(ocp, 1)
     @test_throws UnauthorizedCall constraint!(ocp, :variable, 2:3, [ 0, 3 ])
     @test_throws UnauthorizedCall constraint!(ocp, :variable, 0, 1) # the variable here is of dimension 1
     @test_throws UnauthorizedCall constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
     @test_throws UnauthorizedCall constraint!(ocp, :variable, [ 3, 0, 1 ])
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     @test ocp.variable_dimension == 1
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1, "vv")
     @test is_variable_dependent(ocp)
     @test ocp.variable_dimension == 1
     @test ocp.variable_names == [ "vv" ]
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1, :vv)
     @test ocp.variable_dimension == 1
     @test ocp.variable_names ==[ "vv" ]
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 2)
     @test ocp.variable_dimension == 2
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 2, "vv")
     @test ocp.variable_dimension == 2
     @test ocp.variable_names == [ "vv₁", "vv₂" ]
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 2, [ "vv1", "vv2" ])
     @test ocp.variable_dimension == 2
     @test ocp.variable_names == [ "vv1", "vv2" ]
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 2, :vv)
     @test ocp.variable_dimension == 2
     @test ocp.variable_names == [ "vv₁", "vv₂" ]
@@ -139,13 +139,13 @@ end
 end
 
 @testset "initial and / or final time already set" begin
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     @test !CTBase.__time_set(ocp)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
     @test CTBase.__time_set(ocp)
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
     @test CTBase.__time_set(ocp)
@@ -162,11 +162,11 @@ end
     @test_throws MethodError time!(ocp, 0, Index(1))
     @test_throws MethodError time!(ocp, Index(1), 1)
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
@@ -174,7 +174,7 @@ end
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     @test_throws UnauthorizedCall time!(ocp, 0, 1)
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
@@ -182,13 +182,13 @@ end
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
     @test_throws UnauthorizedCall time!(ocp, 0, 1)
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     time!(ocp, [0, 1])
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
     @test_throws UnauthorizedCall time!(ocp, [0, 1])
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     time!(ocp, 0, 1)
     @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
     @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
@@ -213,19 +213,19 @@ end
     @test is_variable_independent(ocp)
     @test !is_variable_dependent(ocp)
 
-    ocp = Model(time_dependence=:t_dep)
+    ocp = Model(time_dependence=NonAutonomous)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_independent(ocp)
     @test !is_variable_dependent(ocp)
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     @test is_time_independent(ocp)
     @test !is_time_dependent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    ocp = Model(time_dependence=:t_dep, variable_dependence=:v_dep)
+    ocp = Model(time_dependence=NonAutonomous, variable_dependence=Variable)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
@@ -336,21 +336,21 @@ end
     @test ocp.time_name == "s"
 
     # initial time
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "t"
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1), "s")
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1), :s)
     @test ocp.initial_time == 0
@@ -358,21 +358,21 @@ end
     @test ocp.time_name == "s"
     
     # final time
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1, "s")
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
 
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1, :s)
     @test ocp.initial_time == Index(1)
@@ -631,7 +631,7 @@ end
     v = [ 3, 4, 5, 6 ]
     x0 = 7
     xf = 8
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     time!(ocp, 0, 1)
     variable!(ocp, 4)
     state!(ocp, 1)
@@ -656,7 +656,7 @@ end
     v = [ 3, 4, 5, 6 ]
     x0 = 7
     xf = 8
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     time!(ocp, 0, 1)
     variable!(ocp, 4)
     state!(ocp, 1)
@@ -704,7 +704,7 @@ end
 
 @testset "constraint! 10" begin
 
-    ocp = Model(;time_dependence=:t_dep); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(;time_dependence=NonAutonomous); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, 0, 1, :c0)
     constraint!(ocp, :final, 1, 2, :cf)
     @test constraint(ocp, :c0)(12, ∅) == 12
@@ -805,7 +805,7 @@ end
 
 @testset "nlp_constraints with variable" begin
     
-    ocp = Model(variable_dependence=:v_dep)
+    ocp = Model(variable_dependence=Variable)
     time!(ocp, 0, 1)
     variable!(ocp, 4)
     state!(ocp, 2)

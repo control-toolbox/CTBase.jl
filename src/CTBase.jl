@@ -108,6 +108,9 @@ include("onepass.jl")
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
 export States, Costates, Controls, State, Costate, Control, DecisionVariable, Dimension, Index
+export TimeDependence, Autonomous, NonAutonomous
+export VariableDependence, Variable, NonVariable
+export Dummy
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
