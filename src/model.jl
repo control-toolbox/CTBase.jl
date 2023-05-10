@@ -28,6 +28,42 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
+
+The model is defined by the following argument:
+
+- `dep`: either `Autonomous` or `NonAutonomous`. Default is `Autonomous`. And either `Variable` or `NonVariable`. Default is `NonVariable`.
+
+# Examples
+
+```jldoctest
+julia> ocp = Model()
+julia> ocp = Model(NonAutonomous)
+julia> ocp = Model(NonVariable,Variable)
+```
+
+!!! note
+
+    - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
+
+"""
+function Model(dep::DataType...)::OptimalControlModel{<:TimeDependence, <:VariableDependence}
+    # some checkings: 
+    size(filter(p->p<:VariableDependence,dep),1) > 1 && throw(IncorrectArgument("the number of arguments about variable dependence must be equal at most to 1"))
+    size(filter(p->p<:TimeDependence,dep),1) > 1 && throw(IncorrectArgument("the number of arguments about time dependence must be equal at most to 1"))
+    size(dep,1) > 2 && throw(IncorrectArgument("the number of arguments about dependences must be equal at most to 2"))
+    size(filter(p->!(p<:Union{TimeDependence,VariableDependence}),dep),1) > 0 && throw(IncorrectArgument("the wrong of arguments, possible arguments are : NonAutonomous, Autonomous, NonVariable, Variable"))
+    
+    time_dependence = NonAutonomous ∈ dep ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dep ? Variable : NonVariable
+    @__check(time_dependence)
+    @__check(variable_dependence)
+    return OptimalControlModel{time_dependence, variable_dependence}()
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if the model has been defined as time dependent.
 """
 is_time_dependent(ocp::OptimalControlModel{NonAutonomous, vd}) where {vd <: VariableDependence} = true

@@ -457,7 +457,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-@with_kw mutable struct OptimalControlModel{time_dependence, variable_dependence <: VariableDependence} <: AbstractOptimalControlModel
+@with_kw mutable struct OptimalControlModel{time_dependence <: TimeDependence, variable_dependence <: VariableDependence} <: AbstractOptimalControlModel
     initial_time::Union{Time,Index,Nothing}=nothing
     final_time::Union{Time,Index,Nothing}=nothing
     time_name::Union{String, Nothing}=nothing

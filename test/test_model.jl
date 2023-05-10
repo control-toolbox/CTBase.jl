@@ -232,6 +232,45 @@ end
     @test !is_variable_independent(ocp)
 end
 
+@testset "time and variable dependence bis" begin
+    ocp = Model()
+    @test is_time_independent(ocp)
+    @test !is_time_dependent(ocp)
+    @test is_variable_independent(ocp)
+    @test !is_variable_dependent(ocp)
+
+    ocp = Model(NonAutonomous)
+    @test is_time_dependent(ocp)
+    @test !is_time_independent(ocp)
+    @test is_variable_independent(ocp)
+    @test !is_variable_dependent(ocp)
+
+    ocp = Model(Variable)
+    @test is_time_independent(ocp)
+    @test !is_time_dependent(ocp)
+    @test is_variable_dependent(ocp)
+    @test !is_variable_independent(ocp)
+
+    ocp = Model(NonAutonomous, Variable)
+    @test is_time_dependent(ocp)
+    @test !is_time_independent(ocp)
+    @test is_variable_dependent(ocp)
+    @test !is_variable_independent(ocp)
+
+    ocp = Model(Variable, NonAutonomous)
+    @test is_time_dependent(ocp)
+    @test !is_time_independent(ocp)
+    @test is_variable_dependent(ocp)
+    @test !is_variable_independent(ocp)
+
+
+    @test_throws IncorrectArgument Model(Variable, NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(Variable, Dummy)
+
+
+end
+
 @testset "state!" begin
     ocp = Model()
     state!(ocp, 1)
@@ -704,7 +743,17 @@ end
 
 @testset "constraint! 10" begin
 
-    ocp = Model(;time_dependence=NonAutonomous); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(time_dependence=NonAutonomous); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    constraint!(ocp, :initial, 0, 1, :c0)
+    constraint!(ocp, :final, 1, 2, :cf)
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅ ,12) == 12
+
+end
+
+@testset "constraint! 11" begin
+
+    ocp = Model(NonAutonomous); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, 0, 1, :c0)
     constraint!(ocp, :final, 1, 2, :cf)
     @test constraint(ocp, :c0)(12, ∅) == 12
