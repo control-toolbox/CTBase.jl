@@ -184,8 +184,7 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     nn = n isa Integer ? n : 9
     for i ∈ 1:nn p.aliases[Symbol(x, ctindices(i))] = :( $x[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
-    ∂x = Symbol("∂($x)")
-    p.aliases[Symbol(Unicode.normalize(string(x,"̇")))] = :( $∂x )
+    p.aliases[Symbol(Unicode.normalize(string(x,"̇")))] = :( ∂($x) )
     __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
 end
 
@@ -325,7 +324,8 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
 end
 
 p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
-    log && println("dynamics: $x'($t) == $e")
+    ẋ = Symbol(x, "̇") 
+    log && println("dynamics: $ẋ($t) == $e")
     isnothing(label) || return __throw("dynamics cannot be labelled", p.lnum, p.line)
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
