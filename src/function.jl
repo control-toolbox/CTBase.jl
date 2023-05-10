@@ -1,6 +1,6 @@
 # --------------------------------------------------------------------------------------------------
 function BoundaryConstraint(f::Function; variable_dependence::Symbol=__fun_variable_dependence())
-    @check(variable_dependence)
+    @__check(variable_dependence)
     return BoundaryConstraint{variable_dependence}(f)
 end
 
@@ -8,17 +8,17 @@ function (F::BoundaryConstraint{:v_indep})(x0::State, xf::State)::ctVector
     return F.f(x0, xf)
 end
 
-function (F::BoundaryConstraint{:v_indep})(x0::State, xf::State, v::EmptyVariable)::ctVector
+function (F::BoundaryConstraint{:v_indep})(x0::State, xf::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x0, xf)
 end
 
-function (F::BoundaryConstraint{:v_dep})(x0::State, xf::State, v::Variable)::ctVector
+function (F::BoundaryConstraint{:v_dep})(x0::State, xf::State, v::DecisionVariable)::ctVector
     return F.f(x0, xf, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function Mayer(f::Function; variable_dependence::Symbol=__fun_variable_dependence())
-    @check(variable_dependence)
+    @__check(variable_dependence)
     return Mayer{variable_dependence}(f)
 end
 
@@ -26,11 +26,11 @@ function (F::Mayer{:v_indep})(x0::State, xf::State)::ctNumber
     return F.f(x0, xf)
 end
 
-function (F::Mayer{:v_indep})(x0::State, xf::State, v::EmptyVariable)::ctNumber
+function (F::Mayer{:v_indep})(x0::State, xf::State, v::EmptyDecisionVariable)::ctNumber
     return F.f(x0, xf)
 end
 
-function (F::Mayer{:v_dep})(x0::State, xf::State, v::Variable)::ctNumber
+function (F::Mayer{:v_dep})(x0::State, xf::State, v::DecisionVariable)::ctNumber
     return F.f(x0, xf, v)
 end
 
@@ -38,8 +38,8 @@ end
 function Hamiltonian(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Hamiltonian{time_dependence, variable_dependence}(f)
 end
 
@@ -47,15 +47,15 @@ function (F::Hamiltonian{:t_indep, :v_indep})(x::State, p::Costate)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctNumber
+function (F::Hamiltonian{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctNumber
+function (F::Hamiltonian{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctNumber
     return F.f(x, p, v)
 end
 
-function (F::Hamiltonian{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+function (F::Hamiltonian{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
     return F.f(x, p, v)
 end
 
@@ -63,11 +63,11 @@ function (F::Hamiltonian{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctNu
     return F.f(t, x, p)
 end
 
-function (F::Hamiltonian{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctNumber
+function (F::Hamiltonian{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
     return F.f(t, x, p)
 end
 
-function (F::Hamiltonian{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+function (F::Hamiltonian{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
     return F.f(t, x, p, v)
 end
 
@@ -75,8 +75,8 @@ end
 function HamiltonianVectorField(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -84,15 +84,15 @@ function (F::HamiltonianVectorField{:t_indep, :v_indep})(x::State, p::Costate)::
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctVector
+function (F::HamiltonianVectorField{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -100,11 +100,11 @@ function (F::HamiltonianVectorField{:t_dep, :v_indep})(t::Time, x::State, p::Cos
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctVector
+function (F::HamiltonianVectorField{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(t, x, p, v)
 end
 
@@ -112,8 +112,8 @@ end
 function VectorField(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return VectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -121,15 +121,15 @@ function (F::VectorField{:t_indep, :v_indep})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::VectorField{:t_indep, :v_indep})(t::Time, x::State, v::EmptyVariable)::ctVector
+function (F::VectorField{:t_indep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
 
-function (F::VectorField{:t_indep, :v_dep})(x::State, v::Variable)::ctVector
+function (F::VectorField{:t_indep, :v_dep})(x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::VectorField{:t_indep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
+function (F::VectorField{:t_indep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
@@ -137,11 +137,11 @@ function (F::VectorField{:t_dep, :v_indep})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::VectorField{:t_dep, :v_indep})(t::Time, x::State, v::EmptyVariable)::ctVector
+function (F::VectorField{:t_dep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
-function (F::VectorField{:t_dep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
+function (F::VectorField{:t_dep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(t, x, v)
 end
 
@@ -149,8 +149,8 @@ end
 function Lagrange(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
@@ -158,15 +158,15 @@ function (F::Lagrange{:t_indep, :v_indep})(x::State, u::Control)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyVariable)::ctNumber
+function (F::Lagrange{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{:t_indep, :v_dep})(x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{:t_indep, :v_dep})(x::State, u::Control, v::DecisionVariable)::ctNumber
     return F.f(x, u, v)
 end
 
-function (F::Lagrange{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
     return F.f(x, u, v)
 end
 
@@ -174,11 +174,11 @@ function (F::Lagrange{:t_dep, :v_indep})(t::Time, x::State, u::Control)::ctNumbe
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyVariable)::ctNumber
+function (F::Lagrange{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
     return F.f(t, x, u, v)
 end
 
@@ -186,8 +186,8 @@ end
 function Dynamics(f::Function; 
     time_dependence::Symbol=__fun_time_dependence(),
     variable_dependence::Symbol=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Dynamics{time_dependence, variable_dependence}(f)
 end
 
@@ -195,15 +195,15 @@ function (F::Dynamics{:t_indep, :v_indep})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyVariable)::ctVector
+function (F::Dynamics{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{:t_indep, :v_dep})(x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{:t_indep, :v_dep})(x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::Dynamics{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
@@ -211,11 +211,11 @@ function (F::Dynamics{:t_dep, :v_indep})(t::Time, x::State, u::Control)::ctVecto
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyVariable)::ctVector
+function (F::Dynamics{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(t, x, u, v)
 end
 
@@ -223,8 +223,8 @@ end
 function StateConstraint(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return StateConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -232,15 +232,15 @@ function (F::StateConstraint{:t_indep, :v_indep})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::StateConstraint{:t_indep, :v_indep})(t::Time, x::State, v::EmptyVariable)::ctVector
+function (F::StateConstraint{:t_indep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
 
-function (F::StateConstraint{:t_indep, :v_dep})(x::State, v::Variable)::ctVector
+function (F::StateConstraint{:t_indep, :v_dep})(x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::StateConstraint{:t_indep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{:t_indep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
@@ -248,11 +248,11 @@ function (F::StateConstraint{:t_dep, :v_indep})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{:t_dep, :v_indep})(t::Time, x::State, v::EmptyVariable)::ctVector
+function (F::StateConstraint{:t_dep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{:t_dep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{:t_dep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(t, x, v)
 end
 
@@ -260,8 +260,8 @@ end
 function ControlConstraint(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -269,15 +269,15 @@ function (F::ControlConstraint{:t_indep, :v_indep})(u::Control)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{:t_indep, :v_indep})(t::Time, u::Control, v::EmptyVariable)::ctVector
+function (F::ControlConstraint{:t_indep, :v_indep})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{:t_indep, :v_dep})(u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{:t_indep, :v_dep})(u::Control, v::DecisionVariable)::ctVector
     return F.f(u, v)
 end
 
-function (F::ControlConstraint{:t_indep, :v_dep})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{:t_indep, :v_dep})(t::Time, u::Control, v::DecisionVariable)::ctVector
     return F.f(u, v)
 end
 
@@ -285,11 +285,11 @@ function (F::ControlConstraint{:t_dep, :v_indep})(t::Time, u::Control)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{:t_dep, :v_indep})(t::Time, u::Control, v::EmptyVariable)::ctVector
+function (F::ControlConstraint{:t_dep, :v_indep})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{:t_dep, :v_dep})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{:t_dep, :v_dep})(t::Time, u::Control, v::DecisionVariable)::ctVector
     return F.f(t, u, v)
 end
 
@@ -297,8 +297,8 @@ end
 function MixedConstraint(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -306,15 +306,15 @@ function (F::MixedConstraint{:t_indep, :v_indep})(x::State, u::Control)::ctVecto
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyVariable)::ctVector
+function (F::MixedConstraint{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{:t_indep, :v_dep})(x::State, u::Control, v::Variable)::ctVector
+function (F::MixedConstraint{:t_indep, :v_dep})(x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::MixedConstraint{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::MixedConstraint{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
@@ -322,16 +322,16 @@ function (F::MixedConstraint{:t_dep, :v_indep})(t::Time, x::State, u::Control)::
     return F.f(t, x, u)
 end
 
-function (F::MixedConstraint{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyVariable)::ctVector
+function (F::MixedConstraint{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::MixedConstraint{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::MixedConstraint{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(t, x, u, v)
 end
 
 # --------------------------------------------------------------------------------------------------
-function (F::VariableConstraint)(v::Variable)::ctVector
+function (F::VariableConstraint)(v::DecisionVariable)::ctVector
     return F.f(v)
 end
 
@@ -339,8 +339,8 @@ end
 function FeedbackControl(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
@@ -348,15 +348,15 @@ function (F::FeedbackControl{:t_indep, :v_indep})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::FeedbackControl{:t_indep, :v_indep})(t::Time, x::State, v::EmptyVariable)::ctVector
+function (F::FeedbackControl{:t_indep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
 
-function (F::FeedbackControl{:t_indep, :v_dep})(x::State, v::Variable)::ctVector
+function (F::FeedbackControl{:t_indep, :v_dep})(x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::FeedbackControl{:t_indep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{:t_indep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
@@ -364,11 +364,11 @@ function (F::FeedbackControl{:t_dep, :v_indep})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{:t_dep, :v_indep})(t::Time, x::State, v::EmptyVariable)::ctVector
+function (F::FeedbackControl{:t_dep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{:t_dep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{:t_dep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(t, x, v)
 end
 
@@ -376,8 +376,8 @@ end
 function ControlLaw(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
@@ -385,15 +385,15 @@ function (F::ControlLaw{:t_indep, :v_indep})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctVector
+function (F::ControlLaw{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -401,11 +401,11 @@ function (F::ControlLaw{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctVec
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctVector
+function (F::ControlLaw{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(t, x, p, v)
 end
 
@@ -413,8 +413,8 @@ end
 function Multiplier(f::Function; 
     time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
     variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @check(time_dependence)
-    @check(variable_dependence)
+    @__check(time_dependence)
+    @__check(variable_dependence)
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 
@@ -422,15 +422,15 @@ function (F::Multiplier{:t_indep, :v_indep})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctVector
+function (F::Multiplier{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -438,10 +438,10 @@ function (F::Multiplier{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctVec
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyVariable)::ctVector
+function (F::Multiplier{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(t, x, p, v)
 end

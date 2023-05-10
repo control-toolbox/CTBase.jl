@@ -1,5 +1,7 @@
 function test_model() # 30 55 185
 
+∅ = Vector{Real}()
+
 @testset "variable" begin
     ocp = Model(variable_dependence=:v_indep)
     @test_throws UnauthorizedCall variable!(ocp, 1)
@@ -16,12 +18,12 @@ function test_model() # 30 55 185
     variable!(ocp, 1, "vv")
     @test is_variable_dependent(ocp)
     @test ocp.variable_dimension == 1
-    @test ocp.variable_names == [ "vv" ]
+    @test ocp.variable_components_names == [ "vv" ]
     
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 1, :vv)
     @test ocp.variable_dimension == 1
-    @test ocp.variable_names ==[ "vv" ]
+    @test ocp.variable_components_names ==[ "vv" ]
     
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 2)
@@ -30,17 +32,17 @@ function test_model() # 30 55 185
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 2, "vv")
     @test ocp.variable_dimension == 2
-    @test ocp.variable_names == [ "vv₁", "vv₂" ]
+    @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
     
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 2, [ "vv1", "vv2" ])
     @test ocp.variable_dimension == 2
-    @test ocp.variable_names == [ "vv1", "vv2" ]
+    @test ocp.variable_components_names == [ "vv1", "vv2" ]
 
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 2, :vv)
     @test ocp.variable_dimension == 2
-    @test ocp.variable_names == [ "vv₁", "vv₂" ]
+    @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
 end
 
 @testset "time, state and control set or not" begin
@@ -138,23 +140,23 @@ end
 
 @testset "initial and / or final time already set" begin
     ocp = Model(variable_dependence=:v_dep)
-    @test !CTBase.time_set(ocp)
+    @test !CTBase.__is_time_set(ocp)
     variable!(ocp, 1)
     time!(ocp, 0, Index(1))
-    @test CTBase.time_set(ocp)
+    @test CTBase.__is_time_set(ocp)
 
     ocp = Model(variable_dependence=:v_dep)
     variable!(ocp, 1)
     time!(ocp, Index(1), 1)
-    @test CTBase.time_set(ocp)
+    @test CTBase.__is_time_set(ocp)
     
     ocp = Model()
     time!(ocp, 0, 1)
-    @test CTBase.time_set(ocp)
+    @test CTBase.__is_time_set(ocp)
 
     ocp = Model()
     time!(ocp, [0, 1])
-    @test CTBase.time_set(ocp)
+    @test CTBase.__is_time_set(ocp)
 
     ocp = Model()
     @test_throws MethodError time!(ocp, 0, Index(1))
@@ -234,64 +236,64 @@ end
     ocp = Model()
     state!(ocp, 1)
     @test ocp.state_dimension == 1
-    @test ocp.state_names == ["x"]
+    @test ocp.state_components_names == ["x"]
 
     ocp = Model()
     state!(ocp, 1, "y")
     @test ocp.state_dimension == 1
-    @test ocp.state_names == ["y"]
+    @test ocp.state_components_names == ["y"]
 
     ocp = Model()
     state!(ocp, 2)
     @test ocp.state_dimension == 2
-    @test ocp.state_names == ["x₁", "x₂"]
+    @test ocp.state_components_names == ["x₁", "x₂"]
 
     ocp = Model()
     state!(ocp, 2, ["y₁", "y₂"])
     @test ocp.state_dimension == 2
-    @test ocp.state_names == ["y₁", "y₂"]
+    @test ocp.state_components_names == ["y₁", "y₂"]
 
     ocp = Model()
     state!(ocp, 2, :y)
     @test ocp.state_dimension == 2
-    @test ocp.state_names == ["y₁", "y₂"]
+    @test ocp.state_components_names == ["y₁", "y₂"]
 
     ocp = Model()
     state!(ocp, 2, "y")
     @test ocp.state_dimension == 2
-    @test ocp.state_names == ["y₁", "y₂"]
+    @test ocp.state_components_names == ["y₁", "y₂"]
 end
 
 @testset "control!" begin
     ocp = Model()
     control!(ocp, 1)
     @test ocp.control_dimension == 1
-    @test ocp.control_names == ["u"]
+    @test ocp.control_components_names == ["u"]
 
     ocp = Model()
     control!(ocp, 1, "v")
     @test ocp.control_dimension == 1
-    @test ocp.control_names == ["v"]
+    @test ocp.control_components_names == ["v"]
 
     ocp = Model()
     control!(ocp, 2)
     @test ocp.control_dimension == 2
-    @test ocp.control_names == ["u₁", "u₂"]
+    @test ocp.control_components_names == ["u₁", "u₂"]
 
     ocp = Model()
     control!(ocp, 2, ["v₁", "v₂"])
     @test ocp.control_dimension == 2
-    @test ocp.control_names == ["v₁", "v₂"]
+    @test ocp.control_components_names == ["v₁", "v₂"]
 
     ocp = Model()
     control!(ocp, 2, :v)
     @test ocp.control_dimension == 2
-    @test ocp.control_names == ["v₁", "v₂"]
+    @test ocp.control_components_names == ["v₁", "v₂"]
 
     ocp = Model()
     control!(ocp, 2, "v")
     @test ocp.control_dimension == 2
-    @test ocp.control_names == ["v₁", "v₂"]
+    @test ocp.control_components_names == ["v₁", "v₂"]
 end
 
 @testset "time!" begin
@@ -435,14 +437,14 @@ end
     @test_throws IncorrectArgument constraint!(ocp, :initial, [0, 1], :c0)
     constraint!(ocp, :initial, 0, :c0)
     constraint!(ocp, :final, 1, :cf)
-    @test constraint(ocp, :c0)(12, []) == 12
-    @test constraint(ocp, :cf)([], 12) == 12
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅, 12) == 12
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :initial, [0, 1], :c0)
     constraint!(ocp, :final, [1, 2], :cf)
-    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
-    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+    @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
 
     # constraint already exists
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
@@ -459,8 +461,8 @@ end
     xf = 1
     constraint!(ocp, :initial, Index(1), x0, :c0)
     constraint!(ocp, :final, Index(1), xf, :cf)
-    @test constraint(ocp, :c0)(x, []) == x
-    @test constraint(ocp, :cf)([], x) == x
+    @test constraint(ocp, :c0)(x, ∅) == x
+    @test constraint(ocp, :cf)(∅, x) == x
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     x  = [12, 13]
@@ -475,8 +477,8 @@ end
     xf = [1, 2]
     constraint!(ocp, :initial, 1:2, x0, :c0)
     constraint!(ocp, :final, 1:2, xf, :cf)
-    @test constraint(ocp, :c0)(x, []) == x[1:2]
-    @test constraint(ocp, :cf)([], x) == x[1:2]
+    @test constraint(ocp, :c0)(x, ∅) == x[1:2]
+    @test constraint(ocp, :cf)(∅, x) == x[1:2]
 
     # constraint already exists
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
@@ -492,8 +494,8 @@ end
     constraint!(ocp, :final, 1, 2, :cf)
     constraint!(ocp, :control, 0, 1, :cu)
     constraint!(ocp, :state, 0, 1, :cs)
-    @test constraint(ocp, :c0)(12, []) == 12
-    @test constraint(ocp, :cf)([] ,12) == 12
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅ ,12) == 12
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
@@ -502,8 +504,8 @@ end
     constraint!(ocp, :final, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, [0, 1], [1, 2], :cu)
     constraint!(ocp, :state, [0, 1], [1, 2], :cs)
-    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
-    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+    @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
     @test constraint(ocp, :cu)([12, 13]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
@@ -521,8 +523,8 @@ end
     constraint!(ocp, :final, Index(1), 1, 2, :cf)
     constraint!(ocp, :control, Index(1), 0, 1, :cu)
     constraint!(ocp, :state, Index(1), 0, 1, :cs)
-    @test constraint(ocp, :c0)(12, []) == 12
-    @test constraint(ocp, :cf)([], 12) == 12
+    @test constraint(ocp, :c0)(12, ∅) == 12
+    @test constraint(ocp, :cf)(∅, 12) == 12
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
@@ -537,8 +539,8 @@ end
     constraint!(ocp, :final, 1:2, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, 1:2, [0, 1], [1, 2], :cu)
     constraint!(ocp, :state, 1:2, [0, 1], [1, 2], :cs)
-    @test constraint(ocp, :c0)([12, 13], []) == [12, 13]
-    @test constraint(ocp, :cf)([], [12, 13]) == [12, 13]
+    @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+    @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
     @test constraint(ocp, :cu)([12, 13]) == [12, 13]
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 

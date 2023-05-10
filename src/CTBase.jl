@@ -34,8 +34,7 @@ const ctNumber = Real
 """
 Type alias for a vector of real numbers.
 """
-#const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # pb for []
-const ctVector = Union{ctNumber, AbstractVector{<:Any}}
+const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # [] must be defined as Vector{Real}()
 """
 Type alias for a time.
 """
@@ -53,7 +52,7 @@ Type alias for a state.
 """
 const State = ctVector
 """
-Type alias for an adjoint.
+Type alias for an costate.
 """
 const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
@@ -63,23 +62,23 @@ const Control = ctVector
 """
 Type alias for a variable.
 """
-const Variable = ctVector
+const DecisionVariable = ctVector
 """
 Type alias for an empty variable.
 """
-const EmptyVariable = Vector{Any}
+const EmptyDecisionVariable = AbstractVector{<:Any}
 """
 Type alias for a vector of states.
 """
-const States = Vector{<:State}
+const States = AbstractVector{<:State}
 """
-Type alias for a vector of adjoints.
+Type alias for a vector of costates.
 """
-const Costates = Vector{<:Costate}
+const Costates = AbstractVector{<:Costate}
 """
 Type alias for a vector of controls.
 """
-const Controls = Vector{<:Control}
+const Controls = AbstractVector{<:Control}
 """
 Type alias for a dimension.
 """
@@ -108,7 +107,7 @@ include("onepass.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
+export States, Costates, Controls, State, Costate, Control, DecisionVariable, Dimension, Index
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
