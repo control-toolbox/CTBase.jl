@@ -1009,7 +1009,7 @@ function constraint(ocp::OptimalControlModel{td, vd}, label::Symbol) where {td, 
         (:mixed   , f::MixedConstraint,    _, _) => return f
         (:variable, f::VariableConstraint, _, _) => return f
         (:variable, rg, _, _) => return VariableConstraint(v -> v[rg])
-        _ => error("Internal error.")
+        _ => error("Internal error")
     end
 end
 
