@@ -667,6 +667,32 @@ x0 = 3
 xf = 4
 @test_throws UndefVarError o.mayer(x0, xf)
 
+
+@def o begin
+    v ∈ R², variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R, control
+    x(0) - v₁ == 0
+    x(1) - v₁ == 0
+    0 ≤ x(0) - v₁ ≤ 1
+    0 ≤ x(1) - v₁ ≤ 1
+    x(0) + x(1) - v₂ == 0
+    0 ≤ x(0) + x(1) - v₂ ≤ 1
+    x(t) - v₁ == 0
+    u(t) - v₁ == 0
+    z = v₁ + 2v₂
+    0 ≤ x(t) - z ≤ 0
+    0 ≤ u(t) - z ≤ 0
+    0 ≤ x(t) + u(t) - z ≤ 0
+    ẋ(t) == z * x(t) + 2u(t)
+    v₁ == 1
+    0 ≤ v₁ ≤ 1
+    z == 1
+    0 ≤ z ≤ 1
+    z * x(1) → min
+end
+
 # tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes
