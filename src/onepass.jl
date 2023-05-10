@@ -1,13 +1,13 @@
 # onepass
 # todo:
+# - variable tests
+# - nonautonomous tests
+# - add single sided inequalities
+# - add reverse inequalities (≥)
 # - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
-# - ∂(x) instead of x'? and alias ∂x and ẋ to ∂(x)?
-# - check: Symbol(Unicode.normalize(string(:x,"̇"))) == :ẋ
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
 # - 0 ≤ tf ≤ Inf not parsing!? (tf variable)
 # - allow dynamics to be labelled (alternative to ocp.dynamics)?
-# - add single sided inequalities
-# - add reverse inequalities (≥)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - parse dynamics in several steps: x'[2](t) == ..., x'[2:4](t) == ... (each time call dynamics!, and assemble afterwards what the dynamics is...)

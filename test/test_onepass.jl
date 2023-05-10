@@ -1092,6 +1092,7 @@ xf = 4
 
     t0   = 0.1
     tf   = 1.1
+    x0   = ones(4)
     n    = 4
     @def ocp2 begin
         t ∈ [ t0, tf ], time
@@ -1099,10 +1100,10 @@ xf = 4
         u ∈ R^n, control
 
         x(t0) == x0                , initial_1
-        x[2](t0) == x02            , initial_2
-        x[2:3](t0) == y0           , initial_3
-        x0_b ≤ x(t0) ≤ x0_u        , initial_4
-        y0_b ≤ x[2:3](t0) ≤ y0_u   , initial_5
+        x[2](t0) == 1              , initial_2
+        x[2:3](t0) == [ 1, 2 ]     , initial_3
+        x0 ≤ x(t0) ≤ x0 .+ 1       , initial_4
+        [ 1, 2 ] ≤ x[2:3](t0) ≤ [ 3, 4 ], initial_5
     end
     @test ocp2 isa OptimalControlModel
     @test ocp2.state_dimension == n
@@ -1111,19 +1112,19 @@ xf = 4
     @test ocp2.final_time == tf
 
 
-    # all used variables must be definedbefore each test
-    xf   = 11.11
+    # all used variables must be defined before each test
+    xf   = 11.11 * ones(4)
     xf2  = 11.111
-    xf_b = 11.1111
-    xf_u = 11.11111
-    yf   = 2.22
-    yf_b = 2.222
-    yf_u = 2.2222
+    xf_b = 11.1111 * ones(4)
+    xf_u = 11.11111 * ones(4)
+    yf   = 2.22 * ones(2)
+    yf_b = 2.222 * ones(2)
+    yf_u = 2.2222 * ones(2)
 
     # === final
     t0   = 0.2
     tf   = 1.2
-    n    = 5
+    n    = 4
     @def ocp3 begin
 
         t ∈ [ t0, tf ], time
@@ -1145,6 +1146,14 @@ xf = 4
     t0   = 0.3
     tf   = 1.3
     n    = 6
+    xf   = 11.11 * ones(n)
+    xf2  = 11.111
+    xf_b = 11.1111 * ones(n)
+    xf_u = 11.11111 * ones(n)
+    yf   = 2.22 * ones(2)
+    yf_b = 2.222 * ones(2)
+    yf_u = 2.2222 * ones(2)
+
     @def ocp4 begin
 
         t ∈ [ t0, tf ], time
@@ -1167,7 +1176,7 @@ xf = 4
     # === boundary
     t0   = 0.4
     tf   = 1.4
-    n    = 7
+    n    = 2
     @def ocp5 begin
 
         t ∈ [ t0, tf ], time
@@ -1190,7 +1199,7 @@ xf = 4
 
     t0   = 0.5
     tf   = 1.5
-    n    = 8
+    n    = 2
     @def ocp6 begin
 
         t ∈ [ t0, tf ], time
@@ -1222,18 +1231,16 @@ xf = 4
 
     t0   = 0.6
     tf   = 1.6
-    n    = 9
+    n    = 2
     @def ocp7 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        u_b ≤ u(t) ≤ u_u
-        #u(t) == u_u
-        u2_b ≤ u[2](t) ≤ u2_u
-        #u[2](t) == u2_u
-        v_b ≤ u[2:3](t) ≤ v_u
+        u_b ≤ u[1](t) ≤ u_u
+        u2_b ≤ u[1](t) ≤ u2_u
+        v_b ≤ u[2](t) ≤ v_u
         #u[2:3](t) == v_u
         u[1](t)^2 + u[2](t)^2 == 1
         1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
@@ -1246,19 +1253,22 @@ xf = 4
 
     t0   = 0.7
     tf   = 1.7
-    n    = 3
+    n    = 2
+    u_b  = 1.0
+    u_u  = 2.0
+    u2_b = 3.0
+    u2_u = 4.0
+    v_b  = 5.0
+    v_u  = 6.0
     @def ocp8 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        u_b ≤ u(t) ≤ u_u               , control_1
-        #u(t) == u_u                    , control_2
-        u2_b ≤ u[2](t) ≤ u2_u          , control_3
-        #u[2](t) == u2_u                , control_4
-        v_b ≤ u[2:3](t) ≤ v_u          , control_5
-        #u[2:3](t) == v_u               , control_6
+        u_b ≤ u[2](t) ≤ u_u               , control_1
+        u2_b ≤ u[1](t) ≤ u2_u          , control_3
+        [ 1, v_b ] ≤ u[1:2](t) ≤ [ 2, v_u ], control_5
         u[1](t)^2 + u[2](t)^2 == 1     , control_7
         1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  , control_8
     end
@@ -1287,12 +1297,12 @@ xf = 4
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x_b ≤ x(t) ≤ x_u
+        x_b ≤ x[3](t) ≤ x_u
         #x(t) == x_u
         x2_b ≤ x[2](t) ≤ x2_u
         #x[2](t) == x2_u
         #x[2:3](t) == y_u
-        x_u ≤ x[2:3](t) ≤ y_u
+        x_u ≤ x[10](t) ≤ y_u
         x[1:2](t) + x[3:4](t) == [ -1, 1 ]
         [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ]
     end
@@ -1311,12 +1321,12 @@ xf = 4
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x_b ≤ x(t) ≤ x_u                             , state_1
+        x_b ≤ x[3](t) ≤ x_u                             , state_1
         #x(t) == x_u                                  , state_2
         x2_b ≤ x[2](t) ≤ x2_u                        , state_3
         #x[2](t) == x2_u                              , state_4
         #x[2:3](t) == y_u                             , state_5
-        x_u ≤ x[2:3](t) ≤ y_u                        , state_6
+        x_u ≤ x[3](t) ≤ y_u                        , state_6
         x[1:2](t) + x[3:4](t) == [ -1, 1 ]           , state_7
         [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] , state_8
     end
