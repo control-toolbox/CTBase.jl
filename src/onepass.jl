@@ -1,7 +1,6 @@
 # onepass
 # todo:
 # - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
-# - don't __wrap any __throw (use return __throw; check p_time...)
 # - ∂(x) instead of x'? and alias ∂x and ẋ to ∂(x)?
 # - check: Symbol(Unicode.normalize(string(:x,"̇"))) == :ẋ
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
@@ -86,8 +85,10 @@ parse!(p, ocp, e; log=false) = begin
         :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
         :( $u       , control        ) => p_control!(p, ocp, u   ; log) # todo: remove
         :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
-        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log)
-        :( $x'($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log)
+        :( ∂($x)($t) == $e1          ) => p_dynamics!(p, ocp, x, t, e1       ; log)
+        :( ∂($x)($t) == $e1, $label  ) => p_dynamics!(p, ocp, x, t, e1, label; log)
+        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log) # todo: remove
+        :( $x'($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log) # todo: remove
         :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2       ; log)
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
@@ -112,7 +113,7 @@ parse!(p, ocp, e; log=false) = begin
 		# !!! assumes that map is done sequentially for side effects on p
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
             else
-                __throw("unknown syntax", p.lnum, p.line)
+                return __throw("unknown syntax", p.lnum, p.line)
             end end
     end
 end
@@ -149,28 +150,28 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
             :( $v1[$i] ) => (v1 == p.v) ?
-            :( time!($ocp, Index($i), $tf, $tt) ) : __throw("bad time declaration", p.lnum, p.line)
+            :( time!($ocp, Index($i), $tf, $tt) ) : return __throw("bad time declaration", p.lnum, p.line)
             :( $v1     ) => (v1 == p.v) ?
             quote
             ($ocp.variable_dimension ≠ 1) &&
                 throw(IncorrectArgument("variable must be of dimension one for a time"))
                 time!($ocp, Index(1), $tf, $tt)
-        end : __throw("bad time declaration", p.lnum, p.line)
-            _            => __throw("bad time declaration", p.lnum, p.line) end
+            end : return __throw("bad time declaration", p.lnum, p.line)
+            _            => return __throw("bad time declaration", p.lnum, p.line) end
         (false, true ) => @match tf begin
             :( $v1[$i] ) => (v1 == p.v) ?
-            :( time!($ocp, $t0, Index($i), $tt) ) : __throw("bad time declaration", p.lnum, p.line)
+            :( time!($ocp, $t0, Index($i), $tt) ) : return __throw("bad time declaration", p.lnum, p.line)
             :( $v1     ) => (v1 == p.v) ?
             quote
             ($ocp.variable_dimension ≠ 1) &&
                 throw(IncorrectArgument("variable must be of dimension one for a time"))
                 time!($ocp, $t0, Index(1), $tt)
-        end : __throw("bad time declaration", p.lnum, p.line)
-            _            => __throw("bad time declaration", p.lnum, p.line) end
+            end : return __throw("bad time declaration", p.lnum, p.line)
+            _            => return __throw("bad time declaration", p.lnum, p.line) end
         _              => @match (t0, tf) begin
             (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ?
-            :( time!($ocp, Index($i), Index($j), $tt) ) : __throw("bad time declaration", p.lnum, p.line)
-            _ => __throw("bad time declaration", p.lnum, p.line) end
+            :( time!($ocp, Index($i), Index($j), $tt) ) : return __throw("bad time declaration", p.lnum, p.line)
+            _ => return __throw("bad time declaration", p.lnum, p.line) end
     end
     __wrap(code, p.lnum, p.line)
 end
@@ -183,6 +184,8 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     nn = n isa Integer ? n : 9
     for i ∈ 1:nn p.aliases[Symbol(x, ctindices(i))] = :( $x[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
+    ∂x = Symbol("∂($x)")
+    p.aliases[Symbol(Unicode.normalize(string(x,"̇")))] = :( $∂x )
     __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
 end
 
