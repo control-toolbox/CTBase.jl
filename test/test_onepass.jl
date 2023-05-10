@@ -230,7 +230,7 @@ xf = [ 4, 5 ]
 x = [ 1, 2 ]
 u = 3
 @test constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
-@test constraint(o, Symbol("♡"))(x0) == x0[2]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], x[1]^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
@@ -252,7 +252,7 @@ x = [ 1, 2 ]
 u = 3
 z = 4
 @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-@test constraint(o, Symbol("♡"))(x0) == x0[2]
+@test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
@@ -276,7 +276,7 @@ u = 3
 z = 4
 @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
 @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-@test constraint(o, Symbol("♡"))(x0) == x0
+@test constraint(o, Symbol("♡"))(x0, xf, z) == x0
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
@@ -323,30 +323,30 @@ m = 6
     u ∈ R^m, control
     r = x₁
     v = x₂
-    0 ≤ r(t) ≤ 1,                      (1)
-    zeros(n) ≤ x(t) ≤ ones(n),         (2)
+    0 ≤ r(t) ≤ 1,                                (1)
+    zeros(n) ≤ x(t) ≤ ones(n),                   (2)
     [ 0, 0 ] ≤ x[1:2](t) - [ z₁, 1 ] ≤ [ 1, 1 ], (3)
-    [ 0, 0 ] ≤ x[1:2:4](t) ≤ [ 1, 1 ],  (4)
-    0 ≤ v(t)^2 ≤ 1,                    (5)
-    zeros(m) ≤ u(t) ≤ ones(m),         (6)
-    [ 0, 0 ] ≤ u[1:2](t) ≤ [ 1, 1 ],   (7)
-    [ 0, 0 ] ≤ u[1:2:4](t) ≤ [ 1, 1 ], (8)
-    0 ≤ u₂(t)^2 ≤ 1,                   (9)
-    u₁(t) * x[1:2](t) + z + f() == 1, (10)
-    0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1, (11)
+    [ 0, 0 ] ≤ x[1:2:4](t) ≤ [ 1, 1 ],           (4)
+    0 ≤ v(t)^2 ≤ 1,                              (5)
+    zeros(m) ≤ u(t) ≤ ones(m),                   (6)
+    [ 0, 0 ] ≤ u[1:2](t) ≤ [ 1, 1 ],             (7)
+    [ 0, 0 ] ≤ u[1:2:4](t) ≤ [ 1, 1 ],           (8)
+    0 ≤ u₂(t)^2 ≤ 1,                             (9)
+    u₁(t) * x[1:2](t) + z + f() == 1,           (10)
+    0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1,           (11)
 end
 f() = [ 1, 1 ]
 z = 3 * Vector{Float64}(1:2)
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
-@test constraint(o, :eq1 )(x   ) == x[1]
-@test constraint(o, :eq2 )(x   ) == x
+@test constraint(o, :eq1 )(x, z) == x[1]
+@test constraint(o, :eq2 )(x, z) == x
 @test constraint(o, :eq3 )(x, z) == x[1:2] - [ z[1], 1 ]
-@test constraint(o, :eq4 )(x   ) == x[1:2:4]
+@test constraint(o, :eq4 )(x, z) == x[1:2:4]
 @test constraint(o, :eq5 )(x, z) == x[2]^2
-@test constraint(o, :eq6 )(u   ) == u
-@test constraint(o, :eq7 )(u   ) == u[1:2]
-@test constraint(o, :eq8 )(u   ) == u[1:2:4]
+@test constraint(o, :eq6 )(u, z) == u
+@test constraint(o, :eq7 )(u, z) == u[1:2]
+@test constraint(o, :eq8 )(u, z) == u[1:2:4]
 @test constraint(o, :eq9 )(u, z) == u[2]^2
 @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
 @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
@@ -709,7 +709,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 1
-    @test ocp.state_names == [ "u" ]
+    @test ocp.state_name == "u"
 
     t0 = 2.0; tf = 2.1
     @def ocp begin
@@ -721,7 +721,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 4
-    @test ocp.state_names == [ "v₁", "v₂", "v₃", "v₄"]
+    @test ocp.state_name == "v"
 
     t0 = 3.0; tf = 3.1
     @def ocp begin
@@ -733,7 +733,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 3
-    @test ocp.state_names ==  [ "w₁", "w₂", "w₃"]
+    @test ocp.state_name ==  "w"
 
     t0 = 4.0; tf = 4.1
     @def ocp begin
@@ -745,7 +745,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 1
-    @test ocp.state_names == [ "a" ]
+    @test ocp.state_name == "a"
 
 
     t0 = 5.0; tf = 5.1
@@ -758,7 +758,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 1
-    @test ocp.state_names == [ "b" ]
+    @test ocp.state_name == "b"
 
 
     t0 = 6.0; tf = 6.1
@@ -771,7 +771,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 9
-    @test ocp.state_names ==  [ "u₁", "u₂", "u₃", "u₄", "u₅", "u₆", "u₇", "u₈", "u₉"]
+    @test ocp.state_name ==  "u"
 
 
     n = 3
@@ -785,7 +785,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == n
-    @test ocp.state_names == [ "u₁", "u₂", "u₃"]
+    @test ocp.state_name == "u"
 
 
     # control
@@ -799,7 +799,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 1
-    @test ocp.control_names == [ "u" ]
+    @test ocp.control_name == "u"
 
     t0 = 2.0; tf = 2.1
     @def ocp begin
@@ -811,7 +811,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 4
-    @test ocp.control_names == [ "v₁", "v₂", "v₃", "v₄"]
+    @test ocp.control_name == "v"
 
     t0 = 3.0; tf = 3.1
     @def ocp begin
@@ -823,7 +823,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 3
-    @test ocp.control_names ==  [ "w₁", "w₂", "w₃"]
+    @test ocp.control_name ==  "w"
 
     t0 = 4.0; tf = 4.1
     @def ocp begin
@@ -835,7 +835,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 1
-    @test ocp.control_names == [ "a" ]
+    @test ocp.control_name == "a"
 
 
     t0 = 5.0; tf = 5.1
@@ -848,7 +848,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 1
-    @test ocp.control_names == [ "b" ]
+    @test ocp.control_name == "b"
 
 
     t0 = 6.0; tf = 6.1
@@ -861,7 +861,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 9
-    @test ocp.control_names ==  [ "u₁", "u₂", "u₃", "u₄", "u₅", "u₆", "u₇", "u₈", "u₉"]
+    @test ocp.control_name == "u"
 
 
     n = 3
@@ -875,7 +875,7 @@ xf = 4
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == n
-    @test ocp.control_names == [ "u₁", "u₂", "u₃"]
+    @test ocp.control_name == "u"
 
 
     # variables
@@ -886,7 +886,7 @@ xf = 4
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.variable_dimension == 1
-    @test ocp.variable_names == [ "a" ]
+    @test ocp.variable_name == "a"
 
     t0 = .0; tf = .1
     @def ocp begin
@@ -895,7 +895,7 @@ xf = 4
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.variable_dimension == 3
-    @test ocp.variable_names == [ "a₁", "a₂", "a₃" ]
+    @test ocp.variable_name == "a"
 
     # alias
     t0 = .0; tf = .1
@@ -912,9 +912,9 @@ xf = 4
     @test ocp.time_name == "t"
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
-    @test ocp.control_names == [ "u₁", "u₂", "u₃"]
+    @test ocp.control_name == "u"
     @test ocp.control_dimension == 3
-    @test ocp.state_names   ==  ["x₁", "x₂", "x₃"]
+    @test ocp.state_name ==  "x"
     @test ocp.state_dimension == 3
 
     # objectives
@@ -946,13 +946,13 @@ xf = 4
     m0 = 3.0; mf = 1.1
     @def ocp begin
         t ∈ [ t0, tf ], time
-        x ∈ R^2, state
+        x ∈ R^3, state
         u ∈ R^2, control
 
         m = x₂
 
         x(t0) == [ r0, v0, m0 ], (1)
-        0  ≤ u(t) ≤ 1          , (deux)
+        0  ≤ u[1](t) ≤ 1       , (deux)
         r0 ≤ x(t)[1] ≤ r1      , (trois)
         0  ≤ x₂(t) ≤ vmax      , (quatre)
         mf ≤ m(t) ≤ m0         , (5)
@@ -961,20 +961,20 @@ xf = 4
     @test ocp.time_name == "t"
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
-    @test ocp.control_names == [ "u₁", "u₂"]
+    @test ocp.control_name == "u"
     @test ocp.control_dimension == 2
-    @test ocp.state_names   == ["x₁", "x₂"]
-    @test ocp.state_dimension == 2
+    @test ocp.state_name == "x"
+    @test ocp.state_dimension == 3
 
     @def ocp begin
         t ∈ [ t0, tf ], time
-        x ∈ R^2, state
+        x ∈ R^3, state
         u ∈ R^2, control
 
         m = x₂
 
         x(t0) == [ r0, v0, m0 ]
-        0  ≤ u(t) ≤ 1
+        0  ≤ u(t)[2] ≤ 1
         r0 ≤ x(t)[1] ≤ r1
         0  ≤ x₂(t) ≤ vmax
         mf ≤ m(t) ≤ m0
@@ -983,10 +983,10 @@ xf = 4
     @test ocp.time_name == "t"
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
-    @test ocp.control_names == [ "u₁", "u₂"]
+    @test ocp.control_name == "u"
     @test ocp.control_dimension == 2
-    @test ocp.state_names   == ["x₁", "x₂"]
-    @test ocp.state_dimension == 2
+    @test ocp.state_name == "x"
+    @test ocp.state_dimension == 3
 
     # dyslexic definition:  t -> u -> x -> t
     u0 = 9.0; uf = 9.1
@@ -996,13 +996,13 @@ xf = 4
 
     @def ocp begin
         u ∈ [ u0, uf ], time
-        t ∈ R^2, state
+        t ∈ R^3, state
         x ∈ R^2, control
 
         b = t₂
 
         t(u0) == [ z0, k0, b0 ]
-        0  ≤ x(u) ≤ 1
+        0  ≤ x[2](u) ≤ 1
         z0 ≤ t(u)[1] ≤ z1
         0  ≤ t₂(u) ≤ kmax
         bf ≤ b(u) ≤ b0
@@ -1011,11 +1011,10 @@ xf = 4
     @test ocp.time_name == "u"
     @test ocp.initial_time == u0
     @test ocp.final_time   == uf
-    @test ocp.control_names == ["x₁", "x₂"]
+    @test ocp.control_name == "x"
     @test ocp.control_dimension == 2
-    @test ocp.state_names   == [ "t₁", "t₂"]
-    @test ocp.state_dimension == 2
-
+    @test ocp.state_name == "t"
+    @test ocp.state_dimension == 3
 
     # error detections (this can be tricky -> need more work)
 
@@ -1061,11 +1060,11 @@ xf = 4
 #function test_ctparser_constraints()
 
     # all used variables must be definedbefore each test
-    x0   = 11.11
+    x0   = [ 1, 2, 11.11 ]
     x02  = 11.111
     x0_b = 11.1111
     x0_u = 11.11111
-    y0   = 2.22
+    y0   = [ 1, 2.22 ]
     y0_b = 2.222
     y0_u = 2.2222
 
@@ -1082,7 +1081,7 @@ xf = 4
         x(t0) == x0
         x[2](t0) == x02
         x[2:3](t0) == y0
-        x0_b ≤ x(t0) ≤ x0_u
+        x0_b ≤ x₂(t0) ≤ x0_u
         y0_b ≤ x[2:3](t0) ≤ y0_u
     end
     @test ocp1 isa OptimalControlModel

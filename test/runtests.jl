@@ -22,11 +22,10 @@ const constraint_type = CTBase.constraint_type
         :description,
         :exception,
         :function,
-        :model,
         :plot,
         :print,
-        :utils,
         =#
+        :utils,
         :onepass,
 	:goddard,
         )
