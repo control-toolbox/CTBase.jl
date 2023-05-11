@@ -1,6 +1,12 @@
 # --------------------------------------------------------------------------------------------------
-function BoundaryConstraint(f::Function; variable_dependence::DataType = __fun_variable_dependence())
-    @__check(variable_dependence)
+function BoundaryConstraint(f::Function; variable::Bool = false)
+    variable_dependence = variable ? Variable : NonVariable
+    return BoundaryConstraint{variable_dependence}(f)
+end
+
+function BoundaryConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return BoundaryConstraint{variable_dependence}(f)
 end
 
@@ -17,8 +23,14 @@ function (F::BoundaryConstraint{Variable})(x0::State, xf::State, v::DecisionVari
 end
 
 # --------------------------------------------------------------------------------------------------
-function Mayer(f::Function; variable_dependence::DataType = __fun_variable_dependence())
-    @__check(variable_dependence)
+function Mayer(f::Function; variable::Bool = false)
+    variable_dependence = variable ? Variable : NonVariable
+    return Mayer{variable_dependence}(f)
+end
+
+function Mayer(f::Function, dependences::DataType...)
+    @__check(dependences)
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return Mayer{variable_dependence}(f)
 end
 
@@ -36,10 +48,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function Hamiltonian(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return Hamiltonian{time_dependence, variable_dependence}(f)
+end
+
+function Hamiltonian(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return Hamiltonian{time_dependence, variable_dependence}(f)
 end
 
@@ -73,10 +91,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function HamiltonianVectorField(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return HamiltonianVectorField{time_dependence, variable_dependence}(f)
+end
+
+function HamiltonianVectorField(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -110,10 +134,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function VectorField(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return VectorField{time_dependence, variable_dependence}(f)
+end
+
+function VectorField(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return VectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -147,10 +177,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function Lagrange(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return Lagrange{time_dependence, variable_dependence}(f)
+end
+
+function Lagrange(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
@@ -184,10 +220,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function Dynamics(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return Dynamics{time_dependence, variable_dependence}(f)
+end
+
+function Dynamics(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return Dynamics{time_dependence, variable_dependence}(f)
 end
 
@@ -221,10 +263,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function StateConstraint(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return StateConstraint{time_dependence, variable_dependence}(f)
+end
+
+function StateConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return StateConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -258,10 +306,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function ControlConstraint(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return ControlConstraint{time_dependence, variable_dependence}(f)
+end
+
+function ControlConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -295,10 +349,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function MixedConstraint(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return MixedConstraint{time_dependence, variable_dependence}(f)
+end
+
+function MixedConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -337,10 +397,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function FeedbackControl(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return FeedbackControl{time_dependence, variable_dependence}(f)
+end
+
+function FeedbackControl(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
@@ -374,10 +440,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function ControlLaw(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return ControlLaw{time_dependence, variable_dependence}(f)
+end
+
+function ControlLaw(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
@@ -411,10 +483,16 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function Multiplier(f::Function; 
-    time_dependence::DataType=__fun_time_dependence(),
-    variable_dependence::DataType=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
+    return Multiplier{time_dependence, variable_dependence}(f)
+end
+
+function Multiplier(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 

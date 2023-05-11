@@ -9,7 +9,7 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence <: TimeDependence, vd <: VariableDependence}
+function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeDependence, V}) where {V <: VariableDependence}
 
     # check if the problem is empty
     if __isempty(ocp) 
@@ -24,7 +24,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         __control_not_set(ocp) || 
         __dynamics_not_set(ocp) ||
         __objective_not_set(ocp) ||
-        (__variable_not_set(ocp) && vd == Variable)
+        (__variable_not_set(ocp) && V == Variable)
         printstyled(io, "Incomplete optimal control problem\n", bold=true)
         is_incomplete = true
     end
@@ -36,7 +36,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
               " - dynamics  " * (__dynamics_not_set(ocp) ? "❌" : "✅") * "\n" *
               " - objective " * (__objective_not_set(ocp) ? "❌" : "✅") * "\n"
         print(io, txt)
-        if vd == Variable
+        if V == Variable
             print(io, " - variable  " * (__variable_not_set(ocp) ? "❌" : "✅") * "\n")
         end
         return
