@@ -1118,15 +1118,15 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
         return val
     end
 
-    function θ(v)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
-        return val
-    end
-
     function ϕ(x0, xf, v)
         val = Vector{ctNumber}()
         for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf, v)) end
+        return val
+    end
+
+    function θ(v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
         return val
     end
 

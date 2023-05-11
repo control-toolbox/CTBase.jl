@@ -63,11 +63,7 @@ const Control = ctVector
 """
 Type alias for a variable.
 """
-const DecisionVariable = ctVector
-"""
-Type alias for an empty variable.
-"""
-const EmptyDecisionVariable = AbstractVector{<:Any}
+const Variable = ctVector
 """
 Type alias for a vector of states.
 """
@@ -99,7 +95,7 @@ include("checking.jl")
 include("print.jl")
 include("plot.jl")
 #
-include("function.jl")
+include("functions.jl")
 include("model.jl")
 #
 include("ctparser_utils.jl")
@@ -108,7 +104,7 @@ include("onepass.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Costates, Controls, State, Costate, Control, DecisionVariable, Dimension, Index
+export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
