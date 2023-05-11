@@ -1,7 +1,5 @@
 # onepass
 # todo:
-# - variable tests
-# - nonautonomous tests
 # - add single sided inequalities
 # - add reverse inequalities (≥)
 # - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
