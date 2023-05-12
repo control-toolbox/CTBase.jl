@@ -1,8 +1,12 @@
 function test_function()
 
 ∅ = Vector{Real}()
+dummy_function() = nothing
 
 @testset "BoundaryConstraint" begin
+    @test BoundaryConstraint(dummy_function, NonVariable) == BoundaryConstraint(dummy_function, variable=false)
+    @test BoundaryConstraint(dummy_function, Variable) == BoundaryConstraint(dummy_function, variable=true)
+
     @test_throws IncorrectArgument BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], Int64)
     B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], variable=false)
     @test B([0, 0], [1, 1]) == [1, 2]
@@ -12,6 +16,9 @@ function test_function()
 end
 
 @testset "Mayer" begin
+    @test Mayer(dummy_function, NonVariable) == Mayer(dummy_function, variable=false)
+    @test Mayer(dummy_function, Variable) == Mayer(dummy_function, variable=true)
+
     @test_throws IncorrectArgument Mayer((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], Int64)
     G = Mayer((x0, xf) -> [xf[2]-x0[1]], variable=false)
     @test_throws MethodError G([0, 0], [1, 1])
@@ -23,6 +30,11 @@ end
 end
 
 @testset "Hamiltonian" begin
+    @test Hamiltonian(dummy_function, Autonomous, NonVariable) == Hamiltonian(dummy_function, autonomous=true, variable=false)
+    @test Hamiltonian(dummy_function, NonAutonomous, NonVariable) == Hamiltonian(dummy_function, autonomous=false, variable=false)
+    @test Hamiltonian(dummy_function, Autonomous, Variable) == Hamiltonian(dummy_function, autonomous=true, variable=true)
+    @test Hamiltonian(dummy_function, NonAutonomous, Variable) == Hamiltonian(dummy_function, autonomous=false, variable=true)
+
     @test_throws IncorrectArgument Hamiltonian((x, p) -> x + p, Int64)
     @test_throws IncorrectArgument Hamiltonian((x, p) -> x + p, Int64)
     H = Hamiltonian((x, p) -> [x[1]^2+2p[2]], autonomous=true, variable=false)
@@ -45,6 +57,11 @@ end
 end
 
 @testset "HamiltonianVectorField" begin
+    @test HamiltonianVectorField(dummy_function, Autonomous, NonVariable) == HamiltonianVectorField(dummy_function, autonomous=true, variable=false)
+    @test HamiltonianVectorField(dummy_function, NonAutonomous, NonVariable) == HamiltonianVectorField(dummy_function, autonomous=false, variable=false)
+    @test HamiltonianVectorField(dummy_function, Autonomous, Variable) == HamiltonianVectorField(dummy_function, autonomous=true, variable=true)
+    @test HamiltonianVectorField(dummy_function, NonAutonomous, Variable) == HamiltonianVectorField(dummy_function, autonomous=false, variable=true)
+
     @test_throws IncorrectArgument HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
     @test_throws IncorrectArgument HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
     Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], autonomous=true, variable=false)
@@ -65,6 +82,11 @@ end
 end
 
 @testset "VectorField" begin
+    @test VectorField(dummy_function, Autonomous, NonVariable) == VectorField(dummy_function, autonomous=true, variable=false)
+    @test VectorField(dummy_function, NonAutonomous, NonVariable) == VectorField(dummy_function, autonomous=false, variable=false)
+    @test VectorField(dummy_function, Autonomous, Variable) == VectorField(dummy_function, autonomous=true, variable=true)
+    @test VectorField(dummy_function, NonAutonomous, Variable) == VectorField(dummy_function, autonomous=false, variable=true)
+
     @test_throws IncorrectArgument VectorField(x -> [x[1]^2, 2x[2]], Int64)
     @test_throws IncorrectArgument VectorField(x -> [x[1]^2, 2x[2]], Int64)
     V = VectorField(x -> [x[1]^2, 2x[2]], autonomous=true, variable=false)
@@ -85,6 +107,11 @@ end
 end
 
 @testset "Lagrange" begin
+    @test Lagrange(dummy_function, Autonomous, NonVariable) == Lagrange(dummy_function, autonomous=true, variable=false)
+    @test Lagrange(dummy_function, NonAutonomous, NonVariable) == Lagrange(dummy_function, autonomous=false, variable=false)
+    @test Lagrange(dummy_function, Autonomous, Variable) == Lagrange(dummy_function, autonomous=true, variable=true)
+    @test Lagrange(dummy_function, NonAutonomous, Variable) == Lagrange(dummy_function, autonomous=false, variable=true)
+
     @test_throws IncorrectArgument Lagrange((x, u) -> 2x[2]-u[1]^2, Int64)
     @test_throws IncorrectArgument Lagrange((x, u) -> 2x[2]-u[1]^2, Int64)
     L = Lagrange((x, u) -> [2x[2]-u[1]^2], autonomous=true, variable=false)
@@ -107,6 +134,11 @@ end
 end
 
 @testset "Dynamics" begin
+    @test Dynamics(dummy_function, Autonomous, NonVariable) == Dynamics(dummy_function, autonomous=true, variable=false)
+    @test Dynamics(dummy_function, NonAutonomous, NonVariable) == Dynamics(dummy_function, autonomous=false, variable=false)
+    @test Dynamics(dummy_function, Autonomous, Variable) == Dynamics(dummy_function, autonomous=true, variable=true)
+    @test Dynamics(dummy_function, NonAutonomous, Variable) == Dynamics(dummy_function, autonomous=false, variable=true)
+
     # Similar to Lagrange, but the function Dynamics is assumed to return a vector of the same dimension as the state x.
     # dim x = 2, dim u = 1
     # when a dim is 1, consider the element as a scalar
@@ -130,6 +162,11 @@ end
 end
 
 @testset "StateConstraint" begin
+    @test StateConstraint(dummy_function, Autonomous, NonVariable) == StateConstraint(dummy_function, autonomous=true, variable=false)
+    @test StateConstraint(dummy_function, NonAutonomous, NonVariable) == StateConstraint(dummy_function, autonomous=false, variable=false)
+    @test StateConstraint(dummy_function, Autonomous, Variable) == StateConstraint(dummy_function, autonomous=true, variable=true)
+    @test StateConstraint(dummy_function, NonAutonomous, Variable) == StateConstraint(dummy_function, autonomous=false, variable=true)
+
     # Similar to `VectorField` in the usage, but the dimension of the output of the function StateConstraint is arbitrary.
     # dim x = 2
     @test_throws IncorrectArgument StateConstraint(x -> [x[1]^2, 2x[2]], Int64)
@@ -152,6 +189,11 @@ end
 end
 
 @testset "ControlConstraint" begin
+    @test ControlConstraint(dummy_function, Autonomous, NonVariable) == ControlConstraint(dummy_function, autonomous=true, variable=false)
+    @test ControlConstraint(dummy_function, NonAutonomous, NonVariable) == ControlConstraint(dummy_function, autonomous=false, variable=false)
+    @test ControlConstraint(dummy_function, Autonomous, Variable) == ControlConstraint(dummy_function, autonomous=true, variable=true)
+    @test ControlConstraint(dummy_function, NonAutonomous, Variable) == ControlConstraint(dummy_function, autonomous=false, variable=true)
+
     # Similar to `VectorField` in the usage, but the dimension of the output of the function ControlConstraint is arbitrary.
     # dim u = 2
     @test_throws IncorrectArgument ControlConstraint(u -> [u[1]^2, 2u[2]], Int64)
@@ -174,6 +216,11 @@ end
 end
 
 @testset "MixedConstraint" begin
+    @test MixedConstraint(dummy_function, Autonomous, NonVariable) == MixedConstraint(dummy_function, autonomous=true, variable=false)
+    @test MixedConstraint(dummy_function, NonAutonomous, NonVariable) == MixedConstraint(dummy_function, autonomous=false, variable=false)
+    @test MixedConstraint(dummy_function, Autonomous, Variable) == MixedConstraint(dummy_function, autonomous=true, variable=true)
+    @test MixedConstraint(dummy_function, NonAutonomous, Variable) == MixedConstraint(dummy_function, autonomous=false, variable=true)
+
     # Similar to `Lagrange` in the usage, but the dimension of the output of the function MixedConstraint is arbitrary.
     # dim x = 2, dim u = 1, dim output = 2
     @test_throws IncorrectArgument MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
@@ -201,6 +248,11 @@ end
 end
 
 @testset "FeedbackControl" begin
+    @test FeedbackControl(dummy_function, Autonomous, NonVariable) == FeedbackControl(dummy_function, autonomous=true, variable=false)
+    @test FeedbackControl(dummy_function, NonAutonomous, NonVariable) == FeedbackControl(dummy_function, autonomous=false, variable=false)
+    @test FeedbackControl(dummy_function, Autonomous, Variable) == FeedbackControl(dummy_function, autonomous=true, variable=true)
+    @test FeedbackControl(dummy_function, NonAutonomous, Variable) == FeedbackControl(dummy_function, autonomous=false, variable=true)
+
     # Similar to `VectorField` in the usage, but the dimension of the output of the function `f` is arbitrary.
     # dim x = 2, dim output = 1
     @test_throws IncorrectArgument FeedbackControl(x -> x[1]^2+2x[2], Int64)
@@ -224,6 +276,11 @@ end
 
 
 @testset "ControlLaw" begin
+    @test ControlLaw(dummy_function, Autonomous, NonVariable) == ControlLaw(dummy_function, autonomous=true, variable=false)
+    @test ControlLaw(dummy_function, NonAutonomous, NonVariable) == ControlLaw(dummy_function, autonomous=false, variable=false)
+    @test ControlLaw(dummy_function, Autonomous, Variable) == ControlLaw(dummy_function, autonomous=true, variable=true)
+    @test ControlLaw(dummy_function, NonAutonomous, Variable) == ControlLaw(dummy_function, autonomous=false, variable=true)
+
     # Similar to `Hamiltonian` in the usage, but the dimension of the output of the function `ControlLaw` is arbitrary.
     # dim x = 2, dim p =2, dim output = 1
     @test_throws IncorrectArgument ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
@@ -246,6 +303,11 @@ end
 end
 
 @testset "Multiplier" begin
+    @test Multiplier(dummy_function, Autonomous, NonVariable) == Multiplier(dummy_function, autonomous=true, variable=false)
+    @test Multiplier(dummy_function, NonAutonomous, NonVariable) == Multiplier(dummy_function, autonomous=false, variable=false)
+    @test Multiplier(dummy_function, Autonomous, Variable) == Multiplier(dummy_function, autonomous=true, variable=true)
+    @test Multiplier(dummy_function, NonAutonomous, Variable) == Multiplier(dummy_function, autonomous=false, variable=true)
+
     # Similar to `ControlLaw` in the usage.
     # dim x = 2, dim p =2, dim output = 1
     @test_throws IncorrectArgument Multiplier((x, p) -> x[1]^2+2p[2], Int64)

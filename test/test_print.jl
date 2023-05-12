@@ -40,7 +40,7 @@ function test_print()
     @test display(ocp) isa Nothing
 
     #
-    ocp = Model(autonomous=false)
+    ocp = Model(autonomous=false, variable=true)
     variable!(ocp, 1)
     state!(ocp, 1, "y") # dimension of the state with the names of the components
     control!(ocp, 2)           # dimension of the control

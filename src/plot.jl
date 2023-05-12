@@ -39,7 +39,7 @@ end
 $(TYPEDSIGNATURES)
 
 Plot a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
-The argument `s` can be `:state`, `:control` or `:adjoint`.
+The argument `s` can be `:state`, `:control` or `:costate`.
 """
 function _plot_time(sol::OptimalControlSolution, d::Dimension, s::Symbol; 
     t_label, labels::Vector{String}, title::String, kwargs...)
@@ -54,7 +54,7 @@ end
 $(TYPEDSIGNATURES)
 
 Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symbol `s`.
-The argument `s` can be `:state`, `:control` or `:adjoint`.
+The argument `s` can be `:state`, `:control` or `:costate`.
 """
 function _plot_time(sol::OptimalControlSolution, s::Symbol, i::Integer;
     t_label, label::String, kwargs...)
@@ -67,7 +67,7 @@ $(TYPEDSIGNATURES)
 
 Update the plot `p` with the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where
 `f` is given by the symbol `s`.
-The argument `s` can be `:state`, `:control` or `:adjoint`.
+The argument `s` can be `:state`, `:control` or `:costate`.
 """
 function _plot_time!(p, sol::OptimalControlSolution, s::Symbol, i::Integer;
     t_label, label::String, kwargs...)
@@ -82,16 +82,16 @@ The argument `layout` can be `:group` or `:split` (default).
 
 !!! note
 
-    The keyword arguments `state_style`, `control_style` and `adjoint_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `adjoint_style` is passed to the plot of the adjoint.
+    The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
 function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
-    state_style=(), control_style=(), adjoint_style=(), kwargs...)
+    state_style=(), control_style=(), costate_style=(), kwargs...)
 
     # parameters
     n = sol.state_dimension
     m = sol.control_dimension
-    x_labels = sol.state_names
-    u_labels = sol.control_names
+    x_labels = sol.state_components_names
+    u_labels = sol.control_components_names
     t_label = sol.time_name
 
     if layout==:group
@@ -102,8 +102,8 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
         # control
         pu = _plot_time(sol, m, :control; t_label=t_label, labels=u_labels, title="control", control_style...)
 
-        # adjoint
-        pp = _plot_time(sol, n, :adjoint; t_label=t_label, labels="p".*x_labels, title="adjoint", adjoint_style...)
+        # costate
+        pp = _plot_time(sol, n, :costate; t_label=t_label, labels="p".*x_labels, title="costate", costate_style...)
 
         # layout
         ps = Plots.plot(px, pu, pp, layout=(1, 3); kwargs...)
@@ -112,12 +112,12 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
     
         # create tree plot
         state_plots = Vector{PlotLeaf}()
-        adjoint_plots = Vector{PlotLeaf}()
+        costate_plots = Vector{PlotLeaf}()
         control_plots = Vector{PlotLeaf}()
 
         for i ∈ 1:n
             push!(state_plots, PlotLeaf((:state, i)))
-            push!(adjoint_plots, PlotLeaf((:adjoint, i)))
+            push!(costate_plots, PlotLeaf((:costate, i)))
         end
         for i ∈ 1:m
             push!(control_plots, PlotLeaf((:control, i)))
@@ -125,7 +125,7 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
 
         #
         node_x = PlotNode(:column, state_plots)
-        node_p = PlotNode(:column, adjoint_plots)
+        node_p = PlotNode(:column, costate_plots)
         node_u = PlotNode(:column, control_plots)
         node_xp = PlotNode(:row, [node_x, node_p])
 
@@ -147,10 +147,10 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
                 l = x_labels[i]
                 t = i==1 ? "state" : ""
                 style = state_style
-            elseif s==:adjoint
+            elseif s==:costate
                 l = "p"*x_labels[i]
-                t = i==1 ? "adjoint" : ""
-                style = adjoint_style
+                t = i==1 ? "costate" : ""
+                style = costate_style
             elseif s==:control
                 l = u_labels[i]
                 t = i==1 ? "control" : ""
@@ -200,9 +200,9 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 
 **Notes.**
 
-- The argument `xx` can be `:time`, `:state`, `:control` or `:adjoint`.
+- The argument `xx` can be `:time`, `:state`, `:control` or `:costate`.
 - If `xx` is `:time`, then, a label is added to the plot.
-- The argument `yy` can be `:state`, `:control` or `:adjoint`.
+- The argument `yy` can be `:state`, `:control` or `:costate`.
 """
 @recipe function f(sol::OptimalControlSolution,
     xx::Union{Symbol,Tuple{Symbol,Integer}}, yy::Union{Symbol,Tuple{Symbol,Integer}})
@@ -217,11 +217,11 @@ corresponding respectively to the argument `xx` and the argument `yy`.
             i = yy[2]
         end
         if s==:state
-            label --> sol.state_names[i]
+            label --> sol.state_components_names[i]
         elseif s==:control
-            label --> sol.control_names[i]
-        elseif s==:adjoint
-            label --> "p"*sol.state_names[i]
+            label --> sol.control_components_names[i]
+        elseif s==:costate
+            label --> "p"*sol.state_components_names[i]
         end
         # change ylims if the gap between min and max is less than a tol
         tol = 1e-3
@@ -245,7 +245,7 @@ function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}
     T = sol.times
     X = sol.state.(T)
     U = sol.control.(T)
-    P = sol.adjoint.(T)
+    P = sol.costate.(T)
 
     m = length(T)
 
@@ -255,7 +255,7 @@ function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}
             x = T
         elseif vv == :state
             x = [X[i][1] for i in 1:m]
-        elseif vv == :adjoint || vv == :costate
+        elseif vv == :costate || vv == :costate
             x = [P[i][1] for i in 1:m]
         else
             #x = vcat([U[i][1] for i in 1:m-1], U[m-1][1])
@@ -268,7 +268,7 @@ function get(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol,Integer}
             x = T
         elseif vv == :state
             x = [X[i][ii] for i in 1:m]
-        elseif vv == :adjoint || vv == :costate
+        elseif vv == :costate || vv == :costate
             x = [P[i][ii] for i in 1:m]
         else
             #x = vcat([U[i][ii] for i in 1:m-1], U[m-1][ii])

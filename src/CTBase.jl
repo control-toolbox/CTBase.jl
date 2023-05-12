@@ -23,6 +23,7 @@ using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using Printf # to print an OptimalControlModel
 using DataStructures # OrderedDict for aliases
+using Unicode # unicode primitives
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -52,7 +53,7 @@ Type alias for a state.
 """
 const State = ctVector
 """
-Type alias for an adjoint.
+Type alias for an costate.
 """
 const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
@@ -72,7 +73,7 @@ Type alias for a vector of states.
 """
 const States = AbstractVector{<:State}
 """
-Type alias for a vector of adjoints.
+Type alias for a vector of costates.
 """
 const Costates = AbstractVector{<:Costate}
 """
@@ -91,7 +92,7 @@ include("callback.jl")
 include("default.jl")
 include("utils.jl")
 #
-include("type.jl")
+include("types.jl")
 #
 include("checking.jl")
 #

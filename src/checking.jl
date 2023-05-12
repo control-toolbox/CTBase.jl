@@ -18,19 +18,19 @@ function __check_criterion(criterion::Symbol)
 end
 
 function __check_state_set(ocp::OptimalControlModel)
-    __state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before. Use state!."))
+    __is_state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before. Use state!."))
 end
 
 function __check_control_set(ocp::OptimalControlModel)
-    __control_not_set(ocp) && throw(UnauthorizedCall("the control dimension has to be set before. Use control!."))
+    __is_control_not_set(ocp) && throw(UnauthorizedCall("the control dimension has to be set before. Use control!."))
 end
 
-function __check___time_set(ocp::OptimalControlModel)
-    __time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
+function __check___is_time_set(ocp::OptimalControlModel)
+    __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
 end
 
 function __check_variable_set(ocp::OptimalControlModel{T, Variable}) where {T}
-    __variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before. Use variable!."))
+    __is_variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before. Use variable!."))
 end
 
 function __check_variable_set(ocp::OptimalControlModel{T, NonVariable}) where {T}
@@ -40,7 +40,7 @@ end
 function __check_all_set(ocp::OptimalControlModel)
     __check_state_set(ocp)
     __check_control_set(ocp)
-    __check___time_set(ocp)
+    __check___is_time_set(ocp)
     __check_variable_set(ocp)
 end
 

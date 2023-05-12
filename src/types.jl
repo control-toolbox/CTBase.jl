@@ -82,7 +82,7 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 
 !!! warning
 
-    When the state and adjoint are of dimension 1, consider `x` and `p` as scalars.
+    When the state and costate are of dimension 1, consider `x` and `p` as scalars.
 
 ## Examples
 
@@ -136,7 +136,7 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 
 !!! warning
 
-    When the state and adjoint are of dimension 1, consider `x` and `p` as scalars.
+    When the state and costate are of dimension 1, consider `x` and `p` as scalars.
 
 ## Examples
 
@@ -457,42 +457,88 @@ $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModel{time_dependence <: TimeDependence, variable_dependence <: VariableDependence} <: AbstractOptimalControlModel
     initial_time::Union{Time,Index,Nothing}=nothing
+    initial_time_name::Union{String, Nothing}=nothing
     final_time::Union{Time,Index,Nothing}=nothing
+    final_time_name::Union{String, Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
+    control_dimension::Union{Dimension, Nothing}=nothing
+    control_components_names::Union{Vector{String}, Nothing}=nothing
+    control_name::Union{String, Nothing}=nothing
+    state_dimension::Union{Dimension,Nothing}=nothing
+    state_components_names::Union{Vector{String}, Nothing}=nothing
+    state_name::Union{String, Nothing}=nothing
+    variable_dimension::Union{Dimension,Nothing}=nothing
+    variable_components_names::Union{Vector{String}, Nothing}=nothing
+    variable_name::Union{String, Nothing}=nothing
     lagrange::Union{Lagrange,Nothing}=nothing
     mayer::Union{Mayer,Nothing}=nothing
     criterion::Union{Symbol,Nothing}=nothing
     dynamics::Union{Dynamics,Nothing}=nothing
-    variable_dimension::Union{Dimension,Nothing}=nothing
-    variable_names::Union{Vector{String}, Nothing}=nothing
-    state_dimension::Union{Dimension,Nothing}=nothing
-    state_names::Union{Vector{String}, Nothing}=nothing
-    control_dimension::Union{Dimension, Nothing}=nothing
-    control_names::Union{Vector{String}, Nothing}=nothing
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
 end
 
 # used for checkings
-__state_not_set(ocp::OptimalControlModel) = isnothing(ocp.state_dimension) && isnothing(ocp.state_names)
-__control_not_set(ocp::OptimalControlModel) = isnothing(ocp.control_dimension) && isnothing(ocp.control_names)
-__variable_not_set(ocp::OptimalControlModel) = isnothing(ocp.variable_dimension) && isnothing(ocp.variable_names)
-__time_not_set(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && isnothing(ocp.final_time) && isnothing(ocp.time_name)
-__time_set(ocp::OptimalControlModel) = !__time_not_set(ocp)
-__dynamics_not_set(ocp::OptimalControlModel) = isnothing(ocp.dynamics)
-__objective_not_set(ocp::OptimalControlModel) = isnothing(ocp.lagrange) && isnothing(ocp.mayer) && isnothing(ocp.criterion)
-__isempty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && 
+function __is_state_not_set(ocp::OptimalControlModel)
+    conditions = [
+        isnothing(ocp.state_dimension),
+        isnothing(ocp.state_name),
+        isnothing(ocp.state_components_names)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.state_dimension)
+end
+function __is_control_not_set(ocp::OptimalControlModel) 
+    conditions = [
+        isnothing(ocp.control_dimension),
+        isnothing(ocp.control_name),
+        isnothing(ocp.control_components_names)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.control_dimension)
+end
+function __is_variable_not_set(ocp::OptimalControlModel) 
+    conditions = [
+        isnothing(ocp.variable_dimension),
+        isnothing(ocp.variable_name),
+        isnothing(ocp.variable_components_names)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.variable_dimension)
+end
+function __is_time_not_set(ocp::OptimalControlModel)
+    conditions = [
+        isnothing(ocp.initial_time),
+        isnothing(ocp.initial_time_name),
+        isnothing(ocp.final_time),
+        isnothing(ocp.final_time_name),
+        isnothing(ocp.time_name)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.initial_time)
+end
+__is_time_set(ocp::OptimalControlModel) = !__is_time_not_set(ocp)
+__is_dynamics_not_set(ocp::OptimalControlModel) = isnothing(ocp.dynamics)
+function __is_objective_not_set(ocp::OptimalControlModel)
+    conditions = [
+        isnothing(ocp.lagrange) && isnothing(ocp.mayer),
+        isnothing(ocp.criterion)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.criterion)
+end
+__is_empty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && 
+    isnothing(ocp.initial_time_name) &&
     isnothing(ocp.final_time) && 
+    isnothing(ocp.final_time_name) &&
     isnothing(ocp.time_name) && 
     isnothing(ocp.lagrange) && 
     isnothing(ocp.mayer) && 
     isnothing(ocp.criterion) && 
     isnothing(ocp.dynamics) && 
     isnothing(ocp.state_dimension) && 
-    isnothing(ocp.state_names) && 
+    isnothing(ocp.state_name) &&
+    isnothing(ocp.state_components_names) &&
     isnothing(ocp.control_dimension) && 
-    isnothing(ocp.control_names) && 
+    isnothing(ocp.control_name) &&
+    isnothing(ocp.control_components_names) &&
     isnothing(ocp.variable_dimension) && 
-    isnothing(ocp.variable_names) && 
+    isnothing(ocp.variable_name) &&
+    isnothing(ocp.variable_components_names) &&
     isempty(ocp.constraints)
 __is_initial_time_free(ocp) = ocp.initial_time isa Index
 __is_final_time_free(ocp) = ocp.final_time isa Index
@@ -517,19 +563,41 @@ Type of an optimal control solution.
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlSolution <: AbstractOptimalControlSolution 
-    state_dimension::Union{Nothing, Dimension}=nothing
-    control_dimension::Union{Nothing, Dimension}=nothing
     times::Union{Nothing, TimesDisc}=nothing
+    initial_time_name::Union{String, Nothing}=nothing
+    final_time_name::Union{String, Nothing}=nothing
     time_name::Union{String, Nothing}=nothing
-    state::Union{Nothing, Function}=nothing
-    state_names::Union{Vector{String}, Nothing}=nothing
-    adjoint::Union{Nothing, Function}=nothing
+    control_dimension::Union{Nothing, Dimension}=nothing
+    control_components_names::Union{Vector{String}, Nothing}=nothing
+    control_name::Union{String, Nothing}=nothing
     control::Union{Nothing, Function}=nothing
-    control_names::Union{Vector{String}, Nothing}=nothing
+    state_dimension::Union{Nothing, Dimension}=nothing
+    state_components_names::Union{Vector{String}, Nothing}=nothing
+    state_name::Union{String, Nothing}=nothing
+    state::Union{Nothing, Function}=nothing
+    variable_dimension::Union{Dimension,Nothing}=nothing
+    variable_components_names::Union{Vector{String}, Nothing}=nothing
+    variable_name::Union{String, Nothing}=nothing
+    costate::Union{Nothing, Function}=nothing
     objective::Union{Nothing, ctNumber}=nothing
     iterations::Union{Nothing, Integer}=nothing
     stopping::Union{Nothing, Symbol}=nothing # the stopping criterion
     message::Union{Nothing, String}=nothing # the message corresponding to the stopping criterion
     success::Union{Nothing, Bool}=nothing # whether or not the method has finished successfully: CN1, stagnation vs iterations max
     infos::Dict{Symbol, Any}=Dict{Symbol, Any}()
+end
+
+function Base.copy!(sol::OptimalControlSolution, ocp::OptimalControlModel)
+    sol.initial_time_name = ocp.initial_time_name
+    sol.final_time_name = ocp.final_time_name
+    sol.time_name = ocp.time_name
+    sol.control_dimension = ocp.control_dimension
+    sol.control_components_names = ocp.control_components_names
+    sol.control_name = ocp.control_name
+    sol.state_dimension = ocp.state_dimension
+    sol.state_components_names = ocp.state_components_names
+    sol.state_name = ocp.state_name
+    sol.variable_dimension = ocp.variable_dimension
+    sol.variable_components_names = ocp.variable_components_names
+    sol.variable_name = ocp.variable_name
 end
