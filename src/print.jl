@@ -13,7 +13,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
 
     # check if the problem is empty
     if __is_empty(ocp) 
-        printstyled(io, "Empty optimal control problem", bold=true) 
+        printstyled(io, "\nEmpty optimal control model") 
         return
     end
 
@@ -25,20 +25,20 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         __is_dynamics_not_set(ocp) ||
         __is_objective_not_set(ocp) ||
         (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
-        printstyled(io, "Incomplete optimal control problem\n", bold=true)
+        printstyled(io, "\nOptimal control model\n\n")
         is_incomplete = true
     end
 
     if is_incomplete
-        txt = " - times     " * (__is_time_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - state     " * (__is_state_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - control   " * (__is_control_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - dynamics  " * (__is_dynamics_not_set(ocp) ? "❌" : "✅") * "\n" *
-              " - objective " * (__is_objective_not_set(ocp) ? "❌" : "✅") * "\n"
-        print(io, txt)
-        if is_variable_dependent(ocp)
-            print(io, " - variable  " * (__is_variable_not_set(ocp) ? "❌" : "✅") * "\n")
-        end
+        header = [ "times", "state", "control", "dynamics", "objective" ]
+        is_variable_dependent(ocp) && push!(header, "variable")
+        data = hcat(__is_time_not_set(ocp) ? "❌" : "✅",
+                __is_state_not_set(ocp) ? "❌" : "✅", 
+                __is_control_not_set(ocp) ? "❌" : "✅",
+                __is_dynamics_not_set(ocp) ? "❌" : "✅",
+                __is_objective_not_set(ocp) ? "❌" : "✅")
+        is_variable_dependent(ocp) && push!(data, __is_variable_not_set(ocp) ? "❌" : "✅")
+        pretty_table(data, header=header, header_crayon=crayon"yellow")
         return
     end
 
@@ -78,7 +78,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
     #
-    printstyled(io, "Optimal control problem of the form:\n", bold=true)
+    printstyled(io, "\nOptimal control problem of the form:\n")
     println(io, "")
 
     # J
