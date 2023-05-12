@@ -29,11 +29,11 @@ function __check___is_time_set(ocp::OptimalControlModel)
     __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
 end
 
-function __check_variable_set(ocp::OptimalControlModel{T, Variable}) where {T}
+function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence, Variable})
     __is_variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before. Use variable!."))
 end
 
-function __check_variable_set(ocp::OptimalControlModel{T, NonVariable}) where {T}
+function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence, NonVariable})
     nothing
 end
 
