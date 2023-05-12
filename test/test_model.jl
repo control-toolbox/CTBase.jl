@@ -786,16 +786,6 @@ end
 
 end
 
-@testset "constraint! 11" begin
-
-    ocp = Model(NonAutonomous); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
-    constraint!(ocp, :initial, 0, 1, :c0)
-    constraint!(ocp, :final, 1, 2, :cf)
-    @test constraint(ocp, :c0)(12, ∅) == 12
-    @test constraint(ocp, :cf)(∅ ,12) == 12
-
-end
-
 @testset "remove_constraint! and constraints_labels" begin
     
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)

@@ -13,6 +13,7 @@ The model is defined by the following optional keyword argument:
 ```jldoctest
 julia> ocp = Model()
 julia> ocp = Model(autonomous=false)
+julia> ocp = Model(autonomous=false, variable=true)
 ```
 
 !!! note
