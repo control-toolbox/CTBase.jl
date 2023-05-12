@@ -37,7 +37,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
                 __is_control_not_set(ocp) ? "❌" : "✅",
                 __is_dynamics_not_set(ocp) ? "❌" : "✅",
                 __is_objective_not_set(ocp) ? "❌" : "✅")
-        is_variable_dependent(ocp) && push!(data, __is_variable_not_set(ocp) ? "❌" : "✅")
+        is_variable_dependent(ocp) && (data = hcat(data, __is_variable_not_set(ocp) ? "❌" : "✅"))
         pretty_table(data, header=header, header_crayon=crayon"yellow")
         return
     end

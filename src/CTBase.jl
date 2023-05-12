@@ -26,6 +26,7 @@ using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
+using MacroTools: inexpr
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -148,5 +149,8 @@ export replace_call, constraint_type
 
 # onepass
 export @def
+
+# repl
+isdefined(Base, :active_repl) && __init_repl()
 
 end

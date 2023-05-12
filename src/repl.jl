@@ -60,85 +60,99 @@ function __init_model_repl()
     model[:objective] = :()
     model[:constraints] = Expr[]
     model[:alias] = Expr[]
-    #model[:others] = Expr[]
 
-    #
-    history = Symbol[]
+    return model
 
-    return model, history
+end
+
+function __init_history_repl()
+
+    # 
+    history = ModelRepl[]
+
+    return history
 
 end
 
 # update model and history with a new expression
-function __update!(model::ModelRepl, history::Vector{Symbol}, type::Symbol, e::Expr)
-
-    # update history
-    if type ∈ [:time, :state, :control, :variable, :dynamics, :objective]
-        type ∉ history && push!(history, type)
-    elseif type == :alias
-        @match e begin
-            :( $e1 = $e2 ) => begin
-                for i ∈ 1:length(model[:alias])
-                    a = model[:alias][i]
-                    @match a begin
-                        :( $e1 = $a2 ) => (model[:alias][i] = e; return)
-                        _ => (println("\n Internal error, invalid alias: ", e); return)
-                    end
-                end
-            end
-            _ => (println("\n Internal error, invalid alias: ", e); return)
-        end
-        push!(history, type)
-    else
-        push!(history, type)
-    end
+function __update!(model::ModelRepl, type::Symbol, e::Expr)
 
     # update model
     @match type begin
-        :alias       => (push!(model[type], e))
+        :alias       => begin
+            to_add = true
+            @match e begin  # check if the alias is already defined
+                :( $e1 = $e2 ) => begin
+                    for i ∈ 1:length(model[:alias])
+                        a = model[:alias][i]
+                        @match a begin
+                            :( $a1 = $a2 ) => ((a1 == e1) && ((model[:alias][i] = e); to_add = false))
+                            _ => (println("\n Internal error, invalid alias: ", e); return)
+                        end
+                    end
+                end
+                _ => (println("\n Internal error, invalid alias: ", e); return)
+            end
+            to_add && push!(model[:alias], e) # add alias if it is not already defined
+        end
         :constraints => (push!(model[type], e))
-        _            => (model[type] = e)
+        :time        => (model[type] = e)
+        :state       => (model[type] = e)
+        :control     => (model[type] = e)
+        :variable    => (model[type] = e)
+        :dynamics    => (model[type] = e)
+        :objective   => (model[type] = e)
+        _ => (println("\n Internal error, invalid type: ", type); return)
     end
 
 end
 
-# current code
-function __code(model::ModelRepl, history::Vector{Symbol})
-    i_alias = 1
-    i_constraints = 1
-    m = Expr[]
-    for type ∈ history
-        @match type begin
-            :time        => (push!(m, model[type]))
-            :state       => (push!(m, model[type]))
-            :control     => (push!(m, model[type]))
-            :variable    => (push!(m, model[type]))
-            :dynamics    => (push!(m, model[type]))
-            :objective   => (push!(m, model[type]))
-            :alias       => (push!(m, model[type][i_alias]); i_alias += 1)
-            :constraints => (push!(m, model[type][i_constraints]); i_constraints += 1)
-            _            => ()
+function __split_alias(model::ModelRepl) # split alias in two vectors: one for those appearing in model[:time] and the others
+    alias_time  = Expr[]
+    alias_other = Expr[]
+    for a ∈ model[:alias]
+        @match a begin
+            :( $a1 = $a2 ) => begin
+                inexpr(model[:time], a1) ? push!(alias_time, a) : push!(alias_other, a)
+            end
+            _ => (println("\n Internal error, invalid alias: ", a); return)
         end
     end
+    return alias_time, alias_other
+end
+
+# current code
+function __code(model::ModelRepl)
+    m = Expr[]
+    alias_time, alias_other = __split_alias(model)
+    !isempty(alias_time)        && push!(m, alias_time...)
+    model[:time]        != :() && push!(m, model[:time])
+    model[:state]       != :() && push!(m, model[:state])
+    model[:control]     != :() && push!(m, model[:control])
+    model[:variable]    != :() && push!(m, model[:variable])
+    !isempty(alias_other)       && push!(m, alias_other...)
+    model[:dynamics]    != :() && push!(m, model[:dynamics])
+    model[:objective]   != :() && push!(m, model[:objective])
+    model[:constraints] != []  && push!(m, model[:constraints]...)
     return Expr(:block, m...)
 end
 
 # code with a new expression
-function __code(model::ModelRepl, history::Vector{Symbol}, type::Symbol, e::Expr)
+function __code(model::ModelRepl, type::Symbol, e::Expr)
     model_ = deepcopy(model) # copy model
-    history_ = deepcopy(history) # copy history
-    __update!(model_, history_, type, e) # update model and history
-    return __code(model_, history_) # get code
+    __update!(model_, type, e) # update model
+    return __code(model_) # get code
 end
 
 # add to model and history the new expression if it is valid
-function __add!(model::ModelRepl, history::Vector{Symbol}, type::Symbol, e::Expr, debug=false)
+function __add!(model::ModelRepl, history::Vector{ModelRepl}, type::Symbol, e::Expr, debug=false)
     debug && (println("\nParsing: ", e, " as ", type))
     try 
-        code = __code(model, history, type, e) # get code
+        code = __code(model, type, e) # get code
         eval(quote @def ocp $code end) # check code
         debug && (println("\nValid code: ", code))
-        __update!(model, history, type, e) # update model if code is valid
+        push!(history, deepcopy(model)) # update history: save previous model
+        __update!(model, type, e) # update model if code is valid
         debug && (println("\nUpdated model: ", model))
     catch ex
         println("\nParsing error: ", e)
@@ -154,28 +168,35 @@ function __println_code(code)
     println("\nocp = ", code)
 end
 
+function __undo!(history::Vector{ModelRepl})
+    model = length(history) > 0 ? pop!(history) : __init_model_repl()
+    return model
+end
+
 function __init_repl()
 
-    model, history = __init_model_repl()
-    solution = nothing
-    debug = false
-
-    display_code = false
+    model         = __init_model_repl()
+    history       = __init_history_repl()
+    solution      = nothing
+    debug         = false
+    display_code  = false
     display_model = false
 
     function parse_to_expr(s::AbstractString)
         e = Meta.parse(s)
         if e isa Symbol
+            e ∈ [:undo, :u] && (model=__undo!(history); display_code && (code=__code(model); __print_code(code)); return :())
             e ∈ [:clear, :c] && begin
-                model, history = __init_model_repl()
-                c = __code(model, history)
+                push!(history, deepcopy(model))
+                model = __init_model_repl()
+                c = __code(model)
                 return display_model ? :(@def ocp $c) : :()
             end
             e ∈ [:display] && ( display_model = true; display_code = true; return :() )
             e ∈ [:history, :h] && ( println("\nhistory = ", history); return :() )
             e ∈ [:debug, :d] && ( debug = !debug; return :() )
-            e ∈ [:ocp, :model] && ( code = __code(model, history); return :(@def ocp $code) )
-            e ∈ [:code, :c] && ( code = __code(model, history); __print_code(code); return :())
+            e ∈ [:ocp, :model] && ( code = __code(model); return :(@def ocp $code) )
+            e ∈ [:code, :c] && ( code = __code(model); __print_code(code); return :())
             e ∈ [:solve, :s] && ( solution = __solve(); print("\nsolved.") ;return :($solution) )
             e ∈ [:solution, :sol, :plot] && ( return !isnothing(solution) ? :(plot($solution)) : :(println("\nNo solution available.")))
             return e
@@ -218,10 +239,9 @@ function __init_repl()
                 :( $e_ → max                 ) => __add!(model, history, :objective, e, debug)
                 _ => (return e)
             end
-            code = __code(model, history)
+            code = __code(model)
             display_code && (display_model ? __println_code(code) : __print_code(code))
-            eval(quote @def ocp $code end)
-            return display_model ? :(ocp) : :()
+            return display_model ? (quote @def ocp $code end) : :()
         end
     end
 
@@ -235,4 +255,3 @@ function __init_repl()
 
 end
 
-isdefined(Base, :active_repl) && __init_repl()
