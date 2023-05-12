@@ -248,7 +248,7 @@ function __init_repl()
     initrepl(parse_to_expr,
             prompt_text="ct> ",
             prompt_color = :magenta,
-            start_key=')',
+            start_key='>',
             mode_name="ct_mode",
             valid_input_checker=complete_julia,
             startup_text=false)
