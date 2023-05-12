@@ -42,6 +42,8 @@ function __solve()
     sol.message = "ceci est un test"
     sol.success = true
 
+    sleep(4)
+
     return sol
 
 end
@@ -131,9 +133,9 @@ function __code(model::ModelRepl)
     model[:control]     != :() && push!(m, model[:control])
     model[:variable]    != :() && push!(m, model[:variable])
     !isempty(alias_other)       && push!(m, alias_other...)
+    model[:constraints] != []  && push!(m, model[:constraints]...)
     model[:dynamics]    != :() && push!(m, model[:dynamics])
     model[:objective]   != :() && push!(m, model[:objective])
-    model[:constraints] != []  && push!(m, model[:constraints]...)
     return Expr(:block, m...)
 end
 
@@ -198,8 +200,8 @@ function __init_repl()
             e ∈ [:ocp, :model] && ( code = __code(model); return :(@def ocp $code) )
             e ∈ [:code, :c] && ( code = __code(model); __print_code(code); return :())
             e ∈ [:solve, :s] && ( solution = __solve(); print("\nsolved.") ;return :($solution) )
-            e ∈ [:solution, :sol, :plot] && ( return !isnothing(solution) ? :(plot($solution)) : :(println("\nNo solution available.")))
-            return e
+            e ∈ [:solution, :sol, :plot] && ( return !isnothing(solution) ? :(plot($solution, size=(700, 600))) : :(println("\nNo solution available.")))
+            return :()
         else
             @match e begin
                 :( display = $e_             ) => begin
@@ -229,15 +231,13 @@ function __init_repl()
                 :( $a = $e1                  ) => __add!(model, history, :alias, e, debug)
                 :( ∂($x)($t) == $e1          ) => __add!(model, history, :dynamics, e, debug)
                 :( ∂($x)($t) == $e1, $label  ) => __add!(model, history, :dynamics, e, debug)
-                :( $x'($t) == $e1            ) => __add!(model, history, :dynamics, e, debug)
-                :( $x'($t) == $e1, $label    ) => __add!(model, history, :dynamics, e, debug)
                 :( $e1 == $e2                ) => __add!(model, history, :constraints, e, debug)
                 :( $e1 == $e2, $label        ) => __add!(model, history, :constraints, e, debug)
                 :( $e1 ≤  $e2 ≤  $e3         ) => __add!(model, history, :constraints, e, debug)
                 :( $e1 ≤  $e2 ≤  $e3, $label ) => __add!(model, history, :constraints, e, debug)
                 :( $e_ → min                 ) => __add!(model, history, :objective, e, debug)
                 :( $e_ → max                 ) => __add!(model, history, :objective, e, debug)
-                _ => (return e)
+                _ => (return :())
             end
             code = __code(model)
             display_code && (display_model ? __println_code(code) : __print_code(code))
