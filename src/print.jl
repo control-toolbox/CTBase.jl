@@ -12,10 +12,7 @@ Print the optimal control problem.
 function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
 
     # check if the problem is empty
-    if __is_empty(ocp) 
-        printstyled(io, "\nEmpty optimal control model") 
-        return
-    end
+    __is_empty(ocp) && return
 
     # check if the problem is complete: times, state, control, dynamics and variable (if Variable)
     is_incomplete = false
@@ -25,7 +22,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
         __is_dynamics_not_set(ocp) ||
         __is_objective_not_set(ocp) ||
         (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
-        printstyled(io, "\nOptimal control model\n\n")
+        #printstyled(io, "\nOptimal control model\n\n")
         is_incomplete = true
     end
 
@@ -38,6 +35,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
                 __is_dynamics_not_set(ocp) ? "❌" : "✅",
                 __is_objective_not_set(ocp) ? "❌" : "✅")
         is_variable_dependent(ocp) && (data = hcat(data, __is_variable_not_set(ocp) ? "❌" : "✅"))
+        println("")
         pretty_table(data, header=header, header_crayon=crayon"yellow")
         return
     end
@@ -204,7 +202,7 @@ $(TYPEDSIGNATURES)
 Prints the solution.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
-    nothing
+    print(io, typeof(sol))
 end
 
 function Base.show(io::IO, sol::OptimalControlSolution)
