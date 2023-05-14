@@ -86,7 +86,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
 
     # Mayer
     !isnothing(ocp.mayer) && print(io, "g(" *  bounds_args_names * ")")
-    (!isnothing(ocp.mayer) && !isnothing(ocp.lagrange)) && print(io, " +")
+    (!isnothing(ocp.mayer) && !isnothing(ocp.lagrange)) && print(io, " + ")
 
     # Lagrange
     if !isnothing(ocp.lagrange)
