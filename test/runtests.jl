@@ -12,6 +12,12 @@ const constraint_type = CTBase.constraint_type
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
+<<<<<<< HEAD
+=======
+        :model,
+        #=
+        :function,
+>>>>>>> constraints
         :callback,
         #:ctparser_utils,
         #:ctparser,

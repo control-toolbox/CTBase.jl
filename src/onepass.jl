@@ -1,7 +1,5 @@
 # onepass
 # todo:
-# - variable tests
-# - nonautonomous tests
 # - add single sided inequalities
 # - add reverse inequalities (≥)
 # - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
@@ -205,10 +203,12 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match constraint_type(e1, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
-        (:initial , nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
-        (:initial , val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
-        (:final   , nothing) => :( constraint!($ocp, :final  ,       $e2, $llabel) )
-        (:final   , val    ) => :( constraint!($ocp, :final  , $val, $e2, $llabel) )
+        (:initial, nothing) => :( constraint!($ocp, :initial,       $e2, $llabel) )
+        (:initial, val    ) => :( constraint!($ocp, :initial, $val, $e2, $llabel) )
+        (:final, nothing) => :( constraint!($ocp, :final,       $e2, $llabel) )
+        (:final, val    ) => :( constraint!($ocp, :final, $val, $e2, $llabel) )
+        (:variable_range, nothing) => :( constraint!($ocp, :variable,       $e2, $llabel) )
+        (:variable_range, val    ) => :( constraint!($ocp, :variable, $val, $e2, $llabel) )
         (:boundary, ee1    ) => begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
@@ -242,6 +242,15 @@ p_constraint_eq!(p, ocp, e1, e2, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :state, $gs, $e2, $llabel)
             end end
+        (:variable_fun, ee1) => begin
+            gs = gensym()
+	    args = [ p.v ]
+            quote
+                function $gs($(args...))
+                    $ee1
+                end
+                constraint!($ocp, :variable, $gs, $e2, $llabel)
+            end end
         (:mixed, ee1) => begin
             p.t_dep = p.t_dep || has(ee1, p.t)
             gs = gensym()
@@ -265,10 +274,10 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
-        (:initial , nothing) => :( constraint!($ocp, :initial,       $e1, $e3, $llabel) )
-        (:initial , val    ) => :( constraint!($ocp, :initial, $val, $e1, $e3, $llabel) )
-        (:final   , nothing) => :( constraint!($ocp, :final  ,       $e1, $e3, $llabel) )
-        (:final   , val    ) => :( constraint!($ocp, :final  , $val, $e1, $e3, $llabel) )
+        (:initial, nothing) => :( constraint!($ocp, :initial,       $e1, $e3, $llabel) )
+        (:initial, val    ) => :( constraint!($ocp, :initial, $val, $e1, $e3, $llabel) )
+        (:final, nothing) => :( constraint!($ocp, :final,       $e1, $e3, $llabel) )
+        (:final, val    ) => :( constraint!($ocp, :final, $val, $e1, $e3, $llabel) )
         (:boundary, ee2    ) => begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
@@ -305,6 +314,17 @@ p_constraint_ineq!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                     $ee2
                 end
                 constraint!($ocp, :state, $gs, $e1, $e3, $llabel)
+            end end
+        (:variable_range, nothing) => :( constraint!($ocp, :variable,       $e1, $e3, $llabel) )
+        (:variable_range, val    ) => :( constraint!($ocp, :variable, $val, $e1, $e3, $llabel) )
+        (:variable_fun, ee2) => begin
+            gs = gensym()
+	    args = [ p.v ]
+            quote
+                function $gs($(args...))
+                    $ee2
+                end
+                constraint!($ocp, :variable, $gs, $e1, $e3, $llabel)
             end end
         (:mixed, ee2) => begin
             p.t_dep = p.t_dep || has(ee2, p.t)

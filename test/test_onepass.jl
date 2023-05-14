@@ -1,5 +1,7 @@
 # test onepass
 # todo:
+# - test on variables + nlp_constraints 
+# - test non autonomous cases
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 function test_onepass()
@@ -666,6 +668,52 @@ u = 2
 x0 = 3
 xf = 4
 @test_throws UndefVarError o.mayer(x0, xf)
+
+
+@def o begin
+    v ∈ R², variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R, control
+    x(0) - v₁ == 0,             (1)
+    x(1) - v₁ == 0,             (2)
+    0 ≤ x(0) - v₁ ≤ 1,          (3)
+    0 ≤ x(1) - v₁ ≤ 1,          (4)
+    x(0) + x(1) - v₂ == 0,      (5)
+    0 ≤ x(0) + x(1) - v₂ ≤ 1,   (6)
+    x(t) - v₁ == 0,             (7)
+    u(t) - v₁ == 0,             (8)
+    z = v₁ + 2v₂               
+    0 ≤ x(t) - z ≤ 1,           (9)
+    0 ≤ u(t) - z ≤ 1,          (10)
+    0 ≤ x(t) + u(t) - z ≤ 1,   (11)
+    ẋ(t) == z * x(t) + 2u(t)       
+    v₁ == 1,                   (12)
+    0 ≤ v₁ ≤ 1,                (13)
+    z == 1,                    (14)
+    0 ≤ z ≤ 1,                 (15)
+    z * x(1) → min
+end
+x = 1
+x0 = 2
+xf = 3
+u = 4
+v = [ 5, 6 ]
+z = v[1] + 2v[2]
+@test constraint(o,  :eq1)(x0, xf, v) == x0 - v[1]
+@test constraint(o,  :eq2)(x0, xf, v) == xf - v[1]
+@test constraint(o,  :eq3)(x0, xf, v) == x0 - v[1]
+@test constraint(o,  :eq4)(x0, xf, v) == xf - v[1]
+@test constraint(o,  :eq5)(x0, xf, v) == x0 + xf - v[2]
+@test constraint(o,  :eq6)(x0, xf, v) == x0 + xf - v[2]
+@test constraint(o,  :eq7)(x, v) == x - v[1]
+@test constraint(o,  :eq9)(x, v) == x - z
+@test constraint(o, :eq10)(u, v) == u - z
+@test constraint(o, :eq11)(x, u, v) == x + u - z
+@test constraint(o, :eq12)(v) == v[1] 
+@test constraint(o, :eq13)(v) == v[1] 
+@test constraint(o, :eq14)(v) == v[1] + 2v[2]
+@test constraint(o, :eq15)(v) == v[1] + 2v[2]
 
 # tests from ct_parser.jl
 
