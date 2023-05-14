@@ -1,332 +1,392 @@
 # --------------------------------------------------------------------------------------------------
-function BoundaryConstraint(f::Function; variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(variable_dependence)
+function BoundaryConstraint(f::Function; variable::Bool = false)
+    variable_dependence = variable ? Variable : NonVariable
     return BoundaryConstraint{variable_dependence}(f)
 end
 
-function (F::BoundaryConstraint{:v_indep})(x0::State, xf::State)::ctVector
+function BoundaryConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return BoundaryConstraint{variable_dependence}(f)
+end
+
+function (F::BoundaryConstraint{NonVariable})(x0::State, xf::State)::ctVector
     return F.f(x0, xf)
 end
 
-function (F::BoundaryConstraint{:v_indep})(x0::State, xf::State, v::EmptyDecisionVariable)::ctVector
+function (F::BoundaryConstraint{NonVariable})(x0::State, xf::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x0, xf)
 end
 
-function (F::BoundaryConstraint{:v_dep})(x0::State, xf::State, v::DecisionVariable)::ctVector
+function (F::BoundaryConstraint{Variable})(x0::State, xf::State, v::DecisionVariable)::ctVector
     return F.f(x0, xf, v)
 end
 
 # --------------------------------------------------------------------------------------------------
-function Mayer(f::Function; variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(variable_dependence)
+function Mayer(f::Function; variable::Bool = false)
+    variable_dependence = variable ? Variable : NonVariable
     return Mayer{variable_dependence}(f)
 end
 
-function (F::Mayer{:v_indep})(x0::State, xf::State)::ctNumber
+function Mayer(f::Function, dependences::DataType...)
+    @__check(dependences)
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return Mayer{variable_dependence}(f)
+end
+
+function (F::Mayer{NonVariable})(x0::State, xf::State)::ctNumber
     return F.f(x0, xf)
 end
 
-function (F::Mayer{:v_indep})(x0::State, xf::State, v::EmptyDecisionVariable)::ctNumber
+function (F::Mayer{NonVariable})(x0::State, xf::State, v::EmptyDecisionVariable)::ctNumber
     return F.f(x0, xf)
 end
 
-function (F::Mayer{:v_dep})(x0::State, xf::State, v::DecisionVariable)::ctNumber
+function (F::Mayer{Variable})(x0::State, xf::State, v::DecisionVariable)::ctNumber
     return F.f(x0, xf, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function Hamiltonian(f::Function; 
-    time_dependence::Symbol=__fun_time_dependence(),
-    variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return Hamiltonian{time_dependence, variable_dependence}(f)
 end
 
-function (F::Hamiltonian{:t_indep, :v_indep})(x::State, p::Costate)::ctNumber
+function Hamiltonian(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return Hamiltonian{time_dependence, variable_dependence}(f)
+end
+
+function (F::Hamiltonian{Autonomous, NonVariable})(x::State, p::Costate)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
+function (F::Hamiltonian{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctNumber
+function (F::Hamiltonian{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctNumber
     return F.f(x, p, v)
 end
 
-function (F::Hamiltonian{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
+function (F::Hamiltonian{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
     return F.f(x, p, v)
 end
 
-function (F::Hamiltonian{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctNumber
+function (F::Hamiltonian{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate)::ctNumber
     return F.f(t, x, p)
 end
 
-function (F::Hamiltonian{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
+function (F::Hamiltonian{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
     return F.f(t, x, p)
 end
 
-function (F::Hamiltonian{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
+function (F::Hamiltonian{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
     return F.f(t, x, p, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function HamiltonianVectorField(f::Function; 
-    time_dependence::Symbol=__fun_time_dependence(),
-    variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_indep})(x::State, p::Costate)::ctVector
+function HamiltonianVectorField(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return HamiltonianVectorField{time_dependence, variable_dependence}(f)
+end
+
+function (F::HamiltonianVectorField{Autonomous, NonVariable})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctVector
+function (F::HamiltonianVectorField{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
+function (F::HamiltonianVectorField{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::HamiltonianVectorField{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(t, x, p, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function VectorField(f::Function; 
-    time_dependence::Symbol=__fun_time_dependence(),
-    variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return VectorField{time_dependence, variable_dependence}(f)
 end
 
-function (F::VectorField{:t_indep, :v_indep})(x::State)::ctVector
+function VectorField(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return VectorField{time_dependence, variable_dependence}(f)
+end
+
+function (F::VectorField{Autonomous, NonVariable})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::VectorField{:t_indep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
+function (F::VectorField{Autonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
 
-function (F::VectorField{:t_indep, :v_dep})(x::State, v::DecisionVariable)::ctVector
+function (F::VectorField{Autonomous, Variable})(x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::VectorField{:t_indep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
+function (F::VectorField{Autonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::VectorField{:t_dep, :v_indep})(t::Time, x::State)::ctVector
+function (F::VectorField{NonAutonomous, NonVariable})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::VectorField{:t_dep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
+function (F::VectorField{NonAutonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
-function (F::VectorField{:t_dep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
+function (F::VectorField{NonAutonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(t, x, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function Lagrange(f::Function; 
-    time_dependence::Symbol=__fun_time_dependence(),
-    variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
-function (F::Lagrange{:t_indep, :v_indep})(x::State, u::Control)::ctNumber
+function Lagrange(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return Lagrange{time_dependence, variable_dependence}(f)
+end
+
+function (F::Lagrange{Autonomous, NonVariable})(x::State, u::Control)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
+function (F::Lagrange{Autonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{:t_indep, :v_dep})(x::State, u::Control, v::DecisionVariable)::ctNumber
+function (F::Lagrange{Autonomous, Variable})(x::State, u::Control, v::DecisionVariable)::ctNumber
     return F.f(x, u, v)
 end
 
-function (F::Lagrange{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
+function (F::Lagrange{Autonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
     return F.f(x, u, v)
 end
 
-function (F::Lagrange{:t_dep, :v_indep})(t::Time, x::State, u::Control)::ctNumber
+function (F::Lagrange{NonAutonomous, NonVariable})(t::Time, x::State, u::Control)::ctNumber
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
+function (F::Lagrange{NonAutonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
+function (F::Lagrange{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
     return F.f(t, x, u, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function Dynamics(f::Function; 
-    time_dependence::Symbol=__fun_time_dependence(),
-    variable_dependence::Symbol=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return Dynamics{time_dependence, variable_dependence}(f)
 end
 
-function (F::Dynamics{:t_indep, :v_indep})(x::State, u::Control)::ctVector
+function Dynamics(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return Dynamics{time_dependence, variable_dependence}(f)
+end
+
+function (F::Dynamics{Autonomous, NonVariable})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
+function (F::Dynamics{Autonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{:t_indep, :v_dep})(x::State, u::Control, v::DecisionVariable)::ctVector
+function (F::Dynamics{Autonomous, Variable})(x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::Dynamics{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
+function (F::Dynamics{Autonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::Dynamics{:t_dep, :v_indep})(t::Time, x::State, u::Control)::ctVector
+function (F::Dynamics{NonAutonomous, NonVariable})(t::Time, x::State, u::Control)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
+function (F::Dynamics{NonAutonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
+function (F::Dynamics{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(t, x, u, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function StateConstraint(f::Function; 
-    time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-    variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return StateConstraint{time_dependence, variable_dependence}(f)
 end
 
-function (F::StateConstraint{:t_indep, :v_indep})(x::State)::ctVector
+function StateConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return StateConstraint{time_dependence, variable_dependence}(f)
+end
+
+function (F::StateConstraint{Autonomous, NonVariable})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::StateConstraint{:t_indep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
+function (F::StateConstraint{Autonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
 
-function (F::StateConstraint{:t_indep, :v_dep})(x::State, v::DecisionVariable)::ctVector
+function (F::StateConstraint{Autonomous, Variable})(x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::StateConstraint{:t_indep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
+function (F::StateConstraint{Autonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::StateConstraint{:t_dep, :v_indep})(t::Time, x::State)::ctVector
+function (F::StateConstraint{NonAutonomous, NonVariable})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{:t_dep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
+function (F::StateConstraint{NonAutonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{:t_dep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
+function (F::StateConstraint{NonAutonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(t, x, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function ControlConstraint(f::Function; 
-    time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-    variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
-function (F::ControlConstraint{:t_indep, :v_indep})(u::Control)::ctVector
+function ControlConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return ControlConstraint{time_dependence, variable_dependence}(f)
+end
+
+function (F::ControlConstraint{Autonomous, NonVariable})(u::Control)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{:t_indep, :v_indep})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
+function (F::ControlConstraint{Autonomous, NonVariable})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{:t_indep, :v_dep})(u::Control, v::DecisionVariable)::ctVector
+function (F::ControlConstraint{Autonomous, Variable})(u::Control, v::DecisionVariable)::ctVector
     return F.f(u, v)
 end
 
-function (F::ControlConstraint{:t_indep, :v_dep})(t::Time, u::Control, v::DecisionVariable)::ctVector
+function (F::ControlConstraint{Autonomous, Variable})(t::Time, u::Control, v::DecisionVariable)::ctVector
     return F.f(u, v)
 end
 
-function (F::ControlConstraint{:t_dep, :v_indep})(t::Time, u::Control)::ctVector
+function (F::ControlConstraint{NonAutonomous, NonVariable})(t::Time, u::Control)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{:t_dep, :v_indep})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
+function (F::ControlConstraint{NonAutonomous, NonVariable})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{:t_dep, :v_dep})(t::Time, u::Control, v::DecisionVariable)::ctVector
+function (F::ControlConstraint{NonAutonomous, Variable})(t::Time, u::Control, v::DecisionVariable)::ctVector
     return F.f(t, u, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function MixedConstraint(f::Function; 
-    time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-    variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
-function (F::MixedConstraint{:t_indep, :v_indep})(x::State, u::Control)::ctVector
+function MixedConstraint(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return MixedConstraint{time_dependence, variable_dependence}(f)
+end
+
+function (F::MixedConstraint{Autonomous, NonVariable})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{:t_indep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
+function (F::MixedConstraint{Autonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{:t_indep, :v_dep})(x::State, u::Control, v::DecisionVariable)::ctVector
+function (F::MixedConstraint{Autonomous, Variable})(x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::MixedConstraint{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
+function (F::MixedConstraint{Autonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::MixedConstraint{:t_dep, :v_indep})(t::Time, x::State, u::Control)::ctVector
+function (F::MixedConstraint{NonAutonomous, NonVariable})(t::Time, x::State, u::Control)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::MixedConstraint{:t_dep, :v_indep})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
+function (F::MixedConstraint{NonAutonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::MixedConstraint{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
+function (F::MixedConstraint{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
     return F.f(t, x, u, v)
 end
 
@@ -337,111 +397,129 @@ end
 
 # --------------------------------------------------------------------------------------------------
 function FeedbackControl(f::Function; 
-    time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-    variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
-function (F::FeedbackControl{:t_indep, :v_indep})(x::State)::ctVector
+function FeedbackControl(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return FeedbackControl{time_dependence, variable_dependence}(f)
+end
+
+function (F::FeedbackControl{Autonomous, NonVariable})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::FeedbackControl{:t_indep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
+function (F::FeedbackControl{Autonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
 
-function (F::FeedbackControl{:t_indep, :v_dep})(x::State, v::DecisionVariable)::ctVector
+function (F::FeedbackControl{Autonomous, Variable})(x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::FeedbackControl{:t_indep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
+function (F::FeedbackControl{Autonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(x, v)
 end
 
-function (F::FeedbackControl{:t_dep, :v_indep})(t::Time, x::State)::ctVector
+function (F::FeedbackControl{NonAutonomous, NonVariable})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{:t_dep, :v_indep})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
+function (F::FeedbackControl{NonAutonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{:t_dep, :v_dep})(t::Time, x::State, v::DecisionVariable)::ctVector
+function (F::FeedbackControl{NonAutonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
     return F.f(t, x, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function ControlLaw(f::Function; 
-    time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-    variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
-function (F::ControlLaw{:t_indep, :v_indep})(x::State, p::Costate)::ctVector
+function ControlLaw(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return ControlLaw{time_dependence, variable_dependence}(f)
+end
+
+function (F::ControlLaw{Autonomous, NonVariable})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
+function (F::ControlLaw{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::ControlLaw{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::ControlLaw{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctVector
+function (F::ControlLaw{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
+function (F::ControlLaw{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::ControlLaw{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(t, x, p, v)
 end
 
 # --------------------------------------------------------------------------------------------------
 function Multiplier(f::Function; 
-    time_dependence::Union{Nothing,Symbol}=__fun_time_dependence(),
-    variable_dependence::Union{Nothing,Symbol}=__fun_variable_dependence())
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? Variable : NonVariable
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 
-function (F::Multiplier{:t_indep, :v_indep})(x::State, p::Costate)::ctVector
+function Multiplier(f::Function, dependences::DataType...)
+    @__check(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    return Multiplier{time_dependence, variable_dependence}(f)
+end
+
+function (F::Multiplier{Autonomous, NonVariable})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{:t_indep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
+function (F::Multiplier{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{:t_indep, :v_dep})(x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::Multiplier{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::Multiplier{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{:t_dep, :v_indep})(t::Time, x::State, p::Costate)::ctVector
+function (F::Multiplier{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{:t_dep, :v_indep})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
+function (F::Multiplier{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::Multiplier{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
     return F.f(t, x, p, v)
 end

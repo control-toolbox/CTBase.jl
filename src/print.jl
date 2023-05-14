@@ -9,7 +9,7 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
+function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence})
 
     # check if the problem is empty
     if __is_empty(ocp) 

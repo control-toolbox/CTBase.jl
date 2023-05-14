@@ -90,8 +90,8 @@ function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split,
     # parameters
     n = sol.state_dimension
     m = sol.control_dimension
-    x_labels = sol.state_names
-    u_labels = sol.control_names
+    x_labels = sol.state_components_names
+    u_labels = sol.control_components_names
     t_label = sol.time_name
 
     if layout==:group
@@ -217,11 +217,11 @@ corresponding respectively to the argument `xx` and the argument `yy`.
             i = yy[2]
         end
         if s==:state
-            label --> sol.state_names[i]
+            label --> sol.state_components_names[i]
         elseif s==:control
-            label --> sol.control_names[i]
+            label --> sol.control_components_names[i]
         elseif s==:costate
-            label --> "p"*sol.state_names[i]
+            label --> "p"*sol.state_components_names[i]
         end
         # change ylims if the gap between min and max is less than a tol
         tol = 1e-3
