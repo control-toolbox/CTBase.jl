@@ -11,9 +11,6 @@ Print the optimal control problem.
 """
 function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
 
-    println("\n**** debug: no print of ocp right now, check print.jl")
-    return
-
     # check if the problem is empty
     if __is_empty(ocp) 
         printstyled(io, "Empty optimal control problem", bold=true) 
