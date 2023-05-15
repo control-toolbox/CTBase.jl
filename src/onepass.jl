@@ -37,8 +37,8 @@ end
 
 __throw(ex, n, line) = begin
     quote
-        println("Line ", $n, ": ", $line)
-        throw(ParsingError($ex))
+        info = string("\nLine ", $n, ": ", $line)
+        throw(ParsingError(info * "\n" * $ex))
     end
 end
 
@@ -466,18 +466,20 @@ end
 macro def(ocp, e, log=false)
     try
         p0 = ParsingInfo()
-	parse!(p0, ocp, e; log=false)
+	    parse!(p0, ocp, e; log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
-	code = parse!(p, ocp, e; log=log)
-	init = @match (__t_dep(p), __v_dep(p)) begin
+	    code = parse!(p, ocp, e; log=log)
+	    init = @match (__t_dep(p), __v_dep(p)) begin
 	    (false, false) => :( $ocp = Model() )
 	    (true , false) => :( $ocp = Model(time_dependence=:t_dep) )
 	    (false, true ) => :( $ocp = Model(variable_dependence=:v_dep) )
 	    _              => :( $ocp = Model(time_dependence=:t_dep, variable_dependence=:v_dep) )
-	end
+	    end
         code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
     catch ex
         :( throw($ex) ) # can be caught by user
     end
 end
+    
+    
