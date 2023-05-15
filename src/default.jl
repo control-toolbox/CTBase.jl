@@ -13,10 +13,10 @@ $(TYPEDSIGNATURES)
 
 Used to set the default value of the variable dependence of the functions.
 
-The default value is `NonVariable`, which means that the functions are considered variable independent.
-The other possible variable dependence is `Variable`, which means that the functions are considered variable dependent.
+The default value is `Fixed`, which means that the functions are considered variable independent.
+The other possible variable dependence is `NonFixed`, which means that the functions are considered variable dependent.
 """
-__fun_variable_dependence() = NonVariable
+__fun_variable_dependence() = Fixed
 
 """
 $(TYPEDSIGNATURES)
@@ -32,11 +32,11 @@ __ocp_time_dependence() = Autonomous
 $(TYPEDSIGNATURES)
 
 Used to set the default value of the variable dependence of the Optimal Control Problem.
-The default value is `NonVariable`, which means that the Optimal Control Problem is considered variable independent.
-The other possible variable dependence is `Variable`, which means that all the functions used to define the
+The default value is `Fixed`, which means that the Optimal Control Problem is considered variable independent.
+The other possible variable dependence is `NonFixed`, which means that all the functions used to define the
 Optimal Control Problem are considered variable dependent.
 """
-__ocp_variable_dependence() = NonVariable
+__ocp_variable_dependence() = Fixed
 
 """
 $(TYPEDSIGNATURES)

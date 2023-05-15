@@ -108,13 +108,10 @@ include("repl.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-<<<<<<< HEAD
-export States, Costates, Controls, State, Costate, Control, DecisionVariable, Dimension, Index
-export TimeDependence, Autonomous, NonAutonomous
-export VariableDependence, Variable, NonVariable
-=======
+
 export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
->>>>>>> constraints
+export TimeDependence, Autonomous, NonAutonomous
+export VariableDependence, NonFixed, Fixed
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
