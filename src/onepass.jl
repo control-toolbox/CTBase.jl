@@ -37,8 +37,8 @@ end
 
 __throw(ex, n, line) = begin
     quote
-        println("Line ", $n, ": ", $line)
-        throw(ParsingError($ex))
+        info = string("\nLine ", $n, ": ", $line)
+        throw(ParsingError(info * "\n" * $ex))
     end
 end
 
@@ -85,8 +85,6 @@ parse!(p, ocp, e; log=false) = begin
         :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
         :( ∂($x)($t) == $e1          ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( ∂($x)($t) == $e1, $label  ) => p_dynamics!(p, ocp, x, t, e1, label; log)
-        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log) # todo: remove
-        :( $x'($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log) # todo: remove
         :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2       ; log)
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
@@ -466,10 +464,10 @@ end
 macro def(ocp, e, log=false)
     try
         p0 = ParsingInfo()
-	parse!(p0, ocp, e; log=false)
+	    parse!(p0, ocp, e; log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
-	code = parse!(p, ocp, e; log=log)
-	init = @match (__t_dep(p), __v_dep(p)) begin
+	    code = parse!(p, ocp, e; log=log)
+	    init = @match (__t_dep(p), __v_dep(p)) begin
 	    (false, false) => :( $ocp = Model() )
 	    (true , false) => :( $ocp = Model(autonomous=false) )
 	    (false, true ) => :( $ocp = Model(variable=true) )
@@ -481,3 +479,5 @@ macro def(ocp, e, log=false)
         :( throw($ex) ) # can be caught by user
     end
 end
+    
+    

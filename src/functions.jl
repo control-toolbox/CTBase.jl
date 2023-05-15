@@ -14,15 +14,11 @@ function (F::BoundaryConstraint{NonVariable})(x0::State, xf::State)::ctVector
     return F.f(x0, xf)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::BoundaryConstraint{NonVariable})(x0::State, xf::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x0, xf)
 end
 
 function (F::BoundaryConstraint{Variable})(x0::State, xf::State, v::DecisionVariable)::ctVector
-=======
-function (F::BoundaryConstraint{:v_dep})(x0::State, xf::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(x0, xf, v)
 end
 
@@ -42,15 +38,11 @@ function (F::Mayer{NonVariable})(x0::State, xf::State)::ctNumber
     return F.f(x0, xf)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Mayer{NonVariable})(x0::State, xf::State, v::EmptyDecisionVariable)::ctNumber
     return F.f(x0, xf)
 end
 
 function (F::Mayer{Variable})(x0::State, xf::State, v::DecisionVariable)::ctNumber
-=======
-function (F::Mayer{:v_dep})(x0::State, xf::State, v::Variable)::ctNumber
->>>>>>> constraints:src/functions.jl
     return F.f(x0, xf, v)
 end
 
@@ -73,7 +65,6 @@ function (F::Hamiltonian{Autonomous, NonVariable})(x::State, p::Costate)::ctNumb
     return F.f(x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Hamiltonian{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
     return F.f(x, p)
 end
@@ -83,13 +74,6 @@ function (F::Hamiltonian{Autonomous, Variable})(x::State, p::Costate, v::Decisio
 end
 
 function (F::Hamiltonian{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
-=======
-function (F::Hamiltonian{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctNumber
-    return F.f(x, p, v)
-end
-
-function (F::Hamiltonian{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
->>>>>>> constraints:src/functions.jl
     return F.f(x, p, v)
 end
 
@@ -97,15 +81,11 @@ function (F::Hamiltonian{NonAutonomous, NonVariable})(t::Time, x::State, p::Cost
     return F.f(t, x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Hamiltonian{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctNumber
     return F.f(t, x, p)
 end
 
 function (F::Hamiltonian{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctNumber
-=======
-function (F::Hamiltonian{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, p, v)
 end
 
@@ -128,23 +108,15 @@ function (F::HamiltonianVectorField{Autonomous, NonVariable})(x::State, p::Costa
     return F.f(x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::HamiltonianVectorField{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, Variable})(x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
-=======
-function (F::HamiltonianVectorField{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctVector
-    return F.f(x, p, v)
-end
-
-function (F::HamiltonianVectorField{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
+function (F::HamiltonianVectorField{Autonomous, Variable})(t::Time, x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -152,15 +124,11 @@ function (F::HamiltonianVectorField{NonAutonomous, NonVariable})(t::Time, x::Sta
     return F.f(t, x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::HamiltonianVectorField{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
 function (F::HamiltonianVectorField{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
-=======
-function (F::HamiltonianVectorField{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, p, v)
 end
 
@@ -183,7 +151,6 @@ function (F::VectorField{Autonomous, NonVariable})(x::State)::ctVector
     return F.f(x)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::VectorField{Autonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
@@ -193,13 +160,6 @@ function (F::VectorField{Autonomous, Variable})(x::State, v::DecisionVariable)::
 end
 
 function (F::VectorField{Autonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
-=======
-function (F::VectorField{:t_indep, :v_dep})(x::State, v::Variable)::ctVector
-    return F.f(x, v)
-end
-
-function (F::VectorField{:t_indep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(x, v)
 end
 
@@ -207,15 +167,11 @@ function (F::VectorField{NonAutonomous, NonVariable})(t::Time, x::State)::ctVect
     return F.f(t, x)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::VectorField{NonAutonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
 function (F::VectorField{NonAutonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
-=======
-function (F::VectorField{:t_dep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, v)
 end
 
@@ -238,7 +194,6 @@ function (F::Lagrange{Autonomous, NonVariable})(x::State, u::Control)::ctNumber
     return F.f(x, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Lagrange{Autonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
     return F.f(x, u)
 end
@@ -248,13 +203,6 @@ function (F::Lagrange{Autonomous, Variable})(x::State, u::Control, v::DecisionVa
 end
 
 function (F::Lagrange{Autonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
-=======
-function (F::Lagrange{:t_indep, :v_dep})(x::State, u::Control, v::Variable)::ctNumber
-    return F.f(x, u, v)
-end
-
-function (F::Lagrange{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctNumber
->>>>>>> constraints:src/functions.jl
     return F.f(x, u, v)
 end
 
@@ -262,15 +210,11 @@ function (F::Lagrange{NonAutonomous, NonVariable})(t::Time, x::State, u::Control
     return F.f(t, x, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Lagrange{NonAutonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctNumber
     return F.f(t, x, u)
 end
 
 function (F::Lagrange{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctNumber
-=======
-function (F::Lagrange{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctNumber
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, u, v)
 end
 
@@ -293,7 +237,6 @@ function (F::Dynamics{Autonomous, NonVariable})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Dynamics{Autonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(x, u)
 end
@@ -303,13 +246,6 @@ function (F::Dynamics{Autonomous, Variable})(x::State, u::Control, v::DecisionVa
 end
 
 function (F::Dynamics{Autonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
-=======
-function (F::Dynamics{:t_indep, :v_dep})(x::State, u::Control, v::Variable)::ctVector
-    return F.f(x, u, v)
-end
-
-function (F::Dynamics{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(x, u, v)
 end
 
@@ -317,15 +253,11 @@ function (F::Dynamics{NonAutonomous, NonVariable})(t::Time, x::State, u::Control
     return F.f(t, x, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Dynamics{NonAutonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, u)
 end
 
 function (F::Dynamics{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
-=======
-function (F::Dynamics{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, u, v)
 end
 
@@ -348,7 +280,6 @@ function (F::StateConstraint{Autonomous, NonVariable})(x::State)::ctVector
     return F.f(x)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::StateConstraint{Autonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
@@ -358,13 +289,6 @@ function (F::StateConstraint{Autonomous, Variable})(x::State, v::DecisionVariabl
 end
 
 function (F::StateConstraint{Autonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
-=======
-function (F::StateConstraint{:t_indep, :v_dep})(x::State, v::Variable)::ctVector
-    return F.f(x, v)
-end
-
-function (F::StateConstraint{:t_indep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(x, v)
 end
 
@@ -372,15 +296,11 @@ function (F::StateConstraint{NonAutonomous, NonVariable})(t::Time, x::State)::ct
     return F.f(t, x)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::StateConstraint{NonAutonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
 function (F::StateConstraint{NonAutonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
-=======
-function (F::StateConstraint{:t_dep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, v)
 end
 
@@ -403,7 +323,6 @@ function (F::ControlConstraint{Autonomous, NonVariable})(u::Control)::ctVector
     return F.f(u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::ControlConstraint{Autonomous, NonVariable})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(u)
 end
@@ -413,13 +332,6 @@ function (F::ControlConstraint{Autonomous, Variable})(u::Control, v::DecisionVar
 end
 
 function (F::ControlConstraint{Autonomous, Variable})(t::Time, u::Control, v::DecisionVariable)::ctVector
-=======
-function (F::ControlConstraint{:t_indep, :v_dep})(u::Control, v::Variable)::ctVector
-    return F.f(u, v)
-end
-
-function (F::ControlConstraint{:t_indep, :v_dep})(t::Time, u::Control, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(u, v)
 end
 
@@ -427,15 +339,11 @@ function (F::ControlConstraint{NonAutonomous, NonVariable})(t::Time, u::Control)
     return F.f(t, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::ControlConstraint{NonAutonomous, NonVariable})(t::Time, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, u)
 end
 
 function (F::ControlConstraint{NonAutonomous, Variable})(t::Time, u::Control, v::DecisionVariable)::ctVector
-=======
-function (F::ControlConstraint{:t_dep, :v_dep})(t::Time, u::Control, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(t, u, v)
 end
 
@@ -458,7 +366,6 @@ function (F::MixedConstraint{Autonomous, NonVariable})(x::State, u::Control)::ct
     return F.f(x, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::MixedConstraint{Autonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(x, u)
 end
@@ -468,13 +375,6 @@ function (F::MixedConstraint{Autonomous, Variable})(x::State, u::Control, v::Dec
 end
 
 function (F::MixedConstraint{Autonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
-=======
-function (F::MixedConstraint{:t_indep, :v_dep})(x::State, u::Control, v::Variable)::ctVector
-    return F.f(x, u, v)
-end
-
-function (F::MixedConstraint{:t_indep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(x, u, v)
 end
 
@@ -482,20 +382,16 @@ function (F::MixedConstraint{NonAutonomous, NonVariable})(t::Time, x::State, u::
     return F.f(t, x, u)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::MixedConstraint{NonAutonomous, NonVariable})(t::Time, x::State, u::Control, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::MixedConstraint{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::DecisionVariable)::ctVector
-=======
-function (F::MixedConstraint{:t_dep, :v_dep})(t::Time, x::State, u::Control, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
+function (F::MixedConstraint{NonAutonomous, Variable})(t::Time, x::State, u::Control, v::Decisionvariable)::ctVector
     return F.f(t, x, u, v)
 end
 
 # --------------------------------------------------------------------------------------------------
-function (F::VariableConstraint)(v::Variable)::ctVector
+function (F::VariableConstraint)(v::Decisionvariable)::ctVector
     return F.f(v)
 end
 
@@ -518,7 +414,6 @@ function (F::FeedbackControl{Autonomous, NonVariable})(x::State)::ctVector
     return F.f(x)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::FeedbackControl{Autonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(x)
 end
@@ -528,13 +423,6 @@ function (F::FeedbackControl{Autonomous, Variable})(x::State, v::DecisionVariabl
 end
 
 function (F::FeedbackControl{Autonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
-=======
-function (F::FeedbackControl{:t_indep, :v_dep})(x::State, v::Variable)::ctVector
-    return F.f(x, v)
-end
-
-function (F::FeedbackControl{:t_indep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(x, v)
 end
 
@@ -542,15 +430,11 @@ function (F::FeedbackControl{NonAutonomous, NonVariable})(t::Time, x::State)::ct
     return F.f(t, x)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::FeedbackControl{NonAutonomous, NonVariable})(t::Time, x::State, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x)
 end
 
 function (F::FeedbackControl{NonAutonomous, Variable})(t::Time, x::State, v::DecisionVariable)::ctVector
-=======
-function (F::FeedbackControl{:t_dep, :v_dep})(t::Time, x::State, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
     return F.f(t, x, v)
 end
 
@@ -573,23 +457,15 @@ function (F::ControlLaw{Autonomous, NonVariable})(x::State, p::Costate)::ctVecto
     return F.f(x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::ControlLaw{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::ControlLaw{:Autonomous, :Variable})(x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
-=======
-function (F::ControlLaw{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctVector
-    return F.f(x, p, v)
-end
-
-function (F::ControlLaw{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
+function (F::ControlLaw{:Autonomous, :Variable})(t::Time, x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -597,15 +473,11 @@ function (F::ControlLaw{NonAutonomous, NonVariable})(t::Time, x::State, p::Costa
     return F.f(t, x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::ControlLaw{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
-=======
-function (F::ControlLaw{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
+function (F::ControlLaw{:NonAutonomous, :Variable})(t::Time, x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(t, x, p, v)
 end
 
@@ -628,23 +500,15 @@ function (F::Multiplier{Autonomous, NonVariable})(x::State, p::Costate)::ctVecto
     return F.f(x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Multiplier{Autonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{Autonomous, Variable})(x::State, p::Costate, v::DecisionVariable)::ctVector
+function (F::Multiplier{:Autonomous, :Variable})(x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{Autonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
-=======
-function (F::Multiplier{:t_indep, :v_dep})(x::State, p::Costate, v::Variable)::ctVector
-    return F.f(x, p, v)
-end
-
-function (F::Multiplier{:t_indep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
+function (F::Multiplier{:Autonomous, :Variable})(t::Time, x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -652,14 +516,10 @@ function (F::Multiplier{NonAutonomous, NonVariable})(t::Time, x::State, p::Costa
     return F.f(t, x, p)
 end
 
-<<<<<<< HEAD:src/function.jl
 function (F::Multiplier{NonAutonomous, NonVariable})(t::Time, x::State, p::Costate, v::EmptyDecisionVariable)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{NonAutonomous, Variable})(t::Time, x::State, p::Costate, v::DecisionVariable)::ctVector
-=======
-function (F::Multiplier{:t_dep, :v_dep})(t::Time, x::State, p::Costate, v::Variable)::ctVector
->>>>>>> constraints:src/functions.jl
+function (F::Multiplier{:NonAutonomous, :Variable})(t::Time, x::State, p::Costate, v::Decisionvariable)::ctVector
     return F.f(t, x, p, v)
 end

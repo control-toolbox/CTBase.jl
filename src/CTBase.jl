@@ -24,6 +24,9 @@ import Plots: plot, plot! # import instead of using to overload the plot and plo
 using Printf # to print an OptimalControlModel
 using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
+using PrettyTables # to print a table
+using ReplMaker
+using MacroTools: inexpr
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -101,6 +104,7 @@ include("model.jl")
 include("ctparser_utils.jl")
 #include("ctparser.jl")
 include("onepass.jl")
+include("repl.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
@@ -147,5 +151,8 @@ export replace_call, constraint_type
 
 # onepass
 export @def
+
+# repl
+isdefined(Base, :active_repl) && __init_repl()
 
 end
