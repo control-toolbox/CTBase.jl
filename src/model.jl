@@ -475,9 +475,6 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbo
         throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
     end
 
-    # range
-    rg = rg isa Index ? rg.val : rg
-
     # check that rg, lb and ub are consistent
     txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
     (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
@@ -1025,7 +1022,7 @@ function constraint(ocp::OptimalControlModel{T, V}, label::Symbol) where {T <: T
         (:mixed   , f::MixedConstraint,    _, _) => return f
         (:variable, f::VariableConstraint, _, _) => return f
         (:variable, rg, _, _) => return VariableConstraint(v -> v[rg])
-        _ => error("Internal error.")
+        _ => error("Internal error")
     end
 end
 
@@ -1039,9 +1036,9 @@ Return a 6-tuple of tuples:
 - `(ψl, ψ, ψu)` are mixed constraints
 - `(ϕl, ϕ, ϕu)` are boundary constraints
 - `(θl, θ, θu)` are variable constraints
-- `(ulb, uind, uub)` are control linear constraints of a subset of indices
-- `(xlb, xind, xub)` are state linear constraints of a subset of indices
-- `(vlb, vind, vub)` are variable linear constraints of a subset of indices
+- `(ul, uind, uu)` are control linear constraints of a subset of indices
+- `(xl, xind, xu)` are state linear constraints of a subset of indices
+- `(vl, vind, vu)` are variable linear constraints of a subset of indices
 
 !!! note
 
@@ -1050,11 +1047,11 @@ Return a 6-tuple of tuples:
 # Example
 
 ```jldoctest
-julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu),
-    (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
+julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
 ```
 """
-function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence <: TimeDependence}
+function nlp_constraints(ocp::OptimalControlModel)
 
     # we check if the dimensions and times have been set
     @__check(ocp)
@@ -1067,9 +1064,9 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
     ψf = Vector{MixedConstraint}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
     ϕf = Vector{BoundaryConstraint}(); ϕl = Vector{ctNumber}(); ϕu = Vector{ctNumber}()
     θf = Vector{VariableConstraint}(); θl = Vector{ctNumber}(); θu = Vector{ctNumber}()
-    uind = Vector{Int}(); ulb = Vector{ctNumber}(); uub = Vector{ctNumber}()
-    xind = Vector{Int}(); xlb = Vector{ctNumber}(); xub = Vector{ctNumber}()
-    vind = Vector{Int}(); vlb = Vector{ctNumber}(); vub = Vector{ctNumber}()
+    uind = Vector{Int}(); ul = Vector{ctNumber}(); uu = Vector{ctNumber}()
+    xind = Vector{Int}(); xl = Vector{ctNumber}(); xu = Vector{ctNumber}()
+    vind = Vector{Int}(); vl = Vector{ctNumber}(); vu = Vector{ctNumber}()
 
     for (_, c) ∈ constraints
         @match c begin
@@ -1091,16 +1088,16 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
             append!(ξu, ub) end
         (:control, rg, lb, ub) => begin
             append!(uind, rg)
-            append!(ulb, lb)
-            append!(uub, ub) end
+            append!(ul, lb)
+            append!(uu, ub) end
         (:state, f::StateConstraint, lb, ub) => begin
             push!(ηf, f)
             append!(ηl, lb)
             append!(ηu, ub) end
         (:state, rg, lb, ub) => begin
             append!(xind, rg)
-            append!(xlb, lb)
-            append!(xub, ub) end
+            append!(xl, lb)
+            append!(xu, ub) end
         (:mixed, f::MixedConstraint, lb, ub) => begin
             push!(ψf, f)
             append!(ψl, lb)
@@ -1111,8 +1108,8 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
             append!(θu, ub) end
         (:variable, rg, lb, ub) => begin
             append!(vind, rg)
-            append!(vlb, lb)
-            append!(vub, ub) end
+            append!(vl, lb)
+            append!(vu, ub) end
         _ => error("Internal error") end
     end
 
@@ -1134,18 +1131,18 @@ function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_
         return val
     end
 
-    function θ(v)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
-        return val
-    end
-
     function ϕ(x0, xf, v)
         val = Vector{ctNumber}()
         for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf, v)) end
         return val
     end
 
-    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub)
+    function θ(v)
+        val = Vector{ctNumber}()
+        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
+        return val
+    end
+
+    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
 end

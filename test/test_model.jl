@@ -43,6 +43,8 @@ function test_model() # 30 55 185
     variable!(ocp, 2, :vv)
     @test ocp.variable_dimension == 2
     @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
+
+
 end
 
 @testset "time, state and control set or not" begin
@@ -246,11 +248,13 @@ end
     @test !is_variable_dependent(ocp)
 
     ocp = Model(NonFixed)
+    ocp = Model(NonFixed)
     @test is_time_independent(ocp)
     @test !is_time_dependent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
+    ocp = Model(NonAutonomous, NonFixed)
     ocp = Model(NonAutonomous, NonFixed)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
@@ -258,13 +262,16 @@ end
     @test !is_variable_independent(ocp)
 
     ocp = Model(NonFixed, NonAutonomous)
+    ocp = Model(NonFixed, NonAutonomous)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
     @test_throws IncorrectArgument Model(NonFixed, NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonFixed, NonAutonomous, Autonomous)
     @test_throws IncorrectArgument Model(NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonFixed, Int64)
     @test_throws IncorrectArgument Model(NonFixed, Int64)
 
 end
@@ -283,11 +290,13 @@ end
     @test !is_variable_dependent(ocp)
 
     ocp = Model(NonFixed)
+    ocp = Model(NonFixed)
     @test is_time_independent(ocp)
     @test !is_time_dependent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
+    ocp = Model(NonAutonomous, NonFixed)
     ocp = Model(NonAutonomous, NonFixed)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
@@ -295,13 +304,16 @@ end
     @test !is_variable_independent(ocp)
 
     ocp = Model(NonFixed, NonAutonomous)
+    ocp = Model(NonFixed, NonAutonomous)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
     @test_throws IncorrectArgument Model(NonFixed, NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonFixed, NonAutonomous, Autonomous)
     @test_throws IncorrectArgument Model(NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonFixed, Int64)
     @test_throws IncorrectArgument Model(NonFixed, Int64)
 
 end
@@ -814,7 +826,7 @@ end
     constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
-    (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub) = nlp_constraints(ocp)
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
 
     v = Real[]
     
@@ -831,12 +843,12 @@ end
     println("ϕl = ", ϕl)
     println("ϕ = ", ϕ)
     pξlrintln("ϕu = ", ϕu)
-    println("ulb = ", ulb)
+    println("ul = ", ul)
     println("uind = ", uind)
-    println("uub = ", uub)
-    println("xlb = ", xlb)
+    println("uu = ", uu)
+    println("xl = ", xl)
     println("xind = ", xind)
-    println("xub = ", xub)
+    println("xu = ", xu)
     =#
 
     # control
@@ -860,17 +872,17 @@ end
     @test sort(ϕ([1, 3], [4, 100], v)) == sort([3, 4, 103])
 
     # box constraint
-    @test sort(ulb) == sort([0])
+    @test sort(ul) == sort([0])
     @test sort(uind) == sort([1])
-    @test sort(uub) == sort([1])
-    @test sort(xlb) == sort([0, 1])
+    @test sort(uu) == sort([1])
+    @test sort(xl) == sort([0, 1])
     @test sort(xind) == sort([1, 2])
-    @test sort(xub) == sort([1, 2])
+    @test sort(xu) == sort([1, 2])
 
     # variable
-    @test sort(vlb) == sort([ ])
+    @test sort(vl) == sort([ ])
     @test sort(vind) == sort([ ])
-    @test sort(vub) == sort([ ])
+    @test sort(vu) == sort([ ])
     @test sort(θl) == sort([ ])
     @test sort(θu) == sort([ ])
     @test sort(θ(v)) == sort([ ])
@@ -898,7 +910,7 @@ end
     constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
-    (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub) = nlp_constraints(ocp)
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
 
     v = [ 1, 2, 3, 4 ]
 
@@ -923,17 +935,17 @@ end
     @test sort(ϕ([1, 3], [4, 100], v)) == sort([ 3, 4, 103+v[1] ])
 
     # box constraint
-    @test sort(ulb) == sort([0])
+    @test sort(ul) == sort([0])
     @test sort(uind) == sort([1])
-    @test sort(uub) == sort([1])
-    @test sort(xlb) == sort([0, 1])
+    @test sort(uu) == sort([1])
+    @test sort(xl) == sort([0, 1])
     @test sort(xind) == sort([1, 2])
-    @test sort(xub) == sort([1, 2])
+    @test sort(xu) == sort([1, 2])
 
     # variable
-    @test sort(vlb) == sort([ 0, 0, 0, 0, 1, 2, 2 ])
+    @test sort(vl) == sort([ 0, 0, 0, 0, 1, 2, 2 ])
     @test sort(vind) == sort([ 1, 2, 3, 4, 1, 2, 3 ])
-    @test sort(vub) == sort([ 5, 5, 5, 5, 3, 4, 3 ])
+    @test sort(vu) == sort([ 5, 5, 5, 5, 3, 4, 3 ])
     @test sort(θl) == sort([ 0 ])
     @test sort(θu) == sort([ 1 ])
     @test sort(θ(v)) == sort([ v[3]^2 ])
