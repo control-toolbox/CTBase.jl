@@ -67,7 +67,6 @@ const Control = ctVector
 Type alias for a variable.
 """
 const Variable = ctVector
-const Variable = ctVector
 """
 Type alias for a vector of states.
 """
