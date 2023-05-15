@@ -276,7 +276,10 @@ end
 function __quote_ocp(ct_repl::CTRepl; print_ocp::Bool=true)
     print_ocp && __print_code(ct_repl)
     code  = __code(ct_repl.model)
-    ocp_q = (quote @def $(ct_repl.ocp_name) $(code) end)
+    ocp_q = quote 
+                @def $(ct_repl.ocp_name) $(code) 
+                CTBase.__is_complete($(ct_repl.ocp_name)) ? nothing : $(ct_repl.ocp_name) 
+            end
     ct_repl.debug && println("debug> code: ", code)
     ct_repl.debug && println("debug> quote code: ", ocp_q)
     return ocp_q

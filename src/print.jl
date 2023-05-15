@@ -15,18 +15,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     __is_empty(ocp) && return
 
     # check if the problem is complete: times, state, control, dynamics and variable (if NonFixed)
-    is_incomplete = false
-    if  __is_time_not_set(ocp) || 
-        __is_state_not_set(ocp) || 
-        __is_control_not_set(ocp) || 
-        __is_dynamics_not_set(ocp) ||
-        __is_objective_not_set(ocp) ||
-        (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
-        #printstyled(io, "\nOptimal control model\n\n")
-        is_incomplete = true
-    end
-
-    if is_incomplete
+    if __is_incomplete(ocp)
         header = [ "times", "state", "control", "dynamics", "objective" ]
         is_variable_dependent(ocp) && push!(header, "variable")
         data = hcat(__is_time_not_set(ocp) ? "❌" : "✅",
@@ -132,10 +121,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         x_name_space = x_name * "(" * t_name * ")"
     else
         x_name_space = x_name * "(" * t_name * ")"
-        if ocp.state_components_names != [ x_name * ctindices(i) for i ∈ range(1, x_dim) ]
+        if xi_names != [ x_name * ctindices(i) for i ∈ range(1, x_dim) ]
             x_name_space *= " = (" 
             for i ∈ 1:x_dim
-                x_name_space *= ocp.state_components_names[i] * "(" * t_name * ")"
+                x_name_space *= xi_names[i] * "(" * t_name * ")"
                 i < x_dim && (x_name_space *= ", ")
             end
             x_name_space *= ")"
@@ -148,10 +137,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         u_name_space = u_name * "(" * t_name * ")"
     else
         u_name_space = u_name * "(" * t_name * ")"
-        if ocp.control_components_names != [ u_name * ctindices(i) for i ∈ range(1, u_dim) ]
+        if ui_names != [ u_name * ctindices(i) for i ∈ range(1, u_dim) ]
             u_name_space *= " = (" 
             for i ∈ 1:u_dim
-                u_name_space *= ocp.control_components_names[i] * "(" * t_name * ")"
+                u_name_space *= ui_names[i] * "(" * t_name * ")"
                 i < u_dim && (u_name_space *= ", ")
             end
             u_name_space *= ")"
@@ -167,10 +156,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
             v_name_space = v_name
         else
             v_name_space = v_name
-            if ocp.variable_components_names != [ v_name * ctindices(i) for i ∈ range(1, v_dim) ]
+            if vi_names != [ v_name * ctindices(i) for i ∈ range(1, v_dim) ]
                 v_name_space *= " = (" 
                 for i ∈ 1:v_dim
-                    v_name_space *= ocp.variable_components_names[i]
+                    v_name_space *= vi_names[i]
                     i < v_dim && (v_name_space *= ", ")
                 end
                 v_name_space *= ")"

@@ -541,6 +541,11 @@ __is_empty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) &&
     isempty(ocp.constraints)
 __is_initial_time_free(ocp) = ocp.initial_time isa Index
 __is_final_time_free(ocp) = ocp.final_time isa Index
+__is_incomplete(ocp) = begin __is_time_not_set(ocp) || __is_state_not_set(ocp) || 
+    __is_control_not_set(ocp) || __is_dynamics_not_set(ocp) || __is_objective_not_set(ocp) ||
+    (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
+end
+__is_complete(ocp) = !__is_incomplete(ocp)
 
 # --------------------------------------------------------------------------------------------------
 # solution
