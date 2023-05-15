@@ -464,13 +464,14 @@ macro def(ocp, e, log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
-	    (false, false) => :( $ocp = Model() )
-	    (true , false) => :( $ocp = Model(autonomous=false) )
-	    (false, true ) => :( $ocp = Model(variable=true) )
-	    _              => :( $ocp = Model(autonomous=false, variable=true) )
-	end
-        code = Expr(:block, init, code, :( $ocp )) 
-        esc( code )
+            (false, false) => :( $ocp = Model() )
+            (true , false) => :( $ocp = Model(autonomous=false) )
+            (false, true ) => :( $ocp = Model(variable=true) )
+            _              => :( $ocp = Model(autonomous=false, variable=true) )
+	    end
+        code = Expr(:block, init, code, 
+        :($ocp.model_expression=$(QuoteNode(Expr(:$, e)))), :($ocp))
+        esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
     end

@@ -455,6 +455,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModel{time_dependence <: TimeDependence, variable_dependence <: VariableDependence} <: AbstractOptimalControlModel
+    model_expression::Union{Nothing, Expr}=nothing
     initial_time::Union{Time,Index,Nothing}=nothing
     initial_time_name::Union{String, Nothing}=nothing
     final_time::Union{Time,Index,Nothing}=nothing
@@ -520,7 +521,9 @@ function __is_objective_not_set(ocp::OptimalControlModel)
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.criterion)
 end
-__is_empty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) && 
+__is_empty(ocp::OptimalControlModel) = begin
+    isnothing(ocp.model_expression) &&
+    isnothing(ocp.initial_time) && 
     isnothing(ocp.initial_time_name) &&
     isnothing(ocp.final_time) && 
     isnothing(ocp.final_time_name) &&
@@ -539,6 +542,7 @@ __is_empty(ocp::OptimalControlModel) = isnothing(ocp.initial_time) &&
     isnothing(ocp.variable_name) &&
     isnothing(ocp.variable_components_names) &&
     isempty(ocp.constraints)
+end
 __is_initial_time_free(ocp) = ocp.initial_time isa Index
 __is_final_time_free(ocp) = ocp.final_time isa Index
 __is_incomplete(ocp) = begin __is_time_not_set(ocp) || __is_state_not_set(ocp) || 
