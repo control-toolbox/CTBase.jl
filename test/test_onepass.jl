@@ -1,88 +1,92 @@
 # test onepass
+# todo:
+# - test on variables + nlp_constraints 
+# - test non autonomous cases
+# - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 function test_onepass()
 
 t0 = 0
-o = @def t ∈ [ t0, t0 + 4 ], time
+@def o t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
 @test o.final_time == t0 + 4
 
-o = @def begin
+@def o begin
     λ ∈ R^2, variable
     tf = λ₂
     t ∈ [ 0, tf ], time
-    end
+end
 @test o.initial_time == 0
 @test o.final_time == Index(2)
 
-o = @def begin
+@def o begin
     t0 ∈ R, variable
     t ∈ [ t0, 1 ], time
-    end
+end
 @test o.initial_time == Index(1)
 @test o.final_time == 1
 
-o = @def begin
+@def o begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
-    end
+end
 @test o.initial_time == 0
 @test o.final_time == Index(1)
 
-o = @def begin
+@def o begin
     v ∈ R², variable
     s ∈ [ v[1], v[2] ], time
-    end
+end
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
-o = @def begin
+@def o begin
     v ∈ R², variable
     s0 = v₁
     sf = v₂
     s ∈ [ s0, sf ], time
-    end
+end
 @test o.initial_time == Index(1)
 @test o.final_time == Index(2)
 
-@test_throws IncorrectArgument @def begin
+@test_throws IncorrectArgument @def o begin
     t0 ∈ R², variable
     t ∈ [ t0, 1 ], time
-    end
+end
 
-@test_throws IncorrectArgument @def begin
+@test_throws IncorrectArgument @def o begin
     tf ∈ R², variable
     t ∈ [ 0, tf ], time
-    end
+end
 
-@test_throws ParsingError @def begin
+@test_throws ParsingError @def o begin
     v, variable
     t ∈ [ 0, tf[v] ], time
-    end
+end
 
-@test_throws ParsingError @def begin
+@test_throws ParsingError @def o begin
     v, variable
     t ∈ [ t0[v], 1 ], time
-    end
+end
 
-@test_throws ParsingError @def begin
+@test_throws ParsingError @def o begin
     v, variable
     t ∈ [ t0[v], tf[v+1] ], time
-    end
+end
 
-o = @def begin
+@def o begin
     x ∈ R, state
     u ∈ R, control
-    end
+end
 @test o.state_dimension == 1
 @test o.control_dimension == 1
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x ∈ R^3, state
     u ∈ R^2, control
-    x'(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
-    end
+    ẋ(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
+end
 @test o.state_dimension == 3
 @test o.control_dimension == 2
 x = [ 1, 2, 3 ]
@@ -91,22 +95,24 @@ u = [ -1, 2 ]
 
 t0 = 0
 tf = 1
-o = @def begin
+@def o begin
     t ∈ [ t0, tf ], time
     x ∈ R^2, state
     u ∈ R, control
     x(t0) == [ -1, 0 ], (1)
     x(tf) == [  0, 0 ]
-    x'(t) == A * x(t) + B * u(t)
+    ẋ(t) == A * x(t) + B * u(t)
     ∫( 0.5u(t)^2 ) → min
 end
 x = [ 1, 2 ]
+x0 = 2 * x
+xf = 3 * x
 u = -1
 A = [ 0 1
       0 0 ]
 B = [ 0
       1 ]
-@test constraint(o, :eq1)(x) == x
+@test constraint(o, :eq1)(x0, xf) == x0
 @test o.dynamics(x, u) == A * x + B * u
 @test o.lagrange(x, u) == 0.5u^2
 @test o.criterion == :min
@@ -114,12 +120,13 @@ B = [ 0
 a = 1
 f(b) = begin # closure of a, local c, and @def in function
     c = 3
-    @def begin
+    @def ocp begin
         t ∈ [ a, b ], time
         x ∈ R, state
         u ∈ R, control
-        x'(t) == x(t) + u(t) + b + c + d
-    end
+        ẋ(t) == x(t) + u(t) + b + c + d
+end
+    ocp
 end
 o = f(2)
 d = 4
@@ -127,7 +134,7 @@ x = 10
 u = 20
 @test o.dynamics(x, u) == x + u + 2 + 3 + 4
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
     u ∈ R, control
@@ -136,19 +143,21 @@ o = @def begin
         v = x₂
         w = r + 2v
         r(0) == 0,    (1)
-    end
+end
     v(0) == 1,    (♡)
-    x'(t) == [ v(t), w(t)^2 ]
+    ẋ(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end
+end
 x = [ 1, 2 ]
+x0 = 2 * x
+xf = 3 * x
 u = 3
-@test constraint(o, :eq1)(x) == x[1]
-@test constraint(o, Symbol("♡"))(x) == x[2]
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
     u ∈ R, control
@@ -157,17 +166,19 @@ o = @def begin
     w = r + 2v
     r(0) == 0,    (1)
     v(0) == 1,    (♡)
-    x'(t) == [ v(t), w(t)^2 ]
+    ẋ(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end
+end
 x = [ 1, 2 ]
+x0  = 2 * x
+xf  = 3 * x
 u = 3
-@test constraint(o, :eq1)(x) == x[1]
-@test constraint(o, Symbol("♡"))(x) == x[2]
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -177,32 +188,35 @@ o = @def begin
     w = r + 2v
     r(0) == 0,    (1)
     v(0) == 1,    (♡)
-    x'(t) == [ v(t), w(t)^2 + z₁ ]
+    ẋ(t) == [ v(t), w(t)^2 + z₁ ]
     ∫( u(t)^2 + z₂ * x₁(t) ) → min
-    end
+end
 x = [ 1, 2 ]
+x0 = 2 * [ 1, 2 ]
+xf = 3 * [ 1, 2 ]
 u = 3
 z = [ 4, 5 ]
-@test constraint(o, :eq1)(x) == x[1]
-@test constraint(o, Symbol("♡"))(x) == x[2]
+@test constraint(o, :eq1)(x0, xf, z) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
 @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
 @test o.lagrange(x, u, z) == u^2 + z[2] * x[1]
 
-o = @def begin
+@def o begin
     tf, variable
     t ∈ [ 0, tf ], time
     x ∈ R², state
+    u ∈ R, control
     r = x₁
     v = x₂
     w = r¹ + 2v³
     r(0) + w(tf) - tf² == 0,    (1)
-    end
+end
 tf = 2
 x0 = [ 1, 2 ]
 xf = [ 3, 4 ]
 @test constraint(o, :eq1)(x0, xf, tf) == x0[1] + ( xf[1] + 2xf[2]^3 ) - tf^2
 
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x ∈ R², state
     u ∈ R, control
@@ -210,19 +224,19 @@ o = @def begin
     v = x₂
     r(0)^2 + v(1) == 0,    (1)
     v(0) == 1,             (♡)
-    x'(t) == [ v(t), r(t)^2 ]
+    ẋ(t) == [ v(t), r(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
-    end
+end
 x0 = [ 2, 3 ]
 xf = [ 4, 5 ]
 x = [ 1, 2 ]
 u = 3
 @test constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
-@test constraint(o, Symbol("♡"))(x0) == x0[2]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], x[1]^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
 
-o = @def begin
+@def o begin
     z ∈ R, variable
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -231,20 +245,20 @@ o = @def begin
     v = x₂
     r(0) - z == 0,    (1)
     v(0) == 1,        (♡)
-    x'(t) == [ v(t), r(t)^2 + z ]
+    ẋ(t) == [ v(t), r(t)^2 + z ]
     ∫( u(t)^2 + z * x₁(t) ) → min
-    end
+end
 x0 = [ 2, 3 ]
 xf = [ 4, 5 ]
 x = [ 1, 2 ]
 u = 3
 z = 4
 @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-@test constraint(o, Symbol("♡"))(x0) == x0[2]
+@test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
-o = @def begin
+@def o begin
     z ∈ R, variable
     t ∈ [ 0, 1 ], time
     x ∈ R², state
@@ -254,9 +268,9 @@ o = @def begin
     0 ≤ r(0) - z ≤ 1,            (1)
     0 ≤ v(1)^2 ≤ 1,              (2)
     [ 0, 0 ] ≤ x(0) ≤ [ 1, 1 ],  (♡)
-    x'(t) == [ v(t), r(t)^2 + z ]
+    ẋ(t) == [ v(t), r(t)^2 + z ]
     ∫( u(t)^2 + z * x₁(t) ) → min
-    end
+end
 x0 = [ 2, 3 ]
 xf = [ 4, 5 ]
 x = [ 1, 2 ]
@@ -264,13 +278,13 @@ u = 3
 z = 4
 @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
 @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-@test constraint(o, Symbol("♡"))(x0) == x0
+@test constraint(o, Symbol("♡"))(x0, xf, z) == x0
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
 n = 11
 m = 6
-o = @def begin
+@def o begin
     t ∈ [ 0, 1 ], time
     x ∈ R^n, state
     u ∈ R^m, control
@@ -287,7 +301,7 @@ o = @def begin
     0 ≤ u₂(t)^2 ≤ 1,                   (9)
     u₁(t) * x[1:2](t) == 1,           (10)
     0 ≤ u₁(t) * x[1:2](t).^3 ≤ 1,     (11)
-    end
+end
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
 @test constraint(o, :eq1 )(x) == x[1]
@@ -304,42 +318,42 @@ u = 2 * Vector{Float64}(1:m)
 
 n = 11
 m = 6
-o = @def begin
+@def o begin
     z ∈ R^2, variable
     t ∈ [ 0, 1 ], time
     x ∈ R^n, state
     u ∈ R^m, control
     r = x₁
     v = x₂
-    0 ≤ r(t) ≤ 1,                      (1)
-    zeros(n) ≤ x(t) ≤ ones(n),         (2)
+    0 ≤ r(t) ≤ 1,                                (1)
+    zeros(n) ≤ x(t) ≤ ones(n),                   (2)
     [ 0, 0 ] ≤ x[1:2](t) - [ z₁, 1 ] ≤ [ 1, 1 ], (3)
-    [ 0, 0 ] ≤ x[1:2:4](t) ≤ [ 1, 1 ],  (4)
-    0 ≤ v(t)^2 ≤ 1,                    (5)
-    zeros(m) ≤ u(t) ≤ ones(m),         (6)
-    [ 0, 0 ] ≤ u[1:2](t) ≤ [ 1, 1 ],   (7)
-    [ 0, 0 ] ≤ u[1:2:4](t) ≤ [ 1, 1 ], (8)
-    0 ≤ u₂(t)^2 ≤ 1,                   (9)
-    u₁(t) * x[1:2](t) + z + f() == 1, (10)
-    0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1, (11)
-    end
+    [ 0, 0 ] ≤ x[1:2:4](t) ≤ [ 1, 1 ],           (4)
+    0 ≤ v(t)^2 ≤ 1,                              (5)
+    zeros(m) ≤ u(t) ≤ ones(m),                   (6)
+    [ 0, 0 ] ≤ u[1:2](t) ≤ [ 1, 1 ],             (7)
+    [ 0, 0 ] ≤ u[1:2:4](t) ≤ [ 1, 1 ],           (8)
+    0 ≤ u₂(t)^2 ≤ 1,                             (9)
+    u₁(t) * x[1:2](t) + z + f() == 1,           (10)
+    0 ≤ u₁(t) * x[1:2](t).^3 + z ≤ 1,           (11)
+end
 f() = [ 1, 1 ]
 z = 3 * Vector{Float64}(1:2)
 x = Vector{Float64}(1:n)
 u = 2 * Vector{Float64}(1:m)
-@test constraint(o, :eq1 )(x   ) == x[1]
-@test constraint(o, :eq2 )(x   ) == x
+@test constraint(o, :eq1 )(x, z) == x[1]
+@test constraint(o, :eq2 )(x, z) == x
 @test constraint(o, :eq3 )(x, z) == x[1:2] - [ z[1], 1 ]
-@test constraint(o, :eq4 )(x   ) == x[1:2:4]
+@test constraint(o, :eq4 )(x, z) == x[1:2:4]
 @test constraint(o, :eq5 )(x, z) == x[2]^2
-@test constraint(o, :eq6 )(u   ) == u
-@test constraint(o, :eq7 )(u   ) == u[1:2]
-@test constraint(o, :eq8 )(u   ) == u[1:2:4]
+@test constraint(o, :eq6 )(u, z) == u
+@test constraint(o, :eq7 )(u, z) == u[1:2]
+@test constraint(o, :eq8 )(u, z) == u[1:2:4]
 @test constraint(o, :eq9 )(u, z) == u[2]^2
 @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
 @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
 
-o = @def begin
+@def o begin
     s ∈ [ 0, 1 ], time
     y ∈ R^4, state
     w ∈ R, control
@@ -349,11 +363,11 @@ o = @def begin
 end
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
-@test ismin(o)
+@test is_min(o)
 @test o.mayer(y0, yf) == y0[3] + yf[4]
 
 
-o = @def begin
+@def o begin
     s ∈ [ 0, 1 ], time
     y ∈ R^4, state
     w ∈ R, control
@@ -363,10 +377,10 @@ o = @def begin
 end
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
-@test ismax(o)
+@test is_max(o)
 @test o.mayer(y0, yf) == y0[3] + yf[4]
 
-o = @def begin
+@def o begin
     z ∈ R^2, variable
     s ∈ [ 0, z₁ ], time
     y ∈ R^4, state
@@ -378,10 +392,10 @@ end
 z = [ 5, 6 ]
 y0 = [ 1, 2, 3, 4 ]
 yf = 2 * [ 1, 2, 3, 4 ]
-@test ismin(o)
+@test is_min(o)
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -389,7 +403,7 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁ + w² + v³ + z₂
-    y'(s) == [ aa(s), r²(s), 0, 0 ]
+    ẏ(s) == [ aa(s), r²(s), 0, 0 ]
     r(0) + v(z₁) + z₂ → min
 end
 z = [ 5, 6 ]
@@ -400,7 +414,7 @@ w = 7
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -408,7 +422,7 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁(s) + v³ + z₂
-    y'(s) == [ aa(s) + (w^2)(s), r²(s), 0, 0 ]
+    ẏ(s) == [ aa(s) + (w^2)(s), r²(s), 0, 0 ]
     r(0) + v(z₁) + z₂ → min
 end
 z = [ 5, 6 ]
@@ -419,7 +433,7 @@ w = 7
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -427,14 +441,14 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁
-    y'(s) == [ aa(s), r²(s) + w(s) + z₁, 0, 0 ]
+    ẏ(s) == [ aa(s), r²(s) + w(s) + z₁, 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 w = 9
 @test o.dynamics(y, w, z) == [ y[1], y[3]^2 + w + z[1], 0, 0 ]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     __s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -442,14 +456,14 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁(__s)
-    y'(__s) == [ aa(__s), r²(__s) + w(__s) + z₁, 0, 0 ]
+    ẏ(__s) == [ aa(__s), r²(__s) + w(__s) + z₁, 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 w = 9
-@test_throws UndefVarError o.dynamics(y, w, z)
+@test_throws MethodError o.dynamics(y, w, z)
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -457,16 +471,16 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁(s) + v³ + z₂
-    y'(s) == [ aa(s) + w^2, r²(s), 0, 0 ]
+    ẏ(s) == [ aa(s) + w(s)^2, r²(s), 0, 0 ]
 end
 z = [ 5, 6 ]
 y = [ 1, 2, 3, 4 ]
 y0 = y
 yf = 3y0
-ww = 9
+ww = 19
 @test o.dynamics(y, ww, z) == [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     s ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -481,7 +495,7 @@ y0 = y
 yf = 3y0
 @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     __t ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -489,7 +503,7 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁(__t) + v³ + z₂
-    y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
+    ẏ(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
     aa(0) + y₂(z₁) → min
 end
 z = [ 5, 6 ]
@@ -500,7 +514,7 @@ w = 11
 @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 @test_throws UndefVarError o.mayer(y0, yf, z)
 
-o = @def begin
+@def o begin
     z ∈ R², variable
     __t ∈ [ 0, z₁ ], time
     y ∈ R⁴, state
@@ -508,7 +522,7 @@ o = @def begin
     r = y₃
     v = y₄
     aa = y₁(0) + v³ + z₂
-    y'(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
+    ẏ(__t) == [ aa(__t) + (w^2)(__t), r²(__t), 0, 0 ]
     aa(0) + y₂(z₁) → min
 end
 z = [ 5, 6 ]
@@ -519,21 +533,201 @@ w = 11
 @test_throws MethodError o.dynamics(y, w, z)
 @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
-# old tests from ct_parser.jl
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) + ∫(x(t) + u(t)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
 
-#function test_ctparser()
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) - ∫(x(t) + u(t)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  -(x + u)
+@test o.criterion == :min
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) + ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) - ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  -(x + u)
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) + (x(0) + 2x(1)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) - (x(0) + 2x(1)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  -(x0 + 2xf)
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) + (x(0) + 2x(1)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) - (x(0) + 2x(1)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  -(x0 + 2xf)
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    x(0) + 2x(1) + ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test_throws UndefVarError o.mayer(x0, xf)
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    ∫(x(t) + u(t)) - x(0) + 2x(1) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test_throws UndefVarError o.mayer(x0, xf)
+
+
+@def o begin
+    v ∈ R², variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R, control
+    x(0) - v₁ == 0,             (1)
+    x(1) - v₁ == 0,             (2)
+    0 ≤ x(0) - v₁ ≤ 1,          (3)
+    0 ≤ x(1) - v₁ ≤ 1,          (4)
+    x(0) + x(1) - v₂ == 0,      (5)
+    0 ≤ x(0) + x(1) - v₂ ≤ 1,   (6)
+    x(t) - v₁ == 0,             (7)
+    u(t) - v₁ == 0,             (8)
+    z = v₁ + 2v₂               
+    0 ≤ x(t) - z ≤ 1,           (9)
+    0 ≤ u(t) - z ≤ 1,          (10)
+    0 ≤ x(t) + u(t) - z ≤ 1,   (11)
+    ẋ(t) == z * x(t) + 2u(t)       
+    v₁ == 1,                   (12)
+    0 ≤ v₁ ≤ 1,                (13)
+    z == 1,                    (14)
+    0 ≤ z ≤ 1,                 (15)
+    z * x(1) → min
+end
+x = 1
+x0 = 2
+xf = 3
+u = 4
+v = [ 5, 6 ]
+z = v[1] + 2v[2]
+@test constraint(o,  :eq1)(x0, xf, v) == x0 - v[1]
+@test constraint(o,  :eq2)(x0, xf, v) == xf - v[1]
+@test constraint(o,  :eq3)(x0, xf, v) == x0 - v[1]
+@test constraint(o,  :eq4)(x0, xf, v) == xf - v[1]
+@test constraint(o,  :eq5)(x0, xf, v) == x0 + xf - v[2]
+@test constraint(o,  :eq6)(x0, xf, v) == x0 + xf - v[2]
+@test constraint(o,  :eq7)(x, v) == x - v[1]
+@test constraint(o,  :eq9)(x, v) == x - z
+@test constraint(o, :eq10)(u, v) == u - z
+@test constraint(o, :eq11)(x, u, v) == x + u - z
+@test constraint(o, :eq12)(v) == v[1] 
+@test constraint(o, :eq13)(v) == v[1] 
+@test constraint(o, :eq14)(v) == v[1] + 2v[2]
+@test constraint(o, :eq15)(v) == v[1] + 2v[2]
+
+# tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes
 
     # time
-    ocp = @def t ∈ [ 0.0 , 1.0 ], time ;
+    @def ocp t ∈ [ 0.0 , 1.0 ], time ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
     @test ocp.initial_time == 0.0
     @test ocp.final_time   == 1.0
 
     t0 = 3.0
-    ocp = @def begin
+    @def ocp begin
         tf ∈ R, variable
         t ∈ [ t0, tf ], time
     end ;
@@ -543,7 +737,7 @@ w = 11
     @test ocp.final_time   == Index(1)
 
     tf = 3.14
-    ocp = @def begin
+    @def ocp begin
         t0 ∈ R, variable
         t ∈ [ t0, tf ], time
     end ;
@@ -554,7 +748,7 @@ w = 11
 
     # state
     t0 = 1.0; tf = 1.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         u, state
     end ;
@@ -563,10 +757,10 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 1
-    @test ocp.state_names == [ "u" ]
+    @test ocp.state_name == "u"
 
     t0 = 2.0; tf = 2.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         v ∈ R^4, state
     end ;
@@ -575,10 +769,10 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 4
-    @test ocp.state_names == [ "v₁", "v₂", "v₃", "v₄"]
+    @test ocp.state_name == "v"
 
     t0 = 3.0; tf = 3.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         w ∈ R^3, state
     end ;
@@ -587,10 +781,10 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 3
-    @test ocp.state_names ==  [ "w₁", "w₂", "w₃"]
+    @test ocp.state_name ==  "w"
 
     t0 = 4.0; tf = 4.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         a ∈ R, state
     end ;
@@ -599,11 +793,11 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 1
-    @test ocp.state_names == [ "a" ]
+    @test ocp.state_name == "a"
 
 
     t0 = 5.0; tf = 5.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         b ∈ R¹, state
     end ;
@@ -612,11 +806,11 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 1
-    @test ocp.state_names == [ "b" ]
+    @test ocp.state_name == "b"
 
 
     t0 = 6.0; tf = 6.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         u ∈ R⁹, state
     end ;
@@ -625,12 +819,12 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == 9
-    @test ocp.state_names ==  [ "u₁", "u₂", "u₃", "u₄", "u₅", "u₆", "u₇", "u₈", "u₉"]
+    @test ocp.state_name ==  "u"
 
 
     n = 3
     t0 = 7.0; tf = 7.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         u ∈ R^n, state
     end ;
@@ -639,12 +833,12 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.state_dimension == n
-    @test ocp.state_names == [ "u₁", "u₂", "u₃"]
+    @test ocp.state_name == "u"
 
 
     # control
     t0 = 1.0; tf = 1.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         u, control
     end ;
@@ -653,10 +847,10 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 1
-    @test ocp.control_names == [ "u" ]
+    @test ocp.control_name == "u"
 
     t0 = 2.0; tf = 2.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         v ∈ R^4, control
     end ;
@@ -665,10 +859,10 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 4
-    @test ocp.control_names == [ "v₁", "v₂", "v₃", "v₄"]
+    @test ocp.control_name == "v"
 
     t0 = 3.0; tf = 3.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         w ∈ R^3, control
     end ;
@@ -677,10 +871,10 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 3
-    @test ocp.control_names ==  [ "w₁", "w₂", "w₃"]
+    @test ocp.control_name ==  "w"
 
     t0 = 4.0; tf = 4.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         a ∈ R, control
     end ;
@@ -689,11 +883,11 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 1
-    @test ocp.control_names == [ "a" ]
+    @test ocp.control_name == "a"
 
 
     t0 = 5.0; tf = 5.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         b ∈ R¹, control
     end ;
@@ -702,11 +896,11 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 1
-    @test ocp.control_names == [ "b" ]
+    @test ocp.control_name == "b"
 
 
     t0 = 6.0; tf = 6.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         u ∈ R⁹, control
     end ;
@@ -715,12 +909,12 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 9
-    @test ocp.control_names ==  [ "u₁", "u₂", "u₃", "u₄", "u₅", "u₆", "u₇", "u₈", "u₉"]
+    @test ocp.control_name == "u"
 
 
     n = 3
     t0 = 7.0; tf = 7.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0 , tf ], time
         u ∈ R^n, control
     end ;
@@ -729,31 +923,31 @@ w = 11
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
     @test ocp.control_dimension == n
-    @test ocp.control_names == [ "u₁", "u₂", "u₃"]
+    @test ocp.control_name == "u"
 
 
     # variables
     t0 = .0; tf = .1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         a, variable
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.variable_dimension == 1
-    @test ocp.variable_names == [ "a" ]
+    @test ocp.variable_name == "a"
 
     t0 = .0; tf = .1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         a ∈ R³, variable
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.variable_dimension == 3
-    @test ocp.variable_names == [ "a₁", "a₂", "a₃" ]
+    @test ocp.variable_name == "a"
 
     # alias
     t0 = .0; tf = .1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -766,14 +960,14 @@ w = 11
     @test ocp.time_name == "t"
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
-    @test ocp.control_names == [ "u₁", "u₂", "u₃"]
+    @test ocp.control_name == "u"
     @test ocp.control_dimension == 3
-    @test ocp.state_names   ==  ["x₁", "x₂", "x₃"]
+    @test ocp.state_name ==  "x"
     @test ocp.state_dimension == 3
 
     # objectives
     t0 = .0; tf = .1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -782,7 +976,7 @@ w = 11
     @test ocp isa OptimalControlModel
 
     t0 = .0; tf = .1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
@@ -798,15 +992,15 @@ w = 11
     r0 = 1.0; r1 = 2.0
     v0 = 2.0; vmax = sqrt(2)
     m0 = 3.0; mf = 1.1
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
-        x ∈ R^2, state
+        x ∈ R^3, state
         u ∈ R^2, control
 
         m = x₂
 
         x(t0) == [ r0, v0, m0 ], (1)
-        0  ≤ u(t) ≤ 1          , (deux)
+        0  ≤ u[1](t) ≤ 1       , (deux)
         r0 ≤ x(t)[1] ≤ r1      , (trois)
         0  ≤ x₂(t) ≤ vmax      , (quatre)
         mf ≤ m(t) ≤ m0         , (5)
@@ -815,20 +1009,20 @@ w = 11
     @test ocp.time_name == "t"
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
-    @test ocp.control_names == [ "u₁", "u₂"]
+    @test ocp.control_name == "u"
     @test ocp.control_dimension == 2
-    @test ocp.state_names   == ["x₁", "x₂"]
-    @test ocp.state_dimension == 2
+    @test ocp.state_name == "x"
+    @test ocp.state_dimension == 3
 
-    ocp = @def begin
+    @def ocp begin
         t ∈ [ t0, tf ], time
-        x ∈ R^2, state
+        x ∈ R^3, state
         u ∈ R^2, control
 
         m = x₂
 
         x(t0) == [ r0, v0, m0 ]
-        0  ≤ u(t) ≤ 1
+        0  ≤ u(t)[2] ≤ 1
         r0 ≤ x(t)[1] ≤ r1
         0  ≤ x₂(t) ≤ vmax
         mf ≤ m(t) ≤ m0
@@ -837,10 +1031,10 @@ w = 11
     @test ocp.time_name == "t"
     @test ocp.initial_time == t0
     @test ocp.final_time   == tf
-    @test ocp.control_names == [ "u₁", "u₂"]
+    @test ocp.control_name == "u"
     @test ocp.control_dimension == 2
-    @test ocp.state_names   == ["x₁", "x₂"]
-    @test ocp.state_dimension == 2
+    @test ocp.state_name == "x"
+    @test ocp.state_dimension == 3
 
     # dyslexic definition:  t -> u -> x -> t
     u0 = 9.0; uf = 9.1
@@ -848,15 +1042,15 @@ w = 11
     k0 = 2.0; kmax = sqrt(2)
     b0 = 3.0; bf = 1.1
 
-    ocp = @def begin
+    @def ocp begin
         u ∈ [ u0, uf ], time
-        t ∈ R^2, state
+        t ∈ R^3, state
         x ∈ R^2, control
 
         b = t₂
 
         t(u0) == [ z0, k0, b0 ]
-        0  ≤ x(u) ≤ 1
+        0  ≤ x[2](u) ≤ 1
         z0 ≤ t(u)[1] ≤ z1
         0  ≤ t₂(u) ≤ kmax
         bf ≤ b(u) ≤ b0
@@ -865,16 +1059,15 @@ w = 11
     @test ocp.time_name == "u"
     @test ocp.initial_time == u0
     @test ocp.final_time   == uf
-    @test ocp.control_names == ["x₁", "x₂"]
+    @test ocp.control_name == "x"
     @test ocp.control_dimension == 2
-    @test ocp.state_names   == [ "t₁", "t₂"]
-    @test ocp.state_dimension == 2
-
+    @test ocp.state_name == "t"
+    @test ocp.state_dimension == 3
 
     # error detections (this can be tricky -> need more work)
 
     # this one is detected by the generated code (and not the parser)
-    @test_throws CTException @def begin
+    @test_throws CTException @def o begin
         t ∈ [ t0, tf ], time
         t ∈ [ t0, tf ], time
     end
@@ -882,7 +1075,7 @@ w = 11
     # illegal constraint name (1bis), detected by the parser
     t0 = 9.0; tf = 9.1
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -892,7 +1085,7 @@ w = 11
 
     # t0 is unknown in the x(t0) constraint, detected by the parser
     r0 = 1.0; v0 = 2.0; m0 = 3.0
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ 0, 1 ], time
         x ∈ R^2, state
         u ∈ R^2, control
@@ -915,19 +1108,19 @@ w = 11
 #function test_ctparser_constraints()
 
     # all used variables must be definedbefore each test
-    x0   = 11.11
+    x0   = [ 1, 2, 11.11 ]
     x02  = 11.111
     x0_b = 11.1111
     x0_u = 11.11111
-    y0   = 2.22
-    y0_b = 2.222
-    y0_u = 2.2222
+    y0   = [ 1, 2.22 ]
+    y0_b = [ 1, 2.222 ]
+    y0_u = [ 2, 2.2222 ]
 
     # === initial
     t0   = 0.0
     tf   = 1.0
     n    = 3
-    ocp1 = @def begin
+    @def ocp1 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -936,7 +1129,7 @@ w = 11
         x(t0) == x0
         x[2](t0) == x02
         x[2:3](t0) == y0
-        x0_b ≤ x(t0) ≤ x0_u
+        x0_b ≤ x₂(t0) ≤ x0_u
         y0_b ≤ x[2:3](t0) ≤ y0_u
     end
     @test ocp1 isa OptimalControlModel
@@ -947,17 +1140,18 @@ w = 11
 
     t0   = 0.1
     tf   = 1.1
+    x0   = ones(4)
     n    = 4
-    ocp2 = @def begin
+    @def ocp2 begin
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
         x(t0) == x0                , initial_1
-        x[2](t0) == x02            , initial_2
-        x[2:3](t0) == y0           , initial_3
-        x0_b ≤ x(t0) ≤ x0_u        , initial_4
-        y0_b ≤ x[2:3](t0) ≤ y0_u   , initial_5
+        x[2](t0) == 1              , initial_2
+        x[2:3](t0) == [ 1, 2 ]     , initial_3
+        x0 ≤ x(t0) ≤ x0 .+ 1       , initial_4
+        [ 1, 2 ] ≤ x[2:3](t0) ≤ [ 3, 4 ], initial_5
     end
     @test ocp2 isa OptimalControlModel
     @test ocp2.state_dimension == n
@@ -966,20 +1160,20 @@ w = 11
     @test ocp2.final_time == tf
 
 
-    # all used variables must be definedbefore each test
-    xf   = 11.11
+    # all used variables must be defined before each test
+    xf   = 11.11 * ones(4)
     xf2  = 11.111
-    xf_b = 11.1111
-    xf_u = 11.11111
-    yf   = 2.22
-    yf_b = 2.222
-    yf_u = 2.2222
+    xf_b = 11.1111 * ones(4)
+    xf_u = 11.11111 * ones(4)
+    yf   = 2.22 * ones(2)
+    yf_b = 2.222 * ones(2)
+    yf_u = 2.2222 * ones(2)
 
     # === final
     t0   = 0.2
     tf   = 1.2
-    n    = 5
-    ocp3 = @def begin
+    n    = 4
+    @def ocp3 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1000,7 +1194,15 @@ w = 11
     t0   = 0.3
     tf   = 1.3
     n    = 6
-    ocp4 = @def begin
+    xf   = 11.11 * ones(n)
+    xf2  = 11.111
+    xf_b = 11.1111 * ones(n)
+    xf_u = 11.11111 * ones(n)
+    yf   = 2.22 * ones(2)
+    yf_b = 2.222 * ones(2)
+    yf_u = 2.2222 * ones(2)
+
+    @def ocp4 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1022,8 +1224,8 @@ w = 11
     # === boundary
     t0   = 0.4
     tf   = 1.4
-    n    = 7
-    ocp5 = @def begin
+    n    = 2
+    @def ocp5 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1045,8 +1247,8 @@ w = 11
 
     t0   = 0.5
     tf   = 1.5
-    n    = 8
-    ocp6 = @def begin
+    n    = 2
+    @def ocp6 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1077,18 +1279,16 @@ w = 11
 
     t0   = 0.6
     tf   = 1.6
-    n    = 9
-    ocp7 = @def begin
+    n    = 2
+    @def ocp7 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        u_b ≤ u(t) ≤ u_u
-        #u(t) == u_u
-        u2_b ≤ u[2](t) ≤ u2_u
-        #u[2](t) == u2_u
-        v_b ≤ u[2:3](t) ≤ v_u
+        u_b ≤ u[1](t) ≤ u_u
+        u2_b ≤ u[1](t) ≤ u2_u
+        v_b ≤ u[2](t) ≤ v_u
         #u[2:3](t) == v_u
         u[1](t)^2 + u[2](t)^2 == 1
         1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
@@ -1101,19 +1301,22 @@ w = 11
 
     t0   = 0.7
     tf   = 1.7
-    n    = 3
-    ocp8 = @def begin
+    n    = 2
+    u_b  = 1.0
+    u_u  = 2.0
+    u2_b = 3.0
+    u2_u = 4.0
+    v_b  = 5.0
+    v_u  = 6.0
+    @def ocp8 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        u_b ≤ u(t) ≤ u_u               , control_1
-        #u(t) == u_u                    , control_2
-        u2_b ≤ u[2](t) ≤ u2_u          , control_3
-        #u[2](t) == u2_u                , control_4
-        v_b ≤ u[2:3](t) ≤ v_u          , control_5
-        #u[2:3](t) == v_u               , control_6
+        u_b ≤ u[2](t) ≤ u_u               , control_1
+        u2_b ≤ u[1](t) ≤ u2_u          , control_3
+        [ 1, v_b ] ≤ u[1:2](t) ≤ [ 2, v_u ], control_5
         u[1](t)^2 + u[2](t)^2 == 1     , control_7
         1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2  , control_8
     end
@@ -1136,18 +1339,18 @@ w = 11
     t0   = 0.8
     tf   = 1.8
     n    = 10
-    ocp9 = @def begin
+    @def ocp9 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x_b ≤ x(t) ≤ x_u
+        x_b ≤ x[3](t) ≤ x_u
         #x(t) == x_u
         x2_b ≤ x[2](t) ≤ x2_u
         #x[2](t) == x2_u
         #x[2:3](t) == y_u
-        x_u ≤ x[2:3](t) ≤ y_u
+        x_u ≤ x[10](t) ≤ y_u
         x[1:2](t) + x[3:4](t) == [ -1, 1 ]
         [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ]
     end
@@ -1160,18 +1363,18 @@ w = 11
     t0   = 0.9
     tf   = 1.9
     n    = 11
-    ocp10 = @def begin
+    @def ocp10 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
 
-        x_b ≤ x(t) ≤ x_u                             , state_1
+        x_b ≤ x[3](t) ≤ x_u                             , state_1
         #x(t) == x_u                                  , state_2
         x2_b ≤ x[2](t) ≤ x2_u                        , state_3
         #x[2](t) == x2_u                              , state_4
         #x[2:3](t) == y_u                             , state_5
-        x_u ≤ x[2:3](t) ≤ y_u                        , state_6
+        x_u ≤ x[3](t) ≤ y_u                        , state_6
         x[1:2](t) + x[3:4](t) == [ -1, 1 ]           , state_7
         [ -1, 1 ] ≤ x[1:2](t) + x[3:4](t) ≤ [ 0, 2 ] , state_8
     end
@@ -1186,7 +1389,7 @@ w = 11
     t0   = 0.111
     tf   = 1.111
     n    = 12
-    ocp11 = @def begin
+    @def ocp11 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1201,7 +1404,7 @@ w = 11
     @test ocp11.initial_time == t0
     @test ocp11.final_time == tf
 
-    ocp12 = @def begin
+    @def ocp12 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
@@ -1221,14 +1424,14 @@ w = 11
 
     t0   = 0.112
     tf   = 1.112
-    ocp13 = @def begin
+    @def ocp13 begin
 
         t ∈ [ t0, tf ], time
         x ∈ R, state
         u ∈ R, control
 
-        x'(t) == 2x(t) + u(t)^2
-        x'(t) == f(x(t), u(t))
+        ẋ(t) == 2x(t) + u(t)^2
+        ẋ(t) == f(x(t), u(t))
     end
     @test ocp13 isa OptimalControlModel
     @test ocp13.state_dimension   == 1
@@ -1238,83 +1441,83 @@ w = 11
 
     # some syntax (even parseable) are not allowed
     # this is the actual exhaustive list
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x(t) == x_u        , constant_state_not_allowed
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x(t) == x_u
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2](t) == x2_u    , constant_state_index_not_allowed
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2](t) == x2_u
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2:3](t) == y_u    , constant_state_range_not_allowed
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         x[2:3](t) == y_u
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u(t) == u_u         , constant_control_not_allowed
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u(t) == u_u
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2](t) == u2_u     , constant_control_index_not_allowed
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2](t) == u2_u
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2:3](t) == v_u    , constant_control_range_not_allowed
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
         u[2:3](t) == v_u
     end
-    @test_throws ParsingError @def begin
+    @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R, state
         u ∈ R, control
-        x'(t) == f(x(t), u(t))  , named_dynamics_not_allowed  # but allowed if unnamed !
+        ẋ(t) == f(x(t), u(t))  , named_dynamics_not_allowed  # but allowed if unnamed !
     end
 
 end
