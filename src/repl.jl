@@ -312,7 +312,15 @@ end
 
 # quote plot: todo: update when handle correctly solution
 function __quote_plot(ct_repl::CTRepl)
-    return !isnothing(ct_repl.solution) ? :(plot($(ct_repl.solution), size=(700, 600))) : :(println("\nNo solution available."))
+    plot_q = quote
+        if @isdefined($(ct_repl.sol_name))
+            plot($(ct_repl.sol_name), size=(600, 500))
+        else
+            println("\nNo solution available.")
+        end
+    end
+    ct_repl.debug && println("debug> quote plot: ", plot_q)
+    return plot_q
 end
 
 # update the model with a new expression of nature type
