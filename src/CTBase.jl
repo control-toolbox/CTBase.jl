@@ -66,7 +66,7 @@ const Control = ctVector
 """
 Type alias for a variable.
 """
-const DecisionVariable = ctVector
+const Variable = ctVector
 """
 Type alias for a vector of states.
 """
@@ -108,9 +108,10 @@ include("repl.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Costates, Controls, State, Costate, Control, DecisionVariable, Dimension, Index
+
+export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
 export TimeDependence, Autonomous, NonAutonomous
-export VariableDependence, Variable, NonVariable
+export VariableDependence, NonFixed, Fixed
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
