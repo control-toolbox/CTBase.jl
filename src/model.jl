@@ -23,7 +23,7 @@ julia> ocp = Model(autonomous=false, variable=true)
 """
 function Model(; autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
-    variable_dependence = variable ? Variable : NonVariable
+    variable_dependence = variable ? NonFixed : Fixed
     return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
@@ -34,14 +34,14 @@ Return a new `OptimalControlModel` instance, that is a model of an optimal contr
 
 The model is defined by the following argument:
 
-- `dependences`: either `Autonomous` or `NonAutonomous`. Default is `Autonomous`. And either `Variable` or `NonVariable`. Default is `NonVariable`.
+- `dependences`: either `Autonomous` or `NonAutonomous`. Default is `Autonomous`. And either `NonFixed` or `Fixed`. Default is `Fixed`.
 
 # Examples
 
 ```jldoctest
 julia> ocp = Model()
 julia> ocp = Model(NonAutonomous)
-julia> ocp = Model(NonVariable,Variable)
+julia> ocp = Model(Fixed,NonFixed)
 ```
 
 !!! note
@@ -53,7 +53,7 @@ function Model(dependences::DataType...)::OptimalControlModel{<:TimeDependence, 
     # some checkings: 
     @__check(dependences)
     time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = Variable ∈ dependences ? Variable : NonVariable
+    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
     @__check(time_dependence)
     @__check(variable_dependence)
     return OptimalControlModel{time_dependence, variable_dependence}()
@@ -93,8 +93,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined as variable dependent.
 """
-is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, Variable}) = true
-is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, NonVariable}) = false
+is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, NonFixed}) = true
+is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, Fixed}) = false
 
 """
 $(TYPEDSIGNATURES)
@@ -282,7 +282,7 @@ Fix initial time, final time is free and given by the variable at the provided i
 julia> time!(ocp, 0, Index(2), "t")
 ```
 """
-function time!(ocp::OptimalControlModel{<: TimeDependence, Variable}, t0::Time, indf::Index, name::String=__time_name())
+function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, t0::Time, indf::Index, name::String=__time_name())
     __check_variable_set(ocp)
     __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
@@ -308,7 +308,7 @@ Fix final time, initial time is free and given by the variable at the provided i
 julia> time!(ocp, Index(2), 1, "t")
 ```
 """
-function time!(ocp::OptimalControlModel{<: TimeDependence, Variable}, ind0::Index, tf::Time, name::String=__time_name())
+function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, ind0::Index, tf::Time, name::String=__time_name())
     __check_variable_set(ocp)
     __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
@@ -334,7 +334,7 @@ Initial and final times are free and given by the variable at the provided indic
 julia> time!(ocp, Index(2), Index(3), "t")
 ```
 """
-function time!(ocp::OptimalControlModel{<: TimeDependence, Variable}, ind0::Index, indf::Index, name::String=__time_name())
+function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, ind0::Index, indf::Index, name::String=__time_name())
     __check_variable_set(ocp)
     __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
@@ -504,13 +504,13 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbo
     # set the constraint
     if type == :initial
         B = nothing
-        (V == NonVariable) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], V))
-        (V ==   Variable) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], V))
+        (V == Fixed) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], V))
+        (V ==   NonFixed) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], V))
         ocp.constraints[label] = (type, B, lb, ub)
     elseif type == :final
         B = nothing
-        (V == NonVariable) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], V))
-        (V ==   Variable) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], V))
+        (V == Fixed) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], V))
+        (V ==   NonFixed) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], V))
         ocp.constraints[label] = (type, B, lb, ub)
     elseif type == :control
         ocp.constraints[label] = (type, rg, lb, ub)
@@ -1007,19 +1007,19 @@ function constraint(ocp::OptimalControlModel{T, V}, label::Symbol) where {T <: T
         (:control , f::ControlConstraint,  _, _) => return f
         (:control , rg,   _, _) => begin
             C = nothing
-            (T, V) == (Autonomous, NonVariable) && (C = ControlConstraint(u         -> u[rg], T, V))
-            (T, V) == (Autonomous, Variable)   && (C = ControlConstraint((u, v)    -> u[rg], T, V))
-            (T, V) == (NonAutonomous, NonVariable)   && (C = ControlConstraint((t, u)    -> u[rg], T, V))
-            (T, V) == (NonAutonomous, Variable)     && (C = ControlConstraint((t, u, v) -> u[rg], T, V))
+            (T, V) == (Autonomous, Fixed) && (C = ControlConstraint(u         -> u[rg], T, V))
+            (T, V) == (Autonomous, NonFixed)   && (C = ControlConstraint((u, v)    -> u[rg], T, V))
+            (T, V) == (NonAutonomous, Fixed)   && (C = ControlConstraint((t, u)    -> u[rg], T, V))
+            (T, V) == (NonAutonomous, NonFixed)     && (C = ControlConstraint((t, u, v) -> u[rg], T, V))
             return C
         end
         (:state   , f::StateConstraint,    _, _) => return f
         (:state   , rg,   _, _) => begin
             S = nothing
-            (T, V) == (Autonomous, NonVariable) && (S = StateConstraint(x         -> x[rg], T, V))
-            (T, V) == (Autonomous, Variable)   && (S = StateConstraint((x, v)    -> x[rg], T, V))
-            (T, V) == (NonAutonomous, NonVariable)   && (S = StateConstraint((t, x)    -> x[rg], T, V))
-            (T, V) == (NonAutonomous, Variable)     && (S = StateConstraint((t, x, v) -> x[rg], T, V))
+            (T, V) == (Autonomous, Fixed) && (S = StateConstraint(x         -> x[rg], T, V))
+            (T, V) == (Autonomous, NonFixed)   && (S = StateConstraint((x, v)    -> x[rg], T, V))
+            (T, V) == (NonAutonomous, Fixed)   && (S = StateConstraint((t, x)    -> x[rg], T, V))
+            (T, V) == (NonAutonomous, NonFixed)     && (S = StateConstraint((t, x, v) -> x[rg], T, V))
             return S
         end
         (:mixed   , f::MixedConstraint,    _, _) => return f

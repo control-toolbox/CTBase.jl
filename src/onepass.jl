@@ -4,7 +4,7 @@
 # - nonautonomous tests
 # - add single sided inequalities
 # - add reverse inequalities (≥)
-# - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
+# - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, NonFixed / Fixed <: VariableDependence}
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
 # - 0 ≤ tf ≤ Inf not parsing!? (tf variable)
 # - allow dynamics to be labelled (alternative to ocp.dynamics)?

@@ -245,27 +245,27 @@ end
     @test is_variable_independent(ocp)
     @test !is_variable_dependent(ocp)
 
-    ocp = Model(Variable)
+    ocp = Model(NonFixed)
     @test is_time_independent(ocp)
     @test !is_time_dependent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    ocp = Model(NonAutonomous, Variable)
+    ocp = Model(NonAutonomous, NonFixed)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    ocp = Model(Variable, NonAutonomous)
+    ocp = Model(NonFixed, NonAutonomous)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    @test_throws IncorrectArgument Model(Variable, NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonFixed, NonAutonomous, Autonomous)
     @test_throws IncorrectArgument Model(NonAutonomous, Autonomous)
-    @test_throws IncorrectArgument Model(Variable, Int64)
+    @test_throws IncorrectArgument Model(NonFixed, Int64)
 
 end
 
@@ -282,27 +282,27 @@ end
     @test is_variable_independent(ocp)
     @test !is_variable_dependent(ocp)
 
-    ocp = Model(Variable)
+    ocp = Model(NonFixed)
     @test is_time_independent(ocp)
     @test !is_time_dependent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    ocp = Model(NonAutonomous, Variable)
+    ocp = Model(NonAutonomous, NonFixed)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    ocp = Model(Variable, NonAutonomous)
+    ocp = Model(NonFixed, NonAutonomous)
     @test is_time_dependent(ocp)
     @test !is_time_independent(ocp)
     @test is_variable_dependent(ocp)
     @test !is_variable_independent(ocp)
 
-    @test_throws IncorrectArgument Model(Variable, NonAutonomous, Autonomous)
+    @test_throws IncorrectArgument Model(NonFixed, NonAutonomous, Autonomous)
     @test_throws IncorrectArgument Model(NonAutonomous, Autonomous)
-    @test_throws IncorrectArgument Model(Variable, Int64)
+    @test_throws IncorrectArgument Model(NonFixed, Int64)
 
 end
 
@@ -816,8 +816,8 @@ end
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ulb, uind, uub), (xlb, xind, xub), (vlb, vind, vub) = nlp_constraints(ocp)
 
-    v = [ ]
-
+    v = Real[]
+    
     #=
     println("ξl = ", ξl)
     println("ξ = ", ξ)

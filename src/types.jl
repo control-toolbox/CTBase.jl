@@ -15,7 +15,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default value for `variable_dependence` is `NonVariable`.
+The default value for `variable_dependence` is `Fixed`.
 
 !!! warning
 
@@ -45,7 +45,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default value for `variable_dependence` is `NonVariable`.
+The default value for `variable_dependence` is `Fixed`.
 
 !!! warning
 
@@ -78,7 +78,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default values for `time_dependence` and `variable_dependence` are `Autonomous` and `NonVariable` respectively.
+The default values for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
 
 !!! warning
 
@@ -132,7 +132,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default values for `time_dependence` and `variable_dependence` are `Autonomous` and `NonVariable` respectively.
+The default values for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
 
 !!! warning
 
@@ -183,7 +183,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default value for `time_dependence` and `variable_dependence` are `Autonomous` and `NonVariable` respectively.
+The default value for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
 
 !!! warning
 
@@ -234,7 +234,7 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default value for `time_dependence` and `variable_dependence` are `Autonomous` and `NonVariable` respectively.
+The default value for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
 
 !!! warning
 
@@ -446,8 +446,8 @@ abstract type Autonomous <: TimeDependence end
 abstract type NonAutonomous <: TimeDependence end
 
 abstract type VariableDependence end
-abstract type Variable <: VariableDependence end
-abstract type NonVariable <: VariableDependence end
+abstract type NonFixed <: VariableDependence end
+abstract type Fixed <: VariableDependence end
 """
 $(TYPEDEF)
 
