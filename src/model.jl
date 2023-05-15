@@ -475,18 +475,10 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbo
         throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
     end
 
-    # range
-    rg = rg isa Index ? rg.val : rg
-
-<<<<<<< HEAD
     # check that rg, lb and ub are consistent
     txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
     (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
     (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-=======
-    # check if rg and val are consistent
-    (length(rg) != length(val)) && throw(IncorrectArgument("the range `rg`` and the value `val` must have the same dimension"))
->>>>>>> constraints
 
     # dimensions
     n = ocp.state_dimension
@@ -553,19 +545,13 @@ julia> constraint!(ocp, :final, Index(2), 0)
 julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
 ```
 """
-<<<<<<< HEAD
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label())
 
     # we check if the dimensions and times have been set just to force the user to set them before
-=======
-function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, label::Symbol=__constraint_label())
-    # we use the constraint! defined before and first check if the dimensions and times have been set
->>>>>>> constraints
     @__check(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
-<<<<<<< HEAD
     # check if the constraint named label already exists
     if label ∈ constraints_labels(ocp)
         throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
@@ -583,27 +569,12 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
         !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the initial state constraint must be contained in 1:$n"))
     elseif type == :final
         !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the final state constraint must be contained in 1:$n"))
-=======
-    # dimensions
-    n = ocp.state_dimension
-    q = ocp.variable_dimension
-    rg = nothing
-    
-    if type ∈ [:initial, :final]  # not allowed for :control or :state (does not make sense)
-        rg = n == 1 ? Index(1) : 1:n 
-        # check if rg and val are consistent
-        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $n"))
->>>>>>> constraints
     elseif type == :variable
         !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range $rg of the variable constraint must be contained in 1:$q"))
     end
 
-<<<<<<< HEAD
     #
     constraint!(ocp, type, rg, val, val, label)
-=======
-    constraint!(ocp, type, rg, val, label)
->>>>>>> constraints
 
 end
 
@@ -1080,11 +1051,7 @@ julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ,
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
 ```
 """
-<<<<<<< HEAD
-function nlp_constraints(ocp::OptimalControlModel{time_dependence}) where {time_dependence <: TimeDependence}
-=======
 function nlp_constraints(ocp::OptimalControlModel)
->>>>>>> constraints
 
     # we check if the dimensions and times have been set
     @__check(ocp)
