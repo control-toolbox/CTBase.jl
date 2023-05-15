@@ -42,7 +42,7 @@ end
     H = Hamiltonian((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
     @test H([1, 0], [0, 1]) == 3
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError H(t, [1, 0], [0, 1])
     @test_throws MethodError H([1, 0], [0, 1], v)
     @test H(t, [1, 0], [0, 1], v) == 3
@@ -67,7 +67,7 @@ end
     Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], autonomous=true, variable=false)
     @test Hv([1, 0], [0, 1]) == [3, -3]
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError Hv(t, [1, 0], [0, 1])
     @test_throws MethodError Hv([1, 0], [0, 1], v)
     @test Hv(t, [1, 0], [0, 1], v) == [3, -3]
@@ -92,7 +92,7 @@ end
     V = VectorField(x -> [x[1]^2, 2x[2]], autonomous=true, variable=false)
     @test V([1, -1]) == [1, -2]
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError V(t, [1, -1])
     @test_throws MethodError V([1, -1], v)
     @test V(t, [1, -1], v) == [1, -2]
@@ -119,7 +119,7 @@ end
     L = Lagrange((x, u) -> 2x[2]-u[1]^2, autonomous=true, variable=false)
     @test L([1, 0], [1]) == -1
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError L(t, [1, 0], [1])
     @test_throws MethodError L([1, 0], [1], v)
     @test L(t, [1, 0], [1], v) == -1
@@ -147,7 +147,7 @@ end
     D = Dynamics((x, u) -> [2x[2]-u^2, x[1]], autonomous=true, variable=false)
     @test D([1, 0], 1) == [-1, 1]
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError D(t, [1, 0], 1)
     @test_throws MethodError D([1, 0], 1, v)
     @test D(t, [1, 0], 1, v) == [-1, 1]
@@ -174,7 +174,7 @@ end
     S = StateConstraint(x -> [x[1]^2, 2x[2]], autonomous=true, variable=false)
     @test S([1, -1]) == [1, -2]
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError S(t, [1, -1])
     @test_throws MethodError S([1, -1], v)
     @test S(t, [1, -1], v) == [1, -2]
@@ -201,7 +201,7 @@ end
     C = ControlConstraint(u -> [u[1]^2, 2u[2]], autonomous=true, variable=false)
     @test C([1, -1]) == [1, -2]
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError C(t, [1, -1])
     @test_throws MethodError C([1, -1], v)
     @test C(t, [1, -1], v) == [1, -2]
@@ -228,7 +228,7 @@ end
     M = MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], autonomous=true, variable=false)
     @test M([1, 0], 1) == [-1, 1]
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError M(t, [1, 0], 1)
     @test_throws MethodError M([1, 0], 1, v)
     @test M(t, [1, 0], 1, v) == [-1, 1]
@@ -260,7 +260,7 @@ end
     u = FeedbackControl(x -> x[1]^2+2x[2], autonomous=true, variable=false)
     @test u([1, 0]) == 1
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError u(t, [1, 0])
     @test_throws MethodError u([1, 0], v)
     @test u(t, [1, 0], v) == 1
@@ -288,7 +288,7 @@ end
     u = ControlLaw((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
     @test u([1, 0], [0, 1]) == 3
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError u(t, [1, 0], [0, 1])
     @test_throws MethodError u([1, 0], [0, 1], v)
     @test u(t, [1, 0], [0, 1], v) == 3
@@ -315,7 +315,7 @@ end
     μ = Multiplier((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
     @test μ([1, 0], [0, 1]) == 3
     t = 1
-    v = []
+    v = Real[]
     @test_throws MethodError μ(t, [1, 0], [0, 1])
     @test_throws MethodError μ([1, 0], [0, 1], v)
     @test μ(t, [1, 0], [0, 1], v) == 3

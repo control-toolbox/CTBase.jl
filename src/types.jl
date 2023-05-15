@@ -425,13 +425,12 @@ Base.isless(i::Real, j::Index) = i ≤ j.val
 Base.length(i::Index) = 1
 Base.iterate(i::Index, state=0) = state == 0 ? (i, 1) : nothing
 Base.IteratorSize(::Type{Index}) = Base.HasLength()
+Base.append!(v::Vector, i::Index) = Base.append!(v, i.val)
 
 """
 Type alias for an index or range.
 """
 const RangeConstraint = Union{Index, OrdinalRange{<:Integer}}
-
-
 
 """
 $(TYPEDEF)
