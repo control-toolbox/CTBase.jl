@@ -461,11 +461,11 @@ function (F::ControlLaw{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Va
     return F.f(x, p)
 end
 
-function (F::ControlLaw{:Autonomous, :NonFixed})(x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{:Autonomous, :NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -477,7 +477,7 @@ function (F::ControlLaw{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v:
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{:NonAutonomous, :NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(t, x, p, v)
 end
 
@@ -504,11 +504,11 @@ function (F::Multiplier{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Va
     return F.f(x, p)
 end
 
-function (F::Multiplier{:Autonomous, :NonFixed})(x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{:Autonomous, :NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -520,6 +520,6 @@ function (F::Multiplier{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v:
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{:NonAutonomous, :NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(t, x, p, v)
 end
