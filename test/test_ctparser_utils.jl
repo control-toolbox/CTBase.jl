@@ -59,7 +59,7 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 @test constraint_type(:( ẏ(t)                  ), t, t0, tf, x, u, v) ==  :other
 @test constraint_type(:( ẋ(s)                  ), t, t0, tf, x, u, v) ==  :other
 @test constraint_type(:( x(0)'                 ), t, t0, tf, x, u, v) == (:boundary, :(var"x#0"'))
-@test constraint_type(:( ẋ(0)                  ), t, t0, tf, x, u, v) == (:boundary, :(var"x#0"'))
+@test constraint_type(:( x'(0)                 ), t, t0, tf, x, u, v) == (:boundary, :(var"x#0"'))
 @test constraint_type(:( x(t)'                 ), t, t0, tf, x, u, v) == (:state_fun, :(var"x#t"'))
 @test constraint_type(:( x(0)                  ), t, t0, tf, x, u, v) == (:initial, nothing)
 @test constraint_type(:( x[1:2:5](0)           ), t, t0, tf, x, u, v) == (:initial, 1:2:5)

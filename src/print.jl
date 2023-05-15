@@ -43,7 +43,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dep
     try
         nlp_constraints(ocp)
     catch
-        printstyled(io, "Internal error", bold=true)
+        printstyled(io, "Print error", bold=true)
         return
     end
 
