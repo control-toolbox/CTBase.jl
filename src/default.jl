@@ -3,40 +3,40 @@ $(TYPEDSIGNATURES)
 
 Used to set the default value of the time dependence of the functions.
 
-The default value is `:t_indep`, which means that the functions are considered time independent.
-The other possible time dependence is `:t_dep`, which means that the functions are considered time dependent.
+The default value is `Autonomous`, which means that the functions are considered time independent.
+The other possible time dependence is `NonAutonomous`, which means that the functions are considered time dependent.
 """
-__fun_time_dependence() = :t_indep
+__fun_time_dependence() = Autonomous
 
 """
 $(TYPEDSIGNATURES)
 
 Used to set the default value of the variable dependence of the functions.
 
-The default value is `:v_indep`, which means that the functions are considered variable independent.
-The other possible variable dependence is `:v_dep`, which means that the functions are considered variable dependent.
+The default value is `Fixed`, which means that the functions are considered variable independent.
+The other possible variable dependence is `NonFixed`, which means that the functions are considered variable dependent.
 """
-__fun_variable_dependence() = :v_indep
+__fun_variable_dependence() = Fixed
 
 """
 $(TYPEDSIGNATURES)
 
 Used to set the default value of the time dependence of the Optimal Control Problem.
-The default value is `:t_indep`, which means that the Optimal Control Problem is considered time independent.
-The other possible time dependence is `:t_dep`, which means that all the functions used to define the 
+The default value is `Autonomous`, which means that the Optimal Control Problem is considered time independent.
+The other possible time dependence is `NonAutonomous`, which means that all the functions used to define the 
 Optimal Control Problem are considered time dependent.
 """
-__ocp_time_dependence() = :t_indep
+__ocp_time_dependence() = Autonomous
 
 """
 $(TYPEDSIGNATURES)
 
 Used to set the default value of the variable dependence of the Optimal Control Problem.
-The default value is `:v_indep`, which means that the Optimal Control Problem is considered variable independent.
-The other possible variable dependence is `:v_dep`, which means that all the functions used to define the
+The default value is `Fixed`, which means that the Optimal Control Problem is considered variable independent.
+The other possible variable dependence is `NonFixed`, which means that all the functions used to define the
 Optimal Control Problem are considered variable dependent.
 """
-__ocp_variable_dependence() = :v_indep
+__ocp_variable_dependence() = Fixed
 
 """
 $(TYPEDSIGNATURES)

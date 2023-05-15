@@ -4,7 +4,7 @@ function test_print()
     @test display(Model()) isa Nothing
 
     #
-    ocp = Model(time_dependence=:t_dep)
+    ocp = Model(autonomous=false)
     state!(ocp, 2, ["r", "v"]) # dimension of the state with the names of the components
     control!(ocp, 1)           # dimension of the control
     time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
@@ -24,7 +24,7 @@ function test_print()
     @test display(ocp) isa Nothing
 
     #
-    ocp = Model(time_dependence=:t_dep)
+    ocp = Model(autonomous=false)
     state!(ocp, 1, "y") # dimension of the state with the names of the components
     control!(ocp, 1, "v")           # dimension of the control
     time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
@@ -40,7 +40,7 @@ function test_print()
     @test display(ocp) isa Nothing
 
     #
-    ocp = Model(time_dependence=:t_dep, variable_dependence=:v_dep)
+    ocp = Model(autonomous=false, variable=true)
     variable!(ocp, 1)
     state!(ocp, 1, "y") # dimension of the state with the names of the components
     control!(ocp, 2)           # dimension of the control
