@@ -90,19 +90,9 @@ function __init_repl(; debug=false, demo=false)
         # parse e and update ct_repl if needed
         @match e begin
             :( $e_, time                 ) => __add!(ct_repl, :time, e, history)
-            :( $t ∈ [$a, $b]             ) => __add!(ct_repl, :time, :($t ∈ [$a, $b], time), history)
             :( $e_, state                ) => __add!(ct_repl, :state, e, history)
             :( $e_, control              ) => __add!(ct_repl, :control, e, history)
-            :( $x, $u ∈ $X, $U ) || :( ($x, $u) ∈ $X × $U ) || :( ($x, $u) ∈ $X * $U )=> begin
-                __add!(ct_repl, :state, :($x ∈ $X, state), history)
-                __add!(ct_repl, :control, :($u ∈ $U, control), history)
-            end
             :( $e_, variable             ) => __add!(ct_repl, :variable, e, history)
-            :( $x, $u, $v ∈ $X, $U, $V ) || :( ($x, $u, $v) ∈ $X × $U × $V ) || :( ($x, $u, $v) ∈ $X * $U * $V )=> begin
-                __add!(ct_repl, :state, :($x ∈ $X, state), history)
-                __add!(ct_repl, :control, :($u ∈ $U, control), history)
-                __add!(ct_repl, :variable, :($v ∈ $V, variable), history)
-            end
             :( $a = $e1                  ) => __add!(ct_repl, :alias, e, history)
             :( ∂($x)($t) == $e1          ) => __add!(ct_repl, :dynamics, e, history)
             :( ∂($x)($t) == $e1, $label  ) => __add!(ct_repl, :dynamics, e, history)

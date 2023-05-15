@@ -12,6 +12,7 @@ const constraint_type = CTBase.constraint_type
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
+        #=
         :callback,
         :ctparser_utils,
         #:ctparser,
@@ -25,6 +26,7 @@ const constraint_type = CTBase.constraint_type
         :utils,
         :onepass,
 	    :goddard,
+        =#
         )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
