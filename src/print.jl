@@ -9,12 +9,12 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{time_dependence, vd}) where {time_dependence, vd}
+function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence})
 
     # check if the problem is empty
     __is_empty(ocp) && return
 
-    # check if the problem is complete: times, state, control, dynamics and variable (if Variable)
+    # check if the problem is complete: times, state, control, dynamics and variable (if NonFixed)
     is_incomplete = false
     if  __is_time_not_set(ocp) || 
         __is_state_not_set(ocp) || 

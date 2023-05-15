@@ -2,7 +2,7 @@
 # todo:
 # - add single sided inequalities
 # - add reverse inequalities (≥)
-# - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, Variable / NonVariable <: VariableDependence}
+# - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, NonFixed / Fixed <: VariableDependence}
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
 # - 0 ≤ tf ≤ Inf not parsing!? (tf variable)
 # - allow dynamics to be labelled (alternative to ocp.dynamics)?
@@ -85,8 +85,6 @@ parse!(p, ocp, e; log=false) = begin
         :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
         :( ∂($x)($t) == $e1          ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( ∂($x)($t) == $e1, $label  ) => p_dynamics!(p, ocp, x, t, e1, label; log)
-        :( $x'($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log) # todo: remove
-        :( $x'($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log) # todo: remove
         :( $e1 == $e2                ) => p_constraint_eq!(p, ocp, e1, e2       ; log)
         :( $e1 == $e2, $label        ) => p_constraint_eq!(p, ocp, e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint_ineq!(p, ocp, e1, e2, e3      ; log)
@@ -471,10 +469,10 @@ macro def(ocp, e, log=false)
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
 	    (false, false) => :( $ocp = Model() )
-	    (true , false) => :( $ocp = Model(time_dependence=:t_dep) )
-	    (false, true ) => :( $ocp = Model(variable_dependence=:v_dep) )
-	    _              => :( $ocp = Model(time_dependence=:t_dep, variable_dependence=:v_dep) )
-	    end
+	    (true , false) => :( $ocp = Model(autonomous=false) )
+	    (false, true ) => :( $ocp = Model(variable=true) )
+	    _              => :( $ocp = Model(autonomous=false, variable=true) )
+	end
         code = Expr(:block, init, code, :( $ocp )) 
         esc( code )
     catch ex
