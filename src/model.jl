@@ -811,6 +811,52 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val::c
     constraint!(ocp, type, f, val, val, label)
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range.
+
+!!! note
+
+    - The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
+    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
+    - The times must be set before. Use time!.
+
+# Examples
+
+```jldoctest
+julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :final, Index(1), 0, 2)
+julia> constraint!(ocp, :control, Index(1), 0, 2)
+julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
+```
+"""
+function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence}, type::Symbol; 
+    rg::Union{RangeConstraint,Nothing}=nothing, f::Union{Function,Nothing}=nothing,
+    val::Union{ctVector,Nothing}=nothing, lb::Union{ctVector,Nothing}=nothing, ub::Union{ctVector,Nothing}=nothing, 
+    label::Symbol=__constraint_label())
+
+    
+    (lb ≢ nothing && ub === nothing) && (ub = Inf*(size(lb,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+    (lb === nothing && ub ≢ nothing) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+
+    @match (rg,f,val,lb,ub) begin
+        (::Nothing,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, val, label) #
+        (::Nothing,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, lb, ub, label) #
+        (::Nothing,::Function,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, f, val, label) #
+        (::Nothing,::Function,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, f, lb, ub, label) #
+        (::RangeConstraint,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, rg, val, label) #
+        (::RangeConstraint,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, rg, lb, ub, label) #
+        _ => throw(IncorrectArgument)
+    end
+
+    nothing
+
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -825,21 +871,15 @@ Set the dynamics.
 # Example
 
 ```jldoctest
-julia> constraint!(ocp, :dynamics, f)
+julia> dynamics!(ocp, f)
 ```
 """
-function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function) where {T <: TimeDependence, V <: VariableDependence}
+function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)
 
-    # set the dynamics
-    if type ∈ [ :dynamics ]
-        ocp.dynamics = Dynamics(f, T, V)
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :dynamics ] or check the arguments of the constraint! method."))
-    end
+    ocp.dynamics = Dynamics(f, T, V)
 
     nothing # to force to return nothing
 

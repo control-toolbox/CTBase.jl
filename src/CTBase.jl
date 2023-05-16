@@ -132,7 +132,7 @@ export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, 
 # model
 export OptimalControlModel
 export Model
-export variable!, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
+export variable!, time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, constraint
 export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
 

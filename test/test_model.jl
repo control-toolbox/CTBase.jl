@@ -771,19 +771,19 @@ end
 @testset "constraint! 9" begin
     
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
-    constraint!(ocp, :dynamics, (x, u) -> x+u)
+    dynamics!(ocp, (x, u) -> x+u)
     @test ocp.dynamics(1, 2) == 3
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
-    constraint!(ocp, :dynamics, (x, u) -> x[1]+u[1])
+    dynamics!(ocp, (x, u) -> x[1]+u[1])
     @test ocp.dynamics([1, 2], [3, 4]) == 4
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
-    constraint!(ocp, :dynamics, (x, u) -> [x[1]+u[1], x[2]+u[2]])
+    dynamics!(ocp, (x, u) -> [x[1]+u[1], x[2]+u[2]])
     @test ocp.dynamics([1, 2], [3, 4]) == [4, 6]
 
     ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
-    constraint!(ocp, :dynamics, (x, u) -> [x[1]+u, x[2]+u])
+    dynamics!(ocp, (x, u) -> [x[1]+u, x[2]+u])
     @test ocp.dynamics([1, 2], 3) == [4, 5]
 
 end
@@ -795,6 +795,41 @@ end
     constraint!(ocp, :final, 1, 2, :cf)
     @test constraint(ocp, :c0)(12, ∅) == 12
     @test constraint(ocp, :cf)(∅ ,12) == 12
+
+end
+
+@testset "constraint! 11" begin
+
+    dummy(u) = u^2 + u
+
+    ocp = Model(variable=true); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1); variable!(ocp,3)
+    constraint!(ocp, :state, 0, 1, :c0)
+    constraint!(ocp, :control, dummy, 1, :c1)
+    constraint!(ocp, :variable, 1:2:3, [-Inf,-Inf], [0,0], :c2)
+
+    ocp_bis = Model(variable=true); time!(ocp_bis, 0, 1); state!(ocp_bis, 1); control!(ocp_bis, 1); variable!(ocp_bis,3)
+    constraint!(ocp_bis, :state, lb=0, ub=1, label=:c0)
+    constraint!(ocp_bis, :control, f=dummy, val=1, label=:c1)
+    constraint!(ocp_bis, :variable, rg=1:2:3, ub=[0,0], label=:c2)
+
+    @test ocp.constraints == ocp_bis.constraints
+
+    ocp_ter = Model(variable=true); time!(ocp_ter, 0, 1); state!(ocp_ter, 3); control!(ocp_ter, 1); variable!(ocp_ter,1)
+    constraint!(ocp_ter, :variable, 1, :c0)
+    constraint!(ocp_ter, :control, dummy, 1, Inf, :c1)
+    constraint!(ocp_ter, :state, 1:2:3, [0,0], :c2)
+
+    ocp_quad = Model(variable=true); time!(ocp_quad, 0, 1); state!(ocp_quad, 3); control!(ocp_quad, 1); variable!(ocp_quad,1)
+    constraint!(ocp_quad, :variable, val=1, label=:c0)
+    constraint!(ocp_quad, :control, f=dummy, lb=1, label=:c1)
+    constraint!(ocp_quad, :state, rg=1:2:3, val=[0,0], label=:c2)
+
+    @test ocp_ter.constraints == ocp_quad.constraints
+
+    ocp_error = ocp_error = Model(variable=true); time!(ocp_error, 0, 1); state!(ocp_error, 3); control!(ocp_error, 1); variable!(ocp_error,1)
+    @test_throws DataType constraint!(ocp_error, :variable)
+    @test_throws DataType constraint!(ocp_error, :control, f=dummy, val=1, lb=1, label=:c1)
+    @test_throws DataType constraint!(ocp_error, :state, rg=1:2:3, f=dummy, val=[0,0], label=:c2)
 
 end
 
