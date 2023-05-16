@@ -1043,20 +1043,24 @@ function constraint(ocp::OptimalControlModel{T, V}, label::Symbol) where {T <: T
         (:boundary, f::BoundaryConstraint, _, _) => return f
         (:control , f::ControlConstraint,  _, _) => return f
         (:control , rg,   _, _) => begin
-            C = nothing
-            (T, V) == (Autonomous, Fixed) && (C = ControlConstraint(u         -> u[rg], T, V))
-            (T, V) == (Autonomous, NonFixed)   && (C = ControlConstraint((u, v)    -> u[rg], T, V))
-            (T, V) == (NonAutonomous, Fixed)   && (C = ControlConstraint((t, u)    -> u[rg], T, V))
-            (T, V) == (NonAutonomous, NonFixed)     && (C = ControlConstraint((t, u, v) -> u[rg], T, V))
+            C = @match ocp begin
+                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(u         -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => ControlConstraint((u, v)    -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, Fixed} => ControlConstraint((t, u)    -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, NonFixed} => ControlConstraint((t, u, v) -> u[rg], T, V)
+                _ => nothing
+                end
             return C
         end
         (:state   , f::StateConstraint,    _, _) => return f
         (:state   , rg,   _, _) => begin
-            S = nothing
-            (T, V) == (Autonomous, Fixed) && (S = StateConstraint(x         -> x[rg], T, V))
-            (T, V) == (Autonomous, NonFixed)   && (S = StateConstraint((x, v)    -> x[rg], T, V))
-            (T, V) == (NonAutonomous, Fixed)   && (S = StateConstraint((t, x)    -> x[rg], T, V))
-            (T, V) == (NonAutonomous, NonFixed)     && (S = StateConstraint((t, x, v) -> x[rg], T, V))
+            S = @match ocp begin
+                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(x         -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => StateConstraint((x, v)    -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, Fixed} => StateConstraint((t, x)    -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, NonFixed} => StateConstraint((t, x, v) -> x[rg], T, V)
+                _ => nothing
+                end
             return S
         end
         (:mixed   , f::MixedConstraint,    _, _) => return f
