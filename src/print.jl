@@ -20,14 +20,10 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         # some checks
         @assert hasproperty(ocp.model_expression, :args)
         @assert hasproperty(ocp.model_expression, :head)
-        @assert ocp.model_expression.head == :$
-        @assert length(ocp.model_expression.args) == 1
-        @assert hasproperty(ocp.model_expression.args[1], :args)
-        @assert hasproperty(ocp.model_expression.args[1], :head)
-        @assert ocp.model_expression.args[1].head == :block
+        @assert ocp.model_expression.head == :block
 
         # print the code
-        code = ocp.model_expression.args[1]
+        code = ocp.model_expression
         code = MacroTools.striplines(code)
         println(io)
         l = 0
