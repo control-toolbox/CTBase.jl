@@ -799,12 +799,12 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 # Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
-julia> constraint!(ocp, :final, Index(1), 0, 2)
-julia> constraint!(ocp, :control, Index(1), 0, 2)
-julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
-julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :final, val=Index(1), lb=0, ub=2)
+julia> constraint!(ocp, :control, val=Index(1), lb=0, ub=2)
+julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence}, type::Symbol; 
