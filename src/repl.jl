@@ -17,7 +17,7 @@ end
 function __add!(ct_repl::CTRepl, type::Symbol, e::Expr, history::HistoryRepl)
     ct_repl.debug && (println("debug> adding expression: ", e, " of type: ", type))
     try 
-        __eval_ocp(ct_repl)               # test if code is valid: if not, an exception is thrown
+        __eval_ocp(ct_repl, type, e)      # test if code is valid: if not, an exception is thrown
         __update!(ct_repl.model, type, e) # update model
         __add!(history, ct_repl)          # add ct_repl to history
         ct_repl.debug && (println("debug> expression valid, model updated."))
@@ -89,19 +89,16 @@ function __init_repl(; debug=false, demo=false)
 
         # parse e and update ct_repl if needed
         @match e begin
-            :( $e_, time                 ) => __add!(ct_repl, :time, e, history)
-            :( $e_, state                ) => __add!(ct_repl, :state, e, history)
-            :( $e_, control              ) => __add!(ct_repl, :control, e, history)
-            :( $e_, variable             ) => __add!(ct_repl, :variable, e, history)
-            :( $a = $e1                  ) => __add!(ct_repl, :alias, e, history)
-            :( ∂($x)($t) == $e1          ) => __add!(ct_repl, :dynamics, e, history)
-            :( ∂($x)($t) == $e1, $label  ) => __add!(ct_repl, :dynamics, e, history)
-            :( $e1 == $e2                ) => __add!(ct_repl, :constraints, e, history)
-            :( $e1 == $e2, $label        ) => __add!(ct_repl, :constraints, e, history)
-            :( $e1 ≤  $e2 ≤  $e3         ) => __add!(ct_repl, :constraints, e, history)
-            :( $e1 ≤  $e2 ≤  $e3, $label ) => __add!(ct_repl, :constraints, e, history)
-            :( $e_ → min                 ) => __add!(ct_repl, :objective, e, history)
-            :( $e_ → max                 ) => __add!(ct_repl, :objective, e, history)
+            :( $e_, time         ) => __add!(ct_repl, :time, e, history)
+            :( $e_, state        ) => __add!(ct_repl, :state, e, history)
+            :( $e_, control      ) => __add!(ct_repl, :control, e, history)
+            :( $e_, variable     ) => __add!(ct_repl, :variable, e, history)
+            :( ∂($x)($t) == $e_  ) => __add!(ct_repl, :dynamics, e, history)
+            :( $e1 == $e2        ) => __add!(ct_repl, :constraints, e, history)
+            :( $e1 ≤  $e2 ≤  $e3 ) => __add!(ct_repl, :constraints, e, history)
+            :( $e_ → min         ) => __add!(ct_repl, :objective, e, history)
+            :( $e_ → max         ) => __add!(ct_repl, :objective, e, history)
+            :( $a = $e1          ) => __add!(ct_repl, :alias, e, history)
             _ => (println("\nct parsing error\n\nType HELP to see the list of commands or enter a valid expression to update the model."); return nothing)
         end
 
@@ -273,12 +270,9 @@ function __transform_to_command_form(e::Expr)::Symbol
 end
 
 # make @def ocp quote
-function __quote_ocp(ct_repl::CTRepl; print_ocp::Bool=true)
+function __quote_ocp(ct_repl::CTRepl)
     code  = __code(ct_repl.model)
-    print_ocp && begin 
-        #printstyled("\nct> ", color=:magenta, bold=true)
-        println("\n", ct_repl.ocp_name)
-    end
+    println("\n", ct_repl.ocp_name)
     ocp_q = quote @def $(ct_repl.ocp_name) $(code) end
     ct_repl.debug && println("debug> code: ", code)
     ct_repl.debug && println("debug> quote code: ", ocp_q)
@@ -286,8 +280,14 @@ function __quote_ocp(ct_repl::CTRepl; print_ocp::Bool=true)
 end
 
 # eval ocp
-function __eval_ocp(ct_repl::CTRepl)
-    eval(__quote_ocp(ct_repl, print_ocp=false))
+function __eval_ocp(ct_repl::CTRepl, type::Symbol, e::Expr)
+    code  = __code(ct_repl.model, type, e)
+    ocp = gensym()
+    ocp_q = quote @def $ocp $(code) end
+    eval(ocp_q)
+    ct_repl.debug && println("debug> code: ", code)
+    ct_repl.debug && println("debug> quote code: ", ocp_q)
+    nothing
 end
 
 # quote solve: todo: update when using real solver
@@ -348,7 +348,7 @@ function __split_alias(model::ModelRepl)
     for a ∈ model[:alias]
         @match a begin
             :( $a1 = $a2 ) => begin
-                inexpr(model[:time], a1) ? push!(alias_time, a) : push!(alias_other, a)
+                MacroTools.inexpr(model[:time], a1) ? push!(alias_time, a) : push!(alias_other, a)
             end
             _ => (println("\n Internal error, invalid alias: ", a); return)
         end
@@ -360,11 +360,11 @@ end
 function __code(model::ModelRepl)::Expr
     m = Expr[]
     alias_time, alias_other = __split_alias(model)
+    model[:variable]    != :() && push!(m, model[:variable])
     !isempty(alias_time)       && push!(m, alias_time...)
     model[:time]        != :() && push!(m, model[:time])
     model[:state]       != :() && push!(m, model[:state])
     model[:control]     != :() && push!(m, model[:control])
-    model[:variable]    != :() && push!(m, model[:variable])
     !isempty(alias_other)      && push!(m, alias_other...)
     model[:constraints] != []  && push!(m, model[:constraints]...)
     model[:dynamics]    != :() && push!(m, model[:dynamics])

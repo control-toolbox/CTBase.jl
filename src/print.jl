@@ -28,11 +28,15 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
         # print the code
         code = ocp.model_expression.args[1]
+        code = MacroTools.striplines(code)
         println(io)
         l = 0
         for i ∈ eachindex(code.args)
             e = code.args[i]
-            println(io, " "^l, e)
+            @match e begin
+                :( ($a, $b) ) => println(io, " "^l, a, ", ", b)
+                _ => println(io, " "^l, e)
+            end
         end
         
     elseif __is_complete(ocp) # print the model if is is complete

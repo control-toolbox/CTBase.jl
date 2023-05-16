@@ -26,7 +26,7 @@ using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
-using MacroTools: inexpr
+using MacroTools: inexpr, striplines, MacroTools
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
