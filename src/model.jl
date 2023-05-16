@@ -223,13 +223,7 @@ julia> ocp.control_components_names
 function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), components_names::Vector{String}=__control_components_names(m,name))
     # checkings
     (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
-    # set the control dimension and names
-    # components_names = nothing
-    # if (m  > 1) 
-    #     components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, m)] : name
-    # else
-    #     components_names = [name] # name is a String
-    # end
+    
     ocp.control_dimension = m
     ocp.control_components_names = components_names
     ocp.control_name = name
