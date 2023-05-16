@@ -2,7 +2,6 @@
 # todo:
 # - dynamics apart, kwargs constraints (+ one sided, ≥)
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
-# - 0 ≤ tf ≤ Inf not parsing!? (tf variable)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 
