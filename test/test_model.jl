@@ -35,9 +35,7 @@ function test_model() # 30 55 185
     @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
     
     ocp = Model(variable=true)
-    variable!(ocp, 2, [ "vv1", "vv2" ])
-    @test ocp.variable_dimension == 2
-    @test ocp.variable_components_names == [ "vv1", "vv2" ]
+    @test_throws MethodError variable!(ocp, 2, [ "vv1", "vv2" ])
 
     ocp = Model(variable=true)
     variable!(ocp, 2, :vv)
@@ -335,9 +333,7 @@ end
     @test ocp.state_components_names == ["x₁", "x₂"]
 
     ocp = Model()
-    state!(ocp, 2, ["y₁", "y₂"])
-    @test ocp.state_dimension == 2
-    @test ocp.state_components_names == ["y₁", "y₂"]
+    @test_throws MethodError state!(ocp, 2, ["y₁", "y₂"])
 
     ocp = Model()
     state!(ocp, 2, :y)
@@ -367,9 +363,7 @@ end
     @test ocp.control_components_names == ["u₁", "u₂"]
 
     ocp = Model()
-    control!(ocp, 2, ["v₁", "v₂"])
-    @test ocp.control_dimension == 2
-    @test ocp.control_components_names == ["v₁", "v₂"]
+    @test_throws MethodError control!(ocp, 2, ["v₁", "v₂"])
 
     ocp = Model()
     control!(ocp, 2, :v)

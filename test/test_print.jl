@@ -5,7 +5,7 @@ function test_print()
 
     #
     ocp = Model(autonomous=false)
-    state!(ocp, 2, ["r", "v"]) # dimension of the state with the names of the components
+    state!(ocp, 2, "state", ["r", "v"]) # dimension of the state with the names of the components
     control!(ocp, 1)           # dimension of the control
     time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
     constraint!(ocp, :initial, [-1, 0])
