@@ -827,9 +827,9 @@ end
     @test ocp_ter.constraints == ocp_quad.constraints
 
     ocp_error = ocp_error = Model(variable=true); time!(ocp_error, 0, 1); state!(ocp_error, 3); control!(ocp_error, 1); variable!(ocp_error,1)
-    @test_throws DataType constraint!(ocp_error, :variable)
-    @test_throws DataType constraint!(ocp_error, :control, f=dummy, val=1, lb=1, label=:c1)
-    @test_throws DataType constraint!(ocp_error, :state, rg=1:2:3, f=dummy, val=[0,0], label=:c2)
+    @test_throws IncorrectArgument constraint!(ocp_error, :variable)
+    @test_throws IncorrectArgument constraint!(ocp_error, :control, f=dummy, val=1, lb=1, label=:c1)
+    @test_throws IncorrectArgument constraint!(ocp_error, :state, rg=1:2:3, f=dummy, val=[0,0], label=:c2)
 
 end
 

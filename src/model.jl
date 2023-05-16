@@ -850,7 +850,7 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDepe
         (::Nothing,::Function,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, f, lb, ub, label) #
         (::RangeConstraint,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, rg, val, label) #
         (::RangeConstraint,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, rg, lb, ub, label) #
-        _ => throw(IncorrectArgument)
+        _ => throw(IncorrectArgument("Provided arguments are inconsistent"))
     end
 
     nothing
