@@ -865,27 +865,6 @@ end
 
     v = Real[]
     
-    #=
-    println("ξl = ", ξl)
-    println("ξ = ", ξ)
-    println("ξu = ", ξu)
-    println("ηl = ", ηl)
-    println("η = ", η)
-    println("ηu = ", ηu)
-    println("ψl = ", ψl)
-    println("ψ = ", ψ)
-    println("ψu = ", ψu)
-    println("ϕl = ", ϕl)
-    println("ϕ = ", ϕ)
-    pξlrintln("ϕu = ", ϕu)
-    println("ul = ", ul)
-    println("uind = ", uind)
-    println("uu = ", uu)
-    println("xl = ", xl)
-    println("xind = ", xind)
-    println("xu = ", xu)
-    =#
-
     # control
     @test sort(ξl) == sort([0])
     @test sort(ξu) == sort([1])

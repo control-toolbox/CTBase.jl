@@ -1,13 +1,10 @@
 # onepass
 # todo:
-# - add single sided inequalities
-# - add reverse inequalities (≥)
-# - OptimalControlModel{Autonomous / NonAutonomous <: TimeDependence, NonFixed / Fixed <: VariableDependence}
+# - dynamics apart, kwargs constraints (+ one sided, ≥)
 # - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
 # - 0 ≤ tf ≤ Inf not parsing!? (tf variable)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
-# - parse dynamics in several steps: x'[2](t) == ..., x'[2:4](t) == ... (each time call dynamics!, and assemble afterwards what the dynamics is...)
 
 """
 $(TYPEDEF)
@@ -467,13 +464,14 @@ macro def(ocp, e, log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
-	    (false, false) => :( $ocp = Model() )
-	    (true , false) => :( $ocp = Model(autonomous=false) )
-	    (false, true ) => :( $ocp = Model(variable=true) )
-	    _              => :( $ocp = Model(autonomous=false, variable=true) )
-	end
-        code = Expr(:block, init, code, :( $ocp )) 
-        esc( code )
+            (false, false) => :( $ocp = Model() )
+            (true , false) => :( $ocp = Model(autonomous=false) )
+            (false, true ) => :( $ocp = Model(variable=true) )
+            _              => :( $ocp = Model(autonomous=false, variable=true) )
+	    end
+        code = Expr(:block, init, code, 
+        :($ocp.model_expression=$(QuoteNode(Expr(:$, e)))), :($ocp))
+        esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
     end
