@@ -355,7 +355,7 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
         function $gs($(args...))
             $e
         end
-        constraint!($ocp, :dynamics, $gs)
+        dynamics!($ocp, $gs)
     end, p.lnum, p.line)
 end
 
