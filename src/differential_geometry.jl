@@ -13,17 +13,17 @@ end
 # classical calls
 #
 # ctNumber
-function (H::HamiltonianLift{:nonautonomous})(t::Time, x::ctNumber, p::ctNumber, args...; kwargs...)::ctNumber
+function (H::HamiltonianLift{NonAutonomous})(t::Time, x::ctNumber, p::ctNumber, args...; kwargs...)::ctNumber
     return p'*H.X(t, x, args...; kwargs...)
 end
-function (H::HamiltonianLift{:autonomous})(x::ctNumber, p::ctNumber, args...; kwargs...)::ctNumber
+function (H::HamiltonianLift{Autonomous})(x::ctNumber, p::ctNumber, args...; kwargs...)::ctNumber
     return p'*H.X(x, args...; kwargs...)
 end
-# State, Adjoint
-function (H::HamiltonianLift{:nonautonomous})(t::Time, x::State, p::Adjoint, args...; kwargs...)::ctNumber
+# State, Costate
+function (H::HamiltonianLift{NonAutonomous})(t::Time, x::State, p::Costate, args...; kwargs...)::ctNumber
     return p'*H.X(t, x, args...; kwargs...)
 end
-function (H::HamiltonianLift{:autonomous})(x::State, p::Adjoint, args...; kwargs...)::ctNumber
+function (H::HamiltonianLift{Autonomous})(x::State, p::Costate, args...; kwargs...)::ctNumber
     return p'*H.X(x, args...; kwargs...)
 end
 
@@ -36,9 +36,9 @@ function Lift(X::VectorField)::HamiltonianLift
 end
 
 # single lift: from Function
-function Lift(X::Function; time_dependence::Symbol=CTBase.__fun_time_dependence())::HamiltonianLift
-    check_time_dependence(time_dependence)
-    return HamiltonianLift(VectorField(X, time_dependence=time_dependence))
+function Lift(X::Function; time_dependence::DataType=CTBase.__fun_time_dependence())::HamiltonianLift
+    __check_time_dependence(time_dependence)
+    return HamiltonianLift(VectorField(X, time_dependence))
 end
 
 # multiple lifts: from VectorField
@@ -47,65 +47,65 @@ function Lift(Xs::VectorField...)::Tuple{Vararg{HamiltonianLift}}
 end
 
 # multiple lifts: from Function
-function Lift(Xs::Function...; time_dependence::Symbol=CTBase.__fun_time_dependence())::Tuple{Vararg{HamiltonianLift}}
-    check_time_dependence(time_dependence)
+function Lift(Xs::Function...; time_dependence::DataType=CTBase.__fun_time_dependence())::Tuple{Vararg{HamiltonianLift}}
+    __check_time_dependence(time_dependence)
     return Tuple(Lift(X, time_dependence=time_dependence) for X ∈ Xs)
 end
 
 # ---------------------------------------------------------------------------
 # Directional derivative of a scalar function
-function Der(X::VectorField{:autonomous, sd}, f::Function)::Function where {sd}
+function Der(X::VectorField{Autonomous, <: VariableDependence}, f::Function)::Function
    return x -> ctgradient(f, x)'*X(x)
 end
-function Der(X::VectorField{:nonautonomous, sd}, f::Function)::Function where {sd}
+function Der(X::VectorField{NonAutonomous, <: VariableDependence}, f::Function)::Function
     return (t, x) -> ctgradient(y -> f(t, y), x)'*X(t, x)
 end
-function ⋅(X::VectorField{td, sd}, f::Function)::Function where {td, sd}
+function ⋅(X::VectorField, f::Function)::Function
     return Der(X, f)
 end
 
 # ---------------------------------------------------------------------------
 # Lie derivative of a scalar function = directional derivative
-function Lie(X::VectorField{td, sd}, f::Function)::Function where {td, sd}
+function Lie(X::VectorField, f::Function)::Function
     return Der(X, f)
 end
 
 # ---------------------------------------------------------------------------
 # "Directional derivative" of a vector field: internal and only used to compute
 # efficiently the Lie bracket of two vector fields
-function ⅋(X::VectorField{:autonomous, 1}, Y::VectorField{:autonomous, 1})::VectorField{:autonomous, 1}
+function ⅋(X::VectorField{Autonomous, T}, Y::VectorField{Autonomous, T})::VectorField{Autonomous, T} where T
     return VectorField(x -> ctgradient(Y, x)*X(x), 
-        time_dependence=:autonomous, state_dimension=1)
+        Autonomous, T)
 end
-function ⅋(X::VectorField{:nonautonomous, 1}, Y::VectorField{:nonautonomous, 1})::VectorField{:nonautonomous, 1}
+function ⅋(X::VectorField{NonAutonomous, 1}, Y::VectorField{NonAutonomous, 1})::VectorField{NonAutonomous, 1}
     return VectorField((t, x) -> ctgradient(y -> Y(t, y), x)*X(t, x),
-        time_dependence=:nonautonomous, state_dimension=1)
+        NonAutonomous, T)
 end
-function ⅋(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
+function ⅋(X::VectorField{Autonomous, T}, Y::VectorField{Autonomous, T})::VectorField{Autonomous, T} where {T}
     return VectorField(x -> x isa ctNumber ? ctgradient(Y, x)*X(x) : ctjacobian(Y, x)*X(x),
-        time_dependence=:autonomous, state_dimension=sd)
+        Autonomous, T)
 end
-function ⅋(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
+function ⅋(X::VectorField{NonAutonomous, T}, Y::VectorField{NonAutonomous, T})::VectorField{NonAutonomous, T} where {T}
     return VectorField((t, x) -> x isa ctNumber ? ctgradient(y -> Y(t, y), x)*X(t, x) : ctjacobian(y -> Y(t, y), x)*X(t, x),
-        time_dependence=:nonautonomous, state_dimension=sd)
+        NonAutonomous, T)
 end
 
 # ---------------------------------------------------------------------------
 # Lie bracket of two vector fields: [X, Y] = Lie(X, Y)= ad(X, Y)
-function Lie(X::VectorField{:autonomous, sd}, Y::VectorField{:autonomous, sd})::VectorField{:autonomous, sd} where {sd}
-    return VectorField(x -> (X⅋Y)(x)-(Y⅋X)(x), time_dependence=:autonomous, state_dimension=sd)
+function Lie(X::VectorField{Autonomous, T}, Y::VectorField{Autonomous, T})::VectorField{Autonomous, T} where {T}
+    return VectorField(x -> (X⅋Y)(x)-(Y⅋X)(x), Autonomous, T)
 end
-function Lie(X::VectorField{:nonautonomous, sd}, Y::VectorField{:nonautonomous, sd})::VectorField{:nonautonomous, sd} where {sd}
-    return VectorField((t, x) -> (X⅋Y)(t, x)-(Y⅋X)(t, x), time_dependence=:nonautonomous, state_dimension=sd)
+function Lie(X::VectorField{NonAutonomous, T}, Y::VectorField{NonAutonomous, T})::VectorField{NonAutonomous, T} where {T}
+    return VectorField((t, x) -> (X⅋Y)(t, x)-(Y⅋X)(t, x), NonAutonomous, T)
 end
-function ad(X::VectorField{td, sd}, Y::VectorField{td, sd})::VectorField{td, sd} where {td, sd}
+function ad(X::VectorField{T,V}, Y::VectorField{T,V})::VectorField{T,V} where {T,V}
     return Lie(X, Y)
 end
-function Lie(X::Function, Y::Function; time_dependence::Symbol=CTBase.__fun_time_dependence())::VectorField
-    check_time_dependence(time_dependence)
-    return Lie(VectorField(X, time_dependence=time_dependence), VectorField(Y, time_dependence=time_dependence))
+function Lie(X::Function, Y::Function; time_dependence::DataType=CTBase.__fun_time_dependence())::VectorField
+    __check_time_dependence(time_dependence)
+    return Lie(VectorField(X, time_dependence), VectorField(Y, time_dependence))
 end
-function ad(X::Function, Y::Function; time_dependence::Symbol=CTBase.__fun_time_dependence())::VectorField
+function ad(X::Function, Y::Function; time_dependence::DataType=CTBase.__fun_time_dependence())::VectorField
     return Lie(X, Y, time_dependence=time_dependence)
 end
 
@@ -119,7 +119,7 @@ const Sequence = Tuple{Vararg{Integer}}
 __fun_sequence(Xs::VectorField...) = Tuple(1:length(Xs))
 
 #
-function _Lie_sequence(Xs::VectorField{td, sd}...; sequence::Sequence=__fun_sequence(Xs...))::VectorField{td, sd} where {td, sd}
+function _Lie_sequence(Xs::VectorField{T,V}...; sequence::Sequence=__fun_sequence(Xs...))::VectorField{T,V} where {T,V}
 
     # check length of Xs
     length(Xs) < 2 && throw(IncorrectArgument("Xs must have at least two elements"))

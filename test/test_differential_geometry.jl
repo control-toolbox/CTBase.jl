@@ -28,14 +28,14 @@ function test_differential_geometry()
             Test.@test H2([1, 2], [3, 4]) == 33
     
             # nonautonomous case
-            X = VectorField((t, x) -> 2x, time_dependence=:nonautonomous)
+            X = VectorField((t, x) -> 2x, NonAutonomous)
             H = Lift(X)
             Test.@test H(1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4]) == 22
     
             # multiple VectorFields
-            X1 = VectorField((t, x) -> 2x, time_dependence=:nonautonomous)
-            X2 = VectorField((t, x) -> 3x, time_dependence=:nonautonomous)
+            X1 = VectorField((t, x) -> 2x, NonAutonomous)
+            X2 = VectorField((t, x) -> 3x, NonAutonomous)
             H1, H2 = Lift(X1, X2)
             Test.@test H1(1, 1, 1) == 2
             Test.@test H1(1, [1, 2], [3, 4]) == 22
@@ -63,22 +63,22 @@ function test_differential_geometry()
     
             # nonautonomous case
             X = (t, x) -> 2x
-            H = Lift(X, time_dependence=:nonautonomous)
+            H = Lift(eval(X), NonAutonomous)
             Test.@test H(1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4]) == 22
     
             # multiple Functions
             X1 = (t, x) -> 2x
             X2 = (t, x) -> 3x
-            H1, H2 = Lift(X1, X2, time_dependence=:nonautonomous)
+            H1, H2 = Lift(X1, X2, NonAutonomous)
             Test.@test H1(1, 1, 1) == 2
             Test.@test H1(1, [1, 2], [3, 4]) == 22
             Test.@test H2(1, 1, 1) == 3
             Test.@test H2(1, [1, 2], [3, 4]) == 33
 
             # exceptions
-            Test.@test_throws IncorrectArgument Lift(X1, time_dependence=:dummy)
-            Test.@test_throws IncorrectArgument Lift(X1, X2, time_dependence=:dummy)
+            Test.@test_throws IncorrectArgument Lift(X1, Int64)
+            Test.@test_throws IncorrectArgument Lift(X1, X2, Int64)
     
         end
     
@@ -99,13 +99,13 @@ function test_differential_geometry()
         Test.@test (X⋅f)(1) == Der(X, f)(1)
     
         # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
+        X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
         Test.@test Der(X, f)(1, [1, 2]) == 2
         Test.@test (X⋅f)(1, [1, 2]) == Der(X, f)(1, [1, 2])
 
         # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
+        X = VectorField((t, x) -> 2x+t, NonAutonomous)
         f = (t, x) -> t + x^2
         Test.@test Der(X, f)(1, 1) == 6
         Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
@@ -120,8 +120,8 @@ function test_differential_geometry()
         Test.@test ⅋(X, Y)([1, 2]) == [2, -1]
 
         # autonomous, dim 1, with state_dimension
-        X = VectorField(x -> 2x, state_dimension=1)
-        Y = VectorField(x -> 3x, state_dimension=1)
+        X = VectorField(x -> 2x)
+        Y = VectorField(x -> 3x)
         Test.@test ⅋(X, Y)(1) == 6
 
         # autonomous, dim 1
@@ -130,18 +130,18 @@ function test_differential_geometry()
         Test.@test ⅋(X, Y)(1) == 6
 
         # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
-        Y = VectorField((t, x) -> [t + x[1], x[2]], time_dependence=:nonautonomous)
+        X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
+        Y = VectorField((t, x) -> [t + x[1], x[2]], NonAutonomous)
         Test.@test ⅋(X, Y)(1, [1, 2]) == [3, -1]
 
         # nonautonomous, dim 1, with state_dimension
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous, state_dimension=1)
-        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous, state_dimension=1)
+        X = VectorField((t, x) -> 2x+t, NonAutonomous)
+        Y = VectorField((t, x) -> 3x+t, NonAutonomous)
         Test.@test ⅋(X, Y)(1, 1) == 9
 
         # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
-        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
+        X = VectorField((t, x) -> 2x+t, NonAutonomous)
+        Y = VectorField((t, x) -> 3x+t, NonAutonomous)
         Test.@test ⅋(X, Y)(1, 1) == 9
 
     end
@@ -162,12 +162,12 @@ function test_differential_geometry()
         @testset "nonautonomous case" begin
             f = (t, x) -> [t + x[2], -2x[1]]
             g = (t, x) -> [t + 3x[2], -x[1]]
-            X = VectorField(f, time_dependence=:nonautonomous)
-            Y = VectorField(g, time_dependence=:nonautonomous)
+            X = VectorField(f, NonAutonomous)
+            Y = VectorField(g, NonAutonomous)
             Test.@test Lie(X, Y)(1, [1, 2]) == [-5,11]
             Test.@test Lie(X, Y)(1, [1, 2]) == ad(X, Y)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, time_dependence=:nonautonomous)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, time_dependence=:nonautonomous)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, time_dependence=NonAutonomous)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, time_dependence=NonAutonomous)(1, [1, 2])
         end
 
         @testset "mri example" begin
@@ -305,9 +305,9 @@ function test_differential_geometry()
         Test.@test F011_(x) ≈ F011___(x) atol=1e-6
 
         # nonautonomous
-        F0 = VectorField((t,x) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], time_dependence=:nonautonomous)
-        F1 = VectorField((t,x) -> [0, -x[3], x[2]], time_dependence=:nonautonomous)
-        F2 = VectorField((t,x) -> [x[3], 0, -x[1]], time_dependence=:nonautonomous)
+        F0 = VectorField((t,x) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], NonAutonomous)
+        F1 = VectorField((t,x) -> [0, -x[3], x[2]], NonAutonomous)
+        F2 = VectorField((t,x) -> [x[3], 0, -x[1]], NonAutonomous)
         F01_ = Lie(F0, F1)
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
@@ -327,7 +327,7 @@ function test_differential_geometry()
 
     @testset "Poisson" begin
 
-        
+
 
         # Define the Hamiltonian functions
         function f1(x, p)

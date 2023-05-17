@@ -74,6 +74,13 @@ end
 """
 $(TYPEDEF)
 
+Abstract type for hamiltonians.
+"""
+abstract type AbstractHamiltonian end
+
+"""
+$(TYPEDEF)
+
 **Fields**
 
 $(TYPEDFIELDS)
@@ -120,7 +127,7 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-struct Hamiltonian{time_dependence, variable_dependence}
+struct Hamiltonian{time_dependence, variable_dependence} <: AbstractHamiltonian
     f::Function
 end
 
@@ -171,7 +178,7 @@ julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
 [7, -3]
 ```
 """
-struct HamiltonianVectorField{time_dependence, variable_dependence}
+struct HamiltonianVectorField{time_dependence, variable_dependence} <: AbstractHamiltonian
     f::Function
 end
 

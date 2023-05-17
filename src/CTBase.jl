@@ -26,7 +26,7 @@ using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
-using MacroTools: inexpr
+using MacroTools: inexpr, @capture, postwalk
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -89,9 +89,9 @@ include("exception.jl")
 include("description.jl")
 include("callback.jl")
 include("default.jl")
-include("utils.jl")
 #
 include("types.jl")
+include("utils.jl")
 #
 include("checking.jl")
 #
@@ -113,6 +113,7 @@ export ctNumber, ctVector, Time, Times, TimesDisc
 export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
 export TimeDependence, Autonomous, NonAutonomous
 export VariableDependence, NonFixed, Fixed
+export AbstractHamiltonian
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
@@ -126,10 +127,10 @@ export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # checking
-export check_time_dependence
+export __check_time_dependence
 
 # functions
-export AbstractHamiltonian, Hamiltonian, HamiltonianVectorField, VectorField
+export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
 export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
 
@@ -146,6 +147,9 @@ export plot
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
+
+# differential_geometry
+export Ad, Poisson
 
 # ctparser_utils
 export replace_call, constraint_type
