@@ -286,10 +286,14 @@ end
 function __eval_ocp(ct_repl::CTRepl, type::Symbol, e::Expr)
     code  = __code(ct_repl.model, type, e)
     ocp = gensym()
-    ocp_q = quote @def $ocp $(code) end
-    eval(ocp_q)
+    ocp_q = quote @def $ocp $code end
     ct_repl.debug && println("debug> code: ", code)
     ct_repl.debug && println("debug> quote code: ", ocp_q)
+    try 
+        eval(ocp_q)
+    catch ex
+        throw(ex)
+    end
     nothing
 end
 
