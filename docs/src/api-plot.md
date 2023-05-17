@@ -44,10 +44,10 @@ sol.control_dimension = m
 sol.times = times
 sol.time_name="t"
 sol.state = x
-sol.state_names = [ "x" * ctindices(i) for i ∈ range(1, n)]
-sol.adjoint = p
+sol.state_components_names = [ "x" * ctindices(i) for i ∈ range(1, n)]
+sol.costate = p
 sol.control = u
-sol.control_names = [ "u" ]
+sol.control_components_names = [ "u" ]
 sol.objective = objective
 sol.iterations = 0
 sol.stopping = :dummy
@@ -85,7 +85,7 @@ You can specify some styles:
 ```@example main
 plot(sol, 
     state_style=(color=:blue,), 
-    adjoint_style=(color=:black, linestyle=:dash),
+    costate_style=(color=:black, linestyle=:dash),
     control_style=(color=:red, linewidth=2),
     size=(800, 600))
 ```

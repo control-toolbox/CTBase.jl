@@ -16,13 +16,17 @@ import Base
 using DocStringExtensions
 using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-using MLStyle
+using Reexport
+@reexport using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
 using Plots
 import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
 using Printf # to print an OptimalControlModel
-using Reexport
-using MacroTools: @capture, postwalk
+using DataStructures # OrderedDict for aliases
+using Unicode # unicode primitives
+using PrettyTables # to print a table
+using ReplMaker
+using MacroTools: inexpr
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -31,12 +35,10 @@ using MacroTools: @capture, postwalk
 Type alias for a real number.
 """
 const ctNumber = Real
-const MyNumber = Real
 """
 Type alias for a vector of real numbers.
 """
-const ctVector = AbstractVector{<:ctNumber}
-const MyVector = AbstractVector{<:MyNumber}
+const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # [] must be defined as Vector{Real}()
 """
 Type alias for a time.
 """
@@ -54,53 +56,63 @@ Type alias for a state.
 """
 const State = ctVector
 """
-Type alias for an adjoint.
+Type alias for an costate.
 """
-const Adjoint = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
+const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
 """
 Type alias for a control.
 """
 const Control = ctVector
 """
+Type alias for a variable.
+"""
+const Variable = ctVector
+"""
 Type alias for a vector of states.
 """
-const States = Vector{<:State}
+const States = AbstractVector{<:State}
 """
-Type alias for a vector of adjoints.
+Type alias for a vector of costates.
 """
-const Adjoints = Vector{<:Adjoint}
+const Costates = AbstractVector{<:Costate}
 """
 Type alias for a vector of controls.
 """
-const Controls = Vector{<:Control}
+const Controls = AbstractVector{<:Control}
 """
 Type alias for a dimension.
 """
 const Dimension = Integer
 
 #
-include("exceptions.jl")
-include("checking.jl")
+include("exception.jl")
 include("description.jl")
-include("callbacks.jl")
-include("functions.jl")
-#
+include("callback.jl")
 include("default.jl")
 include("utils.jl")
+#
+include("types.jl")
+#
+include("checking.jl")
+#
+include("print.jl")
+include("plot.jl")
+#
+include("functions.jl")
 include("model.jl")
 include("differential_geometry.jl")
 #
 include("ctparser_utils.jl")
 #include("ctparser.jl")
-#@reexport using .CtParser
-#
-include("print.jl")
-include("solution.jl")
-include("plot.jl")
+include("onepass.jl")
+include("repl.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
-export States, Adjoints, Controls, State, Adjoint, Dimension, Index
+
+export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
+export TimeDependence, Autonomous, NonAutonomous
+export VariableDependence, NonFixed, Fixed
 
 # callback
 export CTCallback, CTCallbacks, PrintCallback, StopCallback
@@ -110,7 +122,7 @@ export get_priority_print_callbacks, get_priority_stop_callbacks
 export Description, makeDescription, add, getFullDescription
 
 # exceptions
-export CTException, AmbiguousDescription, InconsistentArgument, IncorrectMethod
+export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # checking
@@ -119,13 +131,13 @@ export check_time_dependence
 # functions
 export AbstractHamiltonian, Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
-export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint
+export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
 
 # model
 export OptimalControlModel
 export Model
-export time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
-export isautonomous, isnonautonomous, ismin, ismax
+export variable!, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
+export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
 
 # solution
@@ -135,7 +147,13 @@ export plot
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
-# _Time
-export _Time
+# ctparser_utils
+export replace_call, constraint_type
+
+# onepass
+export @def
+
+# repl
+isdefined(Base, :active_repl) && __init_repl()
 
 end

@@ -26,3 +26,8 @@ Manifest.toml
 
 # Notebooks checkpoints
 */.ipynb_checkpoints
+
+# garbage
+.\#*
+\#*
+.*.swp
