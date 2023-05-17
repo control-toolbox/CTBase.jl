@@ -471,7 +471,8 @@ macro def(ocp, e, log=false)
             (false, true ) => :( $ocp = Model(variable=true) )
             _              => :( $ocp = Model(autonomous=false, variable=true) )
 	end
-        code = Expr(:block, init, code, :( $ocp.model_expression=$(QuoteNode(Expr(:$, e))) ), :( $ocp ))
+        ee = QuoteNode(e)
+        code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp ))
         esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
