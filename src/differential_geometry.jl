@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-abstract type AbstractHamiltonian end
+# abstract type AbstractHamiltonian end
 
 # ---------------------------------------------------------------------------
 # HamiltonianLift
@@ -145,32 +145,32 @@ end
 # ---------------------------------------------------------------------------
 # Macro
 
-# @Lie F01
-macro Lie(expr::Symbol)
+# # @Lie F01
+# macro Lie(expr::Symbol)
 
-    # split symbol into substrings
-    v = split(string(expr))[1]
+#     # split symbol into substrings
+#     v = split(string(expr))[1]
 
-    # check if the first character is 'F'
-    @assert v[1] == 'F'
+#     # check if the first character is 'F'
+#     @assert v[1] == 'F'
 
-    # get the unique numbers in the symbol
-    uni = sort(unique(v[2:end]))
+#     # get the unique numbers in the symbol
+#     uni = sort(unique(v[2:end]))
 
-    # build the tuple of needed vector fields
-    vfs = Tuple([Symbol(:F, n) for n ∈ uni])
+#     # build the tuple of needed vector fields
+#     vfs = Tuple([Symbol(:F, n) for n ∈ uni])
 
-    # build the sequence to compute the Lie bracket
-    user_sequence = [parse(Integer, c) for c ∈ v[2:end]] # conversion to integer
-    sequence = Tuple([findfirst(v->v==s, parse.(Integer, uni)) for s ∈ user_sequence])
+#     # build the sequence to compute the Lie bracket
+#     user_sequence = [parse(Integer, c) for c ∈ v[2:end]] # conversion to integer
+#     sequence = Tuple([findfirst(v->v==s, parse.(Integer, uni)) for s ∈ user_sequence])
 
-    # build the code
-    code = quote
-        $expr = _Lie_sequence($(vfs...), sequence=$sequence)
-    end
+#     # build the code
+#     code = quote
+#         $expr = _Lie_sequence($(vfs...), sequence=$sequence)
+#     end
 
-    return esc(code)
-end
+#     return esc(code)
+# end
 
 # @Lie [X, Y]
 macro Lie(expr::Expr)
@@ -178,4 +178,21 @@ macro Lie(expr::Expr)
     @assert expr.head == :vect
     @assert length(expr.args) == 2
     return esc(postwalk( x -> @capture(x, [a_, b_]) ? :(Lie($a, $b)) : x, expr))
+end
+
+
+function Poisson(f::AbstractHamiltonian, g::AbstractHamiltonian)
+    function fg(x, p)
+        n = size(x, 1)
+        ff,gg = @match n begin
+            1 => (z -> f(z[1], z[2]), z -> g(z[1], z[2]))
+            _ => (z -> f(z[1:n], z[n+1:2n]), z -> g(z[1:n], z[n+1:2n]))
+        end
+        # ff = z -> f(z[1:n], z[n+1:2n])
+        # gg = z -> g(z[1:n], z[n+1:2n])
+        df = ctgradient(ff, [ x ; p ])
+        dg = ctgradient(gg, [ x ; p ])
+        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
+    end
+    return fg
 end

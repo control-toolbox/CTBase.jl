@@ -293,16 +293,16 @@ function test_differential_geometry()
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
         F011__= @Lie [[F0, F1], F1]
-        @Lie F01
-        @Lie F011
-        Test.@test F01(x) ≈ F01_(x) atol=1e-6
-        Test.@test F011(x) ≈ F011_(x) atol=1e-6
-        Test.@test F01(x) ≈ F01__(x) atol=1e-6
-        Test.@test F011(x) ≈ F011__(x) atol=1e-6
+        # @Lie F01
+        # @Lie F011
+        #Test.@test F01(x) ≈ F01_(x) atol=1e-6
+        #Test.@test F011(x) ≈ F011_(x) atol=1e-6
+        Test.@test F01_(x) ≈ F01__(x) atol=1e-6
+        Test.@test F011_(x) ≈ F011__(x) atol=1e-6
         #
         get_F0 = () -> F0
         F011___ = @Lie [[get_F0(), F1], F1]
-        Test.@test F011(x) ≈ F011___(x) atol=1e-6
+        Test.@test F011_(x) ≈ F011___(x) atol=1e-6
 
         # nonautonomous
         F0 = VectorField((t,x) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], time_dependence=:nonautonomous)
@@ -312,16 +312,45 @@ function test_differential_geometry()
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
         F011__= @Lie [[F0, F1], F1]
-        @Lie F01
-        @Lie F011
-        Test.@test F01(t,x) ≈ F01_(t,x) atol=1e-6
-        Test.@test F011(t,x) ≈ F011_(t,x) atol=1e-6
-        Test.@test F01(t,x) ≈ F01__(t,x) atol=1e-6
-        Test.@test F011(t,x) ≈ F011__(t,x) atol=1e-6
+        # @Lie F01
+        # @Lie F011
+        # Test.@test F01(t,x) ≈ F01_(t,x) atol=1e-6
+        # Test.@test F011(t,x) ≈ F011_(t,x) atol=1e-6
+        Test.@test F01_(t,x) ≈ F01__(t,x) atol=1e-6
+        Test.@test F011_(t,x) ≈ F011__(t,x) atol=1e-6
         #
         get_F0 = () -> F0
         F011___ = @Lie [[get_F0(), F1], F1]
-        Test.@test F011(t, x) ≈ F011___(t, x) atol=1e-6
+        Test.@test F011_(t, x) ≈ F011___(t, x) atol=1e-6
+
+    end
+
+    @testset "Poisson" begin
+
+        
+
+        # Define the Hamiltonian functions
+        function f1(x, p)
+            return(0.5*(x[1]^2+x[2]^2+p[1]^2))
+        end
+
+        function f2(x, p)
+            return(0.5*(x[1]^2+x[2]^2+p[2]^2))
+        end
+
+        H_1 = Hamiltonian(f1)
+        H_2 = Hamiltonian(f2)
+
+        println(typeof(H_1) <: AbstractHamiltonian)
+
+        # Test case 1
+        H_1_2 = Poisson(H_1, H_2)
+
+        # Test case 2
+        H_2_1 = Poisson(H_2, H_1)
+
+        # Test case 3
+        H_1_1 = Poisson(H_1, H_1)
 
     end
 

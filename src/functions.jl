@@ -1,3 +1,6 @@
+abstract type AbstractHamiltonian end
+
+
 """
 $(TYPEDEF)
 
@@ -392,7 +395,7 @@ julia> H(_Time(1), [1, 0], [0, 1])
 3
 ```
 """
-struct Hamiltonian{time_dependence, state_dimension}
+struct Hamiltonian{time_dependence, state_dimension} <: AbstractHamiltonian
     f::Function
     function Hamiltonian(f::Function; 
         state_dimension::Union{Symbol,Dimension}=__state_dimension(), 
