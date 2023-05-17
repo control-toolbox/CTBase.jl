@@ -74,6 +74,92 @@ function _plot_time!(p, sol::OptimalControlSolution, s::Symbol, i::Integer;
     CTBase.plot!(p, sol, :time, (s, i); xlabel=t_label, label=label, kwargs...) # use simple plot
 end
 
+function __initial_plot(sol::OptimalControlSolution; layout::Symbol=:split)
+
+    # parameters
+    n = sol.state_dimension
+    m = sol.control_dimension
+    
+    if layout==:group
+            
+        # state
+        px = Plots.plot()
+        
+        # control
+        pu = Plots.plot()
+
+        # costate
+        pp = Plots.plot()
+
+        # layout
+        ps = Plots.plot(px, pu, pp, layout=(1, 3))
+
+    else
+    
+        # create tree plot
+        state_plots = Vector{PlotLeaf}()
+        costate_plots = Vector{PlotLeaf}()
+        control_plots = Vector{PlotLeaf}()
+
+        for i ∈ 1:n
+            push!(state_plots, PlotLeaf((:state, i)))
+            push!(costate_plots, PlotLeaf((:costate, i)))
+        end
+        for i ∈ 1:m
+            push!(control_plots, PlotLeaf((:control, i)))
+        end
+
+        #
+        node_x = PlotNode(:column, state_plots)
+        node_p = PlotNode(:column, costate_plots)
+        node_u = PlotNode(:column, control_plots)
+        node_xp = PlotNode(:row, [node_x, node_p])
+
+        function _width(r) # generate a{0.2h}, if r=0.2
+            i = Expr(:call, :*, r, :h)
+            a = Expr(:curly, :a, i)
+            return a
+        end
+        r = round(n/(n+m), digits=2)
+        a = _width(r)
+        @eval l = @layout [$a
+                            b]
+        root = PlotNode(l, [node_xp, node_u])
+
+        #
+        function rec_plot(node::PlotLeaf, depth::Integer)
+            return Plots.plot()
+        end
+
+        function rec_plot(node::PlotNode, depth::Integer=0)
+            subplots=()
+            for c ∈ node.children
+                pc = rec_plot(c, depth+1)
+                subplots = (subplots..., pc)
+            end
+            if typeof(node.element)==Symbol
+                if node.element==:row
+                    ps = plot(subplots...; layout=(1, length(subplots)))
+                elseif node.element==:column
+                    ps = plot(subplots...; layout=(length(subplots), 1))
+                else 
+                    error("no such choice for layout")
+                end
+            else
+                ps = plot(subplots...; layout=node.element)
+            end
+            return ps
+        end
+
+        # plot
+        ps = rec_plot(root)
+
+    end
+
+    return ps
+
+end
+
 """
 $(TYPEDSIGNATURES)
 
