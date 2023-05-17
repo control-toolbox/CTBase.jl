@@ -88,6 +88,7 @@ function __init_repl(; debug=false, demo=false)
         return_nothing && ct_repl.debug && println("debug> new expression parsed: ", e)
 
         # parse e and update ct_repl if needed
+        #=
         @match e begin
             :( $e_, time         ) => __add!(ct_repl, :time, e, history)
             :( $e_, state        ) => __add!(ct_repl, :state, e, history)
@@ -101,8 +102,10 @@ function __init_repl(; debug=false, demo=false)
             :( $a = $e1          ) => __add!(ct_repl, :alias, e, history)
             _ => (println("\nct parsing error\n\nType HELP to see the list of commands or enter a valid expression to update the model."); return nothing)
         end
+        =#
+        __add!(ct_repl, :any, e, history)
 
-        # if we are here, e was part of ct dsl
+        # if we are here, e was valid
         return_nothing ? nothing : __quote_ocp(ct_repl)
 
     end
@@ -319,6 +322,7 @@ end
 # update the model with a new expression of nature type
 function __update!(model::ModelRepl, type::Symbol, e::Expr)
     @match type begin
+        :any => unique!(push!(model[:any], e))
         :alias => begin
             to_add = true
             @match e begin  # check if the alias is already defined
@@ -335,10 +339,11 @@ function __update!(model::ModelRepl, type::Symbol, e::Expr)
             end
             to_add && push!(model[:alias], e) # add alias if it is not already defined
         end
-        :constraints => (push!(model[type], e))
+        :constraints => unique!(push!(model[type], e))
         :time || :state || :control || :variable || :dynamics || :objective => (model[type] = e)
         _ => (println("\n Internal error, invalid type: ", type); return)
     end
+    nothing
 end
 
 # split alias in two vectors: one for those appearing in model[:time] and the others
@@ -358,6 +363,7 @@ end
 
 # get code from model
 function __code(model::ModelRepl)::Expr
+    #=
     m = Expr[]
     alias_time, alias_other = __split_alias(model)
     model[:variable]    != :() && push!(m, model[:variable])
@@ -370,11 +376,14 @@ function __code(model::ModelRepl)::Expr
     model[:dynamics]    != :() && push!(m, model[:dynamics])
     model[:objective]   != :() && push!(m, model[:objective])
     return Expr(:block, m...)
+    =#
+    return Expr(:block, model[:any]...)
 end
 
 # create an empty model
 function __init_model_repl()
     model = ModelRepl()
+    #=
     model[:time]        = :()
     model[:state]       = :()
     model[:control]     = :()
@@ -383,6 +392,8 @@ function __init_model_repl()
     model[:objective]   = :()
     model[:constraints] = Expr[]
     model[:alias]       = Expr[]
+    =#
+    model[:any]         = Expr[]
     return model
 end
 
