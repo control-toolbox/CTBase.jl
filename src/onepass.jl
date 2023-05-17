@@ -1,8 +1,12 @@
 # onepass
 # todo:
-# - dynamics apart, kwargs constraints (+ one sided, ≥)
+# - additional checks:
+# (i) when generating functions, there should not be any x or u left
+# (ii) in boundary and mayer, there should not be any left
+# in both cases, has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
+# - update constraint_type to gensym all generated function arg names
 
 """
 $(TYPEDEF)
@@ -354,7 +358,7 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
         function $gs($(args...))
             $e
         end
-        constraint!($ocp, :dynamics, $gs)
+        dynamics!($ocp, $gs)
     end, p.lnum, p.line)
 end
 
@@ -458,17 +462,17 @@ end
 macro def(ocp, e, log=false)
     try
         p0 = ParsingInfo()
-	    parse!(p0, ocp, e; log=false)
+	parse!(p0, ocp, e; log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
-	    code = parse!(p, ocp, e; log=log)
-	    init = @match (__t_dep(p), __v_dep(p)) begin
-	    (false, false) => :( $ocp = Model() )
-	    (true , false) => :( $ocp = Model(autonomous=false) )
-	    (false, true ) => :( $ocp = Model(variable=true) )
-	    _              => :( $ocp = Model(autonomous=false, variable=true) )
+	code = parse!(p, ocp, e; log=log)
+	init = @match (__t_dep(p), __v_dep(p)) begin
+            (false, false) => :( $ocp = Model() )
+            (true , false) => :( $ocp = Model(autonomous=false) )
+            (false, true ) => :( $ocp = Model(variable=true) )
+            _              => :( $ocp = Model(autonomous=false, variable=true) )
 	end
-        code = Expr(:block, init, code, :( $ocp )) 
-        esc( code )
+        code = Expr(:block, init, code, :( $ocp.model_expression=$(QuoteNode(Expr(:$, e))) ), :( $ocp ))
+        esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
     end

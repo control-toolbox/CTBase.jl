@@ -274,9 +274,12 @@ end
 
 # make @def ocp quote
 function __quote_ocp(ct_repl::CTRepl; print_ocp::Bool=true)
-    print_ocp && __print_code(ct_repl)
     code  = __code(ct_repl.model)
-    ocp_q = (quote @def $(ct_repl.ocp_name) $(code) end)
+    print_ocp && begin 
+        #printstyled("\nct> ", color=:magenta, bold=true)
+        println("\n", ct_repl.ocp_name)
+    end
+    ocp_q = quote @def $(ct_repl.ocp_name) $(code) end
     ct_repl.debug && println("debug> code: ", code)
     ct_repl.debug && println("debug> quote code: ", ocp_q)
     return ocp_q
@@ -367,25 +370,6 @@ function __code(model::ModelRepl)::Expr
     model[:dynamics]    != :() && push!(m, model[:dynamics])
     model[:objective]   != :() && push!(m, model[:objective])
     return Expr(:block, m...)
-end
-
-# print code
-function __print_code(ct_repl::CTRepl)
-    code = __code(ct_repl.model)
-    s = "$(ct_repl.ocp_name) = "
-    print("\n" * s)
-    l = length(s)
-    for i ∈ eachindex(code.args)
-        e = code.args[i]
-        print(i==1 ? "" : " "^l, e)
-        print("\n")
-    end
-end
-
-# print code and add a new line
-function __println_code(ct_repl::CTRepl)
-    __print_code(ct_repl)
-    println()
 end
 
 # create an empty model
