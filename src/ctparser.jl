@@ -772,15 +772,15 @@ function ctparser( prob::Expr; _syntax_only::Bool, _debug_mode::Bool,  _verbose_
 
             # dynamics
             ( :dynamics, a, :(==), true) => let
-                codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun))) end
+                codeline = quote dynamics!(ocp, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun))) end
                 push!(_final_code, codeline)
-                _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i, _generated_code)
+                _store_code_as_string("dynamics!(ocp, ($_state_variable, $_control_variable) -> $_dynamic_fun)", i, _generated_code)
             end
             # named dynamics not allowed
             # ( :dynamics, a, :(==), false) => let
-            #     codeline = quote constraint!(ocp, :dynamics, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
+            #     codeline = quote dynamics!(ocp, ($(esc(_state_variable)), $(esc(_control_variable))) -> $(esc(_dynamic_fun)), $(QuoteNode(_name))) end
             #     push!(_final_code, codeline)
-            #     _store_code_as_string("constraint!(ocp, :dynamics, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i, _generated_code)
+            #     _store_code_as_string("dynamics!(ocp, ($_state_variable, $_control_variable) -> $_dynamic_fun, :$_name)", i, _generated_code)
             # end
 
             # error may still happend in some case (ex: x'(t) ≤ xxx)
