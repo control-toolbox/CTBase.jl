@@ -213,6 +213,10 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
         __add!(history, ct_repl) # update history
         return COMMANDS_ACTIONS[:SHOW](ct_repl, history)
     end,
+    :JLS => (ct_repl::CTRepl, history::HistoryRepl) -> begin
+        println("\nhttps://youtu.be/HzRF2622m9A")
+        return nothing
+    end,
 )
 
 # dict of help messages associated to ct repl commands
