@@ -138,7 +138,7 @@ export nlp_constraints, constraints_labels
 
 # solution
 export OptimalControlSolution
-export plot
+export plot, plot!
 
 # utils
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
