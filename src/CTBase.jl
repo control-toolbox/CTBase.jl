@@ -27,6 +27,7 @@ using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
 using MacroTools: inexpr, striplines, MacroTools
+using LinearAlgebra
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types

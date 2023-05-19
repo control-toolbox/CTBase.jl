@@ -195,7 +195,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
 end
 
-function Base.show(io::IO, ocp::OptimalControlModel)
+function Base.show_default(io::IO, ocp::OptimalControlModel)
     print(io, typeof(ocp))
     #show(io, MIME("text/plain"), ocp)
 end
@@ -214,7 +214,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
     print(io, typeof(sol))
 end
 
-function Base.show(io::IO, sol::OptimalControlSolution)
+function Base.show_default(io::IO, sol::OptimalControlSolution)
     print(io, typeof(sol))
     #show(io, MIME("text/plain"), sol)
 end
