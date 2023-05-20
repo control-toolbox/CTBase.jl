@@ -1,4 +1,4 @@
-function test_callbacks()
+function test_callback()
 
 # stop callback
 function mystop(i, sᵢ, dᵢ, xᵢ, gᵢ, fᵢ, ng₀, oTol, aTol, sTol, iterations)

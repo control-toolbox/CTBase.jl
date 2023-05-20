@@ -34,7 +34,7 @@ Exception thrown when an argument is inconsistent.
 
 $(TYPEDFIELDS)
 """
-struct InconsistentArgument <: CTException
+struct IncorrectArgument <: CTException
     var::String
 end
 
@@ -43,7 +43,7 @@ $(TYPEDSIGNATURES)
 
 Print the exception.
 """
-Base.showerror(io::IO, e::InconsistentArgument) = print(io, "InconsistentArgument: ", e.var)
+Base.showerror(io::IO, e::IncorrectArgument) = print(io, "IncorrectArgument: ", e.var)
 
 """
 $(TYPEDEF)
@@ -64,26 +64,6 @@ $(TYPEDSIGNATURES)
 Print the exception.
 """
 Base.showerror(io::IO, e::IncorrectMethod) = print(io, "IncorrectMethod: ", e.var, " is not an existing method")
-
-"""
-$(TYPEDEF)
-
-Exception thrown when an argument is incorrect.
-
-**Fields**
-
-$(TYPEDFIELDS)
-"""
-struct IncorrectArgument <: CTException
-    var::String
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Print the exception.
-"""
-Base.showerror(io::IO, e::IncorrectArgument) = print(io, "IncorrectArgument: ", e.var)
 
 """
 $(TYPEDEF)
@@ -125,7 +105,6 @@ Print the exception.
 """
 Base.showerror(io::IO, e::NotImplemented) = print(io, "NotImplemented: ", e.var)
 
-
 """
 $(TYPEDEF)
 
@@ -145,3 +124,22 @@ $(TYPEDSIGNATURES)
 Print the exception.
 """
 Base.showerror(io::IO, e::UnauthorizedCall) = print(io, "UnauthorizedCall: ", e.var)
+"""
+$(TYPEDEF)
+
+Exception thrown for syntax error during abstract parsing.
+
+**Fields**
+
+$(TYPEDFIELDS)
+"""
+struct ParsingError <: CTException
+    var::String
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Print the exception.
+"""
+Base.showerror(io::IO, e::ParsingError) = print(io, "ParsingError: ", e.var)
