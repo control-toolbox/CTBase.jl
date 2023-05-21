@@ -100,12 +100,13 @@ parse!(p, ocp, e; log=false) = begin
         :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
         :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
         _ => begin
-        p.lnum = p.lnum - 1
-        if e isa LineNumberNode
+            if e isa LineNumberNode
+                p.lnum = p.lnum - 1
                 e
             elseif e isa Expr && e.head == :block
-		# !!! assumes that map is done sequentially for side effects on p
+                p.lnum = p.lnum - 1
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
+		# !!! assumes that map is done sequentially for side effects on p
             else
                 return __throw("unknown syntax", p.lnum, p.line)
             end end
