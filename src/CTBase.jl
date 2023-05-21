@@ -27,6 +27,7 @@ using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
 using MacroTools: inexpr, striplines, MacroTools
+using LinearAlgebra
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -138,7 +139,7 @@ export nlp_constraints, constraints_labels
 
 # solution
 export OptimalControlSolution
-export plot
+export plot, plot!
 
 # utils
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts

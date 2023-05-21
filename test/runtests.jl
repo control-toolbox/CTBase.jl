@@ -19,7 +19,7 @@ const constraint_type = CTBase.constraint_type
         :description,
         :exception,
         :function,
-	:goddard,
+	    :goddard,
         :model,
         :plot,
         :print,
