@@ -47,14 +47,14 @@ function test_differential_geometry()
         @testset "from Function" begin
     
             # autonomous case
-            X = x -> 2x
+            X::Function = x -> 2x
             H = Lift(X)
             Test.@test H(1, 1) == 2
             Test.@test H([1, 2], [3, 4]) == 22
     
             # multiple Functions
-            X1 = x -> 2x
-            X2 = x -> 3x
+            X1::Function = x -> 2x
+            X2::Function = x -> 3x
             H1, H2 = Lift(X1, X2)
             Test.@test H1(1, 1) == 2
             Test.@test H1([1, 2], [3, 4]) == 22
@@ -62,15 +62,15 @@ function test_differential_geometry()
             Test.@test H2([1, 2], [3, 4]) == 33
     
             # nonautonomous case
-            X = (t, x) -> 2x
-            H = Lift(eval(X), NonAutonomous)
+            Xt::Function = (t, x) -> 2x
+            H = Lift(Xt, autonomous=false)
             Test.@test H(1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4]) == 22
     
             # multiple Functions
-            X1 = (t, x) -> 2x
-            X2 = (t, x) -> 3x
-            H1, H2 = Lift(X1, X2, NonAutonomous)
+            X1t::Function = (t, x) -> 2x
+            X2t::Function = (t, x) -> 3x
+            H1, H2 = Lift(X1t, X2t, autonomous=false)
             Test.@test H1(1, 1, 1) == 2
             Test.@test H1(1, [1, 2], [3, 4]) == 22
             Test.@test H2(1, 1, 1) == 3
@@ -166,8 +166,8 @@ function test_differential_geometry()
             Y = VectorField(g, NonAutonomous)
             Test.@test Lie(X, Y)(1, [1, 2]) == [-5,11]
             Test.@test Lie(X, Y)(1, [1, 2]) == ad(X, Y)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, time_dependence=NonAutonomous)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, time_dependence=NonAutonomous)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, autonomous=false)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, autonomous=false)(1, [1, 2])
         end
 
         @testset "mri example" begin
@@ -341,16 +341,14 @@ function test_differential_geometry()
         H_1 = Hamiltonian(f1)
         H_2 = Hamiltonian(f2)
 
-        println(typeof(H_1) <: AbstractHamiltonian)
-
-        # Test case 1
         H_1_2 = Poisson(H_1, H_2)
-
-        # Test case 2
         H_2_1 = Poisson(H_2, H_1)
-
-        # Test case 3
         H_1_1 = Poisson(H_1, H_1)
+
+        a = [1, 2]
+        b = [10, 0]
+
+        Test.@test H_1_2(a,b) ≈ -H_2_1(b,a) atol=1e-6
 
     end
 

@@ -36,8 +36,13 @@ function Lift(X::VectorField)::HamiltonianLift
 end
 
 # single lift: from Function
-function Lift(X::Function; time_dependence::DataType=CTBase.__fun_time_dependence())::HamiltonianLift
-    __check_time_dependence(time_dependence)
+function Lift(X::Function; autonomous::Bool=true)::HamiltonianLift
+    time_dependence = autonomous ? Autonomous : NonAutonomous 
+    return HamiltonianLift(VectorField(X, time_dependence))
+end
+function Lift(X::Function, time_dependence::DataType...)::HamiltonianLift
+    @__check(time_dependence)
+    time_dependence = NonAutonomous ∈ time_dependence ? NonAutonomous : Autonomous
     return HamiltonianLift(VectorField(X, time_dependence))
 end
 
@@ -47,9 +52,16 @@ function Lift(Xs::VectorField...)::Tuple{Vararg{HamiltonianLift}}
 end
 
 # multiple lifts: from Function
-function Lift(Xs::Function...; time_dependence::DataType=CTBase.__fun_time_dependence())::Tuple{Vararg{HamiltonianLift}}
-    __check_time_dependence(time_dependence)
-    return Tuple(Lift(X, time_dependence=time_dependence) for X ∈ Xs)
+function Lift(Xs::Function...; autonomous::Bool=true)::Tuple{Vararg{HamiltonianLift}}
+    time_dependence = autonomous ? Autonomous : NonAutonomous 
+    return Tuple(Lift(X, time_dependence) for X ∈ Xs)
+end
+function Lift(args::Union{Function,DataType}...)::Tuple{Vararg{HamiltonianLift}}
+    #Xs::Function..., dependences::DataType...
+    time_dependence = args[findall(x -> (typeof(x) <: DataType),args)]
+    Xs = args[findall(x -> (typeof(x) <: Function),args)]
+    @__check(time_dependence)
+    return Tuple(Lift(X, time_dependence) for X ∈ Xs)
 end
 
 # ---------------------------------------------------------------------------
@@ -101,12 +113,23 @@ end
 function ad(X::VectorField{T,V}, Y::VectorField{T,V})::VectorField{T,V} where {T,V}
     return Lie(X, Y)
 end
-function Lie(X::Function, Y::Function; time_dependence::DataType=CTBase.__fun_time_dependence())::VectorField
-    __check_time_dependence(time_dependence)
+function Lie(X::Function, Y::Function; autonomous::Bool=true)::VectorField
+    time_dependence = autonomous ? Autonomous : NonAutonomous 
     return Lie(VectorField(X, time_dependence), VectorField(Y, time_dependence))
 end
-function ad(X::Function, Y::Function; time_dependence::DataType=CTBase.__fun_time_dependence())::VectorField
-    return Lie(X, Y, time_dependence=time_dependence)
+function Lie(X::Function, Y::Function, time_dependence::DataType...)::VectorField
+    @__check(time_dependence)
+    time_dependence = NonAutonomous ∈ time_dependence ? NonAutonomous : Autonomous
+    return Lie(VectorField(X, time_dependence), VectorField(Y, time_dependence))
+end
+function ad(X::Function, Y::Function; autonomous::Bool=true)::VectorField
+    time_dependence = autonomous ? Autonomous : NonAutonomous 
+    return Lie(X, Y, time_dependence)
+end
+function ad(X::Function, Y::Function, time_dependence::DataType...)::VectorField
+    @__check(time_dependence)
+    time_dependence = NonAutonomous ∈ time_dependence ? NonAutonomous : Autonomous
+    return Lie(X, Y, time_dependence)
 end
 
 # ---------------------------------------------------------------------------

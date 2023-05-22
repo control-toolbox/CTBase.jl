@@ -2,8 +2,18 @@ function __check_time_dependence(time_dependence::DataType)
     time_dependence ∉ [Autonomous, NonAutonomous] && throw(IncorrectArgument("time_dependence must be either Autonomous or NonAutonomous"))
 end
 
+function __check_time_dependence(time_dependence::Tuple{Vararg{DataType}})
+    size(time_dependence,1) > 1 && throw(IncorrectArgument("the number of arguments about time dependence must be equal to at most 1"))
+    size(filter(p->!(p<:TimeDependence),time_dependence),1) > 0 && throw(IncorrectArgument("possible arguments about time dependence are NonAutonomous, Autonomous"))
+end
+
 function __check_variable_dependence(variable_dependence::DataType)
     variable_dependence ∉ [Fixed, NonFixed] && throw(IncorrectArgument("variable_dependence must be either Fixed or NonFixed"))
+end
+
+function __check_variable_dependence(variable_dependence::Tuple{Vararg{DataType}})
+    size(variable_dependence,1) > 1 && throw(IncorrectArgument("the number of arguments about variable dependence must be equal to at most 1"))
+    size(filter(p->!(p<:VariableDependence),variable_dependence),1) > 0 && throw(IncorrectArgument("possible arguments about variable dependence are NonFixed, Fixed"))
 end
 
 function __check_dependences(dependences::Tuple{Vararg{DataType}})
