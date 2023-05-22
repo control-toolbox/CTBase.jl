@@ -586,6 +586,7 @@ $(TYPEDFIELDS)
     variable_dimension::Union{Dimension,Nothing}=nothing
     variable_components_names::Union{Vector{String}, Nothing}=nothing
     variable_name::Union{String, Nothing}=nothing
+    variable::Union{Nothing, Variable}=nothing
     costate::Union{Nothing, Function}=nothing
     objective::Union{Nothing, ctNumber}=nothing
     iterations::Union{Nothing, Integer}=nothing
