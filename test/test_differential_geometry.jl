@@ -197,86 +197,9 @@ function test_differential_geometry()
             Test.@test ((@Lie [ X, Y ])⋅f)(x) == ((X⋅(Y⋅f))(x) - (Y⋅(X⋅f))(x))
 
         end
-
-        @testset "exceptions" begin
-            X = VectorField(x -> [x[2], -x[1]])
-            Y = VectorField(x -> [x[2], -x[1]])
-            Test.@test_throws TypeError _Lie_sequence(X, Y, sequence=0)
-            Test.@test_throws TypeError _Lie_sequence(X, Y, sequence=1.5)
-            Test.@test_throws TypeError _Lie_sequence(X, Y, sequence=(1, 1.5))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, sequence=(1, 1))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, Y, sequence=(1,))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, Y, sequence=(1, 0))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, Y, sequence=(1, 2, 3))            
-        end
-
-    end # tests for Lie bracket - sequence 1
-
-    @testset "multiple Lie brackets of any length" begin
-
-        x = [1, 2, 3]
-        Γ = 2
-        γ = 1
-        δ = γ-Γ
-        F0 = VectorField(x -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])])
-        F1 = VectorField(x -> [0, -x[3], x[2]])
-        F2 = VectorField(x -> [x[3], 0, -x[1]])
-
-        # length 2
-        F01_ = Lie(F0, F1)
-        F02_ = Lie(F0, F2)
-        F12_ = Lie(F1, F2)
-
-        #
-        F01 = _Lie_sequence(F0, F1, sequence=(1,2))
-        F02 = _Lie_sequence(F0, F2, sequence=(1,2))
-        F12 = _Lie_sequence(F1, F2, sequence=(1,2))
-        Test.@test F01(x) ≈ F01_(x) atol=1e-6
-        Test.@test F02(x) ≈ F02_(x) atol=1e-6
-        Test.@test F12(x) ≈ F12_(x) atol=1e-6     
-        
-        # length 3
-        F120_ = _Lie_sequence(F12, F0, sequence=(1,2))
-        F121_ = _Lie_sequence(F12, F1, sequence=(1,2))
-        F122_ = _Lie_sequence(F12, F2, sequence=(1,2))
-        F011_ = _Lie_sequence(F01, F1, sequence=(1,2))
-        F012_ = _Lie_sequence(F01, F2, sequence=(1,2))
-        F022_ = _Lie_sequence(F02, F2, sequence=(1,2))
-        F010_ = _Lie_sequence(F01, F0, sequence=(1,2))
-        F020_ = _Lie_sequence(F02, F0, sequence=(1,2))
-
-        F120 = _Lie_sequence(F0, F1, F2, sequence=(2,3,1))
-        F121 = _Lie_sequence(F1, F2, sequence=(1,2,1))
-        F122 = _Lie_sequence(F1, F2, sequence=(1,2,2))
-        F011 = _Lie_sequence(F0, F1, sequence=(1,2,2))
-        F012 = _Lie_sequence(F0, F1, F2, sequence=(1,2,3))
-        F012_default = _Lie_sequence(F0, F1, F2)
-        F022 = _Lie_sequence(F0, F2, sequence=(1,2,2))
-        F010 = _Lie_sequence(F0, F1, sequence=(1,2,1))
-        F020 = _Lie_sequence(F0, F2, sequence=(1,2,1))
-
-        Test.@test F120(x) ≈ F120_(x) atol=1e-6
-        Test.@test F121(x) ≈ F121_(x) atol=1e-6
-        Test.@test F122(x) ≈ F122_(x) atol=1e-6
-        Test.@test F011(x) ≈ F011_(x) atol=1e-6
-        Test.@test F012(x) ≈ F012_(x) atol=1e-6
-        Test.@test F012_default(x) ≈ F012_(x) atol=1e-6
-        Test.@test F022(x) ≈ F022_(x) atol=1e-6
-        Test.@test F010(x) ≈ F010_(x) atol=1e-6
-        Test.@test F020(x) ≈ F020_(x) atol=1e-6
-
-        Test.@test F120_(x) ≈ [0, 0, 0] atol=1e-6
-        Test.@test F121_(x) ≈ F2(x) atol=1e-6
-        Test.@test F122_(x) ≈ -F1(x) atol=1e-6
-        Test.@test F011_(x) ≈ [0, -2*δ*x[2], -γ+2*δ*x[3]] atol=1e-6
-        Test.@test F012_(x) ≈ [δ*x[2], δ*x[1], 0] atol=1e-6
-        Test.@test F022_(x) ≈ [-2*δ*x[1], 0, 2*δ*x[3]-γ] atol=1e-6
-        Test.@test F010_(x) ≈ [0, -γ*(γ-2*Γ)+δ^2*x[3], -δ^2*x[2]] atol=1e-6
-        Test.@test F020_(x) ≈ [γ*(γ-2*Γ)-δ^2*x[3], 0, δ^2*x[1]] atol=1e-6
-
     end
 
-    @testset "macro" begin
+    @testset "lie macro" begin
 
         # parameters
         t = 1
@@ -284,6 +207,7 @@ function test_differential_geometry()
         Γ = 2
         γ = 1
         δ = γ-Γ
+        v = 1
 
         # autonomous
         F0 = VectorField(x -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])])
@@ -293,10 +217,7 @@ function test_differential_geometry()
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
         F011__= @Lie [[F0, F1], F1]
-        # @Lie F01
-        # @Lie F011
-        #Test.@test F01(x) ≈ F01_(x) atol=1e-6
-        #Test.@test F011(x) ≈ F011_(x) atol=1e-6
+        
         Test.@test F01_(x) ≈ F01__(x) atol=1e-6
         Test.@test F011_(x) ≈ F011__(x) atol=1e-6
         #
@@ -312,10 +233,7 @@ function test_differential_geometry()
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
         F011__= @Lie [[F0, F1], F1]
-        # @Lie F01
-        # @Lie F011
-        # Test.@test F01(t,x) ≈ F01_(t,x) atol=1e-6
-        # Test.@test F011(t,x) ≈ F011_(t,x) atol=1e-6
+       
         Test.@test F01_(t,x) ≈ F01__(t,x) atol=1e-6
         Test.@test F011_(t,x) ≈ F011__(t,x) atol=1e-6
         #
@@ -323,33 +241,113 @@ function test_differential_geometry()
         F011___ = @Lie [[get_F0(), F1], F1]
         Test.@test F011_(t, x) ≈ F011___(t, x) atol=1e-6
 
+        # # nonfixed
+        # F0 = VectorField((x,v) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], NonFixed)
+        # F1 = VectorField((x,v) -> [0, -x[3], x[2]], NonFixed)
+        # F2 = VectorField((x,v) -> [x[3], 0, -x[1]], NonFixed)
+        # F01_ = Lie(F0, F1)
+        # F011_ = Lie(F01_, F1)
+        # F01__= @Lie [F0, F1]
+        # F011__= @Lie [[F0, F1], F1]
+       
+        # Test.@test F01_(x,v) ≈ F01__(x,v) atol=1e-6
+        # Test.@test F011_(x) ≈ F011__(x) atol=1e-6
+        # #
+        # get_F0 = () -> F0
+        # F011___ = @Lie [[get_F0(), F1], F1]
+        # Test.@test F011_(x) ≈ F011___(x) atol=1e-6
+
     end
 
     @testset "Poisson" begin
 
+        #dimension 1
+        g1(x,p) = 0.5*(x^2+p^2)
+        g2(x,p) = 0.5*(x^2-p^2)
+        g3(x,p) = 0.5*x^2
+        g12(x,p) = g1(x,p)*g2(x,p) 
+        g0(x,p) = 0.5
+
+        H_1 = Hamiltonian(g1)
+        H_2 = Hamiltonian(g2)
+        H_3 = Hamiltonian(g3)
+        H_12 = Hamiltonian(g12)
+
+        P_1_2 = Poisson(H_1, H_2)
+        P_2_1 = Poisson(H_2, H_1)
+        P_1_1 = Poisson(H_1, H_1)
+
+        a = 1
+        b = 2
+
+        Test.@test P_1_2(a,b) ≈ -P_2_1(a,b) atol=1e-6
+        Test.@test Poisson(H_12,H_3)(a,b) ≈ (Poisson(H_1,H_3)(a,b)*H_2(a,b) + H_1(a,b)*Poisson(H_2,H_3)(a,b)) atol=1e-6
+        Test.@test P_1_1(a,b) ≈ 0 atol=1e-6
+        Test.@test Poisson(H_1,Hamiltonian(g0))(a,b) ≈ 0 atol=1e-6
 
 
-        # Define the Hamiltonian functions
-        function f1(x, p)
-            return(0.5*(x[1]^2+x[2]^2+p[1]^2))
-        end
-
-        function f2(x, p)
-            return(0.5*(x[1]^2+x[2]^2+p[2]^2))
-        end
+        #dimension 2
+        f1(x, p) = 0.5*(x[1]^2+x[2]^2+p[1]^2)
+        f2(x, p) = 0.5*(x[1]^2+x[2]^2+p[2]^2)
+        f3(x, p) = 0.5*(x[1]^2+x[2]^2)
+        f12(x,p) = f1(x,p)*f2(x,p)
+        f0(x,p) = 0.5
 
         H_1 = Hamiltonian(f1)
         H_2 = Hamiltonian(f2)
+        H_3 = Hamiltonian(f3)
+        H_12 = Hamiltonian(f12)
 
-        H_1_2 = Poisson(H_1, H_2)
-        H_2_1 = Poisson(H_2, H_1)
-        H_1_1 = Poisson(H_1, H_1)
+        P_1_2 = Poisson(H_1, H_2)
+        P_2_1 = Poisson(H_2, H_1)
+        P_1_1 = Poisson(H_1, H_1)
 
         a = [1, 2]
         b = [10, 0]
 
-        Test.@test H_1_2(a,b) ≈ -H_2_1(b,a) atol=1e-6
+        Test.@test P_1_2(a,b) ≈ -P_2_1(a,b) atol=1e-6
+        Test.@test Poisson(H_12,H_3)(a,b) ≈ (Poisson(H_1,H_3)(a,b)*H_2(a,b) + H_1(a,b)*Poisson(H_2,H_3)(a,b)) atol=1e-6
+        Test.@test P_1_1(a,b) ≈ 0 atol=1e-6
+        Test.@test Poisson(H_1,Hamiltonian(f0))(a,b) ≈ 0 atol=1e-6
+    end
 
+    @testset "Poisson macro" begin
+        # parameters
+        t = 1
+        x = [1, 2, 3]
+        p = [1,0,7]
+        Γ = 2
+        γ = 1
+        δ = γ-Γ
+
+        # autonomous
+        H0 = Hamiltonian((x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2))
+        H1 = Hamiltonian((x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2))
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        
+        Test.@test P01(x, p) ≈ P01_(x, p) atol=1e-6
+        Test.@test P011(x, p) ≈ P011_(x, p) atol=1e-6
+        
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(x, p) ≈ P011__(x, p) atol=1e-6
+
+        # nonautonomous
+        H0 = Hamiltonian((t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2), autonomous=false)
+        H1 = Hamiltonian((t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2), NonAutonomous)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(t, x, p) ≈ P01_(t, x, p) atol=1e-6
+        Test.@test P011(t, x, p) ≈ P011_(t, x, p) atol=1e-6
+        
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(t, x, p) ≈ P011__(t, x, p) atol=1e-6
     end
 
 end # test_differential_geometry

@@ -3,7 +3,7 @@
 
 # ---------------------------------------------------------------------------
 # HamiltonianLift
-struct HamiltonianLift{time_dependence} <: AbstractHamiltonian
+struct HamiltonianLift{time_dependence}  <: AbstractHamiltonian{time_dependence,Any}
     X::VectorField
     function HamiltonianLift(X::VectorField{time_dependence, state_dimension}) where {time_dependence, state_dimension}
         new{time_dependence}(X)
@@ -131,69 +131,48 @@ function ad(X::Function, Y::Function, time_dependence::DataType...)::VectorField
     time_dependence = NonAutonomous ∈ time_dependence ? NonAutonomous : Autonomous
     return Lie(X, Y, time_dependence)
 end
-
-# ---------------------------------------------------------------------------
-# Multiple lie brackets of any length
-
-# type
-const Sequence = Tuple{Vararg{Integer}}
-
-# default value of a sequence of vector fields to compute one Lie bracket
-__fun_sequence(Xs::VectorField...) = Tuple(1:length(Xs))
-
-#
-function _Lie_sequence(Xs::VectorField{T,V}...; sequence::Sequence=__fun_sequence(Xs...))::VectorField{T,V} where {T,V}
-
-    # check length of Xs
-    length(Xs) < 2 && throw(IncorrectArgument("Xs must have at least two elements"))
-
-    # check length of sequence
-    length(sequence) < 2 && throw(IncorrectArgument("sequence must have at least two elements"))
-    
-    # check if the elements of sequence are contained in 1:length(Xs)
-    for o ∈ sequence
-        o < 1 && throw(IncorrectArgument("sequence must contain only positive integers"))
-        o > length(Xs) && throw(IncorrectArgument("sequence must contain only integers less than or equal to the length of Xs"))
+function Poisson(f::AbstractHamiltonian{Autonomous, T}, g::AbstractHamiltonian{Autonomous, T})::AbstractHamiltonian{Autonomous, T} where {T <: VariableDependence}
+    function fg(x, p)
+        n = size(x, 1)
+        ff,gg = @match n begin
+            1 => (z -> f(z[1], z[2]), z -> g(z[1], z[2]))
+            _ => (z -> f(z[1:n], z[n+1:2n]), z -> g(z[1:n], z[n+1:2n]))
+        end
+        df = ctgradient(ff, [ x ; p ])
+        dg = ctgradient(gg, [ x ; p ])
+        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
     end
-
-    # 
-    if length(sequence) == 2
-        return Lie(Xs[sequence[1]], Xs[sequence[2]])
-    else
-        return Lie(_Lie_sequence(Xs..., sequence=sequence[1:end-1]), Xs[sequence[end]])
+    return Hamiltonian(fg, Autonomous, T)
+end
+function Poisson(f::AbstractHamiltonian{NonAutonomous, T}, g::AbstractHamiltonian{NonAutonomous, T})::AbstractHamiltonian{NonAutonomous, T} where {T <: VariableDependence}
+    function fg(t, x, p)
+        n = size(x, 1)
+        ff,gg = @match n begin
+            1 => (z -> f(t, z[1], z[2]), z -> g(t, z[1], z[2]))
+            _ => (z -> f(t, z[1:n], z[n+1:2n]), z -> g(t, z[1:n], z[n+1:2n]))
+        end
+        df = ctgradient(ff, [ x ; p ])
+        dg = ctgradient(gg, [ x ; p ])
+        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
     end
-
+    return Hamiltonian(fg, NonAutonomous, T)
+end
+function Poisson(f::AbstractHamiltonian, g::AbstractHamiltonian)::AbstractHamiltonian
+    function fg(x, p)
+        n = size(x, 1)
+        ff,gg = @match n begin
+            1 => (z -> f(z[1], z[2]), z -> g(z[1], z[2]))
+            _ => (z -> f(z[1:n], z[n+1:2n]), z -> g(z[1:n], z[n+1:2n]))
+        end
+        df = ctgradient(ff, [ x ; p ])
+        dg = ctgradient(gg, [ x ; p ])
+        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
+    end
+    return Hamiltonian(fg)
 end
 
 # ---------------------------------------------------------------------------
-# Macro
-
-# # @Lie F01
-# macro Lie(expr::Symbol)
-
-#     # split symbol into substrings
-#     v = split(string(expr))[1]
-
-#     # check if the first character is 'F'
-#     @assert v[1] == 'F'
-
-#     # get the unique numbers in the symbol
-#     uni = sort(unique(v[2:end]))
-
-#     # build the tuple of needed vector fields
-#     vfs = Tuple([Symbol(:F, n) for n ∈ uni])
-
-#     # build the sequence to compute the Lie bracket
-#     user_sequence = [parse(Integer, c) for c ∈ v[2:end]] # conversion to integer
-#     sequence = Tuple([findfirst(v->v==s, parse.(Integer, uni)) for s ∈ user_sequence])
-
-#     # build the code
-#     code = quote
-#         $expr = _Lie_sequence($(vfs...), sequence=$sequence)
-#     end
-
-#     return esc(code)
-# end
+# Macros
 
 # @Lie [X, Y]
 macro Lie(expr::Expr)
@@ -203,19 +182,10 @@ macro Lie(expr::Expr)
     return esc(postwalk( x -> @capture(x, [a_, b_]) ? :(Lie($a, $b)) : x, expr))
 end
 
-
-function Poisson(f::AbstractHamiltonian, g::AbstractHamiltonian)
-    function fg(x, p)
-        n = size(x, 1)
-        ff,gg = @match n begin
-            1 => (z -> f(z[1], z[2]), z -> g(z[1], z[2]))
-            _ => (z -> f(z[1:n], z[n+1:2n]), z -> g(z[1:n], z[n+1:2n]))
-        end
-        # ff = z -> f(z[1:n], z[n+1:2n])
-        # gg = z -> g(z[1:n], z[n+1:2n])
-        df = ctgradient(ff, [ x ; p ])
-        dg = ctgradient(gg, [ x ; p ])
-        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
-    end
-    return fg
+# @Poisson {X, Y}
+macro Poisson(expr::Expr)
+    @assert hasproperty(expr, :head)
+    @assert expr.head == :braces
+    @assert length(expr.args) == 2
+    return esc(postwalk( x -> @capture(x, {a_, b_}) ? :(Poisson($a, $b)) : x, expr))
 end
