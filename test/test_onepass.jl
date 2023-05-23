@@ -1441,78 +1441,9 @@ z = v[1] + 2v[2]
 
     # some syntax (even parseable) are not allowed
     # this is the actual exhaustive list
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x(t) == x_u        , constant_state_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x(t) == x_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2](t) == x2_u    , constant_state_index_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2](t) == x2_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2:3](t) == y_u    , constant_state_range_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2:3](t) == y_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u(t) == u_u         , constant_control_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u(t) == u_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2](t) == u2_u     , constant_control_index_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2](t) == u2_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2:3](t) == v_u    , constant_control_range_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2:3](t) == v_u
-    end
+    # note: equality constraints on ranges for state and control
+    # are now allowed to ensure a uniform treatment of equalities
+    # as particular inequalities
     @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R, state

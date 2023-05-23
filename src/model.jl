@@ -548,7 +548,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial` or `:final` value constraint on the state, or a `:variable` value.
+Add an `:initial` or `:final` value constraint on the state, or a `:variable` value. Can also be used with
+`:state` and `:control`.
 
 !!! note
 
@@ -580,7 +581,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
     q = ocp.variable_dimension
 
     #
-    if type ∈ [:initial, :final]  # not allowed for :control or :state (does not make sense)
+    if type ∈ [:initial, :final, :state, :control ] # also allowed for :control and :state to treat uniformly eq and ineq
         rg = n == 1 ? Index(1) : 1:n 
         # check if rg and val are consistent
         (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $n"))
@@ -589,7 +590,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
         (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $q"))
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
+        ". Please choose in [ :initial, :final, :state, :control, :variable ] or check the arguments of the constraint! method."))
     end
 
     #
