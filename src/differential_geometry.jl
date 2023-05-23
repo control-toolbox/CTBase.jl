@@ -1,12 +1,10 @@
-# ---------------------------------------------------------------------------
-# abstract type AbstractHamiltonian end
 
 # ---------------------------------------------------------------------------
 # HamiltonianLift
-struct HamiltonianLift{time_dependence}  <: AbstractHamiltonian{time_dependence,Any}
+struct HamiltonianLift{time_dependence,variable_dependence}  <: AbstractHamiltonian{time_dependence,variable_dependence}
     X::VectorField
-    function HamiltonianLift(X::VectorField{time_dependence, state_dimension}) where {time_dependence, state_dimension}
-        new{time_dependence}(X)
+    function HamiltonianLift(X::VectorField{time_dependence, variable_dependence}) where {time_dependence, variable_dependence}
+        new{time_dependence, variable_dependence}(X)
     end
 end
 
@@ -70,8 +68,11 @@ function Der(X::VectorField{Autonomous, <: VariableDependence}, f::Function)::Fu
    return x -> ctgradient(f, x)'*X(x)
 end
 function Der(X::VectorField{NonAutonomous, <: VariableDependence}, f::Function)::Function
-    return (t, x) -> ctgradient(y -> f(t, y), x)'*X(t, x)
+    return (t, x) -> ctgradient(y -> f(t, y), x)'*X(t, x) # + ctgradient(s -> f(s, x), t) ??
 end
+# (X⋅f)(x) = f'(x)⋅X(x)
+# (X⋅f)(t, x) = ∂₁f(t, x) + ∂₂f(t, x)⋅X(t, x)
+# (postulat)
 function ⋅(X::VectorField, f::Function)::Function
     return Der(X, f)
 end
@@ -85,25 +86,30 @@ end
 # ---------------------------------------------------------------------------
 # "Directional derivative" of a vector field: internal and only used to compute
 # efficiently the Lie bracket of two vector fields
-function ⅋(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where V
-    return VectorField(x -> ctgradient(Y, x)*X(x), 
-        Autonomous, V)
-end
-function ⅋(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where V
-    return VectorField((t, x) -> ctgradient(y -> Y(t, y), x)*X(t, x),
-        NonAutonomous, V)
-end
+# function ⅋(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where V
+#     return VectorField(x -> ctgradient(Y, x)*X(x), 
+#         Autonomous, V)
+# end
+# function ⅋(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where V
+#     return VectorField((t, x) -> ctgradient(y -> Y(t, y), x)*X(t, x),
+#         NonAutonomous, V)
+# end
 function ⅋(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where {V}
-    return VectorField(x -> x isa ctNumber ? ctgradient(Y, x)*X(x) : ctjacobian(Y, x)*X(x),
+    return VectorField((x, args...) -> x isa ctNumber ? ctgradient(y -> Y(y, args...), x)*X(x, args...) : ctjacobian(y -> Y(y, args...), x)*X(x, args...),
         Autonomous, V)
 end
 function ⅋(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where {V}
-    return VectorField((t, x) -> x isa ctNumber ? ctgradient(y -> Y(t, y), x)*X(t, x) : ctjacobian(y -> Y(t, y), x)*X(t, x),
+    return VectorField((t, x, args...) -> x isa ctNumber ? ctgradient(y -> Y(t, y, args...), x)*X(t, x, args...) : ctjacobian(y -> Y(t, y, args...), x)*X(t, x, args...),
         NonAutonomous, V)
 end
-
+# function ⅋(X::VectorField{NonAutonomous, NonFixed}, Y::VectorField{NonAutonomous, NonFixed})::VectorField{NonAutonomous, NonFixed}
+#     return VectorField((t, x, v) -> x isa ctNumber ? ctgradient(y -> Y(t, y, v), x)*X(t, x, v) : ctjacobian(y -> Y(t, y, v), x)*X(t, x, v),
+#         NonAutonomous, NonFixed)
+# end
 # ---------------------------------------------------------------------------
 # Lie bracket of two vector fields: [X, Y] = Lie(X, Y)= ad(X, Y)
+## [X, Y]⋅f = (X∘Y - Y∘X)⋅f
+# ⅋ = ? => (X⅋Y - Y⅋X)⋅f = (X∘Y - Y∘X)⋅f
 function Lie(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where {V}
     return VectorField(x -> (X⅋Y)(x)-(Y⅋X)(x), Autonomous, V)
 end
@@ -131,6 +137,8 @@ function ad(X::Function, Y::Function, time_dependence::DataType...)::VectorField
     time_dependence = NonAutonomous ∈ time_dependence ? NonAutonomous : Autonomous
     return Lie(X, Y, time_dependence)
 end
+# f(z) = p⋅X(x), g(z) = p⋅Y(x), z = (x, p) => {f,g}(z) = p⋅[X,Y](x) 
+# {f,g}(z) = g'(z)⋅f⃗(z)
 function Poisson(f::AbstractHamiltonian{Autonomous, T}, g::AbstractHamiltonian{Autonomous, T})::AbstractHamiltonian{Autonomous, T} where {T <: VariableDependence}
     function fg(x, p)
         n = size(x, 1)
@@ -144,6 +152,8 @@ function Poisson(f::AbstractHamiltonian{Autonomous, T}, g::AbstractHamiltonian{A
     end
     return Hamiltonian(fg, Autonomous, T)
 end
+# f(t, z) = p⋅X(x), g(t, z) = p⋅Y(x), z = (x, p) => {f,g}(t, z) = p⋅[X,Y](t, x) 
+# {f,g}(t, z) = ∂₂g(t, z)⋅f⃗(t, z) + ∂₁g(t, z) ?? => {f,g}(t, z) = p⋅[X,Y](t, x) when f,g are Hamiltonian lifts
 function Poisson(f::AbstractHamiltonian{NonAutonomous, T}, g::AbstractHamiltonian{NonAutonomous, T})::AbstractHamiltonian{NonAutonomous, T} where {T <: VariableDependence}
     function fg(t, x, p)
         n = size(x, 1)
