@@ -1,4 +1,4 @@
-const ModelRepl = Dict{Symbol, Union{Expr, Vector{Expr}}}
+const ModelRepl = Vector{Expr}
 
 @with_kw mutable struct CTRepl
     model::ModelRepl = __init_model_repl()
@@ -8,23 +8,11 @@ const ModelRepl = Dict{Symbol, Union{Expr, Vector{Expr}}}
     __demo::Union{Nothing, Bool} = nothing
 end
 
+__init_model_repl() = ModelRepl()
+
 @with_kw mutable struct HistoryRepl
     index::Int=0
     ct_repls::Vector{CTRepl}=Vector{CTRepl}()
-end
-
-# add to model the new expression if it is valid, and then, update history
-function __add!(ct_repl::CTRepl, type::Symbol, e::Expr, history::HistoryRepl)
-    ct_repl.debug && (println("debug> adding expression: ", e, " of type: ", type))
-    try 
-        __eval_ocp(ct_repl)               # test if code is valid: if not, an exception is thrown
-        __update!(ct_repl.model, type, e) # update model
-        __add!(history, ct_repl)          # add ct_repl to history
-        ct_repl.debug && (println("debug> expression valid, model updated."))
-    catch ex
-        println("\nThe model can't be updated. The expression is not valid.")
-        ct_repl.debug && (println("debug> exception thrown: ", ex))
-    end
 end
 
 function __init_repl(; debug=false, demo=false)
@@ -46,6 +34,9 @@ function __init_repl(; debug=false, demo=false)
     # add initial ct_repl to history
     __add!(history, ct_repl)
 
+    # text invalid
+    txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a valid expression to update the model."
+
     function parse_to_expr(s::AbstractString)
         
         # remove spaces from s at the beginning and at the end
@@ -66,12 +57,12 @@ function __init_repl(; debug=false, demo=false)
         # test if e is a command
         @match e begin
             :( $c = $a ) => begin
-                command = __transform_to_command_form(c)
+                command = __transform_to_command(c)
                 ct_repl.debug && println("debug> command: ", command, " and argument: ", a)
                 command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl, a, history))
             end
             :( $c ) => begin
-                command = __transform_to_command_form(c)
+                command = __transform_to_command(c)
                 ct_repl.debug && println("debug> command: ", command)
                 command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl, history))
             end
@@ -86,27 +77,34 @@ function __init_repl(; debug=false, demo=false)
         #
         return_nothing && ct_repl.debug && println("\ndebug> new parsing string: ", s)
         return_nothing && ct_repl.debug && println("debug> new expression parsed: ", e)
+        
+        if e isa Expr
 
-        # parse e and update ct_repl if needed
-        @match e begin
-            :( $e_, time                 ) => __add!(ct_repl, :time, e, history)
-            :( $e_, state                ) => __add!(ct_repl, :state, e, history)
-            :( $e_, control              ) => __add!(ct_repl, :control, e, history)
-            :( $e_, variable             ) => __add!(ct_repl, :variable, e, history)
-            :( $a = $e1                  ) => __add!(ct_repl, :alias, e, history)
-            :( ∂($x)($t) == $e1          ) => __add!(ct_repl, :dynamics, e, history)
-            :( ∂($x)($t) == $e1, $label  ) => __add!(ct_repl, :dynamics, e, history)
-            :( $e1 == $e2                ) => __add!(ct_repl, :constraints, e, history)
-            :( $e1 == $e2, $label        ) => __add!(ct_repl, :constraints, e, history)
-            :( $e1 ≤  $e2 ≤  $e3         ) => __add!(ct_repl, :constraints, e, history)
-            :( $e1 ≤  $e2 ≤  $e3, $label ) => __add!(ct_repl, :constraints, e, history)
-            :( $e_ → min                 ) => __add!(ct_repl, :objective, e, history)
-            :( $e_ → max                 ) => __add!(ct_repl, :objective, e, history)
-            _ => (println("\nct parsing error\n\nType HELP to see the list of commands or enter a valid expression to update the model."); return nothing)
+            # eval ocp to test if the expression is valid
+            ct_repl.debug && (println("debug> try to add expression: ", e))
+            try 
+                __eval_ocp(ct_repl, e)      # test if code is valid: if not, an exception is thrown
+            catch ex
+                println(txt_invalid)
+                ct_repl.debug && (println("debug> exception thrown: ", ex))
+            end
+            
+            # update model
+            __update!(ct_repl.model, e)
+            ct_repl.debug && (println("debug> expression valid, model updated."))
+
+            # add ct_repl to history
+            __add!(history, ct_repl)
+
+            #
+            return return_nothing ? nothing : __quote_ocp(ct_repl)
+
+        else
+
+            println(txt_invalid)
+            return nothing
+
         end
-
-        # if we are here, e was part of ct dsl
-        return_nothing ? nothing : __quote_ocp(ct_repl)
 
     end
 
@@ -247,7 +245,7 @@ COMMANDS_SHORTCUTS = Dict{Symbol, Symbol}(
 __non_existing_command() = :non_existing_command
 
 # transform to a command
-function __transform_to_command_form(c::Symbol)::Symbol
+function __transform_to_command(c::Symbol)::Symbol
 
     # split c in parts
     v = split(string(c), "£")
@@ -268,17 +266,30 @@ function __transform_to_command_form(c::Symbol)::Symbol
 
 end
 
-function __transform_to_command_form(e::Expr)::Symbol
+function __transform_to_command(e::Expr)::Symbol
     return __non_existing_command()
 end
 
+# get code from model
+function __code(model::ModelRepl)::Expr
+    return Expr(:block, model...)
+end
+
+# get code from model and an extra expression
+function __code(model::ModelRepl, e::Expr)
+    model_ = deepcopy(model)    # copy model
+    __update!(model_, e)  # update model_
+    return __code(model_)       # get code
+end
+
+function __update!(model::ModelRepl, e::Expr)
+    unique!(push!(model, e))
+end
+
 # make @def ocp quote
-function __quote_ocp(ct_repl::CTRepl; print_ocp::Bool=true)
+function __quote_ocp(ct_repl::CTRepl)
     code  = __code(ct_repl.model)
-    print_ocp && begin 
-        #printstyled("\nct> ", color=:magenta, bold=true)
-        println("\n", ct_repl.ocp_name)
-    end
+    println("\n", ct_repl.ocp_name)
     ocp_q = quote @def $(ct_repl.ocp_name) $(code) end
     ct_repl.debug && println("debug> code: ", code)
     ct_repl.debug && println("debug> quote code: ", ocp_q)
@@ -286,8 +297,18 @@ function __quote_ocp(ct_repl::CTRepl; print_ocp::Bool=true)
 end
 
 # eval ocp
-function __eval_ocp(ct_repl::CTRepl)
-    eval(__quote_ocp(ct_repl, print_ocp=false))
+function __eval_ocp(ct_repl::CTRepl, e::Expr)
+    code  = __code(ct_repl.model, e)
+    ocp = gensym()
+    ocp_q = quote @def $ocp $code end
+    ct_repl.debug && println("debug> code: ", code)
+    ct_repl.debug && println("debug> quote code: ", ocp_q)
+    try 
+        eval(ocp_q)
+    catch ex
+        throw(ex)
+    end
+    nothing
 end
 
 # quote solve: todo: update when using real solver
@@ -316,90 +337,6 @@ function __quote_plot(ct_repl::CTRepl)
     return plot_q
 end
 
-# update the model with a new expression of nature type
-function __update!(model::ModelRepl, type::Symbol, e::Expr)
-    @match type begin
-        :alias => begin
-            to_add = true
-            @match e begin  # check if the alias is already defined
-                :( $e1 = $e2 ) => begin
-                    for i ∈ eachindex(model[:alias])
-                        a = model[:alias][i]
-                        @match a begin
-                            :( $a1 = $a2 ) => ((a1 == e1) && ((model[:alias][i] = e); to_add = false))
-                            _ => (println("\n Internal error, invalid alias: ", e); return)
-                        end
-                    end
-                end
-                _ => (println("\n Internal error, invalid alias: ", e); return)
-            end
-            to_add && push!(model[:alias], e) # add alias if it is not already defined
-        end
-        :constraints => (push!(model[type], e))
-        :time || :state || :control || :variable || :dynamics || :objective => (model[type] = e)
-        _ => (println("\n Internal error, invalid type: ", type); return)
-    end
-end
-
-# split alias in two vectors: one for those appearing in model[:time] and the others
-function __split_alias(model::ModelRepl)
-    alias_time  = Expr[]
-    alias_other = Expr[]
-    for a ∈ model[:alias]
-        @match a begin
-            :( $a1 = $a2 ) => begin
-                inexpr(model[:time], a1) ? push!(alias_time, a) : push!(alias_other, a)
-            end
-            _ => (println("\n Internal error, invalid alias: ", a); return)
-        end
-    end
-    return alias_time, alias_other
-end
-
-# get code from model
-function __code(model::ModelRepl)::Expr
-    m = Expr[]
-    alias_time, alias_other = __split_alias(model)
-    !isempty(alias_time)       && push!(m, alias_time...)
-    model[:time]        != :() && push!(m, model[:time])
-    model[:state]       != :() && push!(m, model[:state])
-    model[:control]     != :() && push!(m, model[:control])
-    model[:variable]    != :() && push!(m, model[:variable])
-    !isempty(alias_other)      && push!(m, alias_other...)
-    model[:constraints] != []  && push!(m, model[:constraints]...)
-    model[:dynamics]    != :() && push!(m, model[:dynamics])
-    model[:objective]   != :() && push!(m, model[:objective])
-    return Expr(:block, m...)
-end
-
-# create an empty model
-function __init_model_repl()
-    model = ModelRepl()
-    model[:time]        = :()
-    model[:state]       = :()
-    model[:control]     = :()
-    model[:variable]    = :()
-    model[:dynamics]    = :()
-    model[:objective]   = :()
-    model[:constraints] = Expr[]
-    model[:alias]       = Expr[]
-    return model
-end
-
-function __copy!(ct_repl::CTRepl, ct_repl_to_copy::CTRepl)
-    ct_repl.model = deepcopy(ct_repl_to_copy.model)
-    ct_repl.ocp_name = ct_repl_to_copy.ocp_name
-    ct_repl.sol_name = ct_repl_to_copy.sol_name
-    ct_repl.debug = ct_repl_to_copy.debug
-end
-
-# get code from model and an expression
-function __code(model::ModelRepl, type::Symbol, e::Expr)
-    model_ = deepcopy(model)    # copy model
-    __update!(model_, type, e)  # update model_
-    return __code(model_)       # get code
-end
-
 # add model to history
 function __add!(history::HistoryRepl, ct_repl::CTRepl)
     push!(history.ct_repls, deepcopy(ct_repl))
@@ -416,6 +353,14 @@ end
 function __redo!(history::HistoryRepl)
     history.index < length(history.ct_repls) && (history.index += 1)
     return history.ct_repls[history.index]
+end
+
+# copy a ct_repl
+function __copy!(ct_repl::CTRepl, ct_repl_to_copy::CTRepl)
+    ct_repl.model = deepcopy(ct_repl_to_copy.model)
+    ct_repl.ocp_name = ct_repl_to_copy.ocp_name
+    ct_repl.sol_name = ct_repl_to_copy.sol_name
+    ct_repl.debug = ct_repl_to_copy.debug
 end
 
 function Base.show(io::IO, ::MIME"text/plain", ct_repl::CTRepl)

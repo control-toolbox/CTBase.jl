@@ -52,7 +52,7 @@ A = [ 0 1
       0 0 ]
 B = [ 0
       1 ]
-constraint!(ocp, :dynamics, (x, u) -> A*x + B*u)
+dynamics!(ocp, (x, u) -> A*x + B*u)
 
 objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
 nothing # hide

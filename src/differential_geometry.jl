@@ -85,30 +85,30 @@ end
 # ---------------------------------------------------------------------------
 # "Directional derivative" of a vector field: internal and only used to compute
 # efficiently the Lie bracket of two vector fields
-function ⅋(X::VectorField{Autonomous, T}, Y::VectorField{Autonomous, T})::VectorField{Autonomous, T} where T
+function ⅋(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where V
     return VectorField(x -> ctgradient(Y, x)*X(x), 
-        Autonomous, T)
+        Autonomous, V)
 end
-function ⅋(X::VectorField{NonAutonomous, 1}, Y::VectorField{NonAutonomous, 1})::VectorField{NonAutonomous, 1}
+function ⅋(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where V
     return VectorField((t, x) -> ctgradient(y -> Y(t, y), x)*X(t, x),
-        NonAutonomous, T)
+        NonAutonomous, V)
 end
-function ⅋(X::VectorField{Autonomous, T}, Y::VectorField{Autonomous, T})::VectorField{Autonomous, T} where {T}
+function ⅋(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where {V}
     return VectorField(x -> x isa ctNumber ? ctgradient(Y, x)*X(x) : ctjacobian(Y, x)*X(x),
-        Autonomous, T)
+        Autonomous, V)
 end
-function ⅋(X::VectorField{NonAutonomous, T}, Y::VectorField{NonAutonomous, T})::VectorField{NonAutonomous, T} where {T}
+function ⅋(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where {V}
     return VectorField((t, x) -> x isa ctNumber ? ctgradient(y -> Y(t, y), x)*X(t, x) : ctjacobian(y -> Y(t, y), x)*X(t, x),
-        NonAutonomous, T)
+        NonAutonomous, V)
 end
 
 # ---------------------------------------------------------------------------
 # Lie bracket of two vector fields: [X, Y] = Lie(X, Y)= ad(X, Y)
-function Lie(X::VectorField{Autonomous, T}, Y::VectorField{Autonomous, T})::VectorField{Autonomous, T} where {T}
-    return VectorField(x -> (X⅋Y)(x)-(Y⅋X)(x), Autonomous, T)
+function Lie(X::VectorField{Autonomous, V}, Y::VectorField{Autonomous, V})::VectorField{Autonomous, V} where {V}
+    return VectorField(x -> (X⅋Y)(x)-(Y⅋X)(x), Autonomous, V)
 end
-function Lie(X::VectorField{NonAutonomous, T}, Y::VectorField{NonAutonomous, T})::VectorField{NonAutonomous, T} where {T}
-    return VectorField((t, x) -> (X⅋Y)(t, x)-(Y⅋X)(t, x), NonAutonomous, T)
+function Lie(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where {V}
+    return VectorField((t, x) -> (X⅋Y)(t, x)-(Y⅋X)(t, x), NonAutonomous, V)
 end
 function ad(X::VectorField{T,V}, Y::VectorField{T,V})::VectorField{T,V} where {T,V}
     return Lie(X, Y)
@@ -157,19 +157,7 @@ function Poisson(f::AbstractHamiltonian{NonAutonomous, T}, g::AbstractHamiltonia
     end
     return Hamiltonian(fg, NonAutonomous, T)
 end
-function Poisson(f::AbstractHamiltonian, g::AbstractHamiltonian)::AbstractHamiltonian
-    function fg(x, p)
-        n = size(x, 1)
-        ff,gg = @match n begin
-            1 => (z -> f(z[1], z[2]), z -> g(z[1], z[2]))
-            _ => (z -> f(z[1:n], z[n+1:2n]), z -> g(z[1:n], z[n+1:2n]))
-        end
-        df = ctgradient(ff, [ x ; p ])
-        dg = ctgradient(gg, [ x ; p ])
-        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
-    end
-    return Hamiltonian(fg)
-end
+
 
 # ---------------------------------------------------------------------------
 # Macros

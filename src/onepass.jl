@@ -1,9 +1,12 @@
 # onepass
 # todo:
-# - dynamics apart, kwargs constraints (+ one sided, ≥)
-# - x₁(0) + t == 0 : should not parse (cf. t ∈, check constraint_type match)
+# - additional checks:
+# (i) when generating functions, there should not be any x or u left
+# (ii) in boundary and mayer, there should not be any left
+# in both cases, has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
+# - update constraint_type to gensym all generated function arg names
 
 """
 $(TYPEDEF)
@@ -97,12 +100,13 @@ parse!(p, ocp, e; log=false) = begin
         :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
         :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
         _ => begin
-        p.lnum = p.lnum - 1
-        if e isa LineNumberNode
+            if e isa LineNumberNode
+                p.lnum = p.lnum - 1
                 e
             elseif e isa Expr && e.head == :block
-		# !!! assumes that map is done sequentially for side effects on p
+                p.lnum = p.lnum - 1
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
+		# !!! assumes that map is done sequentially for side effects on p
             else
                 return __throw("unknown syntax", p.lnum, p.line)
             end end
@@ -355,7 +359,7 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
         function $gs($(args...))
             $e
         end
-        constraint!($ocp, :dynamics, $gs)
+        dynamics!($ocp, $gs)
     end, p.lnum, p.line)
 end
 
@@ -468,7 +472,8 @@ macro def(ocp, e, log=false)
             (false, true ) => :( $ocp = Model(variable=true) )
             _              => :( $ocp = Model(autonomous=false, variable=true) )
 	end
-        code = Expr(:block, init, code, :( $ocp.model_expression=$(QuoteNode(Expr(:$, e))) ), :( $ocp ))
+        ee = QuoteNode(e)
+        code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp ))
         esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user

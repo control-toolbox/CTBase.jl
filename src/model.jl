@@ -114,21 +114,14 @@ julia> variable!(ocp, 1, "v")
 julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 ```
 """
-function variable!(ocp::OptimalControlModel, q::Dimension, name::Union{String, Vector{String}}=__variable_name(q))
+function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), components_names::Vector{String}=__variable_components_names(q,name))
     # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
-    (q  > 1) && (name isa Vector{String}) && (length(name) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
-    (q == 1) && (name isa Vector{String}) && throw(IncorrectArgument("if the variable dimension is 1, then, the argument name must be a String"))
-    # set the variable dimension and names
-    components_names = nothing
-    if (q  > 1) 
-        components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, q)] : name
-    else
-        components_names = [name] # name is a String
-    end
+    (q  > 1) && (length(components_names) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
+
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
-    ocp.variable_name = name isa String ? name : "v"
+    ocp.variable_name = name
     nothing # to force to return nothing
 end
 
@@ -162,12 +155,6 @@ julia> ocp.state_dimension
 julia> ocp.state_components_names
 ["x₁", "x₂"]
 
-julia> state!(ocp, 2, [ "y₁", "y₂" ])
-julia> ocp.state_dimension
-2
-julia> ocp.state_components_names
-["y₁", "y₂"]
-
 julia> state!(ocp, 2, :y)
 julia> ocp.state_dimension
 2
@@ -181,20 +168,13 @@ julia> ocp.state_components_names
 ["y₁", "y₂"]
 ```
 """
-function state!(ocp::OptimalControlModel, n::Dimension, name::Union{String, Vector{String}}=__state_name(n))
+function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_name(), components_names::Vector{String}=__state_components_names(n,name))
     # checkings
-    (n  > 1) && (name isa Vector{String}) && (length(name) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
-    (n == 1) && (name isa Vector{String}) && throw(IncorrectArgument("if the state dimension is 1, then, the argument name must be a String"))
-    # set the state dimension and names
-    components_names = nothing
-    if (n  > 1) 
-        components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, n)] : name
-    else
-        components_names = [name] # name is a String
-    end
+    (n  > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    
     ocp.state_dimension = n
     ocp.state_components_names = components_names
-    ocp.state_name = name isa String ? name : "x"
+    ocp.state_name = name
     nothing # to force to return nothing
 end
 function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
@@ -227,12 +207,6 @@ julia> ocp.control_dimension
 julia> ocp.control_components_names
 ["u₁", "u₂"]
 
-julia> control!(ocp, 2, [ "v₁", "v₂" ])
-julia> ocp.control_dimension
-2
-julia> ocp.control_components_names
-["v₁", "v₂"]
-
 julia> control!(ocp, 2, :v)
 julia> ocp.control_dimension
 2
@@ -246,20 +220,13 @@ julia> ocp.control_components_names
 ["v₁", "v₂"]
 ```
 """
-function control!(ocp::OptimalControlModel, m::Dimension, name::Union{String, Vector{String}}=__control_name(m))
+function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), components_names::Vector{String}=__control_components_names(m,name))
     # checkings
-    (m  > 1) && (name isa Vector{String}) && (length(name) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
-    (m == 1) && (name isa Vector{String}) && throw(IncorrectArgument("if the control dimension is 1, then, the argument name must be a String"))
-    # set the control dimension and names
-    components_names = nothing
-    if (m  > 1) 
-        components_names = (name isa String) ? [ name * ctindices(i) for i ∈ range(1, m)] : name
-    else
-        components_names = [name] # name is a String
-    end
+    (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
+    
     ocp.control_dimension = m
     ocp.control_components_names = components_names
-    ocp.control_name = name isa String ? name : "u"
+    ocp.control_name = name
     nothing # to force to return nothing
 end
 
@@ -811,6 +778,52 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val::c
     constraint!(ocp, type, f, val, val, label)
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range.
+
+!!! note
+
+    - The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
+    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
+    - The times must be set before. Use time!.
+
+# Examples
+
+```jldoctest
+julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :final, val=Index(1), lb=0, ub=2)
+julia> constraint!(ocp, :control, val=Index(1), lb=0, ub=2)
+julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
+```
+"""
+function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence}, type::Symbol; 
+    rg::Union{RangeConstraint,Nothing}=nothing, f::Union{Function,Nothing}=nothing,
+    val::Union{ctVector,Nothing}=nothing, lb::Union{ctVector,Nothing}=nothing, ub::Union{ctVector,Nothing}=nothing, 
+    label::Symbol=__constraint_label())
+
+    
+    (lb ≢ nothing && ub === nothing) && (ub = Inf*(size(lb,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+    (lb === nothing && ub ≢ nothing) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+
+    @match (rg,f,val,lb,ub) begin
+        (::Nothing,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, val, label) #
+        (::Nothing,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, lb, ub, label) #
+        (::Nothing,::Function,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, f, val, label) #
+        (::Nothing,::Function,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, f, lb, ub, label) #
+        (::RangeConstraint,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, rg, val, label) #
+        (::RangeConstraint,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, rg, lb, ub, label) #
+        _ => throw(IncorrectArgument("Provided arguments are inconsistent"))
+    end
+
+    nothing
+
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -825,21 +838,15 @@ Set the dynamics.
 # Example
 
 ```jldoctest
-julia> constraint!(ocp, :dynamics, f)
+julia> dynamics!(ocp, f)
 ```
 """
-function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function) where {T <: TimeDependence, V <: VariableDependence}
+function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
     @__check(ocp)
 
-    # set the dynamics
-    if type ∈ [ :dynamics ]
-        ocp.dynamics = Dynamics(f, T, V)
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :dynamics ] or check the arguments of the constraint! method."))
-    end
+    ocp.dynamics = Dynamics(f, T, V)
 
     nothing # to force to return nothing
 
@@ -1004,20 +1011,24 @@ function constraint(ocp::OptimalControlModel{T, V}, label::Symbol) where {T <: T
         (:boundary, f::BoundaryConstraint, _, _) => return f
         (:control , f::ControlConstraint,  _, _) => return f
         (:control , rg,   _, _) => begin
-            C = nothing
-            (T, V) == (Autonomous, Fixed) && (C = ControlConstraint(u         -> u[rg], T, V))
-            (T, V) == (Autonomous, NonFixed)   && (C = ControlConstraint((u, v)    -> u[rg], T, V))
-            (T, V) == (NonAutonomous, Fixed)   && (C = ControlConstraint((t, u)    -> u[rg], T, V))
-            (T, V) == (NonAutonomous, NonFixed)     && (C = ControlConstraint((t, u, v) -> u[rg], T, V))
+            C = @match ocp begin
+                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(u         -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => ControlConstraint((u, v)    -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, Fixed} => ControlConstraint((t, u)    -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, NonFixed} => ControlConstraint((t, u, v) -> u[rg], T, V)
+                _ => nothing
+                end
             return C
         end
         (:state   , f::StateConstraint,    _, _) => return f
         (:state   , rg,   _, _) => begin
-            S = nothing
-            (T, V) == (Autonomous, Fixed) && (S = StateConstraint(x         -> x[rg], T, V))
-            (T, V) == (Autonomous, NonFixed)   && (S = StateConstraint((x, v)    -> x[rg], T, V))
-            (T, V) == (NonAutonomous, Fixed)   && (S = StateConstraint((t, x)    -> x[rg], T, V))
-            (T, V) == (NonAutonomous, NonFixed)     && (S = StateConstraint((t, x, v) -> x[rg], T, V))
+            S = @match ocp begin
+                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(x         -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => StateConstraint((x, v)    -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, Fixed} => StateConstraint((t, x)    -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, NonFixed} => StateConstraint((t, x, v) -> x[rg], T, V)
+                _ => nothing
+                end
             return S
         end
         (:mixed   , f::MixedConstraint,    _, _) => return f
