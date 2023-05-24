@@ -665,7 +665,6 @@ x0 = 3
 xf = 4
 @test_throws UndefVarError o.mayer(x0, xf)
 
-
 @def o begin
     v ∈ R², variable
     t ∈ [ 0, 1 ], time
@@ -711,12 +710,148 @@ z = v[1] + 2v[2]
 @test constraint(o, :eq14)(v) == v[1] + 2v[2]
 @test constraint(o, :eq15)(v) == v[1] + 2v[2]
 
+@def o begin
+    v ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R², control
+    x(0) ≤ 0
+    x(0) ≤ 0,              (1)
+    x(1) ≤ 0
+    x(1) ≤ 0,              (2)
+    x³(0) ≤ 0
+    x³(0) ≤ 0,             (3)
+    x³(1) ≤ 0
+    x³(1) ≤ 0,             (4)
+    x(t) ≤ 0
+    x(t) ≤ 0,              (5)
+    x(t) ≤ 0
+    x(t) ≤ 0,              (6)
+    u₁(t) ≤ 0
+    u₁(t) ≤ 0,              (7)
+    u₁(t) ≤ 0
+    u₁(t) ≤ 0,              (8)
+    x³(t) ≤ 0
+    x³(t) ≤ 0,             (9)
+    x³(t) ≤ 0
+    x³(t) ≤ 0,            (10)
+    (u₁^3)(t) ≤ 0
+    (u₁^3)(t) ≤ 0,            (11)
+    (u₁^3)(t) ≤ 0
+    (u₁^3)(t) ≤ 0,            (12)
+    x(t) + (u₁^3)(t) ≤ 0
+    x(t) + (u₁^3)(t) ≤ 0,     (13)
+    x(t) + (u₁^3)(t) ≤ 0
+    x(t) + (u₁^3)(t) ≤ 0,     (14)
+    v ≤ 0
+    v ≤ 0,                (15)
+end
+
+@test o.constraints[:eq1 ][3] == -Inf
+@test o.constraints[:eq2 ][3] == -Inf
+@test o.constraints[:eq3 ][3] == -Inf
+@test o.constraints[:eq4 ][3] == -Inf
+@test o.constraints[:eq5 ][3] == -Inf
+@test o.constraints[:eq6 ][3] == -Inf
+@test o.constraints[:eq7 ][3] == -Inf
+@test o.constraints[:eq8 ][3] == -Inf
+@test o.constraints[:eq9 ][3] == -Inf
+@test o.constraints[:eq10][3] == -Inf
+@test o.constraints[:eq11][3] == -Inf
+@test o.constraints[:eq12][3] == -Inf
+@test o.constraints[:eq13][3] == -Inf
+@test o.constraints[:eq14][3] == -Inf
+@test o.constraints[:eq15][3] == -Inf
+@test o.constraints[:eq1 ][4] == 0
+@test o.constraints[:eq2 ][4] == 0
+@test o.constraints[:eq3 ][4] == 0
+@test o.constraints[:eq4 ][4] == 0
+@test o.constraints[:eq5 ][4] == 0
+@test o.constraints[:eq6 ][4] == 0
+@test o.constraints[:eq7 ][4] == 0
+@test o.constraints[:eq8 ][4] == 0
+@test o.constraints[:eq9 ][4] == 0
+@test o.constraints[:eq10][4] == 0
+@test o.constraints[:eq11][4] == 0
+@test o.constraints[:eq12][4] == 0
+@test o.constraints[:eq13][4] == 0
+@test o.constraints[:eq14][4] == 0
+@test o.constraints[:eq15][4] == 0
+
+@def o begin
+    v ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R², control
+    x(0) ≥ 0
+    x(0) ≥ 0,              (1)
+    x(1) ≥ 0
+    x(1) ≥ 0,              (2)
+    x³(0) ≥ 0
+    x³(0) ≥ 0,             (3)
+    x³(1) ≥ 0
+    x³(1) ≥ 0,             (4)
+    x(t) ≥ 0
+    x(t) ≥ 0,              (5)
+    x(t) ≥ 0
+    x(t) ≥ 0,              (6)
+    u₁(t) ≥ 0
+    u₁(t) ≥ 0,             (7)
+    u₁(t) ≥ 0
+    u₁(t) ≥ 0,             (8)
+    x³(t) ≥ 0
+    x³(t) ≥ 0,             (9)
+    x³(t) ≥ 0
+    x³(t) ≥ 0,            (10)
+    (u₁^3)(t) ≥ 0
+    (u₁^3)(t) ≥ 0,        (11)
+    (u₁^3)(t) ≥ 0
+    (u₁^3)(t) ≥ 0,        (12)
+    x(t) + (u₁^3)(t) ≥ 0
+    x(t) + (u₁^3)(t) ≥ 0, (13)
+    x(t) + (u₁^3)(t) ≥ 0
+    x(t) + (u₁^3)(t) ≥ 0, (14)
+    v ≥ 0
+    v ≥ 0,                (15)
+end
+
+@test o.constraints[:eq1 ][3] == 0
+@test o.constraints[:eq2 ][3] == 0
+@test o.constraints[:eq3 ][3] == 0
+@test o.constraints[:eq4 ][3] == 0
+@test o.constraints[:eq5 ][3] == 0
+@test o.constraints[:eq6 ][3] == 0
+@test o.constraints[:eq7 ][3] == 0
+@test o.constraints[:eq8 ][3] == 0
+@test o.constraints[:eq9 ][3] == 0
+@test o.constraints[:eq10][3] == 0
+@test o.constraints[:eq11][3] == 0
+@test o.constraints[:eq12][3] == 0
+@test o.constraints[:eq13][3] == 0
+@test o.constraints[:eq14][3] == 0
+@test o.constraints[:eq15][3] == 0
+@test o.constraints[:eq1 ][4] == Inf
+@test o.constraints[:eq2 ][4] == Inf
+@test o.constraints[:eq3 ][4] == Inf
+@test o.constraints[:eq4 ][4] == Inf
+@test o.constraints[:eq5 ][4] == Inf
+@test o.constraints[:eq6 ][4] == Inf
+@test o.constraints[:eq7 ][4] == Inf
+@test o.constraints[:eq8 ][4] == Inf
+@test o.constraints[:eq9 ][4] == Inf
+@test o.constraints[:eq10][4] == Inf
+@test o.constraints[:eq11][4] == Inf
+@test o.constraints[:eq12][4] == Inf
+@test o.constraints[:eq13][4] == Inf
+@test o.constraints[:eq14][4] == Inf
+@test o.constraints[:eq15][4] == Inf
+
 # tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes
 
     # time
-    @def ocp t ∈ [ 0.0 , 1.0 ], time ;
+    @def ocp t ∈ [ 0.0 , 1.0 ], time;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
     @test ocp.initial_time == 0.0
