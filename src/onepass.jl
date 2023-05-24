@@ -1,6 +1,5 @@
 # onepass
 # todo:
-# - in p_constraint, replace calls to constraint! by kwargs (note: nothing and rg = same case)
 # - additional checks:
 # (i) when generating functions, there should not be any x or u left
 # (ii) in boundary and mayer, there should not be any left
@@ -8,6 +7,9 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - update constraint_type to gensym all generated function arg names
+# - test on variables + nlp_constraints 
+# - test non autonomous cases
+# - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 """
 $(TYPEDEF)
@@ -201,11 +203,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
-        (:initial, nothing) => :( constraint!($ocp, :initial,      $e1, $e3, $llabel) )
-        (:initial, rg     ) => :( constraint!($ocp, :initial, $rg, $e1, $e3, $llabel) )
-        (:final, nothing) => :( constraint!($ocp, :final,      $e1, $e3, $llabel) )
-        (:final, rg     ) => :( constraint!($ocp, :final, $rg, $e1, $e3, $llabel) )
-        (:boundary, ee2    ) => begin
+        (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:boundary, ee2) => begin
             gs = gensym()
             x0 = Symbol(p.x, "#0")
             xf = Symbol(p.x, "#f")
@@ -214,10 +214,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :boundary, $gs, $e1, $e3, $llabel)
+                constraint!($ocp, :boundary; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:control_range, nothing) => :( constraint!($ocp, :control,      $e1, $e3, $llabel) )
-        (:control_range, rg     ) => :( constraint!($ocp, :control, $rg, $e1, $e3, $llabel) )
+        (:control_range, rg) => :( constraint!($ocp, :control; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:control_fun, ee2) => begin
             p.t_dep = p.t_dep || has(ee2, p.t)
             gs = gensym()
@@ -227,10 +226,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :control, $gs, $e1, $e3, $llabel)
+                constraint!($ocp, :control; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:state_range, nothing) => :( constraint!($ocp, :state,      $e1, $e3, $llabel) )
-        (:state_range, rg     ) => :( constraint!($ocp, :state, $rg, $e1, $e3, $llabel) )
+        (:state_range, rg) => :( constraint!($ocp, :state; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:state_fun, ee2) => begin
             p.t_dep = p.t_dep || has(ee2, p.t)
             gs = gensym()
@@ -240,10 +238,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :state, $gs, $e1, $e3, $llabel)
+                constraint!($ocp, :state; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:variable_range, nothing) => :( constraint!($ocp, :variable,      $e1, $e3, $llabel) )
-        (:variable_range, rg     ) => :( constraint!($ocp, :variable, $rg, $e1, $e3, $llabel) )
+        (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:variable_fun, ee2) => begin
             gs = gensym()
 	    args = [ p.v ]
@@ -251,7 +248,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :variable, $gs, $e1, $e3, $llabel)
+                constraint!($ocp, :variable; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:mixed, ee2) => begin
             p.t_dep = p.t_dep || has(ee2, p.t)
@@ -263,7 +260,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :mixed, $gs, $e1, $e3, $llabel)
+                constraint!($ocp, :mixed; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end
