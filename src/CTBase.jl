@@ -131,7 +131,7 @@ export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 export __check_time_dependence, __check_dependences, @__check
 
 # functions
-export Hamiltonian, HamiltonianVectorField, VectorField
+export Hamiltonian, HamiltonianLift, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
 export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
 

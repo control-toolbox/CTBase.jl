@@ -27,7 +27,7 @@ The default value for `variable_dependence` is `Fixed`.
 julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2]) # variable=false by default
 julia> B([0, 0], [1, 1])
 [1, 2]
-julia> B([0, 0], [1, 1], [])
+julia> B([0, 0], [1, 1],Real[])
 [1, 2]
 julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
 julia> B([0, 0], [1, 1], [1, 2, 3])
@@ -60,7 +60,7 @@ MethodError
 julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
 julia> G([0, 0], [1, 1])
 1
-julia> G([0, 0], [1, 1], [])
+julia> G([0, 0], [1, 1],Real[])
 1
 julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
 julia> G([0, 0], [1, 1], [1, 2, 3])
@@ -105,7 +105,7 @@ julia> H = Hamiltonian((x, p) -> x[1]^2+2p[2])
 julia> H([1, 0], [0, 1])
 3
 julia> t = 1
-julia> v = []
+julia> v = Real[]
 julia> H(t, [1, 0], [0, 1])
 MethodError
 julia> H([1, 0], [0, 1], v)
@@ -131,7 +131,6 @@ struct Hamiltonian{time_dependence, variable_dependence} <: AbstractHamiltonian{
     f::Function
 end
 
-
 """
 $(TYPEDEF)
 
@@ -156,7 +155,7 @@ julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2]) # aut
 julia> Hv([1, 0], [0, 1])
 [3, -3]
 julia> t = 1
-julia> v = []
+julia> v = Real[]
 julia> Hv(t, [1, 0], [0, 1])
 MethodError
 julia> Hv([1, 0], [0, 1], v)
@@ -207,7 +206,7 @@ julia> V = VectorField(x -> [x[1]^2, 2x[2]]) # autonomous=true, variable=false
 julia> V([1, -1])
 [1, -2]
 julia> t = 1
-julia> v = []
+julia> v = Real[]
 julia> V(t, [1, -1])
 MethodError
 julia> V([1, -1], v)
@@ -233,6 +232,56 @@ struct VectorField{time_dependence, variable_dependence}
     f::Function
 end
 
+"""
+$(TYPEDEF)
+
+**Lifts**
+
+$(TYPEDFIELDS)
+
+The values for `time_dependence` and `variable_dependence` are deternimed by the values of those for the VectorField.
+
+!!! warning
+
+    When the state and costate are of dimension 1, consider `x` and `p` as scalars.
+
+## Examples
+
+```@example
+julia> HamiltonianLift(HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]], Int64))
+IncorrectArgument 
+julia> H = HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]]))
+julia> H([1, 2], [1, 1])
+5
+julia> t = 1
+julia> v = Real[]
+julia> H(t, [1, 0], [0, 1])
+MethodError
+julia> H([1, 0], [0, 1], v)
+MethodError 
+julia> H(t, [1, 0], [0, 1], v)
+5
+julia> H = HamiltonianLift(VectorField((x, v) -> [x[1]^2, 2x[2]+v[3]], variable=true))
+julia> H([1, 0], [0, 1], [1, 2, 3])
+3
+julia> H(t, [1, 0], [0, 1], [1, 2, 3])
+3
+julia> H = HamiltonianLift(VectorField((t, x) -> [t+x[1]^2, 2x[2]], autonomous=false))
+julia> H(1, [1, 2], [1, 1])
+6
+julia> H(1, [1, 0], [0, 1], v)
+6
+julia> H = HamiltonianLift(VectorField((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], autonomous=false, variable=true))
+julia> H(1, [1, 0], [0, 1], [1, 2, 3])
+3
+```
+"""
+struct HamiltonianLift{time_dependence,variable_dependence}  <: AbstractHamiltonian{time_dependence,variable_dependence}
+    X::VectorField
+    function HamiltonianLift(X::VectorField{time_dependence, variable_dependence}) where {time_dependence, variable_dependence}
+        new{time_dependence, variable_dependence}(X)
+    end
+end
 
 """
 $(TYPEDEF)
@@ -261,7 +310,7 @@ julia> L = Lagrange((x, u) -> 2x[2]-u[1]^2, autonomous=true, variable=false)
 julia> L([1, 0], [1])
 -1
 julia> t = 1
-julia> v = []
+julia> v = Real[]
 julia> L(t, [1, 0], [1])
 MethodError
 julia> L([1, 0], [1], v)
