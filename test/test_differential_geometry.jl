@@ -171,6 +171,30 @@ function test_differential_geometry()
         f = (t, x) -> t + x^2
         Test.@test Der(X, f)(1, 1) == 6
         Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
+
+        # autonomous, nonfixed, dim 2
+        X = VectorField((x, v) -> [x[2] + v[1], -x[1] + v[2]], NonFixed)
+        f = (x, v) -> x[1]^2 + x[2]^2
+        Test.@test Der(X, f)([1, 2], [2, 1]) == 8
+        Test.@test (X⋅f)([1, 2], [2, 1]) == Der(X, f)([1, 2], [2, 1])
+
+        # autonomous, nonfixed, dim 1
+        X = VectorField((x, v) -> 2x + v, NonFixed)
+        f = (x, v) -> x^2
+        Test.@test Der(X, f)(1, 1) == 6
+        Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
+    
+        # nonautonomous, nonfixed, dim 2
+        X = VectorField((t, x, v) -> [t + x[2], -x[1]], NonAutonomous, NonFixed)
+        f = (t, x, v) -> t + x[1]^2 + x[2]^2
+        Test.@test Der(X, f)(1, [1, 2], 1) == 2
+        Test.@test (X⋅f)(1, [1, 2], 1) == Der(X, f)(1, [1, 2], 1)
+
+        # nonautonomous, nonfixed, dim 1
+        X = VectorField((v, t, x) -> 2x+t+v, NonAutonomous, NonFixed)
+        f = (t, x, v) -> t + x^2
+        Test.@test Der(X, f)(1, 1, 1) == 8
+        Test.@test (X⋅f)(1, 1, 1) == Der(X, f)(1, 1, 1)
     
     end
 

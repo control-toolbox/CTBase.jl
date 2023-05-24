@@ -70,10 +70,10 @@ end
 # ---------------------------------------------------------------------------
 # Directional derivative of a scalar function
 function Der(X::VectorField{Autonomous, <: VariableDependence}, f::Function)::Function
-   return x -> ctgradient(f, x)'*X(x)
+   return (x, args...) -> ctgradient(y -> f(y, args...), x)'*X(x, args...)
 end
 function Der(X::VectorField{NonAutonomous, <: VariableDependence}, f::Function)::Function
-    return (t, x) -> ctgradient(y -> f(t, y), x)'*X(t, x) # + ctgradient(s -> f(s, x), t) ??
+    return (t, x, args...) -> ctgradient(y -> f(t, y, args...), x)'*X(t, x, args...) # + ctgradient(s -> f(s, x), t) ??
 end
 # (X⋅f)(x) = f'(x)⋅X(x)
 # (X⋅f)(t, x) = ∂₁f(t, x) + ∂₂f(t, x)⋅X(t, x)
