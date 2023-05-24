@@ -7,7 +7,6 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - update constraint_type to gensym all generated function arg names
-# - test on variables + nlp_constraints 
 # - test non autonomous cases
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
