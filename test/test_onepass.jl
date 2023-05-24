@@ -278,6 +278,36 @@ z = 4
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
+@def o begin
+    z ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R², state
+    u ∈ R, control
+    r = x₁
+    v = x₂
+    1 ≥ r(0) - z ≥ 0,            (1)
+    1 ≥ v(1)^2 ≥ 0,              (2)
+    [ 1, 1 ] ≥ x(0) ≥ [ 0, 0 ],  (3)
+    ẋ(t) == [ v(t), r(t)^2 + z ]
+    ∫( u(t)^2 + z * x₁(t) ) → min
+end
+x0 = [ 2, 3 ]
+xf = [ 4, 5 ]
+x = [ 1, 2 ]
+u = 3
+z = 4
+@test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+@test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+@test constraint(o, :eq3)(x0, xf, z) == x0
+@test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
+@test o.lagrange(x, u, z) == u^2 + z * x[1]
+@test o.constraints[:eq1][3] == 0
+@test o.constraints[:eq1][4] == 1
+@test o.constraints[:eq2][3] == 0
+@test o.constraints[:eq2][4] == 1
+@test o.constraints[:eq3][3] == [ 0, 0 ]
+@test o.constraints[:eq3][4] == [ 1, 1 ]
+
 n = 11
 m = 6
 @def o begin
