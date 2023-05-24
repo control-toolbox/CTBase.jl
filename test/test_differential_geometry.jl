@@ -41,6 +41,38 @@ function test_differential_geometry()
             Test.@test H1(1, [1, 2], [3, 4]) == 22
             Test.@test H2(1, 1, 1) == 3
             Test.@test H2(1, [1, 2], [3, 4]) == 33
+
+            # autonomous nonfixed case
+            X = VectorField((x, v) -> 2x, NonFixed)
+            H = Lift(X)
+            Test.@test H(1, 1, 1) == 2
+            Test.@test H([1, 2], [3, 4], 1) == 22
+            Test.@test_throws MethodError H([1, 2], 1)
+            Test.@test_throws MethodError H(1, [1, 2])
+    
+            # multiple VectorFields
+            X1 = VectorField((x, v) -> 2x, NonFixed)
+            X2 = VectorField((x, v) -> 3x, NonFixed)
+            H1, H2 = Lift(X1, X2)
+            Test.@test H1(1, 1, 1) == 2
+            Test.@test H1([1, 2], [3, 4], 1) == 22
+            Test.@test H2(1, 1, 1) == 3
+            Test.@test H2([1, 2], [3, 4], 1) == 33
+    
+            # nonautonomous nonfixed case
+            X = VectorField((t, x, v) -> 2x, NonAutonomous, NonFixed)
+            H = Lift(X)
+            Test.@test H(1, 1, 1, 1) == 2
+            Test.@test H(1, [1, 2], [3, 4], 1) == 22
+    
+            # multiple VectorFields
+            X1 = VectorField((t, x, v) -> 2x, NonAutonomous, NonFixed)
+            X2 = VectorField((t, x, v) -> 3x, NonAutonomous, NonFixed)
+            H1, H2 = Lift(X1, X2)
+            Test.@test H1(1, 1, 1, 1) == 2
+            Test.@test H1(1, [1, 2], [3, 4], 1) == 22
+            Test.@test H2(1, 1, 1, 1) == 3
+            Test.@test H2(1, [1, 2], [3, 4], 1) == 33
     
         end
         
@@ -75,6 +107,36 @@ function test_differential_geometry()
             Test.@test H1(1, [1, 2], [3, 4]) == 22
             Test.@test H2(1, 1, 1) == 3
             Test.@test H2(1, [1, 2], [3, 4]) == 33
+
+            # autonomous nonfixed case
+            Xv::Function = (x, v) -> 2x
+            H = Lift(Xv, variable=true)
+            Test.@test H(1, 1, 1) == 2
+            Test.@test H([1, 2], [3, 4], 1) == 22
+    
+            # multiple VectorFields
+            X1v::Function = (x, v) -> 2x
+            X2v::Function = (x, v) -> 3x
+            H1, H2 = Lift(X1v, X2v, variable=true)
+            Test.@test H1(1, 1, 1) == 2
+            Test.@test H1([1, 2], [3, 4], 1) == 22
+            Test.@test H2(1, 1, 1) == 3
+            Test.@test H2([1, 2], [3, 4], 1) == 33
+    
+            # nonautonomous nonfixed case
+            Xtv::Function = (t, x, v) -> 2x
+            H = Lift(Xtv, autonomous=false, variable=true)
+            Test.@test H(1, 1, 1, 1) == 2
+            Test.@test H(1, [1, 2], [3, 4], 1) == 22
+    
+            # multiple VectorFields
+            X1tv::Function = (t, x, v) -> 2x
+            X2tv::Function = (t, x, v) -> 3x
+            H1, H2 = Lift(X1tv, X2tv, autonomous=false, variable=true)
+            Test.@test H1(1, 1, 1, 1) == 2
+            Test.@test H1(1, [1, 2], [3, 4], 1) == 22
+            Test.@test H2(1, 1, 1, 1) == 3
+            Test.@test H2(1, [1, 2], [3, 4], 1) == 33
 
             # exceptions
             Test.@test_throws IncorrectArgument Lift(X1, Int64)
@@ -316,7 +378,7 @@ function test_differential_geometry()
     end
 
     # macros
-    
+
     @testset "lie macro" begin
 
         # parameters

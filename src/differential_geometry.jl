@@ -34,14 +34,16 @@ function Lift(X::VectorField)::HamiltonianLift
 end
 
 # single lift: from Function
-function Lift(X::Function; autonomous::Bool=true)::HamiltonianLift
+function Lift(X::Function; autonomous::Bool=true, variable::Bool=false)::HamiltonianLift
     time_dependence = autonomous ? Autonomous : NonAutonomous 
-    return HamiltonianLift(VectorField(X, time_dependence))
+    variable_dependence = variable ? NonFixed : Fixed
+    return HamiltonianLift(VectorField(X, time_dependence, variable_dependence))
 end
-function Lift(X::Function, time_dependence::DataType...)::HamiltonianLift
-    @__check(time_dependence)
-    time_dependence = NonAutonomous ∈ time_dependence ? NonAutonomous : Autonomous
-    return HamiltonianLift(VectorField(X, time_dependence))
+function Lift(X::Function, dependences::DataType...)::HamiltonianLift
+    @__check(dependences)
+    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    return HamiltonianLift(VectorField(X, time_dependence, variable_dependence))
 end
 
 # multiple lifts: from VectorField
@@ -50,16 +52,19 @@ function Lift(Xs::VectorField...)::Tuple{Vararg{HamiltonianLift}}
 end
 
 # multiple lifts: from Function
-function Lift(Xs::Function...; autonomous::Bool=true)::Tuple{Vararg{HamiltonianLift}}
-    time_dependence = autonomous ? Autonomous : NonAutonomous 
-    return Tuple(Lift(X, time_dependence) for X ∈ Xs)
+function Lift(Xs::Function...; autonomous::Bool=true, variable::Bool=false)::Tuple{Vararg{HamiltonianLift}}
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return Tuple(Lift(X, time_dependence, variable_dependence) for X ∈ Xs)
 end
 function Lift(args::Union{Function,DataType}...)::Tuple{Vararg{HamiltonianLift}}
     #Xs::Function..., dependences::DataType...
-    time_dependence = args[findall(x -> (typeof(x) <: DataType),args)]
     Xs = args[findall(x -> (typeof(x) <: Function),args)]
-    @__check(time_dependence)
-    return Tuple(Lift(X, time_dependence) for X ∈ Xs)
+    dependences = args[findall(x -> (typeof(x) <: DataType),args)]
+    @__check(dependences)
+    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    return Tuple(Lift(X, time_dependence, variable_dependence) for X ∈ Xs)
 end
 
 # ---------------------------------------------------------------------------
