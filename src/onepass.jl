@@ -1,18 +1,14 @@
 # onepass
 # todo:
-# - re-declarations (variable, time, state, control, dynamics, objective): forbid (no warning!)
-# - @__check -> __check
-# - minimal checks: e.g., to declare a (pure) control constraint (`:control`), do not request that
-# state is also declared (time must be, though, as a control constraint might involve time)
+# - test non autonomous cases
 # - additional checks:
 # (i) when generating functions, there should not be any x or u left
 # (ii) in boundary and mayer, there should not be any left
 # in both cases, has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
-# - update constraint_type to gensym all generated function arg names (do the replace call in onepass, not in
-# constraint_type)
-# - test non autonomous cases
+# - update constraint_type to gensym all generated function arg names
+# (do the replace call in onepass, not in constraint_type)
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 """
