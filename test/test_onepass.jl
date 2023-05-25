@@ -876,6 +876,8 @@ end
 @test o.constraints[:eq14][4] == Inf
 @test o.constraints[:eq15][4] == Inf
 
+@test_throws ParsingError @def o t ∈ 1
+
 # tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes

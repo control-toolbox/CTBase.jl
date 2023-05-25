@@ -117,6 +117,7 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), components_names::Vector{String}=__variable_components_names(q,name))
     # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
+    __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
     (q  > 1) && (length(components_names) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
 
     ocp.variable_dimension = q
@@ -170,7 +171,8 @@ julia> ocp.state_components_names
 """
 function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_name(), components_names::Vector{String}=__state_components_names(n,name))
     # checkings
-    (n  > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set. Use state! once."))
+    (n > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
     
     ocp.state_dimension = n
     ocp.state_components_names = components_names
@@ -222,6 +224,7 @@ julia> ocp.control_components_names
 """
 function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), components_names::Vector{String}=__control_components_names(m,name))
     # checkings
+    __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set. Use control! once."))
     (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
     
     ocp.control_dimension = m
@@ -809,8 +812,6 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDepe
         (::RangeConstraint,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, rg, lb, ub, label) #
         _ => throw(IncorrectArgument("Provided arguments are inconsistent"))
     end
-
-    nothing
 
 end
 

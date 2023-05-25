@@ -1,5 +1,8 @@
 # onepass
 # todo:
+# - re-declarations (variable, time, state, control, dynamics, objective): forbid (no warning!)
+# - minimal checks: e.g., to declare a (pure) control constraint (`:control`), do not request that
+# state is also declared (time must be, though, as a control constraint might involve time)
 # - additional checks:
 # (i) when generating functions, there should not be any x or u left
 # (ii) in boundary and mayer, there should not be any left
