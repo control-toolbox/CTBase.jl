@@ -466,27 +466,16 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbo
     end
 
     # set the constraint
-    if type == :initial
-        B = nothing
-        (V == Fixed) && (B = BoundaryConstraint((x0, xf)       -> x0[rg], V))
-        (V ==   NonFixed) && (B = BoundaryConstraint((x0, xf, v)    -> x0[rg], V))
-        ocp.constraints[label] = (type, B, lb, ub)
-    elseif type == :final
-        B = nothing
-        (V == Fixed) && (B = BoundaryConstraint((x0, xf)       -> xf[rg], V))
-        (V ==   NonFixed) && (B = BoundaryConstraint((x0, xf, v)    -> xf[rg], V))
-        ocp.constraints[label] = (type, B, lb, ub)
-    elseif type == :control
-        ocp.constraints[label] = (type, rg, lb, ub)
-    elseif type == :state
-        ocp.constraints[label] = (type, rg, lb, ub)
-    elseif type == :variable
-        ocp.constraints[label] = (type, rg, lb, ub)
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+    fun_rg = @match type begin
+        :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) :
+	                         BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+        :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) :
+	                         BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+        :control || :state || :variable => rg
+        _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
     end
-
+    ocp.constraints[label] = (type, fun_rg, lb, ub)
     nothing # to force to return nothing
 
 end
