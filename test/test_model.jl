@@ -1031,7 +1031,7 @@ end
 
 @testset "redeclarations" begin
 
-    ocp = Model()
+    ocp = Model(variable=true)
     variable!(ocp, 1)
     @test_throws UnauthorizedCall variable!(ocp, 1)
 
