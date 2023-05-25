@@ -467,8 +467,10 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbo
 
     # set the constraint
     fun_rg = @match type begin
-        :initial || :final => V == Fixed ? BoundaryConstraint((x0, xf)    -> x0[rg], V) :
-                                           BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+        :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) :
+	                         BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+        :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) :
+	                         BoundaryConstraint((x0, xf, v) -> xf[rg], V)
         :control || :state || :variable => rg
         _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
         ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
