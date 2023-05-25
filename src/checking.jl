@@ -25,7 +25,7 @@ function __check_control_set(ocp::OptimalControlModel)
     __is_control_not_set(ocp) && throw(UnauthorizedCall("the control dimension has to be set before. Use control!."))
 end
 
-function __check___is_time_set(ocp::OptimalControlModel)
+function __check_is_time_set(ocp::OptimalControlModel)
     __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
 end
 
@@ -40,7 +40,7 @@ end
 function __check_all_set(ocp::OptimalControlModel)
     __check_state_set(ocp)
     __check_control_set(ocp)
-    __check___is_time_set(ocp)
+    __check_is_time_set(ocp)
     __check_variable_set(ocp)
 end
 

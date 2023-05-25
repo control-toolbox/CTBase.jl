@@ -1,6 +1,7 @@
 # onepass
 # todo:
 # - test non autonomous cases
+# - robustify repl
 # - additional checks:
 # (i) when generating functions, there should not be any x or u left
 # (ii) in boundary and mayer, there should not be any left
