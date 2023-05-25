@@ -1,8 +1,4 @@
 # test onepass
-# todo:
-# - test on variables + nlp_constraints 
-# - test non autonomous cases
-# - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 function test_onepass()
 
@@ -281,6 +277,36 @@ z = 4
 @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
 @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
 @test o.lagrange(x, u, z) == u^2 + z * x[1]
+
+@def o begin
+    z ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R², state
+    u ∈ R, control
+    r = x₁
+    v = x₂
+    1 ≥ r(0) - z ≥ 0,            (1)
+    1 ≥ v(1)^2 ≥ 0,              (2)
+    [ 1, 1 ] ≥ x(0) ≥ [ 0, 0 ],  (3)
+    ẋ(t) == [ v(t), r(t)^2 + z ]
+    ∫( u(t)^2 + z * x₁(t) ) → min
+end
+x0 = [ 2, 3 ]
+xf = [ 4, 5 ]
+x = [ 1, 2 ]
+u = 3
+z = 4
+@test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+@test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+@test constraint(o, :eq3)(x0, xf, z) == x0
+@test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
+@test o.lagrange(x, u, z) == u^2 + z * x[1]
+@test o.constraints[:eq1][3] == 0
+@test o.constraints[:eq1][4] == 1
+@test o.constraints[:eq2][3] == 0
+@test o.constraints[:eq2][4] == 1
+@test o.constraints[:eq3][3] == [ 0, 0 ]
+@test o.constraints[:eq3][4] == [ 1, 1 ]
 
 n = 11
 m = 6
@@ -669,7 +695,6 @@ x0 = 3
 xf = 4
 @test_throws UndefVarError o.mayer(x0, xf)
 
-
 @def o begin
     v ∈ R², variable
     t ∈ [ 0, 1 ], time
@@ -715,12 +740,148 @@ z = v[1] + 2v[2]
 @test constraint(o, :eq14)(v) == v[1] + 2v[2]
 @test constraint(o, :eq15)(v) == v[1] + 2v[2]
 
+@def o begin
+    v ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R², control
+    x(0) ≤ 0
+    x(0) ≤ 0,              (1)
+    x(1) ≤ 0
+    x(1) ≤ 0,              (2)
+    x³(0) ≤ 0
+    x³(0) ≤ 0,             (3)
+    x³(1) ≤ 0
+    x³(1) ≤ 0,             (4)
+    x(t) ≤ 0
+    x(t) ≤ 0,              (5)
+    x(t) ≤ 0
+    x(t) ≤ 0,              (6)
+    u₁(t) ≤ 0
+    u₁(t) ≤ 0,              (7)
+    u₁(t) ≤ 0
+    u₁(t) ≤ 0,              (8)
+    x³(t) ≤ 0
+    x³(t) ≤ 0,             (9)
+    x³(t) ≤ 0
+    x³(t) ≤ 0,            (10)
+    (u₁^3)(t) ≤ 0
+    (u₁^3)(t) ≤ 0,            (11)
+    (u₁^3)(t) ≤ 0
+    (u₁^3)(t) ≤ 0,            (12)
+    x(t) + (u₁^3)(t) ≤ 0
+    x(t) + (u₁^3)(t) ≤ 0,     (13)
+    x(t) + (u₁^3)(t) ≤ 0
+    x(t) + (u₁^3)(t) ≤ 0,     (14)
+    v ≤ 0
+    v ≤ 0,                (15)
+end
+
+@test o.constraints[:eq1 ][3] == -Inf
+@test o.constraints[:eq2 ][3] == -Inf
+@test o.constraints[:eq3 ][3] == -Inf
+@test o.constraints[:eq4 ][3] == -Inf
+@test o.constraints[:eq5 ][3] == -Inf
+@test o.constraints[:eq6 ][3] == -Inf
+@test o.constraints[:eq7 ][3] == -Inf
+@test o.constraints[:eq8 ][3] == -Inf
+@test o.constraints[:eq9 ][3] == -Inf
+@test o.constraints[:eq10][3] == -Inf
+@test o.constraints[:eq11][3] == -Inf
+@test o.constraints[:eq12][3] == -Inf
+@test o.constraints[:eq13][3] == -Inf
+@test o.constraints[:eq14][3] == -Inf
+@test o.constraints[:eq15][3] == -Inf
+@test o.constraints[:eq1 ][4] == 0
+@test o.constraints[:eq2 ][4] == 0
+@test o.constraints[:eq3 ][4] == 0
+@test o.constraints[:eq4 ][4] == 0
+@test o.constraints[:eq5 ][4] == 0
+@test o.constraints[:eq6 ][4] == 0
+@test o.constraints[:eq7 ][4] == 0
+@test o.constraints[:eq8 ][4] == 0
+@test o.constraints[:eq9 ][4] == 0
+@test o.constraints[:eq10][4] == 0
+@test o.constraints[:eq11][4] == 0
+@test o.constraints[:eq12][4] == 0
+@test o.constraints[:eq13][4] == 0
+@test o.constraints[:eq14][4] == 0
+@test o.constraints[:eq15][4] == 0
+
+@def o begin
+    v ∈ R, variable
+    t ∈ [ 0, 1 ], time
+    x ∈ R, state
+    u ∈ R², control
+    x(0) ≥ 0
+    x(0) ≥ 0,              (1)
+    x(1) ≥ 0
+    x(1) ≥ 0,              (2)
+    x³(0) ≥ 0
+    x³(0) ≥ 0,             (3)
+    x³(1) ≥ 0
+    x³(1) ≥ 0,             (4)
+    x(t) ≥ 0
+    x(t) ≥ 0,              (5)
+    x(t) ≥ 0
+    x(t) ≥ 0,              (6)
+    u₁(t) ≥ 0
+    u₁(t) ≥ 0,             (7)
+    u₁(t) ≥ 0
+    u₁(t) ≥ 0,             (8)
+    x³(t) ≥ 0
+    x³(t) ≥ 0,             (9)
+    x³(t) ≥ 0
+    x³(t) ≥ 0,            (10)
+    (u₁^3)(t) ≥ 0
+    (u₁^3)(t) ≥ 0,        (11)
+    (u₁^3)(t) ≥ 0
+    (u₁^3)(t) ≥ 0,        (12)
+    x(t) + (u₁^3)(t) ≥ 0
+    x(t) + (u₁^3)(t) ≥ 0, (13)
+    x(t) + (u₁^3)(t) ≥ 0
+    x(t) + (u₁^3)(t) ≥ 0, (14)
+    v ≥ 0
+    v ≥ 0,                (15)
+end
+
+@test o.constraints[:eq1 ][3] == 0
+@test o.constraints[:eq2 ][3] == 0
+@test o.constraints[:eq3 ][3] == 0
+@test o.constraints[:eq4 ][3] == 0
+@test o.constraints[:eq5 ][3] == 0
+@test o.constraints[:eq6 ][3] == 0
+@test o.constraints[:eq7 ][3] == 0
+@test o.constraints[:eq8 ][3] == 0
+@test o.constraints[:eq9 ][3] == 0
+@test o.constraints[:eq10][3] == 0
+@test o.constraints[:eq11][3] == 0
+@test o.constraints[:eq12][3] == 0
+@test o.constraints[:eq13][3] == 0
+@test o.constraints[:eq14][3] == 0
+@test o.constraints[:eq15][3] == 0
+@test o.constraints[:eq1 ][4] == Inf
+@test o.constraints[:eq2 ][4] == Inf
+@test o.constraints[:eq3 ][4] == Inf
+@test o.constraints[:eq4 ][4] == Inf
+@test o.constraints[:eq5 ][4] == Inf
+@test o.constraints[:eq6 ][4] == Inf
+@test o.constraints[:eq7 ][4] == Inf
+@test o.constraints[:eq8 ][4] == Inf
+@test o.constraints[:eq9 ][4] == Inf
+@test o.constraints[:eq10][4] == Inf
+@test o.constraints[:eq11][4] == Inf
+@test o.constraints[:eq12][4] == Inf
+@test o.constraints[:eq13][4] == Inf
+@test o.constraints[:eq14][4] == Inf
+@test o.constraints[:eq15][4] == Inf
+
 # tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes
 
     # time
-    @def ocp t ∈ [ 0.0 , 1.0 ], time ;
+    @def ocp t ∈ [ 0.0 , 1.0 ], time;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
     @test ocp.initial_time == 0.0
@@ -1441,78 +1602,9 @@ z = v[1] + 2v[2]
 
     # some syntax (even parseable) are not allowed
     # this is the actual exhaustive list
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x(t) == x_u        , constant_state_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x(t) == x_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2](t) == x2_u    , constant_state_index_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2](t) == x2_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2:3](t) == y_u    , constant_state_range_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        x[2:3](t) == y_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u(t) == u_u         , constant_control_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u(t) == u_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2](t) == u2_u     , constant_control_index_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2](t) == u2_u
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2:3](t) == v_u    , constant_control_range_not_allowed
-    end
-    @test_throws ParsingError @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^3, state
-        u ∈ R^3, control
-        u[2:3](t) == v_u
-    end
+    # note: equality constraints on ranges for state and control
+    # are now allowed to ensure a uniform treatment of equalities
+    # as particular inequalities
     @test_throws ParsingError @def o begin
         t ∈ [ t0, tf ], time
         x ∈ R, state
