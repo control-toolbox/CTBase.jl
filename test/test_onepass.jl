@@ -1594,7 +1594,6 @@ end
         u ∈ R, control
 
         ẋ(t) == 2x(t) + u(t)^2
-        ẋ(t) == f(x(t), u(t))
     end
     @test ocp13 isa OptimalControlModel
     @test ocp13.state_dimension   == 1

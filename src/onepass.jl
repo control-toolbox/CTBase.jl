@@ -1,6 +1,7 @@
 # onepass
 # todo:
 # - re-declarations (variable, time, state, control, dynamics, objective): forbid (no warning!)
+# - @__check -> __check
 # - minimal checks: e.g., to declare a (pure) control constraint (`:control`), do not request that
 # state is also declared (time must be, though, as a control constraint might involve time)
 # - additional checks:
