@@ -4,9 +4,25 @@ using MacroTools: @capture, postwalk
 include("../src/differential_geometry.jl")
 
 # ---------------------------------------------------------------------------
+∅ = Vector{Real}()
+dummy_function() = nothing
 function test_differential_geometry()
 
     @testset "Lifts" begin
+
+        @testset "HamiltonianLift" begin
+            HL = HamiltonianLift(VectorField(x -> [x[1]^2,x[2]^2], autonomous=true, variable=false))
+            @test HL([1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift(VectorField((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variable=true))
+            @test HL([1, 0], [0, 1], 1) == 1
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+            HL = HamiltonianLift(VectorField((t, x) -> [t+x[1]^2,x[2]^2], autonomous=false, variable=false))
+            @test HL(1, [1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift(VectorField((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true))
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+        end
         
         @testset "from VectorFields" begin
     
@@ -138,6 +154,15 @@ function test_differential_geometry()
             Test.@test H2(1, 1, 1, 1) == 3
             Test.@test H2(1, [1, 2], [3, 4], 1) == 33
 
+            # multiple VectorFields 2
+            X1tv2::Function = (t, x, v) -> 2x
+            X2tv2::Function = (t, x, v) -> 3x
+            H1, H2 = Lift(X1tv2, X2tv2, NonAutonomous, NonFixed)
+            Test.@test H1(1, 1, 1, 1) == 2
+            Test.@test H1(1, [1, 2], [3, 4], 1) == 22
+            Test.@test H2(1, 1, 1, 1) == 3
+            Test.@test H2(1, [1, 2], [3, 4], 1) == 33
+
             # exceptions
             Test.@test_throws IncorrectArgument Lift(X1, Int64)
             Test.@test_throws IncorrectArgument Lift(X1, X2, Int64)
@@ -153,6 +178,7 @@ function test_differential_geometry()
         f = x -> x[1]^2 + x[2]^2
         Test.@test Der(X, f)([1, 2]) == 0
         Test.@test (X⋅f)([1, 2]) == Der(X, f)([1, 2])
+        Test.@test X⋅f == Lie(X,f)
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
@@ -274,7 +300,7 @@ function test_differential_geometry()
             Test.@test Lie(X, Y)([1, 2], 1) == [6, -15]
             Test.@test Lie(X, Y)([1, 2], 1) == ad(X, Y)([1, 2], 1)
             Test.@test Lie(X, Y)([1, 2], 1) == Lie(f, g, NonFixed)([1, 2], 1)
-            Test.@test Lie(X, Y)([1, 2], 1) == ad(f, g, variable=true)([1, 2], 1)
+            Test.@test Lie(X, Y)([1, 2], 1) == ad(f, g, NonFixed)([1, 2], 1)
         end
 
         @testset "nonautonomous nonfixed case" begin
