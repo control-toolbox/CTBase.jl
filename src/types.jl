@@ -81,6 +81,13 @@ abstract type AbstractHamiltonian{time_dependence, variable_dependence} end
 """
 $(TYPEDEF)
 
+Abstract type for vectorfields.
+"""
+abstract type AbstractVectorField{time_dependence, variable_dependence} end
+
+"""
+$(TYPEDEF)
+
 **Fields**
 
 $(TYPEDFIELDS)
@@ -138,57 +145,6 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 
-The default values for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
-
-!!! warning
-
-    When the state and costate are of dimension 1, consider `x` and `p` as scalars.
-
-## Examples
-
-```@example
-julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-IncorrectArgument
-julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-IncorrectArgument
-julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2]) # autonomous=true, variable=false
-julia> Hv([1, 0], [0, 1])
-[3, -3]
-julia> t = 1
-julia> v = Real[]
-julia> Hv(t, [1, 0], [0, 1])
-MethodError
-julia> Hv([1, 0], [0, 1], v)
-MethodError
-julia> Hv(t, [1, 0], [0, 1], v)
-[3, -3]
-julia> Hv = HamiltonianVectorField((x, p, v) -> [x[1]^2+2p[2]+v[3], x[2]-3p[2]^2+v[4]], variable=true)
-julia> Hv([1, 0], [0, 1], [1, 2, 3, 4])
-[6, -3]
-julia> Hv(t, [1, 0], [0, 1], [1, 2, 3, 4])
-[6, -3]
-julia> Hv = HamiltonianVectorField((t, x, p) -> [t+x[1]^2+2p[2], x[2]-3p[2]^2], autonomous=false)
-julia> Hv(1, [1, 0], [0, 1])
-[4, -3]
-julia> Hv(1, [1, 0], [0, 1], v)
-[4, -3]
-julia> Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p[2]^2+v[4]], autonomous=false, variable=true)
-julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
-[7, -3]
-```
-"""
-struct HamiltonianVectorField{time_dependence, variable_dependence} <: AbstractHamiltonian{time_dependence, variable_dependence}
-    f::Function
-end
-
-
-"""
-$(TYPEDEF)
-
-**Fields**
-
-$(TYPEDFIELDS)
-
 The default value for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
 
 !!! warning
@@ -228,7 +184,57 @@ julia> V(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-struct VectorField{time_dependence, variable_dependence}
+struct VectorField{time_dependence, variable_dependence} <: AbstractVectorField{time_dependence, variable_dependence}
+    f::Function
+end
+
+"""
+$(TYPEDEF)
+
+**Fields**
+
+$(TYPEDFIELDS)
+
+The default values for `time_dependence` and `variable_dependence` are `Autonomous` and `Fixed` respectively.
+
+!!! warning
+
+    When the state and costate are of dimension 1, consider `x` and `p` as scalars.
+
+## Examples
+
+```@example
+julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
+IncorrectArgument
+julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
+IncorrectArgument
+julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2]) # autonomous=true, variable=false
+julia> Hv([1, 0], [0, 1])
+[3, -3]
+julia> t = 1
+julia> v = Real[]
+julia> Hv(t, [1, 0], [0, 1])
+MethodError
+julia> Hv([1, 0], [0, 1], v)
+MethodError
+julia> Hv(t, [1, 0], [0, 1], v)
+[3, -3]
+julia> Hv = HamiltonianVectorField((x, p, v) -> [x[1]^2+2p[2]+v[3], x[2]-3p[2]^2+v[4]], variable=true)
+julia> Hv([1, 0], [0, 1], [1, 2, 3, 4])
+[6, -3]
+julia> Hv(t, [1, 0], [0, 1], [1, 2, 3, 4])
+[6, -3]
+julia> Hv = HamiltonianVectorField((t, x, p) -> [t+x[1]^2+2p[2], x[2]-3p[2]^2], autonomous=false)
+julia> Hv(1, [1, 0], [0, 1])
+[4, -3]
+julia> Hv(1, [1, 0], [0, 1], v)
+[4, -3]
+julia> Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p[2]^2+v[4]], autonomous=false, variable=true)
+julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
+[7, -3]
+```
+"""
+struct HamiltonianVectorField{time_dependence, variable_dependence} <: AbstractVectorField{time_dependence, variable_dependence}
     f::Function
 end
 

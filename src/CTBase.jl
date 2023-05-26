@@ -131,7 +131,7 @@ export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 export __check_time_dependence, __check_dependences, @__check
 
 # functions
-export Hamiltonian, HamiltonianLift, HamiltonianVectorField, VectorField
+export Hamiltonian, HamiltonianLift, HamiltonianVectorField, VectorField, AbstractVectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
 export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
 
@@ -150,7 +150,7 @@ export plot, plot!
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
 # differential_geometry
-export Ad, Poisson
+export Ad, Poisson, Lie
 
 # ctparser_utils
 export replace_call, constraint_type

@@ -213,12 +213,12 @@ function test_differential_geometry()
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
         Y = VectorField((t, x) -> [t + x[1], x[2]], NonAutonomous)
-        Test.@test ⅋(X, Y)(1, [1, 2]) == [3, -1]
+        Test.@test ⅋(X, Y)(1, [1, 2]) == [4, -1]
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, NonAutonomous)
         Y = VectorField((t, x) -> 3x+t, NonAutonomous)
-        Test.@test ⅋(X, Y)(1, 1) == 9
+        Test.@test ⅋(X, Y)(1, 1) == 10
 
         # autonomous, nonfixed, dim 1
         X = VectorField((x, v) -> 2x+v, NonFixed)
@@ -228,7 +228,7 @@ function test_differential_geometry()
         # nonautonomous, nonfixed, dim 1
         X = VectorField((t, x, v) -> t+2x+v, NonAutonomous, NonFixed)
         Y = VectorField((t, x, v) -> t+3x+v, NonAutonomous, NonFixed)
-        Test.@test ⅋(X, Y)(1, 1, 1) == 12
+        Test.@test ⅋(X, Y)(1, 1, 1) == 13
         
         # autonomous, nonfixed, dim 2
         X = VectorField((x, v) -> [v[1] + v[2] + x[2], -x[1]], NonFixed)
