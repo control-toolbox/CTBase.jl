@@ -487,6 +487,7 @@ function test_differential_geometry()
         Γ = 2
         γ = 1
         δ = γ-Γ
+        v = 2
 
         # autonomous
         H0 = Hamiltonian((x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2))
@@ -495,10 +496,8 @@ function test_differential_geometry()
         P011 = Poisson(P01, H1)
         P01_= @Poisson {H0, H1}
         P011_= @Poisson {{H0, H1}, H1}
-        
         Test.@test P01(x, p) ≈ P01_(x, p) atol=1e-6
         Test.@test P011(x, p) ≈ P011_(x, p) atol=1e-6
-        
         get_H0 = () -> H0
         P011__ = @Poisson {{get_H0(), H1}, H1}
         Test.@test P011_(x, p) ≈ P011__(x, p) atol=1e-6
@@ -512,10 +511,35 @@ function test_differential_geometry()
         P011_= @Poisson {{H0, H1}, H1}
         Test.@test P01(t, x, p) ≈ P01_(t, x, p) atol=1e-6
         Test.@test P011(t, x, p) ≈ P011_(t, x, p) atol=1e-6
-        
         get_H0 = () -> H0
         P011__ = @Poisson {{get_H0(), H1}, H1}
         Test.@test P011_(t, x, p) ≈ P011__(t, x, p) atol=1e-6
+
+        # autonomous nonfixed
+        H0 = Hamiltonian((x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[1]^2+v), variable=true)
+        H1 = Hamiltonian((x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v), variable=true)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(x, p, v) ≈ P01_(x, p, v) atol=1e-6
+        Test.@test P011(x, p, v) ≈ P011_(x, p, v) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(x, p, v) ≈ P011__(x, p, v) atol=1e-6
+
+        # nonautonomous nonfixed
+        H0 = Hamiltonian((t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[1]^2+v), autonomous=false, variable=true)
+        H1 = Hamiltonian((t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v), NonAutonomous, NonFixed)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(t, x, p, v) ≈ P01_(t, x, p,v ) atol=1e-6
+        Test.@test P011(t, x, p, v) ≈ P011_(t, x, p, v) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(t, x, p, v) ≈ P011__(t, x, p, v) atol=1e-6
     end
 
 end # test_differential_geometry
