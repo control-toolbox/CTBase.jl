@@ -69,10 +69,10 @@ julia> getFullDescription((:a,), desc_list)
 ```
 """
 function getFullDescription(desc::Description, desc_list::Tuple{Vararg{Description}})::Description
-    n = length(desc_list)
+    n = size(desc_list, 1)
     table = zeros(Int8, n, 2)
     for i in range(1, n)
-        table[i, 1] = length(desc ∩ desc_list[i])
+        table[i, 1] = size(desc ∩ desc_list[i], 1)
         table[i, 2] = desc ⊆ desc_list[i] ? 1 : 0
     end
     if maximum(table[:, 2]) == 0

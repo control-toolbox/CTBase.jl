@@ -24,7 +24,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
         # print the code
         code = ocp.model_expression
-        code = MacroTools.striplines(code)
+        code = striplines(code)
         println(io)
         l = 0
         for i ∈ eachindex(code.args)

@@ -17,6 +17,7 @@ const constraint_type = CTBase.constraint_type
         # :ctparser,
         :default,
         :description,
+        :differential_geometry,
         :exception,
         :function,
 	    :goddard,

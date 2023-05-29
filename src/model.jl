@@ -117,7 +117,7 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), components_names::Vector{String}=__variable_components_names(q,name))
     # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
-    (q  > 1) && (length(components_names) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
+    (q  > 1) && (size(components_names, 1) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
 
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
@@ -170,7 +170,7 @@ julia> ocp.state_components_names
 """
 function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_name(), components_names::Vector{String}=__state_components_names(n,name))
     # checkings
-    (n  > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    (n  > 1) && (size(components_names, 1) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
     
     ocp.state_dimension = n
     ocp.state_components_names = components_names
@@ -222,8 +222,7 @@ julia> ocp.control_components_names
 """
 function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), components_names::Vector{String}=__control_components_names(m,name))
     # checkings
-    (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
-    
+    (m  > 1) && (size(components_names, 1) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
     ocp.control_dimension = m
     ocp.control_components_names = components_names
     ocp.control_name = name

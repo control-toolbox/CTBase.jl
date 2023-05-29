@@ -1,12 +1,22 @@
-using Test
-using CTBase
-using MacroTools: @capture, postwalk
-include("../src/differential_geometry.jl")
-
-# ---------------------------------------------------------------------------
 function test_differential_geometry()
+    ∅ = Vector{Real}()
+    dummy_function() = nothing
 
     @testset "Lifts" begin
+
+        @testset "HamiltonianLift" begin
+            HL = HamiltonianLift(VectorField(x -> [x[1]^2,x[2]^2], autonomous=true, variable=false))
+            @test HL([1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift(VectorField((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variable=true))
+            @test HL([1, 0], [0, 1], 1) == 1
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+            HL = HamiltonianLift(VectorField((t, x) -> [t+x[1]^2,x[2]^2], autonomous=false, variable=false))
+            @test HL(1, [1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift(VectorField((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true))
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+        end
         
         @testset "from VectorFields" begin
     
@@ -18,67 +28,56 @@ function test_differential_geometry()
             Test.@test_throws MethodError H([1, 2], 1)
             Test.@test_throws MethodError H(1, [1, 2])
     
-            # multiple VectorFields
-            X1 = VectorField(x -> 2x)
-            X2 = VectorField(x -> 3x)
-            H1, H2 = Lift(X1, X2)
-            Test.@test H1(1, 1) == 2
-            Test.@test H1([1, 2], [3, 4]) == 22
-            Test.@test H2(1, 1) == 3
-            Test.@test H2([1, 2], [3, 4]) == 33
-    
             # nonautonomous case
-            X = VectorField((t, x) -> 2x, time_dependence=:nonautonomous)
+            X = VectorField((t, x) -> 2x, NonAutonomous)
             H = Lift(X)
             Test.@test H(1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4]) == 22
+
+            # autonomous nonfixed case
+            X = VectorField((x, v) -> 2x, NonFixed)
+            H = Lift(X)
+            Test.@test H(1, 1, 1) == 2
+            Test.@test H([1, 2], [3, 4], 1) == 22
+            Test.@test_throws MethodError H([1, 2], 1)
+            Test.@test_throws MethodError H(1, [1, 2])
     
-            # multiple VectorFields
-            X1 = VectorField((t, x) -> 2x, time_dependence=:nonautonomous)
-            X2 = VectorField((t, x) -> 3x, time_dependence=:nonautonomous)
-            H1, H2 = Lift(X1, X2)
-            Test.@test H1(1, 1, 1) == 2
-            Test.@test H1(1, [1, 2], [3, 4]) == 22
-            Test.@test H2(1, 1, 1) == 3
-            Test.@test H2(1, [1, 2], [3, 4]) == 33
+            # nonautonomous nonfixed case
+            X = VectorField((t, x, v) -> 2x, NonAutonomous, NonFixed)
+            H = Lift(X)
+            Test.@test H(1, 1, 1, 1) == 2
+            Test.@test H(1, [1, 2], [3, 4], 1) == 22
     
         end
         
         @testset "from Function" begin
     
             # autonomous case
-            X = x -> 2x
+            X::Function = x -> 2x
             H = Lift(X)
             Test.@test H(1, 1) == 2
             Test.@test H([1, 2], [3, 4]) == 22
     
-            # multiple Functions
-            X1 = x -> 2x
-            X2 = x -> 3x
-            H1, H2 = Lift(X1, X2)
-            Test.@test H1(1, 1) == 2
-            Test.@test H1([1, 2], [3, 4]) == 22
-            Test.@test H2(1, 1) == 3
-            Test.@test H2([1, 2], [3, 4]) == 33
-    
             # nonautonomous case
-            X = (t, x) -> 2x
-            H = Lift(X, time_dependence=:nonautonomous)
+            Xt::Function = (t, x) -> 2x
+            H = Lift(Xt, autonomous=false)
             Test.@test H(1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4]) == 22
+
+            # autonomous nonfixed case
+            Xv::Function = (x, v) -> 2x
+            H = Lift(Xv, variable=true)
+            Test.@test H(1, 1, 1) == 2
+            Test.@test H([1, 2], [3, 4], 1) == 22
     
-            # multiple Functions
-            X1 = (t, x) -> 2x
-            X2 = (t, x) -> 3x
-            H1, H2 = Lift(X1, X2, time_dependence=:nonautonomous)
-            Test.@test H1(1, 1, 1) == 2
-            Test.@test H1(1, [1, 2], [3, 4]) == 22
-            Test.@test H2(1, 1, 1) == 3
-            Test.@test H2(1, [1, 2], [3, 4]) == 33
+            # nonautonomous nonfixed case
+            Xtv::Function = (t, x, v) -> 2x
+            H = Lift(Xtv, autonomous=false, variable=true)
+            Test.@test H(1, 1, 1, 1) == 2
+            Test.@test H(1, [1, 2], [3, 4], 1) == 22
 
             # exceptions
-            Test.@test_throws IncorrectArgument Lift(X1, time_dependence=:dummy)
-            Test.@test_throws IncorrectArgument Lift(X1, X2, time_dependence=:dummy)
+            Test.@test_throws IncorrectArgument Lift(X, Int64)
     
         end
     
@@ -91,6 +90,7 @@ function test_differential_geometry()
         f = x -> x[1]^2 + x[2]^2
         Test.@test Der(X, f)([1, 2]) == 0
         Test.@test (X⋅f)([1, 2]) == Der(X, f)([1, 2])
+        Test.@test X⋅f == Lie(X,f)
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
@@ -99,16 +99,40 @@ function test_differential_geometry()
         Test.@test (X⋅f)(1) == Der(X, f)(1)
     
         # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
+        X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
         Test.@test Der(X, f)(1, [1, 2]) == 2
         Test.@test (X⋅f)(1, [1, 2]) == Der(X, f)(1, [1, 2])
 
         # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
+        X = VectorField((t, x) -> 2x+t, NonAutonomous)
         f = (t, x) -> t + x^2
         Test.@test Der(X, f)(1, 1) == 6
         Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
+
+        # autonomous, nonfixed, dim 2
+        X = VectorField((x, v) -> [x[2] + v[1], -x[1] + v[2]], NonFixed)
+        f = (x, v) -> x[1]^2 + x[2]^2
+        Test.@test Der(X, f)([1, 2], [2, 1]) == 8
+        Test.@test (X⋅f)([1, 2], [2, 1]) == Der(X, f)([1, 2], [2, 1])
+
+        # autonomous, nonfixed, dim 1
+        X = VectorField((x, v) -> 2x + v, NonFixed)
+        f = (x, v) -> x^2
+        Test.@test Der(X, f)(1, 1) == 6
+        Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
+    
+        # nonautonomous, nonfixed, dim 2
+        X = VectorField((t, x, v) -> [t + x[2], -x[1]], NonAutonomous, NonFixed)
+        f = (t, x, v) -> t + x[1]^2 + x[2]^2
+        Test.@test Der(X, f)(1, [1, 2], 1) == 2
+        Test.@test (X⋅f)(1, [1, 2], 1) == Der(X, f)(1, [1, 2], 1)
+
+        # nonautonomous, nonfixed, dim 1
+        X = VectorField((v, t, x) -> 2x+t+v, NonAutonomous, NonFixed)
+        f = (t, x, v) -> t + x^2
+        Test.@test Der(X, f)(1, 1, 1) == 8
+        Test.@test (X⋅f)(1, 1, 1) == Der(X, f)(1, 1, 1)
     
     end
 
@@ -117,32 +141,42 @@ function test_differential_geometry()
         # autonomous, dim 2
         X = VectorField(x -> [x[2], -x[1]])
         Y = VectorField(x -> [x[1], x[2]])
-        Test.@test ⅋(X, Y)([1, 2]) == [2, -1]
-
-        # autonomous, dim 1, with state_dimension
-        X = VectorField(x -> 2x, state_dimension=1)
-        Y = VectorField(x -> 3x, state_dimension=1)
-        Test.@test ⅋(X, Y)(1) == 6
+        Test.@test CTBase.:(⅋)(X, Y)([1, 2]) == [2, -1]
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
         Y = VectorField(x -> 3x)
-        Test.@test ⅋(X, Y)(1) == 6
+        Test.@test CTBase.:(⅋)(X, Y)(1) == 6
 
         # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], time_dependence=:nonautonomous)
-        Y = VectorField((t, x) -> [t + x[1], x[2]], time_dependence=:nonautonomous)
-        Test.@test ⅋(X, Y)(1, [1, 2]) == [3, -1]
-
-        # nonautonomous, dim 1, with state_dimension
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous, state_dimension=1)
-        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous, state_dimension=1)
-        Test.@test ⅋(X, Y)(1, 1) == 9
+        X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
+        Y = VectorField((t, x) -> [t + x[1], x[2]], NonAutonomous)
+        Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2]) == [4, -1]
 
         # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x+t, time_dependence=:nonautonomous)
-        Y = VectorField((t, x) -> 3x+t, time_dependence=:nonautonomous)
-        Test.@test ⅋(X, Y)(1, 1) == 9
+        X = VectorField((t, x) -> 2x+t, NonAutonomous)
+        Y = VectorField((t, x) -> 3x+t, NonAutonomous)
+        Test.@test CTBase.:(⅋)(X, Y)(1, 1) == 10
+
+        # autonomous, nonfixed, dim 1
+        X = VectorField((x, v) -> 2x+v, NonFixed)
+        Y = VectorField((x, v) -> 3x+v, NonFixed)
+        Test.@test CTBase.:(⅋)(X, Y)(1, 1) == 9
+
+        # nonautonomous, nonfixed, dim 1
+        X = VectorField((t, x, v) -> t+2x+v, NonAutonomous, NonFixed)
+        Y = VectorField((t, x, v) -> t+3x+v, NonAutonomous, NonFixed)
+        Test.@test CTBase.:(⅋)(X, Y)(1, 1, 1) == 13
+        
+        # autonomous, nonfixed, dim 2
+        X = VectorField((x, v) -> [v[1] + v[2] + x[2], -x[1]], NonFixed)
+        Y = VectorField((x, v) ->  [v[1] + v[2] + x[1], x[2]], NonFixed)
+        Test.@test CTBase.:(⅋)(X, Y)([1, 2], [2, 3]) == [7, -1]
+
+        # nonautonomous, nonfixed, dim 2
+        X = VectorField((t, x, v) -> [t + v[1] + v[2] + x[2], -x[1]], NonFixed, NonAutonomous)
+        Y = VectorField((t, x, v) ->  [v[1] + v[2] + x[1], x[2]], NonFixed, NonAutonomous)
+        Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2], [2, 3]) == [8, -1]
 
     end
 
@@ -162,12 +196,34 @@ function test_differential_geometry()
         @testset "nonautonomous case" begin
             f = (t, x) -> [t + x[2], -2x[1]]
             g = (t, x) -> [t + 3x[2], -x[1]]
-            X = VectorField(f, time_dependence=:nonautonomous)
-            Y = VectorField(g, time_dependence=:nonautonomous)
+            X = VectorField(f, NonAutonomous)
+            Y = VectorField(g, NonAutonomous)
             Test.@test Lie(X, Y)(1, [1, 2]) == [-5,11]
             Test.@test Lie(X, Y)(1, [1, 2]) == ad(X, Y)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, time_dependence=:nonautonomous)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, time_dependence=:nonautonomous)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, autonomous=false)(1, [1, 2])
+            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, autonomous=false)(1, [1, 2])
+        end
+
+        @testset "autonomous nonfixed case" begin
+            f = (x, v) -> [x[2] + v, 2x[1]]
+            g = (x, v) -> [3x[2], v - x[1]]
+            X = VectorField(f, NonFixed)
+            Y = VectorField(g, variable=true)
+            Test.@test Lie(X, Y)([1, 2], 1) == [6, -15]
+            Test.@test Lie(X, Y)([1, 2], 1) == ad(X, Y)([1, 2], 1)
+            Test.@test Lie(X, Y)([1, 2], 1) == Lie(f, g, NonFixed)([1, 2], 1)
+            Test.@test Lie(X, Y)([1, 2], 1) == ad(f, g, NonFixed)([1, 2], 1)
+        end
+
+        @testset "nonautonomous nonfixed case" begin
+            f = (t, x, v) -> [t + x[2] + v, -2x[1] - v]
+            g = (t, x, v) -> [t + 3x[2] + v, -x[1] - v]
+            X = VectorField(f, NonAutonomous, NonFixed)
+            Y = VectorField(g, NonAutonomous, NonFixed)
+            Test.@test Lie(X, Y)(1, [1, 2], 1) == [-7,12]
+            Test.@test Lie(X, Y)(1, [1, 2], 1) == ad(X, Y)(1, [1, 2], 1)
+            Test.@test Lie(X, Y)(1, [1, 2], 1) == Lie(f, g, autonomous=false, variable=true)(1, [1, 2], 1)
+            Test.@test Lie(X, Y)(1, [1, 2], 1) == ad(f, g, autonomous=false, variable=true)(1, [1, 2], 1)
         end
 
         @testset "mri example" begin
@@ -197,86 +253,95 @@ function test_differential_geometry()
             Test.@test ((@Lie [ X, Y ])⋅f)(x) == ((X⋅(Y⋅f))(x) - (Y⋅(X⋅f))(x))
 
         end
-
-        @testset "exceptions" begin
-            X = VectorField(x -> [x[2], -x[1]])
-            Y = VectorField(x -> [x[2], -x[1]])
-            Test.@test_throws TypeError _Lie_sequence(X, Y, sequence=0)
-            Test.@test_throws TypeError _Lie_sequence(X, Y, sequence=1.5)
-            Test.@test_throws TypeError _Lie_sequence(X, Y, sequence=(1, 1.5))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, sequence=(1, 1))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, Y, sequence=(1,))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, Y, sequence=(1, 0))
-            Test.@test_throws IncorrectArgument _Lie_sequence(X, Y, sequence=(1, 2, 3))            
-        end
-
-    end # tests for Lie bracket - sequence 1
-
-    @testset "multiple Lie brackets of any length" begin
-
-        x = [1, 2, 3]
-        Γ = 2
-        γ = 1
-        δ = γ-Γ
-        F0 = VectorField(x -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])])
-        F1 = VectorField(x -> [0, -x[3], x[2]])
-        F2 = VectorField(x -> [x[3], 0, -x[1]])
-
-        # length 2
-        F01_ = Lie(F0, F1)
-        F02_ = Lie(F0, F2)
-        F12_ = Lie(F1, F2)
-
-        #
-        F01 = _Lie_sequence(F0, F1, sequence=(1,2))
-        F02 = _Lie_sequence(F0, F2, sequence=(1,2))
-        F12 = _Lie_sequence(F1, F2, sequence=(1,2))
-        Test.@test F01(x) ≈ F01_(x) atol=1e-6
-        Test.@test F02(x) ≈ F02_(x) atol=1e-6
-        Test.@test F12(x) ≈ F12_(x) atol=1e-6     
-        
-        # length 3
-        F120_ = _Lie_sequence(F12, F0, sequence=(1,2))
-        F121_ = _Lie_sequence(F12, F1, sequence=(1,2))
-        F122_ = _Lie_sequence(F12, F2, sequence=(1,2))
-        F011_ = _Lie_sequence(F01, F1, sequence=(1,2))
-        F012_ = _Lie_sequence(F01, F2, sequence=(1,2))
-        F022_ = _Lie_sequence(F02, F2, sequence=(1,2))
-        F010_ = _Lie_sequence(F01, F0, sequence=(1,2))
-        F020_ = _Lie_sequence(F02, F0, sequence=(1,2))
-
-        F120 = _Lie_sequence(F0, F1, F2, sequence=(2,3,1))
-        F121 = _Lie_sequence(F1, F2, sequence=(1,2,1))
-        F122 = _Lie_sequence(F1, F2, sequence=(1,2,2))
-        F011 = _Lie_sequence(F0, F1, sequence=(1,2,2))
-        F012 = _Lie_sequence(F0, F1, F2, sequence=(1,2,3))
-        F012_default = _Lie_sequence(F0, F1, F2)
-        F022 = _Lie_sequence(F0, F2, sequence=(1,2,2))
-        F010 = _Lie_sequence(F0, F1, sequence=(1,2,1))
-        F020 = _Lie_sequence(F0, F2, sequence=(1,2,1))
-
-        Test.@test F120(x) ≈ F120_(x) atol=1e-6
-        Test.@test F121(x) ≈ F121_(x) atol=1e-6
-        Test.@test F122(x) ≈ F122_(x) atol=1e-6
-        Test.@test F011(x) ≈ F011_(x) atol=1e-6
-        Test.@test F012(x) ≈ F012_(x) atol=1e-6
-        Test.@test F012_default(x) ≈ F012_(x) atol=1e-6
-        Test.@test F022(x) ≈ F022_(x) atol=1e-6
-        Test.@test F010(x) ≈ F010_(x) atol=1e-6
-        Test.@test F020(x) ≈ F020_(x) atol=1e-6
-
-        Test.@test F120_(x) ≈ [0, 0, 0] atol=1e-6
-        Test.@test F121_(x) ≈ F2(x) atol=1e-6
-        Test.@test F122_(x) ≈ -F1(x) atol=1e-6
-        Test.@test F011_(x) ≈ [0, -2*δ*x[2], -γ+2*δ*x[3]] atol=1e-6
-        Test.@test F012_(x) ≈ [δ*x[2], δ*x[1], 0] atol=1e-6
-        Test.@test F022_(x) ≈ [-2*δ*x[1], 0, 2*δ*x[3]-γ] atol=1e-6
-        Test.@test F010_(x) ≈ [0, -γ*(γ-2*Γ)+δ^2*x[3], -δ^2*x[2]] atol=1e-6
-        Test.@test F020_(x) ≈ [γ*(γ-2*Γ)-δ^2*x[3], 0, δ^2*x[1]] atol=1e-6
-
     end
 
-    @testset "macro" begin
+    @testset "Poisson bracket" begin
+        @testset "autonomous case" begin
+            f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
+            g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
+            h = (x, p) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2
+            f₊g = (x, p) -> f(x, p) + g(x, p)
+            fg = (x, p) -> f(x, p)*g(x, p)
+            F = Hamiltonian(f)
+            G = Hamiltonian(g)
+            H = Hamiltonian(h) 
+            F₊G = Hamiltonian(f₊g)
+            FG = Hamiltonian(fg)
+            Test.@test Poisson(F, Hamiltonian((x,p) -> 42))([1, 2], [2, 1]) == 0
+            Test.@test Poisson(F, G)([1, 2], [2, 1]) == 20
+            Test.@test Poisson(F, G)([1, 2], [2, 1]) == - Poisson(G, F)([1, 2], [2, 1]) # anticommutativity
+            Test.@test Poisson(F₊G, H)([1, 2], [2, 1]) == Poisson(F, H)([1, 2], [2, 1]) + Poisson(G, H)([1, 2], [2, 1]) # bilinearity 1
+            Test.@test Poisson(H, F₊G)([1, 2], [2, 1]) == Poisson(H, F)([1, 2], [2, 1]) + Poisson(H, G)([1, 2], [2, 1]) # bilinearity 2
+            Test.@test Poisson(FG, H)([1, 2], [2, 1]) == Poisson(F, H)([1, 2], [2, 1])*G([1, 2], [2, 1]) + F([1, 2], [2, 1])*Poisson(G, H)([1, 2], [2, 1]) # Liebniz's rule
+            Test.@test Poisson(F, Poisson(G,H))([1, 2], [2, 1]) + Poisson(G, Poisson(H,F))([1, 2], [2, 1]) + Poisson(H, Poisson(F,G))([1, 2], [2, 1]) == 0 # Jacobi identity
+        end
+
+        @testset "nonautonomous case" begin
+            f = (t, x, p) -> t*x[2]^2 + 2x[1]^2 + p[1]^2 + t
+            g = (t, x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] - t
+            h = (t, x, p) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2 + t
+            f₊g = (t, x, p) -> f(t, x, p) + g(t, x, p)
+            fg = (t, x, p) -> f(t, x, p)*g(t, x, p)
+            F = Hamiltonian(f, autonomous=false)
+            G = Hamiltonian(g, autonomous=false)
+            H = Hamiltonian(h, autonomous=false) 
+            F₊G = Hamiltonian(f₊g, autonomous=false)
+            FG = Hamiltonian(fg, autonomous=false)
+            Test.@test Poisson(F, Hamiltonian((t, x, p) -> 42, autonomous=false))(2, [1, 2], [2, 1]) == 0
+            Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == 28
+            Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == - Poisson(G, F)(2, [1, 2], [2, 1]) # anticommutativity
+            Test.@test Poisson(F₊G, H)(2, [1, 2], [2, 1]) == Poisson(F, H)(2, [1, 2], [2, 1]) + Poisson(G, H)(2, [1, 2], [2, 1]) # bilinearity 1
+            Test.@test Poisson(H, F₊G)(2, [1, 2], [2, 1]) == Poisson(H, F)(2, [1, 2], [2, 1]) + Poisson(H, G)(2, [1, 2], [2, 1]) # bilinearity 2
+            Test.@test Poisson(FG, H)(2, [1, 2], [2, 1]) == Poisson(F, H)(2, [1, 2], [2, 1])*G(2, [1, 2], [2, 1]) + F(2, [1, 2], [2, 1])*Poisson(G, H)(2, [1, 2], [2, 1]) # Liebniz's rule
+            Test.@test Poisson(F, Poisson(G,H))(2, [1, 2], [2, 1]) + Poisson(G, Poisson(H,F))(2, [1, 2], [2, 1]) + Poisson(H, Poisson(F,G))(2, [1, 2], [2, 1]) == 0 # Jacobi identity
+        end
+
+        @testset "autonomous nonfixed case" begin
+            f = (x, p, v) -> v[1]*x[2]^2 + 2x[1]^2 + p[1]^2 + v[2]
+            g = (x, p, v) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] - v[2]
+            h = (x, p, v) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2 + v[2]
+            f₊g = (x, p, v) -> f(x, p, v) + g(x, p, v)
+            fg = (x, p, v)-> f(x, p, v)*g(x, p, v)
+            F = Hamiltonian(f, variable=true)
+            G = Hamiltonian(g, variable=true)
+            H = Hamiltonian(h, variable=true) 
+            F₊G = Hamiltonian(f₊g, variable=true)
+            FG = Hamiltonian(fg, variable=true)
+            Test.@test Poisson(F, Hamiltonian((x, p, v) -> 42, variable=true))([1, 2], [2, 1], [4, 4]) == 0
+            Test.@test Poisson(F, G)([1, 2], [2, 1], [4, 4]) == 44
+            Test.@test Poisson(F, G)([1, 2], [2, 1], [4, 4]) == - Poisson(G, F)([1, 2], [2, 1], [4, 4]) # anticommutativity
+            Test.@test Poisson(F₊G, H)([1, 2], [2, 1], [4, 4]) == Poisson(F, H)([1, 2], [2, 1], [4, 4]) + Poisson(G, H)([1, 2], [2, 1], [4, 4]) # bilinearity 1
+            Test.@test Poisson(H, F₊G)([1, 2], [2, 1], [4, 4]) == Poisson(H, F)([1, 2], [2, 1], [4, 4]) + Poisson(H, G)([1, 2], [2, 1], [4, 4]) # bilinearity 2
+            Test.@test Poisson(FG, H)([1, 2], [2, 1], [4, 4]) == Poisson(F, H)([1, 2], [2, 1], [4, 4])*G([1, 2], [2, 1], [4, 4]) + F([1, 2], [2, 1], [4, 4])*Poisson(G, H)([1, 2], [2, 1], [4, 4]) # Liebniz's rule
+            Test.@test Poisson(F, Poisson(G,H))([1, 2], [2, 1], [4, 4]) + Poisson(G, Poisson(H,F))([1, 2], [2, 1], [4, 4]) + Poisson(H, Poisson(F,G))([1, 2], [2, 1], [4, 4]) == 0 # Jacobi identity
+        end
+
+        @testset "nonautonomous nonfixed case" begin
+            @testset "autonomous nonfixed case" begin
+                f = (t, x, p, v) -> t*v[1]*x[2]^2 + 2x[1]^2 + p[1]^2 + v[2]
+                g = (t, x, p, v) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] + t - v[2]
+                h = (t, x, p, v) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2 + t + v[2]
+                f₊g = (t, x, p, v) -> f(t, x, p, v) + g(t, x, p, v)
+                fg = (t, x, p, v)-> f(t, x, p, v)*g(t, x, p, v)
+                F = Hamiltonian(f, autonomous=false, variable=true)
+                G = Hamiltonian(g, autonomous=false, variable=true)
+                H = Hamiltonian(h, autonomous=false, variable=true) 
+                F₊G = Hamiltonian(f₊g, autonomous=false, variable=true)
+                FG = Hamiltonian(fg, autonomous=false, variable=true)
+                Test.@test Poisson(F, Hamiltonian((t, x, p, v) -> 42, autonomous=false, variable=true))(2, [1, 2], [2, 1], [4, 4]) == 0
+                Test.@test Poisson(F, G)(2, [1, 2], [2, 1], [4, 4]) == 76
+                Test.@test Poisson(F, G)(2, [1, 2], [2, 1], [4, 4]) == - Poisson(G, F)(2, [1, 2], [2, 1], [4, 4]) # anticommutativity
+                Test.@test Poisson(F₊G, H)(2, [1, 2], [2, 1], [4, 4]) == Poisson(F, H)(2, [1, 2], [2, 1], [4, 4]) + Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 1
+                Test.@test Poisson(H, F₊G)(2, [1, 2], [2, 1], [4, 4]) == Poisson(H, F)(2, [1, 2], [2, 1], [4, 4]) + Poisson(H, G)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 2
+                Test.@test Poisson(FG, H)(2, [1, 2], [2, 1], [4, 4]) == Poisson(F, H)(2, [1, 2], [2, 1], [4, 4])*G(2, [1, 2], [2, 1], [4, 4]) + F(2, [1, 2], [2, 1], [4, 4])*Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # Liebniz's rule
+                Test.@test Poisson(F, Poisson(G,H))(2, [1, 2], [2, 1], [4, 4]) + Poisson(G, Poisson(H,F))(2, [1, 2], [2, 1], [4, 4]) + Poisson(H, Poisson(F,G))(2, [1, 2], [2, 1], [4, 4]) == 0 # Jacobi identity
+            end
+        end
+    end
+
+    # macros
+
+    @testset "lie macro" begin
 
         # parameters
         t = 1
@@ -284,6 +349,7 @@ function test_differential_geometry()
         Γ = 2
         γ = 1
         δ = γ-Γ
+        v = 1
 
         # autonomous
         F0 = VectorField(x -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])])
@@ -293,40 +359,125 @@ function test_differential_geometry()
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
         F011__= @Lie [[F0, F1], F1]
-        @Lie F01
-        @Lie F011
-        Test.@test F01(x) ≈ F01_(x) atol=1e-6
-        Test.@test F011(x) ≈ F011_(x) atol=1e-6
-        Test.@test F01(x) ≈ F01__(x) atol=1e-6
-        Test.@test F011(x) ≈ F011__(x) atol=1e-6
+        
+        Test.@test F01_(x) ≈ F01__(x) atol=1e-6
+        Test.@test F011_(x) ≈ F011__(x) atol=1e-6
         #
         get_F0 = () -> F0
         F011___ = @Lie [[get_F0(), F1], F1]
-        Test.@test F011(x) ≈ F011___(x) atol=1e-6
+        Test.@test F011_(x) ≈ F011___(x) atol=1e-6
 
         # nonautonomous
-        F0 = VectorField((t,x) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], time_dependence=:nonautonomous)
-        F1 = VectorField((t,x) -> [0, -x[3], x[2]], time_dependence=:nonautonomous)
-        F2 = VectorField((t,x) -> [x[3], 0, -x[1]], time_dependence=:nonautonomous)
+        F0 = VectorField((t,x) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], NonAutonomous)
+        F1 = VectorField((t,x) -> [0, -x[3], x[2]], NonAutonomous)
+        F2 = VectorField((t,x) -> [x[3], 0, -x[1]], NonAutonomous)
         F01_ = Lie(F0, F1)
         F011_ = Lie(F01_, F1)
         F01__= @Lie [F0, F1]
         F011__= @Lie [[F0, F1], F1]
-        @Lie F01
-        @Lie F011
-        Test.@test F01(t,x) ≈ F01_(t,x) atol=1e-6
-        Test.@test F011(t,x) ≈ F011_(t,x) atol=1e-6
-        Test.@test F01(t,x) ≈ F01__(t,x) atol=1e-6
-        Test.@test F011(t,x) ≈ F011__(t,x) atol=1e-6
+       
+        Test.@test F01_(t,x) ≈ F01__(t,x) atol=1e-6
+        Test.@test F011_(t,x) ≈ F011__(t,x) atol=1e-6
         #
         get_F0 = () -> F0
         F011___ = @Lie [[get_F0(), F1], F1]
-        Test.@test F011(t, x) ≈ F011___(t, x) atol=1e-6
+        Test.@test F011_(t, x) ≈ F011___(t, x) atol=1e-6
+
+        # autonomous nonfixed
+        F0 = VectorField((x,v) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], NonFixed)
+        F1 = VectorField((x,v) -> [0, -x[3], x[2]], NonFixed)
+        F2 = VectorField((x,v) -> [x[3], 0, -x[1]], NonFixed)
+        F01_ = Lie(F0, F1)
+        F011_ = Lie(F01_, F1)
+        F01__= @Lie [F0, F1]
+        F011__= @Lie [[F0, F1], F1]
+       
+        Test.@test F01_(x, v) ≈ F01__(x, v) atol=1e-6
+        Test.@test F011_(x, v) ≈ F011__(x, v) atol=1e-6
+        #
+        get_F0 = () -> F0
+        F011___ = @Lie [[get_F0(), F1], F1]
+        Test.@test F011_(x, v) ≈ F011___(x, v) atol=1e-6
+
+        # nonautonomous nonfixed
+        F0 = VectorField((t, x, v) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], NonAutonomous, NonFixed)
+        F1 = VectorField((t, x, v) -> [0, -x[3], x[2]], NonAutonomous, NonFixed)
+        F2 = VectorField((t, x, v) -> [x[3], 0, -x[1]], NonAutonomous, NonFixed)
+        F01_ = Lie(F0, F1)
+        F011_ = Lie(F01_, F1)
+        F01__= @Lie [F0, F1]
+        F011__= @Lie [[F0, F1], F1]
+       
+        Test.@test F01_(t, x, v) ≈ F01__(t, x, v) atol=1e-6
+        Test.@test F011_(t, x, v) ≈ F011__(t, x, v) atol=1e-6
+        #
+        get_F0 = () -> F0
+        F011___ = @Lie [[get_F0(), F1], F1]
+        Test.@test F011_(t, x, v) ≈ F011___(t, x, v) atol=1e-6
 
     end
 
-end # test_differential_geometry
+    @testset "Poisson macro" begin
+        # parameters
+        t = 1
+        x = [1, 2, 3]
+        p = [1,0,7]
+        Γ = 2
+        γ = 1
+        δ = γ-Γ
+        v = 2
 
-@testset "differential geometry" begin
-    test_differential_geometry()
-end
+        # autonomous
+        H0 = Hamiltonian((x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2))
+        H1 = Hamiltonian((x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2))
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(x, p) ≈ P01_(x, p) atol=1e-6
+        Test.@test P011(x, p) ≈ P011_(x, p) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(x, p) ≈ P011__(x, p) atol=1e-6
+
+        # nonautonomous
+        H0 = Hamiltonian((t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2), autonomous=false)
+        H1 = Hamiltonian((t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2), NonAutonomous)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(t, x, p) ≈ P01_(t, x, p) atol=1e-6
+        Test.@test P011(t, x, p) ≈ P011_(t, x, p) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(t, x, p) ≈ P011__(t, x, p) atol=1e-6
+
+        # autonomous nonfixed
+        H0 = Hamiltonian((x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[1]^2+v), variable=true)
+        H1 = Hamiltonian((x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v), variable=true)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(x, p, v) ≈ P01_(x, p, v) atol=1e-6
+        Test.@test P011(x, p, v) ≈ P011_(x, p, v) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(x, p, v) ≈ P011__(x, p, v) atol=1e-6
+
+        # nonautonomous nonfixed
+        H0 = Hamiltonian((t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[1]^2+v), autonomous=false, variable=true)
+        H1 = Hamiltonian((t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v), NonAutonomous, NonFixed)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Poisson {H0, H1}
+        P011_= @Poisson {{H0, H1}, H1}
+        Test.@test P01(t, x, p, v) ≈ P01_(t, x, p,v ) atol=1e-6
+        Test.@test P011(t, x, p, v) ≈ P011_(t, x, p, v) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Poisson {{get_H0(), H1}, H1}
+        Test.@test P011_(t, x, p, v) ≈ P011__(t, x, p, v) atol=1e-6
+    end
+
+end # test_differential_geometry

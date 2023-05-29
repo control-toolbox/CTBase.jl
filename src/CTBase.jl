@@ -26,7 +26,7 @@ using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
-using MacroTools: @capture, postwalk, inexpr, striplines, MacroTools
+using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
 # --------------------------------------------------------------------------------------------------
@@ -90,9 +90,8 @@ include("exception.jl")
 include("description.jl")
 include("callback.jl")
 include("default.jl")
-include("utils.jl")
-#
 include("types.jl")
+include("utils.jl")
 #
 include("checking.jl")
 #
@@ -147,6 +146,9 @@ export plot, plot!
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
+
+# differential geometry
+export Lie, @Lie, Poisson, @Poisson, HamiltonianLift, AbstractHamiltonian, Lift, Der, ⋅, ad
 
 # ctparser_utils
 export replace_call, constraint_type
