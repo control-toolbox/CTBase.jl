@@ -1,5 +1,3 @@
-
-# --------------------------------------------------------------------------------------------------
 """
     A description is a tuple of symbols, that is a Tuple{Vararg{Symbol}}.
 """
@@ -20,32 +18,6 @@ function Base.show(io::IO, ::MIME"text/plain", descriptions::Tuple{Vararg{Descri
         println(io, description)
     end
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-Create a description from a tuple of symbols.
-
-# Example
-```jldoctest
-julia> makeDescription(:a, :b)
-(:a, :b)
-```
-"""
-makeDescription(desc::DescVarArg)::Description = Tuple(desc) # create a description from Vararg{Symbol}
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the description.
-
-# Example
-```jldoctest
-julia> makeDescription((:a, :b))
-(:a, :b)
-```
-"""
-makeDescription(desc::Description)::Description = desc
 
 """
 $(TYPEDSIGNATURES)
