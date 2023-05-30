@@ -57,7 +57,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         ui_names = ocp.control_components_names
         vi_names = is_variable_dependent(ocp) ? ocp.variable_components_names : []
 
-        # dependences
+        # dependencies
         t_ = is_time_dependent(ocp) ? t_name * ", " : ""
         _v = is_variable_dependent(ocp) ? ", " * v_name : ""
 

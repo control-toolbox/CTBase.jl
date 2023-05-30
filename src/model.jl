@@ -34,7 +34,7 @@ Return a new `OptimalControlModel` instance, that is a model of an optimal contr
 
 The model is defined by the following argument:
 
-- `dependences`: either `Autonomous` or `NonAutonomous`. Default is `Autonomous`. And either `NonFixed` or `Fixed`. Default is `Fixed`.
+- `dependencies`: either `Autonomous` or `NonAutonomous`. Default is `Autonomous`. And either `NonFixed` or `Fixed`. Default is `Fixed`.
 
 # Examples
 
@@ -49,13 +49,11 @@ julia> ocp = Model(Fixed,NonFixed)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(dependences::DataType...)::OptimalControlModel{<:TimeDependence, <:VariableDependence}
+function Model(dependencies::DataType...)::OptimalControlModel{<:TimeDependence, <:VariableDependence}
     # some checkings: 
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
-    @__check(time_dependence)
-    @__check(variable_dependence)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
@@ -448,7 +446,7 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbo
         label::Symbol=__constraint_label()) where {V <: VariableDependence}
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -519,7 +517,7 @@ julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
 function constraint!(ocp::OptimalControlModel, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label())
 
     # we check if the dimensions and times have been set just to force the user to set them before
-    @__check(ocp)
+    __check_all_set(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -573,7 +571,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
     # we use the constraint! defined before
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
         ", you cannot use constraint! function with type=:variable."))
 
@@ -627,7 +625,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, lb::ctVector, ub::c
         label::Symbol=__constraint_label()) # we use the constraint! defined before
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -708,7 +706,7 @@ function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
         lb::ctVector, ub::ctVector, label::Symbol=__constraint_label()) where {T, V}
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
     ", you cannot use constraint! function with type=:variable."))
 
@@ -849,7 +847,7 @@ julia> dynamics!(ocp, f)
 function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     __is_dynamics_set(ocp) && throw(UnauthorizedCall("the dynamics has already been set. Use dynamics! once."))
 
     ocp.dynamics = Dynamics(f, T, V)
@@ -886,11 +884,12 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
         criterion::Symbol=__criterion_type()) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set. Use objective! once."))
 
     # check the validity of the criterion
-    @__check(criterion)
+    !__is_criterion_valid(criterion) && throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
+        ". Please choose in [ :min, :max ]."))
     ocp.criterion = criterion
 
     # set the objective
@@ -930,11 +929,12 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f
         criterion::Symbol=__criterion_type()) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set. Use objective! once."))
 
     # check the validity of the criterion
-    @__check(criterion)
+    !__is_criterion_valid(criterion) && throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
+        ". Please choose in [ :min, :max ]."))
     ocp.criterion = criterion
 
     # set the objective
@@ -1063,7 +1063,7 @@ julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ,
 function nlp_constraints(ocp::OptimalControlModel)
 
     # we check if the dimensions and times have been set
-    @__check(ocp)
+    __check_all_set(ocp)
     
     #
     constraints = ocp.constraints
