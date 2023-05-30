@@ -44,11 +44,22 @@ function __check_all_set(ocp::OptimalControlModel)
     __check_variable_set(ocp)
 end
 
-macro __check(s::Symbol)
-    s == :dependences && return esc(quote __check_dependences($s) end)
-    s == :time_dependence && return esc(quote __check_time_dependence($s) end)
-    s == :variable_dependence && return esc(quote __check_variable_dependence($s) end)
-    s == :criterion && return esc(quote __check_criterion($s) end)
-    s == :ocp && return esc(quote __check_all_set($s) end)
-    error("s must be either :time_dependence, :variable_dependence or :criterion")
+## macro __check(s::Symbol)
+##     s == :dependences && return esc(quote __check_dependences($s) end)
+##     s == :time_dependence && return esc(quote __check_time_dependence($s) end)
+##     s == :variable_dependence && return esc(quote __check_variable_dependence($s) end)
+##     s == :criterion && return esc(quote __check_criterion($s) end)
+##     s == :ocp && return esc(quote __check_all_set($s) end)
+##     error("s must be either :time_dependence, :variable_dependence or :criterion")
+## end
+
+macro __check(s)
+    esc( @match s begin
+        :dependences         => :( __check_dependences($s)         )
+        :time_dependence     => :( __check_time_dependence($s)     )
+        :variable_dependence => :( __check_variable_dependence($s) )
+        :criterion           => :( __check_criterion($s)           )
+        :ocp                 => :( __check_all_set($s)             )
+        _                    => :( error("unknown check")          )
+    end )
 end

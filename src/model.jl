@@ -108,6 +108,10 @@ $(TYPEDSIGNATURES)
 
 Define the variable dimension and possibly the names of each component.
 
+!!! note
+
+    You can use variable! once to set the variable dimension when the model is `NonFixed`.
+
 # Examples
 ```jldoctest
 julia> variable!(ocp, 1, "v")
@@ -117,6 +121,7 @@ julia> variable!(ocp, 2, [ "v₁", "v₂" ])
 function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), components_names::Vector{String}=__variable_components_names(q,name))
     # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
+    __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
     (q  > 1) && (length(components_names) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
 
     ocp.variable_dimension = q
@@ -133,6 +138,10 @@ end
 $(TYPEDSIGNATURES)
 
 Define the state dimension and possibly the names of each component.
+
+!!! note
+
+    You must use state! only once to set the state dimension.
 
 # Examples
 
@@ -170,7 +179,8 @@ julia> ocp.state_components_names
 """
 function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_name(), components_names::Vector{String}=__state_components_names(n,name))
     # checkings
-    (n  > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set. Use state! once."))
+    (n > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
     
     ocp.state_dimension = n
     ocp.state_components_names = components_names
@@ -185,6 +195,10 @@ end
 $(TYPEDSIGNATURES)
 
 Define the control dimension and possibly the names of each coordinate.
+
+!!! note
+
+    You must use control! only once to set the control dimension.
 
 # Examples
 
@@ -222,6 +236,7 @@ julia> ocp.control_components_names
 """
 function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), components_names::Vector{String}=__control_components_names(m,name))
     # checkings
+    __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set. Use control! once."))
     (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
     
     ocp.control_dimension = m
@@ -241,7 +256,7 @@ Fix initial time, final time is free and given by the variable at the provided i
 
 !!! note
 
-    You can use time! once to set either the initial or the final time, or both.
+    You must use time! only once to set either the initial or the final time, or both.
 
 # Examples
 
@@ -537,7 +552,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial` or `:final` value constraint on the state, or a `:variable` value.
+Add an `:initial` or `:final` value constraint on the state, or a `:variable` value. Can also be used with
+`:state` and `:control`.
 
 !!! note
 
@@ -569,7 +585,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
     q = ocp.variable_dimension
 
     #
-    if type ∈ [:initial, :final]  # not allowed for :control or :state (does not make sense)
+    if type ∈ [:initial, :final, :state, :control ] # also allowed for :control and :state to treat uniformly eq and ineq
         rg = n == 1 ? Index(1) : 1:n 
         # check if rg and val are consistent
         (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $n"))
@@ -578,7 +594,7 @@ function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, labe
         (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $q"))
     else
         throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :variable ] or check the arguments of the constraint! method."))
+        ". Please choose in [ :initial, :final, :state, :control, :variable ] or check the arguments of the constraint! method."))
     end
 
     #
@@ -809,8 +825,6 @@ function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDepe
         _ => throw(IncorrectArgument("Provided arguments are inconsistent"))
     end
 
-    nothing
-
 end
 
 """
@@ -820,6 +834,8 @@ Set the dynamics.
 
 !!! note
 
+    You can use dynamics! only once to define the dynamics.
+    
     - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
     - The times must be set before. Use time!.
     - When an element is of dimension 1, consider it as a scalar.
@@ -834,6 +850,7 @@ function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: Time
 
     # we check if the dimensions and times have been set
     @__check(ocp)
+    __is_dynamics_set(ocp) && throw(UnauthorizedCall("the dynamics has already been set. Use dynamics! once."))
 
     ocp.dynamics = Dynamics(f, T, V)
 
@@ -847,6 +864,8 @@ $(TYPEDSIGNATURES)
 Set the criterion to the function `f`. Type can be `:mayer` or `:lagrange`. Criterion is `:min` or `:max`.
 
 !!! note
+
+    You can use objective! only once to define the objective.
 
     - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
     - The times must be set before. Use time!.
@@ -868,13 +887,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
 
     # we check if the dimensions and times have been set
     @__check(ocp)
-
-    # reset the objective
-    if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
-        println("warning: The objective is already set. It will be replaced by the new one.")
-    end
-    ocp.mayer = nothing
-    ocp.lagrange = nothing
+    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set. Use objective! once."))
 
     # check the validity of the criterion
     @__check(criterion)
@@ -901,6 +914,8 @@ Set the criterion to the function `g` and `f⁰`. Type can be `:bolza`. Criterio
 
 !!! note
 
+    You can use objective! only once to define the objective.
+
     - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
     - The times must be set before. Use time!.
     - When an element is of dimension 1, consider it as a scalar.
@@ -916,13 +931,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f
 
     # we check if the dimensions and times have been set
     @__check(ocp)
-
-    # reset the objective
-    if !isnothing(ocp.mayer) || !isnothing(ocp.lagrange)
-        println("warning: The objective is already set. It will be replaced by the new one.")
-    end
-    ocp.mayer = nothing
-    ocp.lagrange = nothing
+    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set. Use objective! once."))
 
     # check the validity of the criterion
     @__check(criterion)
