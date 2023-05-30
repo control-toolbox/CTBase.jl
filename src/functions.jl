@@ -94,7 +94,7 @@ function HamiltonianLift(f::Function;
 end
 
 function HamiltonianLift(f::Function, dependences::DataType...)
-    @__check(dependences)
+    __check_dependencies(dependences)
     time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
     return HamiltonianLift{time_dependence, variable_dependence}(f)

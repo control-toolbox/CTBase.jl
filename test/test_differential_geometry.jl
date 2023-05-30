@@ -88,51 +88,43 @@ function test_differential_geometry()
         # autonomous, dim 2
         X = VectorField(x -> [x[2], -x[1]])
         f = x -> x[1]^2 + x[2]^2
-        Test.@test Der(X, f)([1, 2]) == 0
-        Test.@test (X⋅f)([1, 2]) == Der(X, f)([1, 2])
+        Test.@test (X⋅f)([1, 2]) == 0
         Test.@test X⋅f == Lie(X,f)
 
         # autonomous, dim 1
         X = VectorField(x -> 2x)
         f = x -> x^2
-        Test.@test Der(X, f)(1) == 4
-        Test.@test (X⋅f)(1) == Der(X, f)(1)
+        Test.@test (X⋅f)(1) == 4
     
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
-        Test.@test Der(X, f)(1, [1, 2]) == 2
-        Test.@test (X⋅f)(1, [1, 2]) == Der(X, f)(1, [1, 2])
+        Test.@test (X⋅f)(1, [1, 2]) == 2
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, NonAutonomous)
         f = (t, x) -> t + x^2
-        Test.@test Der(X, f)(1, 1) == 6
-        Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
+        Test.@test (X⋅f)(1, 1) == 6
 
         # autonomous, nonfixed, dim 2
         X = VectorField((x, v) -> [x[2] + v[1], -x[1] + v[2]], NonFixed)
         f = (x, v) -> x[1]^2 + x[2]^2
-        Test.@test Der(X, f)([1, 2], [2, 1]) == 8
-        Test.@test (X⋅f)([1, 2], [2, 1]) == Der(X, f)([1, 2], [2, 1])
+        Test.@test (X⋅f)([1, 2], [2, 1]) == 8
 
         # autonomous, nonfixed, dim 1
         X = VectorField((x, v) -> 2x + v, NonFixed)
         f = (x, v) -> x^2
-        Test.@test Der(X, f)(1, 1) == 6
-        Test.@test (X⋅f)(1, 1) == Der(X, f)(1, 1)
+        Test.@test (X⋅f)(1, 1) == 6
     
         # nonautonomous, nonfixed, dim 2
         X = VectorField((t, x, v) -> [t + x[2], -x[1]], NonAutonomous, NonFixed)
         f = (t, x, v) -> t + x[1]^2 + x[2]^2
-        Test.@test Der(X, f)(1, [1, 2], 1) == 2
-        Test.@test (X⋅f)(1, [1, 2], 1) == Der(X, f)(1, [1, 2], 1)
+        Test.@test (X⋅f)(1, [1, 2], 1) == 2
 
         # nonautonomous, nonfixed, dim 1
         X = VectorField((v, t, x) -> 2x+t+v, NonAutonomous, NonFixed)
         f = (t, x, v) -> t + x^2
-        Test.@test Der(X, f)(1, 1, 1) == 8
-        Test.@test (X⋅f)(1, 1, 1) == Der(X, f)(1, 1, 1)
+        Test.@test (X⋅f)(1, 1, 1) == 8
     
     end
 
@@ -151,12 +143,12 @@ function test_differential_geometry()
         # nonautonomous, dim 2
         X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
         Y = VectorField((t, x) -> [t + x[1], x[2]], NonAutonomous)
-        Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2]) == [4, -1]
+        Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2]) == [3, -1]
 
         # nonautonomous, dim 1
         X = VectorField((t, x) -> 2x+t, NonAutonomous)
         Y = VectorField((t, x) -> 3x+t, NonAutonomous)
-        Test.@test CTBase.:(⅋)(X, Y)(1, 1) == 10
+        Test.@test CTBase.:(⅋)(X, Y)(1, 1) == 9
 
         # autonomous, nonfixed, dim 1
         X = VectorField((x, v) -> 2x+v, NonFixed)
@@ -166,7 +158,7 @@ function test_differential_geometry()
         # nonautonomous, nonfixed, dim 1
         X = VectorField((t, x, v) -> t+2x+v, NonAutonomous, NonFixed)
         Y = VectorField((t, x, v) -> t+3x+v, NonAutonomous, NonFixed)
-        Test.@test CTBase.:(⅋)(X, Y)(1, 1, 1) == 13
+        Test.@test CTBase.:(⅋)(X, Y)(1, 1, 1) == 12
         
         # autonomous, nonfixed, dim 2
         X = VectorField((x, v) -> [v[1] + v[2] + x[2], -x[1]], NonFixed)
@@ -188,9 +180,7 @@ function test_differential_geometry()
             X = VectorField(f)
             Y = VectorField(g)
             Test.@test Lie(X, Y)([1, 2]) == [7, -14]
-            Test.@test Lie(X, Y)([1, 2]) == ad(X, Y)([1, 2])
             Test.@test Lie(X, Y)([1, 2]) == Lie(f, g)([1, 2])
-            Test.@test Lie(X, Y)([1, 2]) == ad(f, g)([1, 2])
         end
 
         @testset "nonautonomous case" begin
@@ -199,9 +189,7 @@ function test_differential_geometry()
             X = VectorField(f, NonAutonomous)
             Y = VectorField(g, NonAutonomous)
             Test.@test Lie(X, Y)(1, [1, 2]) == [-5,11]
-            Test.@test Lie(X, Y)(1, [1, 2]) == ad(X, Y)(1, [1, 2])
             Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, autonomous=false)(1, [1, 2])
-            Test.@test Lie(X, Y)(1, [1, 2]) == ad(f, g, autonomous=false)(1, [1, 2])
         end
 
         @testset "autonomous nonfixed case" begin
@@ -210,9 +198,7 @@ function test_differential_geometry()
             X = VectorField(f, NonFixed)
             Y = VectorField(g, variable=true)
             Test.@test Lie(X, Y)([1, 2], 1) == [6, -15]
-            Test.@test Lie(X, Y)([1, 2], 1) == ad(X, Y)([1, 2], 1)
             Test.@test Lie(X, Y)([1, 2], 1) == Lie(f, g, NonFixed)([1, 2], 1)
-            Test.@test Lie(X, Y)([1, 2], 1) == ad(f, g, NonFixed)([1, 2], 1)
         end
 
         @testset "nonautonomous nonfixed case" begin
@@ -221,9 +207,7 @@ function test_differential_geometry()
             X = VectorField(f, NonAutonomous, NonFixed)
             Y = VectorField(g, NonAutonomous, NonFixed)
             Test.@test Lie(X, Y)(1, [1, 2], 1) == [-7,12]
-            Test.@test Lie(X, Y)(1, [1, 2], 1) == ad(X, Y)(1, [1, 2], 1)
             Test.@test Lie(X, Y)(1, [1, 2], 1) == Lie(f, g, autonomous=false, variable=true)(1, [1, 2], 1)
-            Test.@test Lie(X, Y)(1, [1, 2], 1) == ad(f, g, autonomous=false, variable=true)(1, [1, 2], 1)
         end
 
         @testset "mri example" begin
