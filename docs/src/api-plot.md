@@ -89,3 +89,5 @@ plot(sol,
     control_style=(color=:red, linewidth=2),
     size=(800, 600))
 ```
+
+You can also add additional plots with the command `plot!`.
