@@ -41,7 +41,7 @@ The model is defined by the following argument:
 ```jldoctest
 julia> ocp = Model()
 julia> ocp = Model(NonAutonomous)
-julia> ocp = Model(Fixed,NonFixed)
+julia> ocp = Model(Autonomous, NonFixed)
 ```
 
 !!! note
@@ -113,15 +113,16 @@ Define the variable dimension and possibly the names of each component.
 # Examples
 ```jldoctest
 julia> variable!(ocp, 1, "v")
-julia> variable!(ocp, 2, [ "v₁", "v₂" ])
+julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
 ```
 """
-function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), components_names::Vector{String}=__variable_components_names(q,name))
+function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), 
+    components_names::Vector{String}=__variable_components_names(q, name))
     # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
     __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
     (q  > 1) && (length(components_names) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
-
+    #
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
     ocp.variable_name = name
@@ -175,11 +176,12 @@ julia> ocp.state_components_names
 ["y₁", "y₂"]
 ```
 """
-function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_name(), components_names::Vector{String}=__state_components_names(n,name))
+function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_name(), 
+    components_names::Vector{String}=__state_components_names(n, name))
     # checkings
     __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set. Use state! once."))
     (n > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
-    
+    #
     ocp.state_dimension = n
     ocp.state_components_names = components_names
     ocp.state_name = name
@@ -232,7 +234,8 @@ julia> ocp.control_components_names
 ["v₁", "v₂"]
 ```
 """
-function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), components_names::Vector{String}=__control_components_names(m,name))
+function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control_name(), 
+    components_names::Vector{String}=__control_components_names(m, name))
     # checkings
     __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set. Use control! once."))
     (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
