@@ -4,9 +4,9 @@ function BoundaryConstraint(f::Function; variable::Bool = false)
     return BoundaryConstraint{variable_dependence}(f)
 end
 
-function BoundaryConstraint(f::Function, dependences::DataType...)
-    @__check(dependences)
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function BoundaryConstraint(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return BoundaryConstraint{variable_dependence}(f)
 end
 
@@ -28,9 +28,9 @@ function Mayer(f::Function; variable::Bool = false)
     return Mayer{variable_dependence}(f)
 end
 
-function Mayer(f::Function, dependences::DataType...)
-    @__check(dependences)
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function Mayer(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Mayer{variable_dependence}(f)
 end
 
@@ -54,10 +54,10 @@ function Hamiltonian(f::Function;
     return Hamiltonian{time_dependence, variable_dependence}(f)
 end
 
-function Hamiltonian(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function Hamiltonian(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Hamiltonian{time_dependence, variable_dependence}(f)
 end
 
@@ -97,10 +97,10 @@ function HamiltonianVectorField(f::Function;
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
-function HamiltonianVectorField(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function HamiltonianVectorField(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -140,10 +140,10 @@ function VectorField(f::Function;
     return VectorField{time_dependence, variable_dependence}(f)
 end
 
-function VectorField(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function VectorField(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return VectorField{time_dependence, variable_dependence}(f)
 end
 
@@ -183,10 +183,10 @@ function Lagrange(f::Function;
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
-function Lagrange(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function Lagrange(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
@@ -226,10 +226,10 @@ function Dynamics(f::Function;
     return Dynamics{time_dependence, variable_dependence}(f)
 end
 
-function Dynamics(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function Dynamics(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Dynamics{time_dependence, variable_dependence}(f)
 end
 
@@ -269,10 +269,10 @@ function StateConstraint(f::Function;
     return StateConstraint{time_dependence, variable_dependence}(f)
 end
 
-function StateConstraint(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function StateConstraint(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return StateConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -312,10 +312,10 @@ function ControlConstraint(f::Function;
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
-function ControlConstraint(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function ControlConstraint(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -355,10 +355,10 @@ function MixedConstraint(f::Function;
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
-function MixedConstraint(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function MixedConstraint(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
@@ -403,10 +403,10 @@ function FeedbackControl(f::Function;
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
-function FeedbackControl(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function FeedbackControl(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
@@ -446,10 +446,10 @@ function ControlLaw(f::Function;
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
-function ControlLaw(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function ControlLaw(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
@@ -489,10 +489,10 @@ function Multiplier(f::Function;
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 
-function Multiplier(f::Function, dependences::DataType...)
-    @__check(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+function Multiplier(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 

@@ -533,7 +533,6 @@ end
 __is_objective_set(ocp::OptimalControlModel) = !__is_objective_not_set(ocp)
 
 __is_empty(ocp::OptimalControlModel) = begin
-    isnothing(ocp.model_expression) &&
     isnothing(ocp.initial_time) && 
     isnothing(ocp.initial_time_name) &&
     isnothing(ocp.final_time) && 
@@ -564,6 +563,8 @@ __is_incomplete(ocp) = begin __is_time_not_set(ocp) || __is_state_not_set(ocp) |
     (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
 end
 __is_complete(ocp) = !__is_incomplete(ocp)
+
+__is_criterion_valid(criterion::Symbol) = criterion ∈ [:min, :max]
 
 # --------------------------------------------------------------------------------------------------
 # solution

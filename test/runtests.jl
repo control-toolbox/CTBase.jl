@@ -14,12 +14,11 @@ const constraint_type = CTBase.constraint_type
     for name ∈ (
         :callback,
         :ctparser_utils,
-        # :ctparser,
         :default,
         :description,
         :exception,
         :function,
-	:goddard,
+	    :goddard,
         :model,
         :plot,
         :print,
