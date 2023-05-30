@@ -533,7 +533,6 @@ end
 __is_objective_set(ocp::OptimalControlModel) = !__is_objective_not_set(ocp)
 
 __is_empty(ocp::OptimalControlModel) = begin
-    isnothing(ocp.model_expression) &&
     isnothing(ocp.initial_time) && 
     isnothing(ocp.initial_time_name) &&
     isnothing(ocp.final_time) && 
