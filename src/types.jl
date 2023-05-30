@@ -565,6 +565,8 @@ __is_incomplete(ocp) = begin __is_time_not_set(ocp) || __is_state_not_set(ocp) |
 end
 __is_complete(ocp) = !__is_incomplete(ocp)
 
+__is_criterion_valid(criterion::Symbol) = criterion ∈ [:min, :max]
+
 # --------------------------------------------------------------------------------------------------
 # solution
 #
