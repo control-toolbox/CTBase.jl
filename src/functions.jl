@@ -47,6 +47,7 @@ function (F::Mayer{NonFixed})(x0::State, xf::State, v::Variable)::ctNumber
 end
 
 # --------------------------------------------------------------------------------------------------
+# Hamiltonian
 function Hamiltonian(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
@@ -64,29 +65,61 @@ end
 function (F::Hamiltonian{Autonomous, Fixed})(x::State, p::Costate)::ctNumber
     return F.f(x, p)
 end
-
 function (F::Hamiltonian{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
     return F.f(x, p)
 end
-
 function (F::Hamiltonian{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctNumber
     return F.f(x, p, v)
 end
-
 function (F::Hamiltonian{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
     return F.f(x, p, v)
 end
-
 function (F::Hamiltonian{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctNumber
     return F.f(t, x, p)
 end
-
 function (F::Hamiltonian{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
     return F.f(t, x, p)
 end
-
 function (F::Hamiltonian{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
     return F.f(t, x, p, v)
+end
+
+# ---------------------------------------------------------------------------
+# HamiltonianLift
+function HamiltonianLift(f::Function; 
+    autonomous::Bool=true, variable::Bool=false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return HamiltonianLift{time_dependence, variable_dependence}(f)
+end
+
+function HamiltonianLift(f::Function, dependences::DataType...)
+    __check_dependencies(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+    return HamiltonianLift{time_dependence, variable_dependence}(f)
+end
+
+function (H::HamiltonianLift{Autonomous, Fixed})(x::State, p::Costate)::ctNumber
+    return p'*H.X(x)
+end
+function (H::HamiltonianLift{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+    return p'*H.X(x)
+end
+function (H::HamiltonianLift{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctNumber
+    return p'*H.X(x, v)
+end
+function (H::HamiltonianLift{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+    return p'*H.X(x, v)
+end
+function (H::HamiltonianLift{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctNumber
+    return p'*H.X(t, x)
+end
+function (H::HamiltonianLift{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+    return p'*H.X(t, x)
+end
+function (H::HamiltonianLift{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+    return p'*H.X(t, x, v)
 end
 
 # --------------------------------------------------------------------------------------------------

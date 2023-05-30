@@ -121,7 +121,7 @@ function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variab
     # checkings
     is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
     __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
-    (q  > 1) && (length(components_names) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
+    (q  > 1) && (size(components_names, 1) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
     #
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
@@ -180,7 +180,7 @@ function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_nam
     components_names::Vector{String}=__state_components_names(n, name))
     # checkings
     __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set. Use state! once."))
-    (n > 1) && (length(components_names) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    (n  > 1) && (size(components_names, 1) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
     #
     ocp.state_dimension = n
     ocp.state_components_names = components_names
@@ -238,8 +238,8 @@ function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control
     components_names::Vector{String}=__control_components_names(m, name))
     # checkings
     __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set. Use control! once."))
-    (m  > 1) && (length(components_names) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
-    
+    (m  > 1) && (size(components_names, 1) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
+    #
     ocp.control_dimension = m
     ocp.control_components_names = components_names
     ocp.control_name = name
@@ -269,6 +269,7 @@ function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, t0::Time, 
     __check_variable_set(ocp)
     __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
     (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
+    #
     ocp.initial_time = t0
     ocp.final_time = indf
     ocp.time_name = name
@@ -970,6 +971,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
+    nothing
 end
 
 """

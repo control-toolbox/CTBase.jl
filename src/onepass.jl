@@ -392,15 +392,15 @@ end
 macro def(ocp, e, log=false)
     try
         p0 = ParsingInfo()
-	parse!(p0, ocp, e; log=false)
+	    parse!(p0, ocp, e; log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
-	code = parse!(p, ocp, e; log=log)
-	init = @match (__t_dep(p), __v_dep(p)) begin
+	    code = parse!(p, ocp, e; log=log)
+	    init = @match (__t_dep(p), __v_dep(p)) begin
             (false, false) => :( $ocp = Model() )
             (true , false) => :( $ocp = Model(autonomous=false) )
             (false, true ) => :( $ocp = Model(variable=true) )
             _              => :( $ocp = Model(autonomous=false, variable=true) )
-	end
+	    end
         ee = QuoteNode(e)
         code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp ))
         esc(code)

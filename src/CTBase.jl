@@ -26,7 +26,7 @@ using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
-using MacroTools: inexpr, striplines, MacroTools
+using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
 # --------------------------------------------------------------------------------------------------
@@ -90,9 +90,8 @@ include("exception.jl")
 include("description.jl")
 include("callback.jl")
 include("default.jl")
-include("utils.jl")
-#
 include("types.jl")
+include("utils.jl")
 #
 include("checking.jl")
 #
@@ -101,6 +100,7 @@ include("plot.jl")
 #
 include("functions.jl")
 include("model.jl")
+include("differential_geometry.jl")
 #
 include("ctparser_utils.jl")
 #include("ctparser.jl")
@@ -125,6 +125,9 @@ export Description, makeDescription, add, getFullDescription
 export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
+# checking
+export check_time_dependence
+
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
@@ -142,7 +145,10 @@ export OptimalControlSolution
 export plot, plot!
 
 # utils
-export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
+export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
+
+# differential geometry
+export Lie, @Lie, Poisson, @Poisson, HamiltonianLift, AbstractHamiltonian, Lift, ⋅, ∂ₜ
 
 # ctparser_utils
 export replace_call, constraint_type
