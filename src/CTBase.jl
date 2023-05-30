@@ -26,7 +26,8 @@ using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
 using ReplMaker
-using MacroTools: inexpr
+using MacroTools: inexpr, striplines, MacroTools
+using LinearAlgebra
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
@@ -132,13 +133,13 @@ export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, 
 # model
 export OptimalControlModel
 export Model
-export variable!, time!, constraint!, objective!, state!, control!, remove_constraint!, constraint
+export variable!, time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, constraint
 export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
 
 # solution
 export OptimalControlSolution
-export plot
+export plot, plot!
 
 # utils
 export Ad, Poisson, ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts

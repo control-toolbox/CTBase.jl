@@ -4,6 +4,14 @@
 # Display: text/html ?
 # Base.show, Base.print
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
+
+__print(e::Expr, io::IO, l::Int) = begin
+    @match e begin
+        :( ($a, $b) ) => println(io, " "^l, a, ", ", b)
+        _ => println(io, " "^l, e)
+    end
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -18,21 +26,17 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     if !isnothing(ocp.model_expression)
 
         # some checks
-        @assert hasproperty(ocp.model_expression, :args)
         @assert hasproperty(ocp.model_expression, :head)
-        @assert ocp.model_expression.head == :$
-        @assert length(ocp.model_expression.args) == 1
-        @assert hasproperty(ocp.model_expression.args[1], :args)
-        @assert hasproperty(ocp.model_expression.args[1], :head)
-        @assert ocp.model_expression.args[1].head == :block
+
+        #
+        println(io)
 
         # print the code
-        code = ocp.model_expression.args[1]
-        println(io)
-        l = 0
-        for i ∈ eachindex(code.args)
-            e = code.args[i]
-            println(io, " "^l, e)
+        tab  = 0
+        code = MacroTools.striplines(ocp.model_expression)
+        @match code.head begin
+            :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
+            _      => __print(code, io, tab)
         end
         
     elseif __is_complete(ocp) # print the model if is is complete
@@ -195,7 +199,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
 end
 
-function Base.show(io::IO, ocp::OptimalControlModel)
+function Base.show_default(io::IO, ocp::OptimalControlModel)
     print(io, typeof(ocp))
     #show(io, MIME("text/plain"), ocp)
 end
@@ -214,7 +218,7 @@ function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
     print(io, typeof(sol))
 end
 
-function Base.show(io::IO, sol::OptimalControlSolution)
+function Base.show_default(io::IO, sol::OptimalControlSolution)
     print(io, typeof(sol))
     #show(io, MIME("text/plain"), sol)
 end
