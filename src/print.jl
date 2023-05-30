@@ -33,7 +33,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
         # print the code
         tab  = 0
-        code = MacroTools.striplines(ocp.model_expression)
+        code = striplines(ocp.model_expression)
         @match code.head begin
             :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
             _      => __print(code, io, tab)
