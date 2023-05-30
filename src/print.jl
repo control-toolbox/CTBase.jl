@@ -4,6 +4,14 @@
 # Display: text/html ?
 # Base.show, Base.print
 # pretty print : https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing
+
+__print(e::Expr, io::IO, l::Int) = begin
+    @match e begin
+        :( ($a, $b) ) => println(io, " "^l, a, ", ", b)
+        _ => println(io, " "^l, e)
+    end
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -18,21 +26,17 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     if !isnothing(ocp.model_expression)
 
         # some checks
-        @assert hasproperty(ocp.model_expression, :args)
         @assert hasproperty(ocp.model_expression, :head)
-        @assert ocp.model_expression.head == :block
+
+        #
+        println(io)
 
         # print the code
-        code = ocp.model_expression
-        code = striplines(code)
-        println(io)
-        l = 0
-        for i ∈ eachindex(code.args)
-            e = code.args[i]
-            @match e begin
-                :( ($a, $b) ) => println(io, " "^l, a, ", ", b)
-                _ => println(io, " "^l, e)
-            end
+        tab  = 0
+        code = MacroTools.striplines(ocp.model_expression)
+        @match code.head begin
+            :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
+            _      => __print(code, io, tab)
         end
         
     elseif __is_complete(ocp) # print the model if is is complete
@@ -53,7 +57,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         ui_names = ocp.control_components_names
         vi_names = is_variable_dependent(ocp) ? ocp.variable_components_names : []
 
-        # dependences
+        # dependencies
         t_ = is_time_dependent(ocp) ? t_name * ", " : ""
         _v = is_variable_dependent(ocp) ? ", " * v_name : ""
 

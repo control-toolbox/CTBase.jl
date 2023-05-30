@@ -540,22 +540,6 @@ $(TYPEDFIELDS)
 end
 
 # used for checkings
-function __is_state_not_set(ocp::OptimalControlModel)
-    conditions = [
-        isnothing(ocp.state_dimension),
-        isnothing(ocp.state_name),
-        isnothing(ocp.state_components_names)]
-    @assert all(conditions) || !any(conditions) # either all or none
-    return isnothing(ocp.state_dimension)
-end
-function __is_control_not_set(ocp::OptimalControlModel) 
-    conditions = [
-        isnothing(ocp.control_dimension),
-        isnothing(ocp.control_name),
-        isnothing(ocp.control_components_names)]
-    @assert all(conditions) || !any(conditions) # either all or none
-    return isnothing(ocp.control_dimension)
-end
 function __is_variable_not_set(ocp::OptimalControlModel) 
     conditions = [
         isnothing(ocp.variable_dimension),
@@ -564,6 +548,8 @@ function __is_variable_not_set(ocp::OptimalControlModel)
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.variable_dimension)
 end
+__is_variable_set(ocp::OptimalControlModel) = !__is_variable_not_set(ocp)
+
 function __is_time_not_set(ocp::OptimalControlModel)
     conditions = [
         isnothing(ocp.initial_time),
@@ -575,7 +561,30 @@ function __is_time_not_set(ocp::OptimalControlModel)
     return isnothing(ocp.initial_time)
 end
 __is_time_set(ocp::OptimalControlModel) = !__is_time_not_set(ocp)
+
+function __is_state_not_set(ocp::OptimalControlModel)
+    conditions = [
+        isnothing(ocp.state_dimension),
+        isnothing(ocp.state_name),
+        isnothing(ocp.state_components_names)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.state_dimension)
+end
+__is_state_set(ocp::OptimalControlModel) = !__is_state_not_set(ocp)
+
+function __is_control_not_set(ocp::OptimalControlModel) 
+    conditions = [
+        isnothing(ocp.control_dimension),
+        isnothing(ocp.control_name),
+        isnothing(ocp.control_components_names)]
+    @assert all(conditions) || !any(conditions) # either all or none
+    return isnothing(ocp.control_dimension)
+end
+__is_control_set(ocp::OptimalControlModel) = !__is_control_not_set(ocp)
+
 __is_dynamics_not_set(ocp::OptimalControlModel) = isnothing(ocp.dynamics)
+__is_dynamics_set(ocp::OptimalControlModel) = !__is_dynamics_not_set(ocp)
+
 function __is_objective_not_set(ocp::OptimalControlModel)
     conditions = [
         isnothing(ocp.lagrange) && isnothing(ocp.mayer),
@@ -583,8 +592,9 @@ function __is_objective_not_set(ocp::OptimalControlModel)
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.criterion)
 end
+__is_objective_set(ocp::OptimalControlModel) = !__is_objective_not_set(ocp)
+
 __is_empty(ocp::OptimalControlModel) = begin
-    isnothing(ocp.model_expression) &&
     isnothing(ocp.initial_time) && 
     isnothing(ocp.initial_time_name) &&
     isnothing(ocp.final_time) && 
@@ -605,13 +615,18 @@ __is_empty(ocp::OptimalControlModel) = begin
     isnothing(ocp.variable_components_names) &&
     isempty(ocp.constraints)
 end
+
 __is_initial_time_free(ocp) = ocp.initial_time isa Index
+
 __is_final_time_free(ocp) = ocp.final_time isa Index
+
 __is_incomplete(ocp) = begin __is_time_not_set(ocp) || __is_state_not_set(ocp) || 
     __is_control_not_set(ocp) || __is_dynamics_not_set(ocp) || __is_objective_not_set(ocp) ||
     (__is_variable_not_set(ocp) && is_variable_dependent(ocp))
 end
 __is_complete(ocp) = !__is_incomplete(ocp)
+
+__is_criterion_valid(criterion::Symbol) = criterion ∈ [:min, :max]
 
 # --------------------------------------------------------------------------------------------------
 # solution
