@@ -1,5 +1,7 @@
 # onepass
 # todo:
+# - test non autonomous cases
+# - robustify repl
 # - additional checks:
 # (i) when generating functions, there should not be any x or u left
 # (ii) in boundary and mayer, there should not be any left
@@ -7,7 +9,7 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - update constraint_type to gensym all generated function arg names
-# - test non autonomous cases
+# (do the replace call in onepass, not in constraint_type)
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 """
@@ -152,29 +154,26 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     code = @match (has(t0, p.v), has(tf, p.v)) begin
         (false, false) => :( time!($ocp, $t0, $tf, $tt) )
         (true , false) => @match t0 begin
-            :( $v1[$i] ) => (v1 == p.v) ?
-            :( time!($ocp, Index($i), $tf, $tt) ) : return __throw("bad time declaration", p.lnum, p.line)
-            :( $v1     ) => (v1 == p.v) ?
-            quote
-            ($ocp.variable_dimension ≠ 1) &&
-                throw(IncorrectArgument("variable must be of dimension one for a time"))
-                time!($ocp, Index(1), $tf, $tt)
-            end : return __throw("bad time declaration", p.lnum, p.line)
-            _            => return __throw("bad time declaration", p.lnum, p.line) end
+            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, Index($i), $tf, $tt) )
+            :( $v1     ) && if (v1 == p.v) end => quote
+                ($ocp.variable_dimension ≠ 1) &&
+		throw(IncorrectArgument("variable must be of dimension one for a time"))
+                time!($ocp, Index(1), $tf, $tt) end
+            _                                  =>
+	        return __throw("bad time declaration", p.lnum, p.line) end
         (false, true ) => @match tf begin
-            :( $v1[$i] ) => (v1 == p.v) ?
-            :( time!($ocp, $t0, Index($i), $tt) ) : return __throw("bad time declaration", p.lnum, p.line)
-            :( $v1     ) => (v1 == p.v) ?
-            quote
-            ($ocp.variable_dimension ≠ 1) &&
-                throw(IncorrectArgument("variable must be of dimension one for a time"))
-                time!($ocp, $t0, Index(1), $tt)
-            end : return __throw("bad time declaration", p.lnum, p.line)
-            _            => return __throw("bad time declaration", p.lnum, p.line) end
+            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, $t0, Index($i), $tt) )
+            :( $v1     ) && if (v1 == p.v) end => quote
+                ($ocp.variable_dimension ≠ 1) &&
+		throw(IncorrectArgument("variable must be of dimension one for a time"))
+                time!($ocp, $t0, Index(1), $tt) end
+            _                                  =>
+	        return __throw("bad time declaration", p.lnum, p.line) end
         _              => @match (t0, tf) begin
-            (:( $v1[$i] ), :( $v2[$j] )) => (v1 == v2 == p.v) ?
-            :( time!($ocp, Index($i), Index($j), $tt) ) : return __throw("bad time declaration", p.lnum, p.line)
-            _ => return __throw("bad time declaration", p.lnum, p.line) end
+            (:( $v1[$i] ), :( $v2[$j] )) && if (v1 == v2 == p.v) end => 
+                :( time!($ocp, Index($i), Index($j), $tt) )
+            _                                                        =>
+	        return __throw("bad time declaration", p.lnum, p.line) end
     end
     __wrap(code, p.lnum, p.line)
 end

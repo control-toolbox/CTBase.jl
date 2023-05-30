@@ -350,56 +350,41 @@ constraint_type(e, t, t0, tf, x, u, v) = begin
     ut = Symbol(u, "#t")
     @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf), has(e, v) ] begin
         [ true , false, false, false, false, false, _ ] => @match e begin
-            :( $y[$i:$p:$j]($s) ) => (y == x && s == t0) ? (:initial, i:p:j   ) : 
-	                             (:boundary, replace_call(e, x, t0, x0))
-            :( $y[$i:$j   ]($s) ) => (y == x && s == t0) ? (:initial, i:j     ) :
-	                             (:boundary, replace_call(e, x, t0, x0))
-            :( $y[$i      ]($s) ) => (y == x && s == t0) ? (:initial, Index(i)) :
-	                             (:boundary, replace_call(e, x, t0, x0))
-            :( $y($s)           ) => (y == x && s == t0) ? (:initial, nothing ) : 
-	                             (:boundary, replace_call(e, x, t0, x0))
-	    _                     => (:boundary, replace_call(e, x, t0, x0)) end
+            :( $y[$i:$p:$j]($s) ) && if (y == x && s == t0) end => (:initial, i:p:j   )
+            :( $y[$i:$j   ]($s) ) && if (y == x && s == t0) end => (:initial, i:j     )
+            :( $y[$i      ]($s) ) && if (y == x && s == t0) end => (:initial, Index(i))
+            :( $y($s)           ) && if (y == x && s == t0) end => (:initial, nothing )
+	    _                                                   => (:boundary, replace_call(e, x, t0, x0)) end
         [ false, true , false, false, false, false, _ ] => @match e begin 
-            :( $y[$i:$p:$j]($s) ) => (y == x && s == tf) ? (:final, i:p:j   ) :
-	                             (:boundary, replace_call(e, x, tf, xf))
-            :( $y[$i:$j   ]($s) ) => (y == x && s == tf) ? (:final, i:j     ) :
-	                             (:boundary, replace_call(e, x, tf, xf))
-            :( $y[$i      ]($s) ) => (y == x && s == tf) ? (:final, Index(i)) :
-	                             (:boundary, replace_call(e, x, tf, xf))
-            :( $y($s) )           => (y == x && s == tf) ? (:final, nothing ) :
-	                             (:boundary, replace_call(e, x, tf, xf))
-	    _                     => (:boundary, replace_call(e, x, tf, xf)) end
+            :( $y[$i:$p:$j]($s) ) && if (y == x && s == tf) end => (:final, i:p:j   )
+            :( $y[$i:$j   ]($s) ) && if (y == x && s == tf) end => (:final, i:j     )
+            :( $y[$i      ]($s) ) && if (y == x && s == tf) end => (:final, Index(i))
+            :( $y($s) )           && if (y == x && s == tf) end => (:final, nothing )
+	    _                                                   => (:boundary, replace_call(e, x, tf, xf)) end
         [ true , true , false, false, false, false, _ ] => begin
             e = replace_call(e, x, t0, x0)
             e = replace_call(e, x, tf, xf)
             (:boundary, e) end
         [ false, false, true , false, false, false, _ ] => @match e begin
-            :( $c[$i:$p:$j]($s) ) => (c == u && s == t ) ? (:control_range, i:p:j   ) :
-	                             (:control_fun, replace_call(e, u, t, ut))
-            :( $c[$i:$j   ]($s) ) => (c == u && s == t ) ? (:control_range, i:j     ) :
-	                             (:control_fun, replace_call(e, u, t, ut))
-            :( $c[$i      ]($s) ) => (c == u && s == t ) ? (:control_range, Index(i)) :
-	                             (:control_fun, replace_call(e, u, t, ut))
-            :( $c($s)           ) => (c == u && s == t ) ? (:control_range, nothing ) :
-	                             (:control_fun, replace_call(e, u, t, ut))
-	    _                     => (:control_fun, replace_call(e, u, t, ut)) end
+            :( $c[$i:$p:$j]($s) ) && if (c == u && s == t) end => (:control_range, i:p:j   )
+            :( $c[$i:$j   ]($s) ) && if (c == u && s == t) end => (:control_range, i:j     )
+            :( $c[$i      ]($s) ) && if (c == u && s == t) end => (:control_range, Index(i))
+            :( $c($s)           ) && if (c == u && s == t) end => (:control_range, nothing )
+	    _                                                  => (:control_fun, replace_call(e, u, t, ut)) end
         [ false, false, false, true , false, false, _ ] => @match e begin
-            :( $y[$i:$p:$j]($s) ) => (y == x && s == t ) ? (:state_range, i:p:j   ) :
-	                             (:state_fun, replace_call(e, x, t, xt))
-            :( $y[$i:$j   ]($s) ) => (y == x && s == t ) ? (:state_range, i:j     ) :
-	                             (:state_fun, replace_call(e, x, t, xt))
-            :( $y[$i      ]($s) ) => (y == x && s == t ) ? (:state_range, Index(i)) :
-	                             (:state_fun, replace_call(e, x, t, xt))
-            :( $y($s)           ) => (y == x && s == t ) ? (:state_range, nothing ) :
-	                             (:state_fun, replace_call(e, x, t, xt))
-	    _                     => (:state_fun, replace_call(e, x, t, xt)) end
+            :( $y[$i:$p:$j]($s) ) && if (y == x && s == t) end => (:state_range, i:p:j   )
+            :( $y[$i:$j   ]($s) ) && if (y == x && s == t) end => (:state_range, i:j     )
+            :( $y[$i      ]($s) ) && if (y == x && s == t) end => (:state_range, Index(i))
+            :( $y($s)           ) && if (y == x && s == t) end => (:state_range, nothing )
+	    _                                                  => (:state_fun, replace_call(e, x, t, xt)) end
         [ false, false, true , true , false, false, _ ] =>
             (:mixed, replace_call(e, [ x, u ], t, [ xt, ut ]))
         [ false, false, false, false, false, false, true ] => @match e begin
-            :( $w[$i:$p:$j]     ) => (w == v) ? (:variable_range, i:p:j   ) : (:variable_fun, e)
-            :( $w[$i:$j   ]     ) => (w == v) ? (:variable_range, i:j     ) : (:variable_fun, e)
-            :( $w[$i      ]     ) => (w == v) ? (:variable_range, Index(i)) : (:variable_fun, e)
-            _                     => (e == v) ? (:variable_range, nothing ) : (:variable_fun, e) end
+            :( $w[$i:$p:$j]     ) && if (w == v) end => (:variable_range, i:p:j   )
+            :( $w[$i:$j   ]     ) && if (w == v) end => (:variable_range, i:j     )
+            :( $w[$i      ]     ) && if (w == v) end => (:variable_range, Index(i))
+            _                     && if (e == v) end => (:variable_range, nothing )
+	    _                                        => (:variable_fun, e) end
         _ => :other
     end
 end

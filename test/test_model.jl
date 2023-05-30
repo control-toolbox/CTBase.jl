@@ -2,7 +2,7 @@ function test_model() # 30 55 185
 
 ∅ = Vector{Real}()
 
-@testset "variable" begin
+@testset "variable!" begin
     ocp = Model(variable=false)
     @test_throws UnauthorizedCall variable!(ocp, 1)
     @test_throws UnauthorizedCall constraint!(ocp, :variable, 2:3, [ 0, 3 ])
@@ -1011,7 +1011,6 @@ end
     @test ocp.mayer([2, 3], [5, 6]) == 2
     @test ocp.lagrange([1, 2], [3, 4]) == 4.5
 
-    # replacing the objective
     ocp = Model()
     time!(ocp, 0, 1)
     state!(ocp, 2)
@@ -1019,10 +1018,62 @@ end
     objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
     @test ocp.lagrange([1, 2], [3, 4]) == 4.5
     @test isnothing(ocp.mayer)
+
+    ocp = Model()
+    time!(ocp, 0, 1)
+    state!(ocp, 2)
+    control!(ocp, 2)
     objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
     @test ocp.mayer([2, 3], [5, 6]) == 2
     @test isnothing(ocp.lagrange)
 
+end
+
+@testset "redeclarations" begin
+
+    ocp = Model(variable=true)
+    variable!(ocp, 1)
+    @test_throws UnauthorizedCall variable!(ocp, 1)
+
+    ocp = Model()
+    time!(ocp, 0, 1)
+    @test_throws UnauthorizedCall time!(ocp, 0, 1)
+
+    ocp = Model()
+    state!(ocp, 1)
+    @test_throws UnauthorizedCall state!(ocp, 1)
+
+    ocp = Model()
+    control!(ocp, 1)
+    @test_throws UnauthorizedCall control!(ocp, 1)
+
+    ocp = Model()
+    time!(ocp, 0, 1)
+    state!(ocp, 1)
+    control!(ocp, 1)
+    dynamics!(ocp, (x, u) -> x + u)
+    @test_throws UnauthorizedCall dynamics!(ocp, (x, u) -> x + u)
+
+    ocp = Model()
+    time!(ocp, 0, 1)
+    state!(ocp, 1)
+    control!(ocp, 1)
+    objective!(ocp, :mayer, (x0, xf) -> x0 + xf)
+    @test_throws UnauthorizedCall objective!(ocp, :mayer, (x0, xf) -> x0 + xf)
+
+    ocp = Model()
+    time!(ocp, 0, 1)
+    state!(ocp, 1)
+    control!(ocp, 1)
+    objective!(ocp, :lagrange, (x, u) -> x + u)
+    @test_throws UnauthorizedCall objective!(ocp, :lagrange, (x, u) -> x + u)
+
+    ocp = Model()
+    time!(ocp, 0, 1)
+    state!(ocp, 1)
+    control!(ocp, 1)
+    objective!(ocp, :bolza, (x0, xf) -> x0 + xf, (x, u) -> x + u)
+    @test_throws UnauthorizedCall objective!(ocp, :bolza, (x0, xf) -> x0 + xf, (x, u) -> x + u) 
 end
 
 end

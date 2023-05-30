@@ -876,6 +876,8 @@ end
 @test o.constraints[:eq14][4] == Inf
 @test o.constraints[:eq15][4] == Inf
 
+@test_throws ParsingError @def o t ∈ 1
+
 # tests from ct_parser.jl
 
     # phase 1: minimal problems, to check all possible syntaxes
@@ -1592,7 +1594,6 @@ end
         u ∈ R, control
 
         ẋ(t) == 2x(t) + u(t)^2
-        ẋ(t) == f(x(t), u(t))
     end
     @test ocp13 isa OptimalControlModel
     @test ocp13.state_dimension   == 1
