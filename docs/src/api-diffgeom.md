@@ -1,4 +1,4 @@
-# Exceptions
+# Differential geometry
 
 ```@meta
 CurrentModule =  CTBase
@@ -7,6 +7,6 @@ CurrentModule =  CTBase
 ```@autodocs
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Pages = ["exception.jl"]
+Pages = ["differential_geometry.jl"]
 Private = false
 ```

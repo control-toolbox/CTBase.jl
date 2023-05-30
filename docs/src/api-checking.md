@@ -1,4 +1,4 @@
-# Solution
+# Checkings
 
 ```@meta
 CurrentModule =  CTBase
@@ -7,6 +7,6 @@ CurrentModule =  CTBase
 ```@autodocs
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Pages = ["solution.jl"]
+Pages = ["checking.jl"]
 Private = false
 ```

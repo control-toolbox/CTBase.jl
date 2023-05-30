@@ -1,4 +1,4 @@
-# Exceptions
+# Types
 
 ```@meta
 CurrentModule =  CTBase
@@ -7,6 +7,6 @@ CurrentModule =  CTBase
 ```@autodocs
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Pages = ["exception.jl"]
+Pages = ["types.jl"]
 Private = false
 ```
