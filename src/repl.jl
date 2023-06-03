@@ -1,14 +1,12 @@
 const ModelRepl = Vector{Expr}
 
 @with_kw mutable struct CTRepl
-    model::ModelRepl = __init_model_repl()
+    model::ModelRepl = ModelRepl()
     ocp_name::Symbol = gensym(:ocp)
     sol_name::Symbol = gensym(:sol)
     debug::Bool = false
     __demo::Union{Nothing, Bool} = nothing
 end
-
-__init_model_repl() = ModelRepl()
 
 @with_kw mutable struct HistoryRepl
     index::Int=0
@@ -35,7 +33,8 @@ function __init_repl(; debug=false, demo=false)
     __add!(history, ct_repl)
 
     # text invalid
-    txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a valid expression to update the model."
+    txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a " *
+                    "valid expression to update the model."
 
     function parse_to_expr(s::AbstractString)
         
@@ -85,8 +84,9 @@ function __init_repl(; debug=false, demo=false)
             try 
                 __eval_ocp(ct_repl, e)      # test if code is valid: if not, an exception is thrown
             catch ex
-                println(txt_invalid)
                 ct_repl.debug && (println("debug> exception thrown: ", ex))
+                println(txt_invalid)
+                return nothing
             end
             
             # update model
@@ -106,7 +106,7 @@ function __init_repl(; debug=false, demo=false)
 
         end
 
-    end
+    end # parse_to_expr
 
     # makerepl command
     initrepl(parse_to_expr,
@@ -207,7 +207,7 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
         return :($ct_repl)
     end,
     :CLEAR => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        ct_repl.model = __init_model_repl()
+        ct_repl.model = ModelRepl()
         __add!(history, ct_repl) # update history
         return COMMANDS_ACTIONS[:SHOW](ct_repl, history)
     end,
