@@ -37,6 +37,19 @@ end
 
 Lie(X::VectorField, f::Function)::Function = X⋅f
 
+function Lie(X::Function, f::Function; autonomous::Bool=true, variable::Bool=false)::Function
+    time_dependence = autonomous ? Autonomous : NonAutonomous 
+    variable_dependence = variable ? NonFixed : Fixed
+    return Lie(VectorField(X, time_dependence, variable_dependence), f)
+end
+
+function Lie(X::Function, f::Function, dependences::DataType...)::Function
+    __check_dependencies(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+    return Lie(VectorField(X, time_dependence, variable_dependence), f)
+end
+
 # ---------------------------------------------------------------------------
 # partial derivative wrt time
 ∂ₜ(f) = (t, args...) -> ctgradient(y -> f(y, args...), t)
@@ -69,19 +82,6 @@ end
 
 function Lie(X::VectorField{NonAutonomous, V}, Y::VectorField{NonAutonomous, V})::VectorField{NonAutonomous, V} where {V<:VariableDependence}
     return VectorField((t, x, args...) -> (X⅋Y)(t, x, args...)-(Y⅋X)(t, x, args...), NonAutonomous, V)
-end
-
-function Lie(X::Function, Y::Function; autonomous::Bool=true, variable::Bool=false)::VectorField
-    time_dependence = autonomous ? Autonomous : NonAutonomous 
-    variable_dependence = variable ? NonFixed : Fixed
-    return Lie(VectorField(X, time_dependence, variable_dependence), VectorField(Y, time_dependence, variable_dependence))
-end
-
-function Lie(X::Function, Y::Function, dependences::DataType...)::VectorField
-    __check_dependencies(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
-    return Lie(VectorField(X, time_dependence, variable_dependence), VectorField(Y, time_dependence, variable_dependence))
 end
 
 # ---------------------------------------------------------------------------
@@ -122,6 +122,20 @@ end
 
 function Poisson(f::HamiltonianLift{T, V}, g::HamiltonianLift{T, V})::HamiltonianLift{T, V} where {T <: TimeDependence, V <: VariableDependence}
     return HamiltonianLift(Lie(f.X, g.X))
+end
+
+function Poisson(f::Function, g::Function; autonomous::Bool=true, variable::Bool=false)::Hamiltonian
+    time_dependence = autonomous ? Autonomous : NonAutonomous 
+    variable_dependence = variable ? NonFixed : Fixed
+    return Poisson(Hamiltonian(f, time_dependence, variable_dependence), Hamiltonian(g, time_dependence, variable_dependence))
+end
+
+function Poisson(f::Function, g::AbstractHamiltonian{T, V})::Hamiltonian where {T<:TimeDependence, V<:VariableDependence}
+    return Poisson(Hamiltonian(f, T, V), g)
+end
+
+function Poisson(f::AbstractHamiltonian{T, V}, g::Function)::Hamiltonian where {T<:TimeDependence, V<:VariableDependence}
+    return Poisson(f, Hamiltonian(g, T, V))
 end
 
 # ---------------------------------------------------------------------------

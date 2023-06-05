@@ -137,31 +137,31 @@ function HamiltonianVectorField(f::Function, dependencies::DataType...)
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
 end
 
-function (F::HamiltonianVectorField{Autonomous, Fixed})(x::State, p::Costate)::ctVector
+function (F::HamiltonianVectorField{Autonomous, Fixed})(x::State, p::Costate)::Tuple{DState, DCostate}
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::Tuple{DState, DCostate}
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::Tuple{DState, DCostate}
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::Tuple{DState, DCostate}
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctVector
+function (F::HamiltonianVectorField{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::Tuple{DState, DCostate}
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::Tuple{DState, DCostate}
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::HamiltonianVectorField{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::Tuple{DState, DCostate}
     return F.f(t, x, p, v)
 end
 

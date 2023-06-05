@@ -86,45 +86,61 @@ function test_differential_geometry()
     @testset "Directional derivative of a scalar function" begin
     
         # autonomous, dim 2
-        X = VectorField(x -> [x[2], -x[1]])
+        φ = x -> [x[2], -x[1]]
+        X = VectorField(φ)
         f = x -> x[1]^2 + x[2]^2
         Test.@test (X⋅f)([1, 2]) == 0
-        Test.@test X⋅f == Lie(X,f)
+        Test.@test (X⋅f)([1, 2]) == Lie(X,f)([1, 2])
+        Test.@test Lie(φ,f)([1, 2]) == 0
 
         # autonomous, dim 1
-        X = VectorField(x -> 2x)
+        φ = x -> 2x
+        X = VectorField(φ)
         f = x -> x^2
         Test.@test (X⋅f)(1) == 4
+        Test.@test Lie(φ,f)(1) == 4
     
         # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
+        φ = (t, x) -> [t + x[2], -x[1]]
+        X = VectorField(φ, NonAutonomous)
         f = (t, x) -> t + x[1]^2 + x[2]^2
         Test.@test (X⋅f)(1, [1, 2]) == 2
+        Test.@test Lie(φ, f, NonAutonomous)(1, [1, 2]) == 2
 
         # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x+t, NonAutonomous)
+        φ = (t, x) -> 2x+t
+        X = VectorField(φ, NonAutonomous)
         f = (t, x) -> t + x^2
         Test.@test (X⋅f)(1, 1) == 6
+        Test.@test Lie(φ, f, NonAutonomous)(1, 1) == 6
 
         # autonomous, nonfixed, dim 2
-        X = VectorField((x, v) -> [x[2] + v[1], -x[1] + v[2]], NonFixed)
+        φ = (x, v) -> [x[2] + v[1], -x[1] + v[2]]
+        X = VectorField(φ, NonFixed)
         f = (x, v) -> x[1]^2 + x[2]^2
         Test.@test (X⋅f)([1, 2], [2, 1]) == 8
+        Test.@test Lie(φ, f, NonFixed)([1, 2], [2, 1]) == 8
 
         # autonomous, nonfixed, dim 1
-        X = VectorField((x, v) -> 2x + v, NonFixed)
+        φ = (x, v) -> 2x+v
+        X = VectorField(φ, NonFixed)
         f = (x, v) -> x^2
         Test.@test (X⋅f)(1, 1) == 6
+        Test.@test Lie(φ, f, NonFixed)(1, 1) == 6
     
         # nonautonomous, nonfixed, dim 2
-        X = VectorField((t, x, v) -> [t + x[2], -x[1]], NonAutonomous, NonFixed)
+        φ = (t, x, v) -> [t + x[2] + v[1], -x[1] + v[2]]
+        X = VectorField(φ, NonAutonomous, NonFixed)
         f = (t, x, v) -> t + x[1]^2 + x[2]^2
-        Test.@test (X⋅f)(1, [1, 2], 1) == 2
+        Test.@test (X⋅f)(1, [1, 2], [2, 1]) == 10
+        Test.@test Lie(φ, f, NonAutonomous, NonFixed)(1, [1, 2], [2, 1]) == 10
 
         # nonautonomous, nonfixed, dim 1
-        X = VectorField((v, t, x) -> 2x+t+v, NonAutonomous, NonFixed)
+        φ = (t, x, v) -> 2x+t+v
+        X = VectorField(φ, NonAutonomous, NonFixed)
         f = (t, x, v) -> t + x^2
         Test.@test (X⋅f)(1, 1, 1) == 8
+        Test.@test Lie(φ, f, NonAutonomous, NonFixed)(1, 1, 1) == 8
     
     end
 
@@ -180,7 +196,6 @@ function test_differential_geometry()
             X = VectorField(f)
             Y = VectorField(g)
             Test.@test Lie(X, Y)([1, 2]) == [7, -14]
-            Test.@test Lie(X, Y)([1, 2]) == Lie(f, g)([1, 2])
         end
 
         @testset "nonautonomous case" begin
@@ -189,7 +204,6 @@ function test_differential_geometry()
             X = VectorField(f, NonAutonomous)
             Y = VectorField(g, NonAutonomous)
             Test.@test Lie(X, Y)(1, [1, 2]) == [-5,11]
-            Test.@test Lie(X, Y)(1, [1, 2]) == Lie(f, g, autonomous=false)(1, [1, 2])
         end
 
         @testset "autonomous nonfixed case" begin
@@ -198,7 +212,6 @@ function test_differential_geometry()
             X = VectorField(f, NonFixed)
             Y = VectorField(g, variable=true)
             Test.@test Lie(X, Y)([1, 2], 1) == [6, -15]
-            Test.@test Lie(X, Y)([1, 2], 1) == Lie(f, g, NonFixed)([1, 2], 1)
         end
 
         @testset "nonautonomous nonfixed case" begin
@@ -207,7 +220,6 @@ function test_differential_geometry()
             X = VectorField(f, NonAutonomous, NonFixed)
             Y = VectorField(g, NonAutonomous, NonFixed)
             Test.@test Lie(X, Y)(1, [1, 2], 1) == [-7,12]
-            Test.@test Lie(X, Y)(1, [1, 2], 1) == Lie(f, g, autonomous=false, variable=true)(1, [1, 2], 1)
         end
 
         @testset "mri example" begin
@@ -246,11 +258,17 @@ function test_differential_geometry()
             h = (x, p) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2
             f₊g = (x, p) -> f(x, p) + g(x, p)
             fg = (x, p) -> f(x, p)*g(x, p)
+            #
             F = Hamiltonian(f)
             G = Hamiltonian(g)
             H = Hamiltonian(h) 
             F₊G = Hamiltonian(f₊g)
             FG = Hamiltonian(fg)
+            #
+            Test.@test Poisson(f, g)([1, 2], [2, 1]) == 20            
+            Test.@test Poisson(f, G)([1, 2], [2, 1]) == 20
+            Test.@test Poisson(F, g)([1, 2], [2, 1]) == 20
+            #
             Test.@test Poisson(F, Hamiltonian((x,p) -> 42))([1, 2], [2, 1]) == 0
             Test.@test Poisson(F, G)([1, 2], [2, 1]) == 20
             Test.@test Poisson(F, G)([1, 2], [2, 1]) == - Poisson(G, F)([1, 2], [2, 1]) # anticommutativity
@@ -271,6 +289,11 @@ function test_differential_geometry()
             H = Hamiltonian(h, autonomous=false) 
             F₊G = Hamiltonian(f₊g, autonomous=false)
             FG = Hamiltonian(fg, autonomous=false)
+            #
+            Test.@test Poisson(f, g, autonomous=false)(2, [1, 2], [2, 1]) == 28
+            Test.@test Poisson(f, G)(2, [1, 2], [2, 1]) == 28
+            Test.@test Poisson(F, g)(2, [1, 2], [2, 1]) == 28
+            #
             Test.@test Poisson(F, Hamiltonian((t, x, p) -> 42, autonomous=false))(2, [1, 2], [2, 1]) == 0
             Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == 28
             Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == - Poisson(G, F)(2, [1, 2], [2, 1]) # anticommutativity

@@ -62,23 +62,23 @@ end
     @test HamiltonianVectorField(dummy_function, Autonomous, NonFixed) == HamiltonianVectorField(dummy_function, autonomous=true, variable=true)
     @test HamiltonianVectorField(dummy_function, NonAutonomous, NonFixed) == HamiltonianVectorField(dummy_function, autonomous=false, variable=true)
 
-    @test_throws IncorrectArgument HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-    @test_throws IncorrectArgument HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-    Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], autonomous=true, variable=false)
-    @test Hv([1, 0], [0, 1]) == [3, -3]
+    @test_throws IncorrectArgument HamiltonianVectorField((x, p) -> ([x[1]^2+2p[2]], [x[2]-3p[2]^2]), Int64)
+    @test_throws IncorrectArgument HamiltonianVectorField((x, p) -> ([x[1]^2+2p[2]], [x[2]-3p[2]^2]), Int64)
+    Hv = HamiltonianVectorField((x, p) -> ([x[1]^2+2p[2]], [x[2]-3p[2]^2]), autonomous=true, variable=false)
+    @test Hv([1, 0], [0, 1]) == ([3], [-3])
     t = 1
     v = Real[]
     @test_throws MethodError Hv(t, [1, 0], [0, 1])
     @test_throws MethodError Hv([1, 0], [0, 1], v)
-    @test Hv(t, [1, 0], [0, 1], v) == [3, -3]
-    Hv = HamiltonianVectorField((x, p, v) -> [x[1]^2+2p[2]+v[3], x[2]-3p[2]^2], autonomous=true, variable=true)
-    @test Hv([1, 0], [0, 1], [1, 2, 3]) == [6, -3]
-    @test Hv(t, [1, 0], [0, 1], [1, 2, 3]) == [6, -3]
-    Hv = HamiltonianVectorField((t, x, p) -> [t+x[1]^2+2p[2], x[2]-3p[2]^2], autonomous=false, variable=false)
-    @test Hv(1, [1, 0], [0, 1]) == [4, -3]
-    @test Hv(1, [1, 0], [0, 1], v) == [4, -3]
-    Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p[2]^2], autonomous=false, variable=true)
-    @test Hv(1, [1, 0], [0, 1], [1, 2, 3]) == [7, -3]
+    @test Hv(t, [1, 0], [0, 1], v) == ([3], [-3])
+    Hv = HamiltonianVectorField((x, p, v) -> ([x[1]^2+2p[2]+v[3]], [x[2]-3p[2]^2]), autonomous=true, variable=true)
+    @test Hv([1, 0], [0, 1], [1, 2, 3]) == ([6], [-3])
+    @test Hv(t, [1, 0], [0, 1], [1, 2, 3]) == ([6], [-3])
+    Hv = HamiltonianVectorField((t, x, p) -> ([t+x[1]^2+2p[2]], [x[2]-3p[2]^2]), autonomous=false, variable=false)
+    @test Hv(1, [1, 0], [0, 1]) == ([4], [-3])
+    @test Hv(1, [1, 0], [0, 1], v) == ([4], [-3])
+    Hv = HamiltonianVectorField((t, x, p, v) -> ([t+x[1]^2+2p[2]+v[3]], [x[2]-3p[2]^2]), autonomous=false, variable=true)
+    @test Hv(1, [1, 0], [0, 1], [1, 2, 3]) == ([7], [-3])
 end
 
 @testset "VectorField" begin

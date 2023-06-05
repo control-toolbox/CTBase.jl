@@ -85,6 +85,10 @@ Type alias for a dimension.
 const Dimension = Integer
 
 #
+const DState     = ctVector
+const DCostate   = ctVector
+
+#
 include("exception.jl")
 include("description.jl")
 include("callback.jl")
@@ -110,6 +114,7 @@ include("repl.jl")
 export ctNumber, ctVector, Time, Times, TimesDisc
 
 export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
+export DState, DCostate
 export TimeDependence, Autonomous, NonAutonomous
 export VariableDependence, NonFixed, Fixed
 

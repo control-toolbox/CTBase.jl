@@ -74,7 +74,7 @@ $(TYPEDSIGNATURES)
 Return the gradient of `f` at `x`.
 """
 function ctgradient(f::Function, x::ctNumber)
-    return ForwardDiff.gradient(x -> f(x[1]), [x])[1]
+    return ForwardDiff.derivative(x -> f(x), x)
 end
 
 """
