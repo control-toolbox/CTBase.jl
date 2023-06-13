@@ -1,5 +1,7 @@
 # onepass
 # todo:
+# -  0.5∫( u(t)^2 ) → min
+# - cannot call solve if problem not fully defined (dynamics not defined...)
 # - test non autonomous cases
 # - robustify repl
 # - additional checks:
