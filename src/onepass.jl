@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - update constraint_type to gensym all generated function arg names
 # - test non autonomous cases
 # - robustify repl
 # - additional checks:
@@ -8,7 +9,6 @@
 # in both cases, has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
-# - update constraint_type to gensym all generated function arg names
 # (do the replace call in onepass, not in constraint_type)
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
