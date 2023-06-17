@@ -1,14 +1,11 @@
 # onepass
 # todo:
-# - constraint_type + onepass: (..., nothing) -> ...
 # - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2...
 #   (most internal first)
 # - test non autonomous cases
 # - robustify repl
-# - additional checks:
-# (i) when generating functions, there should not be any x or u left
-# (ii) in boundary and mayer, there should not be any left
-# in both cases, has(ee, x/u/t) must be false (postcondition)
+# - additional checks: when generating functions (constraints, dynamics, costs), there should not be any x or u left
+#   (but the user might indeed do so); meaning that has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
