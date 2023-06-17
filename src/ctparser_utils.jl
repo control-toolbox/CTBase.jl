@@ -366,7 +366,7 @@ constraint_type(e, t, t0, tf, x, u, v) = begin
             :( $w[$i:$j   ]     ) && if (w == v) end => (:variable_range, i:j     )
             :( $w[$i      ]     ) && if (w == v) end => (:variable_range, Index(i))
             _                     && if (e == v) end => (:variable_range, nothing )
-	    _                                        => (:variable_fun, e) end
+	    _                                        => (:variable_fun  , nothing ) end
         _ => :other
     end
 end

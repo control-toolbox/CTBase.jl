@@ -1,7 +1,6 @@
 # onepass
 # todo:
-# - update constraint_type to gensym all generated function arg names
-# - projections: wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2...
+# - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2...
 #   (most internal first)
 # - test non autonomous cases
 # - robustify repl
@@ -11,7 +10,6 @@
 # in both cases, has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
-# (do the replace call in onepass, not in constraint_type)
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 """
@@ -211,10 +209,12 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:boundary, ee2) => begin
+        (:boundary, _) => begin
             gs = gensym()
-            x0 = Symbol(p.x, "#0")
-            xf = Symbol(p.x, "#f")
+            x0 = gensym()
+            xf = gensym()
+	    ee2 = replace_call(e2 , p.x, p.t0, x0)
+	    ee2 = replace_call(ee2, p.x, p.tf, xf)
 	    args = [ x0, xf ]; __v_dep(p) && push!(args, p.v);
             quote
                 function $gs($(args...))
@@ -223,10 +223,11 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :boundary; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:control_range, rg) => :( constraint!($ocp, :control; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:control_fun, ee2) => begin
-            p.t_dep = p.t_dep || has(ee2, p.t)
+        (:control_fun  , _ ) => begin
             gs = gensym()
-            ut = Symbol(p.u, "#t")
+            ut = gensym()
+	    ee2 = replace_call(e2, p.u, p.t, ut)
+            p.t_dep = p.t_dep || has(ee2, p.t)
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
@@ -235,10 +236,11 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :control; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:state_range, rg) => :( constraint!($ocp, :state; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:state_fun, ee2) => begin
-            p.t_dep = p.t_dep || has(ee2, p.t)
+        (:state_fun  , _ ) => begin
             gs = gensym()
-            xt = Symbol(p.x, "#t")
+            xt = gensym()
+	    ee2 = replace_call(e2, p.x, p.t, xt)
+            p.t_dep = p.t_dep || has(ee2, p.t)
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
@@ -247,20 +249,21 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :state; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:variable_fun, ee2) => begin
+        (:variable_fun  , _ ) => begin
             gs = gensym()
 	    args = [ p.v ]
             quote
                 function $gs($(args...))
-                    $ee2
+                    $e2
                 end
                 constraint!($ocp, :variable; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:mixed, ee2) => begin
-            p.t_dep = p.t_dep || has(ee2, p.t)
+        (:mixed, _) => begin
             gs = gensym()
-            xt = Symbol(p.x, "#t")
-            ut = Symbol(p.u, "#t")
+            xt = gensym()
+            ut = gensym()
+	    ee2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
+            p.t_dep = p.t_dep || has(ee2, p.t)
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
@@ -282,8 +285,8 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
     x ≠ p.x && return __throw("wrong state for dynamics", p.lnum, p.line)
     t ≠ p.t && return __throw("wrong time for dynamics", p.lnum, p.line)
-    xt = Symbol(p.x, "#t")
-    ut = Symbol(p.u, "#t")
+    xt = Symbol(p.x, "#t") # debug
+    ut = Symbol(p.u, "#t") # debug
     e = replace_call(e, [ p.x, p.u ], p.t, [ xt, ut ])
     p.t_dep = p.t_dep || has(e, t)
     gs = gensym()

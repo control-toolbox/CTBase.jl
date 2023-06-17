@@ -91,7 +91,7 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 @test constraint_type(:( v[1:10]               ), t, t0, tf, x, u, v) == (:variable_range, 1:10)
 @test constraint_type(:( v[2]                  ), t, t0, tf, x, u, v) == (:variable_range, Index(2))
 @test constraint_type(:( v                     ), t, t0, tf, x, u, v) == (:variable_range, nothing)
-@test constraint_type(:( v^2 + 1               ), t, t0, tf, x, u, v) == (:variable_fun, :(v ^ 2 + 1))
-@test constraint_type(:( v[2]^2 + 1            ), t, t0, tf, x, u, v) == (:variable_fun, :(v[2] ^ 2 + 1))
+@test constraint_type(:( v^2 + 1               ), t, t0, tf, x, u, v) == (:variable_fun, nothing)
+@test constraint_type(:( v[2]^2 + 1            ), t, t0, tf, x, u, v) == (:variable_fun, nothing)
 
 end
