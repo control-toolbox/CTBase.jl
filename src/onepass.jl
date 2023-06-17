@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - constraint_type + onepass: (..., nothing) -> ...
 # - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2...
 #   (most internal first)
 # - test non autonomous cases
@@ -209,7 +210,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:boundary, _) => begin
+         :boundary     => begin
             gs = gensym()
             x0 = gensym()
             xf = gensym()
@@ -223,7 +224,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :boundary; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:control_range, rg) => :( constraint!($ocp, :control; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:control_fun  , _ ) => begin
+         :control_fun        => begin
             gs = gensym()
             ut = gensym()
 	    ee2 = replace_call(e2, p.u, p.t, ut)
@@ -236,7 +237,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :control; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:state_range, rg) => :( constraint!($ocp, :state; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:state_fun  , _ ) => begin
+         :state_fun        => begin
             gs = gensym()
             xt = gensym()
 	    ee2 = replace_call(e2, p.x, p.t, xt)
@@ -249,7 +250,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :state; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:variable_fun  , _ ) => begin
+         :variable_fun        => begin
             gs = gensym()
 	    args = [ p.v ]
             quote
@@ -258,7 +259,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 end
                 constraint!($ocp, :variable; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:mixed, _) => begin
+         :mixed => begin
             gs = gensym()
             xt = gensym()
             ut = gensym()
