@@ -1,10 +1,7 @@
 # onepass
 # todo:
-# -  0.5∫( u(t)^2 ) → min
 # - cannot call solve if problem not fully defined (dynamics not defined...)
-# - update constraint_type to gensym all generated function arg names
-# - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2...
-#   (most internal first)
+# - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2... (most internal first)
 # - test non autonomous cases
 # - robustify repl
 # - additional checks: when generating functions (constraints, dynamics, costs), there should not be any x or u left
