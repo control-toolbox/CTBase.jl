@@ -1,6 +1,8 @@
 # onepass
 # todo:
 # - update constraint_type to gensym all generated function arg names
+# - projections: wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2...
+#   (most internal first)
 # - test non autonomous cases
 # - robustify repl
 # - additional checks:

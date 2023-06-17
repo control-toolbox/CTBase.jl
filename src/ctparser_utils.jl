@@ -63,7 +63,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Replace calls in e of the form `(...x...)(t)` by `(...y...)(t)`.
+Replace calls in e of the form `(...x...)(t)` by `(...y...)`.
 
 # Example
 ```jldoctest
@@ -103,7 +103,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Replace calls in e of the form `(...x1...x2...)(t)` by `(...y1...y2...)(t)` for all symbols `x1`, `x2`... in the vector `x`.
+Replace calls in e of the form `(...x1...x2...)(t)` by `(...y1...y2...)` for all symbols `x1`, `x2`... in the vector `x`.
 
 # Example
 ```jldoctest
