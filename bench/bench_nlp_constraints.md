@@ -56,7 +56,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
     vl = Vector{ctNumber}()
     vu = Vector{ctNumber}()
     for (_, c) = constraints
-        @match c begin
+        MLStyle.@match c begin
                 (:initial, f::BoundaryConstraint, lb, ub) => begin
                         push!(ϕf, f)
                         append!(ϕl, lb)
@@ -218,7 +218,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
     vl = Vector{ctNumber}()
     vu = Vector{ctNumber}()
     for (_, c) = constraints
-        @match c begin
+        MLStyle.@match c begin
                 (:initial, f::BoundaryConstraint, lb, ub) => begin
                         append!(ϕn, length(lb))
                         push!(ϕf, f)
@@ -285,28 +285,61 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
     ϕfn = length(ϕf)
     θfn = length(θf)
     function ξ!(val, t, u, v)
-        (val[1:ξn[i]] = (ξf[i])(t, u, v) for i = 1:ξfn)
+        offset = 0
+        for i = 1:ξfn
+            val[1 + offset:(ξn[i] + offset) - 1] = (ξf[i])(t, u, v)
+            offset += ξn[i]
+        end
+        nothing
     end
     function η!(val, t, x, v)
-        (val[1:ηn[i]] = (ηf[i])(t, x, v) for i = 1:ηfn)
+        offset = 0
+        for i = 1:ηfn
+            val[1 + offset:(ηn[i] + offset) - 1] = (ηf[i])(t, x, v)
+            offset += ηn[i]
+        end
+        nothing
     end
     function ψ!(val, t, x, u, v)
-        (val[1:ψn[i]] = (ψf[i])(t, x, u, v) for i = 1:ψfn)
+        offset = 0
+        for i = 1:ψfn
+            val[1 + offset:(ψn[i] + offset) - 1] = (ψf[i])(t, x, u, v)
+            offset += ψn[i]
+        end
+        nothing
     end
     function ϕ!(val, x0, xf, v)
-        (val[1:ϕn[i]] = (ϕf[i])(x0, xf, v) for i = 1:ϕfn)
+        offset = 0
+        for i = 1:ϕfn
+            val[1 + offset:(ϕn[i] + offset) - 1] = (ϕf[i])(x0, xf, v)
+            offset += ϕn[i]
+        end
+        nothing
     end
     function θ!(val, v)
-        (val[1:θn[i]] = (θf[i])(v) for i = 1:θfn)
+        offset = 0
+        for i = 1:θfn
+            val[1 + offset:(θn[i] + offset) - 1] = (θf[i])(v)
+            offset += θn[i]
+        end
+        nothing
     end
     return ((ξl, ξ!, ξu), (ηl, η!, ηu), (ψl, ψ!, ψu), (ϕl, ϕ!, ϕu), (θl, θ!, θu), (uind, ul, uu), (xind, xl, xu), (vind, vl, vu))
 end
 function test_alloc_good(ocp)
     function get_state(XU, i, n, m)
-        return @view(XU[rg((i - 1) * (n + m) + 1, (i - 1) * (n + m) + n)])
+        if n == 1
+            return XU[(i - 1) * (n + m) + 1]
+        else
+            return @view(XU[rg((i - 1) * (n + m) + 1, (i - 1) * (n + m) + n)])
+        end
     end
     function get_control(XU, i, n, m)
-        return @view(XU[rg((i - 1) * (n + m) + n + 1, (i - 1) * (n + m) + n + m)])
+        if m == 1
+            return XU[(i - 1) * (n + m) + n + 1]
+        else
+            return @view(XU[rg((i - 1) * (n + m) + n + 1, (i - 1) * (n + m) + n + m)])
+        end
     end
     function set_control_constraint!(C, i, valξ, nξ, nc)
         C[(i - 1) * nc + 1:(i - 1) * nc + nξ] = valξ
@@ -349,53 +382,3 @@ println("Allocations and times for good and bad code")
 println()
 println("good code")
 t_good = @benchmark(test_alloc_good(ocp))
-begin
-    t_good
-end
-```
-
-```bash
-BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  33.924 μs …   6.374 ms  ┊ GC (min … max):  0.00% … 98.32%
- Time  (median):     36.941 μs               ┊ GC (median):     0.00%
- Time  (mean ± σ):   42.255 μs ± 161.599 μs  ┊ GC (mean ± σ):  10.00% ±  2.60%
-
-       ▆██▆▂                                                    
-  ▁▁▂▄███████▆▆▆▆▆▇▇▆▆▅▄▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
-  33.9 μs         Histogram: frequency by time         52.4 μs <
-
- Memory estimate: 59.22 KiB, allocs estimate: 903.
-```
-
-```julia
-println()
-println("bad code")
-t_bad = @benchmark(test_alloc_bad(ocp))
-begin
-    t_bad
-end
-```
-
-```bash
-BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  390.514 μs …  18.280 ms  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     399.156 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   446.864 μs ± 444.823 μs  ┊ GC (mean ± σ):  3.85% ± 4.50%
-
-  █▆▄▂▂▂▂▁▁▁                                                    ▁
-  ████████████▇█▇▇▆▆▆▆▆▇▆▆▅▅▅▅▅▅▄▅▅▄▅▅▄▄▄▄▄▄▄▅▅▆▄▅▄▅▄▅▂▃▃▃▂▄▃▄▃ █
-  391 μs        Histogram: log(frequency) by time        984 μs <
-
- Memory estimate: 184.45 KiB, allocs estimate: 5355.
-```
-
-```julia
-println()
-println("ratio of times: ", mean(t_bad.times) / mean(t_good.times))
-println("ratio of allocations: ", mean(t_bad.memory) / mean(t_good.memory))
-```
-
-```bash
-ratio of times: 32.199945009397474
-ratio of allocations: 15.882585751978892
-```
