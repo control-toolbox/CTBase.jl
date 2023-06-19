@@ -1,15 +1,13 @@
 # onepass
 # todo:
-# - update constraint_type to gensym all generated function arg names
+# - cannot call solve if problem not fully defined (dynamics not defined...)
+# - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2... (most internal first)
 # - test non autonomous cases
 # - robustify repl
-# - additional checks:
-# (i) when generating functions, there should not be any x or u left
-# (ii) in boundary and mayer, there should not be any left
-# in both cases, has(ee, x/u/t) must be false (postcondition)
+# - additional checks: when generating functions (constraints, dynamics, costs), there should not be any x or u left
+#   (but the user might indeed do so); meaning that has(ee, x/u/t) must be false (postcondition)
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
-# (do the replace call in onepass, not in constraint_type)
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 
 """
@@ -209,10 +207,12 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
         (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:boundary, ee2) => begin
+         :boundary     => begin
             gs = gensym()
-            x0 = Symbol(p.x, "#0")
-            xf = Symbol(p.x, "#f")
+            x0 = gensym()
+            xf = gensym()
+	    ee2 = replace_call(e2 , p.x, p.t0, x0)
+	    ee2 = replace_call(ee2, p.x, p.tf, xf)
 	    args = [ x0, xf ]; __v_dep(p) && push!(args, p.v);
             quote
                 function $gs($(args...))
@@ -221,10 +221,11 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :boundary; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:control_range, rg) => :( constraint!($ocp, :control; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:control_fun, ee2) => begin
-            p.t_dep = p.t_dep || has(ee2, p.t)
+         :control_fun        => begin
             gs = gensym()
-            ut = Symbol(p.u, "#t")
+            ut = gensym()
+	    ee2 = replace_call(e2, p.u, p.t, ut)
+            p.t_dep = p.t_dep || has(ee2, p.t)
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
@@ -233,10 +234,11 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :control; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:state_range, rg) => :( constraint!($ocp, :state; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:state_fun, ee2) => begin
-            p.t_dep = p.t_dep || has(ee2, p.t)
+         :state_fun        => begin
             gs = gensym()
-            xt = Symbol(p.x, "#t")
+            xt = gensym()
+	    ee2 = replace_call(e2, p.x, p.t, xt)
+            p.t_dep = p.t_dep || has(ee2, p.t)
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
@@ -245,20 +247,21 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 constraint!($ocp, :state; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:variable_fun, ee2) => begin
+         :variable_fun        => begin
             gs = gensym()
 	    args = [ p.v ]
             quote
                 function $gs($(args...))
-                    $ee2
+                    $e2
                 end
                 constraint!($ocp, :variable; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:mixed, ee2) => begin
-            p.t_dep = p.t_dep || has(ee2, p.t)
+         :mixed => begin
             gs = gensym()
-            xt = Symbol(p.x, "#t")
-            ut = Symbol(p.u, "#t")
+            xt = gensym()
+            ut = gensym()
+	    ee2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
+            p.t_dep = p.t_dep || has(ee2, p.t)
 	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
@@ -280,8 +283,8 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
     x ≠ p.x && return __throw("wrong state for dynamics", p.lnum, p.line)
     t ≠ p.t && return __throw("wrong time for dynamics", p.lnum, p.line)
-    xt = Symbol(p.x, "#t")
-    ut = Symbol(p.u, "#t")
+    xt = gensym()
+    ut = gensym()
     e = replace_call(e, [ p.x, p.u ], p.t, [ xt, ut ])
     p.t_dep = p.t_dep || has(e, t)
     gs = gensym()
@@ -299,8 +302,8 @@ p_lagrange!(p, ocp, e, type; log=false) = begin
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
-    xt = Symbol(p.x, "#t")
-    ut = Symbol(p.u, "#t")
+    xt = gensym()
+    ut = gensym()
     e = replace_call(e, [ p.x, p.u ], p.t, [ xt, ut ])
     p.t_dep = p.t_dep || has(e, p.t)
     ttype = QuoteNode(type)
@@ -320,8 +323,8 @@ p_mayer!(p, ocp, e, type; log=false) = begin
     isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
     isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
     gs = gensym()
-    x0 = Symbol(p.x, "#0")
-    xf = Symbol(p.x, "#f")
+    x0 = gensym()
+    xf = gensym()
     e = replace_call(e, p.x, p.t0, x0)
     e = replace_call(e, p.x, p.tf, xf)
     ttype = QuoteNode(type)
@@ -342,14 +345,14 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
     isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
     gs1 = gensym()
-    x0 = Symbol(p.x, "#0")
-    xf = Symbol(p.x, "#f")
+    x0 = gensym()
+    xf = gensym()
     e1 = replace_call(e1, p.x, p.t0, x0)
     e1 = replace_call(e1, p.x, p.tf, xf)
     args1 = [ x0, xf ]; __v_dep(p) && push!(args1, p.v)
     gs2 = gensym()
-    xt = Symbol(p.x, "#t")
-    ut = Symbol(p.u, "#t")
+    xt = gensym()
+    ut = gensym()
     e2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
     p.t_dep = p.t_dep || has(e2, p.t)
     args2 = [ ]; __t_dep(p) && push!(args2, p.t); push!(args2, xt, ut); __v_dep(p) && push!(args2, p.v)
