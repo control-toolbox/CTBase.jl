@@ -17,10 +17,10 @@ julia&gt; constraint_type(:( ẋ(s) ), t, t0, tf, x, u, v)
 :other
 
 julia&gt; constraint_type(:( x(0)&#39; ), t, t0, tf, x, u, v)
-(:boundary, :(var&quot;x#0&quot;&#39;))
+:boundary
 
 julia&gt; constraint_type(:( x(t)&#39; ), t, t0, tf, x, u, v)
-(:state_fun, :(var&quot;x#t&quot;&#39;))
+:state_fun
 
 julia&gt; constraint_type(:( x(0) ), t, t0, tf, x, u, v)
 (:initial, nothing)
@@ -35,7 +35,7 @@ julia&gt; constraint_type(:( x[1](0) ), t, t0, tf, x, u, v)
 (:initial, Index(1))
 
 julia&gt; constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u, v)
-(:boundary, :(2 * var&quot;x#0&quot;[1] ^ 2))
+:boundary
 
 julia&gt; constraint_type(:( x(tf) ), t, t0, tf, x, u, v)
 (:final, nothing)
@@ -50,10 +50,10 @@ julia&gt; constraint_type(:( x[1](tf) ), t, t0, tf, x, u, v)
 (:final, Index(1))
 
 julia&gt; constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u, v)
-(:boundary, :(2 * var&quot;x#f&quot;[1] ^ 2))
+:boundary
 
 julia&gt; constraint_type(:( x[1](tf) - x[2](0) ), t, t0, tf, x, u, v)
-(:boundary, :(var&quot;x#f&quot;[1] - var&quot;x#0&quot;[2]))
+:boundary
 
 julia&gt; constraint_type(:( u[1:2:5](t) ), t, t0, tf, x, u, v)
 (:control_range, 1:2:5)
@@ -68,7 +68,7 @@ julia&gt; constraint_type(:( u(t) ), t, t0, tf, x, u, v)
 (:control_range, nothing)
 
 julia&gt; constraint_type(:( 2u[1](t)^2 ), t, t0, tf, x, u, v)
-(:control_fun, :(2 * var&quot;u#t&quot;[1] ^ 2))
+:control_fun
 
 julia&gt; constraint_type(:( x[1:2:5](t) ), t, t0, tf, x, u, v)
 (:state_range, 1:2:5)
@@ -83,10 +83,10 @@ julia&gt; constraint_type(:( x(t) ), t, t0, tf, x, u, v)
 (:state_range, nothing)
 
 julia&gt; constraint_type(:( 2x[1](t)^2 ), t, t0, tf, x, u, v)
-(:state_fun, :(2 * var&quot;x#t&quot;[1] ^ 2))
+:state_fun
 
 julia&gt; constraint_type(:( 2u[1](t)^2 * x(t) ), t, t0, tf, x, u, v)
-(:mixed, :((2 * var&quot;u#t&quot;[1] ^ 2) * var&quot;x#t&quot;))
+:mixed
 
 julia&gt; constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u, v)
 :other
@@ -95,7 +95,7 @@ julia&gt; constraint_type(:( 2u[1](0)^2 * x(t) ), t, t0, tf, x, u, v)
 :other
 
 julia&gt; constraint_type(:( 2u[1](t)^2 * x(t) + v ), t, t0, tf, x, u, v)
-(:mixed, :((2 * var&quot;u#t&quot;[1] ^ 2) * var&quot;x#t&quot; + v))
+:mixed
 
 julia&gt; constraint_type(:( v[1:2:10] ), t, t0, tf, x, u, v)
 (:variable_range, 1:2:9)
@@ -113,8 +113,8 @@ julia&gt; constraint_type(:( v^2  + 1 ), t, t0, tf, x, u, v)
 (:variable_fun, :(v ^ 2 + 1))
 
 julia&gt; constraint_type(:( v[2]^2 + 1 ), t, t0, tf, x, u, v)
-(:variable_fun, :(v[2] ^ 2 + 1))</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/3ad849f6b114b31c05a749438efc3f0f153e56a0/src/ctparser_utils.jl#L228">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="CTBase.replace_call-Tuple{Any, Symbol, Any, Any}" href="#CTBase.replace_call-Tuple{Any, Symbol, Any, Any}"><code>CTBase.replace_call</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">replace_call(e, x::Symbol, t, y) -&gt; Any
-</code></pre><p>Replace calls in e of the form <code>(...x...)(t)</code> by <code>(...y...)(t)</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">
+(:variable_fun, :(v[2] ^ 2 + 1))</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/9bb90006dddcd0d669f1154b622b3d151c5b0e67/src/ctparser_utils.jl#L218">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="CTBase.replace_call-Tuple{Any, Symbol, Any, Any}" href="#CTBase.replace_call-Tuple{Any, Symbol, Any, Any}"><code>CTBase.replace_call</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">replace_call(e, x::Symbol, t, y) -&gt; Any
+</code></pre><p>Replace calls in e of the form <code>(...x...)(t)</code> by <code>(...y...)</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">
 julia&gt; t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
 julia&gt; e = :( x[1](0) * 2x(tf) - x[2](tf) * 2x(0) )
@@ -133,8 +133,8 @@ julia&gt; e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(replace_call(e, x, t, 
 :(F0(x) + u * F1(x))
 
 julia&gt; e = :( 0.5u(t)^2  ); replace_call(e, u, t, u)
-:(0.5 * u ^ 2)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/3ad849f6b114b31c05a749438efc3f0f153e56a0/src/ctparser_utils.jl#L63">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="CTBase.replace_call-Tuple{Any, Vector{Symbol}, Any, Any}" href="#CTBase.replace_call-Tuple{Any, Vector{Symbol}, Any, Any}"><code>CTBase.replace_call</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">replace_call(e, x::Vector{Symbol}, t, y) -&gt; Any
-</code></pre><p>Replace calls in e of the form <code>(...x1...x2...)(t)</code> by <code>(...y1...y2...)(t)</code> for all symbols <code>x1</code>, <code>x2</code>... in the vector <code>x</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">
+:(0.5 * u ^ 2)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/9bb90006dddcd0d669f1154b622b3d151c5b0e67/src/ctparser_utils.jl#L63">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="CTBase.replace_call-Tuple{Any, Vector{Symbol}, Any, Any}" href="#CTBase.replace_call-Tuple{Any, Vector{Symbol}, Any, Any}"><code>CTBase.replace_call</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">replace_call(e, x::Vector{Symbol}, t, y) -&gt; Any
+</code></pre><p>Replace calls in e of the form <code>(...x1...x2...)(t)</code> by <code>(...y1...y2...)</code> for all symbols <code>x1</code>, <code>x2</code>... in the vector <code>x</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">
 julia&gt; t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
 julia&gt; e = :( (x^2 + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu ])
@@ -144,7 +144,7 @@ julia&gt; e = :( ((x^2)(t) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :u
 :(xx ^ 2 + uu[1])
 
 julia&gt; e = :( ((x^2)(t0) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu ])
-:((xx ^ 2)(t0) + uu[1])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/3ad849f6b114b31c05a749438efc3f0f153e56a0/src/ctparser_utils.jl#L103">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="CTBase.@def" href="#CTBase.@def"><code>CTBase.@def</code></a> — <span class="docstring-category">Macro</span></header><section><div><p>Define an optimal control problem. One pass parsing of the definition.</p><p><strong>Example</strong></p><pre><code class="language-julia hljs">@def ocp begin
+:((xx ^ 2)(t0) + uu[1])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/9bb90006dddcd0d669f1154b622b3d151c5b0e67/src/ctparser_utils.jl#L94">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="CTBase.@def" href="#CTBase.@def"><code>CTBase.@def</code></a> — <span class="docstring-category">Macro</span></header><section><div><p>Define an optimal control problem. One pass parsing of the definition.</p><p><strong>Example</strong></p><pre><code class="language-julia hljs">@def ocp begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
     x ∈ R², state
@@ -158,4 +158,4 @@ julia&gt; e = :( ((x^2)(t0) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :
     v(tf) == 0
     ẋ(t) == [ v(t), u(t) ]
     tf → min
-end</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/3ad849f6b114b31c05a749438efc3f0f153e56a0/src/onepass.jl#L368">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="api-model.html">« Model</a><a class="docs-footer-nextpage" href="api-plot.html">Plot »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Friday 16 June 2023 20:01">Friday 16 June 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/control-toolbox/CTBase.jl/blob/9bb90006dddcd0d669f1154b622b3d151c5b0e67/src/onepass.jl#L371">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="api-model.html">« Model</a><a class="docs-footer-nextpage" href="api-plot.html">Plot »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Monday 19 June 2023 10:01">Monday 19 June 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
