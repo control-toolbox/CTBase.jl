@@ -98,7 +98,7 @@ function Poisson(f::AbstractHamiltonian{Autonomous, V}, g::AbstractHamiltonian{A
         end
         df = ctgradient(ff, [ x ; p ])
         dg = ctgradient(gg, [ x ; p ])
-        return df[1:n]'*dg[n+1:2n] - df[n+1:2n]'*dg[1:n]
+        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n]
     end
     return Hamiltonian(fg, Autonomous, V)
 end
@@ -115,7 +115,7 @@ function Poisson(f::AbstractHamiltonian{NonAutonomous, V}, g::AbstractHamiltonia
         end
         df = ctgradient(ff, [ x ; p ])
         dg = ctgradient(gg, [ x ; p ])
-        return df[1:n]'*dg[n+1:2n] - df[n+1:2n]'*dg[1:n]
+        return df[n+1:2n]'*dg[1:n] - df[1:n]'*dg[n+1:2n] 
     end
     return Hamiltonian(fg, NonAutonomous, V)
 end
@@ -127,6 +127,13 @@ end
 function Poisson(f::Function, g::Function; autonomous::Bool=true, variable::Bool=false)::Hamiltonian
     time_dependence = autonomous ? Autonomous : NonAutonomous 
     variable_dependence = variable ? NonFixed : Fixed
+    return Poisson(Hamiltonian(f, time_dependence, variable_dependence), Hamiltonian(g, time_dependence, variable_dependence))
+end
+
+function Poisson(f::Function, g::Function, dependences::DataType...)::Hamiltonian
+    __check_dependencies(dependences)
+    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
     return Poisson(Hamiltonian(f, time_dependence, variable_dependence), Hamiltonian(g, time_dependence, variable_dependence))
 end
 

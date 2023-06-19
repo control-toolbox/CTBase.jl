@@ -265,12 +265,12 @@ function test_differential_geometry()
             F₊G = Hamiltonian(f₊g)
             FG = Hamiltonian(fg)
             #
-            Test.@test Poisson(f, g)([1, 2], [2, 1]) == 20            
-            Test.@test Poisson(f, G)([1, 2], [2, 1]) == 20
-            Test.@test Poisson(F, g)([1, 2], [2, 1]) == 20
+            Test.@test Poisson(f, g)([1, 2], [2, 1]) == -20            
+            Test.@test Poisson(f, G)([1, 2], [2, 1]) == -20
+            Test.@test Poisson(F, g)([1, 2], [2, 1]) == -20
             #
             Test.@test Poisson(F, Hamiltonian((x,p) -> 42))([1, 2], [2, 1]) == 0
-            Test.@test Poisson(F, G)([1, 2], [2, 1]) == 20
+            Test.@test Poisson(F, G)([1, 2], [2, 1]) == -20
             Test.@test Poisson(F, G)([1, 2], [2, 1]) == - Poisson(G, F)([1, 2], [2, 1]) # anticommutativity
             Test.@test Poisson(F₊G, H)([1, 2], [2, 1]) == Poisson(F, H)([1, 2], [2, 1]) + Poisson(G, H)([1, 2], [2, 1]) # bilinearity 1
             Test.@test Poisson(H, F₊G)([1, 2], [2, 1]) == Poisson(H, F)([1, 2], [2, 1]) + Poisson(H, G)([1, 2], [2, 1]) # bilinearity 2
@@ -290,12 +290,12 @@ function test_differential_geometry()
             F₊G = Hamiltonian(f₊g, autonomous=false)
             FG = Hamiltonian(fg, autonomous=false)
             #
-            Test.@test Poisson(f, g, autonomous=false)(2, [1, 2], [2, 1]) == 28
-            Test.@test Poisson(f, G)(2, [1, 2], [2, 1]) == 28
-            Test.@test Poisson(F, g)(2, [1, 2], [2, 1]) == 28
+            Test.@test Poisson(f, g, autonomous=false)(2, [1, 2], [2, 1]) == - 28
+            Test.@test Poisson(f, G)(2, [1, 2], [2, 1]) == - 28
+            Test.@test Poisson(F, g)(2, [1, 2], [2, 1]) == - 28
             #
             Test.@test Poisson(F, Hamiltonian((t, x, p) -> 42, autonomous=false))(2, [1, 2], [2, 1]) == 0
-            Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == 28
+            Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == - 28
             Test.@test Poisson(F, G)(2, [1, 2], [2, 1]) == - Poisson(G, F)(2, [1, 2], [2, 1]) # anticommutativity
             Test.@test Poisson(F₊G, H)(2, [1, 2], [2, 1]) == Poisson(F, H)(2, [1, 2], [2, 1]) + Poisson(G, H)(2, [1, 2], [2, 1]) # bilinearity 1
             Test.@test Poisson(H, F₊G)(2, [1, 2], [2, 1]) == Poisson(H, F)(2, [1, 2], [2, 1]) + Poisson(H, G)(2, [1, 2], [2, 1]) # bilinearity 2
@@ -315,7 +315,7 @@ function test_differential_geometry()
             F₊G = Hamiltonian(f₊g, variable=true)
             FG = Hamiltonian(fg, variable=true)
             Test.@test Poisson(F, Hamiltonian((x, p, v) -> 42, variable=true))([1, 2], [2, 1], [4, 4]) == 0
-            Test.@test Poisson(F, G)([1, 2], [2, 1], [4, 4]) == 44
+            Test.@test Poisson(F, G)([1, 2], [2, 1], [4, 4]) == -44
             Test.@test Poisson(F, G)([1, 2], [2, 1], [4, 4]) == - Poisson(G, F)([1, 2], [2, 1], [4, 4]) # anticommutativity
             Test.@test Poisson(F₊G, H)([1, 2], [2, 1], [4, 4]) == Poisson(F, H)([1, 2], [2, 1], [4, 4]) + Poisson(G, H)([1, 2], [2, 1], [4, 4]) # bilinearity 1
             Test.@test Poisson(H, F₊G)([1, 2], [2, 1], [4, 4]) == Poisson(H, F)([1, 2], [2, 1], [4, 4]) + Poisson(H, G)([1, 2], [2, 1], [4, 4]) # bilinearity 2
@@ -324,26 +324,72 @@ function test_differential_geometry()
         end
 
         @testset "nonautonomous nonfixed case" begin
-            @testset "autonomous nonfixed case" begin
-                f = (t, x, p, v) -> t*v[1]*x[2]^2 + 2x[1]^2 + p[1]^2 + v[2]
-                g = (t, x, p, v) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] + t - v[2]
-                h = (t, x, p, v) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2 + t + v[2]
-                f₊g = (t, x, p, v) -> f(t, x, p, v) + g(t, x, p, v)
-                fg = (t, x, p, v)-> f(t, x, p, v)*g(t, x, p, v)
-                F = Hamiltonian(f, autonomous=false, variable=true)
-                G = Hamiltonian(g, autonomous=false, variable=true)
-                H = Hamiltonian(h, autonomous=false, variable=true) 
-                F₊G = Hamiltonian(f₊g, autonomous=false, variable=true)
-                FG = Hamiltonian(fg, autonomous=false, variable=true)
-                Test.@test Poisson(F, Hamiltonian((t, x, p, v) -> 42, autonomous=false, variable=true))(2, [1, 2], [2, 1], [4, 4]) == 0
-                Test.@test Poisson(F, G)(2, [1, 2], [2, 1], [4, 4]) == 76
-                Test.@test Poisson(F, G)(2, [1, 2], [2, 1], [4, 4]) == - Poisson(G, F)(2, [1, 2], [2, 1], [4, 4]) # anticommutativity
-                Test.@test Poisson(F₊G, H)(2, [1, 2], [2, 1], [4, 4]) == Poisson(F, H)(2, [1, 2], [2, 1], [4, 4]) + Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 1
-                Test.@test Poisson(H, F₊G)(2, [1, 2], [2, 1], [4, 4]) == Poisson(H, F)(2, [1, 2], [2, 1], [4, 4]) + Poisson(H, G)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 2
-                Test.@test Poisson(FG, H)(2, [1, 2], [2, 1], [4, 4]) == Poisson(F, H)(2, [1, 2], [2, 1], [4, 4])*G(2, [1, 2], [2, 1], [4, 4]) + F(2, [1, 2], [2, 1], [4, 4])*Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # Liebniz's rule
-                Test.@test Poisson(F, Poisson(G,H))(2, [1, 2], [2, 1], [4, 4]) + Poisson(G, Poisson(H,F))(2, [1, 2], [2, 1], [4, 4]) + Poisson(H, Poisson(F,G))(2, [1, 2], [2, 1], [4, 4]) == 0 # Jacobi identity
-            end
+            f = (t, x, p, v) -> t*v[1]*x[2]^2 + 2x[1]^2 + p[1]^2 + v[2]
+            g = (t, x, p, v) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] + t - v[2]
+            h = (t, x, p, v) -> x[2]^2 + -2x[1]^2 + p[1]^2 - 2p[2]^2 + t + v[2]
+            f₊g = (t, x, p, v) -> f(t, x, p, v) + g(t, x, p, v)
+            fg = (t, x, p, v)-> f(t, x, p, v)*g(t, x, p, v)
+            F = Hamiltonian(f, autonomous=false, variable=true)
+            G = Hamiltonian(g, autonomous=false, variable=true)
+            H = Hamiltonian(h, autonomous=false, variable=true) 
+            F₊G = Hamiltonian(f₊g, autonomous=false, variable=true)
+            FG = Hamiltonian(fg, autonomous=false, variable=true)
+            Test.@test Poisson(F, Hamiltonian((t, x, p, v) -> 42, autonomous=false, variable=true))(2, [1, 2], [2, 1], [4, 4]) == 0
+            Test.@test Poisson(F, G)(2, [1, 2], [2, 1], [4, 4]) == - 76
+            Test.@test Poisson(F, G)(2, [1, 2], [2, 1], [4, 4]) == - Poisson(G, F)(2, [1, 2], [2, 1], [4, 4]) # anticommutativity
+            Test.@test Poisson(F₊G, H)(2, [1, 2], [2, 1], [4, 4]) == Poisson(F, H)(2, [1, 2], [2, 1], [4, 4]) + Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 1
+            Test.@test Poisson(H, F₊G)(2, [1, 2], [2, 1], [4, 4]) == Poisson(H, F)(2, [1, 2], [2, 1], [4, 4]) + Poisson(H, G)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 2
+            Test.@test Poisson(FG, H)(2, [1, 2], [2, 1], [4, 4]) == Poisson(F, H)(2, [1, 2], [2, 1], [4, 4])*G(2, [1, 2], [2, 1], [4, 4]) + F(2, [1, 2], [2, 1], [4, 4])*Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # Liebniz's rule
+            Test.@test Poisson(F, Poisson(G,H))(2, [1, 2], [2, 1], [4, 4]) + Poisson(G, Poisson(H,F))(2, [1, 2], [2, 1], [4, 4]) + Poisson(H, Poisson(F,G))(2, [1, 2], [2, 1], [4, 4]) == 0 # Jacobi identity
         end
+    end
+
+    @testset "poisson bracket of Lifts" begin
+
+        @testset "autonomous case" begin
+            f = x -> [x[1] + x[2]^2, x[1], 0]
+            g = x -> [0, x[2], x[1]^2 + 4*x[2]]
+            F = Lift(f)
+            G = Lift(g)
+            F_ = (x, p) -> p' * f(x)
+            G_ = (x, p) -> p' * g(x)
+            Test.@test Poisson(F, G)([1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G_)([1, 2, 3], [4, 0, 4]) atol=1e-6
+            Test.@test Poisson(F, G_)([1, 2, 3],[4, 0, 4]) ≈ Poisson(F_, G)([1, 2, 3],[4, 0, 4]) atol=1e-6
+        end
+
+        @testset "nonautonomous case" begin
+            f = (t, x) -> [t*x[1] + x[2]^2, x[1], 0]
+            g = (t, x) -> [0, x[2], t*x[1]^2 + 4*x[2]]
+            F = Lift(f,NonAutonomous)
+            G = Lift(g,NonAutonomous)
+            F_ = (t, x, p) -> p' * f(t, x)
+            G_ = (t, x, p) -> p' * g(t, x)
+            Test.@test Poisson(F, G)(2, [1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G_, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) atol=1e-6
+            Test.@test Poisson(F, G_)(2, [1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G)(2, [1, 2, 3], [4, 0, 4]) atol=1e-6
+        end
+
+        @testset "autonomous nonfixed case" begin
+            f = (x, v) -> [x[1] + v*x[2]^2, x[1], 0]
+            g = (x, v) -> [0, x[2], x[1]^2 + v*4*x[2]]
+            F = Lift(f, NonFixed)
+            G = Lift(g, NonFixed)
+            F_ = (x, p, v) -> p' * f(x, v)
+            G_ = (x, p, v) -> p' * g(x, v)
+            Test.@test Poisson(F, G)([1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G_, NonFixed)([1, 2, 3], [4, 0, 4], 1) atol=1e-6
+            Test.@test Poisson(F, G_)([1, 2, 3],[4, 0, 4], 1) ≈ Poisson(F_, G)([1, 2, 3],[4, 0, 4], 1) atol=1e-6
+        end
+
+        @testset "nonautonomous nonfixed case" begin
+            f = (t, x, v) -> [t*x[1] + v*x[2]^2, x[1], 0]
+            g = (t, x, v) -> [0, x[2], t*x[1]^2 + v*4*x[2]]
+            F = Lift(f,NonAutonomous, NonFixed)
+            G = Lift(g,NonAutonomous, NonFixed)
+            F_ = (t, x, p, v) -> p' * f(t, x, v)
+            G_ = (t, x, p, v) -> p' * g(t, x, v)
+            Test.@test Poisson(F, G)(2, [1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G_, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol=1e-6
+            Test.@test Poisson(F, G_)(2, [1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G)(2, [1, 2, 3], [4, 0, 4], 1) atol=1e-6
+        end
+
     end
 
     # macros
