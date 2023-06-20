@@ -148,18 +148,14 @@ end
 # ---------------------------------------------------------------------------
 # Macros
 
-# @Lie [X, Y]
+# @Lie [X, Y], for Lie brackets
+# @Lie {X, Y}, for Poisson brackets
 macro Lie(expr::Expr)
-    @assert hasproperty(expr, :head)
-    @assert expr.head == :vect
-    @assert size(expr.args, 1) == 2
-    return esc(postwalk( x -> @capture(x, [a_, b_]) ? :(Lie($a, $b)) : x, expr))
-end
-
-# @Poisson {X, Y}
-macro Poisson(expr::Expr)
-    @assert hasproperty(expr, :head)
-    @assert expr.head == :braces
-    @assert size(expr.args, 1) == 2
-    return esc(postwalk( x -> @capture(x, {a_, b_}) ? :(Poisson($a, $b)) : x, expr))
+    fun(x) = @match (@capture(x, [a_, b_]),@capture(x, {c_, d_})) begin
+        (true, false) => :(Lie($a, $b))
+        (false, true) => :(Poisson($c, $d))
+        (false, false) => x
+        _ => error("internal error")
+    end
+    return esc(postwalk(fun,expr))
 end

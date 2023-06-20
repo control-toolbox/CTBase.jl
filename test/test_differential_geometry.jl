@@ -470,7 +470,7 @@ function test_differential_geometry()
 
     end
 
-    @testset "Poisson macro" begin
+    @testset "poisson macro" begin
         # parameters
         t = 1
         x = [1, 2, 3]
@@ -485,12 +485,12 @@ function test_differential_geometry()
         H1 = Hamiltonian((x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2))
         P01 = Poisson(H0, H1)
         P011 = Poisson(P01, H1)
-        P01_= @Poisson {H0, H1}
-        P011_= @Poisson {{H0, H1}, H1}
+        P01_= @Lie {H0, H1}
+        P011_= @Lie {{H0, H1}, H1}
         Test.@test P01(x, p) ≈ P01_(x, p) atol=1e-6
         Test.@test P011(x, p) ≈ P011_(x, p) atol=1e-6
         get_H0 = () -> H0
-        P011__ = @Poisson {{get_H0(), H1}, H1}
+        P011__ = @Lie {{get_H0(), H1}, H1}
         Test.@test P011_(x, p) ≈ P011__(x, p) atol=1e-6
 
         # nonautonomous
@@ -498,12 +498,12 @@ function test_differential_geometry()
         H1 = Hamiltonian((t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2), NonAutonomous)
         P01 = Poisson(H0, H1)
         P011 = Poisson(P01, H1)
-        P01_= @Poisson {H0, H1}
-        P011_= @Poisson {{H0, H1}, H1}
+        P01_= @Lie {H0, H1}
+        P011_= @Lie {{H0, H1}, H1}
         Test.@test P01(t, x, p) ≈ P01_(t, x, p) atol=1e-6
         Test.@test P011(t, x, p) ≈ P011_(t, x, p) atol=1e-6
         get_H0 = () -> H0
-        P011__ = @Poisson {{get_H0(), H1}, H1}
+        P011__ = @Lie {{get_H0(), H1}, H1}
         Test.@test P011_(t, x, p) ≈ P011__(t, x, p) atol=1e-6
 
         # autonomous nonfixed
@@ -511,12 +511,12 @@ function test_differential_geometry()
         H1 = Hamiltonian((x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v), variable=true)
         P01 = Poisson(H0, H1)
         P011 = Poisson(P01, H1)
-        P01_= @Poisson {H0, H1}
-        P011_= @Poisson {{H0, H1}, H1}
+        P01_= @Lie {H0, H1}
+        P011_= @Lie {{H0, H1}, H1}
         Test.@test P01(x, p, v) ≈ P01_(x, p, v) atol=1e-6
         Test.@test P011(x, p, v) ≈ P011_(x, p, v) atol=1e-6
         get_H0 = () -> H0
-        P011__ = @Poisson {{get_H0(), H1}, H1}
+        P011__ = @Lie {{get_H0(), H1}, H1}
         Test.@test P011_(x, p, v) ≈ P011__(x, p, v) atol=1e-6
 
         # nonautonomous nonfixed
@@ -524,13 +524,62 @@ function test_differential_geometry()
         H1 = Hamiltonian((t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v), NonAutonomous, NonFixed)
         P01 = Poisson(H0, H1)
         P011 = Poisson(P01, H1)
-        P01_= @Poisson {H0, H1}
-        P011_= @Poisson {{H0, H1}, H1}
+        P01_= @Lie {H0, H1}
+        P011_= @Lie {{H0, H1}, H1}
         Test.@test P01(t, x, p, v) ≈ P01_(t, x, p,v ) atol=1e-6
         Test.@test P011(t, x, p, v) ≈ P011_(t, x, p, v) atol=1e-6
         get_H0 = () -> H0
-        P011__ = @Poisson {{get_H0(), H1}, H1}
+        P011__ = @Lie {{get_H0(), H1}, H1}
         Test.@test P011_(t, x, p, v) ≈ P011__(t, x, p, v) atol=1e-6
+    end
+
+    @testset "lie and poisson macros operation (sum,diff,...)" begin
+        # parameters
+        t = 1
+        x = [1, 2, 3]
+        p = [1,0,7]
+        Γ = 2
+        γ = 1
+        δ = γ-Γ
+        v = 1
+
+        # lie
+        # autonomous
+        F0 = VectorField(x -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])])
+        F1 = VectorField(x -> [0, -x[3], x[2]])
+        F2 = VectorField(x -> [x[3], 0, -x[1]])
+        Test.@test @Lie [F0, F1](x) + 4*[F1, F2](x) == [8, -8, -2]
+        Test.@test @Lie [F0, F1](x) - [F1, F2](x) == [-2, -3, -2]
+        Test.@test @Lie [F0, F1](x) .* [F1, F2](x) == [0, 4, 0]
+        Test.@test @Lie [1, 1, 1] + ([[F0, F1], F1](x) + [F1, F2](x) + [1, 1, 1]) == [4, 5, -5]
+
+        # nonautonomous nonfixed
+        F0 = VectorField((t, x, v) -> [-Γ*x[1], -Γ*x[2], γ*(1-x[3])], NonAutonomous, NonFixed)
+        F1 = VectorField((t, x, v) -> [0, -x[3], x[2]], NonAutonomous, NonFixed)
+        F2 = VectorField((t, x, v) -> [x[3], 0, -x[1]], NonAutonomous, NonFixed)
+        Test.@test @Lie [F0, F1](t, x, v) + 4*[F1, F2](t, x, v) == [8, -8, -2]
+        Test.@test @Lie [F0, F1](t, x, v) - [F1, F2](t, x, v) == [-2, -3, -2]
+        Test.@test @Lie [F0, F1](t, x, v) .* [F1, F2](t, x, v) == [0, 4, 0]
+        Test.@test @Lie [1, 1, 1] + ([[F0, F1], F1](t, x, v) + [F1, F2](t, x, v) + [1, 1, 1]) == [4, 5, -5]
+
+        # poisson
+        # autonomous
+        H0 = Hamiltonian((x, p) -> 0.5*(2x[1]^2+x[2]^2+p[1]^2))
+        H1 = Hamiltonian((x, p) -> 0.5*(3x[1]^2+x[2]^2+p[2]^2))
+        H2 = Hamiltonian((x, p) -> 0.5*(4x[1]^2+x[2]^2+p[1]^3+p[2]^2))
+        Test.@test @Lie {H0, H1}(x, p) + 4*{H1, H2}(x, p) == - 15
+        Test.@test @Lie {H0, H1}(x, p) - {H1, H2}(x, p) == 7.5
+        Test.@test @Lie {H0, H1}(x, p) * {H1, H2}(x, p) == -13.5
+        Test.@test @Lie 4 + ({{H0, H1}, H1}(x, p) + -2*{H1, H2}(x, p) + 21) == 39
+
+        # nonautonomous nonfixed
+        H0 = Hamiltonian((t, x, p, v) -> 0.5*(2x[1]^2+x[2]^2+p[1]^2), autonomous=false, variable=true)
+        H1 = Hamiltonian((t, x, p, v) -> 0.5*(3x[1]^2+x[2]^2+p[2]^2), autonomous=false, variable=true)
+        H2 = Hamiltonian((t, x, p, v) -> 0.5*(4x[1]^2+x[2]^2+p[1]^3+p[2]^2), autonomous=false, variable=true)
+        Test.@test @Lie {H0, H1}(t, x, p, v) + 4*{H1, H2}(t, x, p, v) == - 15
+        Test.@test @Lie {H0, H1}(t, x, p, v) - {H1, H2}(t, x, p, v) == 7.5
+        Test.@test @Lie {H0, H1}(t, x, p, v) * {H1, H2}(t, x, p, v) == -13.5
+        Test.@test @Lie 4 + ({{H0, H1}, H1}(t, x, p, v) + -2*{H1, H2}(t, x, p, v) + 21) == 39
     end
 
 end # test_differential_geometry
