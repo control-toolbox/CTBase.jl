@@ -503,11 +503,25 @@ abstract type AbstractOptimalControlModel end
 $(TYPEDEF)
 """
 abstract type TimeDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type Autonomous <: TimeDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type NonAutonomous <: TimeDependence end
-
+"""
+$(TYPEDEF)
+"""
 abstract type VariableDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type NonFixed <: VariableDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type Fixed <: VariableDependence end
 """
 $(TYPEDEF)

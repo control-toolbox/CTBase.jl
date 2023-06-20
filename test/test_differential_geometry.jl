@@ -98,6 +98,7 @@ function test_differential_geometry()
         X = VectorField(φ)
         f = x -> x^2
         Test.@test (X⋅f)(1) == 4
+        Test.@test (φ⋅f)(1) == 4
         Test.@test Lie(φ,f)(1) == 4
     
         # nonautonomous, dim 2

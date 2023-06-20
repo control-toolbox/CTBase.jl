@@ -152,7 +152,7 @@ export plot, plot!
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
 # differential geometry
-export Lie, @Lie, Poisson, @Poisson, HamiltonianLift, AbstractHamiltonian, Lift, ⋅, ∂ₜ
+export Lie, @Lie, Poisson, HamiltonianLift, AbstractHamiltonian, Lift, ⋅, ∂ₜ
 
 # ctparser_utils
 export replace_call, constraint_type
