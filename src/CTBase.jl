@@ -130,7 +130,6 @@ export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
 # checking
-export check_time_dependence
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
