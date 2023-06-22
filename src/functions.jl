@@ -1069,6 +1069,20 @@ function (F::ControlConstraint{NonAutonomous, NonFixed})(t::Time, u::Control, v:
 end
 
 # --------------------------------------------------------------------------------------------------
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```MixedConstraint``` of a function.
+Dependencies are specified with a boolean, variable, false by default, autonomous, true by default.
+
+```@example
+julia> M = MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], autonomous=true, variable=false)
+julia> M = MixedConstraint((x, u, v) -> [2x[2]-u^2+v[3], x[1]], autonomous=true, variable=true)
+julia> M = MixedConstraint((t, x, u) -> [t+2x[2]-u^2, x[1]], autonomous=false, variable=false)
+julia> M = MixedConstraint((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], autonomous=false, variable=true)
+```
+"""
 function MixedConstraint(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
@@ -1076,6 +1090,24 @@ function MixedConstraint(f::Function;
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```MixedConstraint``` of a function.
+Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
+
+```@example
+julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
+IncorrectArgument
+julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
+IncorrectArgument
+julia> M = MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Autonomous, Fixed)
+julia> M = MixedConstraint((x, u, v) -> [2x[2]-u^2+v[3], x[1]], Autonomous, NonFixed)
+julia> M = MixedConstraint((t, x, u) -> [t+2x[2]-u^2, x[1]], NonAutonomous, Fixed)
+julia> M = MixedConstraint((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], NonAutonomous, NonFixed)
+```
+"""
 function MixedConstraint(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
@@ -1083,6 +1115,41 @@ function MixedConstraint(f::Function, dependencies::DataType...)
     return MixedConstraint{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the value of the MixedConstraint function.
+
+```@example
+julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
+IncorrectArgument
+julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
+IncorrectArgument
+julia> M = MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], autonomous=true, variable=false)
+julia> M([1, 0], 1)
+[-1, 1]
+julia> t = 1
+julia> v = Real[]
+julia> MethodError M(t, [1, 0], 1)
+julia> MethodError M([1, 0], 1, v)
+julia> M(t, [1, 0], 1, v)
+[-1, 1]
+julia> M = MixedConstraint((x, u, v) -> [2x[2]-u^2+v[3], x[1]], autonomous=true, variable=true)
+julia> M([1, 0], 1, [1, 2, 3])
+[2, 1]
+julia> M(t, [1, 0], 1, [1, 2, 3])
+[2, 1]
+julia> M = MixedConstraint((t, x, u) -> [t+2x[2]-u^2, x[1]], autonomous=false, variable=false)
+julia> M(1, [1, 0], 1)
+[0, 1]
+julia> M(1, [1, 0], 1, v)
+[0, 1]
+julia> M = MixedConstraint((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], autonomous=false, variable=true)
+julia> M(1, [1, 0], 1, [1, 2, 3])
+[3, 1]
+```
+"""
 function (F::MixedConstraint{Autonomous, Fixed})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
@@ -1112,11 +1179,37 @@ function (F::MixedConstraint{NonAutonomous, NonFixed})(t::Time, x::State, u::Con
 end
 
 # --------------------------------------------------------------------------------------------------
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the value of the VariableConstraint function.
+
+```@example
+julia> V = VariableConstraint(v -> [v[1]^2, 2v[2]])
+julia> V([1, -1])
+[1, -2]
+```
+"""
 function (F::VariableConstraint)(v::Variable)::ctVector
     return F.f(v)
 end
 
 # --------------------------------------------------------------------------------------------------
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```FeedbackControl``` of a function.
+Dependencies are specified with a boolean, variable, false by default, autonomous, true by default.
+
+```@example
+julia> u = FeedbackControl(x -> x[1]^2+2x[2], autonomous=true, variable=false)
+julia> u = FeedbackControl((x, v) -> x[1]^2+2x[2]+v[3], autonomous=true, variable=true)
+julia> u = FeedbackControl((t, x) -> t+x[1]^2+2x[2], autonomous=false, variable=false)
+julia> u = FeedbackControl((t, x, v) -> t+x[1]^2+2x[2]+v[3], autonomous=false, variable=true)
+```
+"""
 function FeedbackControl(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
@@ -1124,6 +1217,24 @@ function FeedbackControl(f::Function;
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```FeedbackControl``` of a function.
+Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
+
+```@example
+julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
+IncorrectArgument
+julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
+IncorrectArgument
+julia> u = FeedbackControl(x -> x[1]^2+2x[2], Autonomous, Fixed)
+julia> u = FeedbackControl((x, v) -> x[1]^2+2x[2]+v[3], Autonomous, NonFixed)
+julia> u = FeedbackControl((t, x) -> t+x[1]^2+2x[2], NonAutonomous, Fixed)
+julia> u = FeedbackControl((t, x, v) -> t+x[1]^2+2x[2]+v[3], NonAutonomous, NonFixed)
+```
+"""
 function FeedbackControl(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
@@ -1131,6 +1242,41 @@ function FeedbackControl(f::Function, dependencies::DataType...)
     return FeedbackControl{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the value of the FeedbackControl function.
+
+```@example
+julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
+IncorrectArgument
+julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
+IncorrectArgument
+julia> u = FeedbackControl(x -> x[1]^2+2x[2], autonomous=true, variable=false)
+julia> u([1, 0])
+1
+julia> t = 1
+julia> v = Real[]
+julia> MethodError u(t, [1, 0])
+julia> MethodError u([1, 0], v)
+julia> u(t, [1, 0], v)
+1
+julia> u = FeedbackControl((x, v) -> x[1]^2+2x[2]+v[3], autonomous=true, variable=true)
+julia> u([1, 0], [1, 2, 3])
+4
+julia> u(t, [1, 0], [1, 2, 3])
+4
+julia> u = FeedbackControl((t, x) -> t+x[1]^2+2x[2], autonomous=false, variable=false)
+julia> u(1, [1, 0])
+2
+julia> u(1, [1, 0], v)
+2
+julia> u = FeedbackControl((t, x, v) -> t+x[1]^2+2x[2]+v[3], autonomous=false, variable=true)
+julia> u(1, [1, 0], [1, 2, 3])
+5
+```
+"""
 function (F::FeedbackControl{Autonomous, Fixed})(x::State)::ctVector
     return F.f(x)
 end
@@ -1160,6 +1306,20 @@ function (F::FeedbackControl{NonAutonomous, NonFixed})(t::Time, x::State, v::Var
 end
 
 # --------------------------------------------------------------------------------------------------
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```ControlLaw``` of a function.
+Dependencies are specified with a boolean, variable, false by default, autonomous, true by default.
+
+```@example
+julia> u = ControlLaw((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
+julia> u = ControlLaw((x, p, v) -> x[1]^2+2p[2]+v[3], autonomous=true, variable=true)
+julia> u = ControlLaw((t, x, p) -> t+x[1]^2+2p[2], autonomous=false, variable=false)
+julia> u = ControlLaw((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
+```
+"""
 function ControlLaw(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
@@ -1167,6 +1327,24 @@ function ControlLaw(f::Function;
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```ControlLaw``` of a function.
+Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
+
+```@example
+julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> u = ControlLaw((x, p) -> x[1]^2+2p[2], Autonomous, Fixed)
+julia> u = ControlLaw((x, p, v) -> x[1]^2+2p[2]+v[3], Autonomous, NonFixed)
+julia> u = ControlLaw((t, x, p) -> t+x[1]^2+2p[2], NonAutonomous, Fixed)
+julia> u = ControlLaw((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], NonAutonomous, NonFixed)
+```
+"""
 function ControlLaw(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
@@ -1174,6 +1352,41 @@ function ControlLaw(f::Function, dependencies::DataType...)
     return ControlLaw{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the value of the ControlLaw function.
+
+```@example
+julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> u = ControlLaw((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
+julia> u([1, 0], [0, 1])
+3
+julia> t = 1
+julia> v = Real[]
+julia> MethodError u(t, [1, 0], [0, 1])
+julia> MethodError u([1, 0], [0, 1], v)
+julia> u(t, [1, 0], [0, 1], v)
+3
+julia> u = ControlLaw((x, p, v) -> x[1]^2+2p[2]+v[3], autonomous=true, variable=true)
+julia> u([1, 0], [0, 1], [1, 2, 3])
+6
+julia> u(t, [1, 0], [0, 1], [1, 2, 3])
+6
+julia> u = ControlLaw((t, x, p) -> t+x[1]^2+2p[2], autonomous=false, variable=false)
+julia> u(1, [1, 0], [0, 1])
+4
+julia> u(1, [1, 0], [0, 1], v)
+4
+julia> u = ControlLaw((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
+julia> u(1, [1, 0], [0, 1], [1, 2, 3])
+7
+```
+"""
 function (F::ControlLaw{Autonomous, Fixed})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
@@ -1203,6 +1416,20 @@ function (F::ControlLaw{NonAutonomous, NonFixed})(t::Time, x::State, p::Costate,
 end
 
 # --------------------------------------------------------------------------------------------------
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```Multiplier``` of a function.
+Dependencies are specified with a boolean, variable, false by default, autonomous, true by default.
+
+```@example
+julia> μ = Multiplier((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
+julia> μ = Multiplier((x, p, v) -> x[1]^2+2p[2]+v[3], autonomous=true, variable=true)
+julia> μ = Multiplier((t, x, p) -> t+x[1]^2+2p[2], autonomous=false, variable=false)
+julia> μ = Multiplier((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
+```
+"""
 function Multiplier(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
@@ -1210,6 +1437,24 @@ function Multiplier(f::Function;
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the ```Multiplier``` of a function.
+Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
+
+```@example
+julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> μ = Multiplier((x, p) -> x[1]^2+2p[2], Autonomous, Fixed)
+julia> μ = Multiplier((x, p, v) -> x[1]^2+2p[2]+v[3], Autonomous, NonFixed)
+julia> μ = Multiplier((t, x, p) -> t+x[1]^2+2p[2], NonAutonomous, Fixed)
+julia> μ = Multiplier((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], NonAutonomous, NonFixed)
+```
+"""
 function Multiplier(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
@@ -1217,6 +1462,39 @@ function Multiplier(f::Function, dependencies::DataType...)
     return Multiplier{time_dependence, variable_dependence}(f)
 end
 
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the value of the Multiplier function.
+
+```@example
+julia> IncorrectArgument Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+julia> IncorrectArgument Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+julia> μ = Multiplier((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
+julia> μ([1, 0], [0, 1])
+3
+julia> t = 1
+julia> v = Real[]
+julia> MethodError μ(t, [1, 0], [0, 1])
+julia> MethodError μ([1, 0], [0, 1], v)
+julia> μ(t, [1, 0], [0, 1], v)
+3
+julia> μ = Multiplier((x, p, v) -> x[1]^2+2p[2]+v[3], autonomous=true, variable=true)
+julia> μ([1, 0], [0, 1], [1, 2, 3])
+6
+julia> μ(t, [1, 0], [0, 1], [1, 2, 3])
+6
+julia> μ = Multiplier((t, x, p) -> t+x[1]^2+2p[2], autonomous=false, variable=false)
+julia> μ(1, [1, 0], [0, 1])
+4
+julia> μ(1, [1, 0], [0, 1], v)
+4
+julia> μ = Multiplier((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
+julia> μ(1, [1, 0], [0, 1], [1, 2, 3])
+7
+```
+"""
 function (F::Multiplier{Autonomous, Fixed})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
