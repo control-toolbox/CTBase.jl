@@ -74,7 +74,7 @@ end
 # ---------------------------------------------------------------------------
 # Lie derivative of a scalar function along a vector field or a function: L_X(f) = X⋅f
 
-# (postulat)
+# (postulate)
 # (X⋅f)(x)    = f'(x)⋅X(x)
 # (X⋅f)(t, x) = ∂ₓf(t, x)⋅X(t, x)
 # (g⋅f)(x) = f'(x)⋅G(x) with G the vector of g
