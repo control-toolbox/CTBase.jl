@@ -119,17 +119,17 @@ julia> H([1, 0], [0, 1], v)
 MethodError 
 julia> H(t, [1, 0], [0, 1], v)
 3
-julia> H = Hamiltonian((x, p, v) -> [x[1]^2+2p[2]+v[3]], variable=true)
+julia> H = Hamiltonian((x, p, v) -> x[1]^2+2p[2]+v[3], variable=true)
 julia> H([1, 0], [0, 1], [1, 2, 3])
 6
 julia> H(t, [1, 0], [0, 1], [1, 2, 3])
 6
-julia> H = Hamiltonian((t, x, p) -> [t+x[1]^2+2p[2]], autonomous=false)
+julia> H = Hamiltonian((t, x, p) -> t+x[1]^2+2p[2], autonomous=false)
 julia> H(1, [1, 0], [0, 1])
 4
 julia> H(1, [1, 0], [0, 1], v)
 4
-julia> H = Hamiltonian((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3]], autonomous=false, variable=true)
+julia> H = Hamiltonian((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
 julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
@@ -503,11 +503,25 @@ abstract type AbstractOptimalControlModel end
 $(TYPEDEF)
 """
 abstract type TimeDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type Autonomous <: TimeDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type NonAutonomous <: TimeDependence end
-
+"""
+$(TYPEDEF)
+"""
 abstract type VariableDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type NonFixed <: VariableDependence end
+"""
+$(TYPEDEF)
+"""
 abstract type Fixed <: VariableDependence end
 """
 $(TYPEDEF)
