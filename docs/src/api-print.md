@@ -37,12 +37,12 @@ and other constraints such as
 
 Let us define the following optimal control problem.
 
-```julia @example main
+```@example main
 using CTBase
 
 ocp = Model()
 
-state!(ocp, 2, ["r", "v"]) # dimension of the state with the names of the components
+state!(ocp, 2, "x", ["r", "v"]) # dimension of the state with the names of the components
 control!(ocp, 1)           # dimension of the control
 time!(ocp, [0, 1], "s")    # initial and final time, with the name of the variable time
 
@@ -55,7 +55,6 @@ B = [ 0
 dynamics!(ocp, (x, u) -> A*x + B*u)
 
 objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
-nothing # hide
 ```
 
 Then, we can print the form of this optimal control problem:
