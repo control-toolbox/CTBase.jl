@@ -1,4 +1,4 @@
-# Types
+# [Types and functions](@id api-types)
 
 ```@meta
 CurrentModule =  CTBase

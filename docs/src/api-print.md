@@ -62,3 +62,30 @@ Then, we can print the form of this optimal control problem:
 ```@example main
 ocp
 ```
+
+You can also define the optimal control problem in an abstract form:
+
+```@example main2
+using CTBase
+
+@def ocp begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R^2, state
+    u ∈ R, control
+    x(0) == [ -1, 0 ], (1)
+    x(1) == [  0, 0 ]
+    ẋ(t) == A * x(t) + B * u(t)
+    ∫( 0.5u(t)^2 ) → min
+end
+A = [ 0 1
+      0 0 ]
+B = [ 0
+      1 ]
+nothing #hide
+```
+
+Then, you can print this optimal control problem:
+
+```@example main2
+ocp
+```

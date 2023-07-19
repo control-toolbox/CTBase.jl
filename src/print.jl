@@ -29,7 +29,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         @assert hasproperty(ocp.model_expression, :head)
 
         #
-        println(io)
+        #println(io)
 
         # print the code
         tab  = 0
@@ -68,7 +68,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
         #
-        printstyled(io, "\nOptimal control problem of the form:\n")
+        printstyled(io, "Optimal control problem of the form:\n")
         println(io, "")
 
         # J

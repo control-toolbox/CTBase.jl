@@ -85,7 +85,13 @@ Type alias for a dimension.
 const Dimension = Integer
 
 #
+"""
+Type alias for a tangent vector to the state space.
+"""
 const DState     = ctVector
+"""
+Type alias for a tangent vector to the costate space.
+"""
 const DCostate   = ctVector
 
 #
@@ -123,7 +129,7 @@ export CTCallback, CTCallbacks, PrintCallback, StopCallback
 export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # description
-export Description, makeDescription, add, getFullDescription
+export Description, add, getFullDescription
 
 # exceptions
 export CTException, ParsingError, AmbiguousDescription, IncorrectMethod

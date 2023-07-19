@@ -1,4 +1,4 @@
-# CTBase.jl
+# [CTBase.jl](@id CTBaseModule)
 
 ```@meta
 CurrentModule =  CTBase

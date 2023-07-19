@@ -1,4 +1,4 @@
-# Exceptions
+# [Exceptions](@id api-exceptions)
 
 ```@meta
 CurrentModule =  CTBase
