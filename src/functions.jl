@@ -75,7 +75,6 @@ $(TYPEDSIGNATURES)
 Return the evaluation of the BoundaryConstraint at ```x0```, ```xf```, ```v```.
 
 ```@example
-julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
 julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
 julia> B([0, 0], [1, 1], [1, 2, 3])
 [4, 1]
@@ -969,14 +968,14 @@ end
 
 $(TYPEDSIGNATURES)
 
-Return the ```StateConstraint``` of a function.
+Return the ```ControlConstraint``` of a function.
 Dependencies are specified with a boolean, variable, false by default, autonomous, true by default.
 
 ```@example
-julia> S = StateConstraint(x -> [x[1]^2, 2x[2]], autonomous=true, variable=false)
-julia> S = StateConstraint((x, v) -> [x[1]^2, 2x[2]+v[3]], autonomous=true, variable=true)
-julia> S = StateConstraint((t, x) -> [t+x[1]^2, 2x[2]], autonomous=false, variable=false)
-julia> S = StateConstraint((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], autonomous=false, variable=true)
+julia> C = ControlConstraint(u -> [u[1]^2, 2u[2]], autonomous=true, variable=false)
+julia> C = ControlConstraint((u, v) -> [u[1]^2, 2u[2]+v[3]], autonomous=true, variable=true)
+julia> C = ControlConstraint((t, u) -> [t+u[1]^2, 2u[2]], autonomous=false, variable=false)
+julia> C = ControlConstraint((t, u, v) -> [t+u[1]^2, 2u[2]+v[3]], autonomous=false, variable=true)
 ```
 """
 function ControlConstraint(f::Function; 
@@ -1258,8 +1257,10 @@ julia> u([1, 0])
 1
 julia> t = 1
 julia> v = Real[]
-julia> MethodError u(t, [1, 0])
-julia> MethodError u([1, 0], v)
+julia> u(t, [1, 0])
+MethodError
+julia> u([1, 0], v)
+MethodError
 julia> u(t, [1, 0], v)
 1
 julia> u = FeedbackControl((x, v) -> x[1]^2+2x[2]+v[3], autonomous=true, variable=true)
@@ -1368,8 +1369,10 @@ julia> u([1, 0], [0, 1])
 3
 julia> t = 1
 julia> v = Real[]
-julia> MethodError u(t, [1, 0], [0, 1])
-julia> MethodError u([1, 0], [0, 1], v)
+julia> u(t, [1, 0], [0, 1])
+MethodError
+julia> u([1, 0], [0, 1], v)
+MethodError
 julia> u(t, [1, 0], [0, 1], v)
 3
 julia> u = ControlLaw((x, p, v) -> x[1]^2+2p[2]+v[3], autonomous=true, variable=true)
@@ -1469,15 +1472,19 @@ $(TYPEDSIGNATURES)
 Return the value of the Multiplier function.
 
 ```@example
-julia> IncorrectArgument Multiplier((x, p) -> x[1]^2+2p[2], Int64)
-julia> IncorrectArgument Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
+julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
+IncorrectArgument
 julia> μ = Multiplier((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
 julia> μ([1, 0], [0, 1])
 3
 julia> t = 1
 julia> v = Real[]
-julia> MethodError μ(t, [1, 0], [0, 1])
-julia> MethodError μ([1, 0], [0, 1], v)
+julia> μ(t, [1, 0], [0, 1])
+MethodError
+julia> μ([1, 0], [0, 1], v)
+MethodError
 julia> μ(t, [1, 0], [0, 1], v)
 3
 julia> μ = Multiplier((x, p, v) -> x[1]^2+2p[2]+v[3], autonomous=true, variable=true)
