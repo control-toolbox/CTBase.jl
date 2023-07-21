@@ -4,7 +4,7 @@ function test_differential_geometry()
 
     @testset "Lifts" begin
 
-        @testset "HamiltonianLift" begin
+        @testset "HamiltonianLift from VectorField" begin
             HL = HamiltonianLift(VectorField(x -> [x[1]^2,x[2]^2], autonomous=true, variable=false))
             @test HL([1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
@@ -15,6 +15,31 @@ function test_differential_geometry()
             @test HL(1, [1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
             HL = HamiltonianLift(VectorField((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true))
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+        end
+
+        @testset "HamiltonianLift from Function" begin
+            HL = HamiltonianLift(x -> [x[1]^2,x[2]^2], autonomous=true, variable=false)
+            @test HL([1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variable=true)
+            @test HL([1, 0], [0, 1], 1) == 1
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+            HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], autonomous=false, variable=false)
+            @test HL(1, [1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true)
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+            HL = HamiltonianLift(x -> [x[1]^2,x[2]^2], Autonomous, Fixed)
+            @test HL([1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], Autonomous, NonFixed)
+            @test HL([1, 0], [0, 1], 1) == 1
+            @test HL(1, [1, 0], [0, 1], 1) == 1
+            HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], NonAutonomous, Fixed)
+            @test HL(1, [1, 0], [0, 1]) == 0
+            @test HL(1, [1, 0], [0, 1], 1) == 0
+            HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], NonAutonomous, NonFixed)
             @test HL(1, [1, 0], [0, 1], 1) == 1
         end
         

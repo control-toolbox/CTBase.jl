@@ -290,12 +290,10 @@ Return an ```HamiltonianLift``` of a function.
 Dependencies are specified with a boolean, variable, false by default, autonomous, true by default.
 
 ```@example
-julia> HamiltonianLift(HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]], Int64))
-IncorrectArgument 
-julia> H = HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]]))
-julia> H = HamiltonianLift(VectorField((x, v) -> [x[1]^2, 2x[2]+v[3]], variable=true))
-julia> H = HamiltonianLift(VectorField((t, x) -> [t+x[1]^2, 2x[2]], autonomous=false))
-julia> H = HamiltonianLift(VectorField((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], autonomous=false, variable=true))
+julia> HL = HamiltonianLift(x -> [x[1]^2,x[2]^2], autonomous=true, variable=false)
+julia> HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variable=true)
+julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], autonomous=false, variable=false)
+julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true)
 ```
 
 """
@@ -303,7 +301,7 @@ function HamiltonianLift(f::Function;
     autonomous::Bool=true, variable::Bool=false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
-    return HamiltonianLift{time_dependence, variable_dependence}(f)
+    return HamiltonianLift(VectorField(f,time_dependence,variable_dependence))
 end
 
 """
@@ -316,10 +314,10 @@ Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, N
 ```@example
 julia> HamiltonianLift(HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]], Int64))
 IncorrectArgument 
-julia> H = HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]]))
-julia> H = HamiltonianLift(VectorField((x, v) -> [x[1]^2, 2x[2]+v[3]], NonFixed))
-julia> H = HamiltonianLift(VectorField((t, x) -> [t+x[1]^2, 2x[2]], NonAutonomous))
-julia> H = HamiltonianLift(VectorField((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], NonAutonomous, NonFixed))
+julia> HL = HamiltonianLift(x -> [x[1]^2,x[2]^2], Autonomous, Fixed)
+julia> HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], Autonomous, NonFixed)
+julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], NonAutonomous, Fixed)
+julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], NonAutonomous, NonFixed)
 ```
 
 """
@@ -327,7 +325,7 @@ function HamiltonianLift(f::Function, dependences::DataType...)
     __check_dependencies(dependences)
     time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
-    return HamiltonianLift{time_dependence, variable_dependence}(f)
+    return HamiltonianLift(VectorField(f,time_dependence,variable_dependence))
 end
 
 """

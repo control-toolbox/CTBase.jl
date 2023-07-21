@@ -212,8 +212,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```VectorField``` returns a ```VectorField``` of a function.
 The function must take 1 to 3 arguments, `x` to `(t, x, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -286,8 +286,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```HamiltonianVectorField``` returns a ```HamiltonianVectorField``` of a function.
 The function must take 2 to 4 arguments, `(x, p)` to `(t, x, p, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -409,6 +409,15 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 3
 ```
 
+Alternatively, it is possible to construct the `HamiltonianLift` from a `Function` being the `VectorField`.
+
+```@example
+julia> HL1 = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variable=true)
+julia> HL2 = HamiltonianLift(VectorField((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variable=true))
+julia> HL1([1, 0], [0, 1], 1) == HL2([1, 0], [0, 1], 1)
+true
+```
+
 """
 struct HamiltonianLift{time_dependence,variable_dependence}  <: AbstractHamiltonian{time_dependence,variable_dependence}
     X::VectorField
@@ -431,8 +440,8 @@ The default value for `time_dependence` and `variable_dependence` are `Autonomou
 The constructor ```Lagrange``` returns a ```Lagrange``` cost of a function.
 The function must take 2 to 4 arguments, `(x, u)` to `(t, x, u, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -512,8 +521,8 @@ The default value for `time_dependence` and `variable_dependence` are `Autonomou
 The constructor ```Dynamics``` returns a ```Dynamics``` of a function.
 The function must take 2 to 4 arguments, `(x, u)` to `(t, x, u, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -587,8 +596,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```StateConstraint``` returns a ```StateConstraint``` of a function.
 The function must take 1 to 3 arguments, `x` to `(t, x, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -665,8 +674,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```ControlConstraint``` returns a ```ControlConstraint``` of a function.
 The function must take 1 to 3 arguments, `u` to `(t, u, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -738,8 +747,8 @@ The default value for `time_dependence` and `variable_dependence` are `Autonomou
 The constructor ```MixedConstraint``` returns a ```MixedConstraint``` of a function.
 The function must take 2 to 4 arguments, `(x, u)` to `(t, x, u, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -861,8 +870,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```FeedbackControl``` returns a ```FeedbackControl``` of a function.
 The function must take 1 to 3 arguments, `x` to `(t, x, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -940,8 +949,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```ControlLaw``` returns a ```ControlLaw``` of a function.
 The function must take 2 to 4 arguments, `(x, p)` to `(t, x, p, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
@@ -1019,8 +1028,8 @@ The default values for `time_dependence` and `variable_dependence` are `Autonomo
 The constructor ```Multiplier``` returns a ```Multiplier``` of a function.
 The function must take 2 to 4 arguments, `(x, p)` to `(t, x, p, v)`, if the function is variable or non autonomous, it must be specified. 
 Dependencies are specified either with :
-    - booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
-    - `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
+- booleans, `autonomous` and `variable`, respectively `true` and `false` by default 
+- `DataType`, `Autonomous`/`NonAutonomous` and `NonFixed`/`Fixed`, respectively `Autonomous` and `Fixed` by default.
 
 ## *Examples*
 
