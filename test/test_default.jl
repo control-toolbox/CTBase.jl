@@ -8,6 +8,14 @@ function test_default()
         @test CTBase.__ocp_time_dependence() == Autonomous
     end
 
+    @testset "Default value of the variable dependence of the functions" begin
+        @test CTBase.__fun_variable_dependence() == Fixed
+    end
+
+    @testset "Default value of the variable dependence of the Optimal Control Problem" begin
+        @test CTBase.__ocp_variable_dependence() == Fixed
+    end
+
     @testset "Default value of the state names of the Optimal Control Problem" begin
         @test CTBase.__state_name() == "x"
         @test CTBase.__state_components_names(2,CTBase.__state_name()) == ["x₁", "x₂"]
