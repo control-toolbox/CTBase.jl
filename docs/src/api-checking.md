@@ -1,8 +1,15 @@
 # Checkings
 
-```@meta
-CurrentModule =  CTBase
+## Index
+
+```@index
+Pages   = ["api-checking.md"]
+Modules = [CTBase]
+Order = [:module, :constant, :type, :function, :macro]
+Private = false
 ```
+
+## Documentation
 
 ```@autodocs
 Modules = [CTBase]

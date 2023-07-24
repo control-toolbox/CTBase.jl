@@ -13,7 +13,12 @@ end
     ct_repls::Vector{CTRepl}=Vector{CTRepl}()
 end
 
-function __init_repl(; debug=false, demo=false)
+"""
+$(TYPEDSIGNATURES)
+
+Create a ct REPL.
+"""
+function ctrepl(; debug=false, demo=false)
 
     # init: ct_repl, history
     ct_repl = CTRepl()

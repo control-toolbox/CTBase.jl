@@ -1,10 +1,15 @@
-# API for developers
+# Private functions
 
-```@meta
-CurrentModule =  CTBase
+## Index
+
+```@index
+Pages   = ["api-callbacks.md"]
+Modules = [CTBase]
+Order = [:module, :constant, :type, :function, :macro]
+Private = false
 ```
 
-Here is the doc of private functions and types.
+## Documentation
 
 ```@autodocs
 Modules = [CTBase]

@@ -1,8 +1,15 @@
 # Differential geometry
 
-```@meta
-CurrentModule =  CTBase
+## Index
+
+```@index
+Pages   = ["api-diffgeom.md"]
+Modules = [CTBase]
+Order = [:module, :constant, :type, :function, :macro]
+Private = false
 ```
+
+## Documentation
 
 ```@autodocs
 Modules = [CTBase]

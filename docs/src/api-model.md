@@ -1,8 +1,15 @@
 # Model
 
-```@meta
-CurrentModule =  CTBase
+## Index
+
+```@index
+Pages   = ["api-model.md"]
+Modules = [CTBase]
+Order = [:module, :constant, :type, :function, :macro]
+Private = false
 ```
+
+## Documentation
 
 ```@autodocs
 Modules = [CTBase]

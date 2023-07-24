@@ -1,15 +1,13 @@
 # Print
 
-```@meta
-CurrentModule =  CTBase
-```
-
 ```@autodocs
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
 Pages = ["print.jl"]
 Private = false
 ```
+
+## Examples
 
 An optimal control problem can be described as minimising the cost functional
 

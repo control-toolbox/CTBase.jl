@@ -1,8 +1,15 @@
 # Functions
 
-```@meta
-CurrentModule =  CTBase
+## Index
+
+```@index
+Pages   = ["api-functions.md"]
+Modules = [CTBase]
+Order = [:module, :constant, :type, :function, :macro]
+Private = false
 ```
+
+## Documentation
 
 ```@autodocs
 Modules = [CTBase]

@@ -85,11 +85,11 @@ julia> e = :( A*x(t) + B*u(t) ); replace_call(replace_call(e, x, t, x), u, t, u)
 julia> e = :( F0(x(t)) + u(t)*F1(x(t)) ); replace_call(replace_call(e, x, t, x), u, t, u)
 :(F0(x) + u * F1(x))
 
-julia> e = :( 0.5u(t)^2  ); replace_call(e, u, t, u)
+julia> e = :( 0.5u(t)^2 ); replace_call(e, u, t, u)
 :(0.5 * u ^ 2)
 ```
 """
-replace_call(e, x::Symbol, t, y) = replace_call(e, [ x ], t, [ y ]) 
+replace_call(e, x::Symbol, t, y) = replace_call(e, [ x ], t, [ y ]) 
 
 """
 $(TYPEDSIGNATURES)
