@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Print · CTBase.jl</title><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">CTBase.jl</a></span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="index.html">Introduction</a></li><li><span class="tocitem">API</span><ul><li><a class="tocitem" href="api-ctbase.html">CTBase.jl</a></li><li><a class="tocitem" href="api-ctrepl.html">ct repl</a></li><li><a class="tocitem" href="api-default.html">Default</a></li><li><a class="tocitem" href="api-description.html">Description</a></li><li><a class="tocitem" href="api-diffgeom.html">Differential geometry</a></li><li><a class="tocitem" href="api-exceptions.html">Exceptions</a></li><li><a class="tocitem" href="api-model.html">Model</a></li><li><a class="tocitem" href="api-parser.html">Parser</a></li><li><a class="tocitem" href="api-plot.html">Plot</a></li><li class="is-active"><a class="tocitem" href="api-print.html">Print</a><ul class="internal"><li><a class="tocitem" href="#Examples"><span>Examples</span></a></li></ul></li><li><a class="tocitem" href="api-types.html">Types and functions</a></li><li><a class="tocitem" href="api-utils.html">Utils</a></li></ul></li><li><a class="tocitem" href="api-developers.html">Developers</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">API</a></li><li class="is-active"><a href="api-print.html">Print</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="api-print.html">Print</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/control-toolbox/CTBase.jl/blob/main/docs/src/api-print.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Print"><a class="docs-heading-anchor" href="#Print">Print</a><a id="Print-1"></a><a class="docs-heading-anchor-permalink" href="#Print" title="Permalink"></a></h1><h2 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h2><p>An optimal control problem can be described as minimising the cost functional</p><p class="math-container">\[g(t_0, x(t_0), t_f, x(t_f)) + \int_{t_0}^{t_f} f^{0}(t, x(t), u(t))~\mathrm{d}t\]</p><p>where the state <span>$x$</span> and the control <span>$u$</span> are functions subject, for <span>$t \in [t_0, t_f]$</span>, to the differential constraint</p><p class="math-container">\[   \dot{x}(t) = f(t, x(t), u(t))\]</p><p>and other constraints such as</p><p class="math-container">\[\begin{array}{llcll}
+~\xi_l  &amp;\le&amp; \xi(t, u(t))        &amp;\le&amp; \xi_u, \\
+\eta_l &amp;\le&amp; \eta(t, x(t))       &amp;\le&amp; \eta_u, \\
+\psi_l &amp;\le&amp; \psi(t, x(t), u(t)) &amp;\le&amp; \psi_u, \\
+\phi_l &amp;\le&amp; \phi(t_0, x(t_0), t_f, x(t_f)) &amp;\le&amp; \phi_u.
+\end{array}\]</p><p>Let us define the following optimal control problem.</p><pre><code class="language-julia hljs">using CTBase
+
+ocp = Model()
+
+state!(ocp, 2, &quot;x&quot;, [&quot;r&quot;, &quot;v&quot;]) # dimension of the state with the names of the components
+control!(ocp, 1)           # dimension of the control
+time!(ocp, [0, 1], &quot;s&quot;)    # initial and final time, with the name of the variable time
+
+constraint!(ocp, :initial, [-1, 0])
+constraint!(ocp, :final  , [ 0, 0])
+A = [ 0 1
+      0 0 ]
+B = [ 0
+      1 ]
+dynamics!(ocp, (x, u) -&gt; A*x + B*u)
+
+objective!(ocp, :lagrange, (x, u) -&gt; 0.5u^2)</code></pre><p>Then, we can print the form of this optimal control problem:</p><pre><code class="language-julia hljs">ocp</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Optimal control problem of the form:
+
+    minimize  J(x, u) = ∫ f⁰(x(s), u(s)) ds, over [0, 1]
+
+    subject to
+
+        ẋ(s) = f(x(s), u(s)), s in [0, 1] a.e.,
+
+        ϕl ≤ ϕ(x(0), x(1)) ≤ ϕu, 
+
+    where x(s) = (r(s), v(s)) ∈ R² and u(s) ∈ R.
+</code></pre><p>You can also define the optimal control problem in an abstract form:</p><pre><code class="language-julia hljs">using CTBase
+
+@def ocp begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R^2, state
+    u ∈ R, control
+    x(0) == [ -1, 0 ], (1)
+    x(1) == [  0, 0 ]
+    ẋ(t) == A * x(t) + B * u(t)
+    ∫( 0.5u(t)^2 ) → min
+end
+A = [ 0 1
+      0 0 ]
+B = [ 0
+      1 ]</code></pre><p>Then, you can print this optimal control problem:</p><pre><code class="language-julia hljs">ocp</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">t ∈ [0, 1], time
+x ∈ R ^ 2, state
+u ∈ R, control
+x(0) == [-1, 0], 1
+x(1) == [0, 0]
+ẋ(t) == A * x(t) + B * u(t)
+∫(0.5 * u(t) ^ 2) → min
+</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="api-plot.html">« Plot</a><a class="docs-footer-nextpage" href="api-types.html">Types and functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Monday 24 July 2023 22:02">Monday 24 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
