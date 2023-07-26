@@ -380,13 +380,16 @@ Define an optimal control problem. One pass parsing of the definition.
     t ∈ [ 0, tf ], time
     x ∈ R², state
     u ∈ R, control
+    tf ≥ 0
     -1 ≤ u(t) ≤ 1
     q = x₁
     v = x₂
-    q(0) == 1,    (1)
-    v(0) == 2,    (2)
+    q(0) == 1
+    v(0) == 2
     q(tf) == 0
     v(tf) == 0
+    0 ≤ q(t) ≤ 5,       (1)
+    -2 ≤ v(t) ≤ 3,      (2)
     ẋ(t) == [ v(t), u(t) ]
     tf → min
 end
