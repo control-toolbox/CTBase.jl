@@ -9,7 +9,6 @@ makedocs(
         "API" => ["api-ctbase.md", 
         #"api-callbacks.md",
         #"api-checking.md",
-        "api-ctrepl.md",
         "api-default.md", 
         "api-description.md", 
         "api-diffgeom.md",
@@ -19,6 +18,7 @@ makedocs(
         "api-parser.md",
         "api-plot.md", 
         "api-print.md",
+        "api-ctrepl.md",
         "api-types.md", 
         "api-utils.md"],
         "Developers" => "api-developers.md"

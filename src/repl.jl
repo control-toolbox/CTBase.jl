@@ -10,7 +10,7 @@ end
 
 @with_kw mutable struct HistoryRepl
     index::Int=0
-    ct_repls::Vector{CTRepl}=Vector{CTRepl}()
+    ct_repl_datas_data::Vector{CTRepl}=Vector{CTRepl}()
 end
 
 """
@@ -18,12 +18,12 @@ $(TYPEDSIGNATURES)
 
 Create a ct REPL.
 """
-function ctrepl(; debug=false, demo=false)
+function ct_repl(; debug=false, demo=false)
 
-    # init: ct_repl, history
-    ct_repl = CTRepl()
-    ct_repl.debug = debug
-    ct_repl.__demo = demo
+    # init: ct_repl_data, history
+    ct_repl_data = CTRepl()
+    ct_repl_data.debug = debug
+    ct_repl_data.__demo = demo
     history::HistoryRepl = HistoryRepl(0, Vector{ModelRepl}())
 
     # if demo, print a message
@@ -34,8 +34,8 @@ function ctrepl(; debug=false, demo=false)
     println("For example, you can type:\n")
     println("    ct> NAME=(ocp, sol)\n")
 
-    # add initial ct_repl to history
-    __add!(history, ct_repl)
+    # add initial ct_repl_data to history
+    __add!(history, ct_repl_data)
 
     # text invalid
     txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a " *
@@ -53,22 +53,22 @@ function ctrepl(; debug=false, demo=false)
         e = Meta.parse(s)
 
         #
-        ct_repl.debug && println("\ndebug> parsing string: ", s)
-        ct_repl.debug && println("debug> expression parsed: ", e)
-        ct_repl.debug && println("debug> expression type: ", typeof(e))
-        ct_repl.debug && println("debug> dump of expression: ", dump(e))
+        ct_repl_data.debug && println("\ndebug> parsing string: ", s)
+        ct_repl_data.debug && println("debug> expression parsed: ", e)
+        ct_repl_data.debug && println("debug> expression type: ", typeof(e))
+        ct_repl_data.debug && println("debug> dump of expression: ", dump(e))
 
         # test if e is a command
         @match e begin
             :( $c = $a ) => begin
                 command = __transform_to_command(c)
-                ct_repl.debug && println("debug> command: ", command, " and argument: ", a)
-                command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl, a, history))
+                ct_repl_data.debug && println("debug> command: ", command, " and argument: ", a)
+                command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, a, history))
             end
             :( $c ) => begin
                 command = __transform_to_command(c)
-                ct_repl.debug && println("debug> command: ", command)
-                command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl, history))
+                ct_repl_data.debug && println("debug> command: ", command)
+                command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, history))
             end
             _ => nothing
         end
@@ -79,30 +79,30 @@ function ctrepl(; debug=false, demo=false)
         e = Meta.parse(s)
 
         #
-        return_nothing && ct_repl.debug && println("\ndebug> new parsing string: ", s)
-        return_nothing && ct_repl.debug && println("debug> new expression parsed: ", e)
+        return_nothing && ct_repl_data.debug && println("\ndebug> new parsing string: ", s)
+        return_nothing && ct_repl_data.debug && println("debug> new expression parsed: ", e)
         
         if e isa Expr
 
             # eval ocp to test if the expression is valid
-            ct_repl.debug && (println("debug> try to add expression: ", e))
+            ct_repl_data.debug && (println("debug> try to add expression: ", e))
             try 
-                __eval_ocp(ct_repl, e)      # test if code is valid: if not, an exception is thrown
+                __eval_ocp(ct_repl_data, e)      # test if code is valid: if not, an exception is thrown
             catch ex
-                ct_repl.debug && (println("debug> exception thrown: ", ex))
+                ct_repl_data.debug && (println("debug> exception thrown: ", ex))
                 println(txt_invalid)
                 return nothing
             end
             
             # update model
-            __update!(ct_repl.model, e)
-            ct_repl.debug && (println("debug> expression valid, model updated."))
+            __update!(ct_repl_data.model, e)
+            ct_repl_data.debug && (println("debug> expression valid, model updated."))
 
-            # add ct_repl to history
-            __add!(history, ct_repl)
+            # add ct_repl_data to history
+            __add!(history, ct_repl_data)
 
             #
-            return return_nothing ? nothing : __quote_ocp(ct_repl)
+            return return_nothing ? nothing : __quote_ocp(ct_repl_data)
 
         else
 
@@ -130,24 +130,24 @@ end
 
 # dict of actions associated to ct repl commands
 COMMANDS_ACTIONS = Dict{Symbol, Function}(
-    :SHOW => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        return __quote_ocp(ct_repl)
+    :SHOW => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        return __quote_ocp(ct_repl_data)
     end,
-    :SOLVE => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        return __quote_solve(ct_repl)
+    :SOLVE => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        return __quote_solve(ct_repl_data)
     end,
-    :PLOT => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        return __quote_plot(ct_repl)
+    :PLOT => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        return __quote_plot(ct_repl_data)
     end,
-    :DEBUG => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        ct_repl.debug = !ct_repl.debug
-        println("\n debug mode: " * (ct_repl.debug ? "on" : "off"))
-        __add!(history, ct_repl) # update history
+    :DEBUG => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        ct_repl_data.debug = !ct_repl_data.debug
+        println("\n debug mode: " * (ct_repl_data.debug ? "on" : "off"))
+        __add!(history, ct_repl_data) # update history
         return nothing
     end,
-    :NAME => (ct_repl::CTRepl, name::Union{Symbol, Expr}, history::HistoryRepl) -> begin
-        ocp_name = ct_repl.ocp_name
-        sol_name = ct_repl.sol_name
+    :NAME => (ct_repl_data::CTRepl, name::Union{Symbol, Expr}, history::HistoryRepl) -> begin
+        ocp_name = ct_repl_data.ocp_name
+        sol_name = ct_repl_data.sol_name
         if isa(name, Symbol)
             name = (name, Symbol(string(name, "_sol")))
         elseif isa(name, Expr)
@@ -156,15 +156,15 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
             println("\nname error\n\nType HELP to see the list of commands or enter a valid expression to update the model.")
             return nothing
         end
-        ct_repl.ocp_name = name[1]
-        ct_repl.sol_name = name[2]
-        ct_repl.debug && println("debug> ocp name: ", ct_repl.ocp_name)
-        ct_repl.debug && println("debug> sol name: ", ct_repl.sol_name)
-        __add!(history, ct_repl) # update history
-        qo1 = ct_repl.ocp_name ≠ ocp_name ? :($(ct_repl.ocp_name) = "no optimal control") : :()
-        qs1 = ct_repl.sol_name ≠ sol_name ? :($(ct_repl.sol_name) = "no solution") : :()
-        qo2 = ct_repl.ocp_name ≠ ocp_name ? :($(ct_repl.ocp_name) = $(ocp_name)) : :()
-        qs2 = ct_repl.sol_name ≠ sol_name ? :($(ct_repl.sol_name) = $(sol_name)) : :()
+        ct_repl_data.ocp_name = name[1]
+        ct_repl_data.sol_name = name[2]
+        ct_repl_data.debug && println("debug> ocp name: ", ct_repl_data.ocp_name)
+        ct_repl_data.debug && println("debug> sol name: ", ct_repl_data.sol_name)
+        __add!(history, ct_repl_data) # update history
+        qo1 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
+        qs1 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
+        qo2 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = $(ocp_name)) : :()
+        qs2 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = $(sol_name)) : :()
         name_q = (quote
                     $(qo1)
                     $(qs1)
@@ -176,20 +176,20 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
                         nothing
                     end
                   end)
-        ct_repl.debug && println("debug> new name quote: ", name_q)
+        ct_repl_data.debug && println("debug> new name quote: ", name_q)
         return name_q
     end,
-    :UNDO => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        ct_repl_ = __undo!(history)
-        __copy!(ct_repl, ct_repl_)
+    :UNDO => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        ct_repl_data_ = __undo!(history)
+        __copy!(ct_repl_data, ct_repl_data_)
         return nothing
     end,
-    :REDO => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        ct_repl_ = __redo!(history)
-        __copy!(ct_repl, ct_repl_)
+    :REDO => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        ct_repl_data_ = __redo!(history)
+        __copy!(ct_repl_data, ct_repl_data_)
         return nothing
     end,
-    :HELP => (ct_repl::CTRepl, history::HistoryRepl) -> begin
+    :HELP => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
         l = 22
         n = 6
         println("\nCommands:\n")
@@ -208,15 +208,15 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
         end
         return nothing
     end,
-    :REPL => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        return :($ct_repl)
+    :REPL => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        return :($ct_repl_data)
     end,
-    :CLEAR => (ct_repl::CTRepl, history::HistoryRepl) -> begin
-        ct_repl.model = ModelRepl()
-        __add!(history, ct_repl) # update history
-        return COMMANDS_ACTIONS[:SHOW](ct_repl, history)
+    :CLEAR => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
+        ct_repl_data.model = ModelRepl()
+        __add!(history, ct_repl_data) # update history
+        return COMMANDS_ACTIONS[:SHOW](ct_repl_data, history)
     end,
-    :JLS => (ct_repl::CTRepl, history::HistoryRepl) -> begin
+    :JLS => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
         println("\nhttps://youtu.be/HzRF2622m9A")
         return nothing
     end,
@@ -292,26 +292,26 @@ function __code(model::ModelRepl, e::Expr)
 end
 
 function __update!(model::ModelRepl, e::Expr)
-    unique!(push!(model, e))
+    push!(model, e)
 end
 
 # make @def ocp quote
-function __quote_ocp(ct_repl::CTRepl)
-    code  = __code(ct_repl.model)
-    println("\n", ct_repl.ocp_name)
-    ocp_q = quote @def $(ct_repl.ocp_name) $(code) end
-    ct_repl.debug && println("debug> code: ", code)
-    ct_repl.debug && println("debug> quote code: ", ocp_q)
+function __quote_ocp(ct_repl_data::CTRepl)
+    code  = __code(ct_repl_data.model)
+    println("\n", ct_repl_data.ocp_name)
+    ocp_q = quote @def $(ct_repl_data.ocp_name) $(code) end
+    ct_repl_data.debug && println("debug> code: ", code)
+    ct_repl_data.debug && println("debug> quote code: ", ocp_q)
     return ocp_q
 end
 
 # eval ocp
-function __eval_ocp(ct_repl::CTRepl, e::Expr)
-    code  = __code(ct_repl.model, e)
+function __eval_ocp(ct_repl_data::CTRepl, e::Expr)
+    code  = __code(ct_repl_data.model, e)
     ocp = gensym()
     ocp_q = quote @def $ocp $code end
-    ct_repl.debug && println("debug> code: ", code)
-    ct_repl.debug && println("debug> quote code: ", ocp_q)
+    ct_repl_data.debug && println("debug> code: ", code)
+    ct_repl_data.debug && println("debug> quote code: ", ocp_q)
     try 
         eval(ocp_q)
     catch ex
@@ -321,64 +321,64 @@ function __eval_ocp(ct_repl::CTRepl, e::Expr)
 end
 
 # quote solve: todo: update when using real solver
-function __quote_solve(ct_repl::CTRepl)
-    if ct_repl.__demo
-        solve_q = (quote $(ct_repl.sol_name) = CTBase.__demo_solver(); nothing end)
-        ct_repl.debug && println("debug> quote solve: ", solve_q)
+function __quote_solve(ct_repl_data::CTRepl)
+    if ct_repl_data.__demo
+        solve_q = (quote $(ct_repl_data.sol_name) = CTBase.__demo_solver(); nothing end)
+        ct_repl_data.debug && println("debug> quote solve: ", solve_q)
         return solve_q
     else
-        solve_q = (quote $(ct_repl.sol_name) = solve($(ct_repl.ocp_name)) end)
-        ct_repl.debug && println("debug> quote solve: ", solve_q)
+        solve_q = (quote $(ct_repl_data.sol_name) = solve($(ct_repl_data.ocp_name)) end)
+        ct_repl_data.debug && println("debug> quote solve: ", solve_q)
         return solve_q
     end
 end
 
 # quote plot: todo: update when handle correctly solution
-function __quote_plot(ct_repl::CTRepl)
+function __quote_plot(ct_repl_data::CTRepl)
     plot_q = quote
-        if @isdefined($(ct_repl.sol_name))
-            plot($(ct_repl.sol_name), size=(600, 500))
+        if @isdefined($(ct_repl_data.sol_name))
+            plot($(ct_repl_data.sol_name), size=(600, 500))
         else
             println("\nNo solution available.")
         end
     end
-    ct_repl.debug && println("debug> quote plot: ", plot_q)
+    ct_repl_data.debug && println("debug> quote plot: ", plot_q)
     return plot_q
 end
 
 # add model to history
-function __add!(history::HistoryRepl, ct_repl::CTRepl)
-    push!(history.ct_repls, deepcopy(ct_repl))
+function __add!(history::HistoryRepl, ct_repl_data::CTRepl)
+    push!(history.ct_repl_datas_data, deepcopy(ct_repl_data))
     history.index += 1
 end
 
 # go to previous model in history
 function __undo!(history::HistoryRepl)
     history.index > 1 && (history.index -= 1)
-    return history.ct_repls[history.index]
+    return history.ct_repl_datas_data[history.index]
 end
 
 # go to next model in history
 function __redo!(history::HistoryRepl)
-    history.index < length(history.ct_repls) && (history.index += 1)
-    return history.ct_repls[history.index]
+    history.index < length(history.ct_repl_datas_data) && (history.index += 1)
+    return history.ct_repl_datas_data[history.index]
 end
 
-# copy a ct_repl
-function __copy!(ct_repl::CTRepl, ct_repl_to_copy::CTRepl)
-    ct_repl.model = deepcopy(ct_repl_to_copy.model)
-    ct_repl.ocp_name = ct_repl_to_copy.ocp_name
-    ct_repl.sol_name = ct_repl_to_copy.sol_name
-    ct_repl.debug = ct_repl_to_copy.debug
+# copy a ct_repl_data
+function __copy!(ct_repl_data::CTRepl, ct_repl_data_to_copy::CTRepl)
+    ct_repl_data.model = deepcopy(ct_repl_data_to_copy.model)
+    ct_repl_data.ocp_name = ct_repl_data_to_copy.ocp_name
+    ct_repl_data.sol_name = ct_repl_data_to_copy.sol_name
+    ct_repl_data.debug = ct_repl_data_to_copy.debug
 end
 
-function Base.show(io::IO, ::MIME"text/plain", ct_repl::CTRepl)
+function Base.show(io::IO, ::MIME"text/plain", ct_repl_data::CTRepl)
     print(io, "\n")
     println(io, "ct> ")
-    println(io, "model: ", ct_repl.model)
-    println(io, "ocp_name: ", ct_repl.ocp_name)
-    println(io, "sol_name: ", ct_repl.sol_name)
-    println(io, "debug: ", ct_repl.debug)
+    println(io, "model: ", ct_repl_data.model)
+    println(io, "ocp_name: ", ct_repl_data.ocp_name)
+    println(io, "sol_name: ", ct_repl_data.sol_name)
+    println(io, "debug: ", ct_repl_data.debug)
 end
 
 function __demo_solver()

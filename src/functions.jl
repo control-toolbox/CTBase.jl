@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------------------------------------
-"""
+#= """
 
 $(TYPEDSIGNATURES)
 
@@ -10,29 +10,34 @@ Dependencies are specified with a boolean, variable, false by default.
 julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
 julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
 ```
-
-"""
-function BoundaryConstraint(f::Function; variable::Bool = false)
-    variable_dependence = variable ? NonFixed : Fixed
-    return BoundaryConstraint{variable_dependence}(f)
-end
+""" =#
+#function BoundaryConstraint(f::Function; variable::Bool=false)
+#    variable_dependence = variable ? NonFixed : Fixed
+#    return BoundaryConstraint{variable_dependence}(f)
+#end
 
 """
 
 $(TYPEDSIGNATURES)
 
 Return a ```BoundaryConstraint``` of a function.
-Dependencies are specified with a DataType, NonFixed/Fixed, Fixed by default.
+Dependencies are specified with a DataType: NonFixed/Fixed or with a boolean, variable, false by default.
 
 ```@example
 julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
+julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
+julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], Fixed)
 julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], NonFixed)
 ```
-
 """
-function BoundaryConstraint(f::Function, dependencies::DataType...)
+function BoundaryConstraint(f::Function, dependencies::DataType...; variable::Bool=false)
     __check_dependencies(dependencies)
-    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    # if dependencies is not empty we use it in priority
+    if size(dependencies, 1) > 0
+        variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    else
+        variable_dependence = variable ? NonFixed : Fixed
+    end
     return BoundaryConstraint{variable_dependence}(f)
 end
 
@@ -85,7 +90,7 @@ function (F::BoundaryConstraint{NonFixed})(x0::State, xf::State, v::Variable)::c
 end
 
 # --------------------------------------------------------------------------------------------------
-"""
+#= """
 
 $(TYPEDSIGNATURES)
 
@@ -96,29 +101,34 @@ Dependencies are specified with a boolean, variable, false by default.
 julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
 julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
 ```
-
 """
 function Mayer(f::Function; variable::Bool = false)
     variable_dependence = variable ? NonFixed : Fixed
     return Mayer{variable_dependence}(f)
-end
+end =#
 
 """
 
 $(TYPEDSIGNATURES)
 
 Return a ```Mayer``` cost of a function.
-Dependencies are specified with a DataType, NonFixed/Fixed, Fixed by default.
+Dependencies are specified with a DataType: NonFixed/Fixed, or with a boolean, variable, false by default.
 
 ```@example
 julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
+julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
+julia> G = Mayer((x0, xf) -> xf[2]-x0[1], Fixed)
 julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], NonFixed)
 ```
-
 """
-function Mayer(f::Function, dependencies::DataType...)
+function Mayer(f::Function, dependencies::DataType...; variable::Bool=false)
     __check_dependencies(dependencies)
-    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    # if dependencies is not empty we use it in priority
+    if size(dependencies, 1) > 0
+        variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    else
+        variable_dependence = variable ? NonFixed : Fixed
+    end
     return Mayer{variable_dependence}(f)
 end
 
@@ -183,7 +193,6 @@ Dependencies are specified with a boolean, variable, false by default, autonomou
 julia> H = Hamiltonian((x, p) -> x[1]^2+2p[2])
 julia> H = Hamiltonian((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3]], autonomous=false, variable=true)
 ```
-
 """
 function Hamiltonian(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
@@ -295,7 +304,6 @@ julia> HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], autonomous=true, variab
 julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], autonomous=false, variable=false)
 julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true)
 ```
-
 """
 function HamiltonianLift(f::Function; 
     autonomous::Bool=true, variable::Bool=false)
@@ -319,7 +327,6 @@ julia> HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], Autonomous, NonFixed)
 julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], NonAutonomous, Fixed)
 julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], NonAutonomous, NonFixed)
 ```
-
 """
 function HamiltonianLift(f::Function, dependences::DataType...)
     __check_dependencies(dependences)

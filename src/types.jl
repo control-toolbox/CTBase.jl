@@ -52,7 +52,6 @@ julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]
 julia> B([0, 0], [1, 1], [1, 2, 3])
 [4, 1]
 ```
-
 """
 struct BoundaryConstraint{variable_dependence}
     f::Function
@@ -103,8 +102,6 @@ julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
 julia> G([0, 0], [1, 1], [1, 2, 3])
 4
 ```
-
-
 """
 struct Mayer{variable_dependence}
     f::Function
@@ -192,7 +189,6 @@ julia> H = Hamiltonian((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, va
 julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
-    
 """
 struct Hamiltonian{time_dependence, variable_dependence} <: AbstractHamiltonian{time_dependence, variable_dependence}
     f::Function

@@ -8,7 +8,7 @@ function __check_dependencies(dependencies::Tuple{Vararg{DataType}})
     size(filter(p->p<:VariableDependence,dependencies),1) > 1 && throw(IncorrectArgument("the number of arguments about variable dependence must be equal at most to 1"))
     size(filter(p->p<:TimeDependence,dependencies),1) > 1 && throw(IncorrectArgument("the number of arguments about time dependence must be equal at most to 1"))
     size(dependencies,1) > 2 && throw(IncorrectArgument("the number of arguments about dependencies must be equal at most to 2"))
-    size(filter(p->!(p<:Union{TimeDependence,VariableDependence}),dependencies),1) > 0 && throw(IncorrectArgument("the wrong of arguments, possible arguments are : NonAutonomous, Autonomous, Fixed, NonFixed"))
+    size(filter(p->!(p<:Union{TimeDependence,VariableDependence}),dependencies),1) > 0 && throw(IncorrectArgument("wrong type arguments, possible arguments are: NonAutonomous, Autonomous, Fixed, NonFixed"))
 end
 
 """
