@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------------------------------------
-#= """
+"""
 
 $(TYPEDSIGNATURES)
 
@@ -10,34 +10,10 @@ Dependencies are specified with a boolean, variable, false by default.
 julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
 julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
 ```
-""" =#
-#function BoundaryConstraint(f::Function; variable::Bool=false)
-#    variable_dependence = variable ? NonFixed : Fixed
-#    return BoundaryConstraint{variable_dependence}(f)
-#end
 
 """
-
-$(TYPEDSIGNATURES)
-
-Return a ```BoundaryConstraint``` of a function.
-Dependencies are specified with a DataType: NonFixed/Fixed or with a boolean, variable, false by default.
-
-```@example
-julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
-julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
-julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2], Fixed)
-julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], NonFixed)
-```
-"""
-function BoundaryConstraint(f::Function, dependencies::DataType...; variable::Bool=false)
-    __check_dependencies(dependencies)
-    # if dependencies is not empty we use it in priority
-    if size(dependencies, 1) > 0
-        variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
-    else
-        variable_dependence = variable ? NonFixed : Fixed
-    end
+function BoundaryConstraint(f::Function; variable::Bool = false)
+    variable_dependence = variable ? NonFixed : Fixed
     return BoundaryConstraint{variable_dependence}(f)
 end
 
@@ -45,52 +21,53 @@ end
 
 $(TYPEDSIGNATURES)
 
-Return the evaluation of the BoundaryConstraint at ```x0```, ```xf```.
+Return a ```BoundaryConstraint``` of a function.
+Dependencies are specified with a DataType, NonFixed/Fixed, Fixed by default.
+
+```@example
+julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
+julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], NonFixed)
+```
+
+"""
+function BoundaryConstraint(f::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return BoundaryConstraint{variable_dependence}(f)
+end
+
+"""
+
+$(TYPEDSIGNATURES)
+
+Return the evaluation of the BoundaryConstraint.
 
 ```@example
 julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
 julia> B([0, 0], [1, 1])
 [1, 2]
+julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
+julia> B([0, 0], [1, 1],Real[])
+[1, 2]
+julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
+julia> B([0, 0], [1, 1], [1, 2, 3])
+[4, 1]
 ```
 """
 function (F::BoundaryConstraint{Fixed})(x0::State, xf::State)::ctVector
     return F.f(x0, xf)
 end
 
-"""
-
-$(TYPEDSIGNATURES)
-
-Return the evaluation of the BoundaryConstraint at ```x0```, ```xf```, with a variable given but ignored.
-
-```@example
-julia> B = BoundaryConstraint((x0, xf) -> [xf[2]-x0[1], 2xf[1]+x0[2]^2])
-julia> B([0, 0], [1, 1],Real[])
-[1, 2]
-```
-"""
 function (F::BoundaryConstraint{Fixed})(x0::State, xf::State, v::Variable)::ctVector
     return F.f(x0, xf)
 end
 
-"""
-
-$(TYPEDSIGNATURES)
-
-Return the evaluation of the BoundaryConstraint at ```x0```, ```xf```, ```v```.
-
-```@example
-julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]+x0[2]^2], variable=true)
-julia> B([0, 0], [1, 1], [1, 2, 3])
-[4, 1]
-```
-"""
 function (F::BoundaryConstraint{NonFixed})(x0::State, xf::State, v::Variable)::ctVector
     return F.f(x0, xf, v)
 end
 
 # --------------------------------------------------------------------------------------------------
-#= """
+"""
 
 $(TYPEDSIGNATURES)
 
@@ -101,34 +78,29 @@ Dependencies are specified with a boolean, variable, false by default.
 julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
 julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
 ```
+
 """
 function Mayer(f::Function; variable::Bool = false)
     variable_dependence = variable ? NonFixed : Fixed
     return Mayer{variable_dependence}(f)
-end =#
+end
 
 """
 
 $(TYPEDSIGNATURES)
 
 Return a ```Mayer``` cost of a function.
-Dependencies are specified with a DataType: NonFixed/Fixed, or with a boolean, variable, false by default.
+Dependencies are specified with a DataType, NonFixed/Fixed, Fixed by default.
 
 ```@example
 julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
-julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
-julia> G = Mayer((x0, xf) -> xf[2]-x0[1], Fixed)
 julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], NonFixed)
 ```
+
 """
-function Mayer(f::Function, dependencies::DataType...; variable::Bool=false)
+function Mayer(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
-    # if dependencies is not empty we use it in priority
-    if size(dependencies, 1) > 0
-        variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
-    else
-        variable_dependence = variable ? NonFixed : Fixed
-    end
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Mayer{variable_dependence}(f)
 end
 
@@ -136,46 +108,28 @@ end
 
 $(TYPEDSIGNATURES)
 
-Return the evaluation of the Mayer cost at ```x0```, ```xf```.
+Return the evaluation of the Mayer cost.
 
 ```@example
 julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
 julia> G([0, 0], [1, 1])
 1
+julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
+julia> G([0, 0], [1, 1], Real[])
+1
+julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
+julia> G([0, 0], [1, 1], [1, 2, 3])
+4
 ```
 """
 function (F::Mayer{Fixed})(x0::State, xf::State)::ctNumber
     return F.f(x0, xf)
 end
 
-"""
-
-$(TYPEDSIGNATURES)
-
-Return the evaluation of the Mayer cost at ```x0```, ```xf```, with a variable given but ignored.
-
-```@example
-julia> G = Mayer((x0, xf) -> xf[2]-x0[1])
-julia> G([0, 0], [1, 1],Real[])
-1
-```
-"""
 function (F::Mayer{Fixed})(x0::State, xf::State, v::Variable)::ctNumber
     return F.f(x0, xf)
 end
 
-"""
-
-$(TYPEDSIGNATURES)
-
-Return the evaluation of the Mayer cost at ```x0```, ```xf```, ```v```.
-
-```@example
-julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
-julia> G([0, 0], [1, 1], [1, 2, 3])
-4
-```
-"""
 function (F::Mayer{NonFixed})(x0::State, xf::State, v::Variable)::ctNumber
     return F.f(x0, xf, v)
 end
