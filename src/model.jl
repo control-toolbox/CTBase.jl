@@ -500,113 +500,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial` or `:final` value constraint on a range of the state, or a value constraint on a range of the
-`:variable`.
-
-!!! note
-
-    - The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:q if the constraint is on the variable.
-    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
-    - The times must be set before. Use time!.
-
-# Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
-julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
-julia> constraint!(ocp, :final, Index(2), 0)
-julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
-```
-"""
-function constraint!(ocp::OptimalControlModel, type::Symbol, rg::RangeConstraint, val::ctVector, label::Symbol=__constraint_label())
-
-    # we check if the dimensions and times have been set just to force the user to set them before
-    __check_all_set(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
-    ", you cannot use constraint! function with type=:variable."))
-
-    # check if the constraint named label already exists
-    if label ∈ constraints_labels(ocp)
-        throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    end
-
-    # check if rg and val are consistent
-    (length(rg) != length(val)) && throw(IncorrectArgument("the range `rg`` and the value `val` must have the same dimension"))
-
-    # dimensions
-    n = ocp.state_dimension
-    q = ocp.variable_dimension
-
-    # check if the range is valid
-    if type == :initial        
-        !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the initial state constraint must be contained in 1:$n"))
-    elseif type == :final
-        !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range $rg of the final state constraint must be contained in 1:$n"))
-    elseif type == :variable
-        !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range $rg of the variable constraint must be contained in 1:$q"))
-    end
-
-    #
-    constraint!(ocp, type, rg, val, val, label)
-
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Add an `:initial` or `:final` value constraint on the state, or a `:variable` value. Can also be used with
-`:state` and `:control`.
-
-!!! note
-
-    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
-    - The times must be set before. Use time!.
-    - When an element is of dimension 1, consider it as a scalar.
-
-# Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial, [ 0, 0 ])
-julia> constraint!(ocp, :final, 2) # if the state is of dimension 1
-julia> constraint!(ocp, :variable, [ 3, 0, 1 ])
-```
-"""
-function constraint!(ocp::OptimalControlModel, type::Symbol, val::ctVector, label::Symbol=__constraint_label())
-    # we use the constraint! defined before
-
-    # we check if the dimensions and times have been set
-    __check_all_set(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
-        ", you cannot use constraint! function with type=:variable."))
-
-    #
-    rg = nothing
-
-    # dimensions
-    n = ocp.state_dimension
-    q = ocp.variable_dimension
-
-    #
-    if type ∈ [:initial, :final, :state, :control ] # also allowed for :control and :state to treat uniformly eq and ineq
-        rg = n == 1 ? Index(1) : 1:n 
-        # check if rg and val are consistent
-        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $n"))
-    elseif type == :variable
-        rg = q == 1 ? Index(1) : 1:q
-        (length(rg) != length(val)) && throw(IncorrectArgument("`val` must be of dimension $q"))
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :state, :control, :variable ] or check the arguments of the constraint! method."))
-    end
-
-    #
-    constraint!(ocp, type, rg, val, label)
-
-end
-
-"""
-$(TYPEDSIGNATURES)
-
 Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint (whole range).
 
 !!! note
@@ -742,53 +635,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add a `:boundary`, `:control`, `:state`, `:mixed` or `:variable` value functional constraint.
-
-!!! note
-
-    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
-    - The times must be set before. Use time!.
-    - When an element is of dimension 1, consider it as a scalar.
-
-# Examples
-
-```@example
-# variable independent ocp
-julia> constraint!(ocp, :boundary, (x0, xf) -> x0[3]+xf[2], 0)
-
-# variable dependent ocp
-julia> constraint!(ocp, :boundary, (x0, xf, v) -> x0[3]+xf[2]*v[1], 0)
-
-# time independent and variable independent ocp
-julia> constraint!(ocp, :control, u -> 2u, 1)
-julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ])
-julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0)
-
-# time dependent and variable independent ocp
-julia> constraint!(ocp, :control, (t, u) -> 2u, 1)
-julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ])
-julia> constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0)
-
-# time independent and variable dependent ocp
-julia> constraint!(ocp, :control, (u, v) -> 2u*v[1], 1)
-julia> constraint!(ocp, :state, (x, v) -> x-v[2], [ 0, 0, 0 ])
-julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u+v[1], 0)
-
-# time dependent and variable dependent ocp
-julia> constraint!(ocp, :control, (t, u, v) -> 2u-t*v[2], 1)
-julia> constraint!(ocp, :state, (t, x, v) -> x-t+v[1], [ 0, 0, 0 ])
-julia> constraint!(ocp, :mixed, (t, x, u, v) -> x[1]-u*v[1], 0)
-```
-"""
-function constraint!(ocp::OptimalControlModel, type::Symbol, f::Function, val::ctVector, 
-        label::Symbol=__constraint_label()) # we use the constraint! defined before
-    constraint!(ocp, type, f, val, val, label)
-end
-
-
-"""
-$(TYPEDSIGNATURES)
-
 Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range.
 
 !!! note
@@ -801,29 +647,25 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 
 ```jldoctest
 julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :final, val=Index(1), lb=0, ub=2)
-julia> constraint!(ocp, :control, val=Index(1), lb=0, ub=2)
+julia> constraint!(ocp, :final, rg=1, lb=0, ub=2)
+julia> constraint!(ocp, :control, rg=1, lb=0, ub=2)
 julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
 julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
 julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence}, type::Symbol; 
-    rg::Union{RangeConstraint,Nothing}=nothing, f::Union{Function,Nothing}=nothing,
-    val::Union{ctVector,Nothing}=nothing, lb::Union{ctVector,Nothing}=nothing, ub::Union{ctVector,Nothing}=nothing, 
+    rg::Union{OrdinalRange{<:Integer},Integer,Nothing}=nothing, f::Union{Function,Nothing}=nothing, lb::Union{ctVector,Nothing}=nothing, ub::Union{ctVector,Nothing}=nothing, 
     label::Symbol=__constraint_label())
 
-    
     (lb ≢ nothing && ub === nothing) && (ub = Inf*(size(lb,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
     (lb === nothing && ub ≢ nothing) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
-
-    @match (rg,f,val,lb,ub) begin
-        (::Nothing,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, val, label) #
-        (::Nothing,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, lb, ub, label) #
-        (::Nothing,::Function,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, f, val, label) #
-        (::Nothing,::Function,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, f, lb, ub, label) #
-        (::RangeConstraint,::Nothing,::ctVector,::Nothing,::Nothing) => return constraint!(ocp, type, rg, val, label) #
-        (::RangeConstraint,::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, rg, lb, ub, label) #
+    (typeof(rg) <: Int) && (rg = Index(rg))
+    
+    @match (rg,f,lb,ub) begin
+        (::Nothing,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, lb, ub, label) #
+        (::Nothing,::Function,::ctVector,::ctVector) => return constraint!(ocp, type, f, lb, ub, label) #
+        (::RangeConstraint,::Nothing,::ctVector,::ctVector) => return constraint!(ocp, type, rg, lb, ub, label) #
         _ => throw(IncorrectArgument("Provided arguments are inconsistent"))
     end
 
