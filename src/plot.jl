@@ -321,10 +321,12 @@ corresponding respectively to the argument `xx` and the argument `yy`.
     x = __get_data_plot(sol, xx)
     y = __get_data_plot(sol, yy)
     if xx isa Symbol && xx==:time
+
         s, i = @match yy begin
             ::Symbol => (yy, 1)
             _        => yy
         end
+
         label = @match s begin
             :state   => sol.state_components_names[i]
             :control => sol.control_components_names[i]
@@ -332,14 +334,16 @@ corresponding respectively to the argument `xx` and the argument `yy`.
             :control_norm => "‖"*sol.control_name*"‖"
             _        => error("Internal error, no such choice for label")
         end
+
         # change ylims if the gap between min and max is less than a tol
-        tol = 1e-3
-        ymin = minimum(y)
-        ymax = maximum(y)
-        if abs(ymax-ymin) ≤ abs(ymin)*tol
-            ymiddle = (ymin+ymax)/2.0
-            ylims --> (0.9*ymiddle, 1.1*ymiddle)
-        end
+        # tol = 1e-3
+        # ymin = minimum(y)
+        # ymax = maximum(y)
+        # if abs(ymax-ymin) ≤ abs(ymin)*tol
+        #     ymiddle = (ymin+ymax)/2.0
+        #     ylims --> (0.9*ymiddle, 1.1*ymiddle)
+        # end
+        
     end
     return x, y
 end
