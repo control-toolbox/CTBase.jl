@@ -155,23 +155,23 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
             :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, Index($i), $tf, $tt) )
             :( $v1     ) && if (v1 == p.v) end => quote
                 ($ocp.variable_dimension ≠ 1) &&
-		throw(IncorrectArgument("variable must be of dimension one for a time"))
+		        throw(IncorrectArgument("variable must be of dimension one for a time"))
                 time!($ocp, Index(1), $tf, $tt) end
             _                                  =>
-	        return __throw("bad time declaration", p.lnum, p.line) end
+	            return __throw("bad time declaration", p.lnum, p.line) end
         (false, true ) => @match tf begin
             :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, $t0, Index($i), $tt) )
             :( $v1     ) && if (v1 == p.v) end => quote
                 ($ocp.variable_dimension ≠ 1) &&
-		throw(IncorrectArgument("variable must be of dimension one for a time"))
+		        throw(IncorrectArgument("variable must be of dimension one for a time"))
                 time!($ocp, $t0, Index(1), $tt) end
             _                                  =>
-	        return __throw("bad time declaration", p.lnum, p.line) end
+	            return __throw("bad time declaration", p.lnum, p.line) end
         _              => @match (t0, tf) begin
             (:( $v1[$i] ), :( $v2[$j] )) && if (v1 == v2 == p.v) end => 
                 :( time!($ocp, Index($i), Index($j), $tt) )
             _                                                        =>
-	        return __throw("bad time declaration", p.lnum, p.line) end
+	            return __throw("bad time declaration", p.lnum, p.line) end
     end
     __wrap(code, p.lnum, p.line)
 end
@@ -211,9 +211,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             gs = gensym()
             x0 = gensym()
             xf = gensym()
-	    ee2 = replace_call(e2 , p.x, p.t0, x0)
-	    ee2 = replace_call(ee2, p.x, p.tf, xf)
-	    args = [ x0, xf ]; __v_dep(p) && push!(args, p.v);
+	        ee2 = replace_call(e2 , p.x, p.t0, x0)
+	        ee2 = replace_call(ee2, p.x, p.tf, xf)
+	        args = [ x0, xf ]; __v_dep(p) && push!(args, p.v);
             quote
                 function $gs($(args...))
                     $ee2
@@ -224,9 +224,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
          :control_fun        => begin
             gs = gensym()
             ut = gensym()
-	    ee2 = replace_call(e2, p.u, p.t, ut)
+	        ee2 = replace_call(e2, p.u, p.t, ut)
             p.t_dep = p.t_dep || has(ee2, p.t)
-	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
+	        args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
                     $ee2
@@ -237,9 +237,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
          :state_fun        => begin
             gs = gensym()
             xt = gensym()
-	    ee2 = replace_call(e2, p.x, p.t, xt)
+	        ee2 = replace_call(e2, p.x, p.t, xt)
             p.t_dep = p.t_dep || has(ee2, p.t)
-	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
+	        args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
                     $ee2
@@ -249,7 +249,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :variable_fun        => begin
             gs = gensym()
-	    args = [ p.v ]
+	        args = [ p.v ]
             quote
                 function $gs($(args...))
                     $e2
@@ -260,9 +260,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             gs = gensym()
             xt = gensym()
             ut = gensym()
-	    ee2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
+	        ee2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
             p.t_dep = p.t_dep || has(ee2, p.t)
-	    args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
+	        args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
                     $ee2
@@ -408,11 +408,9 @@ macro def(ocp, e, log=false)
             _              => :( $ocp = Model(autonomous=false, variable=true) )
 	    end
         ee = QuoteNode(e)
-        code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp ))
+        code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp )) # todo: remove returned ocp value?
         esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
     end
 end
-    
-    
