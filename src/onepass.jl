@@ -211,9 +211,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             gs = gensym()
             x0 = gensym()
             xf = gensym()
-	        ee2 = replace_call(e2 , p.x, p.t0, x0)
-	        ee2 = replace_call(ee2, p.x, p.tf, xf)
-	        args = [ x0, xf ]; __v_dep(p) && push!(args, p.v);
+            ee2 = replace_call(e2 , p.x, p.t0, x0)
+            ee2 = replace_call(ee2, p.x, p.tf, xf)
+            args = [ x0, xf ]; __v_dep(p) && push!(args, p.v);
             quote
                 function $gs($(args...))
                     $ee2
@@ -224,9 +224,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
          :control_fun        => begin
             gs = gensym()
             ut = gensym()
-	        ee2 = replace_call(e2, p.u, p.t, ut)
+            ee2 = replace_call(e2, p.u, p.t, ut)
             p.t_dep = p.t_dep || has(ee2, p.t)
-	        args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
+            args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
                     $ee2
@@ -237,9 +237,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
          :state_fun        => begin
             gs = gensym()
             xt = gensym()
-	        ee2 = replace_call(e2, p.x, p.t, xt)
+            ee2 = replace_call(e2, p.x, p.t, xt)
             p.t_dep = p.t_dep || has(ee2, p.t)
-	        args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
+            args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
                     $ee2
@@ -249,7 +249,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
         (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :variable_fun        => begin
             gs = gensym()
-	        args = [ p.v ]
+            args = [ p.v ]
             quote
                 function $gs($(args...))
                     $e2
@@ -260,9 +260,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             gs = gensym()
             xt = gensym()
             ut = gensym()
-	        ee2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
+            ee2 = replace_call(e2, [ p.x, p.u ], p.t, [ xt, ut ])
             p.t_dep = p.t_dep || has(ee2, p.t)
-	        args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
+            args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
                     $ee2
