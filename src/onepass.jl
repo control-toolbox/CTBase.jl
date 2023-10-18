@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - for all p_... functions, write: code = quote ... end; __wrap(code, p.lnum, p.line)
 # - cannot call solve if problem not fully defined (dynamics not defined...)
 # - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2... (most internal first)
 # - test non autonomous cases
