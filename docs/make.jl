@@ -2,6 +2,7 @@ using Documenter
 using CTBase
 
 makedocs(
+    warnonly = :cross_references,
     sitename = "CTBase.jl",
     format = Documenter.HTML(prettyurls = false),
     pages = [
