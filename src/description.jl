@@ -1,10 +1,32 @@
 """
-    A description is a tuple of symbols, that is a Tuple{Vararg{Symbol}}.
+DescVarArg is a Vararg of symbols. `DescVarArg` is a type alias for a Vararg of symbols.
+
+```jldoctest
+julia> const DescVarArg = Vararg{Symbol}
+```
+
+See also: [`Description`](@ref).
 """
 const DescVarArg = Vararg{Symbol}
 
 """
-    A description is a tuple of symbols, that is a Tuple{Vararg{Symbol}}.
+A description is a tuple of symbols. `Description` is a type alias for a tuple of symbols.
+
+```jldoctest
+julia> const Description = Tuple{DescVarArg}
+```
+
+See also: [`DescVarArg`](@ref).
+
+# Example
+
+[`Base.show`](@ref) is overloaded for descriptions, that is tuple of descriptions are printed as follows:
+
+```jldoctest
+julia> display( ( (:a, :b), (:b, :c) ) )
+(:a, :b)
+(:b, :c)
+```
 """
 const Description = Tuple{DescVarArg}
 
@@ -12,10 +34,20 @@ const Description = Tuple{DescVarArg}
 $(TYPEDSIGNATURES)
 
 Print a tuple of descriptions.
+
+# Example
+
+```jldoctest
+julia> display( ( (:a, :b), (:b, :c) ) )
+(:a, :b)
+(:b, :c)
+```
 """
 function Base.show(io::IO, ::MIME"text/plain", descriptions::Tuple{Vararg{Description}})
-    for description ∈ descriptions
-        println(io, description)
+    N = size(descriptions, 1)
+    for i in range(1, N)
+        description = descriptions[i]
+        i < N ? print(io, "$description\n") : print(io, "$description")
     end
 end
 
@@ -28,6 +60,8 @@ Return a tuple containing only the description `y`.
 ```jldoctest
 julia> descriptions = ()
 julia> descriptions = add(descriptions, (:a,))
+(:a,)
+julia> print(descriptions)
 ((:a,),)
 julia> descriptions[1]
 (:a,)
@@ -38,19 +72,24 @@ add(x::Tuple{}, y::Description)::Tuple{Vararg{Description}} = (y,)
 """
 $(TYPEDSIGNATURES)
 
-Concatenate the description `y` at the tuple of descriptions `x` if it is not already in the tuple `x`.
+Concatenate the description `y` to the tuple of descriptions `x` if `x` does not contain `y`
+and return the new tuple of descriptions. Throw an error if the description `y` is already contained in `x`.
 
 # Example
+
 ```jldoctest
 julia> descriptions = ()
 julia> descriptions = add(descriptions, (:a,))
-((:a,),)
+(:a,)
 julia> descriptions = add(descriptions, (:b,))
-((:a,), (:b,))
+(:a,)
+(:b,)
+julia> descriptions = add(descriptions, (:b,))
+ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
 ```
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
-    y ∈ x ? throw(IncorrectArgument("the description $y is already in the list")) : return (x..., y)
+    y ∈ x ? throw(IncorrectArgument("the description $y is already in $x")) : return (x..., y)
 end
 
 """
@@ -61,9 +100,12 @@ a list of complete descriptions `desc_list`. If several complete descriptions ar
 then the first one is returned.
 
 # Example
+
 ```jldoctest
 julia> desc_list = ((:a, :b), (:b, :c), (:a, :c))
-((:a, :b), (:b, :c), (:a, :c))
+(:a, :b)
+(:b, :c)
+(:a, :c)
 julia> getFullDescription((:a,), desc_list)
 (:a, :b)
 ```
@@ -88,6 +130,7 @@ $(TYPEDSIGNATURES)
 Return the difference between the description `x` and the description `y`.
 
 # Example
+
 ```jldoctest
 julia> (:a, :b) \\ (:a,)
 (:b,)

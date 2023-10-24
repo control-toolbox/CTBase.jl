@@ -33,64 +33,164 @@ using LinearAlgebra
 # const AbstractVector{T} = AbstractArray{T,1}.
 """
 Type alias for a real number.
+
+```jldoctest
+julia> const ctNumber = Real
+```
 """
 const ctNumber = Real
+
 """
 Type alias for a vector of real numbers.
+
+```jldoctest
+julia> const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}}
+```
+
+See also: [`ctNumber`](@ref), [`State`](@ref), [`Costate`](@ref), [`Control`](@ref), [`Variable`](@ref).
 """
 const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # [] must be defined as Vector{Real}()
+
 """
 Type alias for a time.
+
+```jldoctest
+julia> const Time = ctNumber
+```
+
+See also: [`ctNumber`](@ref), [`Times`](@ref), [`TimesDisc`](@ref).
 """
 const Time = ctNumber
+
 """
 Type alias for a vector of times.
+
+```jldoctest
+julia> const Times = AbstractVector{<:Time}
+```
+
+See also: [`Time`](@ref), [`TimesDisc`](@ref).
 """
 const Times = AbstractVector{<:Time}
+
 """
-Type alias for a grid of times.
+Type alias for a grid of times. This is used to define a discretization of time interval given to solvers.
+
+```jldoctest
+julia> const TimesDisc = Union{Times, StepRangeLen}
+```
+
+See also: [`Time`](@ref), [`Times`](@ref).
 """
 const TimesDisc = Union{Times, StepRangeLen}
+
 """
-Type alias for a state.
+Type alias for a state in Rⁿ.
+
+```jldoctest
+julia> const State = ctVector
+```
+
+See also: [`ctVector`](@ref), [`Costate`](@ref), [`Control`](@ref), [`Variable`](@ref).
 """
 const State = ctVector
+
 """
-Type alias for an costate.
+Type alias for a costate in Rⁿ.
+
+```jldoctest
+julia> const Costate = ctVector
+```
+
+See also: [`ctVector`](@ref), [`State`](@ref), [`Control`](@ref), [`Variable`](@ref).
 """
-const Costate = ctVector # todo: add ajoint to write p*f(x, u) instead of p'*f(x,u)
+const Costate = ctVector # todo: add adjoint to write p*f(x, u) instead of p'*f(x,u)
+
 """
-Type alias for a control.
+Type alias for a control in Rᵐ.
+
+```jldoctest
+julia> const Control = ctVector
+```
+
+See also: [`ctVector`](@ref), [`State`](@ref), [`Costate`](@ref), [`Variable`](@ref).
 """
 const Control = ctVector
+
 """
-Type alias for a variable.
+Type alias for a variable in Rᵏ.
+
+```jldoctest
+julia> const Variable = ctVector
+```
+
+See also: [`ctVector`](@ref), [`State`](@ref), [`Costate`](@ref), [`Control`](@ref).
 """
 const Variable = ctVector
+
 """
 Type alias for a vector of states.
+
+```jldoctest
+julia> const States = AbstractVector{<:State}
+```
+
+See also: [`State`](@ref), [`Costates`](@ref), [`Controls`](@ref).
 """
 const States = AbstractVector{<:State}
+
 """
 Type alias for a vector of costates.
+
+```jldoctest
+julia> const Costates = AbstractVector{<:Costate}
+```
+
+See also: [`Costate`](@ref), [`States`](@ref), [`Controls`](@ref).
 """
 const Costates = AbstractVector{<:Costate}
+
 """
 Type alias for a vector of controls.
+
+```jldoctest
+julia> const Controls = AbstractVector{<:Control}
+```
+
+See also: [`Control`](@ref), [`States`](@ref), [`Costates`](@ref).
 """
 const Controls = AbstractVector{<:Control}
+
 """
-Type alias for a dimension.
+Type alias for a dimension. This is used to define the dimension of the state space, 
+the costate space, the control space, etc.
+
+```jldoctest
+julia> const Dimension = Integer
+```
 """
 const Dimension = Integer
 
 #
 """
 Type alias for a tangent vector to the state space.
+
+```jldoctest
+julia> const DState = ctVector
+```
+
+See also: [`ctVector`](@ref), [`DCostate`](@ref).
 """
 const DState     = ctVector
+
 """
 Type alias for a tangent vector to the costate space.
+
+```jldoctest
+julia> const DCostate = ctVector
+```
+
+See also: [`ctVector`](@ref), [`DState`](@ref).
 """
 const DCostate   = ctVector
 
