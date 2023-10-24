@@ -208,8 +208,8 @@ has(e, x, t) = begin
 	if :yes ∈ args
 	    :yes
 	else @match ee begin
-            :( $eee($tt) ) => (tt == t && has(eee, x)) ? :yes : ee
-            _ => ee end
+            :( $eee($tt) ) => (tt == t && has(eee, x)) ? :yes : ee
+            _ => ee end
         end
     end
     expr_it(e, foo(x, t), x -> x) == :yes

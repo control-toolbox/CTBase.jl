@@ -1,11 +1,12 @@
-# Default
+# Repl
 
 ## Index
 
 ```@index
-Pages   = ["api-default.md"]
+Pages   = ["api-repl.md"]
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
+Private = false
 ```
 
 ## Documentation
@@ -13,5 +14,6 @@ Order = [:module, :constant, :type, :function, :macro]
 ```@autodocs
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Pages = ["default.jl"]
+Pages = ["repl.jl"]
+Private = false
 ```
