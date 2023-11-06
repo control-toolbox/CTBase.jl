@@ -478,40 +478,10 @@ julia> constraint!(ocp, :variable, 0, 1) # the variable here is of dimension 1
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Union{ctVector,Nothing}, ub::Union{ctVector,Nothing}, 
         label::Symbol=__constraint_label())
-    # we check if the dimensions and times have been set
-    __check_all_set(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" *
-    ", you cannot use constraint! function with type=:variable."))
 
-    #
-    rg = nothing
+    constraint!(ocp, type, rg=nothing, f=nothing, lb=lb, ub=ub, label=label)
 
-    # dimensions
-    n = ocp.state_dimension
-    m = ocp.control_dimension
-    q = ocp.variable_dimension
-
-    #
-    if type ∈ [:initial, :final, :state]
-        rg = n == 1 ? Index(1) : 1:n
-        txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
-    elseif type == :control
-        rg = m == 1 ? Index(1) : 1:m
-        txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
-    elseif type == :variable
-        rg = q == 1 ? Index(1) : 1:q
-        txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
-    else
-        throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-        ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
-    end
-    
-    #
-    (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
-    (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-
-    #
-    constraint!(ocp, type, rg=rg, f=nothing, lb=lb, ub=ub, label=label)
+    nothing # to force to return nothing
 
 end
 
@@ -609,7 +579,29 @@ function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol;
 
     @match (rg,f,lb,ub) begin
         (::Nothing,::Nothing,::ctVector,::ctVector) => begin
-                constraint!(ocp,type,lb,ub,label)
+                #
+                rg = nothing
+
+                #
+                if type ∈ [:initial, :final, :state]
+                    rg = n == 1 ? Index(1) : 1:n
+                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
+                elseif type == :control
+                    rg = m == 1 ? Index(1) : 1:m
+                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
+                elseif type == :variable
+                    rg = q == 1 ? Index(1) : 1:q
+                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
+                else
+                    throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                    ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
+                end
+                
+                #
+                (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
+                (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
+
+                constraint!(ocp, type, rg=rg, lb=lb, ub=ub, label=label)
             end
         (::Nothing,::Function,::ctVector,::ctVector) => begin
                 # set the constraint
