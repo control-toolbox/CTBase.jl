@@ -396,20 +396,6 @@ function recipe_label(sol::OptimalControlSolution, xx::Union{Symbol,Tuple{Symbol
     return label
 end
 
-@recipe function f(sol::OptimalControlSolution,
-    xx::Union{Symbol,Tuple{Symbol,Integer}}, 
-    yy::Union{Symbol,Tuple{Symbol,Integer}})
-
-    #
-    x = __get_data_plot(sol, xx)
-    y = __get_data_plot(sol, yy)
-
-    #
-    label = recipe_label(sol, xx, yy)
-    
-    return x, y
-end
-
 """
 $(TYPEDSIGNATURES)
 

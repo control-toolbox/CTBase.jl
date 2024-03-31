@@ -166,7 +166,7 @@ export replace_call, constraint_type
 export @def
 
 # repl
-export ct_repl
-isdefined(Base, :active_repl) && ct_repl()
+##export ct_repl
+##isdefined(Base, :active_repl) && ct_repl()
 
 end
