@@ -24,7 +24,7 @@ using Printf # to print an OptimalControlModel
 using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
-using ReplMaker
+#using ReplMaker
 using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
@@ -112,9 +112,9 @@ include("model.jl")
 include("differential_geometry.jl")
 #
 include("ctparser_utils.jl")
-#include("ctparser.jl")
+##include("ctparser.jl")
 include("onepass.jl")
-include("repl.jl")
+#include("repl.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
