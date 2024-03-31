@@ -13,114 +13,127 @@ end
     ct_repl_datas_data::Vector{CTRepl}=Vector{CTRepl}()
 end
 
+ct_repl_is_set = false
+
 """
 $(TYPEDSIGNATURES)
 
 Create a ct REPL.
 """
-function ct_repl(; debug=false, demo=false)
+function ct_repl(; debug=false, demo=false, verbose=false)
 
-    # init: ct_repl_data, history
-    ct_repl_data = CTRepl()
-    ct_repl_data.debug = debug
-    ct_repl_data.__demo = demo
-    history::HistoryRepl = HistoryRepl(0, Vector{ModelRepl}())
-
-    # if demo, print a message
-    demo && println("\nWelcome to the demo of the ct REPL.\n")
-
-    # advice to start by setting the name of the ocp and the solution
-    println("To start, you should set the name of the optimal control problem and the name of the solution.")
-    println("For example, you can type:\n")
-    println("    ct> NAME=(ocp, sol)\n")
-
-    # add initial ct_repl_data to history
-    __add!(history, ct_repl_data)
-
-    # text invalid
-    txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a " *
-                    "valid expression to update the model."
-
-    function parse_to_expr(s::AbstractString)
-        
-        # remove spaces from s at the beginning and at the end
-        s = strip(s)
-
-        # check if it is a comment
-        startswith(s, "#") && return nothing
-
-        # parse string
-        e = Meta.parse(s)
+    if !ct_repl_is_set
 
         #
-        ct_repl_data.debug && println("\ndebug> parsing string: ", s)
-        ct_repl_data.debug && println("debug> expression parsed: ", e)
-        ct_repl_data.debug && println("debug> expression type: ", typeof(e))
-        ct_repl_data.debug && println("debug> dump of expression: ", dump(e))
+        global ct_repl_is_set = true
 
-        # test if e is a command
-        @match e begin
-            :( $c = $a ) => begin
-                command = __transform_to_command(c)
-                ct_repl_data.debug && println("debug> command: ", command, " and argument: ", a)
-                command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, a, history))
-            end
-            :( $c ) => begin
-                command = __transform_to_command(c)
-                ct_repl_data.debug && println("debug> command: ", command)
-                command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, history))
-            end
-            _ => nothing
-        end
+        # init: ct_repl_data, history
+        ct_repl_data = CTRepl()
+        ct_repl_data.debug = debug
+        ct_repl_data.__demo = demo
+        history::HistoryRepl = HistoryRepl(0, Vector{ModelRepl}())
 
-        # check if s finishes with a ";". If yes then remove it and return nothing at the end
-        return_nothing = endswith(s, ";") ? true : false
-        return_nothing && (s = s[1:end-1])
-        e = Meta.parse(s)
+        # if demo, print a message
+        demo && println("\nWelcome to the demo of the ct REPL.\n")
 
-        #
-        return_nothing && ct_repl_data.debug && println("\ndebug> new parsing string: ", s)
-        return_nothing && ct_repl_data.debug && println("debug> new expression parsed: ", e)
-        
-        if e isa Expr
+        # advice to start by setting the name of the ocp and the solution
+        println("To start, you should set the name of the optimal control problem and the name of the solution.")
+        println("For example, you can type:\n")
+        println("    ct> NAME=(ocp, sol)\n")
 
-            # eval ocp to test if the expression is valid
-            ct_repl_data.debug && (println("debug> try to add expression: ", e))
-            try 
-                __eval_ocp(ct_repl_data, e)      # test if code is valid: if not, an exception is thrown
-            catch ex
-                ct_repl_data.debug && (println("debug> exception thrown: ", ex))
-                println(txt_invalid)
-                return nothing
-            end
+        # add initial ct_repl_data to history
+        __add!(history, ct_repl_data)
+
+        # text invalid
+        txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a " *
+                        "valid expression to update the model."
+
+        function parse_to_expr(s::AbstractString)
             
-            # update model
-            __update!(ct_repl_data.model, e)
-            ct_repl_data.debug && (println("debug> expression valid, model updated."))
+            # remove spaces from s at the beginning and at the end
+            s = strip(s)
 
-            # add ct_repl_data to history
-            __add!(history, ct_repl_data)
+            # check if it is a comment
+            startswith(s, "#") && return nothing
+
+            # parse string
+            e = Meta.parse(s)
 
             #
-            return return_nothing ? nothing : __quote_ocp(ct_repl_data)
+            ct_repl_data.debug && println("\ndebug> parsing string: ", s)
+            ct_repl_data.debug && println("debug> expression parsed: ", e)
+            ct_repl_data.debug && println("debug> expression type: ", typeof(e))
+            ct_repl_data.debug && println("debug> dump of expression: ", dump(e))
 
-        else
+            # test if e is a command
+            @match e begin
+                :( $c = $a ) => begin
+                    command = __transform_to_command(c)
+                    ct_repl_data.debug && println("debug> command: ", command, " and argument: ", a)
+                    command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, a, history))
+                end
+                :( $c ) => begin
+                    command = __transform_to_command(c)
+                    ct_repl_data.debug && println("debug> command: ", command)
+                    command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, history))
+                end
+                _ => nothing
+            end
 
-            println(txt_invalid)
-            return nothing
+            # check if s finishes with a ";". If yes then remove it and return nothing at the end
+            return_nothing = endswith(s, ";") ? true : false
+            return_nothing && (s = s[1:end-1])
+            e = Meta.parse(s)
 
+            #
+            return_nothing && ct_repl_data.debug && println("\ndebug> new parsing string: ", s)
+            return_nothing && ct_repl_data.debug && println("debug> new expression parsed: ", e)
+            
+            if e isa Expr
+
+                # eval ocp to test if the expression is valid
+                ct_repl_data.debug && (println("debug> try to add expression: ", e))
+                try 
+                    __eval_ocp(ct_repl_data, e)      # test if code is valid: if not, an exception is thrown
+                catch ex
+                    ct_repl_data.debug && (println("debug> exception thrown: ", ex))
+                    println(txt_invalid)
+                    return nothing
+                end
+                
+                # update model
+                __update!(ct_repl_data.model, e)
+                ct_repl_data.debug && (println("debug> expression valid, model updated."))
+
+                # add ct_repl_data to history
+                __add!(history, ct_repl_data)
+
+                #
+                return return_nothing ? nothing : __quote_ocp(ct_repl_data)
+
+            else
+
+                println(txt_invalid)
+                return nothing
+
+            end
+
+        end # parse_to_expr
+
+        # makerepl command
+        initrepl(parse_to_expr,
+                prompt_text="ct> ",
+                prompt_color = :magenta,
+                start_key='>',
+                mode_name="ct_mode",
+                valid_input_checker=complete_julia,
+                startup_text=false)
+            
+    else
+        if verbose
+            println("ct repl is already set.")
         end
-
-    end # parse_to_expr
-
-    # makerepl command
-    initrepl(parse_to_expr,
-            prompt_text="ct> ",
-            prompt_color = :magenta,
-            start_key='>',
-            mode_name="ct_mode",
-            valid_input_checker=complete_julia,
-            startup_text=false)
+    end
 
 end
 
@@ -286,8 +299,9 @@ end
 
 # get code from model and an extra expression
 function __code(model::ModelRepl, e::Expr)
+    println("ici")
     model_ = deepcopy(model)    # copy model
-    __update!(model_, e)  # update model_
+    __update!(model_, e)        # update model_
     return __code(model_)       # get code
 end
 
