@@ -113,6 +113,30 @@ B = [ 0
 @test o.lagrange(x, u) == 0.5u^2
 @test o.criterion == :min
 
+t0 = 0
+tf = 1
+@def o begin
+    t ∈ [ t0, tf ], time
+    x ∈ R^2, state
+    u ∈ R, control
+    x(t0) == [ -1, 0 ], (1)
+    x(tf) == [  0, 0 ]
+    ẋ(t) == A * x(t) + B * u(t)
+    0.5 * ∫( u(t)^2 ) → min
+end
+x = [ 1, 2 ]
+x0 = 2 * x
+xf = 3 * x
+u = -1
+A = [ 0 1
+      0 0 ]
+B = [ 0
+      1 ]
+@test constraint(o, :eq1)(x0, xf) == x0
+@test o.dynamics(x, u) == A * x + B * u
+@test o.lagrange(x, u) == 0.5u^2
+@test o.criterion == :min
+
 a = 1
 f(b) = begin # closure of a, local c, and @def in function
     c = 3
@@ -573,11 +597,40 @@ xf = 4
 @test o.lagrange(x, u) ==  x + u
 @test o.criterion == :min
 
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) + 1 * ∫(x(t) + u(t)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
 @def o begin
     t ∈ [ 0, 1 ], time
     x, state
     u, control
     (x(0) + 2x(1)) - ∫(x(t) + u(t)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  -(x + u)
+@test o.criterion == :min
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) - 1 * ∫(x(t) + u(t)) → min
 end
 x = 1
 u = 2
@@ -605,7 +658,35 @@ xf = 4
     t ∈ [ 0, 1 ], time
     x, state
     u, control
+    (x(0) + 2x(1)) + 1 * ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
     (x(0) + 2x(1)) - ∫(x(t) + u(t)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  -(x + u)
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    (x(0) + 2x(1)) - 1 * ∫(x(t) + u(t)) → max
 end
 x = 1
 u = 2
@@ -633,7 +714,35 @@ xf = 4
     t ∈ [ 0, 1 ], time
     x, state
     u, control
+    1 * ∫(x(t) + u(t)) + (x(0) + 2x(1)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
     ∫(x(t) + u(t)) - (x(0) + 2x(1)) → min
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  -(x0 + 2xf)
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :min
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    1 * ∫(x(t) + u(t)) - (x(0) + 2x(1)) → min
 end
 x = 1
 u = 2
@@ -661,7 +770,35 @@ xf = 4
     t ∈ [ 0, 1 ], time
     x, state
     u, control
+    1 * ∫(x(t) + u(t)) + (x(0) + 2x(1)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  x0 + 2xf
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
     ∫(x(t) + u(t)) - (x(0) + 2x(1)) → max
+end
+x = 1
+u = 2
+x0 = 3
+xf = 4
+@test o.mayer(x0, xf) ==  -(x0 + 2xf)
+@test o.lagrange(x, u) ==  x + u
+@test o.criterion == :max
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x, state
+    u, control
+    1 * ∫(x(t) + u(t)) - (x(0) + 2x(1)) → max
 end
 x = 1
 u = 2

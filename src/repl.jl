@@ -141,6 +141,47 @@ end
 # utils functions
 # ----------------------------------------------------------------
 
+function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, history::HistoryRepl)
+    println("")
+    println("Optimal control problem name: ", ct_repl_data.ocp_name)
+    println("Solution name: ", ct_repl_data.sol_name)
+end
+
+function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, name::Union{Symbol, Expr}, history::HistoryRepl)
+    ocp_name = ct_repl_data.ocp_name
+    sol_name = ct_repl_data.sol_name
+    if isa(name, Symbol)
+        name = (name, Symbol(string(name, "_sol")))
+    elseif isa(name, Expr)
+        name = (name.args[1], name.args[2])
+    else
+        println("\nname error\n\nType HELP to see the list of commands or enter a valid expression to update the model.")
+        return nothing
+    end
+    ct_repl_data.ocp_name = name[1]
+    ct_repl_data.sol_name = name[2]
+    ct_repl_data.debug && println("debug> ocp name: ", ct_repl_data.ocp_name)
+    ct_repl_data.debug && println("debug> sol name: ", ct_repl_data.sol_name)
+    __add!(history, ct_repl_data) # update history
+    qo1 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
+    qs1 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
+    qo2 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = $(ocp_name)) : :()
+    qs2 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = $(sol_name)) : :()
+    name_q = (quote
+                $(qo1)
+                $(qs1)
+                try 
+                    $(qo2)
+                    $(qs2)
+                    nothing
+                catch e
+                    nothing
+                end
+                end)
+    ct_repl_data.debug && println("debug> new name quote: ", name_q)
+    return name_q
+end
+
 # dict of actions associated to ct repl commands
 COMMANDS_ACTIONS = Dict{Symbol, Function}(
     :SHOW => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
@@ -158,40 +199,7 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
         __add!(history, ct_repl_data) # update history
         return nothing
     end,
-    :NAME => (ct_repl_data::CTRepl, name::Union{Symbol, Expr}, history::HistoryRepl) -> begin
-        ocp_name = ct_repl_data.ocp_name
-        sol_name = ct_repl_data.sol_name
-        if isa(name, Symbol)
-            name = (name, Symbol(string(name, "_sol")))
-        elseif isa(name, Expr)
-            name = (name.args[1], name.args[2])
-        else
-            println("\nname error\n\nType HELP to see the list of commands or enter a valid expression to update the model.")
-            return nothing
-        end
-        ct_repl_data.ocp_name = name[1]
-        ct_repl_data.sol_name = name[2]
-        ct_repl_data.debug && println("debug> ocp name: ", ct_repl_data.ocp_name)
-        ct_repl_data.debug && println("debug> sol name: ", ct_repl_data.sol_name)
-        __add!(history, ct_repl_data) # update history
-        qo1 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
-        qs1 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
-        qo2 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = $(ocp_name)) : :()
-        qs2 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = $(sol_name)) : :()
-        name_q = (quote
-                    $(qo1)
-                    $(qs1)
-                    try 
-                        $(qo2)
-                        $(qs2)
-                        nothing
-                    catch e
-                        nothing
-                    end
-                  end)
-        ct_repl_data.debug && println("debug> new name quote: ", name_q)
-        return name_q
-    end,
+    :NAME => NAME_ACTION_FUNCTION,
     :UNDO => (ct_repl_data::CTRepl, history::HistoryRepl) -> begin
         ct_repl_data_ = __undo!(history)
         __copy!(ct_repl_data, ct_repl_data_)
@@ -299,7 +307,6 @@ end
 
 # get code from model and an extra expression
 function __code(model::ModelRepl, e::Expr)
-    println("ici")
     model_ = deepcopy(model)    # copy model
     __update!(model_, e)        # update model_
     return __code(model_)       # get code
