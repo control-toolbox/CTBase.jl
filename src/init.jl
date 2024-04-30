@@ -29,22 +29,6 @@ mutable struct OCPInit
     multipliers_init::Union{Nothing, ctVector}
     info::Symbol
 
-#=
-    +++add a third version that takes a single argument init ?
-
-    if isnothing(init)
-        init =  OCPInit()
-    elseif init isa CTBase.OptimalControlSolution
-        init = OCPInit(init)
-    else
-        x_init = :state    ∈ keys(init) ? init[:state]    : nothing
-        u_init = :control  ∈ keys(init) ? init[:control]  : nothing
-        v_init = :variable ∈ keys(init) ? init[:variable] : nothing
-        init = OCPInit(state=x_init, control=u_init, variable=v_init)
-    end
-=#
-
-
     # constructor from constant vector or function handles
     function OCPInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing, costate::Union{Nothing, ctVector, Function}=nothing, multipliers::Union{Nothing, ctVector}=nothing)
 
