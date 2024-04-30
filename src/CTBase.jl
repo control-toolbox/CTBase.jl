@@ -115,6 +115,8 @@ include("ctparser_utils.jl")
 ##include("ctparser.jl")
 include("onepass.jl")
 include("repl.jl")
+#
+include("init.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
@@ -152,6 +154,9 @@ export nlp_constraints, constraints_labels
 # solution
 export OptimalControlSolution
 export plot, plot!
+
+# initialization
+export OCPInit
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
