@@ -29,32 +29,11 @@ mutable struct OCPInit
     multipliers_init::Union{Nothing, ctVector}
     info::Symbol
 
-    # constructor from constant vector or function handles
-    function OCPInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing, costate::Union{Nothing, ctVector, Function}=nothing, multipliers::Union{Nothing, ctVector}=nothing)
-
-        init = new()
-        init.info = :constant_or_function
-        
-        # use provided function or interpolate provided vector
-        init.state_init = (state isa Function) ? t -> state(t) : t -> state
-        init.control_init = (control isa Function) ? t -> control(t) : t -> control
-        init.variable_init = variable
-        
-        init.costate_init = (costate isa Function) ? t -> costate(t) : t -> costate
-        init.multipliers_init = multipliers
-
-        return init
-    end
-
-    # constructor from existing solution
+    # warm start from solution
     function OCPInit(sol::OptimalControlSolution)
 
         init = new()
-        init.info = :solution
-
-        # Notes
-        # - the possible internal state for Lagrange cost is not taken into account here
-        # - set scalar format for dimension 1 case
+        init.info = :from_solution
         init.state_init    = t -> sol.state(t)
         init.control_init  = t -> sol.control(t)
         init.variable_init = sol.variable
@@ -62,4 +41,18 @@ mutable struct OCPInit
 
         return init
     end
+
+    # constant / functional init
+    function OCPInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing)
+        
+        init = new()
+        init.info = :constant_or_function
+        init.state_init = (state isa Function) ? t -> state(t) : t -> state
+        init.control_init = (control isa Function) ? t -> control(t) : t -> control
+        init.variable_init = variable
+        #+++ add costate and scalar multipliers
+        
+        return init
+    end
+
 end
