@@ -42,7 +42,7 @@ mutable struct OCPInit
         return init
     end
 
-    # constant / functional init
+    # constant / functional init with explicit arguments
     function OCPInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing)
         
         init = new()
@@ -53,6 +53,17 @@ mutable struct OCPInit
         #+++ add costate and scalar multipliers
         
         return init
+    end
+
+    # version with arguments as collection/iterable
+    # (may be fused with version above ?)
+    function OCPInit(init)
+
+        x_init = :state    ∈ keys(init) ? init[:state]    : nothing
+        u_init = :control  ∈ keys(init) ? init[:control]  : nothing
+        v_init = :variable ∈ keys(init) ? init[:variable] : nothing
+        return OCPInit(state=x_init, control=u_init, variable=v_init)
+    
     end
 
 end
