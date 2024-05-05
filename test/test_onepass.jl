@@ -2,13 +2,22 @@
 
 function test_onepass()
 
+@def o begin
+    x = (y, z) ∈ R², state
+    u = (uu1, uu2, uu3) ∈ R³, control
+    v = (vv1, vv2) ∈ R², variable
+end
+@test o.state_components_names == [ "y", "z" ]
+@test o.control_components_names == [ "uu1", "uu2", "uu3" ]
+@test o.variable_components_names == [ "vv1", "vv2" ]
+
 t0 = 0
 @def o t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
 @test o.final_time == t0 + 4
 
 @def o begin
-    λ ∈ R^2, variable
+    λ ∈ R^2, variable
     tf = λ₂
     t ∈ [ 0, tf ], time
 end
@@ -887,9 +896,9 @@ z = v[1] + 2v[2]
     x(1) ≤ 0
     x(1) ≤ 0,              (2)
     x³(0) ≤ 0
-    x³(0) ≤ 0,             (3)
+    x³(0) ≤ 0,             (3)
     x³(1) ≤ 0
-    x³(1) ≤ 0,             (4)
+    x³(1) ≤ 0,             (4)
     x(t) ≤ 0
     x(t) ≤ 0,              (5)
     x(t) ≤ 0
@@ -899,17 +908,17 @@ z = v[1] + 2v[2]
     u₁(t) ≤ 0
     u₁(t) ≤ 0,              (8)
     x³(t) ≤ 0
-    x³(t) ≤ 0,             (9)
+    x³(t) ≤ 0,             (9)
     x³(t) ≤ 0
-    x³(t) ≤ 0,            (10)
+    x³(t) ≤ 0,            (10)
     (u₁^3)(t) ≤ 0
     (u₁^3)(t) ≤ 0,            (11)
     (u₁^3)(t) ≤ 0
-    (u₁^3)(t) ≤ 0,            (12)
+    (u₁^3)(t) ≤ 0,            (12)
     x(t) + (u₁^3)(t) ≤ 0
     x(t) + (u₁^3)(t) ≤ 0,     (13)
     x(t) + (u₁^3)(t) ≤ 0
-    x(t) + (u₁^3)(t) ≤ 0,     (14)
+    x(t) + (u₁^3)(t) ≤ 0,     (14)
     v ≤ 0
     v ≤ 0,                (15)
 end
@@ -955,9 +964,9 @@ end
     x(1) ≥ 0
     x(1) ≥ 0,              (2)
     x³(0) ≥ 0
-    x³(0) ≥ 0,             (3)
+    x³(0) ≥ 0,             (3)
     x³(1) ≥ 0
-    x³(1) ≥ 0,             (4)
+    x³(1) ≥ 0,             (4)
     x(t) ≥ 0
     x(t) ≥ 0,              (5)
     x(t) ≥ 0
@@ -967,13 +976,13 @@ end
     u₁(t) ≥ 0
     u₁(t) ≥ 0,             (8)
     x³(t) ≥ 0
-    x³(t) ≥ 0,             (9)
+    x³(t) ≥ 0,             (9)
     x³(t) ≥ 0
-    x³(t) ≥ 0,            (10)
+    x³(t) ≥ 0,            (10)
     (u₁^3)(t) ≥ 0
     (u₁^3)(t) ≥ 0,        (11)
     (u₁^3)(t) ≥ 0
-    (u₁^3)(t) ≥ 0,        (12)
+    (u₁^3)(t) ≥ 0,        (12)
     x(t) + (u₁^3)(t) ≥ 0
     x(t) + (u₁^3)(t) ≥ 0, (13)
     x(t) + (u₁^3)(t) ≥ 0

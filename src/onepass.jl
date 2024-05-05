@@ -73,19 +73,33 @@ parse!(p, ocp, e; log=false) = begin
         e = subs(e, a, p.aliases[a])
     end
     @match e begin
+        #
+        :( $a = $e1 ) =>
+        @match e1 begin
+            :( ($names) ∈ R^$q, variable ) => p_variable!(p, ocp, a, q; components_names=names, log)
+            :( ($names) ∈ R^$n, state    ) =>    p_state!(p, ocp, a, n; components_names=names, log)
+            :( ($names) ∈ R^$m, control  ) =>  p_control!(p, ocp, a, m; components_names=names, log)
+            :( ($names) ∈ R, $dummy      ) => return __throw("unknown syntax", p.lnum, p.line)
+            _                              => p_alias!(p, ocp, a, e1; log) # alias
+        end
+        # variable
         :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; log)
         :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; log)
         :( $v       , variable       ) => p_variable!(p, ocp, v   ; log) # todo: remove
+        # time
         :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; log)
+        # state
         :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; log)
         :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; log)
         :( $x       , state          ) => p_state!(p, ocp, x   ; log) # todo: remove
+        # control
         :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; log)
         :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
         :( $u       , control        ) => p_control!(p, ocp, u   ; log) # todo: remove
-        :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
+        # dynamics
         :( ∂($x)($t) == $e1          ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( ∂($x)($t) == $e1, $label  ) => p_dynamics!(p, ocp, x, t, e1, label; log)
+        # constraints
         :( $e1 == $e2                ) => p_constraint!(p, ocp, e2     , e1, e2       ; log)
         :( $e1 == $e2, $label        ) => p_constraint!(p, ocp, e2     , e1, e2, label; log)
         :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
@@ -96,10 +110,12 @@ parse!(p, ocp, e; log=false) = begin
         :( $e3 ≥  $e2 ≥  $e1, $label ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
         :( $e2 ≥  $e1                ) => p_constraint!(p, ocp, e1     , e2, nothing       ; log)
         :( $e2 ≥  $e1,        $label ) => p_constraint!(p, ocp, e1     , e2, nothing, label; log)
+        # lagrange cost
         :(             ∫($e1) → min  ) => p_lagrange!(p, ocp,     e1,         :min; log)
         :(       $e1 * ∫($e2) → min  ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :min; log)
         :(             ∫($e1) → max  ) => p_lagrange!(p, ocp,     e1,         :max; log)
         :(       $e1 * ∫($e2) → max  ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :max; log)
+        # bolza cost
         :( $e1 +       ∫($e2) → min  ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
         :( $e1 + $e2 * ∫($e3) → min  ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
         :( $e1 -       ∫($e2) → min  ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :min; log)
@@ -116,6 +132,7 @@ parse!(p, ocp, e; log=false) = begin
         :( $e2 * ∫($e3) + $e1 → max  ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
         :(       ∫($e2) - $e1 → max  ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :max; log)
         :( $e2 * ∫($e3) - $e1 → max  ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :max; log)
+        # mayer cost
         :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
         :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
         _ => begin
@@ -132,7 +149,7 @@ parse!(p, ocp, e; log=false) = begin
     end
 end
 
-p_variable!(p, ocp, v, q=1; log=false) = begin
+p_variable!(p, ocp, v, q=1; components_names=nothing, log=false) = begin
     log && println("variable: $v, dim: $q")
     v isa Symbol || return __throw("forbidden variable name: $v", p.lnum, p.line)
     p.v = v
@@ -140,7 +157,12 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     qq = q isa Integer ? q : 9
     for i ∈ 1:qq p.aliases[Symbol(v, ctindices(i))] = :( $v[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(v, ctupperscripts(i))] = :( $v^$i  ) end
-    __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
+    if (isnothing(components_names))
+        __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
+    else
+        ss = QuoteNode(string.(components_names.args))
+        __wrap(:( variable!($ocp, $q, $vv, $ss) ), p.lnum, p.line) 
+    end
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
@@ -187,7 +209,7 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     __wrap(code, p.lnum, p.line)
 end
 
-p_state!(p, ocp, x, n=1; log=false) = begin
+p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
     log && println("state: $x, dim: $n")
     x isa Symbol || return __throw("forbidden state name: $x", p.lnum, p.line)
     p.x = x
@@ -196,10 +218,15 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     for i ∈ 1:nn p.aliases[Symbol(x, ctindices(i))] = :( $x[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
     p.aliases[Symbol(Unicode.normalize(string(x,"̇")))] = :( ∂($x) )
-    __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
+    if (isnothing(components_names))
+        __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
+    else
+        ss = QuoteNode(string.(components_names.args))
+        __wrap(:( state!($ocp, $n, $xx, $ss) ), p.lnum, p.line)
+    end
 end
 
-p_control!(p, ocp, u, m=1; log=false) = begin
+p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
     log && println("control: $u, dim: $m")
     u isa Symbol || return __throw("forbidden control name: $u", p.lnum, p.line)
     p.u = u
@@ -207,7 +234,12 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     mm =  m isa Integer ? m : 9
     for i ∈ 1:mm p.aliases[Symbol(u, ctindices(i))] = :( $u[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(u, ctupperscripts(i))] = :( $u^$i  ) end
-    __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
+    if (isnothing(components_names))
+        __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
+    else
+        ss = QuoteNode(string.(components_names.args))
+        __wrap(:( control!($ocp, $m, $uu, $ss) ), p.lnum, p.line)
+    end
 end
 
 p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
