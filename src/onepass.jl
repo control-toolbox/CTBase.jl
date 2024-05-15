@@ -83,58 +83,62 @@ parse!(p, ocp, e; log=false) = begin
             _                              => p_alias!(p, ocp, a, e1; log) # alias
         end
         # variable
-        :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; log)
-        :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; log)
-        :( $v       , variable       ) => p_variable!(p, ocp, v   ; log) # todo: remove
+        :( ($e1, $e2) ∈ R^$q, variable ) => return __throw("unknown syntax: please provide a name to the variable", p.lnum, p.line)
+        :( $v ∈ R^$q, variable         ) => p_variable!(p, ocp, v, q; log)
+        :( $v ∈ R   , variable         ) => p_variable!(p, ocp, v   ; log)
+        :( $v       , variable         ) => p_variable!(p, ocp, v   ; log) # todo: remove
         # time
-        :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; log)
+        :( $t ∈ [ $t0, $tf ], time     ) => p_time!(p, ocp, t, t0, tf; log)
         # state
-        :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; log)
-        :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; log)
-        :( $x       , state          ) => p_state!(p, ocp, x   ; log) # todo: remove
+        :( ($e1, $e2) ∈ R^$n, state    ) => return __throw("unknown syntax: please provide a name to the state", p.lnum, p.line)
+        :( $x ∈ R^$n, state            ) => p_state!(p, ocp, x, n; log)
+        :( $x ∈ R   , state            ) => p_state!(p, ocp, x   ; log)
+        :( $x       , state            ) => p_state!(p, ocp, x   ; log) # todo: remove
         # control
-        :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; log)
-        :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
-        :( $u       , control        ) => p_control!(p, ocp, u   ; log) # todo: remove
+        :( ($e1, $e2) ∈ R^$m, control  ) => return __throw("unknown syntax: please provide a name to the control", p.lnum, p.line)
+        :( $u ∈ R^$m, control          ) => p_control!(p, ocp, u, m; log)
+        :( $u ∈ R   , control          ) => p_control!(p, ocp, u   ; log)
+        :( $u       , control          ) => p_control!(p, ocp, u   ; log) # todo: remove
         # dynamics
-        :( ∂($x)($t) == $e1          ) => p_dynamics!(p, ocp, x, t, e1       ; log)
-        :( ∂($x)($t) == $e1, $label  ) => p_dynamics!(p, ocp, x, t, e1, label; log)
+        :( ∂($x)($t) == $e1            ) => p_dynamics!(p, ocp, x, t, e1       ; log)
+        :( ∂($x)($t) == $e1, $label    ) => p_dynamics!(p, ocp, x, t, e1, label; log)
         # constraints
-        :( $e1 == $e2                ) => p_constraint!(p, ocp, e2     , e1, e2       ; log)
-        :( $e1 == $e2, $label        ) => p_constraint!(p, ocp, e2     , e1, e2, label; log)
-        :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
-        :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
-        :(        $e2 ≤  $e3         ) => p_constraint!(p, ocp, nothing, e2, e3            ; log)
-        :(        $e2 ≤  $e3, $label ) => p_constraint!(p, ocp, nothing, e2, e3     , label; log)
-        :( $e3 ≥  $e2 ≥  $e1         ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
-        :( $e3 ≥  $e2 ≥  $e1, $label ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
-        :( $e2 ≥  $e1                ) => p_constraint!(p, ocp, e1     , e2, nothing       ; log)
-        :( $e2 ≥  $e1,        $label ) => p_constraint!(p, ocp, e1     , e2, nothing, label; log)
+        :( $e1 == $e2                  ) => p_constraint!(p, ocp, e2     , e1, e2            ; log)
+        :( $e1 == $e2, $label          ) => p_constraint!(p, ocp, e2     , e1, e2,      label; log)
+        :( $e1 ≤  $e2 ≤  $e3           ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
+        :( $e1 ≤  $e2 ≤  $e3, $label   ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
+        :(        $e2 ≤  $e3           ) => p_constraint!(p, ocp, nothing, e2, e3            ; log)
+        :(        $e2 ≤  $e3, $label   ) => p_constraint!(p, ocp, nothing, e2, e3     , label; log)
+        :( $e3 ≥  $e2 ≥  $e1           ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
+        :( $e3 ≥  $e2 ≥  $e1, $label   ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
+        :( $e2 ≥  $e1                  ) => p_constraint!(p, ocp, e1     , e2, nothing       ; log)
+        :( $e2 ≥  $e1,        $label   ) => p_constraint!(p, ocp, e1     , e2, nothing, label; log)
         # lagrange cost
-        :(             ∫($e1) → min  ) => p_lagrange!(p, ocp,     e1,         :min; log)
-        :(       $e1 * ∫($e2) → min  ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :min; log)
-        :(             ∫($e1) → max  ) => p_lagrange!(p, ocp,     e1,         :max; log)
-        :(       $e1 * ∫($e2) → max  ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :max; log)
+        :(             ∫($e1) → min    ) => p_lagrange!(p, ocp,     e1,         :min; log)
+        :(       $e1 * ∫($e2) → min    ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :min; log)
+        :(             ∫($e1) → max    ) => p_lagrange!(p, ocp,     e1,         :max; log)
+        :(       $e1 * ∫($e2) → max    ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :max; log)
         # bolza cost
-        :( $e1 +       ∫($e2) → min  ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
-        :( $e1 + $e2 * ∫($e3) → min  ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
-        :( $e1 -       ∫($e2) → min  ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :min; log)
-        :( $e1 - $e2 * ∫($e3) → min  ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :min; log)
-        :( $e1 +       ∫($e2) → max  ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
-        :( $e1 + $e2 * ∫($e3) → max  ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
-        :( $e1 -       ∫($e2) → max  ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :max; log)
-        :( $e1 - $e2 * ∫($e3) → max  ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :max; log)
-        :(       ∫($e2) + $e1 → min  ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
-        :( $e2 * ∫($e3) + $e1 → min  ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
-        :(       ∫($e2) - $e1 → min  ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :min; log)
-        :( $e2 * ∫($e3) - $e1 → min  ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :min; log)
-        :(       ∫($e2) + $e1 → max  ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
-        :( $e2 * ∫($e3) + $e1 → max  ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
-        :(       ∫($e2) - $e1 → max  ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :max; log)
-        :( $e2 * ∫($e3) - $e1 → max  ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :max; log)
+        :( $e1 +       ∫($e2) → min    ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
+        :( $e1 + $e2 * ∫($e3) → min    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
+        :( $e1 -       ∫($e2) → min    ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :min; log)
+        :( $e1 - $e2 * ∫($e3) → min    ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :min; log)
+        :( $e1 +       ∫($e2) → max    ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
+        :( $e1 + $e2 * ∫($e3) → max    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
+        :( $e1 -       ∫($e2) → max    ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :max; log)
+        :( $e1 - $e2 * ∫($e3) → max    ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :max; log)
+        :(       ∫($e2) + $e1 → min    ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
+        :( $e2 * ∫($e3) + $e1 → min    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
+        :(       ∫($e2) - $e1 → min    ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :min; log)
+        :( $e2 * ∫($e3) - $e1 → min    ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :min; log)
+        :(       ∫($e2) + $e1 → max    ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
+        :( $e2 * ∫($e3) + $e1 → max    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
+        :(       ∫($e2) - $e1 → max    ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :max; log)
+        :( $e2 * ∫($e3) - $e1 → max    ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :max; log)
         # mayer cost
-        :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
-        :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
+        :( $e1          → min          ) => p_mayer!(p, ocp, e1, :min; log)
+        :( $e1          → max          ) => p_mayer!(p, ocp, e1, :max; log)
+        #
         _ => begin
             if e isa LineNumberNode
                 p.lnum = p.lnum - 1
@@ -142,7 +146,7 @@ parse!(p, ocp, e; log=false) = begin
             elseif e isa Expr && e.head == :block
                 p.lnum = p.lnum - 1
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
-		# !!! assumes that map is done sequentially for side effects on p
+		    # !!! assumes that map is done sequentially for side effects on p
             else
                 return __throw("unknown syntax", p.lnum, p.line)
             end end
@@ -160,6 +164,7 @@ p_variable!(p, ocp, v, q=1; components_names=nothing, log=false) = begin
     if (isnothing(components_names))
         __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
     else
+        for i ∈ 1:qq p.aliases[components_names.args[i]] = :( $v[$i] ) end
         ss = QuoteNode(string.(components_names.args))
         __wrap(:( variable!($ocp, $q, $vv, $ss) ), p.lnum, p.line) 
     end
@@ -221,6 +226,7 @@ p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
     if (isnothing(components_names))
         __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
     else
+        for i ∈ 1:nn p.aliases[components_names.args[i]] = :( $x[$i] ) end
         ss = QuoteNode(string.(components_names.args))
         __wrap(:( state!($ocp, $n, $xx, $ss) ), p.lnum, p.line)
     end
@@ -237,6 +243,7 @@ p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
     if (isnothing(components_names))
         __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
     else
+        for i ∈ 1:mm p.aliases[components_names.args[i]] = :( $u[$i] ) end
         ss = QuoteNode(string.(components_names.args))
         __wrap(:( control!($ocp, $m, $uu, $ss) ), p.lnum, p.line)
     end

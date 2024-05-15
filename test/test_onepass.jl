@@ -11,6 +11,18 @@ end
 @test o.control_components_names == [ "uu1", "uu2", "uu3" ]
 @test o.variable_components_names == [ "vv1", "vv2" ]
 
+@test_throws ParsingError @def o begin # a name must be provided
+    (y, z) ∈ R², state
+end
+
+@test_throws ParsingError @def o begin # a name must be provided
+    (uu1, uu2, uu3) ∈ R³, control
+end
+
+@test_throws ParsingError @def o begin # a name must be provided
+    (vv1, vv2) ∈ R², variable
+end
+
 t0 = 0
 @def o t ∈ [ t0, t0 + 4 ], time
 @test o.initial_time == t0
@@ -19,6 +31,13 @@ t0 = 0
 @def o begin
     λ ∈ R^2, variable
     tf = λ₂
+    t ∈ [ 0, tf ], time
+end
+@test o.initial_time == 0
+@test o.final_time == Index(2)
+
+@def o begin
+    λ = (λ₁, tf) ∈ R^2, variable
     t ∈ [ 0, tf ], time
 end
 @test o.initial_time == 0
@@ -91,6 +110,18 @@ end
     x ∈ R^3, state
     u ∈ R^2, control
     ẋ(t) == [ x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t) ]
+end
+@test o.state_dimension == 3
+@test o.control_dimension == 2
+x = [ 1, 2, 3 ]
+u = [ -1, 2 ]
+@test o.dynamics(x, u) == [ x[1] + 2u[2], 2x[3], x[1] + u[2] ]
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x ∈ R^3, state
+    u = (u₁, v) ∈ R^2, control
+    ẋ(t) == [ x[1](t) + 2v(t), 2x[3](t), x[1](t) + v(t) ]
 end
 @test o.state_dimension == 3
 @test o.control_dimension == 2
@@ -172,7 +203,7 @@ u = 20
         v = x₂
         w = r + 2v
         r(0) == 0,    (1)
-end
+    end
     v(0) == 1,    (♡)
     ẋ(t) == [ v(t), w(t)^2 ]
     ∫( u(t)^2 + x₁(t) ) → min
@@ -192,6 +223,25 @@ u = 3
     u ∈ R, control
     r = x₁
     v = x₂
+    w = r + 2v
+    r(0) == 0,    (1)
+    v(0) == 1,    (♡)
+    ẋ(t) == [ v(t), w(t)^2 ]
+    ∫( u(t)^2 + x₁(t) ) → min
+end
+x = [ 1, 2 ]
+x0  = 2 * x
+xf  = 3 * x
+u = 3
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+@test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
+@test o.lagrange(x, u) == u^2 + x[1]
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x = (r, v) ∈ R², state
+    u ∈ R, control
     w = r + 2v
     r(0) == 0,    (1)
     v(0) == 1,    (♡)
