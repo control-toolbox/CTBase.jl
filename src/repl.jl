@@ -299,7 +299,6 @@ end
 
 # get code from model and an extra expression
 function __code(model::ModelRepl, e::Expr)
-    println("ici")
     model_ = deepcopy(model)    # copy model
     __update!(model_, e)        # update model_
     return __code(model_)       # get code
