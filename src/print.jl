@@ -190,14 +190,14 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     #
     println(io)
     printstyled(io, "Declarations ", bold=true)
-    printstyled(io, "(ꜝ required):\n", bold=false)
+    printstyled(io, "(* required):\n", bold=false)
     #println(io)
     
     # print table of settings
-    header = [ "timesꜝ", "stateꜝ", "controlꜝ"]
+    header = [ "times*", "state*", "control*"]
     #is_variable_dependent(ocp) && push!(header, "variable")
     push!(header, "variable")
-    push!(header, "dynamicsꜝ", "objectiveꜝ", "constraints")
+    push!(header, "dynamics*", "objective*", "constraints")
     data = hcat(__is_time_not_set(ocp) ? "❌" : "✅",
         __is_state_not_set(ocp) ? "❌" : "✅", 
         __is_control_not_set(ocp) ? "❌" : "✅")
