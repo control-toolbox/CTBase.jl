@@ -67,13 +67,15 @@ Foo
 ```
 """
 parse!(p, ocp, e; log=false) = begin
+    #
     p.lnum = p.lnum + 1
     p.line = string(e)
     for a ∈ keys(p.aliases)
         e = subs(e, a, p.aliases[a])
     end
+    #
     @match e begin
-        #
+        # aliases
         :( $a = $e1 ) =>
         @match e1 begin
             :( ($names) ∈ R^$q, variable ) => p_variable!(p, ocp, a, q; components_names=names, log)
@@ -84,7 +86,7 @@ parse!(p, ocp, e; log=false) = begin
             :( [$names] ∈ R^$m, control  ) =>  p_control!(p, ocp, a, m; components_names=names, log)
             :( ($names) ∈ R, $dummy      ) => return __throw("unknown syntax", p.lnum, p.line)
             :( [$names] ∈ R, $dummy      ) => return __throw("unknown syntax", p.lnum, p.line)
-            _                              => p_alias!(p, ocp, a, e1; log) # alias
+            _                                  => p_alias!(p, ocp, a, e1; log) # alias
         end
         # variable
         :( ($e1, $e2) ∈ R^$q, variable ) => return __throw("unknown syntax: please provide a name to the variable", p.lnum, p.line)
@@ -118,27 +120,43 @@ parse!(p, ocp, e; log=false) = begin
         :( $e2 ≥  $e1                  ) => p_constraint!(p, ocp, e1     , e2, nothing       ; log)
         :( $e2 ≥  $e1,        $label   ) => p_constraint!(p, ocp, e1     , e2, nothing, label; log)
         # lagrange cost
-        :(             ∫($e1) → min    ) => p_lagrange!(p, ocp,     e1,         :min; log)
-        :(       $e1 * ∫($e2) → min    ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :min; log)
-        :(             ∫($e1) → max    ) => p_lagrange!(p, ocp,     e1,         :max; log)
-        :(       $e1 * ∫($e2) → max    ) => p_lagrange!(p, ocp, :( $e1 * $e2 ), :max; log)
+        :(             ∫($e1)       → min    ) => p_lagrange!(p, ocp,      e1        , :min; log)
+        :(           - ∫($e1)       → min    ) => p_lagrange!(p, ocp, :( -$e1 )      , :min; log)
+        :(       $e1 * ∫($e2)       → min    ) => p_lagrange!(p, ocp, :(  $e1 * $e2 ), :min; log)
+        #:(     - $e1 * ∫($e2)       → min    ) => p_lagrange!(p, ocp, :( -$e1 * $e2 ), :min; log)
+        :(             ∫($e2) / $e1 → min    ) => p_lagrange!(p, ocp, :(  $e2 / $e1 ), :min; log)
+        :(           - ∫($e2) / $e1 → min    ) => p_lagrange!(p, ocp, :( -$e2 / $e1 ), :min; log)
+        :(             ∫($e1)       → max    ) => p_lagrange!(p, ocp,      e1        , :max; log)
+        :(           - ∫($e1)       → max    ) => p_lagrange!(p, ocp, :( -$e1 )      , :max; log)
+        :(       $e1 * ∫($e2)       → max    ) => p_lagrange!(p, ocp, :(  $e1 * $e2 ), :max; log)
+        #:(     - $e1 * ∫($e2)       → max    ) => p_lagrange!(p, ocp, :( -$e1 * $e2 ), :max; log)
+        :(             ∫($e2) / $e1 → max    ) => p_lagrange!(p, ocp, :(  $e2 / $e1 ), :max; log)
+        :(           - ∫($e2) / $e1 → max    ) => p_lagrange!(p, ocp, :( -$e2 / $e1 ), :max; log)
         # bolza cost
-        :( $e1 +       ∫($e2) → min    ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
-        :( $e1 + $e2 * ∫($e3) → min    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
-        :( $e1 -       ∫($e2) → min    ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :min; log)
-        :( $e1 - $e2 * ∫($e3) → min    ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :min; log)
-        :( $e1 +       ∫($e2) → max    ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
-        :( $e1 + $e2 * ∫($e3) → max    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
-        :( $e1 -       ∫($e2) → max    ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :max; log)
-        :( $e1 - $e2 * ∫($e3) → max    ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :max; log)
-        :(       ∫($e2) + $e1 → min    ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
-        :( $e2 * ∫($e3) + $e1 → min    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
-        :(       ∫($e2) - $e1 → min    ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :min; log)
-        :( $e2 * ∫($e3) - $e1 → min    ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :min; log)
-        :(       ∫($e2) + $e1 → max    ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
-        :( $e2 * ∫($e3) + $e1 → max    ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
-        :(       ∫($e2) - $e1 → max    ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :max; log)
-        :( $e2 * ∫($e3) - $e1 → max    ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :max; log)
+        :( $e1 +       ∫($e2)             → min   ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
+        :( $e1 + $e2 * ∫($e3)             → min   ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
+        :( $e1 +       ∫($e3) / $e2       → min   ) => p_bolza!(p, ocp,      e1,   :(  $e3 / $e2 ), :min; log)
+        :( $e1 -       ∫($e2)             → min   ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :min; log)
+        :( $e1 - $e2 * ∫($e3)             → min   ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :min; log)
+        :( $e1 -       ∫($e3) / $e2       → min   ) => p_bolza!(p, ocp,      e1,   :( -$e3 / $e2 ), :min; log)
+        :( $e1 +       ∫($e2)             → max   ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
+        :( $e1 + $e2 * ∫($e3)             → max   ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
+        :( $e1 +       ∫($e3) / $e2       → max   ) => p_bolza!(p, ocp,      e1,   :(  $e3 / $e2 ), :max; log)
+        :( $e1 -       ∫($e2)             → max   ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :max; log)
+        :( $e1 - $e2 * ∫($e3)             → max   ) => p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :max; log)
+        :( $e1 -       ∫($e3) / $e2       → max   ) => p_bolza!(p, ocp,      e1,   :( -$e3 / $e2 ), :max; log)
+        :(             ∫($e2) + $e1       → min   ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
+        :(       $e2 * ∫($e3) + $e1       → min   ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
+        :(             ∫($e3) / $e2 + $e1 → min   ) => p_bolza!(p, ocp,      e1,   :(  $e3 / $e2 ), :min; log)
+        :(             ∫($e2) - $e1       → min   ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :min; log)
+        :(       $e2 * ∫($e3) - $e1       → min   ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :min; log)
+        :(             ∫($e3) / $e2 - $e1 → min   ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e3 / $e2 ), :min; log)
+        :(             ∫($e2) + $e1       → max   ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
+        :(       $e2 * ∫($e3) + $e1       → max   ) => p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
+        :(             ∫($e3) / $e2 + $e1 → max   ) => p_bolza!(p, ocp,      e1,   :(  $e3 / $e2 ), :max; log)
+        :(             ∫($e2) - $e1       → max   ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :max; log)
+        :(       $e2 * ∫($e3) - $e1       → max   ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :max; log)
+        :(             ∫($e3) / $e2 - $e1 → max   ) => p_bolza!(p, ocp, :( -$e1 ), :(  $e3 / $e2 ), :max; log)
         # mayer cost
         :( $e1          → min          ) => p_mayer!(p, ocp, e1, :min; log)
         :( $e1          → max          ) => p_mayer!(p, ocp, e1, :max; log)
@@ -150,7 +168,7 @@ parse!(p, ocp, e; log=false) = begin
             elseif e isa Expr && e.head == :block
                 p.lnum = p.lnum - 1
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
-		    # !!! assumes that map is done sequentially for side effects on p
+            # !!! assumes that map is done sequentially for side effects on p
             else
                 return __throw("unknown syntax", p.lnum, p.line)
             end end
