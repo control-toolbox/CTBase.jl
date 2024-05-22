@@ -177,6 +177,30 @@ B = [ 0
 @test o.lagrange(x, u) == 0.5u^2
 @test o.criterion == :min
 
+t0 = 0
+tf = 1
+@def o begin
+    t ∈ [ t0, tf ], time
+    x ∈ R^2, state
+    u ∈ R, control
+    x(t0) == [ -1, 0 ], (1)
+    x(tf) == [  0, 0 ]
+    ẋ(t) == A * x(t) + B * u(t)
+    0.5∫( u(t)^2 ) → min
+end
+x = [ 1, 2 ]
+x0 = 2 * x
+xf = 3 * x
+u = -1
+A = [ 0 1
+      0 0 ]
+B = [ 0
+      1 ]
+@test constraint(o, :eq1)(x0, xf) == x0
+@test o.dynamics(x, u) == A * x + B * u
+@test o.lagrange(x, u) == 0.5u^2
+@test o.criterion == :min
+
 a = 1
 f(b) = begin # closure of a, local c, and @def in function
     c = 3
