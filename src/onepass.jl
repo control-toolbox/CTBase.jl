@@ -77,9 +77,13 @@ parse!(p, ocp, e; log=false) = begin
         :( $a = $e1 ) =>
         @match e1 begin
             :( ($names) ∈ R^$q, variable ) => p_variable!(p, ocp, a, q; components_names=names, log)
+            :( [$names] ∈ R^$q, variable ) => p_variable!(p, ocp, a, q; components_names=names, log)
             :( ($names) ∈ R^$n, state    ) =>    p_state!(p, ocp, a, n; components_names=names, log)
+            :( [$names] ∈ R^$n, state    ) =>    p_state!(p, ocp, a, n; components_names=names, log)
             :( ($names) ∈ R^$m, control  ) =>  p_control!(p, ocp, a, m; components_names=names, log)
+            :( [$names] ∈ R^$m, control  ) =>  p_control!(p, ocp, a, m; components_names=names, log)
             :( ($names) ∈ R, $dummy      ) => return __throw("unknown syntax", p.lnum, p.line)
+            :( [$names] ∈ R, $dummy      ) => return __throw("unknown syntax", p.lnum, p.line)
             _                              => p_alias!(p, ocp, a, e1; log) # alias
         end
         # variable

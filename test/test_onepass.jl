@@ -11,6 +11,15 @@ end
 @test o.control_components_names == [ "uu1", "uu2", "uu3" ]
 @test o.variable_components_names == [ "vv1", "vv2" ]
 
+@def o begin
+    x = [y, z] ∈ R², state
+    u = [uu1, uu2, uu3] ∈ R³, control
+    v = [vv1, vv2] ∈ R², variable
+end
+@test o.state_components_names == [ "y", "z" ]
+@test o.control_components_names == [ "uu1", "uu2", "uu3" ]
+@test o.variable_components_names == [ "vv1", "vv2" ]
+
 @test_throws ParsingError @def o begin # a name must be provided
     (y, z) ∈ R², state
 end
@@ -21,6 +30,18 @@ end
 
 @test_throws ParsingError @def o begin # a name must be provided
     (vv1, vv2) ∈ R², variable
+end
+
+@test_throws ParsingError @def o begin # a name must be provided
+    [y, z] ∈ R², state
+end
+
+@test_throws ParsingError @def o begin # a name must be provided
+    [uu1, uu2, uu3] ∈ R³, control
+end
+
+@test_throws ParsingError @def o begin # a name must be provided
+    [vv1, vv2] ∈ R², variable
 end
 
 t0 = 0
@@ -264,7 +285,7 @@ u = 3
 
 @def o begin
     t ∈ [ 0, 1 ], time
-    x = (r, v) ∈ R², state
+    x = ( r, v ) ∈ R², state
     u ∈ R, control
     w = r + 2v
     r(0) == 0,    (1)
@@ -280,6 +301,46 @@ u = 3
 @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
 @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
 @test o.lagrange(x, u) == u^2 + x[1]
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x = [ r, v ] ∈ R², state
+    u ∈ R, control
+    w = r + 2v
+    r(0) == 0,    (1)
+    v(0) == 1,    (♡)
+    ẋ(t) == [ v(t), w(t)^2 ]
+    ∫( u(t)^2 + x₁(t) ) → min
+end
+x = [ 1, 2 ]
+x0  = 2 * x
+xf  = 3 * x
+u = 3
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+@test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
+@test o.lagrange(x, u) == u^2 + x[1]
+
+@def o begin
+    t ∈ [ 0, 1 ], time
+    x = [ r, v ] ∈ R², state
+    c = [ u, b ] ∈ R², control
+    w = r + 2v
+    b(t) == 0
+    r(0) == 0,    (1)
+    v(0) == 1,    (♡)
+    ẋ(t) == [ v(t), w(t)^2 ]
+    ∫( u(t)^2 + b(t)^2 + x₁(t) ) → min
+end
+x = [ 1, 2 ]
+x0  = 2 * x
+xf  = 3 * x
+u = 3
+c = [ u, 0 ]
+@test constraint(o, :eq1)(x0, xf) == x0[1]
+@test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+@test o.dynamics(x, c) == [ x[2], (x[1] + 2x[2])^2 ]
+@test o.lagrange(x, c) == u^2 + x[1]
 
 @def o begin
     z ∈ R², variable
