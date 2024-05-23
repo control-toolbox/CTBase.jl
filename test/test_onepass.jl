@@ -1731,13 +1731,13 @@ end
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
-        (x(0) + 2x(1)) + ∫(x(t) + u(t)) → min
+        (x(0) + 3x(1)) + ∫(x(t) + u(t)) → min
     end
     x = 1
     u = 2
     x0 = 3
     xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
+    @test o.mayer(x0, xf) ==  x0 + 3xf
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :min
 
@@ -1818,13 +1818,13 @@ end
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
-        (x(0) + 2x(1)) + ∫(x(t) + u(t)) → max
+        (x(0) + 5x(1)) + ∫(x(t) + u(t)) → max
     end
     x = 1
     u = 2
     x0 = 3
     xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
+    @test o.mayer(x0, xf) ==  x0 + 5xf
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :max
 
@@ -2030,32 +2030,6 @@ end
         t * ∫(x(t) + u(t)) - 1 → max
     end
     
-    # -------------------------------
-    # error
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x ∈ R, state
-        u ∈ R, control
-        x(0) + 2x(1) + ∫(x(t) + u(t)) → max
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test_throws UndefVarError o.mayer(x0, xf)
-    
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x ∈ R, state
-        u ∈ R, control
-        ∫(x(t) + u(t)) - x(0) + 2x(1) → max
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test_throws UndefVarError o.mayer(x0, xf)
-
 end
 
 # ---------------------------------------------------------------
@@ -2232,6 +2206,38 @@ end
         x(t0) == [ r0, v0, m0 ], (1)
         0  ≤ u(t) ≤ 1          , (1bis)
     end
+
+    # bad syntax for Bolza cost interpreted as a Mayer term with trailing ∫ 
+    @test_throws ParsingError @def o begin
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        ẋ(t) == A * x(t) + B * u(t)
+        1 + 2 + ∫( u(t)^2 ) → min # should be ( 1 + 2 ) + ∫(...)
+    end
+
+    @test_throws ParsingError @def o begin
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        ẋ(t) == A * x(t) + B * u(t)
+        ∫( u(t)^2 ) + 1 + 2 → min # should be ∫(...) + ( 1 + 2 )
+    end
+
+    @test_throws ParsingError @def o begin
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        ẋ(t) == A * x(t) + B * u(t)
+        ∫( u(t)^2 ) / 2 → min # forbidden
+    end
+
 
 end
 

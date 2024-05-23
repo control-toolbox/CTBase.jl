@@ -11,7 +11,6 @@
 # - add assert for pre/post conditions and invariants
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
 # - currently "t ∈ [ 0+0, 1 ], time" is allowed, and compels to declare "x(0+0) == ..."
-# - add a waring (@warn) when Mayer part has ∫ (bad syntax usage, e.g. "1 + 2 + ∫(...)" instead of "(1 + 2) + ∫(...)")
 
 """
 $(TYPEDEF)
@@ -384,6 +383,7 @@ p_mayer!(p, ocp, e, type; log=false) = begin
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
     isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
+    has(e, :∫) && return __throw("bad objective declaration resulting in a Mayer term with trailing ∫", p.lnum, p.line)
     gs = gensym()
     x0 = gensym()
     xf = gensym()
