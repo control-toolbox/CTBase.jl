@@ -35,13 +35,17 @@ function test_model() # 30 55 185
     @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
     
     ocp = Model(variable=true)
+    variable!(ocp, 2, "uu", [ "vv₁", "vv₂" ])
+    @test ocp.variable_dimension == 2
+    @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
+
+    ocp = Model(variable=true)
     @test_throws MethodError variable!(ocp, 2, [ "vv1", "vv2" ])
 
     ocp = Model(variable=true)
     variable!(ocp, 2, :vv)
     @test ocp.variable_dimension == 2
     @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
-
 
 end
 
@@ -344,6 +348,11 @@ end
     state!(ocp, 2, "y")
     @test ocp.state_dimension == 2
     @test ocp.state_components_names == ["y₁", "y₂"]
+
+    ocp = Model()
+    state!(ocp, 2, "y", ["z₁", "z₂"])
+    @test ocp.state_dimension == 2
+    @test ocp.state_components_names == ["z₁", "z₂"]
 end
 
 @testset "control!" begin
@@ -372,6 +381,11 @@ end
 
     ocp = Model()
     control!(ocp, 2, "v")
+    @test ocp.control_dimension == 2
+    @test ocp.control_components_names == ["v₁", "v₂"]
+
+    ocp = Model()
+    control!(ocp, 2, "u", ["v₁", "v₂"])
     @test ocp.control_dimension == 2
     @test ocp.control_components_names == ["v₁", "v₂"]
 end

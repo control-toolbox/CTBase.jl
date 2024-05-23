@@ -9,6 +9,7 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
+# - currently "t ∈ [ 0+0, 1 ], time" is allowed, and compels to declare "x(0+0) == ..."
 
 """
 $(TYPEDEF)
@@ -66,47 +67,88 @@ Foo
 ```
 """
 parse!(p, ocp, e; log=false) = begin
+    #
     p.lnum = p.lnum + 1
     p.line = string(e)
     for a ∈ keys(p.aliases)
         e = subs(e, a, p.aliases[a])
     end
+    #
     @match e begin
-        :( $v ∈ R^$q, variable       ) => p_variable!(p, ocp, v, q; log)
-        :( $v ∈ R   , variable       ) => p_variable!(p, ocp, v   ; log)
-        :( $v       , variable       ) => p_variable!(p, ocp, v   ; log) # todo: remove
-        :( $t ∈ [ $t0, $tf ], time   ) => p_time!(p, ocp, t, t0, tf; log)
-        :( $x ∈ R^$n, state          ) => p_state!(p, ocp, x, n; log)
-        :( $x ∈ R   , state          ) => p_state!(p, ocp, x   ; log)
-        :( $x       , state          ) => p_state!(p, ocp, x   ; log) # todo: remove
-        :( $u ∈ R^$m, control        ) => p_control!(p, ocp, u, m; log)
-        :( $u ∈ R   , control        ) => p_control!(p, ocp, u   ; log)
-        :( $u       , control        ) => p_control!(p, ocp, u   ; log) # todo: remove
-        :( $a = $e1                  ) => p_alias!(p, ocp, a, e1; log)
-        :( ∂($x)($t) == $e1          ) => p_dynamics!(p, ocp, x, t, e1       ; log)
-        :( ∂($x)($t) == $e1, $label  ) => p_dynamics!(p, ocp, x, t, e1, label; log)
-        :( $e1 == $e2                ) => p_constraint!(p, ocp, e2     , e1, e2       ; log)
-        :( $e1 == $e2, $label        ) => p_constraint!(p, ocp, e2     , e1, e2, label; log)
-        :( $e1 ≤  $e2 ≤  $e3         ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
-        :( $e1 ≤  $e2 ≤  $e3, $label ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
-        :(        $e2 ≤  $e3         ) => p_constraint!(p, ocp, nothing, e2, e3            ; log)
-        :(        $e2 ≤  $e3, $label ) => p_constraint!(p, ocp, nothing, e2, e3     , label; log)
-        :( $e3 ≥  $e2 ≥  $e1         ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
-        :( $e3 ≥  $e2 ≥  $e1, $label ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
-        :( $e2 ≥  $e1                ) => p_constraint!(p, ocp, e1     , e2, nothing       ; log)
-        :( $e2 ≥  $e1,        $label ) => p_constraint!(p, ocp, e1     , e2, nothing, label; log)
-        :(       ∫($e1) → min        ) => p_lagrange!(p, ocp, e1, :min; log)
-        :(       ∫($e1) → max        ) => p_lagrange!(p, ocp, e1, :max; log)
-        :( $e1 + ∫($e2) → min        ) => p_bolza!(p, ocp,      e1,      e2  , :min; log)
-        :( $e1 - ∫($e2) → min        ) => p_bolza!(p, ocp,      e1, :( -$e2 ), :min; log)
-        :( $e1 + ∫($e2) → max        ) => p_bolza!(p, ocp,      e1,      e2  , :max; log)
-        :( $e1 - ∫($e2) → max        ) => p_bolza!(p, ocp,      e1, :( -$e2 ), :max; log)
-        :( ∫($e2) + $e1 → min        ) => p_bolza!(p, ocp,      e1,      e2  , :min; log)
-        :( ∫($e2) - $e1 → min        ) => p_bolza!(p, ocp, :( -$e1 ),    e2  , :min; log)
-        :( ∫($e2) + $e1 → max        ) => p_bolza!(p, ocp,      e1,      e2  , :max; log)
-        :( ∫($e2) - $e1 → max        ) => p_bolza!(p, ocp, :( -$e1 ),    e2  , :max; log)
-        :( $e1          → min        ) => p_mayer!(p, ocp, e1, :min; log)
-        :( $e1          → max        ) => p_mayer!(p, ocp, e1, :max; log)
+        # aliases
+        :( $a = $e1 ) =>
+        @match e1 begin
+        :( ($names) ∈ R^$q, variable      ) => p_variable!(p, ocp, a, q; components_names=names, log)
+        :( [$names] ∈ R^$q, variable      ) => p_variable!(p, ocp, a, q; components_names=names, log)
+        :( ($names) ∈ R^$n, state         ) =>    p_state!(p, ocp, a, n; components_names=names, log)
+        :( [$names] ∈ R^$n, state         ) =>    p_state!(p, ocp, a, n; components_names=names, log)
+        :( ($names) ∈ R^$m, control       ) =>  p_control!(p, ocp, a, m; components_names=names, log)
+        :( [$names] ∈ R^$m, control       ) =>  p_control!(p, ocp, a, m; components_names=names, log)
+        _                                 =>    p_alias!(p, ocp, a, e1; log) # alias
+        end                           
+        # variable                    
+        :( $v ∈ R^$q, variable            ) => p_variable!(p, ocp, v, q; log)
+        :( $v ∈ R   , variable            ) => p_variable!(p, ocp, v   ; log)
+        # time                        
+        :( $t ∈ [ $t0, $tf ], time        ) => p_time!(p, ocp, t, t0, tf; log)
+        # state                       
+        :( $x ∈ R^$n, state               ) => p_state!(p, ocp, x, n; log)
+        :( $x ∈ R   , state               ) => p_state!(p, ocp, x   ; log)
+        # control                     
+        :( $u ∈ R^$m, control             ) => p_control!(p, ocp, u, m; log)
+        :( $u ∈ R   , control             ) => p_control!(p, ocp, u   ; log)
+        # dynamics                    
+        :( ∂($x)($t) == $e1               ) => p_dynamics!(p, ocp, x, t, e1       ; log)
+        :( ∂($x)($t) == $e1, $label       ) => p_dynamics!(p, ocp, x, t, e1, label; log)
+        # constraints                 
+        :( $e1 == $e2                     ) => p_constraint!(p, ocp, e2     , e1, e2            ; log)
+        :( $e1 == $e2, $label             ) => p_constraint!(p, ocp, e2     , e1, e2,      label; log)
+        :( $e1 ≤  $e2 ≤  $e3              ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
+        :( $e1 ≤  $e2 ≤  $e3, $label      ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
+        :(        $e2 ≤  $e3              ) => p_constraint!(p, ocp, nothing, e2, e3            ; log)
+        :(        $e2 ≤  $e3, $label      ) => p_constraint!(p, ocp, nothing, e2, e3     , label; log)
+        :( $e3 ≥  $e2 ≥  $e1              ) => p_constraint!(p, ocp, e1     , e2, e3            ; log)
+        :( $e3 ≥  $e2 ≥  $e1, $label      ) => p_constraint!(p, ocp, e1     , e2, e3     , label; log)
+        :( $e2 ≥  $e1                     ) => p_constraint!(p, ocp, e1     , e2, nothing       ; log)
+        :( $e2 ≥  $e1,        $label      ) => p_constraint!(p, ocp, e1     , e2, nothing, label; log)
+        # lagrange cost
+        :(             ∫($e1)       → min ) => p_lagrange!(p, ocp,      e1        , :min; log)
+        :(           - ∫($e1)       → min ) => p_lagrange!(p, ocp, :( -$e1 )      , :min; log)
+        :(       $e1 * ∫($e2)       → min ) => has(e1, p.t) ? ( return __throw("time $(p.t) must not appear in $e1", p.lnum, p.line) ) :
+                                               p_lagrange!(p, ocp, :(  $e1 * $e2 ), :min; log)
+        :(             ∫($e1)       → max ) => p_lagrange!(p, ocp,      e1        , :max; log)
+        :(           - ∫($e1)       → max ) => p_lagrange!(p, ocp, :( -$e1 )      , :max; log)
+        :(       $e1 * ∫($e2)       → max ) => has(e1, p.t) ? ( return __throw("time $(p.t) must not appear in $e1", p.lnum, p.line) ) :
+                                               p_lagrange!(p, ocp, :(  $e1 * $e2 ), :max; log)
+        # bolza cost
+        :( $e1 +       ∫($e2)       → min ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
+        :( $e1 + $e2 * ∫($e3)       → min ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
+        :( $e1 -       ∫($e2)       → min ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :min; log)
+        :( $e1 - $e2 * ∫($e3)       → min ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :min; log)
+        :( $e1 +       ∫($e2)       → max ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
+        :( $e1 + $e2 * ∫($e3)       → max ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
+        :( $e1 -       ∫($e2)       → max ) => p_bolza!(p, ocp,      e1,   :( -$e2 )      , :max; log)
+        :( $e1 - $e2 * ∫($e3)       → max ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp,      e1,   :( -$e2 * $e3 ), :max; log)
+        :(             ∫($e2) + $e1 → min ) => p_bolza!(p, ocp,      e1,        e2        , :min; log)
+        :(       $e2 * ∫($e3) + $e1 → min ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :min; log)
+        :(             ∫($e2) - $e1 → min ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :min; log)
+        :(       $e2 * ∫($e3) - $e1 → min ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :min; log)
+        :(             ∫($e2) + $e1 → max ) => p_bolza!(p, ocp,      e1,        e2        , :max; log)
+        :(       $e2 * ∫($e3) + $e1 → max ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp,      e1,   :(  $e2 * $e3 ), :max; log)
+        :(             ∫($e2) - $e1 → max ) => p_bolza!(p, ocp, :( -$e1 ),      e2        , :max; log)
+        :(       $e2 * ∫($e3) - $e1 → max ) => has(e2, p.t) ? ( return __throw("time $(p.t) must not appear in $e2", p.lnum, p.line) ) :
+                                               p_bolza!(p, ocp, :( -$e1 ), :(  $e2 * $e3 ), :max; log)
+        # mayer cost
+        :( $e1                      → min ) => p_mayer!(p, ocp, e1, :min; log)
+        :( $e1                      → max ) => p_mayer!(p, ocp, e1, :max; log)
+        #
         _ => begin
             if e isa LineNumberNode
                 p.lnum = p.lnum - 1
@@ -114,14 +156,14 @@ parse!(p, ocp, e; log=false) = begin
             elseif e isa Expr && e.head == :block
                 p.lnum = p.lnum - 1
                 Expr(:block, map(e -> parse!(p, ocp, e; log), e.args)...)
-		# !!! assumes that map is done sequentially for side effects on p
+            # !!! assumes that map is done sequentially for side effects on p
             else
                 return __throw("unknown syntax", p.lnum, p.line)
             end end
     end
 end
 
-p_variable!(p, ocp, v, q=1; log=false) = begin
+p_variable!(p, ocp, v, q=1; components_names=nothing, log=false) = begin
     log && println("variable: $v, dim: $q")
     v isa Symbol || return __throw("forbidden variable name: $v", p.lnum, p.line)
     p.v = v
@@ -129,7 +171,13 @@ p_variable!(p, ocp, v, q=1; log=false) = begin
     qq = q isa Integer ? q : 9
     for i ∈ 1:qq p.aliases[Symbol(v, ctindices(i))] = :( $v[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(v, ctupperscripts(i))] = :( $v^$i  ) end
-    __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
+    if (isnothing(components_names))
+        __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
+    else
+        for i ∈ 1:qq p.aliases[components_names.args[i]] = :( $v[$i] ) end
+        ss = QuoteNode(string.(components_names.args))
+        __wrap(:( variable!($ocp, $q, $vv, $ss) ), p.lnum, p.line) 
+    end
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
@@ -176,7 +224,7 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     __wrap(code, p.lnum, p.line)
 end
 
-p_state!(p, ocp, x, n=1; log=false) = begin
+p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
     log && println("state: $x, dim: $n")
     x isa Symbol || return __throw("forbidden state name: $x", p.lnum, p.line)
     p.x = x
@@ -185,10 +233,16 @@ p_state!(p, ocp, x, n=1; log=false) = begin
     for i ∈ 1:nn p.aliases[Symbol(x, ctindices(i))] = :( $x[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
     p.aliases[Symbol(Unicode.normalize(string(x,"̇")))] = :( ∂($x) )
-    __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
+    if (isnothing(components_names))
+        __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
+    else
+        for i ∈ 1:nn p.aliases[components_names.args[i]] = :( $x[$i] ) end
+        ss = QuoteNode(string.(components_names.args))
+        __wrap(:( state!($ocp, $n, $xx, $ss) ), p.lnum, p.line)
+    end
 end
 
-p_control!(p, ocp, u, m=1; log=false) = begin
+p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
     log && println("control: $u, dim: $m")
     u isa Symbol || return __throw("forbidden control name: $u", p.lnum, p.line)
     p.u = u
@@ -196,7 +250,13 @@ p_control!(p, ocp, u, m=1; log=false) = begin
     mm =  m isa Integer ? m : 9
     for i ∈ 1:mm p.aliases[Symbol(u, ctindices(i))] = :( $u[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(u, ctupperscripts(i))] = :( $u^$i  ) end
-    __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
+    if (isnothing(components_names))
+        __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
+    else
+        for i ∈ 1:mm p.aliases[components_names.args[i]] = :( $u[$i] ) end
+        ss = QuoteNode(string.(components_names.args))
+        __wrap(:( control!($ocp, $m, $uu, $ss) ), p.lnum, p.line)
+    end
 end
 
 p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
@@ -298,7 +358,7 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
 end
 
 p_lagrange!(p, ocp, e, type; log=false) = begin
-    log && println("objective: ∫($e) → $type")
+    log && println("objective (Lagrange): ∫($e) → $type")
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
@@ -318,10 +378,11 @@ p_lagrange!(p, ocp, e, type; log=false) = begin
 end
 
 p_mayer!(p, ocp, e, type; log=false) = begin
-    log && println("objective: $e → $type")
+    log && println("objective (Mayer): $e → $type")
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
     isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
+    has(e, :∫) && return __throw("bad objective declaration resulting in a Mayer term with trailing ∫", p.lnum, p.line)
     gs = gensym()
     x0 = gensym()
     xf = gensym()
@@ -338,7 +399,7 @@ p_mayer!(p, ocp, e, type; log=false) = begin
 end
 
 p_bolza!(p, ocp, e1, e2, type; log=false) = begin
-    log && println("objective: $e1 + ∫($e2) → $type")
+    log && println("objective (Bolza): $e1 + ∫($e2) → $type")
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
     isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
