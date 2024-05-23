@@ -202,7 +202,7 @@ julia> has(e, :u, :t)
 true
 ```
 """
-has(e, x, t::Union{Symbol, Real}) = begin
+has(e, x, t) = begin
     foo(x, t) = (h, args...) -> begin
         ee = Expr(h, args...)
 	    if :yes ∈ args

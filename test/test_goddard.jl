@@ -16,7 +16,7 @@ x0 = [ r0, v0, m0 ]
 # Abstract model
 @def ocp begin
 
-    tf, variable
+    tf ∈ R, variable
     t ∈ [ t0, tf ], time
     x ∈ R³, state
     u ∈ R, control

@@ -10,6 +10,8 @@
 # - tests exceptions (parsing and semantics/runtime)
 # - add assert for pre/post conditions and invariants
 # - add tests on ParsingError + run time errors (wrapped in try ... catch's - use string to be precise)
+# - currently "t ∈ [ 0+0, 1 ], time" is allowed, and compels to declare "x(0+0) == ..."
+# - add a waring (@warn) when Mayer part has ∫ (bad syntax usage, e.g. "1 + 2 + ∫(...)" instead of "(1 + 2) + ∫(...)")
 
 """
 $(TYPEDEF)
@@ -89,17 +91,14 @@ parse!(p, ocp, e; log=false) = begin
         # variable                    
         :( $v ∈ R^$q, variable            ) => p_variable!(p, ocp, v, q; log)
         :( $v ∈ R   , variable            ) => p_variable!(p, ocp, v   ; log)
-        :( $v       , variable            ) => p_variable!(p, ocp, v   ; log) # todo: remove
         # time                        
         :( $t ∈ [ $t0, $tf ], time        ) => p_time!(p, ocp, t, t0, tf; log)
         # state                       
         :( $x ∈ R^$n, state               ) => p_state!(p, ocp, x, n; log)
         :( $x ∈ R   , state               ) => p_state!(p, ocp, x   ; log)
-        :( $x       , state               ) => p_state!(p, ocp, x   ; log) # todo: remove
         # control                     
         :( $u ∈ R^$m, control             ) => p_control!(p, ocp, u, m; log)
         :( $u ∈ R   , control             ) => p_control!(p, ocp, u   ; log)
-        :( $u       , control             ) => p_control!(p, ocp, u   ; log) # todo: remove
         # dynamics                    
         :( ∂($x)($t) == $e1               ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( ∂($x)($t) == $e1, $label       ) => p_dynamics!(p, ocp, x, t, e1, label; log)
@@ -361,7 +360,7 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
 end
 
 p_lagrange!(p, ocp, e, type; log=false) = begin
-    log && println("objective: ∫($e) → $type")
+    log && println("objective (Lagrange): ∫($e) → $type")
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.u) && return __throw("control not yet declared", p.lnum, p.line)
     isnothing(p.t) && return __throw("time not yet declared", p.lnum, p.line)
@@ -381,7 +380,7 @@ p_lagrange!(p, ocp, e, type; log=false) = begin
 end
 
 p_mayer!(p, ocp, e, type; log=false) = begin
-    log && println("objective: $e → $type")
+    log && println("objective (Mayer): $e → $type")
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
     isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)
@@ -401,7 +400,7 @@ p_mayer!(p, ocp, e, type; log=false) = begin
 end
 
 p_bolza!(p, ocp, e1, e2, type; log=false) = begin
-    log && println("objective: $e1 + ∫($e2) → $type")
+    log && println("objective (Bolza): $e1 + ∫($e2) → $type")
     isnothing(p.x) && return __throw("state not yet declared", p.lnum, p.line)
     isnothing(p.t0) && return __throw("time not yet declared", p.lnum, p.line)
     isnothing(p.tf) && return __throw("time not yet declared", p.lnum, p.line)

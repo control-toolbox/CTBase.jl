@@ -124,7 +124,6 @@ function test_onepass()
         t ∈ [ t0, tf ], time
         x ∈ R^3, state
         u ∈ R^3, control
-
         r = x[1]
         v = x₂
         a = x₃
@@ -217,7 +216,7 @@ end
     t0 = .0; tf = .1
     @def ocp begin
         t ∈ [ t0, tf ], time
-        a, variable
+        a ∈ R, variable
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.variable_dimension == 1
@@ -288,7 +287,7 @@ end
     t0 = 1.0; tf = 1.1
     @def ocp begin
         t ∈ [ t0, tf ], time
-        u, state
+        u ∈ R, state
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
@@ -374,7 +373,7 @@ end
     t0 = 1.0; tf = 1.1
     @def ocp begin
         t ∈ [ t0, tf ], time
-        u, control
+        u ∈ R, control
     end ;
     @test ocp isa OptimalControlModel
     @test ocp.time_name == "t"
@@ -432,7 +431,6 @@ end
     @test ocp.control_dimension == 1
     @test ocp.control_name == "b"
 
-
     t0 = 6.0; tf = 6.1
     @def ocp begin
         t ∈ [ t0 , tf ], time
@@ -444,7 +442,6 @@ end
     @test ocp.final_time   == tf
     @test ocp.control_dimension == 9
     @test ocp.control_name == "u"
-
 
     n = 3
     t0 = 7.0; tf = 7.1
@@ -527,7 +524,7 @@ end
         z ∈ R², variable
         __t ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
-        w, control
+        w ∈ R, control
         r = y₃
         v = y₄
         aa = y₁(0) + v³ + z₂
@@ -549,7 +546,7 @@ end
 @testset "constraints" begin
 
     @def o begin
-        tf, variable
+        tf ∈ R, variable
         t ∈ [ 0, tf ], time
         x ∈ R², state
         u ∈ R, control
@@ -633,7 +630,6 @@ end
     @test constraint(o, :eq9 )(u, z) == u[2]^2
     @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
     @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
-
 
     @def o begin
         t ∈ [ 0, 1 ], time
@@ -1039,9 +1035,7 @@ end
         u ∈ [ u0, uf ], time
         t ∈ R^3, state
         x ∈ R^2, control
-
         b = t₂
-
         t(u0) == [ z0, k0, b0 ]
         0  ≤ x[2](u) ≤ 1
         z0 ≤ t(u)[1] ≤ z1
@@ -1083,7 +1077,6 @@ end
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x(t0) == x0
         x[2](t0) == x02
         x[2:3](t0) == y0
@@ -1132,11 +1125,9 @@ end
     tf   = 1.2
     n    = 4
     @def ocp3 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x(tf) == xf
         xf_b ≤ x(tf) ≤ xf_u
         x[2](tf) == xf2
@@ -1165,7 +1156,6 @@ end
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x(tf) == xf                , final_1
         xf_b ≤ x(tf) ≤ xf_u        , final_2
         x[2](tf) == xf2            , final_3
@@ -1184,18 +1174,15 @@ end
     tf   = 1.4
     n    = 2
     @def ocp5 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x(tf) - tf*x(t0) == [ 0, 1 ]
         [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]
         x[2](t0)^2 == 1
         1 ≤ x[2](t0)^2 ≤ 2
         x[2](tf)^2 == 1
         1 ≤ x[2](tf)^2 ≤ 2
-
     end
     @test ocp5 isa OptimalControlModel
     @test ocp5.state_dimension == n
@@ -1207,18 +1194,15 @@ end
     tf   = 1.5
     n    = 2
     @def ocp6 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x(tf) - tf*x(t0) == [ 0, 1 ]            , boundary_1
         [ 0, 1 ] ≤ x(tf) - tf*x(t0) ≤ [ 1, 3 ]  , boundary_2
         x[2](t0)^2 == 1                         , boundary_3
         1 ≤ x[2](t0)^2 ≤ 2                      , boundary_4
         x[2](tf)^2 == 1                         , boundary_5
         1 ≤ x[2](tf)^2 ≤ 2                      , boundary_6
-
     end
     @test ocp6 isa OptimalControlModel
     @test ocp6.state_dimension == n
@@ -1239,11 +1223,9 @@ end
     tf   = 1.6
     n    = 2
     @def ocp7 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         u_b ≤ u[1](t) ≤ u_u
         u2_b ≤ u[1](t) ≤ u2_u
         v_b ≤ u[2](t) ≤ v_u
@@ -1267,11 +1249,9 @@ end
     v_b  = 5.0
     v_u  = 6.0
     @def ocp8 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         u_b ≤ u[2](t) ≤ u_u               , control_1
         u2_b ≤ u[1](t) ≤ u2_u          , control_3
         [ 1, v_b ] ≤ u[1:2](t) ≤ [ 2, v_u ], control_5
@@ -1283,7 +1263,6 @@ end
     @test ocp8.control_dimension == n
     @test ocp8.initial_time == t0
     @test ocp8.final_time == tf
-
 
     # more vars
     x_b  = 10.0
@@ -1298,11 +1277,9 @@ end
     tf   = 1.8
     n    = 10
     @def ocp9 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x_b ≤ x[3](t) ≤ x_u
         #x(t) == x_u
         x2_b ≤ x[2](t) ≤ x2_u
@@ -1322,11 +1299,9 @@ end
     tf   = 1.9
     n    = 11
     @def ocp10 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         x_b ≤ x[3](t) ≤ x_u                             , state_1
         #x(t) == x_u                                  , state_2
         x2_b ≤ x[2](t) ≤ x2_u                        , state_3
@@ -1342,7 +1317,6 @@ end
     @test ocp10.initial_time == t0
     @test ocp10.final_time == tf
 
-
     # === mixed
     t0   = 0.111
     tf   = 1.111
@@ -1352,7 +1326,6 @@ end
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         u[2](t) * x[1:2](t) == [ -1, 1 ]
         [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]
     end
@@ -1363,11 +1336,9 @@ end
     @test ocp11.final_time == tf
 
     @def ocp12 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R^n, state
         u ∈ R^n, control
-
         u[2](t) * x[1:2](t) == [ -1, 1 ]                       , mixed_1
         [ -1, 1 ] ≤ u[2](t) * x[1:2](t) ≤ [ 0, 2 ]             , mixed_2
     end
@@ -1377,17 +1348,14 @@ end
     @test ocp12.initial_time == t0
     @test ocp12.final_time == tf
 
-
     # === dynamics
 
     t0   = 0.112
     tf   = 1.112
     @def ocp13 begin
-
         t ∈ [ t0, tf ], time
         x ∈ R, state
         u ∈ R, control
-
         ẋ(t) == 2x(t) + u(t)^2
     end
     @test ocp13 isa OptimalControlModel
@@ -1545,7 +1513,7 @@ end
         x(t0) == [ -1, 0 ], (1)
         x(tf) == [  0, 0 ]
         ẋ(t) == A * x(t) + B * u(t)
-        ∫( u(t)^2 ) / 2 → min
+        (-0.5 + tf) * ∫( u(t)^2 ) → min
     end
     x = [ 1, 2 ]
     x0 = 2 * x
@@ -1557,32 +1525,32 @@ end
           1 ]
     @test constraint(o, :eq1)(x0, xf) == x0
     @test o.dynamics(x, u) == A * x + B * u
-    @test o.lagrange(x, u) == 0.5u^2
+    @test o.lagrange(x, u) == (-0.5 + tf) * u^2
     @test o.criterion == :min
 
     t0 = 0
     tf = 1
-    @def o begin
+    @test_throws ParsingError @def o begin # a call to the time (t, here) must not appear before the integral
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
         x(t0) == [ -1, 0 ], (1)
         x(tf) == [  0, 0 ]
         ẋ(t) == A * x(t) + B * u(t)
-        -∫( u(t)^2 ) / 2 → min
+        (-0.5 + t) * ∫( u(t)^2 ) → min
     end
-    x = [ 1, 2 ]
-    x0 = 2 * x
-    xf = 3 * x
-    u = -1
-    A = [ 0 1
-          0 0 ]
-    B = [ 0
-          1 ]
-    @test constraint(o, :eq1)(x0, xf) == x0
-    @test o.dynamics(x, u) == A * x + B * u
-    @test o.lagrange(x, u) == -0.5u^2
-    @test o.criterion == :min
+
+    t0 = 0
+    tf = 1
+    @test_throws ParsingError @def o begin # a call to the time (t, here) must not appear before the integral
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        ẋ(t) == A * x(t) + B * u(t)
+        (-0.5 + x(t)) * ∫( u(t)^2 ) → min
+    end
 
     # -----------------------------------
     # max 
@@ -1706,54 +1674,6 @@ end
     @test o.lagrange(x, u) == -0.5u^2
     @test o.criterion == :max
 
-    t0 = 0
-    tf = 1
-    @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^2, state
-        u ∈ R, control
-        x(t0) == [ -1, 0 ], (1)
-        x(tf) == [  0, 0 ]
-        ẋ(t) == A * x(t) + B * u(t)
-        ∫( u(t)^2 ) / 2 → max
-    end
-    x = [ 1, 2 ]
-    x0 = 2 * x
-    xf = 3 * x
-    u = -1
-    A = [ 0 1
-          0 0 ]
-    B = [ 0
-          1 ]
-    @test constraint(o, :eq1)(x0, xf) == x0
-    @test o.dynamics(x, u) == A * x + B * u
-    @test o.lagrange(x, u) == 0.5u^2
-    @test o.criterion == :max
-
-    t0 = 0
-    tf = 1
-    @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^2, state
-        u ∈ R, control
-        x(t0) == [ -1, 0 ], (1)
-        x(tf) == [  0, 0 ]
-        ẋ(t) == A * x(t) + B * u(t)
-        -∫( u(t)^2 ) / 2 → max
-    end
-    x = [ 1, 2 ]
-    x0 = 2 * x
-    xf = 3 * x
-    u = -1
-    A = [ 0 1
-          0 0 ]
-    B = [ 0
-          1 ]
-    @test constraint(o, :eq1)(x0, xf) == x0
-    @test o.dynamics(x, u) == A * x + B * u
-    @test o.lagrange(x, u) == -0.5u^2
-    @test o.criterion == :max
-
     # -----------------------------------
     t0 = .0; tf = .1
     @def ocp begin
@@ -1775,6 +1695,31 @@ end
 
 end
 
+   t0 = 0
+    tf = 1
+    @test_throws ParsingError @def o begin # a call to the time (t, here) must not appear before the integral
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        ẋ(t) == A * x(t) + B * u(t)
+        (-0.5 + t) * ∫( u(t)^2 ) → max
+    end
+
+    t0 = 0
+    tf = 1
+    @test_throws ParsingError @def o begin # a call to the time (t, here) must not appear before the integral
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        ẋ(t) == A * x(t) + B * u(t)
+        (-0.5 + x(t)) * ∫( u(t)^2 ) → max
+    end
+
+
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "Bolza cost" begin
@@ -1784,8 +1729,8 @@ end
     # Mayer ± Lagrange
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) + ∫(x(t) + u(t)) → min
     end
     x = 1
@@ -1798,8 +1743,22 @@ end
 
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
+        (x(0) + 2x(1)) + ∫(x(t) + u(t)) → min
+    end
+    x = 1
+    u = 2
+    x0 = 3
+    xf = 4
+    @test o.mayer(x0, xf) ==  x0 + 2xf
+    @test o.lagrange(x, u) ==  x + u
+    @test o.criterion == :min
+
+    @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) + 2 * ∫(x(t) + u(t)) → min
     end
     x = 1
@@ -1812,22 +1771,8 @@ end
 
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        (x(0) + 2x(1)) + ∫(x(t) + u(t)) / 2 → min
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
-    @test o.lagrange(x, u) ==  (x + u)/2
-    @test o.criterion == :min
-    
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) - ∫(x(t) + u(t)) → min
     end
     x = 1
@@ -1840,8 +1785,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) - 2 * ∫(x(t) + u(t)) → min
     end
     x = 1
@@ -1851,28 +1796,28 @@ end
     @test o.mayer(x0, xf) ==  x0 + 2xf
     @test o.lagrange(x, u) ==  -2(x + u)
     @test o.criterion == :min
-    
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        (x(0) + 2x(1)) - ∫(x(t) + u(t)) / 2 → min
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
-    @test o.lagrange(x, u) ==  -(x + u)/2
-    @test o.criterion == :min
 
+    @test_throws ParsingError @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
+        (x(0) + 2x(1)) + t * ∫(x(t) + u(t)) → min
+    end
+
+   @test_throws ParsingError @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
+        (x(0) + 2x(1)) - t * ∫(x(t) + u(t)) → min
+    end
+ 
     # -------------------------------
     # max 
     # Mayer ± Lagrange
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) + ∫(x(t) + u(t)) → max
     end
     x = 1
@@ -1885,8 +1830,8 @@ end
 
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) + 2 * ∫(x(t) + u(t)) → max
     end
     x = 1
@@ -1899,22 +1844,8 @@ end
 
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        (x(0) + 2x(1)) + ∫(x(t) + u(t)) / 2 → max
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
-    @test o.lagrange(x, u) ==  (x + u)/2
-    @test o.criterion == :max
-    
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) - ∫(x(t) + u(t)) → max
     end
     x = 1
@@ -1927,8 +1858,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         (x(0) + 2x(1)) - 2 * ∫(x(t) + u(t)) → max
     end
     x = 1
@@ -1938,28 +1869,28 @@ end
     @test o.mayer(x0, xf) ==  x0 + 2xf
     @test o.lagrange(x, u) ==  -2(x + u)
     @test o.criterion == :max
-    
-    @def o begin
+
+    @test_throws ParsingError @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        (x(0) + 2x(1)) - ∫(x(t) + u(t)) / 2 → max
+        x ∈ R, state
+        u ∈ R, control
+        (x(0) + 2x(1)) + t * ∫(x(t) + u(t)) → max
     end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
-    @test o.lagrange(x, u) ==  -(x + u)/2
-    @test o.criterion == :max
-    
+
+   @test_throws ParsingError @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
+        (x(0) + 2x(1)) - t * ∫(x(t) + u(t)) → max
+    end
+ 
     # -------------------------------
     # min 
     # Lagrange ± Mayer
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         ∫(x(t) + u(t)) + (x(0) + 2x(1)) → min
     end
     x = 1
@@ -1972,8 +1903,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         2 * ∫(x(t) + u(t)) + (x(0) + 2x(1)) → min
     end
     x = 1
@@ -1986,22 +1917,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        ∫(x(t) + u(t)) / 2 + (x(0) + 2x(1)) → min
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
-    @test o.lagrange(x, u) ==  (x + u)/2
-    @test o.criterion == :min
-
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         ∫(x(t) + u(t)) - (x(0) + 2x(1)) → min
     end
     x = 1
@@ -2014,8 +1931,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         2 * ∫(x(t) + u(t)) - (x(0) + 2x(1)) → min
     end
     x = 1
@@ -2025,28 +1942,28 @@ end
     @test o.mayer(x0, xf) ==  -(x0 + 2xf)
     @test o.lagrange(x, u) ==  2(x + u)
     @test o.criterion == :min
-    
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        ∫(x(t) + u(t)) / 2 - (x(0) + 2x(1)) → min
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  -(x0 + 2xf)
-    @test o.lagrange(x, u) == (x + u)/2
-    @test o.criterion == :min
 
+    @test_throws ParsingError @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
+        t * ∫(x(t) + u(t)) + 1 → min
+    end
+ 
+    @test_throws ParsingError @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
+        t * ∫(x(t) + u(t)) - 1 → min
+    end
+ 
     # -------------------------------
     # max
     # Lagrange ± Mayer
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         ∫(x(t) + u(t)) + (x(0) + 2x(1)) → max
     end
     x = 1
@@ -2059,8 +1976,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         2 * ∫(x(t) + u(t)) + (x(0) + 2x(1)) → max
     end
     x = 1
@@ -2073,22 +1990,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        ∫(x(t) + u(t)) / 2 + (x(0) + 2x(1)) → max
-    end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  x0 + 2xf
-    @test o.lagrange(x, u) ==  (x + u)/2
-    @test o.criterion == :max
-
-    @def o begin
-        t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         ∫(x(t) + u(t)) - (x(0) + 2x(1)) → max
     end
     x = 1
@@ -2101,8 +2004,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         2 * ∫(x(t) + u(t)) - (x(0) + 2x(1)) → max
     end
     x = 1
@@ -2112,27 +2015,27 @@ end
     @test o.mayer(x0, xf) ==  -(x0 + 2xf)
     @test o.lagrange(x, u) ==  2(x + u)
     @test o.criterion == :max
-    
-    @def o begin
+
+    @test_throws ParsingError @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
-        ∫(x(t) + u(t)) / 2 - (x(0) + 2x(1)) → max
+        x ∈ R, state
+        u ∈ R, control
+        t * ∫(x(t) + u(t)) + 1 → max
     end
-    x = 1
-    u = 2
-    x0 = 3
-    xf = 4
-    @test o.mayer(x0, xf) ==  -(x0 + 2xf)
-    @test o.lagrange(x, u) == (x + u)/2
-    @test o.criterion == :max
+ 
+    @test_throws ParsingError @def o begin
+        t ∈ [ 0, 1 ], time
+        x ∈ R, state
+        u ∈ R, control
+        t * ∫(x(t) + u(t)) - 1 → max
+    end
     
     # -------------------------------
     # error
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         x(0) + 2x(1) + ∫(x(t) + u(t)) → max
     end
     x = 1
@@ -2143,8 +2046,8 @@ end
     
     @def o begin
         t ∈ [ 0, 1 ], time
-        x, state
-        u, control
+        x ∈ R, state
+        u ∈ R, control
         ∫(x(t) + u(t)) - x(0) + 2x(1) → max
     end
     x = 1
@@ -2242,7 +2145,7 @@ end
         z ∈ R², variable
         s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
-        w, control
+        w ∈ R, control
         r = y₃
         v = y₄
         aa = y₁ + v³ + z₂
@@ -2257,7 +2160,7 @@ end
         z ∈ R², variable
         __t ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
-        w, control
+        w ∈ R, control
         r = y₃
         v = y₄
         aa = y₁(__t) + v³ + z₂
@@ -2317,7 +2220,6 @@ end
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R^2, control
-
         0  ≤ u(t) ≤ 1          , (1bis)
     end
 
@@ -2327,7 +2229,6 @@ end
         t ∈ [ 0, 1 ], time
         x ∈ R^2, state
         u ∈ R^2, control
-
         x(t0) == [ r0, v0, m0 ], (1)
         0  ≤ u(t) ≤ 1          , (1bis)
     end
