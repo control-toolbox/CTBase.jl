@@ -188,7 +188,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return true if e contains an `(...x...)(t)` call.
+Return true if e contains a `(...x...)(t)` call.
 
 # Example
 ```jldoctest
@@ -202,7 +202,7 @@ julia> has(e, :u, :t)
 true
 ```
 """
-has(e, x, t) = begin
+has(e, x, t::Symbol) = begin
     foo(x, t) = (h, args...) -> begin
         ee = Expr(h, args...)
 	    if :yes ∈ args
@@ -216,9 +216,37 @@ has(e, x, t) = begin
 end
 
 # todo: has_call(e, t) == true if e = ...(t)... i.e. if e contains an evaluation (call) at t
-# has_call(:( 2f(t) ), :t) == true
 # slight update of has(e, x, t); intended to check expression to be incorporated into Lagrange integrand, see onepass.jl
 # TBI
+"""
+$(TYPEDSIGNATURES)
+
+Return true if e contains a `(...)(t)` call.
+
+# Example
+```jldoctest
+julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
+:(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
+
+julia> has_call(e, :t)
+
+julia> has_call(e, :x)
+
+julia> has_call(:( 2f(t) ), :t)
+```
+"""
+has_call(e, t::Symbol) = begin
+    foo(t) = (h, args...) -> begin
+        ee = Expr(h, args...)
+	    if :yes ∈ args
+	        :yes
+	    else @match ee begin
+            :( $eee($tt) ) => (tt == t) ? :yes : ee
+            _ => ee end
+        end
+    end
+    expr_it(e, foo(t), x -> x) == :yes
+end
 
 """
 $(TYPEDSIGNATURES)
