@@ -15,7 +15,7 @@ module CTBase
 import Base
 using DocStringExtensions
 using DifferentiationInterface: AutoForwardDiff, derivative, gradient, jacobian, prepare_derivative, prepare_gradient, prepare_jacobian
-using ForwardDiff: ForwardDiff # automatic differentiation
+import ForwardDiff
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
@@ -94,6 +94,8 @@ const DState     = ctVector
 Type alias for a tangent vector to the costate space.
 """
 const DCostate   = ctVector
+
+__auto() = AutoForwardDiff()
 
 #
 include("exception.jl")
