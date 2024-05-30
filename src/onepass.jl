@@ -260,11 +260,12 @@ p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
 end
 
 p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
-    log && println("constraint: $e1 ≤ $e2 ≤ $e3,    ($label)")
+    c_type = constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v)
+    log && println("constraint ($c_type): $e1 ≤ $e2 ≤ $e3,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
-    code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
+    code = @match c_type begin
         (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :boundary     => begin
