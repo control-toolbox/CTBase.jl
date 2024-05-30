@@ -95,7 +95,7 @@ Type alias for a tangent vector to the costate space.
 """
 const DCostate   = ctVector
 
-__auto() = AutoForwardDiff()
+__auto() = AutoForwardDiff() # default AD backend
 
 #
 include("exception.jl")
