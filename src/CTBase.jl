@@ -19,8 +19,7 @@ using Interpolations: linear_interpolation, Line, Interpolations # for default i
 using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
 using Plots
-import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
-using Printf # to print an OptimalControlModel
+using Printf # to print an Opt imalControlModel
 using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table

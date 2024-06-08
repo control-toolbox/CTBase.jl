@@ -48,7 +48,7 @@ function __plot_time!(p::Union{Plots.Plot, Plots.Subplot}, sol::OptimalControlSo
     end
 
     # reset ylims: ylims=:auto
-    CTBase.plot!(p, sol, :time, (s, i), time; ylims=:auto, xlabel=t_label, label=label, kwargs...) # use simple plot
+    Plots.plot!(p, sol, :time, (s, i), time; ylims=:auto, xlabel=t_label, label=label, kwargs...) # use simple plot
 
     # change ylims if the gap between min and max is less than a tol
     tol  = 1e-3
@@ -262,7 +262,7 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - `time` can be `:default` or `:normalized`.
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
-function CTBase.plot!(p::Plots.Plot, sol::OptimalControlSolution; layout::Symbol=:split,
+function Plots.plot!(p::Plots.Plot, sol::OptimalControlSolution; layout::Symbol=:split,
     control::Symbol=:components, time::Symbol=:default,
     state_style=(), control_style=(), costate_style=(), kwargs...)
 
@@ -326,6 +326,17 @@ function CTBase.plot!(p::Plots.Plot, sol::OptimalControlSolution; layout::Symbol
 
 end
 
+function __size_plot(sol::OptimalControlSolution, control::Symbol)
+    n = sol.state_dimension
+    #m = sol.control_dimension
+    m = @match control begin
+        :components => sol.control_dimension
+        :norm => 1
+        :all => sol.control_dimension + 1
+        _ => throw(IncorrectArgument("No such choice for control. Use :components, :norm or :all"))
+    end
+    return (600, 140*(n+m))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -337,10 +348,17 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - The argument `layout` can be `:group` or `:split` (default).
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
-function CTBase.plot(sol::OptimalControlSolution; layout::Symbol=:split, 
-    control::Symbol=:components, time::Symbol=:default, state_style=(), control_style=(), costate_style=(), kwargs...)
+function Plots.plot(sol::OptimalControlSolution; 
+    layout::Symbol=:split, 
+    control::Symbol=:components, 
+    time::Symbol=:default, 
+    size=__size_plot(sol, control),
+    state_style=(), 
+    control_style=(), 
+    costate_style=(),
+    kwargs...)
     #
-    p = __initial_plot(sol; layout=layout, kwargs...)
+    p = __initial_plot(sol; layout=layout, control=control, size=size, kwargs...)
     #
     return plot!(p, sol; layout=layout, control=control, time=time,
         state_style=state_style, control_style=control_style, costate_style=costate_style, kwargs...)
