@@ -266,8 +266,8 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match c_type begin
-        (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
-        (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:initial, rg) => :( CTBase.__constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:final  , rg) => :( CTBase.__constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :boundary     => begin
             gs = gensym()
             x0 = gensym()
@@ -279,9 +279,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :boundary; f=$gs, lb=$e1, ub=$e3, label=$llabel)
+                CTBase.__constraint!($ocp, :boundary; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:control_range, rg) => :( constraint!($ocp, :control; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:control_range, rg) => :( CTBase.__constraint!($ocp, :control; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :control_fun        => begin
             gs = gensym()
             ut = gensym()
@@ -292,9 +292,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :control; f=$gs, lb=$e1, ub=$e3, label=$llabel)
+                CTBase.__constraint!($ocp, :control; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:state_range, rg) => :( constraint!($ocp, :state; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:state_range, rg) => :( CTBase.__constraint!($ocp, :state; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :state_fun        => begin
             gs = gensym()
             xt = gensym()
@@ -305,9 +305,9 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :state; f=$gs, lb=$e1, ub=$e3, label=$llabel)
+                CTBase.__constraint!($ocp, :state; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
-        (:variable_range, rg) => :( constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
+        (:variable_range, rg) => :( CTBase.__constraint!($ocp, :variable; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :variable_fun        => begin
             gs = gensym()
             args = [ p.v ]
@@ -315,7 +315,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $e2
                 end
-                constraint!($ocp, :variable; f=$gs, lb=$e1, ub=$e3, label=$llabel)
+                CTBase.__constraint!($ocp, :variable; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
          :mixed => begin
             gs = gensym()
@@ -328,7 +328,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
                 function $gs($(args...))
                     $ee2
                 end
-                constraint!($ocp, :mixed; f=$gs, lb=$e1, ub=$e3, label=$llabel)
+                CTBase.__constraint!($ocp, :mixed; f=$gs, lb=$e1, ub=$e3, label=$llabel)
             end end
         _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end

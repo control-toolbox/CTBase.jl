@@ -816,9 +816,9 @@ end
     constraint!(ocp, :variable, 1:2:3, [-Inf,-Inf], [0,0], :c2)
 
     ocp_bis = Model(variable=true); time!(ocp_bis, 0, 1); state!(ocp_bis, 1); control!(ocp_bis, 1); variable!(ocp_bis,3)
-    constraint!(ocp_bis, :state, lb=0, ub=1, label=:c0)
-    constraint!(ocp_bis, :control, f=dummy, ub=1, lb=1, label=:c1)
-    constraint!(ocp_bis, :variable, rg=1:2:3, ub=[0,0], label=:c2)
+    CTBase.__constraint!(ocp_bis, :state, lb=0, ub=1, label=:c0)
+    CTBase.__constraint!(ocp_bis, :control, f=dummy, ub=1, lb=1, label=:c1)
+    CTBase.__constraint!(ocp_bis, :variable, rg=1:2:3, ub=[0,0], label=:c2)
 
     @test ocp.constraints == ocp_bis.constraints
 
@@ -828,18 +828,19 @@ end
     constraint!(ocp_ter, :state, 1:2:3, [0,0], [0,0], :c2)
 
     ocp_quad = Model(variable=true); time!(ocp_quad, 0, 1); state!(ocp_quad, 3); control!(ocp_quad, 1); variable!(ocp_quad,1)
-    constraint!(ocp_quad, :variable, lb=1, ub=1, label=:c0)
-    constraint!(ocp_quad, :control, f=dummy, lb=1, label=:c1)
-    constraint!(ocp_quad, :state, rg=1:2:3, lb=[0,0],ub=[0,0], label=:c2)
+    CTBase.__constraint!(ocp_quad, :variable, lb=1, ub=1, label=:c0)
+    CTBase.__constraint!(ocp_quad, :control, f=dummy, lb=1, label=:c1)
+    CTBase.__constraint!(ocp_quad, :state, rg=1:2:3, lb=[0,0],ub=[0,0], label=:c2)
 
     @test ocp_ter.constraints == ocp_quad.constraints
 
     ocp_error = ocp_error = Model(variable=true); time!(ocp_error, 0, 1); state!(ocp_error, 3); control!(ocp_error, 1); variable!(ocp_error,1)
-    @test_throws IncorrectArgument constraint!(ocp_error, :variable)
-    @test_throws IncorrectArgument constraint!(ocp_error, :control, f=dummy, label=:c1)
-    @test_throws IncorrectArgument constraint!(ocp_error, :state, rg=1:2:3, label=:c2)
-    @test_throws IncorrectArgument constraint!(ocp_error, :state, rg=1:2:3, f=dummy, lb=[0,0], ub=[0,0], label=:c3)
-    @test_throws IncorrectArgument constraint!(ocp_error, :state, f=dummy, rg=1:2:3, lb=[0,0], ub=[0,0], label=:c4)
+    @test_throws IncorrectArgument CTBase.__constraint!(ocp_error, :variable)
+    @test_throws IncorrectArgument CTBase.__constraint!(ocp_error, :control, f=dummy, label=:c1)
+    @test_throws IncorrectArgument CTBase.__constraint!(ocp_error, :state, rg=1:2:3, label=:c2)
+    @test_throws IncorrectArgument CTBase.__constraint!(ocp_error, :state, rg=1:2:3, f=dummy, lb=[0,0], ub=[0,0], label=:c3)
+    @test_throws IncorrectArgument CTBase.__constraint!(ocp_error, :state, f=dummy, rg=1:2:3, lb=[0,0], ub=[0,0], label=:c4)
+
 end
 
 @testset "remove_constraint! and constraints_labels" begin

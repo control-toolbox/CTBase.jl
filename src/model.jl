@@ -463,19 +463,22 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 # Examples
 
 ```jldoctest
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
 julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
 julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbol, rg::RangeConstraint, lb::Union{ctVector,Nothing}, ub::Union{ctVector,Nothing}, 
-        label::Symbol=__constraint_label()) where {V <: VariableDependence} 
+function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, 
+    type::Symbol, 
+    rg::RangeConstraint, 
+    lb::Union{ctVector,Nothing}, 
+    ub::Union{ctVector,Nothing}, 
+    label::Symbol=__constraint_label()) where {V <: VariableDependence} 
 
-    constraint!(ocp, type, rg=rg, f=nothing, lb=lb, ub=ub, label=label)
-
+    __constraint!(ocp, type, rg=rg, f=nothing, lb=lb, ub=ub, label=label)
     nothing # to force to return nothing
 
 end
@@ -494,17 +497,20 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 # Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
-julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
-julia> constraint!(ocp, :final, Index(2), 0)
-julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
+julia> constraint!(ocp, :initial, [ 0, 0, 0 ], [ 1, 2, 1 ]) # the state is of dim 3
+julia> constraint!(ocp, :final, -1, 1) # the state is of dim 1
+julia> constraint!(ocp, :control, 0, 2)
+julia> constraint!(ocp, :state, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :variable, [ 0, 0 ], [ 1, 2 ])
 ```
 """
-function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Union{ctVector,Nothing}, ub::Union{ctVector,Nothing}, 
-        label::Symbol=__constraint_label())
+function constraint!(ocp::OptimalControlModel, 
+    type::Symbol, 
+    lb::Union{ctVector,Nothing}, 
+    ub::Union{ctVector,Nothing}, 
+    label::Symbol=__constraint_label())
 
-    constraint!(ocp, type, rg=nothing, f=nothing, lb=lb, ub=ub, label=label)
-
+    __constraint!(ocp, type, rg=nothing, f=nothing, lb=lb, ub=ub, label=label)
     nothing # to force to return nothing
 
 end
@@ -550,11 +556,14 @@ julia> constraint!(ocp, :state, (t, x, v) -> x-t*v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (t, x, u, v) -> x[1]*v[2]-u, 0, 1)
 ```
 """
-function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function, 
-        lb::Union{ctVector,Nothing}, ub::Union{ctVector,Nothing}, label::Symbol=__constraint_label()) where {T, V}
+function constraint!(ocp::OptimalControlModel{T, V}, 
+    type::Symbol, 
+    f::Function, 
+    lb::Union{ctVector,Nothing}, 
+    ub::Union{ctVector,Nothing}, 
+    label::Symbol=__constraint_label()) where {T, V}
 
-    constraint!(ocp, type, rg=nothing, f=f, lb=lb, ub=ub, label=label)
-
+    __constraint!(ocp, type, rg=nothing, f=f, lb=lb, ub=ub, label=label)
     nothing # to force to return nothing
 
 end
@@ -562,27 +571,15 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range.
+General setter for constraints.
 
-!!! note
-
-    - The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
-    - The state, control and variable dimensions must be set before. Use state!, control! and variable!.
-    - The times must be set before. Use time!.
-
-# Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :final, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :control, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
-```
 """
-function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol;
-    rg::Union{OrdinalRange{<:Integer},Integer,Index,Nothing}=nothing, f::Union{Function,Nothing}=nothing, lb::W=nothing, ub::X=nothing, 
+function __constraint!(ocp::OptimalControlModel{T, V}, 
+    type::Symbol;
+    rg::Union{OrdinalRange{<:Integer},Integer,Index,Nothing}=nothing, 
+    f::Union{Function,Nothing}=nothing, 
+    lb::W=nothing, 
+    ub::X=nothing, 
     label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence, W <: Union{ctVector,Nothing}, X <: Union{ctVector,Nothing}}
 
     __check_all_set(ocp)
@@ -625,7 +622,7 @@ function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol;
                 (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
                 (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
 
-                constraint!(ocp, type, rg=rg, lb=lb, ub=ub, label=label)
+                __constraint!(ocp, type, rg=rg, lb=lb, ub=ub, label=label)
             end
         (::Nothing,::Function,::ctVector,::ctVector) => begin
                 # set the constraint
