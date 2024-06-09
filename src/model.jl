@@ -113,7 +113,7 @@ Define the variable dimension and possibly the names of each component.
 # Examples
 ```jldoctest
 julia> variable!(ocp, 1, "v")
-julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
+julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
 ```
 """
 function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variable_name(), 
@@ -127,6 +127,14 @@ function variable!(ocp::OptimalControlModel, q::Dimension, name::String=__variab
     ocp.variable_components_names = components_names
     ocp.variable_name = name
     nothing # to force to return nothing
+end
+
+function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol, components_names::Vector{Symbol})
+    variable!(ocp, q, string(name), string.(components_names))
+end
+
+function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol, components_names::Vector{String})
+    variable!(ocp, q, string(name), components_names)
 end
 
 function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol)
@@ -187,6 +195,15 @@ function state!(ocp::OptimalControlModel, n::Dimension, name::String=__state_nam
     ocp.state_name = name
     nothing # to force to return nothing
 end
+
+function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol, components_names::Vector{Symbol})
+    state!(ocp, n, string(name), string.(components_names))
+end
+
+function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol, components_names::Vector{String})
+    state!(ocp, n, string(name), components_names)
+end
+
 function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
     state!(ocp, n, string(name))
 end
@@ -244,6 +261,14 @@ function control!(ocp::OptimalControlModel, m::Dimension, name::String=__control
     ocp.control_components_names = components_names
     ocp.control_name = name
     nothing # to force to return nothing
+end
+
+function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol, components_names::Vector{Symbol})
+    control!(ocp, m, string(name), string.(components_names))
+end
+
+function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol, components_names::Vector{String})
+    control!(ocp, m, string(name), components_names)
 end
 
 function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol)
@@ -438,12 +463,12 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 # Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
 julia> constraint!(ocp, :final, Index(1), 0, 2)
 julia> constraint!(ocp, :control, Index(1), 0, 2)
-julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
-julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
-julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel{<: TimeDependence, V}, type::Symbol, rg::RangeConstraint, lb::Union{ctVector,Nothing}, ub::Union{ctVector,Nothing}, 
@@ -469,11 +494,10 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 # Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, [ 0, 0, 0 ], [ 1, 2, 1 ])
-julia> constraint!(ocp, :final, [ 0, 0, 0 ], [ 1, 2, 1 ])
-julia> constraint!(ocp, :control, [ 0, 0 ], [ 2, 3 ])
-julia> constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
-julia> constraint!(ocp, :variable, 0, 1) # the variable here is of dimension 1
+julia> constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ])
+julia> constraint!(ocp, :initial, 2:3, [ 0, 0 ])
+julia> constraint!(ocp, :final, Index(2), 0)
+julia> constraint!(ocp, :variable, 2:3, [ 0, 3 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel, type::Symbol, lb::Union{ctVector,Nothing}, ub::Union{ctVector,Nothing}, 
@@ -507,22 +531,22 @@ julia> constraint!(ocp, :boundary, (x0, xf, v) -> x0[3]+xf[2]*v[1], 0, 1)
 
 # time independent and variable independent ocp
 julia> constraint!(ocp, :control, u -> 2u, 0, 1)
-julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0, 1)
 
 # time dependent and variable independent ocp
 julia> constraint!(ocp, :control, (t, u) -> 2u, 0, 1)
-julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0, 1)
 
 # time independent and variable dependent ocp
 julia> constraint!(ocp, :control, (u, v) -> 2u*v[1], 0, 1)
-julia> constraint!(ocp, :state, (x, v) -> x-v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :state, (x, v) -> x-v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (x, u, v) -> x[1]-v[2]*u, 0, 1)
 
 # time dependent and variable dependent ocp
 julia> constraint!(ocp, :control, (t, u, v) -> 2u+v[2], 0, 1)
-julia> constraint!(ocp, :state, (t, x, v) -> x-t*v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
+julia> constraint!(ocp, :state, (t, x, v) -> x-t*v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
 julia> constraint!(ocp, :mixed, (t, x, u, v) -> x[1]*v[2]-u, 0, 1)
 ```
 """
@@ -549,12 +573,12 @@ Add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint 
 # Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
 julia> constraint!(ocp, :final, rg=1, lb=0, ub=2)
 julia> constraint!(ocp, :control, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
 ```
 """
 function constraint!(ocp::OptimalControlModel{T, V}, type::Symbol;

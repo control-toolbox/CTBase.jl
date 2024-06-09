@@ -7,8 +7,8 @@ function test_model() # 30 55 185
     @test_throws UnauthorizedCall variable!(ocp, 1)
     @test_throws UnauthorizedCall constraint!(ocp, :variable, 2:3, [ 0, 3 ], [ 0, 3 ])
     @test_throws UnauthorizedCall constraint!(ocp, :variable, 0, 1) # the variable here is of dimension 1
-    @test_throws UnauthorizedCall constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
-    @test_throws UnauthorizedCall constraint!(ocp, :variable, [ 3, 0, 1 ], [ 3, 0, 1 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :variable, [ 3, 0, 1 ], [ 3, 0, 1 ])
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
@@ -35,13 +35,17 @@ function test_model() # 30 55 185
     @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
     
     ocp = Model(variable=true)
+    variable!(ocp, 2, "uu", [ "vv₁", "vv₂" ])
+    @test ocp.variable_dimension == 2
+    @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
+
+    ocp = Model(variable=true)
     @test_throws MethodError variable!(ocp, 2, [ "vv1", "vv2" ])
 
     ocp = Model(variable=true)
     variable!(ocp, 2, :vv)
     @test ocp.variable_dimension == 2
     @test ocp.variable_components_names == [ "vv₁", "vv₂" ]
-
 
 end
 
@@ -59,26 +63,26 @@ end
     i == 7 && begin state!(ocp, 2); control!(ocp, 1) end
 
     # constraint! 1
-    @test_throws UnauthorizedCall constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 0, 0, 0 ])
-    @test_throws UnauthorizedCall constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 0, 0 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 0, 0, 0 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 0, 0 ])
     @test_throws UnauthorizedCall constraint!(ocp, :final, Index(2), 0, 0)
 
     # constraint! 2
-    @test_throws UnauthorizedCall constraint!(ocp, :initial, [ 0, 0 ], [ 0, 0 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, [ 0, 0 ], [ 0, 0 ])
     @test_throws UnauthorizedCall constraint!(ocp, :final, 2, 2) # if the state is of dimension 1
 
     # constraint! 3
-    @test_throws UnauthorizedCall constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, 2:3, [ 0, 0 ], [ 1, 2 ])
     @test_throws UnauthorizedCall constraint!(ocp, :final, Index(1), 0, 2)
     @test_throws UnauthorizedCall constraint!(ocp, :control, Index(1), 0, 2)
-    @test_throws UnauthorizedCall constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
-    @test_throws UnauthorizedCall constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :state, 2:3, [ 0, 0 ], [ 1, 2 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, 1:2:5, [ 0, 0, 0 ], [ 1, 2, 1 ])
 
     # constraint! 4
-    @test_throws UnauthorizedCall constraint!(ocp, :initial, [ 0, 0, 0 ], [ 1, 2, 1 ])
-    @test_throws UnauthorizedCall constraint!(ocp, :final, [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :initial, [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :final, [ 0, 0, 0 ], [ 1, 2, 1 ])
     @test_throws UnauthorizedCall constraint!(ocp, :control, [ 0, 0 ], [ 2, 3 ])
-    @test_throws UnauthorizedCall constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall constraint!(ocp, :state, [ 0, 0, 0 ], [ 1, 2, 1 ])
 
     # constraint! 5
     # variable independent ocp
@@ -89,22 +93,22 @@ end
 
     # time independent and variable independent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, u -> 2u, 0, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 1, 2, 1 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0, 1)
 
     # time dependent and variable independent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, (t, u) -> 2u, 0, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 1, 2, 1 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0, 1)
 
     # time independent and variable dependent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, (u, v) -> 2u*v[1], 0, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, (x, v) -> x-v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, (x, v) -> x-v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (x, u, v) -> x[1]-v[2]*u, 0, 1)
 
     # time dependent and variable dependent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, (t, u, v) -> 2u+v[2], 0, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x, v) -> x-t*v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x, v) -> x-t*v[1], [ 0, 0, 0 ], [ 1, 2, 1 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (t, x, u, v) -> x[1]*v[2]-u, 0, 1)
 
     # constraint! 6
@@ -116,22 +120,22 @@ end
 
     # time independent and variable independent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, u -> 2u, 1, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 0, 0, 0 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, x -> x-1, [ 0, 0, 0 ], [ 0, 0, 0 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (x, u) -> x[1]-u, 0, 0)
 
     # time dependent and variable independent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, (t, u) -> 2u, 1, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 0, 0, 0 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x) -> x-t, [ 0, 0, 0 ], [ 0, 0, 0 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (t, x, u) -> x[1]-u, 0, 0)
 
     # time independent and variable dependent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, (u, v) -> 2u*v[1], 1, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, (x, v) -> x-v[2], [ 0, 0, 0 ], [ 0, 0, 0 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, (x, v) -> x-v[2], [ 0, 0, 0 ], [ 0, 0, 0 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (x, u) -> x[1]-u+v[1], 0, 0)
 
     # time dependent and variable dependent ocp
     @test_throws UnauthorizedCall  constraint!(ocp, :control, (t, u, v) -> 2u-t*v[2], 1, 1)
-    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x, v) -> x-t+v[1], [ 0, 0, 0 ], [ 0, 0, 0 ])
+    @test_throws UnauthorizedCall  constraint!(ocp, :state, (t, x, v) -> x-t+v[1], [ 0, 0, 0 ], [ 0, 0, 0 ])
     @test_throws UnauthorizedCall  constraint!(ocp, :mixed, (t, x, u, v) -> x[1]-u*v[1], 0, 0)
 
     end
@@ -344,6 +348,11 @@ end
     state!(ocp, 2, "y")
     @test ocp.state_dimension == 2
     @test ocp.state_components_names == ["y₁", "y₂"]
+
+    ocp = Model()
+    state!(ocp, 2, "y", ["z₁", "z₂"])
+    @test ocp.state_dimension == 2
+    @test ocp.state_components_names == ["z₁", "z₂"]
 end
 
 @testset "control!" begin
@@ -372,6 +381,11 @@ end
 
     ocp = Model()
     control!(ocp, 2, "v")
+    @test ocp.control_dimension == 2
+    @test ocp.control_components_names == ["v₁", "v₂"]
+
+    ocp = Model()
+    control!(ocp, 2, "u", ["v₁", "v₂"])
     @test ocp.control_dimension == 2
     @test ocp.control_components_names == ["v₁", "v₂"]
 end
@@ -716,7 +730,7 @@ end
     variable!(ocp, 4)
     state!(ocp, 1)
     control!(ocp, 1)
-    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], :eq1)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], :eq1)
     constraint!(ocp, :variable, Index(1), 0, 1, :eq2)
     constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 1, 2 ], :eq3)
     constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], [ -1, 1 ], :eq4)
@@ -745,7 +759,7 @@ end
     constraint!(ocp, :control, (u, v) -> u + v[1], 0, 1, :cu)
     constraint!(ocp, :state, (x, v) -> x + v[1], 0, 1, :cs)
     constraint!(ocp, :mixed, (x, u, v) -> x + u + v[1], 1, 1, :cm)
-    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], :eq1)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], :eq1)
     constraint!(ocp, :variable, Index(1), 0, 0, :eq2)
     constraint!(ocp, :variable, 1:2, [ 0, 0 ], [ 0, 0 ], :eq3)
     constraint!(ocp, :variable, 1:2:4, [ 0, 0 ], [ 0, 0 ], :eq4)
@@ -913,7 +927,7 @@ end
     constraint!(ocp, :control, (u, v) -> u+v[2], 0, 1, :cuu)
     constraint!(ocp, :state, (x, v) -> x+v[1:2], [0, 1], [1, 2], :css)
     constraint!(ocp, :mixed, (x, u, v) -> x[1]+u+v[2], 1, 1, :cm)
-    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 5, 5, 5, 5 ], :cv1)
+    constraint!(ocp, :variable, [ 0, 0, 0, 0 ], [ 5, 5, 5, 5 ], :cv1)
     constraint!(ocp, :variable, 1:2, [ 1, 2 ], [ 3, 4 ], :cv2)
     constraint!(ocp, :variable, Index(3), 2, 3, :cv3)
     constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)

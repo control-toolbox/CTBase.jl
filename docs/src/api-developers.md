@@ -3,10 +3,10 @@
 ## Index
 
 ```@index
-Pages   = ["api-callbacks.md"]
+Pages   = ["api-developers.md"]
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Private = false
+Public = false
 ```
 
 ## Documentation

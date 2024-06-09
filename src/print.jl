@@ -29,17 +29,23 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         @assert hasproperty(ocp.model_expression, :head)
 
         #
-        #println(io)
+        println(io)
+        printstyled(io, "The ", bold=true)
+        is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
+        printstyled(io, "optimal control problem is given by:\n", bold=true)
+        println(io)
 
         # print the code
-        tab  = 0
+        tab  = 4
         code = striplines(ocp.model_expression)
         @match code.head begin
             :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
             _      => __print(code, io, tab)
         end
-        
-    elseif __is_complete(ocp) # print the model if is is complete
+    
+    end
+    
+    if __is_complete(ocp) # print the model if is is complete
         
         # dimensions
         x_dim = ocp.state_dimension
@@ -68,8 +74,11 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
         #
-        printstyled(io, "Optimal control problem of the form:\n")
-        println(io, "")
+        println(io)
+        printstyled(io, "The ", bold=true)
+        is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
+        printstyled(io, "optimal control problem is of the form:\n", bold=true)
+        println(io)
 
         # J
         printstyled(io, "    minimize  ", color=:blue); print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
@@ -178,21 +187,29 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
     end
 
+    #
+    println(io)
+    printstyled(io, "Declarations ", bold=true)
+    printstyled(io, "(* required):\n", bold=false)
+    #println(io)
+    
     # print table of settings
-    header = [ "times", "state", "control"]
-    is_variable_dependent(ocp) && push!(header, "variable")
-    push!(header, "dynamics", "objective", "constraints")
-    data = hcat(__is_time_not_set(ocp) ? "❌" : "✅",
-        __is_state_not_set(ocp) ? "❌" : "✅", 
-        __is_control_not_set(ocp) ? "❌" : "✅")
-    is_variable_dependent(ocp) && begin
+    header = [ "times*", "state*", "control*"]
+    #is_variable_dependent(ocp) && push!(header, "variable")
+    push!(header, "variable")
+    push!(header, "dynamics*", "objective*", "constraints")
+    data = hcat(__is_time_not_set(ocp)      ? "❌" : "✅",
+                __is_state_not_set(ocp)     ? "❌" : "✅", 
+                __is_control_not_set(ocp)   ? "❌" : "✅")
+    #is_variable_dependent(ocp) && 
+    begin
         (data = hcat(data, 
-        __is_variable_not_set(ocp) ? "❌" : "✅")) 
+                __is_variable_not_set(ocp)  ? "❌" : "✅")) 
     end
     data = hcat(data, 
-        __is_dynamics_not_set(ocp) ? "❌" : "✅",
-        __is_objective_not_set(ocp) ? "❌" : "✅",
-        isempty(ocp.constraints) ? "❌" : "✅")
+                __is_dynamics_not_set(ocp)  ? "❌" : "✅",
+                __is_objective_not_set(ocp) ? "❌" : "✅",
+                isempty(ocp.constraints)    ? "❌" : "✅")
     println("")
     pretty_table(data, header=header, header_crayon=crayon"yellow")
     nothing

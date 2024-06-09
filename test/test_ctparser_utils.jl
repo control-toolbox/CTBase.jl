@@ -27,7 +27,7 @@ e = :( A*x(t) + B*u(t) )
 e = :( F0(x(t)) + u(t)*F1(x(t)) )
 @test replace_call(replace_call(e, x, t, x), u, t, u) == :(F0(x) + u * F1(x))
 
-e = :( 0.5u(t)^2  )
+e = :( 0.5u(t)^2  )
 @test replace_call(e, u, t, u) == :(0.5 * u ^ 2)
 
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
