@@ -19,8 +19,7 @@ using Interpolations: linear_interpolation, Line, Interpolations # for default i
 using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
 using Plots
-import Plots: plot, plot! # import instead of using to overload the plot and plot! functions
-using Printf # to print an OptimalControlModel
+using Printf # to print an Opt imalControlModel
 using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
@@ -212,9 +211,11 @@ include("model.jl")
 include("differential_geometry.jl")
 #
 include("ctparser_utils.jl")
-#include("ctparser.jl")
+##include("ctparser.jl")
 include("onepass.jl")
 include("repl.jl")
+#
+include("init.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
@@ -252,6 +253,9 @@ export nlp_constraints, constraints_labels
 # solution
 export OptimalControlSolution
 export plot, plot!
+
+# initialization
+export OCPInit
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
