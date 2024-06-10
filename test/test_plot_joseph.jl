@@ -24,8 +24,8 @@ t0=0
 tf=1
 x0=0
 x = t -> -1+1e-8*rand()
-p = t -> +1+1e-8*rand()
-u = t -> -1
+p = t -> 0+1e-8*rand()
+u = t -> 0
 objective = 1
 #
 N=201
