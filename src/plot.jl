@@ -63,7 +63,7 @@ function __plot_time!(p::Union{Plots.Plot, Plots.Subplot}, sol::OptimalControlSo
 
     if (ymin != Inf) && (ymax != -Inf) && (abs(ymax-ymin) ≤ abs(ymin)*tol)
         ymiddle = (ymin+ymax)/2.0
-        ylims!(p, (0.9*ymiddle, 1.1*ymiddle))
+        ymiddle > 0 ? ylims!(p, (0.9*ymiddle, 1.1*ymiddle)) : ylims!(p, (1.1*ymiddle, 0.9*ymiddle))
     end
 
     return p
