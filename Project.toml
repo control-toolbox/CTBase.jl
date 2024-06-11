@@ -1,7 +1,7 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
 authors = ["Olivier Cots <olivier.cots@enseeiht.fr>"]
-version = "0.9.0"
+version = "0.9.1"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"

@@ -430,6 +430,11 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
     end, p.lnum, p.line)
 end
 
+# redirection to Model() to avoid confusion with other functions Model from other packages
+function __OCPModel(args...; kwargs...)
+    return CTBase.Model(args...; kwargs...)
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -464,10 +469,10 @@ macro def(ocp, e, log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
-            (false, false) => :( $ocp = Model() )
-            (true , false) => :( $ocp = Model(autonomous=false) )
-            (false, true ) => :( $ocp = Model(variable=true) )
-            _              => :( $ocp = Model(autonomous=false, variable=true) )
+            (false, false) => :( $ocp = __OCPModel() )
+            (true , false) => :( $ocp = __OCPModel(autonomous=false) )
+            (false, true ) => :( $ocp = __OCPModel(variable=true) )
+            _              => :( $ocp = __OCPModel(autonomous=false, variable=true) )
 	    end
         ee = QuoteNode(e)
         code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp )) # todo: remove returned ocp value?
