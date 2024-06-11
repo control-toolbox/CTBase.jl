@@ -55,11 +55,11 @@ end
 
     ocp = Model()
 
-    i == 2 && begin time!(ocp, 0, 1) end
+    i == 2 && begin __time!(ocp, 0, 1) end
     i == 3 && begin state!(ocp, 2) end
     i == 4 && begin control!(ocp, 1) end
-    i == 5 && begin time!(ocp, 0, 1); state!(ocp, 2) end
-    i == 6 && begin time!(ocp, 0, 1); control!(ocp, 1) end
+    i == 5 && begin __time!(ocp, 0, 1); state!(ocp, 2) end
+    i == 6 && begin __time!(ocp, 0, 1); control!(ocp, 1) end
     i == 7 && begin state!(ocp, 2); control!(ocp, 1) end
 
     # constraint! 1
@@ -146,57 +146,48 @@ end
     ocp = Model(variable=true)
     @test !CTBase.__is_time_set(ocp)
     variable!(ocp, 1)
-    time!(ocp, 0, Index(1))
+    __time!(ocp, 0, Index(1))
     @test CTBase.__is_time_set(ocp)
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, Index(1), 1)
+    __time!(ocp, Index(1), 1)
     @test CTBase.__is_time_set(ocp)
     
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     @test CTBase.__is_time_set(ocp)
 
     ocp = Model()
-    time!(ocp, [0, 1])
-    @test CTBase.__is_time_set(ocp)
-
-    ocp = Model()
-    @test_throws MethodError time!(ocp, 0, Index(1))
-    @test_throws MethodError time!(ocp, Index(1), 1)
+    @test_throws MethodError __time!(ocp, 0, Index(1))
+    @test_throws MethodError __time!(ocp, Index(1), 1)
 
     ocp = Model(variable=true)
-    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
+    @test_throws UnauthorizedCall __time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall __time!(ocp, Index(1), 1)
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
-    @test_throws UnauthorizedCall time!(ocp, [0, 1])
-    @test_throws UnauthorizedCall time!(ocp, 0, 1)
+    __time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall __time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall __time!(ocp, Index(1), 1)
+    @test_throws UnauthorizedCall __time!(ocp, 0, 1)
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, Index(1), 1)
-    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
-    @test_throws UnauthorizedCall time!(ocp, [0, 1])
-    @test_throws UnauthorizedCall time!(ocp, 0, 1)
+    __time!(ocp, Index(1), 1)
+    @test_throws UnauthorizedCall __time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall __time!(ocp, Index(1), 1)
+    @test_throws UnauthorizedCall __time!(ocp, 0, 1)
 
     ocp = Model(variable=true)
-    time!(ocp, [0, 1])
-    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
-    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    @test_throws UnauthorizedCall __time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall __time!(ocp, Index(1), 1)
 
     ocp = Model(variable=true)
-    time!(ocp, 0, 1)
-    @test_throws UnauthorizedCall time!(ocp, 0, Index(1))
-    @test_throws UnauthorizedCall time!(ocp, Index(1), 1)
-    @test_throws UnauthorizedCall time!(ocp, [0, 1])
+    __time!(ocp, 0, 1)
+    @test_throws UnauthorizedCall __time!(ocp, 0, Index(1))
+    @test_throws UnauthorizedCall __time!(ocp, Index(1), 1)
 end
 
 @testset "Index" begin
@@ -393,38 +384,19 @@ end
 @testset "time!" begin
     # initial and final times
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
 
     ocp = Model()
-    time!(ocp, 0, 1, "s")
+    __time!(ocp, 0, 1, "s")
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
     
     ocp = Model()
-    time!(ocp, 0, 1, :s)
-    @test ocp.initial_time == 0
-    @test ocp.final_time == 1
-    @test ocp.time_name == "s"
-
-    # initial and final times (bis)
-    ocp = Model()
-    time!(ocp, [0, 1])
-    @test ocp.initial_time == 0
-    @test ocp.final_time == 1
-    @test ocp.time_name == "t"
-
-    ocp = Model()
-    time!(ocp, [0, 1], "s")
-    @test ocp.initial_time == 0
-    @test ocp.final_time == 1
-    @test ocp.time_name == "s"
-
-    ocp = Model()
-    time!(ocp, [0, 1], :s)
+    __time!(ocp, 0, 1, :s)
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
@@ -432,21 +404,21 @@ end
     # initial time
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, 0, Index(1))
+    __time!(ocp, 0, Index(1))
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "t"
     
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, 0, Index(1), "s")
+    __time!(ocp, 0, Index(1), "s")
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, 0, Index(1), :s)
+    __time!(ocp, 0, Index(1), :s)
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "s"
@@ -454,21 +426,21 @@ end
     # final time
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, Index(1), 1)
+    __time!(ocp, Index(1), 1)
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, Index(1), 1, "s")
+    __time!(ocp, Index(1), 1, "s")
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
 
     ocp = Model(variable=true)
     variable!(ocp, 1)
-    time!(ocp, Index(1), 1, :s)
+    __time!(ocp, Index(1), 1, :s)
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "s"
@@ -476,7 +448,7 @@ end
 
 @testset "is_min vs is_max" begin
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 1)
     objective!(ocp, :mayer, (x0, xf) -> x0[1] + xf[2])
@@ -484,7 +456,7 @@ end
     @test !is_max(ocp)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 1)
     objective!(ocp, :mayer, (x0, xf) -> x0[1] + xf[2], :max)
@@ -492,7 +464,7 @@ end
     @test !is_min(ocp)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 1)
     objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
@@ -500,7 +472,7 @@ end
     @test !is_max(ocp)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 1)
     objective!(ocp, :lagrange, (x, u) -> 0.5u^2, :max)
@@ -508,7 +480,7 @@ end
     @test !is_min(ocp)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 1)
     objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u^2) # the control is of dimension 1
@@ -516,7 +488,7 @@ end
     @test !is_max(ocp)
     
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 1)
     objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u^2, :max) # the control is of dimension 1
@@ -527,21 +499,21 @@ end
 
 @testset "constraint! 1" begin
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     @test_throws IncorrectArgument constraint!(ocp, :initial, [0, 1], :c0)
     constraint!(ocp, :initial, 0, :c0)
     constraint!(ocp, :final, 1, :cf)
     @test constraint(ocp, :c0)(12, ∅) == 12
     @test constraint(ocp, :cf)(∅, 12) == 12
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :initial, [0, 1], :c0)
     constraint!(ocp, :final, [1, 2], :cf)
     @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
     @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
 
     # constraint already exists
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, 0, :c)
     @test_throws UnauthorizedCall constraint!(ocp, :final, 0, :c)
 
@@ -549,7 +521,7 @@ end
 
 @testset "constraint! 2" begin
     
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     x  = 12
     x0 = 0
     xf = 1
@@ -558,14 +530,14 @@ end
     @test constraint(ocp, :c0)(x, ∅) == x
     @test constraint(ocp, :cf)(∅, x) == x
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     x  = [12, 13]
     x0 = [0, 1]
     xf = [1, 2]
     @test_throws IncorrectArgument constraint!(ocp, :initial, Index(2), x0, :c0)
     @test_throws IncorrectArgument constraint!(ocp, :final, Index(2), xf, :cf)
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     x  = [12, 13]
     x0 = [0, 1]
     xf = [1, 2]
@@ -575,7 +547,7 @@ end
     @test constraint(ocp, :cf)(∅, x) == x[1:2]
 
     # constraint already exists
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :initial, Index(1), 0, :c)
     @test_throws UnauthorizedCall constraint!(ocp, :final, Index(1), 0, :c)
 
@@ -583,7 +555,7 @@ end
 
 @testset "constraint! 3" begin
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, 0, 1, :c0)
     constraint!(ocp, :final, 1, 2, :cf)
     constraint!(ocp, :control, 0, 1, :cu)
@@ -593,7 +565,7 @@ end
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     constraint!(ocp, :initial, [0, 1], [1, 2], :c0)
     constraint!(ocp, :final, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, [0, 1], [1, 2], :cu)
@@ -604,7 +576,7 @@ end
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
     # constraint already exists
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, 0, 1, :c)
     @test_throws UnauthorizedCall constraint!(ocp, :final, 0, 1, :c)
 
@@ -612,7 +584,7 @@ end
 
 @testset "constraint! 4" begin
  
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, Index(1), 0, 1, :c0)
     constraint!(ocp, :final, Index(1), 1, 2, :cf)
     constraint!(ocp, :control, Index(1), 0, 1, :cu)
@@ -622,13 +594,13 @@ end
     @test constraint(ocp, :cu)(12) == 12
     @test constraint(ocp, :cs)(12) == 12
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     @test_throws IncorrectArgument constraint!(ocp, :initial, Index(2), [0, 1], [1, 2], :c0)
     @test_throws IncorrectArgument constraint!(ocp, :final, Index(2), [1, 2], [2, 3], :cf)
     @test_throws IncorrectArgument constraint!(ocp, :control, Index(2), [0, 1], [1, 2], :cu)
     @test_throws IncorrectArgument constraint!(ocp, :state, Index(2), [0, 1], [1, 2], :cs)
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     constraint!(ocp, :initial, 1:2, [0, 1], [1, 2], :c0)
     constraint!(ocp, :final, 1:2, [1, 2], [2, 3], :cf)
     constraint!(ocp, :control, 1:2, [0, 1], [1, 2], :cu)
@@ -639,7 +611,7 @@ end
     @test constraint(ocp, :cs)([12, 13]) == [12, 13]
 
     # constraint already exists
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :initial, Index(1), 0, 1, :c)
     @test_throws UnauthorizedCall constraint!(ocp, :final, Index(1), 0, 1, :c)
 
@@ -647,7 +619,7 @@ end
 
 @testset "constraint! 5" begin
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, :cb)
     constraint!(ocp, :control, u->u, 0, :cu)
     constraint!(ocp, :state, x->x, 0, :cs)
@@ -657,7 +629,7 @@ end
     @test constraint(ocp, :cs)(12) == 12
     @test constraint(ocp, :cm)(12, 13) == 12+13
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     constraint!(ocp, :boundary, (x0, xf) -> x0[1]+xf[1], 0, :cb)
     constraint!(ocp, :control, u->u[1], 0, :cu)
     constraint!(ocp, :state, x->x[1], 0, :cs)
@@ -667,7 +639,7 @@ end
     @test constraint(ocp, :cs)([12, 13]) == 12
     @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12+14
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 3); control!(ocp, 3)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 3); control!(ocp, 3)
     constraint!(ocp, :boundary, (x0, xf) -> [x0[1]+xf[1], x0[2]+xf[2]], [0, 0], :cb)
     constraint!(ocp, :control, u->u[1:2], [0, 0], :cu)
     constraint!(ocp, :state, x->x[1:2], [0, 0], :cs)
@@ -678,7 +650,7 @@ end
     @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12+15, 13+16]
     
     # constraint already exists
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :control, u->u, 0, 1, :c)
     @test_throws UnauthorizedCall constraint!(ocp, :control, u->u, 0, 1, :c)
 
@@ -686,7 +658,7 @@ end
 
 @testset "constraint! 6" begin
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, 1, :cb)
     constraint!(ocp, :control, u->u, 0, 1, :cu)
     constraint!(ocp, :state, x->x, 0, 1, :cs)
@@ -696,7 +668,7 @@ end
     @test constraint(ocp, :cs)(12) == 12
     @test constraint(ocp, :cm)(12, 13) == 12+13
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     constraint!(ocp, :boundary, (x0, xf) -> x0[1]+xf[1], 0, 1, :cb)
     constraint!(ocp, :control, u->u[1], 0, 1, :cu)
     constraint!(ocp, :state, x->x[1], 0, 1, :cs)
@@ -706,7 +678,7 @@ end
     @test constraint(ocp, :cs)([12, 13]) == 12
     @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12+14
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :boundary, (x0, xf) -> [x0[1]+xf[1], x0[2]+xf[2]], [0, 0], [1, 1], :cb)
     constraint!(ocp, :control, u->u[1:2], [0, 0], [1, 1], :cu)
     constraint!(ocp, :state, x->x[1:2], [0, 0], [1, 1], :cs)
@@ -726,7 +698,7 @@ end
     x0 = 7
     xf = 8
     ocp = Model(variable=true)
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     variable!(ocp, 4)
     state!(ocp, 1)
     control!(ocp, 1)
@@ -751,7 +723,7 @@ end
     x0 = 7
     xf = 8
     ocp = Model(variable=true)
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     variable!(ocp, 4)
     state!(ocp, 1)
     control!(ocp, 1)
@@ -778,19 +750,19 @@ end
 
 @testset "constraint! 9" begin
     
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     dynamics!(ocp, (x, u) -> x+u)
     @test ocp.dynamics(1, 2) == 3
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     dynamics!(ocp, (x, u) -> x[1]+u[1])
     @test ocp.dynamics([1, 2], [3, 4]) == 4
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 2)
     dynamics!(ocp, (x, u) -> [x[1]+u[1], x[2]+u[2]])
     @test ocp.dynamics([1, 2], [3, 4]) == [4, 6]
 
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     dynamics!(ocp, (x, u) -> [x[1]+u, x[2]+u])
     @test ocp.dynamics([1, 2], 3) == [4, 5]
 
@@ -798,7 +770,7 @@ end
 
 @testset "constraint! 10" begin
 
-    ocp = Model(autonomous=false); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(autonomous=false); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :initial, 0, 1, :c0)
     constraint!(ocp, :final, 1, 2, :cf)
     @test constraint(ocp, :c0)(12, ∅) == 12
@@ -810,31 +782,31 @@ end
 
     dummy(u) = u^2 + u
 
-    ocp = Model(variable=true); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1); variable!(ocp,3)
+    ocp = Model(variable=true); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1); variable!(ocp,3)
     constraint!(ocp, :state, 0, 1, :c0)
     constraint!(ocp, :control, dummy, 1, :c1)
     constraint!(ocp, :variable, 1:2:3, [-Inf,-Inf], [0,0], :c2)
 
-    ocp_bis = Model(variable=true); time!(ocp_bis, 0, 1); state!(ocp_bis, 1); control!(ocp_bis, 1); variable!(ocp_bis,3)
+    ocp_bis = Model(variable=true); __time!(ocp_bis, 0, 1); state!(ocp_bis, 1); control!(ocp_bis, 1); variable!(ocp_bis,3)
     constraint!(ocp_bis, :state, lb=0, ub=1, label=:c0)
     constraint!(ocp_bis, :control, f=dummy, val=1, label=:c1)
     constraint!(ocp_bis, :variable, rg=1:2:3, ub=[0,0], label=:c2)
 
     @test ocp.constraints == ocp_bis.constraints
 
-    ocp_ter = Model(variable=true); time!(ocp_ter, 0, 1); state!(ocp_ter, 3); control!(ocp_ter, 1); variable!(ocp_ter,1)
+    ocp_ter = Model(variable=true); __time!(ocp_ter, 0, 1); state!(ocp_ter, 3); control!(ocp_ter, 1); variable!(ocp_ter,1)
     constraint!(ocp_ter, :variable, 1, :c0)
     constraint!(ocp_ter, :control, dummy, 1, Inf, :c1)
     constraint!(ocp_ter, :state, 1:2:3, [0,0], :c2)
 
-    ocp_quad = Model(variable=true); time!(ocp_quad, 0, 1); state!(ocp_quad, 3); control!(ocp_quad, 1); variable!(ocp_quad,1)
+    ocp_quad = Model(variable=true); __time!(ocp_quad, 0, 1); state!(ocp_quad, 3); control!(ocp_quad, 1); variable!(ocp_quad,1)
     constraint!(ocp_quad, :variable, val=1, label=:c0)
     constraint!(ocp_quad, :control, f=dummy, lb=1, label=:c1)
     constraint!(ocp_quad, :state, rg=1:2:3, val=[0,0], label=:c2)
 
     @test ocp_ter.constraints == ocp_quad.constraints
 
-    ocp_error = ocp_error = Model(variable=true); time!(ocp_error, 0, 1); state!(ocp_error, 3); control!(ocp_error, 1); variable!(ocp_error,1)
+    ocp_error = ocp_error = Model(variable=true); __time!(ocp_error, 0, 1); state!(ocp_error, 3); control!(ocp_error, 1); variable!(ocp_error,1)
     @test_throws IncorrectArgument constraint!(ocp_error, :variable)
     @test_throws IncorrectArgument constraint!(ocp_error, :control, f=dummy, val=1, lb=1, label=:c1)
     @test_throws IncorrectArgument constraint!(ocp_error, :state, rg=1:2:3, f=dummy, val=[0,0], label=:c2)
@@ -843,7 +815,7 @@ end
 
 @testset "remove_constraint! and constraints_labels" begin
     
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, 1, :cb)
     constraint!(ocp, :control, u->u, 0, 1, :cu)
     k = constraints_labels(ocp)
@@ -858,7 +830,7 @@ end
 
 @testset "nlp_constraints without variable" begin
     
-    ocp = Model(); time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
+    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     constraint!(ocp, :initial, Index(2), 10, :ci)
     constraint!(ocp, :final, Index(1), 1, :cf)
     constraint!(ocp, :control, 0, 1, :cu)
@@ -914,7 +886,7 @@ end
 @testset "nlp_constraints with variable" begin
     
     ocp = Model(variable=true)
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     variable!(ocp, 4)
     state!(ocp, 2)
     control!(ocp, 1)
@@ -982,35 +954,35 @@ end
     @test_throws UnauthorizedCall objective!(ocp, :bolza, (t0, x0, tf, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
     @test ocp.lagrange(1, 2) == 2
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
     objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
     @test ocp.lagrange([1, 2], [3, 4]) == 4.5
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     objective!(ocp, :mayer, (x0, xf) -> 0.5x0^2)
     @test ocp.mayer(2, 3) == 2
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
     objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
     @test ocp.mayer([2, 3], [5, 6]) == 2
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     objective!(ocp, :bolza, (x0, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
@@ -1018,7 +990,7 @@ end
     @test ocp.lagrange(1, 2) == 2
     
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
     objective!(ocp, :bolza, (x0, xf) -> 0.5x0[1]^2, (x, u) -> 0.5u[1]^2)
@@ -1026,7 +998,7 @@ end
     @test ocp.lagrange([1, 2], [3, 4]) == 4.5
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
     objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
@@ -1034,7 +1006,7 @@ end
     @test isnothing(ocp.mayer)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 2)
     control!(ocp, 2)
     objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
@@ -1050,8 +1022,8 @@ end
     @test_throws UnauthorizedCall variable!(ocp, 1)
 
     ocp = Model()
-    time!(ocp, 0, 1)
-    @test_throws UnauthorizedCall time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
+    @test_throws UnauthorizedCall __time!(ocp, 0, 1)
 
     ocp = Model()
     state!(ocp, 1)
@@ -1062,28 +1034,28 @@ end
     @test_throws UnauthorizedCall control!(ocp, 1)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     dynamics!(ocp, (x, u) -> x + u)
     @test_throws UnauthorizedCall dynamics!(ocp, (x, u) -> x + u)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     objective!(ocp, :mayer, (x0, xf) -> x0 + xf)
     @test_throws UnauthorizedCall objective!(ocp, :mayer, (x0, xf) -> x0 + xf)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     objective!(ocp, :lagrange, (x, u) -> x + u)
     @test_throws UnauthorizedCall objective!(ocp, :lagrange, (x, u) -> x + u)
 
     ocp = Model()
-    time!(ocp, 0, 1)
+    __time!(ocp, 0, 1)
     state!(ocp, 1)
     control!(ocp, 1)
     objective!(ocp, :bolza, (x0, xf) -> x0 + xf, (x, u) -> x + u)
