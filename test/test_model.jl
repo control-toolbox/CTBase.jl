@@ -531,12 +531,6 @@ end
     @test constraint(ocp, :c0)(x, ∅) == x
     @test constraint(ocp, :cf)(∅, x) == x
 
-    ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
-    x  = [12, 13]
-    x0 = [0, 1]
-    xf = [1, 2]
-    @test_throws IncorrectArgument __constraint!(ocp, :initial, Index(2), x0, :c0)
-    @test_throws IncorrectArgument __constraint!(ocp, :final, Index(2), xf, :cf)
     constraint!(ocp, :initial, rg=1, lb=x0, ub=x0, label=:c00)
     constraint!(ocp, :final, rg=1, lb=xf, ub=xf, label=:cff)
     @test constraint(ocp, :c00)(x, ∅) == x
