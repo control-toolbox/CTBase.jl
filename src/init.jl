@@ -66,4 +66,10 @@ mutable struct OCPInit
     
     end
 
+    # trivial version that just returns its argument
+    # used for unified syntax in caller functions
+    function OCPInit(init::OCPInit)
+        return init
+    end
+
 end
