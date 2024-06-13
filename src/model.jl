@@ -101,6 +101,36 @@ Return `true` if the model has been defined as variable independent.
 """
 is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with free initial time.
+"""
+has_free_initial_time(ocp::OptimalControlModel) = (typeof(ocp.initial_time)==Index)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with free final time.
+"""
+has_free_final_time(ocp::OptimalControlModel) = (typeof(ocp.final_time)==Index)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with lagrange cost.
+"""
+has_lagrange_cost(ocp::OptimalControlModel) = !isnothing(ocp.lagrange)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with mayer cost.
+"""
+has_mayer_cost(ocp::OptimalControlModel) = !isnothing(ocp.mayer)
+
+
 """
 $(TYPEDSIGNATURES)
 
