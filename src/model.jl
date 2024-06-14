@@ -1213,15 +1213,15 @@ function nlp_constraints(ocp::OptimalControlModel)
     end
 
     # set specific constraints dimensions
-    ocp.dim_control_constraints = length(ξf)
-    ocp.dim_state_constraints = length(ηf)
-    ocp.dim_mixed_constraints = length(ψf)
+    ocp.dim_control_constraints = length(ξl)
+    ocp.dim_state_constraints = length(ηl)
+    ocp.dim_mixed_constraints = length(ψl)
     ocp.dim_path_constraints = ocp.dim_control_constraints + ocp.dim_state_constraints + ocp.dim_mixed_constraints
-    ocp.dim_boundary_conditions = length(ϕf)
-    ocp.dim_variable_constraints = length(θf)
-    ocp.dim_control_box = length(uind)
-    ocp.dim_state_box = length(xind)
-    ocp.dim_variable_box = length(vind)
+    ocp.dim_boundary_conditions = length(ϕl)
+    ocp.dim_variable_constraints = length(θl)
+    ocp.dim_control_box = length(ul)
+    ocp.dim_state_box = length(xl)
+    ocp.dim_variable_box = length(vl)
 
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
