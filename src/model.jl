@@ -340,7 +340,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Fix initial time, final time is free and given by the variable at the provided index.
+Set the initial and final times. We denote by t0 the initial time and tf the final time.
+The optimal control problem is denoted ocp.
+When a time is free, then one must provide the corresponding index of the ocp variable.
 
 !!! note
 
@@ -349,166 +351,88 @@ Fix initial time, final time is free and given by the variable at the provided i
 # Examples
 
 ```jldoctest
-julia> time!(ocp, 0, Index(2), "t")
+julia> time!(ocp, t0=0,   tf=1  ) # Fixed t0 and fixed tf
+julia> time!(ocp, t0=0,   indf=2) # Fixed t0 and free  tf
+julia> time!(ocp, ind0=2, tf=1  ) # Free  t0 and fixed tf
+julia> time!(ocp, ind0=2, indf=3) # Free  t0 and free  tf
+```
+
+When you plot a solution of an optimal control problem, the name of the time variable appears.
+By default, the name is "t".
+Consider you want to set the name of the time variable to "s".
+
+```jldoctest
+julia> time!(ocp, t0=0, tf=1, name="s") # name is a String
+# or
+julia> time!(ocp, t0=0, tf=1, name=:s ) # name is a Symbol  
 ```
 """
-function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, t0::Time, indf::Index, name::String=__time_name())
-    __check_variable_set(ocp)
+function time!(
+    ocp::OptimalControlModel{<: TimeDependence, VT};
+    t0::Union{Time, Nothing}=nothing,
+    tf::Union{Time, Nothing}=nothing,
+    ind0::Union{Integer, Nothing}=nothing, 
+    indf::Union{Integer, Nothing}=nothing, 
+    name::Union{String, Symbol}=__time_name()) where VT
+
+    # check if the problem has been set to Variable or NonVariable
+    VT == NonFixed && (!isnothing(ind0) || !isnothing(indf)) && __check_variable_set(ocp)
+
+    # check if indices are in 1:q
+    q = ocp.variable_dimension
+    !isnothing(ind0) && !(1 ≤ ind0 ≤ q) && throw(IncorrectArgument("the index of t0 variable must be contained in 1:$q"))
+    !isnothing(indf) && !(1 ≤ indf ≤ q) && throw(IncorrectArgument("the index of tf variable must be contained in 1:$q"))
+
+    # check if the function has been already called
     __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
+
+    # check consistency
+    !isnothing(t0) && !isnothing(ind0) && throw(IncorrectArgument("Providing t0 and ind0 has no sense. The initial time cannot be fixed and free."))
+     isnothing(t0) &&  isnothing(ind0) && throw(IncorrectArgument("Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free)."))
+    !isnothing(tf) && !isnothing(indf) && throw(IncorrectArgument("Providing tf and indf has no sense. The final time cannot be fixed and free."))
+     isnothing(tf) &&  isnothing(indf) && throw(IncorrectArgument("Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free)."))
+
+    VT == Fixed && !isnothing(ind0) && throw(IncorrectArgument("You cannot have the initial time free (ind0 is provided) and the ocp non variable."))
+    VT == Fixed && !isnothing(indf) && throw(IncorrectArgument("You cannot have the final time free (indf is provided) and the ocp non variable."))
+
     #
-    ocp.initial_time = t0
-    ocp.final_time = indf
-    ocp.time_name = name
-    ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
-    ocp.final_time_name = ocp.variable_components_names[indf]
+    name = name isa String ? name : string(name)
+
+    # core
+    @match (t0, ind0, tf, indf) begin
+        (::Time, ::Nothing, ::Time, ::Nothing) => begin # (t0, tf)
+            ocp.initial_time      = t0
+            ocp.final_time        = tf
+            ocp.time_name         = name
+            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
+            ocp.final_time_name   = tf isa Integer ? string(tf) : string(round(tf, digits=2))
+        end
+        (::Nothing, ::Integer, ::Time, ::Nothing) => begin # (ind0, tf)
+            ocp.initial_time      = Index(ind0)
+            ocp.final_time        = tf
+            ocp.time_name         = name
+            ocp.initial_time_name = ocp.variable_components_names[ind0]
+            ocp.final_time_name   = tf isa Integer ? string(tf) : string(round(tf, digits=2))
+        end
+        (::Time, ::Nothing, ::Nothing, ::Integer) => begin # (t0, indf)
+            ocp.initial_time      = t0
+            ocp.final_time        = Index(indf)
+            ocp.time_name         = name
+            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
+            ocp.final_time_name   = ocp.variable_components_names[indf]
+        end
+        (::Nothing, ::Integer, ::Nothing, ::Integer) => begin # (ind0, indf)
+            ocp.initial_time      = Index(ind0)
+            ocp.final_time        = Index(indf)
+            ocp.time_name         = name
+            ocp.initial_time_name = ocp.variable_components_names[ind0]
+            ocp.final_time_name   = ocp.variable_components_names[indf]
+        end
+        _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
+    end 
+
     nothing # to force to return nothing
-end
 
-function time!(ocp::OptimalControlModel, t0::Time, indf::Index, name::Symbol)
-    time!(ocp, t0, indf, string(name))
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Fix final time, initial time is free and given by the variable at the provided index.
-
-# Examples
-```jldoctest
-julia> time!(ocp, Index(2), 1, "t")
-```
-"""
-function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, ind0::Index, tf::Time, name::String=__time_name())
-    __check_variable_set(ocp)
-    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
-    ocp.initial_time = ind0
-    ocp.final_time = tf
-    ocp.time_name = name
-    ocp.initial_time_name = ocp.variable_components_names[ind0]
-    ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits=2))
-    nothing # to force to return nothing
-end
-
-function time!(ocp::OptimalControlModel, ind0::Index, tf::Time, name::Symbol)
-    time!(ocp, ind0, tf, string(name))
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Initial and final times are free and given by the variable at the provided indices.
-
-# Examples
-```jldoctest
-julia> time!(ocp, Index(2), Index(3), "t")
-```
-"""
-function time!(ocp::OptimalControlModel{<: TimeDependence, NonFixed}, ind0::Index, indf::Index, name::String=__time_name())
-    __check_variable_set(ocp)
-    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    (ind0.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
-    (indf.val > ocp.variable_dimension) && throw(IncorrectArgument("out of range index of variable"))
-    ocp.initial_time = ind0
-    ocp.final_time = indf
-    ocp.time_name = name
-    ocp.initial_time_name = ocp.variable_components_names[ind0]
-    ocp.final_time_name = ocp.variable_components_names[indf]
-    nothing # to force to return nothing
-end
-
-function time!(ocp::OptimalControlModel, ind0::Index, indf::Index, name::Symbol)
-    time!(ocp, ind0, indf, string(name))
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Fix initial and final times to `times[1]` and `times[2]`, respectively.
-
-# Examples
-
-```jldoctest
-julia> time!(ocp, [ 0, 1 ])
-julia> ocp.initial_time
-0
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"t"
-
-julia> time!(ocp, [ 0, 1 ], "s")
-julia> ocp.initial_time
-0
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"s"
-
-julia> time!(ocp, [ 0, 1 ], :s)
-julia> ocp.initial_time
-0
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"s"
-```
-"""
-function time!(ocp::OptimalControlModel, times::Times, name::String=__time_name())
-    (length(times) != 2) && throw(IncorrectArgument("times must be of dimension 2"))
-    time!(ocp, times[1], times[2], name)
-end
-
-function time!(ocp::OptimalControlModel, times::Times, name::Symbol)
-    time!(ocp, times, string(name))
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Fix initial and final times to `times[1]` and `times[2]`, respectively.
-
-# Examples
-
-```jldoctest
-julia> time!(ocp, 0, 1)
-julia> ocp.initial_time
-0
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"t"
-
-julia> time!(ocp, 0, 1, "s")
-julia> ocp.initial_time
-0
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"s"
-
-julia> time!(ocp, 0, 1, :s)
-julia> ocp.initial_time
-0
-julia> ocp.final_time
-1
-julia> ocp.time_name
-"s"
-```
-"""
-function time!(ocp::OptimalControlModel, t0::Time, tf::Time, name::String=__time_name())
-    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
-    ocp.initial_time=t0
-    ocp.final_time=tf
-    ocp.time_name = name
-    ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
-    ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits=2))
-    nothing # to force to return nothing
-end
-
-function time!(ocp::OptimalControlModel, t0::Time, tf::Time, name::Symbol)
-    time!(ocp, t0, tf, string(name))
 end
 
 """

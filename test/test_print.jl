@@ -7,7 +7,7 @@ function test_print()
     ocp = Model(autonomous=false)
     state!(ocp, 2, "state", ["r", "v"]) # dimension of the state with the names of the components
     control!(ocp, 1)           # dimension of the control
-    time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
+    __time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
     __constraint!(ocp, :initial, [-1, 0], [-1, 0])
     __constraint!(ocp, :final  , [ 0, 0], [0, 0])
     A = [ 0 1
@@ -27,7 +27,7 @@ function test_print()
     ocp = Model(autonomous=false)
     state!(ocp, 1, "y") # dimension of the state with the names of the components
     control!(ocp, 1, "v")           # dimension of the control
-    time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
+    __time!(ocp, 0, 1, "s")    # initial and final time, with the name of the variable time
     __constraint!(ocp, :initial, -1, -1)
     __constraint!(ocp, :final  , 0, 0)
     dynamics!(ocp, (t, x, u) -> x+u)
@@ -44,7 +44,7 @@ function test_print()
     variable!(ocp, 1)
     state!(ocp, 1, "y") # dimension of the state with the names of the components
     control!(ocp, 2)           # dimension of the control
-    time!(ocp, 0, Index(1), "s")    # initial and final time, with the name of the variable time
+    __time!(ocp, 0, Index(1), "s")    # initial and final time, with the name of the variable time
     __constraint!(ocp, :initial, -1, -1)
     __constraint!(ocp, :final  , 0, 0)
     dynamics!(ocp, (t, x, u) -> x+u)

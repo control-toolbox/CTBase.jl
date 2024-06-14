@@ -42,7 +42,7 @@ ocp = Model()
 
 state!(ocp, 2, "x", ["r", "v"]) # dimension of the state with the names of the components
 control!(ocp, 1)           # dimension of the control
-time!(ocp, [0, 1], "s")    # initial and final time, with the name of the variable time
+time!(ocp, t0=0, tf=1, name="s")    # initial and final time, with the name of the variable time
 
 constraint!(ocp, :initial, lb=[-1, 0], ub=[-1, 0])
 constraint!(ocp, :final  , lb=[ 0, 0], ub=[ 0, 0])
