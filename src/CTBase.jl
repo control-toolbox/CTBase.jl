@@ -150,6 +150,7 @@ export Model
 export variable!, time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, constraint
 export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
+export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
 
 # solution
 export OptimalControlSolution

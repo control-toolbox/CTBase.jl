@@ -1212,6 +1212,28 @@ function nlp_constraints(ocp::OptimalControlModel)
         return val
     end
 
+    # set specific constraints dimensions
+    ocp.dim_control_constraints = length(ξf)
+    ocp.dim_state_constraints = length(ηf)
+    ocp.dim_mixed_constraints = length(ψf)
+    ocp.dim_path_constraints = ocp.dim_control_constraints + ocp.dim_state_constraints + ocp.dim_mixed_constraints
+    ocp.dim_boundary_conditions = length(ϕf)
+    ocp.dim_variable_constraints = length(θf)
+    ocp.dim_control_box = length(uind)
+    ocp.dim_state_box = length(xind)
+    ocp.dim_variable_box = length(vind)
+
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
 end
+
+# getters for constraints dimensions
+dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
+dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
+dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
+dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_path_constraints 
+dim_boundary_conditions(ocp::OptimalControlModel) = ocp.dim_boundary_conditions 
+dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
+dim_control_box(ocp::OptimalControlModel) = ocp.dim_control_box 
+dim_state_box(ocp::OptimalControlModel) = ocp.dim_state_box 
+dim_variable_box(ocp::OptimalControlModel) = ocp.dim_variable_box
