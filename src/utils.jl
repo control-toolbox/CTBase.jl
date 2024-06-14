@@ -73,8 +73,9 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-function ctgradient(f::Function, x::ctNumber)
-    return ForwardDiff.derivative(x -> f(x), x)
+function ctgradient(f::Function, x::ctNumber; backend=__auto())
+    extras = prepare_derivative(f, backend, x)
+    return derivative(f, backend, x, extras)
 end
 
 """
@@ -82,8 +83,9 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-function ctgradient(f::Function, x)
-    return ForwardDiff.gradient(f, x)
+function ctgradient(f::Function, x; backend=__auto())
+    extras = prepare_gradient(f, backend, x)
+    return gradient(f, backend, x, extras)
 end
 
 """
@@ -98,8 +100,11 @@ $(TYPEDSIGNATURES)
 
 Return the Jacobian of `f` at `x`.
 """
-function ctjacobian(f::Function, x::ctNumber) 
-    return ForwardDiff.jacobian(x -> f(x[1]), [x])
+function ctjacobian(f::Function, x::ctNumber; backend=__auto())
+    f_number_to_number = only ∘ f ∘ only
+    extras = prepare_derivative(f_number_to_number, backend, x)
+    der = derivative(f_number_to_number, backend, x, extras)
+    return [der;;]
 end
 
 """
@@ -107,7 +112,10 @@ $(TYPEDSIGNATURES)
 
 Return the Jacobian of `f` at `x`.
 """
-ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)
+function ctjacobian(f::Function, x; backend=__auto())
+    extras = prepare_jacobian(f, backend, x)
+    return jacobian(f, backend, x, extras)
+end
 
 """
 $(TYPEDSIGNATURES)

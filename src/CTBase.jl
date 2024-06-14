@@ -14,7 +14,8 @@ module CTBase
 # using
 import Base
 using DocStringExtensions
-using ForwardDiff: jacobian, gradient, ForwardDiff # automatic differentiation
+using DifferentiationInterface: AutoForwardDiff, derivative, gradient, jacobian, prepare_derivative, prepare_gradient, prepare_jacobian
+import ForwardDiff
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
@@ -192,6 +193,8 @@ julia> const DCostate = ctVector
 See also: [`ctVector`](@ref), [`DState`](@ref).
 """
 const DCostate   = ctVector
+
+__auto() = AutoForwardDiff() # default AD backend
 
 #
 include("exception.jl")
