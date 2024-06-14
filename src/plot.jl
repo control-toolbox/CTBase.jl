@@ -197,7 +197,6 @@ function __initial_plot(sol::OptimalControlSolution; layout::Symbol=:split,
             _ => throw(IncorrectArgument("No such choice for control. Use :components, :norm or :all"))
         end
 
-
     elseif layout==:split
 
         # create tree plot
@@ -254,6 +253,19 @@ function __initial_plot(sol::OptimalControlSolution; layout::Symbol=:split,
 
 end
 
+function __keep_series_attributes(;kwargs...)
+
+    series_attributes = Plots.attributes(:Series)
+
+    out = []
+    for kw ∈ kwargs
+        kw[1] ∈ series_attributes && push!(out, kw)
+    end
+
+    return out
+
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -266,9 +278,16 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - `time` can be `:default` or `:normalized`.
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
-function Plots.plot!(p::Plots.Plot, sol::OptimalControlSolution; layout::Symbol=:split,
-    control::Symbol=:components, time::Symbol=:default,
-    state_style=(), control_style=(), costate_style=(), kwargs...)
+function Plots.plot!(
+    p::Plots.Plot, 
+    sol::OptimalControlSolution; 
+    layout::Symbol=:split,
+    control::Symbol=:components, 
+    time::Symbol=:default,
+    state_style=(), 
+    control_style=(), 
+    costate_style=(), 
+    kwargs...)
 
     #
     n = sol.state_dimension
@@ -278,20 +297,23 @@ function Plots.plot!(p::Plots.Plot, sol::OptimalControlSolution; layout::Symbol=
     u_label = sol.control_name
     t_label = sol.time_name
 
+    # split series attributes 
+    series_attr= __keep_series_attributes(; kwargs...)
+
     if layout==:group
         
-        __plot_time!(p[1], sol, n, :state, time;   t_label=t_label, labels=x_labels,      title="state",   lims=:auto, state_style...)
-        __plot_time!(p[2], sol, n, :costate, time; t_label=t_label, labels="p".*x_labels, title="costate", lims=:auto, costate_style...)
+        __plot_time!(p[1], sol, n, :state, time;   t_label=t_label, labels=x_labels,      title="state",   lims=:auto, series_attr..., state_style...)
+        __plot_time!(p[2], sol, n, :costate, time; t_label=t_label, labels="p".*x_labels, title="costate", lims=:auto, series_attr..., costate_style...)
         @match control begin
             :components => begin
-                __plot_time!(p[3], sol, m, :control, time; t_label=t_label, labels=u_labels, title="control", lims=:auto, control_style...)
+                __plot_time!(p[3], sol, m, :control, time; t_label=t_label, labels=u_labels, title="control", lims=:auto, series_attr..., control_style...)
             end
             :norm => begin
-                __plot_time!(p[3], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", title="control norm", lims=:auto, control_style...)
+                __plot_time!(p[3], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", title="control norm", lims=:auto, series_attr..., control_style...)
             end
             :all => begin
-                __plot_time!(p[3], sol, m, :control, time; t_label=t_label, labels=u_labels, title="control", lims=:auto, control_style...)
-                __plot_time!(p[4], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", title="control norm", lims=:auto, control_style...)
+                __plot_time!(p[3], sol, m, :control, time; t_label=t_label, labels=u_labels, title="control", lims=:auto, series_attr..., control_style...)
+                __plot_time!(p[4], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", title="control norm", lims=:auto, series_attr..., control_style...)
             end
             _ => throw(IncorrectArgument("No such choice for control. Use :components, :norm or :all"))
         end
@@ -299,23 +321,23 @@ function Plots.plot!(p::Plots.Plot, sol::OptimalControlSolution; layout::Symbol=
     elseif layout==:split
 
         for i ∈ 1:n
-            __plot_time!(p[i],   sol, :state,   i, time; t_label=t_label, label=x_labels[i],     state_style...)
-            __plot_time!(p[i+n], sol, :costate, i, time; t_label=t_label, label="p"*x_labels[i], costate_style...)
+            __plot_time!(p[i],   sol, :state,   i, time; t_label=t_label, label=x_labels[i], series_attr..., state_style...)
+            __plot_time!(p[i+n], sol, :costate, i, time; t_label=t_label, label="p"*x_labels[i], series_attr..., costate_style...)
         end
         @match control begin
             :components => begin
                 for i ∈ 1:m
-                    __plot_time!(p[i+2*n], sol, :control, i, time; t_label=t_label, label=u_labels[i], control_style...)
+                    __plot_time!(p[i+2*n], sol, :control, i, time; t_label=t_label, label=u_labels[i], series_attr..., control_style...)
                 end
             end
             :norm => begin
-                __plot_time!(p[2*n+1], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", control_style...)
+                __plot_time!(p[2*n+1], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", series_attr..., control_style...)
             end
             :all => begin
                 for i ∈ 1:m
-                    __plot_time!(p[i+2*n], sol, :control, i, time; t_label=t_label, label=u_labels[i], control_style...)
+                    __plot_time!(p[i+2*n], sol, :control, i, time; t_label=t_label, label=u_labels[i], series_attr..., control_style...)
                 end
-                __plot_time!(p[2*n+m+1], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", control_style...)
+                __plot_time!(p[2*n+m+1], sol, :control_norm, -1, time; t_label=t_label, label="‖"*u_label*"‖", series_attr..., control_style...)
             end
             _ => throw(IncorrectArgument("No such choice for control. Use :components, :norm or :all"))
         end

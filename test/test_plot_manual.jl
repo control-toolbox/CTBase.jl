@@ -52,12 +52,11 @@ sol.message = "ceci est un test"
 sol.success = true
 
 #
-plt = plot(sol, layout=layout, control=control_plt) #, size=size)
+plt = plot(sol, layout=layout, control=control_plt, size=size, flip=true, linewidth=5)
 #plot(sol, layout=:group)
 #ps=plot(sol, :time, (:state, 1))
 #plot!(ps, sol, :time, (:control, 1))
 
-return 
 # ----------------------------------------
 # SOL 2
 n=2
