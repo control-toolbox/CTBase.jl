@@ -27,7 +27,7 @@ e = :( A*x(t) + B*u(t) )
 e = :( F0(x(t)) + u(t)*F1(x(t)) )
 @test replace_call(replace_call(e, x, t, x), u, t, u) == :(F0(x) + u * F1(x))
 
-e = :( 0.5u(t)^2  )
+e = :( 0.5u(t)^2  )
 @test replace_call(e, u, t, u) == :(0.5 * u ^ 2)
 
 t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
@@ -64,24 +64,24 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 @test constraint_type(:( x(0)                  ), t, t0, tf, x, u, v) == (:initial, nothing)
 @test constraint_type(:( x[1:2:5](0)           ), t, t0, tf, x, u, v) == (:initial, 1:2:5)
 @test constraint_type(:( x[1:2](0)             ), t, t0, tf, x, u, v) == (:initial, 1:2)
-@test constraint_type(:( x[1](0)               ), t, t0, tf, x, u, v) == (:initial, Index(1))
+@test constraint_type(:( x[1](0)               ), t, t0, tf, x, u, v) == (:initial, 1)
 @test constraint_type(:( x[1:2](0)             ), t, t0, tf, x, u, v) == (:initial, 1:2)
 @test constraint_type(:( 2x[1](0)^2            ), t, t0, tf, x, u, v) ==  :boundary
 @test constraint_type(:( x(tf)                 ), t, t0, tf, x, u, v) == (:final, nothing)
 @test constraint_type(:( x[1:2:5](tf)          ), t, t0, tf, x, u, v) == (:final, 1:2:5)
 @test constraint_type(:( x[1:2](tf)            ), t, t0, tf, x, u, v) == (:final, 1:2)
-@test constraint_type(:( x[1](tf)              ), t, t0, tf, x, u, v) == (:final, Index(1))
+@test constraint_type(:( x[1](tf)              ), t, t0, tf, x, u, v) == (:final, 1)
 @test constraint_type(:( x[1:2](tf)            ), t, t0, tf, x, u, v) == (:final, 1:2)
 @test constraint_type(:( x[1](tf) - x[2](0)    ), t, t0, tf, x, u, v) ==  :boundary
 @test constraint_type(:( 2x[1](tf)^2           ), t, t0, tf, x, u, v) ==  :boundary
 @test constraint_type(:( u[1:2:5](t)           ), t, t0, tf, x, u, v) == (:control_range, 1:2:5)
 @test constraint_type(:( u[1:2](t)             ), t, t0, tf, x, u, v) == (:control_range, 1:2)
-@test constraint_type(:( u[1](t)               ), t, t0, tf, x, u, v) == (:control_range, Index(1))
+@test constraint_type(:( u[1](t)               ), t, t0, tf, x, u, v) == (:control_range, 1)
 @test constraint_type(:( u(t)                  ), t, t0, tf, x, u, v) == (:control_range, nothing)
 @test constraint_type(:( 2u[1](t)^2            ), t, t0, tf, x, u, v) ==  :control_fun
 @test constraint_type(:( x[1:2:5](t)           ), t, t0, tf, x, u, v) == (:state_range, 1:2:5)
 @test constraint_type(:( x[1:2](t)             ), t, t0, tf, x, u, v) == (:state_range, 1:2)
-@test constraint_type(:( x[1](t)               ), t, t0, tf, x, u, v) == (:state_range, Index(1))
+@test constraint_type(:( x[1](t)               ), t, t0, tf, x, u, v) == (:state_range, 1)
 @test constraint_type(:( x(t)                  ), t, t0, tf, x, u, v) == (:state_range, nothing)
 @test constraint_type(:( 2x[1](t)^2            ), t, t0, tf, x, u, v) ==  :state_fun
 @test constraint_type(:( 2u[1](t)^2 * x(t)     ), t, t0, tf, x, u, v) ==  :mixed
@@ -89,7 +89,7 @@ t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 @test constraint_type(:( 2u[1](t)^2 * x(t) + v ), t, t0, tf, x, u, v) ==  :mixed
 @test constraint_type(:( v[1:2:10]             ), t, t0, tf, x, u, v) == (:variable_range, 1:2:9)
 @test constraint_type(:( v[1:10]               ), t, t0, tf, x, u, v) == (:variable_range, 1:10)
-@test constraint_type(:( v[2]                  ), t, t0, tf, x, u, v) == (:variable_range, Index(2))
+@test constraint_type(:( v[2]                  ), t, t0, tf, x, u, v) == (:variable_range, 2)
 @test constraint_type(:( v                     ), t, t0, tf, x, u, v) == (:variable_range, nothing)
 @test constraint_type(:( v^2 + 1               ), t, t0, tf, x, u, v) ==  :variable_fun
 @test constraint_type(:( v[2]^2 + 1            ), t, t0, tf, x, u, v) ==  :variable_fun

@@ -1,4 +1,5 @@
 using CTBase
+#using Plots
 
 layout = :split
 size   = (900, 600)
@@ -51,11 +52,12 @@ sol.message = "ceci est un test"
 sol.success = true
 
 #
-plt = plot(sol, layout=layout, size=size, control=control_plt)
+plt = plot(sol, layout=layout, control=control_plt) #, size=size)
 #plot(sol, layout=:group)
 #ps=plot(sol, :time, (:state, 1))
 #plot!(ps, sol, :time, (:control, 1))
 
+return 
 # ----------------------------------------
 # SOL 2
 n=2

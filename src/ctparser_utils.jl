@@ -250,7 +250,7 @@ julia> constraint_type(:( x[1:2](0) ), t, t0, tf, x, u, v)
 (:initial, 1:2)
 
 julia> constraint_type(:( x[1](0) ), t, t0, tf, x, u, v)
-(:initial, Index(1))
+(:initial, 1)
 
 julia> constraint_type(:( 2x[1](0)^2 ), t, t0, tf, x, u, v)
 :boundary
@@ -265,7 +265,7 @@ julia> constraint_type(:( x[1:2](tf) ), t, t0, tf, x, u, v)
 (:final, 1:2)
 
 julia> constraint_type(:( x[1](tf) ), t, t0, tf, x, u, v)
-(:final, Index(1))
+(:final, 1)
 
 julia> constraint_type(:( 2x[1](tf)^2 ), t, t0, tf, x, u, v)
 :boundary
@@ -280,7 +280,7 @@ julia> constraint_type(:( u[1:2](t) ), t, t0, tf, x, u, v)
 (:control_range, 1:2)
 
 julia> constraint_type(:( u[1](t) ), t, t0, tf, x, u, v)
-(:control_range, Index(1))
+(:control_range, 1)
 
 julia> constraint_type(:( u(t) ), t, t0, tf, x, u, v)
 (:control_range, nothing)
@@ -295,7 +295,7 @@ julia> constraint_type(:( x[1:2](t) ), t, t0, tf, x, u, v)
 (:state_range, 1:2)
 
 julia> constraint_type(:( x[1](t) ), t, t0, tf, x, u, v)
-(:state_range, Index(1))
+(:state_range, 1)
 
 julia> constraint_type(:( x(t) ), t, t0, tf, x, u, v)
 (:state_range, nothing)
@@ -322,7 +322,7 @@ julia> constraint_type(:( v[1:10] ), t, t0, tf, x, u, v)
 (:variable_range, 1:10)
 
 julia> constraint_type(:( v[2] ), t, t0, tf, x, u, v)
-(:variable_range, Index(2))
+(:variable_range, 2)
 
 julia> constraint_type(:( v ), t, t0, tf, x, u, v)
 (:variable_range, nothing)
@@ -339,33 +339,33 @@ constraint_type(e, t, t0, tf, x, u, v) = begin
         [ true , false, false, false, false, false, _ ] => @match e begin
             :( $y[$i:$p:$j]($s) ) && if (y == x && s == t0) end => (:initial , i:p:j   )
             :( $y[$i:$j   ]($s) ) && if (y == x && s == t0) end => (:initial , i:j     )
-            :( $y[$i      ]($s) ) && if (y == x && s == t0) end => (:initial , Index(i))
+            :( $y[$i      ]($s) ) && if (y == x && s == t0) end => (:initial , i)
             :( $y($s)           ) && if (y == x && s == t0) end => (:initial , nothing )
 	    _                                                   =>  :boundary end
         [ false, true , false, false, false, false, _ ] => @match e begin 
             :( $y[$i:$p:$j]($s) ) && if (y == x && s == tf) end => (:final   , i:p:j   )
             :( $y[$i:$j   ]($s) ) && if (y == x && s == tf) end => (:final   , i:j     )
-            :( $y[$i      ]($s) ) && if (y == x && s == tf) end => (:final   , Index(i))
+            :( $y[$i      ]($s) ) && if (y == x && s == tf) end => (:final   , i)
             :( $y($s) )           && if (y == x && s == tf) end => (:final   , nothing )
 	    _                                                   =>  :boundary end
         [ true , true , false, false, false, false, _ ] => :boundary
         [ false, false, true , false, false, false, _ ] => @match e begin
             :( $c[$i:$p:$j]($s) ) && if (c == u && s == t) end => (:control_range, i:p:j   )
             :( $c[$i:$j   ]($s) ) && if (c == u && s == t) end => (:control_range, i:j     )
-            :( $c[$i      ]($s) ) && if (c == u && s == t) end => (:control_range, Index(i))
+            :( $c[$i      ]($s) ) && if (c == u && s == t) end => (:control_range, i)
             :( $c($s)           ) && if (c == u && s == t) end => (:control_range, nothing )
 	    _                                                  =>  :control_fun end
         [ false, false, false, true , false, false, _ ] => @match e begin
             :( $y[$i:$p:$j]($s) ) && if (y == x && s == t) end => (:state_range, i:p:j   )
             :( $y[$i:$j   ]($s) ) && if (y == x && s == t) end => (:state_range, i:j     )
-            :( $y[$i      ]($s) ) && if (y == x && s == t) end => (:state_range, Index(i))
+            :( $y[$i      ]($s) ) && if (y == x && s == t) end => (:state_range, i)
             :( $y($s)           ) && if (y == x && s == t) end => (:state_range, nothing )
 	    _                                                  =>  :state_fun end
         [ false, false, true , true , false, false, _ ] => :mixed
         [ false, false, false, false, false, false, true ] => @match e begin
             :( $w[$i:$p:$j]     ) && if (w == v) end => (:variable_range, i:p:j   )
             :( $w[$i:$j   ]     ) && if (w == v) end => (:variable_range, i:j     )
-            :( $w[$i      ]     ) && if (w == v) end => (:variable_range, Index(i))
+            :( $w[$i      ]     ) && if (w == v) end => (:variable_range, i)
             _                     && if (e == v) end => (:variable_range, nothing )
 	    _                                        =>  :variable_fun end
         _ => :other

@@ -198,26 +198,26 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     p.tf = tf
     tt = QuoteNode(t)
     code = @match (has(t0, p.v), has(tf, p.v)) begin
-        (false, false) => :( time!($ocp, $t0, $tf, $tt) )
+        (false, false) => :( time!($ocp; t0=$t0, tf=$tf, name=$tt) )
         (true , false) => @match t0 begin
-            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, Index($i), $tf, $tt) )
+            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp; ind0=$i, tf=$tf, name=$tt) )
             :( $v1     ) && if (v1 == p.v) end => quote
                 ($ocp.variable_dimension ≠ 1) &&
 		        throw(IncorrectArgument("variable must be of dimension one for a time"))
-                time!($ocp, Index(1), $tf, $tt) end
+                time!($ocp; ind0=1, tf=$tf, name=$tt) end
             _                                  =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
         (false, true ) => @match tf begin
-            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, $t0, Index($i), $tt) )
+            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp; t0=$t0, indf=$i, name=$tt) )
             :( $v1     ) && if (v1 == p.v) end => quote
                 ($ocp.variable_dimension ≠ 1) &&
 		        throw(IncorrectArgument("variable must be of dimension one for a time"))
-                time!($ocp, $t0, Index(1), $tt) end
+                time!($ocp; t0=$t0, indf=1, name=$tt) end
             _                                  =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
         _              => @match (t0, tf) begin
             (:( $v1[$i] ), :( $v2[$j] )) && if (v1 == v2 == p.v) end => 
-                :( time!($ocp, Index($i), Index($j), $tt) )
+                :( time!($ocp; ind0=$i, indf=$j, name=$tt) )
             _                                                        =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
     end
@@ -260,11 +260,12 @@ p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
 end
 
 p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
-    log && println("constraint: $e1 ≤ $e2 ≤ $e3,    ($label)")
+    c_type = constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v)
+    log && println("constraint ($c_type): $e1 ≤ $e2 ≤ $e3,    ($label)")
     label isa Integer && ( label = Symbol(:eq, label) )
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
-    code = @match constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v) begin
+    code = @match c_type begin
         (:initial, rg) => :( constraint!($ocp, :initial; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
         (:final  , rg) => :( constraint!($ocp, :final  ; rg=$rg, lb=$e1, ub=$e3, label=$llabel) )
          :boundary     => begin
@@ -429,6 +430,11 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
     end, p.lnum, p.line)
 end
 
+# redirection to Model() to avoid confusion with other functions Model from other packages
+function __OCPModel(args...; kwargs...)
+    return CTBase.Model(args...; kwargs...)
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -463,10 +469,10 @@ macro def(ocp, e, log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
-            (false, false) => :( $ocp = Model() )
-            (true , false) => :( $ocp = Model(autonomous=false) )
-            (false, true ) => :( $ocp = Model(variable=true) )
-            _              => :( $ocp = Model(autonomous=false, variable=true) )
+            (false, false) => :( $ocp = __OCPModel() )
+            (true , false) => :( $ocp = __OCPModel(autonomous=false) )
+            (false, true ) => :( $ocp = __OCPModel(variable=true) )
+            _              => :( $ocp = __OCPModel(autonomous=false, variable=true) )
 	    end
         ee = QuoteNode(e)
         code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp )) # todo: remove returned ocp value?
