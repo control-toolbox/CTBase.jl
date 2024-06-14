@@ -1176,15 +1176,15 @@ $(TYPEDFIELDS)
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
 
     # internal dimensions for constraints
-    dim_control_constraints::Int64=0
-    dim_state_constraints::Int64=0
-    dim_mixed_constraints::Int64=0
-    dim_path_constraints::Int64=0
-    dim_boundary_conditions::Int64=0
-    dim_variable_constraints::Int64=0
-    dim_control_box::Int64=0
-    dim_state_box::Int64=0
-    dim_variable_box::Int64=0
+    dim_control_constraints::Dimension=0
+    dim_state_constraints::Dimension=0
+    dim_mixed_constraints::Dimension=0
+    dim_path_constraints::Dimension=0
+    dim_boundary_conditions::Dimension=0
+    dim_variable_constraints::Dimension=0
+    dim_control_box::Dimension=0
+    dim_state_box::Dimension=0
+    dim_variable_box::Dimension=0
 end
 
 # used for checkings
