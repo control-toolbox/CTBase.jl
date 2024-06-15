@@ -194,8 +194,6 @@ See also: [`ctVector`](@ref), [`DState`](@ref).
 """
 const DCostate   = ctVector
 
-__auto() = AutoForwardDiff() # default AD backend
-
 #
 include("exception.jl")
 include("description.jl")
@@ -214,7 +212,6 @@ include("model.jl")
 include("differential_geometry.jl")
 #
 include("ctparser_utils.jl")
-##include("ctparser.jl")
 include("onepass.jl")
 include("repl.jl")
 #

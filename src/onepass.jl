@@ -430,7 +430,13 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
     end, p.lnum, p.line)
 end
 
-# redirection to Model() to avoid confusion with other functions Model from other packages
+"""
+$(TYPEDSIGNATURES)
+
+Redirection to [`Model`](@ref) to avoid confusion with other functions Model from other packages
+if imported. This function is used by [`@def`](@ref).
+
+"""
 function __OCPModel(args...; kwargs...)
     return CTBase.Model(args...; kwargs...)
 end

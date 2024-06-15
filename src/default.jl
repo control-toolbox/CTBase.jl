@@ -1,6 +1,15 @@
 """
 $(TYPEDSIGNATURES)
 
+Used to set the default value of Automatic Differentiation backend.
+
+The default value is `AutoForwardDiff()`, that is the `ForwardDiff` package is used by default.
+"""
+__auto() = AutoForwardDiff() # default AD backend
+
+"""
+$(TYPEDSIGNATURES)
+
 Used to set the default value of the time dependence of the functions.
 
 The default value is `Autonomous`, which means that the functions are considered time independent.

@@ -12,6 +12,7 @@ makedocs(
         "api-description.md", 
         "api-diffgeom.md",
         "api-exceptions.md", 
+        "api-init.md",
         "api-model.md",
         "api-parser.md",
         "api-plot.md", 
