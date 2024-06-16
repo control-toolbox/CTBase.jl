@@ -198,20 +198,35 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     #is_variable_dependent(ocp) && push!(header, "variable")
     push!(header, "variable")
     push!(header, "dynamics*", "objective*", "constraints")
-    data = hcat(__is_time_not_set(ocp)      ? "❌" : "✅",
-                __is_state_not_set(ocp)     ? "❌" : "✅", 
-                __is_control_not_set(ocp)   ? "❌" : "✅")
+    data = hcat(__is_time_not_set(ocp)      ? "X" : "V",
+                __is_state_not_set(ocp)     ? "X" : "V", 
+                __is_control_not_set(ocp)   ? "X" : "V")
     #is_variable_dependent(ocp) && 
     begin
         (data = hcat(data, 
-                __is_variable_not_set(ocp)  ? "❌" : "✅")) 
+                __is_variable_not_set(ocp)  ? "X" : "V")) 
     end
     data = hcat(data, 
-                __is_dynamics_not_set(ocp)  ? "❌" : "✅",
-                __is_objective_not_set(ocp) ? "❌" : "✅",
-                isempty(ocp.constraints)    ? "❌" : "✅")
+                __is_dynamics_not_set(ocp)  ? "X" : "V",
+                __is_objective_not_set(ocp) ? "X" : "V",
+                isempty(ocp.constraints)    ? "X" : "V")
     println("")
-    pretty_table(data, header=header, header_crayon=crayon"yellow")
+    h1 = Highlighter(
+    (data, i, j) -> data[i, j] == "X",
+    bold       = true,
+    foreground = :red )
+    h2 = Highlighter(
+    (data, i, j) -> data[i, j] == "V",
+    bold       = true,
+    foreground = :green )
+    pretty_table(io, data; 
+        tf=tf_unicode_rounded, 
+        header=header, 
+        header_crayon=crayon"yellow", 
+        crop=:none, 
+        highlighters=(h1, h2),
+        alignment=:c,
+        compact_printing=true)
     nothing
 
 end

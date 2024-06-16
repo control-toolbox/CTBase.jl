@@ -18,6 +18,12 @@ global ct_repl_is_set::Bool = false
 global ct_repl_data::CTRepl 
 global ct_repl_ct_repl_history::HistoryRepl
 
+"""
+$(TYPEDSIGNATURES)
+
+Update the model adding the expression e. It must be public since in the ct repl, this function 
+is quoted each time an expression is parsed and is valid. 
+"""
 function ct_repl_update_model(e::Expr)
 
     ct_repl_data.debug && (println("debug> expression to add: ", e))    
