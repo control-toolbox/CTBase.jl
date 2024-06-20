@@ -655,11 +655,13 @@ function constraint!(
                     ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
                 end
                 ocp.constraints[label] = (type, fun_rg, lb, ub)
-                nothing # to force to return nothing
 
             end #
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
+
+    # update constraints dimensions
+    __set_dim_constraints(ocp)
 
 end
 
@@ -805,6 +807,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
+    __set_dim_constraints(ocp) # update constraints dimensions
     nothing
 end
 
@@ -1004,6 +1007,12 @@ function nlp_constraints(ocp::OptimalControlModel)
 
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
+end
+
+#
+function __set_dim_constraints(ocp::OptimalControlModel)
+    nlp_constraints(ocp)
+    nothing
 end
 
 # getters for constraints dimensions
