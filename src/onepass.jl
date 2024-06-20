@@ -32,7 +32,7 @@ end
 
 __init_aliases() = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
-    for i ∈ 1:9  al[Symbol(:R, ctupperscripts(i))] = :( R^$i  ) end
+    for i ∈ 1:9 al[Symbol(:R, ctupperscripts(i))] = :( R^$i  ) end
     al
 end
 
@@ -88,15 +88,15 @@ parse!(p, ocp, e; log=false) = begin
         end                           
         # variable                    
         :( $v ∈ R^$q, variable            ) => p_variable!(p, ocp, v, q; log)
-        :( $v ∈ R   , variable            ) => p_variable!(p, ocp, v   ; log)
+        :( $v ∈ R   , variable            ) => p_variable!(p, ocp, v, 1; log)
         # time                        
         :( $t ∈ [ $t0, $tf ], time        ) => p_time!(p, ocp, t, t0, tf; log)
         # state                       
         :( $x ∈ R^$n, state               ) => p_state!(p, ocp, x, n; log)
-        :( $x ∈ R   , state               ) => p_state!(p, ocp, x   ; log)
+        :( $x ∈ R   , state               ) => p_state!(p, ocp, x, 1; log)
         # control                     
         :( $u ∈ R^$m, control             ) => p_control!(p, ocp, u, m; log)
-        :( $u ∈ R   , control             ) => p_control!(p, ocp, u   ; log)
+        :( $u ∈ R   , control             ) => p_control!(p, ocp, u, 1; log)
         # dynamics                    
         :( ∂($x)($t) == $e1               ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( ∂($x)($t) == $e1, $label       ) => p_dynamics!(p, ocp, x, t, e1, label; log)
@@ -163,7 +163,7 @@ parse!(p, ocp, e; log=false) = begin
     end
 end
 
-p_variable!(p, ocp, v, q=1; components_names=nothing, log=false) = begin
+p_variable!(p, ocp, v, q; components_names=nothing, log=false) = begin
     log && println("variable: $v, dim: $q")
     v isa Symbol || return __throw("forbidden variable name: $v", p.lnum, p.line)
     p.v = v
@@ -224,7 +224,7 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     __wrap(code, p.lnum, p.line)
 end
 
-p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
+p_state!(p, ocp, x, n; components_names=nothing, log=false) = begin
     log && println("state: $x, dim: $n")
     x isa Symbol || return __throw("forbidden state name: $x", p.lnum, p.line)
     p.x = x
@@ -242,7 +242,7 @@ p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
     end
 end
 
-p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
+p_control!(p, ocp, u, m; components_names=nothing, log=false) = begin
     log && println("control: $u, dim: $m")
     u isa Symbol || return __throw("forbidden control name: $u", p.lnum, p.line)
     p.u = u
