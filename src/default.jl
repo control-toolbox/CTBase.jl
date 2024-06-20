@@ -13,7 +13,7 @@ Used to set the default value of Automatic Differentiation backend.
 
 The default value is `AutoForwardDiff()`, that is the `ForwardDiff` package is used by default.
 """
-__auto() = __default_AD_backend # default AD backend
+__get_AD_backend() = __default_AD_backend # default AD backend
 
 """
 $(TYPEDSIGNATURES)
