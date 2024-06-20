@@ -158,7 +158,7 @@ export OptimalControlSolution
 export plot, plot!
 
 # initialization
-export OCPInit
+export OptimalControlInit
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
