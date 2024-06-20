@@ -52,7 +52,7 @@ sol.message = "ceci est un test"
 sol.success = true
 
 #
-plt = plot(sol, layout=layout, control=control_plt, size=size, flip=true, linewidth=5)
+plt = plot(sol, layout=layout, control=control_plt, size=size, flip=true, linewidth=5, solution_label="sol1")
 #plot(sol, layout=:group)
 #ps=plot(sol, :time, (:state, 1))
 #plot!(ps, sol, :time, (:control, 1))
@@ -101,7 +101,7 @@ sol.message = "ceci est un test"
 sol.success = true
 
 if do_plot_2 
-    plot!(plt, sol, layout=layout, size=size, control=control_plt)
+    plot!(plt, sol, layout=layout, size=size, control=control_plt, solution_label="sol2")
 else
     plt
 end
