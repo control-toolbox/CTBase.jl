@@ -32,7 +32,7 @@ end
 
 __init_aliases() = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
-    for i ∈ 1:9  al[Symbol(:R, ctupperscripts(i))] = :( R^$i  ) end
+    for i ∈ 1:9 al[Symbol(:R, ctupperscripts(i))] = :( R^$i  ) end
     al
 end
 
@@ -88,15 +88,15 @@ parse!(p, ocp, e; log=false) = begin
         end                           
         # variable                    
         :( $v ∈ R^$q, variable            ) => p_variable!(p, ocp, v, q; log)
-        :( $v ∈ R   , variable            ) => p_variable!(p, ocp, v   ; log)
+        :( $v ∈ R   , variable            ) => p_variable!(p, ocp, v, 1; log)
         # time                        
         :( $t ∈ [ $t0, $tf ], time        ) => p_time!(p, ocp, t, t0, tf; log)
         # state                       
         :( $x ∈ R^$n, state               ) => p_state!(p, ocp, x, n; log)
-        :( $x ∈ R   , state               ) => p_state!(p, ocp, x   ; log)
+        :( $x ∈ R   , state               ) => p_state!(p, ocp, x, 1; log)
         # control                     
         :( $u ∈ R^$m, control             ) => p_control!(p, ocp, u, m; log)
-        :( $u ∈ R   , control             ) => p_control!(p, ocp, u   ; log)
+        :( $u ∈ R   , control             ) => p_control!(p, ocp, u, 1; log)
         # dynamics                    
         :( ∂($x)($t) == $e1               ) => p_dynamics!(p, ocp, x, t, e1       ; log)
         :( ∂($x)($t) == $e1, $label       ) => p_dynamics!(p, ocp, x, t, e1, label; log)
@@ -163,7 +163,7 @@ parse!(p, ocp, e; log=false) = begin
     end
 end
 
-p_variable!(p, ocp, v, q=1; components_names=nothing, log=false) = begin
+p_variable!(p, ocp, v, q; components_names=nothing, log=false) = begin
     log && println("variable: $v, dim: $q")
     v isa Symbol || return __throw("forbidden variable name: $v", p.lnum, p.line)
     p.v = v
@@ -198,33 +198,33 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
     p.tf = tf
     tt = QuoteNode(t)
     code = @match (has(t0, p.v), has(tf, p.v)) begin
-        (false, false) => :( time!($ocp, $t0, $tf, $tt) )
+        (false, false) => :( time!($ocp; t0=$t0, tf=$tf, name=$tt) )
         (true , false) => @match t0 begin
-            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, Index($i), $tf, $tt) )
+            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp; ind0=$i, tf=$tf, name=$tt) )
             :( $v1     ) && if (v1 == p.v) end => quote
                 ($ocp.variable_dimension ≠ 1) &&
 		        throw(IncorrectArgument("variable must be of dimension one for a time"))
-                time!($ocp, Index(1), $tf, $tt) end
+                time!($ocp; ind0=1, tf=$tf, name=$tt) end
             _                                  =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
         (false, true ) => @match tf begin
-            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp, $t0, Index($i), $tt) )
+            :( $v1[$i] ) && if (v1 == p.v) end => :( time!($ocp; t0=$t0, indf=$i, name=$tt) )
             :( $v1     ) && if (v1 == p.v) end => quote
                 ($ocp.variable_dimension ≠ 1) &&
 		        throw(IncorrectArgument("variable must be of dimension one for a time"))
-                time!($ocp, $t0, Index(1), $tt) end
+                time!($ocp; t0=$t0, indf=1, name=$tt) end
             _                                  =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
         _              => @match (t0, tf) begin
             (:( $v1[$i] ), :( $v2[$j] )) && if (v1 == v2 == p.v) end => 
-                :( time!($ocp, Index($i), Index($j), $tt) )
+                :( time!($ocp; ind0=$i, indf=$j, name=$tt) )
             _                                                        =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
     end
     __wrap(code, p.lnum, p.line)
 end
 
-p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
+p_state!(p, ocp, x, n; components_names=nothing, log=false) = begin
     log && println("state: $x, dim: $n")
     x isa Symbol || return __throw("forbidden state name: $x", p.lnum, p.line)
     p.x = x
@@ -242,7 +242,7 @@ p_state!(p, ocp, x, n=1; components_names=nothing, log=false) = begin
     end
 end
 
-p_control!(p, ocp, u, m=1; components_names=nothing, log=false) = begin
+p_control!(p, ocp, u, m; components_names=nothing, log=false) = begin
     log && println("control: $u, dim: $m")
     u isa Symbol || return __throw("forbidden control name: $u", p.lnum, p.line)
     p.u = u
@@ -433,6 +433,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Redirection to [`Model`](@ref) to avoid confusion with other functions Model from other packages
+if imported. This function is used by [`@def`](@ref).
+
+"""
+function __OCPModel(args...; kwargs...)
+    return CTBase.Model(args...; kwargs...)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Define an optimal control problem. One pass parsing of the definition.
 
 # Example
@@ -464,10 +475,10 @@ macro def(ocp, e, log=false)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
-            (false, false) => :( $ocp = Model() )
-            (true , false) => :( $ocp = Model(autonomous=false) )
-            (false, true ) => :( $ocp = Model(variable=true) )
-            _              => :( $ocp = Model(autonomous=false, variable=true) )
+            (false, false) => :( $ocp = __OCPModel() )
+            (true , false) => :( $ocp = __OCPModel(autonomous=false) )
+            (false, true ) => :( $ocp = __OCPModel(variable=true) )
+            _              => :( $ocp = __OCPModel(autonomous=false, variable=true) )
 	    end
         ee = QuoteNode(e)
         code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp )) # todo: remove returned ocp value?
