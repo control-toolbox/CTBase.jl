@@ -1,5 +1,5 @@
 #
-global __default_AD_backend = AutoForwardDiff()
+__default_AD_backend = AutoForwardDiff()
 
 function set_AD_backend(AD) 
     global __default_AD_backend = AD

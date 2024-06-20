@@ -14,9 +14,9 @@ end
 end
 
 #
-global ct_repl_is_set::Bool = false
-global ct_repl_data::CTRepl 
-global ct_repl_ct_repl_history::HistoryRepl
+ct_repl_is_set::Bool = false
+ct_repl_data::CTRepl = CTRepl()
+ct_repl_history::HistoryRepl = HistoryRepl(0, Vector{ModelRepl}())
 
 """
 $(TYPEDSIGNATURES)
@@ -47,13 +47,14 @@ Create a ct REPL.
 """
 function ct_repl(; debug=false, demo=false, verbose=false)
 
+    global ct_repl_is_set
+    global ct_repl_data
+    global ct_repl_history
+
     if !ct_repl_is_set
-#
-        global ct_repl_is_set = true
-        
-        # init: ct_repl_data, ct_repl_history
-        global ct_repl_data = CTRepl()
-        global ct_repl_history = HistoryRepl(0, Vector{ModelRepl}())
+
+        #
+        ct_repl_is_set = true
 
         #
         ct_repl_data.debug = debug
