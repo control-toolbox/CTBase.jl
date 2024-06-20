@@ -17,6 +17,7 @@
 
 # a la main
 using CTBase
+using PlotUtils
 
 n=1
 m=1

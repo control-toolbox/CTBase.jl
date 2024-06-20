@@ -1,5 +1,5 @@
 using CTBase
-#using Plots
+using Plots
 
 layout = :split
 size   = (900, 600)

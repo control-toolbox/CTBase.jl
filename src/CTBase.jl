@@ -19,7 +19,6 @@ import ForwardDiff
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
-using Plots
 using Printf # to print an Opt imalControlModel
 using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
@@ -205,7 +204,6 @@ include("utils.jl")
 include("checking.jl")
 #
 include("print.jl")
-include("plot.jl")
 #
 include("functions.jl")
 include("model.jl")
@@ -254,7 +252,6 @@ export nlp_constraints, constraints_labels
 
 # solution
 export OptimalControlSolution
-export plot, plot!
 
 # initialization
 export OCPInit
