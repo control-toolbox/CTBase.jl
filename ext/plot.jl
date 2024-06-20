@@ -11,8 +11,8 @@ $(TYPEDEF)
 A leaf of a plot tree.
 """
 struct PlotLeaf <: AbstractPlotTreeElement
-    value::Tuple{Symbol,Integer}
-    PlotLeaf(value::Tuple{Symbol,Integer}) = new(value) 
+    value::Tuple{Symbol, Integer}
+    PlotLeaf(value::Tuple{Symbol, Integer}) = new(value) 
 end
 
 """
@@ -402,7 +402,7 @@ function Plots.plot(sol::OptimalControlSolution;
     #
     p = __initial_plot(sol; layout=layout, control=control, size=size, kwargs...)
     #
-    return plot!(p, sol; layout=layout, control=control, time=time, solution_label=solution_label,
+    return Plots.plot!(p, sol; layout=layout, control=control, time=time, solution_label=solution_label,
         state_style=state_style, control_style=control_style, costate_style=costate_style, kwargs...)
 end
 
