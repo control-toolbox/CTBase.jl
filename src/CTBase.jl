@@ -236,7 +236,8 @@ export Description, add, getFullDescription
 export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 
-# checking
+# AD
+export set_AD_backend
 
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
