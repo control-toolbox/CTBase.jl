@@ -249,12 +249,14 @@ export __OCPModel # redirection to Model to avoid confusion with other Model fun
 export variable!, time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, constraint
 export is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
 export nlp_constraints, constraints_labels
+export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
+export dim_boundary_conditions, dim_control_constraints, dim_state_constraints, dim_variable_constraints, dim_mixed_constraints, dim_path_constraints, dim_control_box, dim_state_box, dim_variable_box
 
 # solution
 export OptimalControlSolution
 
 # initialization
-export OCPInit
+export OptimalControlInit
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts

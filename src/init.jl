@@ -5,22 +5,22 @@ Initialization of the OCP solution that can be used when solving the discretized
 
 # Constructors:
 
-- `OCPInit()`: default initialization
-- `OCPInit(x_init, u_init, v_init)`: constant vector and/or function handles
-- `OCPInit(sol)`: from existing solution
+- `OptimalControlInit()`: default initialization
+- `OptimalControlInit(x_init, u_init, v_init)`: constant vector and/or function handles
+- `OptimalControlInit(sol)`: from existing solution
 
 # Examples
 
 ```julia-repl
-julia> init = OCPInit()
-julia> init = OCPInit(x_init=[0.1, 0.2], u_init=0.3)
-julia> init = OCPInit(x_init=[0.1, 0.2], u_init=0.3, v_init=0.5)
-julia> init = OCPInit(x_init=[0.1, 0.2], u_init=t->sin(t), v_init=0.5)
-julia> init = OCPInit(sol)
+julia> init = OptimalControlInit()
+julia> init = OptimalControlInit(x_init=[0.1, 0.2], u_init=0.3)
+julia> init = OptimalControlInit(x_init=[0.1, 0.2], u_init=0.3, v_init=0.5)
+julia> init = OptimalControlInit(x_init=[0.1, 0.2], u_init=t->sin(t), v_init=0.5)
+julia> init = OptimalControlInit(sol)
 ```
 
 """
-mutable struct OCPInit
+mutable struct OptimalControlInit
 
     state_init::Function
     control_init::Function
@@ -30,7 +30,7 @@ mutable struct OCPInit
     info::Symbol
 
     # warm start from solution
-    function OCPInit(sol::OptimalControlSolution)
+    function OptimalControlInit(sol::OptimalControlSolution)
 
         init = new()
         init.info = :from_solution
@@ -43,7 +43,7 @@ mutable struct OCPInit
     end
 
     # constant / functional init with explicit arguments
-    function OCPInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing)
+    function OptimalControlInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing)
         
         init = new()
         init.info = :constant_or_function
@@ -57,13 +57,19 @@ mutable struct OCPInit
 
     # version with arguments as collection/iterable
     # (may be fused with version above ?)
-    function OCPInit(init)
+    function OptimalControlInit(init)
 
         x_init = :state    ∈ keys(init) ? init[:state]    : nothing
         u_init = :control  ∈ keys(init) ? init[:control]  : nothing
         v_init = :variable ∈ keys(init) ? init[:variable] : nothing
-        return OCPInit(state=x_init, control=u_init, variable=v_init)
+        return OptimalControlInit(state=x_init, control=u_init, variable=v_init)
     
+    end
+
+    # trivial version that just returns its argument
+    # used for unified syntax in caller functions
+    function OptimalControlInit(init::OptimalControlInit)
+        return init
     end
 
 end

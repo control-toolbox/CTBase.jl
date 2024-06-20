@@ -106,6 +106,36 @@ Return `true` if the model has been defined as variable independent.
 """
 is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with free initial time.
+"""
+has_free_initial_time(ocp::OptimalControlModel) = (typeof(ocp.initial_time)==Index)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with free final time.
+"""
+has_free_final_time(ocp::OptimalControlModel) = (typeof(ocp.final_time)==Index)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with lagrange cost.
+"""
+has_lagrange_cost(ocp::OptimalControlModel) = !isnothing(ocp.lagrange)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with mayer cost.
+"""
+has_mayer_cost(ocp::OptimalControlModel) = !isnothing(ocp.mayer)
+
+
 """
 $(TYPEDSIGNATURES)
 
@@ -625,11 +655,13 @@ function constraint!(
                     ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
                 end
                 ocp.constraints[label] = (type, fun_rg, lb, ub)
-                nothing # to force to return nothing
 
             end #
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
+
+    # update constraints dimensions
+    __set_dim_constraints(ocp)
 
 end
 
@@ -775,6 +807,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
+    __set_dim_constraints(ocp) # update constraints dimensions
     nothing
 end
 
@@ -961,6 +994,34 @@ function nlp_constraints(ocp::OptimalControlModel)
         return val
     end
 
+    # set specific constraints dimensions
+    ocp.dim_control_constraints = length(ξl)
+    ocp.dim_state_constraints = length(ηl)
+    ocp.dim_mixed_constraints = length(ψl)
+    ocp.dim_path_constraints = ocp.dim_control_constraints + ocp.dim_state_constraints + ocp.dim_mixed_constraints
+    ocp.dim_boundary_conditions = length(ϕl)
+    ocp.dim_variable_constraints = length(θl)
+    ocp.dim_control_box = length(ul)
+    ocp.dim_state_box = length(xl)
+    ocp.dim_variable_box = length(vl)
+
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
 end
+
+#
+function __set_dim_constraints(ocp::OptimalControlModel)
+    nlp_constraints(ocp)
+    nothing
+end
+
+# getters for constraints dimensions
+dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
+dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
+dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
+dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_path_constraints 
+dim_boundary_conditions(ocp::OptimalControlModel) = ocp.dim_boundary_conditions 
+dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
+dim_control_box(ocp::OptimalControlModel) = ocp.dim_control_box 
+dim_state_box(ocp::OptimalControlModel) = ocp.dim_state_box 
+dim_variable_box(ocp::OptimalControlModel) = ocp.dim_variable_box
