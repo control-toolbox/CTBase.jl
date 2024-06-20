@@ -5,6 +5,7 @@ function test_onepass()
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "aliases" begin
+    println("aliases testset...")
 
     @def o begin
         x = (y, z) ∈ R², state
@@ -142,6 +143,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "variable" begin
+    println("variable testset...")
 
     @def o begin
         λ ∈ R^2, variable
@@ -236,6 +238,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "time" begin
+    println("time testset...")
 
     t0 = 0
     @def o t ∈ [ t0, t0 + 4 ], time
@@ -275,6 +278,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "state / control" begin
+    println("state / control testset...")
 
     @def o begin
         x ∈ R, state
@@ -461,6 +465,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "dynamics" begin
+    println("dynamics testset...")
 
     @def o begin
         t ∈ [ 0, 1 ], time
@@ -544,6 +549,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "constraints" begin
+    println("constraints testset...")
 
     @def o begin
         tf ∈ R, variable
@@ -975,8 +981,103 @@ end
     @test o.constraints[:eq14][4] == Inf
     @test o.constraints[:eq15][4] == Inf
 
-    # minimal constraint tests
-    # remark: constraint are heavily tested in test_ctparser_constraints.jl
+    @def o begin
+        v ∈ R^2, variable
+        t ∈ [ 0, 1 ], time
+        x ∈ R², state
+        u ∈ R², control
+        x(0) ≤ [ 0, 0 ]
+        x(0) ≤ [ 0, 0 ],              (1)
+        x(1) ≤ [ 0, 0 ]
+        x(1) ≤ [ 0, 0 ],               (2)
+        [ x₁(0)^3, 0 ] ≤ [ 0, 0 ]
+        [ x₁(0)^3, 0 ] ≤ [ 0, 0 ],     (3)
+        x(t) ≤ [ 0, 0 ]
+        x(t) ≤ [ 0, 0 ],             (4)
+        u(t) ≤ [ 0, 0 ]
+        u(t) ≤ [ 0, 0 ],         (5)
+        [ x₁(t)^3, 0 ] ≤ [ 0, 0 ]
+        [ x₁(t)^3, 0 ] ≤ [ 0, 0 ], (6)
+        [ u₁(t)^3, 0 ] ≤ [ 0, 0 ]
+        [ u₁(t)^3, 0 ] ≤ [ 0, 0 ], (7)
+        [ u₁(t)^3, x₁(t) ] ≤ [ 0, 0 ]
+        [ u₁(t)^3, x₁(t) ] ≤ [ 0, 0 ], (8)
+        v ≤ [ 0, 0 ]
+        v ≤ [ 0, 0 ], (9)
+        [ v₁^2, 0 ] ≤ [ 0, 0 ]
+        [ v₁^2, 0 ] ≤ [ 0, 0 ], (10)
+    end
+    
+    @test o.constraints[:eq1 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq2 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq3 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq4 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq5 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq6 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq7 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq8 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq9 ][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq10][3] ==-[ Inf, Inf ]
+    @test o.constraints[:eq1 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq2 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq3 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq4 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq5 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq6 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq7 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq8 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq9 ][4] == [ 0, 0 ]
+    @test o.constraints[:eq10][4] == [ 0, 0 ]
+
+    @def o begin
+        v ∈ R^2, variable
+        t ∈ [ 0, 1 ], time
+        x ∈ R², state
+        u ∈ R², control
+        x(0) ≥ [ 0, 0 ]
+        x(0) ≥ [ 0, 0 ],              (1)
+        x(1) ≥ [ 0, 0 ]
+        x(1) ≥ [ 0, 0 ],               (2)
+        [ x₁(0)^3, 0 ] ≥ [ 0, 0 ]
+        [ x₁(0)^3, 0 ] ≥ [ 0, 0 ],     (3)
+        x(t) ≥ [ 0, 0 ]
+        x(t) ≥ [ 0, 0 ],             (4)
+        u(t) ≥ [ 0, 0 ]
+        u(t) ≥ [ 0, 0 ],         (5)
+        [ x₁(t)^3, 0 ] ≥ [ 0, 0 ]
+        [ x₁(t)^3, 0 ] ≥ [ 0, 0 ], (6)
+        [ u₁(t)^3, 0 ] ≥ [ 0, 0 ]
+        [ u₁(t)^3, 0 ] ≥ [ 0, 0 ], (7)
+        [ u₁(t)^3, x₁(t) ] ≥ [ 0, 0 ]
+        [ u₁(t)^3, x₁(t) ] ≥ [ 0, 0 ], (8)
+        v ≥ [ 0, 0 ]
+        v ≥ [ 0, 0 ], (9)
+        [ v₁^2, 0 ] ≥ [ 0, 0 ]
+        [ v₁^2, 0 ] ≥ [ 0, 0 ], (10)
+    end
+    
+    @test o.constraints[:eq1 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq2 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq3 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq4 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq5 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq6 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq7 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq8 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq9 ][4] == [ Inf, Inf ]
+    @test o.constraints[:eq10][4] == [ Inf, Inf ]
+    @test o.constraints[:eq1 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq2 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq3 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq4 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq5 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq6 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq7 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq8 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq9 ][3] == [ 0, 0 ]
+    @test o.constraints[:eq10][3] == [ 0, 0 ]
+
+
     t0 = 9.0; tf = 9.1
     r0 = 1.0; r1 = 2.0
     v0 = 2.0; vmax = sqrt(2)
@@ -1381,6 +1482,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "Lagrange cost" begin
+    println("lagrange testset...")
 
     # --------------------------------
     # min
@@ -1723,6 +1825,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "Bolza cost" begin
+    println("Bolza testset...")
 
     # -------------------------------
     # min 
@@ -2035,6 +2138,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "Mayer cost" begin
+    println("Mayer testset...")
 
     @def o begin
         s ∈ [ 0, 1 ], time
@@ -2154,6 +2258,7 @@ end
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
 @testset "closure" begin
+    println("closure testset...")
 
     a = 1
     f(b) = begin # closure of a, local c, and @def in function
