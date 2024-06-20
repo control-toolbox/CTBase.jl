@@ -559,6 +559,71 @@ function test_differential_geometry()
         Test.@test P011_(t, x, p, v) ≈ P011__(t, x, p, v) atol=1e-6
     end
 
+    @testset "poisson macro with functions" begin
+        # parameters
+        t = 1
+        x = [1, 2, 3]
+        p = [1,0,7]
+        Γ = 2
+        γ = 1
+        δ = γ-Γ
+        v = 2
+
+        # autonomous
+        H0 = (x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2)
+        H1 = (x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2)
+        P01 = Poisson(H0, H1)
+        P011 = Poisson(P01, H1)
+        P01_= @Lie {H0, H1}
+        P011_= @Lie {{H0, H1}, H1}
+        Test.@test P01(x, p) ≈ P01_(x, p) atol=1e-6
+        Test.@test P011(x, p) ≈ P011_(x, p) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Lie {{get_H0(), H1}, H1}
+        Test.@test P011_(x, p) ≈ P011__(x, p) atol=1e-6
+
+        # nonautonomous
+        H0 = (t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2)
+        H1 = (t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2)
+        P01 = Poisson(H0, H1; autonomous=false)
+        P011 = Poisson(P01, H1)
+        P01_val = @Lie {H0, H1}(t, x, p) autonomous=false
+        P01_= @Lie {H0, H1} autonomous=false
+        P011_= @Lie {{H0, H1}, H1} autonomous=false
+        Test.@test P01(t, x, p) ≈ P01_(t, x, p) atol=1e-6
+        Test.@test P01_val ≈ P01_(t, x, p) atol=1e-6
+        Test.@test P011(t, x, p) ≈ P011_(t, x, p) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Lie {{get_H0(), H1}, H1} NonAutonomous
+        Test.@test P011_(t, x, p) ≈ P011__(t, x, p) atol=1e-6
+
+        # autonomous nonfixed
+        H0 = (x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[1]^2+v)
+        H1 = (x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v)
+        P01 = Poisson(H0, H1; variable=true)
+        P011 = Poisson(P01, H1)
+        P01_= @Lie {H0, H1} variable=true
+        P011_= @Lie {{H0, H1}, H1} variable=true
+        Test.@test P01(x, p, v) ≈ P01_(x, p, v) atol=1e-6
+        Test.@test P011(x, p, v) ≈ P011_(x, p, v) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Lie {{get_H0(), H1}, H1} NonFixed
+        Test.@test P011_(x, p, v) ≈ P011__(x, p, v) atol=1e-6
+
+        # nonautonomous nonfixed
+        H0 = (t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[1]^2+v)
+        H1 = (t, x, p, v) -> 0.5*(x[1]^2+x[2]^2+p[2]^2+v)
+        P01 = Poisson(H0, H1; autonomous=false, variable=true)
+        P011 = Poisson(P01, H1)
+        P01_= @Lie {H0, H1} autonomous=false variable=true
+        P011_= @Lie {{H0, H1}, H1} NonAutonomous NonFixed
+        Test.@test P01(t, x, p, v) ≈ P01_(t, x, p,v ) atol=1e-6
+        Test.@test P011(t, x, p, v) ≈ P011_(t, x, p, v) atol=1e-6
+        get_H0 = () -> H0
+        P011__ = @Lie {{get_H0(), H1}, H1} NonAutonomous NonFixed
+        Test.@test P011_(t, x, p, v) ≈ P011__(t, x, p, v) atol=1e-6
+    end
+
     @testset "lie and poisson macros operation (sum,diff,...)" begin
         # parameters
         t = 1

@@ -536,7 +536,7 @@ function constraint!(
     end
 
     # bounds
-    (!isnothing(lb) &&  isnothing(ub)) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+    (!isnothing(lb) &&  isnothing(ub)) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(lb), size(lb,1))))
     ( isnothing(lb) && !isnothing(ub)) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
 
     # range
