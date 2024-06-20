@@ -190,7 +190,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     #
     println(io)
     printstyled(io, "Declarations ", bold=true)
-    printstyled(io, "(* for required):\n", bold=false)
+    printstyled(io, "(* required):\n", bold=false)
     #println(io)
     
     # print table of settings
