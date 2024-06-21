@@ -484,12 +484,12 @@ We denote by `x`, `u` and `v` respectively the state, control and variable.
 ## Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, lb=[ 0, 0, 0 ])                 # [ 0, 0, 0 ] ≤ x(t0),                          dim(x) = 3
-julia> constraint!(ocp, :initial, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ]) # [ 0, 0, 0 ] ≤ x(t0) ≤ [ 1, 2, 1 ],            dim(x) = 3
-julia> constraint!(ocp, :final, lb=-1, ub=1)                      #          -1 ≤ x(tf) ≤ 1,                      dim(x) = 1
-julia> constraint!(ocp, :control, lb=0, ub=2)                     #           0 ≤ u(t)  ≤ 2,        t ∈ [t0, tf], dim(u) = 1
-julia> constraint!(ocp, :state, lb=[ 0, 0 ], ub=[ 1, 2 ])         #    [ 0, 0 ] ≤ x(t)  ≤ [ 1, 2 ], t ∈ [t0, tf], dim(x) = 2
-julia> constraint!(ocp, :variable, lb=[ 0, 0 ], ub=[ 1, 2 ])      #    [ 0, 0 ] ≤    v  ≤ [ 1, 2 ],               dim(v) = 2
+julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ])                 # [ 0, 0, 0 ] ≤ x(t0),                          dim(x) = 3
+julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ]) # [ 0, 0, 0 ] ≤ x(t0) ≤ [ 1, 2, 1 ],            dim(x) = 3
+julia> constraint!(ocp, :final; lb=-1, ub=1)                      #          -1 ≤ x(tf) ≤ 1,                      dim(x) = 1
+julia> constraint!(ocp, :control; lb=0, ub=2)                     #           0 ≤ u(t)  ≤ 2,        t ∈ [t0, tf], dim(u) = 1
+julia> constraint!(ocp, :state; lb=[ 0, 0 ], ub=[ 1, 2 ])         #    [ 0, 0 ] ≤ x(t)  ≤ [ 1, 2 ], t ∈ [t0, tf], dim(x) = 2
+julia> constraint!(ocp, :variable; lb=[ 0, 0 ], ub=[ 1, 2 ])      #    [ 0, 0 ] ≤    v  ≤ [ 1, 2 ],               dim(v) = 2
 ```
 
 # Box constraint on the state, control or variable on some components
@@ -501,12 +501,12 @@ The range of the constraint must be contained in 1:n if the constraint is on the
 ## Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :final, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :control, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial; rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :initial; rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :final; rg=1, lb=0, ub=2)
+julia> constraint!(ocp, :control; rg=1, lb=0, ub=2)
+julia> constraint!(ocp, :state; rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :variable; rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
 ```
 
 # Functional constraint
@@ -517,30 +517,30 @@ You can add a `:boundary`, `:control`, `:state`, `:mixed` or `:variable` box fun
 
 ```@example
 # variable independent ocp
-julia> constraint!(ocp, :boundary, f = (x0, xf) -> x0[3]+xf[2], lb=0, ub=1)
+julia> constraint!(ocp, :boundary; f = (x0, xf) -> x0[3]+xf[2], lb=0, ub=1)
 
 # variable dependent ocp
-julia> constraint!(ocp, :boundary, f = (x0, xf, v) -> x0[3]+xf[2]*v[1], lb=0, ub=1)
+julia> constraint!(ocp, :boundary; f = (x0, xf, v) -> x0[3]+xf[2]*v[1], lb=0, ub=1)
 
 # time independent and variable independent ocp
-julia> constraint!(ocp, :control, f = u -> 2u, lb=0, ub=1)
-julia> constraint!(ocp, :state, f = x -> x-1, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (x, u) -> x[1]-u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = u -> 2u, lb=0, ub=1)
+julia> constraint!(ocp, :state; f = x -> x-1, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (x, u) -> x[1]-u, lb=0, ub=1)
 
 # time dependent and variable independent ocp
-julia> constraint!(ocp, :control, f = (t, u) -> 2u, lb=0, ub=1)
-julia> constraint!(ocp, :state, f = (t, x) -> x-t, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (t, x, u) -> x[1]-u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = (t, u) -> 2u, lb=0, ub=1)
+julia> constraint!(ocp, :state; f = (t, x) -> t * x, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (t, x, u) -> x[1]-u, lb=0, ub=1)
 
 # time independent and variable dependent ocp
-julia> constraint!(ocp, :control, f = (u, v) -> 2u*v[1], lb=0, ub=1)
-julia> constraint!(ocp, :state, f = (x, v) -> x-v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (x, u, v) -> x[1]-v[2]*u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = (u, v) -> 2u * v[1], lb=0, ub=1)
+julia> constraint!(ocp, :state; f = (x, v) -> x * v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (x, u, v) -> x[1]-v[2]*u, lb=0, ub=1)
 
 # time dependent and variable dependent ocp
-julia> constraint!(ocp, :control, f = (t, u, v) -> 2u+v[2], lb=0, ub=1)
-julia> constraint!(ocp, :state, f = (t, x, v) -> x-t*v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = (t, u, v) -> 2u+v[2], lb=0, ub=1)
+julia> constraint!(ocp, :state; f = (t, x, v) -> x-t*v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
 ```
 
 """
@@ -570,23 +570,23 @@ function constraint!(
     ( isnothing(lb) && !isnothing(ub)) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
 
     # range
-    (typeof(rg) <: Int) && (rg = Index(rg))
+    (typeof(rg) <: Int) && (rg = Index(rg)) # debug: useless?
 
     # checkings
     @match (rg, f) begin
         (::RangeConstraint, ::Function) => throw(UnauthorizedCall("Providing a range (rg keyword) and a function (f keyword) is not authorized."))
-        _ => nothing
+        _ => nothing # debug: rewrite properly 
     end
     @match (lb, ub) begin
         (::Nothing, ::Nothing) => throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
-        _ => nothing
+        _ => nothing # debug: rewrite properly
     end
 
     # core
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
                 
-                rg = nothing
+                rg = nothing # debug: useless
 
                 if type ∈ [:initial, :final, :state]
                     rg = n == 1 ? Index(1) : 1:n
@@ -605,7 +605,7 @@ function constraint!(
                 (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
                 (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
 
-                constraint!(ocp, type, rg=rg, lb=lb, ub=ub, label=label)
+                constraint!(ocp, type; rg=rg, lb=lb, ub=ub, label=label)
 
             end
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
@@ -661,7 +661,7 @@ function constraint!(
     end
 
     # update constraints dimensions
-    __set_dim_constraints(ocp)
+    __set_dim_constraints(ocp) # debug: WTF
 
 end
 
@@ -807,7 +807,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
-    __set_dim_constraints(ocp) # update constraints dimensions
+    __set_dim_constraints(ocp) # update constraints dimensions # debug: WTF
     nothing
 end
 
@@ -1010,7 +1010,7 @@ function nlp_constraints(ocp::OptimalControlModel)
 end
 
 #
-function __set_dim_constraints(ocp::OptimalControlModel)
+function __set_dim_constraints(ocp::OptimalControlModel) # debug: WTF
     nlp_constraints(ocp)
     nothing
 end
