@@ -935,13 +935,22 @@ function nlp_constraints(ocp::OptimalControlModel)
     @assert length(ψl) == length(ψu)
     @assert length(ϕl) == length(ϕu)
     @assert length(θl) == length(θu)
+    @assert length(ul) == length(uu)
+    @assert length(xl) == length(xu)
+    @assert length(vl) == length(vu)
 
     # debug: return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
     function ξ(t, u, v) # nonlinear control constraints
-        dim = length(ξb)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ξf) append!(val, ξf[i](t, u, v)) end
+        dim = length(ξl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ξf)
+            ξi = ξf[i](t, u, v)
+            li = length(ξi)
+            val[j:j+li-1] .= ξi # .= also allows scalar value for ξi
+            j = j + li
+        end
         return val
     end
 
