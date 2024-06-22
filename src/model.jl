@@ -895,15 +895,7 @@ function nlp_constraints(ocp::OptimalControlModel)
 
     for (_, c) ∈ constraints
         @match c begin
-        (:initial, f::BoundaryConstraint, lb, ub) => begin
-            push!(ϕf, f)
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:final, f::BoundaryConstraint, lb, ub) => begin
-            push!(ϕf, f)
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:boundary, f::BoundaryConstraint, lb, ub) => begin
+        (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary] end => begin
             push!(ϕf, f)
             append!(ϕl, lb)
             append!(ϕu, ub) end
@@ -938,46 +930,35 @@ function nlp_constraints(ocp::OptimalControlModel)
         _ => error("Internal error") end
     end
 
-    function ξ(t, u, v)
+    function ξ(t, u, v) # nonlinear control constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ξf) append!(val, ξf[i](t, u, v)) end
         return val
     end
 
-    function η(t, x, v)
+    function η(t, x, v) # nonlinear state constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ηf) append!(val, ηf[i](t, x, v)) end
         return val
     end
 
-    function ψ(t, x, u, v)
+    function ψ(t, x, u, v) # nonlinear mixed constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u, v)) end
         return val
     end
 
-    function ϕ(x0, xf, v)
+    function ϕ(x0, xf, v) # nonlinear boundary constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf, v)) end
         return val
     end
 
-    function θ(v)
+    function θ(v) # nonlinear variable constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(θf) append!(val, θf[i](v)) end
         return val
     end
-
-    # set specific constraints dimensions
-    ocp.dim_control_constraints = length(ξl)
-    ocp.dim_state_constraints = length(ηl)
-    ocp.dim_mixed_constraints = length(ψl)
-    ocp.dim_path_constraints = ocp.dim_control_constraints + ocp.dim_state_constraints + ocp.dim_mixed_constraints
-    ocp.dim_boundary_conditions = length(ϕl)
-    ocp.dim_variable_constraints = length(θl)
-    ocp.dim_control_box = length(ul)
-    ocp.dim_state_box = length(xl)
-    ocp.dim_variable_box = length(vl)
 
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
