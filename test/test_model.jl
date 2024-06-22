@@ -859,7 +859,7 @@ end
 
 end
 
-@testset "nlp_constraints without variable" begin
+@testset "nlp_constraints! without variable" begin
     
     ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 2); control!(ocp, 1)
     __constraint!(ocp, :initial, Index(2), 10, 10, :ci)
@@ -872,7 +872,7 @@ end
     __constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
-    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
 
     v = Real[]
     
@@ -912,9 +912,19 @@ end
     @test sort(θu) == sort([ ])
     @test sort(θ(v)) == sort([ ])
 
+    # dimensions
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == nothing
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == nothing
+
 end
 
-@testset "nlp_constraints with variable" begin
+@testset "nlp_constraints! with variable" begin
     
     ocp = Model(variable=true)
     __time!(ocp, 0, 1)
@@ -935,7 +945,7 @@ end
     __constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
-    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
 
     v = [ 1, 2, 3, 4 ]
 
@@ -959,6 +969,11 @@ end
     @test sort(ϕu) == sort([10, 1, 1])
     @test sort(ϕ([1, 3], [4, 100], v)) == sort([ 3, 4, 103+v[1] ])
 
+    # variable
+    @test sort(θl) == sort([ 0 ])
+    @test sort(θu) == sort([ 1 ])
+    @test sort(θ(v)) == sort([ v[3]^2 ])
+
     # box constraint
     @test sort(ul) == sort([0])
     @test sort(uind) == sort([1])
@@ -966,14 +981,19 @@ end
     @test sort(xl) == sort([0, 1])
     @test sort(xind) == sort([1, 2])
     @test sort(xu) == sort([1, 2])
-
-    # variable
     @test sort(vl) == sort([ 0, 0, 0, 0, 1, 2, 2 ])
     @test sort(vind) == sort([ 1, 2, 3, 4, 1, 2, 3 ])
     @test sort(vu) == sort([ 5, 5, 5, 5, 3, 4, 3 ])
-    @test sort(θl) == sort([ 0 ])
-    @test sort(θu) == sort([ 1 ])
-    @test sort(θ(v)) == sort([ v[3]^2 ])
+
+    # dimensions
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 1
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 7
 
 end
 

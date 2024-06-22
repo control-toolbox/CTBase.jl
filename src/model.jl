@@ -1,3 +1,4 @@
+# todo: use design pattern to generate functions in nlp_constraints!
 """
 $(TYPEDSIGNATURES)
 
@@ -865,18 +866,20 @@ Return a 6-tuple of tuples:
 - `(xl, xind, xu)` are state linear constraints of a subset of indices
 - `(vl, vind, vu)` are variable linear constraints of a subset of indices
 
+and update information about constraint dimensions of  `ocp`.
+
 !!! note
 
-    - The dimensions of the state and control must be set before calling `nlp_constraints`.
+    - The dimensions of the state and control must be set before calling `nlp_constraints!`.
 
 # Example
 
 ```jldoctest
 julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
-    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints(ocp)
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
 ```
 """
-function nlp_constraints(ocp::OptimalControlModel)
+function nlp_constraints!(ocp::OptimalControlModel)
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
@@ -965,12 +968,6 @@ function nlp_constraints(ocp::OptimalControlModel)
         return val
     end
 
-    function _η(t, x, v) # nonlinear state constraints
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ηf) append!(val, ηf[i](t, x, v)) end
-        return val
-    end
-
     function ψ(t, x, u, v) # nonlinear mixed constraints
         dim = length(ψl)
         val = zeros(ctNumber, dim)
@@ -984,13 +981,7 @@ function nlp_constraints(ocp::OptimalControlModel)
         return val
     end
 
-    function _ψ(t, x, u, v) # nonlinear mixed constraints
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u, v)) end
-        return val
-    end
-    
-    function ϕ(x0, xf, v) # nonlinear mixed constraints
+    function ϕ(x0, xf, v) # nonlinear boundary constraints
         dim = length(ϕl)
         val = zeros(ctNumber, dim)
         j = 1
@@ -1003,13 +994,7 @@ function nlp_constraints(ocp::OptimalControlModel)
         return val
     end
 
-    function _ϕ(x0, xf, v) # nonlinear boundary constraints
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf, v)) end
-        return val
-    end
-
-    function θ(v) # nonlinear mixed constraints
+    function θ(v) # nonlinear variable constraints
         dim = length(θl)
         val = zeros(ctNumber, dim)
         j = 1
@@ -1022,12 +1007,93 @@ function nlp_constraints(ocp::OptimalControlModel)
         return val
     end
 
-    function _θ(v) # nonlinear variable constraints
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(θf) append!(val, θf[i](v)) end
-        return val
-    end
+    ocp.dim_control_constraints = length(ξl)
+    ocp.dim_state_constraints = length(ηl)
+    ocp.dim_mixed_constraints = length(ψl)
+    ocp.dim_boundary_constraints = length(ϕl)
+    ocp.dim_variable_constraints = length(θl) 
+    ocp.dim_control_range = length(ul)
+    ocp.dim_state_range = length(xl) 
+    ocp.dim_variable_range = length(vl)
 
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
 end
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of nonlinear state constraints (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of nonlinear control constraints (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of nonlinear mixed constraints (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of nonlinear path (state + control + mixed) constraints (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints + 
+                                                 ocp.dim_control_constraints +
+                                                 ocp.dim_mixed_constraints 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the boundary constraints (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_boundary_constraints(ocp::OptimalControlModel) = ocp.dim_boundary_constraints 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of nonlinear variable constraints (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of range constraints on state (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_state_range(ocp::OptimalControlModel) = ocp.dim_state_range 
+dim_state_box = dim_state_range # alias, CTDirect.jl compatibility
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of range constraints on control (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_control_range(ocp::OptimalControlModel) = ocp.dim_control_range 
+dim_control_box = dim_control_range # alias, CTDirect.jl compatibility
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of range constraints on variable (`nothing` if not knonw).
+Information is updated after `nlp_constraints!` is called.
+"""
+dim_variable_range(ocp::OptimalControlModel) = ocp.dim_variable_range
+dim_variable_box = dim_variable_range # alias, CTDirect.jl compatibility
