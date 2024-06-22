@@ -816,8 +816,8 @@ end
     @test_throws UnauthorizedCall constraint!(ocp_error, :variable)
     @test_throws UnauthorizedCall constraint!(ocp_error, :control, f=dummy, label=:c1)
     @test_throws UnauthorizedCall constraint!(ocp_error, :state, rg=1:2:3, label=:c2)
-    @test_throws UnauthorizedCall constraint!(ocp_error, :state, rg=1:2:3, f=dummy, lb=[0,0], ub=[0,0], label=:c3)
-    @test_throws UnauthorizedCall constraint!(ocp_error, :state, f=dummy, rg=1:2:3, lb=[0,0], ub=[0,0], label=:c4)
+    @test_throws IncorrectArgument constraint!(ocp_error, :state, rg=1:2:3, f=dummy, lb=[0,0], ub=[0,0], label=:c3)
+    @test_throws IncorrectArgument constraint!(ocp_error, :state, f=dummy, rg=1:2:3, lb=[0,0], ub=[0,0], label=:c4)
 
 end
 

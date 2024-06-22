@@ -558,7 +558,7 @@ function constraint!(
     __check_all_set(ocp)
     type == :variable && is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable" * ", you cannot use constraint! function with type=:variable."))
     label ∈ constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    !isnothing(lb) && !isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
+    isnothing(lb) && isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
 
     # bounds
     isnothing(lb) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
