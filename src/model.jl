@@ -65,10 +65,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if the model is autonomous.
+"""
+is_autonomous(ocp::OptimalControlModel{Autonomous, <: VariableDependence}) = true
+is_autonomous(ocp::OptimalControlModel{NonAutonomous, <: VariableDependence}) = false
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if the model has been defined as time dependent.
 """
-is_time_dependent(ocp::OptimalControlModel{NonAutonomous, <: VariableDependence}) = true
-is_time_dependent(ocp::OptimalControlModel{Autonomous, <: VariableDependence}) = false
+is_time_dependent(ocp::OptimalControlModel) = !is_autonomous(ocp)
 
 """
 $(TYPEDSIGNATURES)
@@ -94,10 +101,17 @@ is_max(ocp::OptimalControlModel) = !is_min(ocp)
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if the model is fixed (= has no variable).
+"""
+is_fixed(ocp::OptimalControlModel{<: TimeDependence, Fixed}) = true
+is_fixed(ocp::OptimalControlModel{<: TimeDependence, NonFixed}) = false
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if the model has been defined as variable dependent.
 """
-is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, NonFixed}) = true
-is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, Fixed}) = false
+is_variable_dependent(ocp::OptimalControlModel) = !is_fixed(ocp)
 
 """
 $(TYPEDSIGNATURES)
@@ -105,7 +119,7 @@ $(TYPEDSIGNATURES)
 Return `true` if the model has been defined as variable independent.
 """
 is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
-
+###
 
 """
 $(TYPEDSIGNATURES)
@@ -165,8 +179,7 @@ function variable!(
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
     ocp.variable_name = name
-    nothing # to force to return nothing
-
+    return nothing
 end
 
 function variable!(
@@ -174,7 +187,6 @@ function variable!(
     q::Dimension, 
     name::Symbol, 
     components_names::Vector{Symbol})
-
     variable!(ocp, q, string(name), string.(components_names))
 end
 
@@ -183,7 +195,6 @@ function variable!(
     q::Dimension, 
     name::Symbol, 
     components_names::Vector{String})
-
     variable!(ocp, q, string(name), components_names)
 end
 
@@ -191,7 +202,6 @@ function variable!(
     ocp::OptimalControlModel, 
     q::Dimension, 
     name::Symbol)
-
     variable!(ocp, q, string(name))
 end
 
@@ -251,7 +261,7 @@ function state!(
     ocp.state_dimension = n
     ocp.state_components_names = components_names
     ocp.state_name = name
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -337,7 +347,7 @@ function control!(
     ocp.control_dimension = m
     ocp.control_components_names = components_names
     ocp.control_name = name
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -461,7 +471,7 @@ function time!(
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end 
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -476,27 +486,13 @@ Add a constraint to an optimal control problem, denoted `ocp`.
     - The initial and final times must be set before. Use time!.
     - When an element is of dimension 1, consider it as a scalar.
 
-# Box constraint on the state, control or variable
-
 You can add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint (whole range). 
+
+# Range constraint on the state, control or variable
+
+You can add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range of it, that is only on some components. If not range is specified, then the constraint is on the whole range.
 We denote by `x`, `u` and `v` respectively the state, control and variable.
-
-## Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ])                 # [ 0, 0, 0 ] ≤ x(t0),                          dim(x) = 3
-julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ]) # [ 0, 0, 0 ] ≤ x(t0) ≤ [ 1, 2, 1 ],            dim(x) = 3
-julia> constraint!(ocp, :final; lb=-1, ub=1)                      #          -1 ≤ x(tf) ≤ 1,                      dim(x) = 1
-julia> constraint!(ocp, :control; lb=0, ub=2)                     #           0 ≤ u(t)  ≤ 2,        t ∈ [t0, tf], dim(u) = 1
-julia> constraint!(ocp, :state; lb=[ 0, 0 ], ub=[ 1, 2 ])         #    [ 0, 0 ] ≤ x(t)  ≤ [ 1, 2 ], t ∈ [t0, tf], dim(x) = 2
-julia> constraint!(ocp, :variable; lb=[ 0, 0 ], ub=[ 1, 2 ])      #    [ 0, 0 ] ≤    v  ≤ [ 1, 2 ],               dim(v) = 2
-```
-
-# Box constraint on the state, control or variable on some components
-
-You can add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range of it, that is only on some components.
-We denote by `n`, `m` and `q` respectively the dimension of the state, control and variable.
-The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
+We denote by `n`, `m` and `q` respectively the dimension of the state, control and variable. The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
 
 ## Examples
 
@@ -507,6 +503,12 @@ julia> constraint!(ocp, :final; rg=1, lb=0, ub=2)
 julia> constraint!(ocp, :control; rg=1, lb=0, ub=2)
 julia> constraint!(ocp, :state; rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
 julia> constraint!(ocp, :variable; rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ])                 # [ 0, 0, 0 ] ≤ x(t0),                          dim(x) = 3
+julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ]) # [ 0, 0, 0 ] ≤ x(t0) ≤ [ 1, 2, 1 ],            dim(x) = 3
+julia> constraint!(ocp, :final; lb=-1, ub=1)                      #          -1 ≤ x(tf) ≤ 1,                      dim(x) = 1
+julia> constraint!(ocp, :control; lb=0, ub=2)                     #           0 ≤ u(t)  ≤ 2,        t ∈ [t0, tf], dim(u) = 1
+julia> constraint!(ocp, :state; lb=[ 0, 0 ], ub=[ 1, 2 ])         #    [ 0, 0 ] ≤ x(t)  ≤ [ 1, 2 ], t ∈ [t0, tf], dim(x) = 2
+julia> constraint!(ocp, :variable; lb=[ 0, 0 ], ub=[ 1, 2 ])      #    [ 0, 0 ] ≤    v  ≤ [ 1, 2 ],               dim(v) = 2
 ```
 
 # Functional constraint
@@ -549,9 +551,9 @@ function constraint!(
     type::Symbol;
     rg::Union{OrdinalRange{<:Integer}, Index, Integer, Nothing}=nothing, 
     f::Union{Function, Nothing}=nothing, 
-    lb::W=nothing, 
-    ub::X=nothing, 
-    label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence, W <: Union{ctVector, Nothing}, X <: Union{ctVector, Nothing}}
+    lb::Union{ctVector, Nothing}=nothing, 
+    ub::Union{ctVector, Nothing}=nothing, 
+    label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence}
 
     __check_all_set(ocp)
     type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" * ", you cannot use constraint! function with type=:variable."))
@@ -570,7 +572,7 @@ function constraint!(
     ( isnothing(lb) && !isnothing(ub)) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
 
     # range
-    (typeof(rg) <: Int) && (rg = Index(rg)) # debug: useless?
+    (typeof(rg) <: Int) && (rg = Index(rg))
 
     # checkings
     @match (rg, f) begin
@@ -660,9 +662,6 @@ function constraint!(
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
 
-    # update constraints dimensions
-    __set_dim_constraints(ocp) # debug: WTF
-
 end
 
 """
@@ -692,7 +691,7 @@ function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: Time
 
     ocp.dynamics = Dynamics(f, T, V)
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -742,7 +741,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
         ". Please choose in [ :mayer, :lagrange ]."))
     end
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -786,7 +785,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f
         ". Please choose :bolza."))
     end
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -807,8 +806,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
-    __set_dim_constraints(ocp) # update constraints dimensions # debug: WTF
-    nothing
+    return nothing
 end
 
 """
@@ -1009,13 +1007,7 @@ function nlp_constraints(ocp::OptimalControlModel)
 
 end
 
-#
-function __set_dim_constraints(ocp::OptimalControlModel) # debug: WTF
-    nlp_constraints(ocp)
-    nothing
-end
-
-# getters for constraints dimensions
+# getters for constraints dimensions # debug: rewrite properly (make the computation from the dict)
 dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
 dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
 dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
