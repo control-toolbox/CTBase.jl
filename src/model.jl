@@ -65,10 +65,17 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if the model is autonomous.
+"""
+is_autonomous(ocp::OptimalControlModel{Autonomous, <: VariableDependence}) = true
+is_autonomous(ocp::OptimalControlModel{NonAutonomous, <: VariableDependence}) = false
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if the model has been defined as time dependent.
 """
-is_time_dependent(ocp::OptimalControlModel{NonAutonomous, <: VariableDependence}) = true
-is_time_dependent(ocp::OptimalControlModel{Autonomous, <: VariableDependence}) = false
+is_time_dependent(ocp::OptimalControlModel) = !is_autonomous(ocp)
 
 """
 $(TYPEDSIGNATURES)
@@ -94,10 +101,17 @@ is_max(ocp::OptimalControlModel) = !is_min(ocp)
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if the model is fixed (= has no variable).
+"""
+is_fixed(ocp::OptimalControlModel{<: TimeDependence, Fixed}) = true
+is_fixed(ocp::OptimalControlModel{<: TimeDependence, NonFixed}) = false
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if the model has been defined as variable dependent.
 """
-is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, NonFixed}) = true
-is_variable_dependent(ocp::OptimalControlModel{<: TimeDependence, Fixed}) = false
+is_variable_dependent(ocp::OptimalControlModel) = !is_fixed(ocp)
 
 """
 $(TYPEDSIGNATURES)
@@ -105,7 +119,7 @@ $(TYPEDSIGNATURES)
 Return `true` if the model has been defined as variable independent.
 """
 is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
-
+###
 
 """
 $(TYPEDSIGNATURES)
@@ -158,15 +172,14 @@ function variable!(
     components_names::Vector{String}=__variable_components_names(q, name))
 
     # checkings
-    is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
+    is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable, you cannot use variable! function."))
     __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
     (q  > 1) && (size(components_names, 1) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
     
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
     ocp.variable_name = name
-    nothing # to force to return nothing
-
+    return nothing
 end
 
 function variable!(
@@ -174,7 +187,6 @@ function variable!(
     q::Dimension, 
     name::Symbol, 
     components_names::Vector{Symbol})
-
     variable!(ocp, q, string(name), string.(components_names))
 end
 
@@ -183,7 +195,6 @@ function variable!(
     q::Dimension, 
     name::Symbol, 
     components_names::Vector{String})
-
     variable!(ocp, q, string(name), components_names)
 end
 
@@ -191,7 +202,6 @@ function variable!(
     ocp::OptimalControlModel, 
     q::Dimension, 
     name::Symbol)
-
     variable!(ocp, q, string(name))
 end
 
@@ -251,7 +261,7 @@ function state!(
     ocp.state_dimension = n
     ocp.state_components_names = components_names
     ocp.state_name = name
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -337,7 +347,7 @@ function control!(
     ocp.control_dimension = m
     ocp.control_components_names = components_names
     ocp.control_name = name
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -461,7 +471,7 @@ function time!(
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end 
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -476,37 +486,29 @@ Add a constraint to an optimal control problem, denoted `ocp`.
     - The initial and final times must be set before. Use time!.
     - When an element is of dimension 1, consider it as a scalar.
 
-# Box constraint on the state, control or variable
-
 You can add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint (whole range). 
+
+# Range constraint on the state, control or variable
+
+You can add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range of it, that is only on some components. If not range is specified, then the constraint is on the whole range.
 We denote by `x`, `u` and `v` respectively the state, control and variable.
+We denote by `n`, `m` and `q` respectively the dimension of the state, control and variable. The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
 
 ## Examples
 
 ```jldoctest
-julia> constraint!(ocp, :initial, lb=[ 0, 0, 0 ])                 # [ 0, 0, 0 ] ≤ x(t0),                          dim(x) = 3
-julia> constraint!(ocp, :initial, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ]) # [ 0, 0, 0 ] ≤ x(t0) ≤ [ 1, 2, 1 ],            dim(x) = 3
-julia> constraint!(ocp, :final, lb=-1, ub=1)                      #          -1 ≤ x(tf) ≤ 1,                      dim(x) = 1
-julia> constraint!(ocp, :control, lb=0, ub=2)                     #           0 ≤ u(t)  ≤ 2,        t ∈ [t0, tf], dim(u) = 1
-julia> constraint!(ocp, :state, lb=[ 0, 0 ], ub=[ 1, 2 ])         #    [ 0, 0 ] ≤ x(t)  ≤ [ 1, 2 ], t ∈ [t0, tf], dim(x) = 2
-julia> constraint!(ocp, :variable, lb=[ 0, 0 ], ub=[ 1, 2 ])      #    [ 0, 0 ] ≤    v  ≤ [ 1, 2 ],               dim(v) = 2
-```
-
-# Box constraint on the state, control or variable on some components
-
-You can add an `:initial`, `:final`, `:control`, `:state` or `:variable` box constraint on a range of it, that is only on some components.
-We denote by `n`, `m` and `q` respectively the dimension of the state, control and variable.
-The range of the constraint must be contained in 1:n if the constraint is on the state, or 1:m if the constraint is on the control, or 1:q if the constraint is on the variable.
-
-## Examples
-
-```jldoctest
-julia> constraint!(ocp, :initial, rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :initial, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :final, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :control, rg=1, lb=0, ub=2)
-julia> constraint!(ocp, :state, rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
-julia> constraint!(ocp, :variable, rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial; rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :initial; rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :final; rg=1, lb=0, ub=2)
+julia> constraint!(ocp, :control; rg=1, lb=0, ub=2)
+julia> constraint!(ocp, :state; rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :variable; rg=1:2, lb=[ 0, 0 ], ub=[ 1, 2 ])
+julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ])                 # [ 0, 0, 0 ] ≤ x(t0),                          dim(x) = 3
+julia> constraint!(ocp, :initial; lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ]) # [ 0, 0, 0 ] ≤ x(t0) ≤ [ 1, 2, 1 ],            dim(x) = 3
+julia> constraint!(ocp, :final; lb=-1, ub=1)                      #          -1 ≤ x(tf) ≤ 1,                      dim(x) = 1
+julia> constraint!(ocp, :control; lb=0, ub=2)                     #           0 ≤ u(t)  ≤ 2,        t ∈ [t0, tf], dim(u) = 1
+julia> constraint!(ocp, :state; lb=[ 0, 0 ], ub=[ 1, 2 ])         #    [ 0, 0 ] ≤ x(t)  ≤ [ 1, 2 ], t ∈ [t0, tf], dim(x) = 2
+julia> constraint!(ocp, :variable; lb=[ 0, 0 ], ub=[ 1, 2 ])      #    [ 0, 0 ] ≤    v  ≤ [ 1, 2 ],               dim(v) = 2
 ```
 
 # Functional constraint
@@ -517,30 +519,30 @@ You can add a `:boundary`, `:control`, `:state`, `:mixed` or `:variable` box fun
 
 ```@example
 # variable independent ocp
-julia> constraint!(ocp, :boundary, f = (x0, xf) -> x0[3]+xf[2], lb=0, ub=1)
+julia> constraint!(ocp, :boundary; f = (x0, xf) -> x0[3]+xf[2], lb=0, ub=1)
 
 # variable dependent ocp
-julia> constraint!(ocp, :boundary, f = (x0, xf, v) -> x0[3]+xf[2]*v[1], lb=0, ub=1)
+julia> constraint!(ocp, :boundary; f = (x0, xf, v) -> x0[3]+xf[2]*v[1], lb=0, ub=1)
 
 # time independent and variable independent ocp
-julia> constraint!(ocp, :control, f = u -> 2u, lb=0, ub=1)
-julia> constraint!(ocp, :state, f = x -> x-1, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (x, u) -> x[1]-u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = u -> 2u, lb=0, ub=1)
+julia> constraint!(ocp, :state; f = x -> x-1, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (x, u) -> x[1]-u, lb=0, ub=1)
 
 # time dependent and variable independent ocp
-julia> constraint!(ocp, :control, f = (t, u) -> 2u, lb=0, ub=1)
-julia> constraint!(ocp, :state, f = (t, x) -> x-t, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (t, x, u) -> x[1]-u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = (t, u) -> 2u, lb=0, ub=1)
+julia> constraint!(ocp, :state; f = (t, x) -> t * x, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (t, x, u) -> x[1]-u, lb=0, ub=1)
 
 # time independent and variable dependent ocp
-julia> constraint!(ocp, :control, f = (u, v) -> 2u*v[1], lb=0, ub=1)
-julia> constraint!(ocp, :state, f = (x, v) -> x-v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (x, u, v) -> x[1]-v[2]*u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = (u, v) -> 2u * v[1], lb=0, ub=1)
+julia> constraint!(ocp, :state; f = (x, v) -> x * v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (x, u, v) -> x[1]-v[2]*u, lb=0, ub=1)
 
 # time dependent and variable dependent ocp
-julia> constraint!(ocp, :control, f = (t, u, v) -> 2u+v[2], lb=0, ub=1)
-julia> constraint!(ocp, :state, f = (t, x, v) -> x-t*v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
-julia> constraint!(ocp, :mixed, f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
+julia> constraint!(ocp, :control; f = (t, u, v) -> 2u+v[2], lb=0, ub=1)
+julia> constraint!(ocp, :state; f = (t, x, v) -> x-t*v[1], lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
+julia> constraint!(ocp, :mixed; f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
 ```
 
 """
@@ -549,120 +551,93 @@ function constraint!(
     type::Symbol;
     rg::Union{OrdinalRange{<:Integer}, Index, Integer, Nothing}=nothing, 
     f::Union{Function, Nothing}=nothing, 
-    lb::W=nothing, 
-    ub::X=nothing, 
-    label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence, W <: Union{ctVector, Nothing}, X <: Union{ctVector, Nothing}}
+    lb::Union{ctVector, Nothing}=nothing, 
+    ub::Union{ctVector, Nothing}=nothing, 
+    label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence}
 
     __check_all_set(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" * ", you cannot use constraint! function with type=:variable."))
+    type == :variable && is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable" * ", you cannot use constraint! function with type=:variable."))
+    label ∈ constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
+    isnothing(lb) && isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
+
+    # bounds
+    isnothing(lb) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+    isnothing(ub) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(lb), size(lb,1))))
 
     # dimensions
     n = ocp.state_dimension
     m = ocp.control_dimension
     q = ocp.variable_dimension
     
-    if label ∈ constraints_labels(ocp)
-        throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    end
-
-    # bounds
-    (!isnothing(lb) &&  isnothing(ub)) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(lb), size(lb,1))))
-    ( isnothing(lb) && !isnothing(ub)) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
-
     # range
     (typeof(rg) <: Int) && (rg = Index(rg))
-
-    # checkings
-    @match (rg, f) begin
-        (::RangeConstraint, ::Function) => throw(UnauthorizedCall("Providing a range (rg keyword) and a function (f keyword) is not authorized."))
-        _ => nothing
-    end
-    @match (lb, ub) begin
-        (::Nothing, ::Nothing) => throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
-        _ => nothing
-    end
-
+    
     # core
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
-                
-                rg = nothing
-
-                if type ∈ [:initial, :final, :state]
-                    rg = n == 1 ? Index(1) : 1:n
-                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
-                elseif type == :control
-                    rg = m == 1 ? Index(1) : 1:m
-                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
-                elseif type == :variable
-                    rg = q == 1 ? Index(1) : 1:q
-                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
-                else
-                    throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                    ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
-                end
-                
-                (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
-                (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-
-                constraint!(ocp, type, rg=rg, lb=lb, ub=ub, label=label)
-
+            if type ∈ [:initial, :final, :state]
+                rg = n == 1 ? Index(1) : 1:n
+                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
+            elseif type == :control
+                rg = m == 1 ? Index(1) : 1:m
+                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
+            elseif type == :variable
+                rg = q == 1 ? Index(1) : 1:q
+                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
+            else
+                throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
             end
-        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+            (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
+            (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
+            constraint!(ocp, type; rg=rg, lb=lb, ub=ub, label=label) end
 
-                # set the constraint
-                if type == :boundary
-                    ocp.constraints[label] = (type, BoundaryConstraint(f, V), lb, ub)
-                elseif type == :control
-                    ocp.constraints[label] = (type, ControlConstraint(f, T, V), lb, ub)
-                elseif type == :state
-                    ocp.constraints[label] = (type, StateConstraint(f, T, V), lb, ub)
-                elseif type == :mixed
-                    ocp.constraints[label] = (type, MixedConstraint(f, T, V), lb, ub)
-                elseif type == :variable
-                    ocp.constraints[label] = (type, VariableConstraint(f), lb, ub)
-                else
-                    throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                    ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
-                end
-
-            end
         (::RangeConstraint, ::Nothing, ::ctVector, ::ctVector) => begin
-                
-                txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
-                (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
-                (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-            
-                # check if the range is valid
-                if type == :initial        
-                    !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the initial state constraint must be contained in 1:$n"))
-                elseif type == :final
-                    !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the final state constraint must be contained in 1:$n"))
-                elseif type == :control
-                    !all(1 .≤ rg .≤ m) && throw(IncorrectArgument("the range of the control constraint must be contained in 1:$m"))
-                elseif type == :state
-                    !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the state constraint must be contained in 1:$n"))
-                elseif type == :variable
-                    !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range of the variable constraint must be contained in 1:$q"))
-                end
+            txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
+            (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
+            (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
+            # check if the range is valid
+            if type == :initial        
+                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the initial state constraint must be contained in 1:$n"))
+            elseif type == :final
+                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the final state constraint must be contained in 1:$n"))
+            elseif type == :control
+                !all(1 .≤ rg .≤ m) && throw(IncorrectArgument("the range of the control constraint must be contained in 1:$m"))
+            elseif type == :state
+                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the state constraint must be contained in 1:$n"))
+            elseif type == :variable
+                !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range of the variable constraint must be contained in 1:$q"))
+            end
+            # set the constraint
+            fun_rg = @match type begin
+                :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) : BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+                :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) : BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+                :control || :state || :variable => rg
+                _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
+            end
+            ocp.constraints[label] = (type, fun_rg, lb, ub) end
+        
+        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+            # set the constraint
+            if type == :boundary
+                ocp.constraints[label] = (type, BoundaryConstraint(f, V), lb, ub)
+            elseif type == :control
+                ocp.constraints[label] = (type, ControlConstraint(f, T, V), lb, ub)
+            elseif type == :state
+                ocp.constraints[label] = (type, StateConstraint(f, T, V), lb, ub)
+            elseif type == :mixed
+                ocp.constraints[label] = (type, MixedConstraint(f, T, V), lb, ub)
+            elseif type == :variable
+                ocp.constraints[label] = (type, VariableConstraint(f), lb, ub)
+            else
+                throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
+            end end
 
-                # set the constraint
-                fun_rg = @match type begin
-                    :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) : BoundaryConstraint((x0, xf, v) -> x0[rg], V)
-                    :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) : BoundaryConstraint((x0, xf, v) -> xf[rg], V)
-                    :control || :state || :variable => rg
-                    _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                    ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
-                end
-                ocp.constraints[label] = (type, fun_rg, lb, ub)
-
-            end #
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
-
-    # update constraints dimensions
-    __set_dim_constraints(ocp)
-
+    return nothing
 end
 
 """
@@ -692,7 +667,7 @@ function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: Time
 
     ocp.dynamics = Dynamics(f, T, V)
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -742,7 +717,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
         ". Please choose in [ :mayer, :lagrange ]."))
     end
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -786,7 +761,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f
         ". Please choose :bolza."))
     end
 
-    nothing # to force to return nothing
+    return nothing
 
 end
 
@@ -807,8 +782,7 @@ function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
         ". Please check the list of constraints: ocp.constraints."))
     end
     delete!(ocp.constraints, label)
-    __set_dim_constraints(ocp) # update constraints dimensions
-    nothing
+    return nothing
 end
 
 """
@@ -921,15 +895,7 @@ function nlp_constraints(ocp::OptimalControlModel)
 
     for (_, c) ∈ constraints
         @match c begin
-        (:initial, f::BoundaryConstraint, lb, ub) => begin
-            push!(ϕf, f)
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:final, f::BoundaryConstraint, lb, ub) => begin
-            push!(ϕf, f)
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:boundary, f::BoundaryConstraint, lb, ub) => begin
+        (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary] end => begin
             push!(ϕf, f)
             append!(ϕl, lb)
             append!(ϕu, ub) end
@@ -964,64 +930,104 @@ function nlp_constraints(ocp::OptimalControlModel)
         _ => error("Internal error") end
     end
 
-    function ξ(t, u, v)
-        val = Vector{ctNumber}()
-        for i ∈ 1:length(ξf) append!(val, ξf[i](t, u, v)) end
+    @assert length(ξl) == length(ξu)
+    @assert length(ηl) == length(ηu)
+    @assert length(ψl) == length(ψu)
+    @assert length(ϕl) == length(ϕu)
+    @assert length(θl) == length(θu)
+    @assert length(ul) == length(uu)
+    @assert length(xl) == length(xu)
+    @assert length(vl) == length(vu)
+
+    function ξ(t, u, v) # nonlinear control constraints
+        dim = length(ξl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ξf)
+            vali = ξf[i](t, u, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
         return val
     end
 
-    function η(t, x, v)
+    function η(t, x, v) # nonlinear state constraints
+        dim = length(ηl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ηf)
+            vali = ηf[i](t, x, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
+
+    function _η(t, x, v) # nonlinear state constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ηf) append!(val, ηf[i](t, x, v)) end
         return val
     end
 
-    function ψ(t, x, u, v)
+    function ψ(t, x, u, v) # nonlinear mixed constraints
+        dim = length(ψl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ψf)
+            vali = ψf[i](t, x, u, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
+
+    function _ψ(t, x, u, v) # nonlinear mixed constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u, v)) end
         return val
     end
+    
+    function ϕ(x0, xf, v) # nonlinear mixed constraints
+        dim = length(ϕl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ϕf)
+            vali = ϕf[i](x0, xf, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
 
-    function ϕ(x0, xf, v)
+    function _ϕ(x0, xf, v) # nonlinear boundary constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf, v)) end
         return val
     end
 
-    function θ(v)
+    function θ(v) # nonlinear mixed constraints
+        dim = length(θl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(θf)
+            vali = θf[i](v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
+
+    function _θ(v) # nonlinear variable constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(θf) append!(val, θf[i](v)) end
         return val
     end
 
-    # set specific constraints dimensions
-    ocp.dim_control_constraints = length(ξl)
-    ocp.dim_state_constraints = length(ηl)
-    ocp.dim_mixed_constraints = length(ψl)
-    ocp.dim_path_constraints = ocp.dim_control_constraints + ocp.dim_state_constraints + ocp.dim_mixed_constraints
-    ocp.dim_boundary_conditions = length(ϕl)
-    ocp.dim_variable_constraints = length(θl)
-    ocp.dim_control_box = length(ul)
-    ocp.dim_state_box = length(xl)
-    ocp.dim_variable_box = length(vl)
-
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
 end
-
-#
-function __set_dim_constraints(ocp::OptimalControlModel)
-    nlp_constraints(ocp)
-    nothing
-end
-
-# getters for constraints dimensions
-dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
-dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
-dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
-dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_path_constraints 
-dim_boundary_conditions(ocp::OptimalControlModel) = ocp.dim_boundary_conditions 
-dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
-dim_control_box(ocp::OptimalControlModel) = ocp.dim_control_box 
-dim_state_box(ocp::OptimalControlModel) = ocp.dim_state_box 
-dim_variable_box(ocp::OptimalControlModel) = ocp.dim_variable_box
