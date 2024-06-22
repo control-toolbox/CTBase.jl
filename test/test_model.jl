@@ -871,6 +871,17 @@ end
     __constraint!(ocp, :state, x->x, [0, 1], [1, 2], :css)
     __constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
 
+    # dimensions (not yet set)
+    @test dim_control_constraints(ocp) == nothing
+    @test dim_state_constraints(ocp) == nothing
+    @test dim_mixed_constraints(ocp) == nothing
+    @test dim_path_constraints(ocp) == nothing
+    @test dim_boundary_constraints(ocp) == nothing
+    @test dim_variable_constraints(ocp) == nothing
+    @test dim_control_range(ocp) == nothing
+    @test dim_state_range(ocp) == nothing
+    @test dim_variable_range(ocp) == nothing
+
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
 
@@ -912,15 +923,16 @@ end
     @test sort(θu) == sort([ ])
     @test sort(θ(v)) == sort([ ])
 
-    # dimensions
+    # dimensions (set)
     @test dim_control_constraints(ocp) == 1
     @test dim_state_constraints(ocp) == 2
     @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
     @test dim_boundary_constraints(ocp) == 3
-    @test dim_variable_constraints(ocp) == nothing
+    @test dim_variable_constraints(ocp) == 0
     @test dim_control_range(ocp) == 1
     @test dim_state_range(ocp) == 2
-    @test dim_variable_range(ocp) == nothing
+    @test dim_variable_range(ocp) == 0 
 
 end
 
@@ -943,6 +955,17 @@ end
     __constraint!(ocp, :variable, 1:2, [ 1, 2 ], [ 3, 4 ], :cv2)
     __constraint!(ocp, :variable, Index(3), 2, 3, :cv3)
     __constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)
+
+    # dimensions (not yet set)
+    @test dim_control_constraints(ocp) == nothing
+    @test dim_state_constraints(ocp) == nothing
+    @test dim_mixed_constraints(ocp) == nothing
+    @test dim_path_constraints(ocp) == nothing
+    @test dim_boundary_constraints(ocp) == nothing
+    @test dim_variable_constraints(ocp) == nothing
+    @test dim_control_range(ocp) == nothing
+    @test dim_state_range(ocp) == nothing
+    @test dim_variable_range(ocp) == nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -989,6 +1012,7 @@ end
     @test dim_control_constraints(ocp) == 1
     @test dim_state_constraints(ocp) == 2
     @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
     @test dim_boundary_constraints(ocp) == 3
     @test dim_variable_constraints(ocp) == 1
     @test dim_control_range(ocp) == 1

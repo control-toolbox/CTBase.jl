@@ -1174,10 +1174,10 @@ $(TYPEDFIELDS)
     criterion::Union{Symbol,Nothing}=nothing
     dynamics::Union{Dynamics,Nothing}=nothing
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
-    dim_control_contraints::Union{Dimension,Nothing}=nothing
-    dim_state_contraints::Union{Dimension,Nothing}=nothing
+    dim_control_constraints::Union{Dimension,Nothing}=nothing
+    dim_state_constraints::Union{Dimension,Nothing}=nothing
     dim_mixed_constraints::Union{Dimension,Nothing}=nothing
-    dim_boundary_conditions::Union{Dimension,Nothing}=nothing
+    dim_boundary_constraints::Union{Dimension,Nothing}=nothing
     dim_variable_constraints::Union{Dimension,Nothing}=nothing
     dim_control_range::Union{Dimension,Nothing}=nothing
     dim_state_range::Union{Dimension,Nothing}=nothing

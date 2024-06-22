@@ -866,11 +866,12 @@ Return a 6-tuple of tuples:
 - `(xl, xind, xu)` are state linear constraints of a subset of indices
 - `(vl, vind, vu)` are variable linear constraints of a subset of indices
 
-and update information about constraint dimensions of  `ocp`.
+and update information about constraints dimensions of  `ocp`.
 
 !!! note
 
     - The dimensions of the state and control must be set before calling `nlp_constraints!`.
+    - For a `Fixed` problem, dimensions associated with constraints on the variable are set to zero.
 
 # Example
 
@@ -1011,7 +1012,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
     ocp.dim_state_constraints = length(ηl)
     ocp.dim_mixed_constraints = length(ψl)
     ocp.dim_boundary_constraints = length(ϕl)
-    ocp.dim_variable_constraints = length(θl) 
+    ocp.dim_variable_constraints = length(θl)
     ocp.dim_control_range = length(ul)
     ocp.dim_state_range = length(xl) 
     ocp.dim_variable_range = length(vl)
@@ -1048,12 +1049,15 @@ dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints
 """
 $(TYPEDSIGNATURES)
 
-Return the dimension of nonlinear path (state + control + mixed) constraints (`nothing` if not knonw).
+Return the dimension of nonlinear path (state + control + mixed) constraints (`nothing` if one of them is not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints + 
-                                                 ocp.dim_control_constraints +
-                                                 ocp.dim_mixed_constraints 
+function dim_path_constraints(ocp::OptimalControlModel)
+    isnothing(ocp.dim_control_constraints) && return nothing
+    isnothing(ocp.dim_state_constraints) && return nothing
+    isnothing(ocp.dim_mixed_constraints) && return nothing
+    return ocp.dim_state_constraints + ocp.dim_control_constraints + ocp.dim_mixed_constraints
+end
 
 """
 $(TYPEDSIGNATURES)
