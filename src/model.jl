@@ -172,7 +172,7 @@ function variable!(
     components_names::Vector{String}=__variable_components_names(q, name))
 
     # checkings
-    is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent, you cannot use variable! function."))
+    is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable, you cannot use variable! function."))
     __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
     (q  > 1) && (size(components_names, 1) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
     
@@ -556,112 +556,88 @@ function constraint!(
     label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence}
 
     __check_all_set(ocp)
-    type == :variable && is_variable_independent(ocp) && throw(UnauthorizedCall("the ocp is variable independent" * ", you cannot use constraint! function with type=:variable."))
+    type == :variable && is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable" * ", you cannot use constraint! function with type=:variable."))
+    label ∈ constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
+    !isnothing(lb) && !isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
+
+    # bounds
+    isnothing(lb) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
+    isnothing(ub) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(lb), size(lb,1))))
 
     # dimensions
     n = ocp.state_dimension
     m = ocp.control_dimension
     q = ocp.variable_dimension
     
-    if label ∈ constraints_labels(ocp)
-        throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    end
-
-    # bounds
-    (!isnothing(lb) &&  isnothing(ub)) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(lb), size(lb,1))))
-    ( isnothing(lb) && !isnothing(ub)) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
-
     # range
     (typeof(rg) <: Int) && (rg = Index(rg))
-
-    # checkings
-    @match (rg, f) begin
-        (::RangeConstraint, ::Function) => throw(UnauthorizedCall("Providing a range (rg keyword) and a function (f keyword) is not authorized."))
-        _ => nothing # debug: rewrite properly 
-    end
-    @match (lb, ub) begin
-        (::Nothing, ::Nothing) => throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
-        _ => nothing # debug: rewrite properly
-    end
-
+    
     # core
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
-                
-                rg = nothing # debug: useless
-
-                if type ∈ [:initial, :final, :state]
-                    rg = n == 1 ? Index(1) : 1:n
-                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
-                elseif type == :control
-                    rg = m == 1 ? Index(1) : 1:m
-                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
-                elseif type == :variable
-                    rg = q == 1 ? Index(1) : 1:q
-                    txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
-                else
-                    throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                    ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
-                end
-                
-                (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
-                (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-
-                constraint!(ocp, type; rg=rg, lb=lb, ub=ub, label=label)
-
+            if type ∈ [:initial, :final, :state]
+                rg = n == 1 ? Index(1) : 1:n
+                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
+            elseif type == :control
+                rg = m == 1 ? Index(1) : 1:m
+                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
+            elseif type == :variable
+                rg = q == 1 ? Index(1) : 1:q
+                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
+            else
+                throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
             end
-        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+            (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
+            (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
+            constraint!(ocp, type; rg=rg, lb=lb, ub=ub, label=label) end
 
-                # set the constraint
-                if type == :boundary
-                    ocp.constraints[label] = (type, BoundaryConstraint(f, V), lb, ub)
-                elseif type == :control
-                    ocp.constraints[label] = (type, ControlConstraint(f, T, V), lb, ub)
-                elseif type == :state
-                    ocp.constraints[label] = (type, StateConstraint(f, T, V), lb, ub)
-                elseif type == :mixed
-                    ocp.constraints[label] = (type, MixedConstraint(f, T, V), lb, ub)
-                elseif type == :variable
-                    ocp.constraints[label] = (type, VariableConstraint(f), lb, ub)
-                else
-                    throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                    ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
-                end
-
-            end
         (::RangeConstraint, ::Nothing, ::ctVector, ::ctVector) => begin
-                
-                txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
-                (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
-                (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-            
-                # check if the range is valid
-                if type == :initial        
-                    !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the initial state constraint must be contained in 1:$n"))
-                elseif type == :final
-                    !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the final state constraint must be contained in 1:$n"))
-                elseif type == :control
-                    !all(1 .≤ rg .≤ m) && throw(IncorrectArgument("the range of the control constraint must be contained in 1:$m"))
-                elseif type == :state
-                    !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the state constraint must be contained in 1:$n"))
-                elseif type == :variable
-                    !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range of the variable constraint must be contained in 1:$q"))
-                end
+            txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
+            (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
+            (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
+            # check if the range is valid
+            if type == :initial        
+                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the initial state constraint must be contained in 1:$n"))
+            elseif type == :final
+                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the final state constraint must be contained in 1:$n"))
+            elseif type == :control
+                !all(1 .≤ rg .≤ m) && throw(IncorrectArgument("the range of the control constraint must be contained in 1:$m"))
+            elseif type == :state
+                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the state constraint must be contained in 1:$n"))
+            elseif type == :variable
+                !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range of the variable constraint must be contained in 1:$q"))
+            end
+            # set the constraint
+            fun_rg = @match type begin
+                :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) : BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+                :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) : BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+                :control || :state || :variable => rg
+                _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
+            end
+            ocp.constraints[label] = (type, fun_rg, lb, ub) end
+        
+        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+            # set the constraint
+            if type == :boundary
+                ocp.constraints[label] = (type, BoundaryConstraint(f, V), lb, ub)
+            elseif type == :control
+                ocp.constraints[label] = (type, ControlConstraint(f, T, V), lb, ub)
+            elseif type == :state
+                ocp.constraints[label] = (type, StateConstraint(f, T, V), lb, ub)
+            elseif type == :mixed
+                ocp.constraints[label] = (type, MixedConstraint(f, T, V), lb, ub)
+            elseif type == :variable
+                ocp.constraints[label] = (type, VariableConstraint(f), lb, ub)
+            else
+                throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
+                ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
+            end end
 
-                # set the constraint
-                fun_rg = @match type begin
-                    :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) : BoundaryConstraint((x0, xf, v) -> x0[rg], V)
-                    :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) : BoundaryConstraint((x0, xf, v) -> xf[rg], V)
-                    :control || :state || :variable => rg
-                    _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                    ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
-                end
-                ocp.constraints[label] = (type, fun_rg, lb, ub)
-
-            end #
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
-
+    return nothing
 end
 
 """
