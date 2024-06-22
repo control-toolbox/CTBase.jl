@@ -939,40 +939,90 @@ function nlp_constraints(ocp::OptimalControlModel)
     @assert length(xl) == length(xu)
     @assert length(vl) == length(vu)
 
-    # debug: return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
-
     function ξ(t, u, v) # nonlinear control constraints
         dim = length(ξl)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ξf)
-            ξi = ξf[i](t, u, v)
-            li = length(ξi)
-            val[j:j+li-1] .= ξi # .= also allows scalar value for ξi
+            vali = ξf[i](t, u, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
     end
 
     function η(t, x, v) # nonlinear state constraints
+        dim = length(ηl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ηf)
+            vali = ηf[i](t, x, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
+
+    function _η(t, x, v) # nonlinear state constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ηf) append!(val, ηf[i](t, x, v)) end
         return val
     end
 
     function ψ(t, x, u, v) # nonlinear mixed constraints
+        dim = length(ψl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ψf)
+            vali = ψf[i](t, x, u, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
+
+    function _ψ(t, x, u, v) # nonlinear mixed constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ψf) append!(val, ψf[i](t, x, u, v)) end
         return val
     end
+    
+    function ϕ(x0, xf, v) # nonlinear mixed constraints
+        dim = length(ϕl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(ϕf)
+            vali = ϕf[i](x0, xf, v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
 
-    function ϕ(x0, xf, v) # nonlinear boundary constraints
+    function _ϕ(x0, xf, v) # nonlinear boundary constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(ϕf) append!(val, ϕf[i](x0, xf, v)) end
         return val
     end
 
-    function θ(v) # nonlinear variable constraints
+    function θ(v) # nonlinear mixed constraints
+        dim = length(θl)
+        val = zeros(ctNumber, dim)
+        j = 1
+        for i ∈ 1:length(θf)
+            vali = θf[i](v)
+            li = length(vali)
+            val[j:j+li-1] .= vali # .= also allows scalar value for vali
+            j = j + li
+        end
+        return val
+    end
+
+    function _θ(v) # nonlinear variable constraints
         val = Vector{ctNumber}()
         for i ∈ 1:length(θf) append!(val, θf[i](v)) end
         return val
@@ -981,16 +1031,3 @@ function nlp_constraints(ocp::OptimalControlModel)
     return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
 
 end
-
-# getters for constraints dimensions # debug: rewrite properly (make the computation from the dict)
-#dim_boundary_conditions(ocp::OptimalControlModel) = ocp.dim_boundary_conditions 
-
-#dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
-#dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
-#dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
-# NO dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_path_constraints 
-#dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
-
-#dim_state_box(ocp::OptimalControlModel) = ocp.dim_state_box 
-#dim_control_box(ocp::OptimalControlModel) = ocp.dim_control_box 
-#dim_variable_box(ocp::OptimalControlModel) = ocp.dim_variable_box
