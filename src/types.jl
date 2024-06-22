@@ -1174,17 +1174,6 @@ $(TYPEDFIELDS)
     criterion::Union{Symbol,Nothing}=nothing
     dynamics::Union{Dynamics,Nothing}=nothing
     constraints::Dict{Symbol, Tuple{Vararg{Any}}}=Dict{Symbol, Tuple{Vararg{Any}}}()
-
-    # internal dimensions for constraints
-    dim_control_constraints::Union{Dimension, Nothing}=nothing
-    dim_state_constraints::Union{Dimension, Nothing}=nothing
-    dim_mixed_constraints::Union{Dimension, Nothing}=nothing
-    dim_path_constraints::Union{Dimension, Nothing}=nothing
-    dim_boundary_conditions::Union{Dimension, Nothing}=nothing
-    dim_variable_constraints::Union{Dimension, Nothing}=nothing
-    dim_control_box::Union{Dimension, Nothing}=nothing
-    dim_state_box::Union{Dimension, Nothing}=nothing
-    dim_variable_box::Union{Dimension, Nothing}=nothing
 end
 
 # used for checkings

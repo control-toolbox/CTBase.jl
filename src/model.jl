@@ -930,7 +930,16 @@ function nlp_constraints(ocp::OptimalControlModel)
         _ => error("Internal error") end
     end
 
+    @assert length(ξl) == length(ξu)
+    @assert length(ηl) == length(ηu)
+    @assert length(ψl) == length(ψu)
+    @assert length(ϕl) == length(ϕu)
+    @assert length(θl) == length(θu)
+
+    # debug: return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
+
     function ξ(t, u, v) # nonlinear control constraints
+        dim = length(ξb)
         val = Vector{ctNumber}()
         for i ∈ 1:length(ξf) append!(val, ξf[i](t, u, v)) end
         return val
@@ -965,12 +974,14 @@ function nlp_constraints(ocp::OptimalControlModel)
 end
 
 # getters for constraints dimensions # debug: rewrite properly (make the computation from the dict)
-dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
-dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
-dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
-dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_path_constraints 
-dim_boundary_conditions(ocp::OptimalControlModel) = ocp.dim_boundary_conditions 
-dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
-dim_control_box(ocp::OptimalControlModel) = ocp.dim_control_box 
-dim_state_box(ocp::OptimalControlModel) = ocp.dim_state_box 
-dim_variable_box(ocp::OptimalControlModel) = ocp.dim_variable_box
+#dim_boundary_conditions(ocp::OptimalControlModel) = ocp.dim_boundary_conditions 
+
+#dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
+#dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
+#dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
+# NO dim_path_constraints(ocp::OptimalControlModel) = ocp.dim_path_constraints 
+#dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
+
+#dim_state_box(ocp::OptimalControlModel) = ocp.dim_state_box 
+#dim_control_box(ocp::OptimalControlModel) = ocp.dim_control_box 
+#dim_variable_box(ocp::OptimalControlModel) = ocp.dim_variable_box
