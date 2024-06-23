@@ -104,7 +104,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         println(io, "")
 
         # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
-        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints(ocp)
+        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints!(ocp)
         has_constraints = false
         if !isempty(ξl) || !isempty(ulb)
             has_constraints = true
