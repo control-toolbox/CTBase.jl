@@ -222,7 +222,8 @@ $(TYPEDSIGNATURES)
 Return the type constraint among
 `:initial`, `:final`, `:boundary`, `:control_range`, `:control_fun`,
 `:state_range`, `:state_fun`, `:mixed`, `:variable_range`, `:variable_fun` (`:other` otherwise),
-together with the appropriate value (range, updated expression...)
+together with the appropriate value (range, updated expression...) Expressions like `u(t0)` where `u`
+is the control and `t0` the initial time return `:other`.
 
 # Example
 ```jldoctest
@@ -328,10 +329,9 @@ julia> constraint_type(:( v ), t, t0, tf, x, u, v)
 (:variable_range, nothing)
 
 julia> constraint_type(:( v^2  + 1 ), t, t0, tf, x, u, v)
-(:variable_fun, :(v ^ 2 + 1))
-
+:variable_fun
 julia> constraint_type(:( v[2]^2 + 1 ), t, t0, tf, x, u, v)
-(:variable_fun, :(v[2] ^ 2 + 1))
+:variable_fun
 ```
 """
 constraint_type(e, t, t0, tf, x, u, v) = begin
