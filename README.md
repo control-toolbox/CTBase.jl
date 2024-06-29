@@ -15,7 +15,7 @@
 [down-img]: https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/CTBase
 [down-url]: https://pkgs.genieframework.com?packages=CTBase
 
-[release-img]: https://img.shields.io/github/v/release/control-toolbox/CTBase.jl.svg?style=flat-square
+[release-img]: https://img.shields.io/github/v/release/control-toolbox/CTBase.jl.svg?style=round-square
 [release-url]: https://github.com/control-toolbox/CTBase.jl/releases
 
 The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
