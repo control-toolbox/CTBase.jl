@@ -15,12 +15,16 @@
 [down-img]: https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/CTBase
 [down-url]: https://pkgs.genieframework.com?packages=CTBase
 
+[release-img]: https://img.shields.io/github/v/release/control-toolbox/CTBase.jl.svg?style=flat-square
+[release-url]: https://github.com/control-toolbox/CTBase.jl/releases
+
 The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
 
 | **Documentation**  | [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url]  |
 |:------------------:|:------------------------------------------------------------------------------------------------:|
-| **Build Status**   | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url]                           |
-| **Downloads**      | [![CTBase Downloads][down-img]][down-url]                                                         |
+| **Code Status**    | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url]                           |
+| **Release**        | [![Release][release-img]][release-url]                                                           |
+| **Downloads**      | [![Downloads][down-img]][down-url]                                                               |
 
 ## Installation
 
