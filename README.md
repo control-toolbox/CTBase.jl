@@ -22,7 +22,7 @@ The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://githu
 
 | **Documentation**  | **Code Status**  | **Release**  | **Downloads** |
 |:-------------------|:-----------------|:-------------|:--------------|
-| [![Documentation][doc-stable-img]][doc-stable-url] <br> [![Documentation][doc-dev-img]][doc-dev-url] | [![Build Status][ci-img]][ci-url] <br> [![Covering Status][co-img]][co-url] | [![Release][release-img]][release-url] | [![Downloads][down-img]][down-url] |
+| [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url] | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] | [![Release][release-img]][release-url] | [![Downloads][down-img]][down-url] |
 
 ## Installation
 
