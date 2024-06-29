@@ -20,12 +20,9 @@
 
 The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
 
-|                    |                                                                                                       |
-|:-------------------|:------------------------------------------------------------------------------------------------------|
-| **Documentation**  | [![Documentation][doc-stable-img]][doc-stable-url] <br> [![Documentation][doc-dev-img]][doc-dev-url]  |
-| **Code Status**    | [![Build Status][ci-img]][ci-url] <br> [![Covering Status][co-img]][co-url]                           |
-| **Release**        | [![Release][release-img]][release-url]                                                                |
-| **Downloads**      | [![Downloads][down-img]][down-url]                                                                    |
+| **Documentation**  | **Code Status**  | **Release**  | **Downloads** |
+|:-------------------|:-----------------|:-------------|:--------------|
+| [![Documentation][doc-stable-img]][doc-stable-url] <br> [![Documentation][doc-dev-img]][doc-dev-url] | [![Build Status][ci-img]][ci-url] <br> [![Covering Status][co-img]][co-url] | [![Release][release-img]][release-url] | [![Downloads][down-img]][down-url] |
 
 ## Installation
 
