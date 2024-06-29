@@ -7,10 +7,10 @@
 [co-url]: https://codecov.io/gh/control-toolbox/CTBase.jl
 
 [doc-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[doc-dev-url]: http://control-toolbox.github.io/CTBase.jl/dev
+[doc-dev-url]: https://control-toolbox.org/docs/ctbase/dev/
 
 [doc-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[doc-stable-url]: http://control-toolbox.github.io/CTBase.jl/stable
+[doc-stable-url]: https://control-toolbox.org/docs/ctbase/stable/
 
 [down-img]: https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/CTBase
 [down-url]: https://pkgs.genieframework.com?packages=CTBase
