@@ -196,7 +196,7 @@ const DCostate   = ctVector
 #
 include("exception.jl")
 include("description.jl")
-include("callback.jl")
+#include("callback.jl")
 include("default.jl")
 include("types.jl")
 include("utils.jl")
@@ -223,9 +223,9 @@ export DState, DCostate
 export TimeDependence, Autonomous, NonAutonomous
 export VariableDependence, NonFixed, Fixed
 
-# callback
-export CTCallback, CTCallbacks, PrintCallback, StopCallback
-export get_priority_print_callbacks, get_priority_stop_callbacks
+# # callback
+# export CTCallback, CTCallbacks, PrintCallback, StopCallback
+# export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # description
 export Description, add, getFullDescription
