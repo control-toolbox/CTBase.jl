@@ -1,14 +1,14 @@
 using Documenter
 using CTBase
-using Plots
+#using Plots
 
 makedocs(;
-    modules=[
-        CTBase,
-        isdefined(Base, :get_extension) ?
-        Base.get_extension(CTBase, :CTBasePlots) :
-        CTBase.CTBasePlots,
-    ],
+    # modules=[
+    #     CTBase,
+    #     isdefined(Base, :get_extension) ?
+    #     Base.get_extension(CTBase, :CTBasePlots) :
+    #     CTBase.CTBasePlots,
+    # ],
     warnonly = [:cross_references, :autodocs_block],
     sitename = "CTBase.jl",
     format = Documenter.HTML(prettyurls = false),
