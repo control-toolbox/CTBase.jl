@@ -33,7 +33,7 @@ using LinearAlgebra
 """
 Type alias for a real number.
 
-```jldoctest
+```@example
 julia> const ctNumber = Real
 ```
 """
@@ -42,7 +42,7 @@ const ctNumber = Real
 """
 Type alias for a vector of real numbers.
 
-```jldoctest
+```@example
 julia> const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}}
 ```
 
@@ -53,7 +53,7 @@ const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # [] must be define
 """
 Type alias for a time.
 
-```jldoctest
+```@example
 julia> const Time = ctNumber
 ```
 
@@ -64,7 +64,7 @@ const Time = ctNumber
 """
 Type alias for a vector of times.
 
-```jldoctest
+```@example
 julia> const Times = AbstractVector{<:Time}
 ```
 
@@ -75,7 +75,7 @@ const Times = AbstractVector{<:Time}
 """
 Type alias for a grid of times. This is used to define a discretization of time interval given to solvers.
 
-```jldoctest
+```@example
 julia> const TimesDisc = Union{Times, StepRangeLen}
 ```
 
@@ -86,7 +86,7 @@ const TimesDisc = Union{Times, StepRangeLen}
 """
 Type alias for a state in Rⁿ.
 
-```jldoctest
+```@example
 julia> const State = ctVector
 ```
 
@@ -97,7 +97,7 @@ const State = ctVector
 """
 Type alias for a costate in Rⁿ.
 
-```jldoctest
+```@example
 julia> const Costate = ctVector
 ```
 
@@ -108,7 +108,7 @@ const Costate = ctVector # todo: add adjoint to write p*f(x, u) instead of p'*f(
 """
 Type alias for a control in Rᵐ.
 
-```jldoctest
+```@example
 julia> const Control = ctVector
 ```
 
@@ -119,7 +119,7 @@ const Control = ctVector
 """
 Type alias for a variable in Rᵏ.
 
-```jldoctest
+```@example
 julia> const Variable = ctVector
 ```
 
@@ -130,7 +130,7 @@ const Variable = ctVector
 """
 Type alias for a vector of states.
 
-```jldoctest
+```@example
 julia> const States = AbstractVector{<:State}
 ```
 
@@ -141,7 +141,7 @@ const States = AbstractVector{<:State}
 """
 Type alias for a vector of costates.
 
-```jldoctest
+```@example
 julia> const Costates = AbstractVector{<:Costate}
 ```
 
@@ -152,7 +152,7 @@ const Costates = AbstractVector{<:Costate}
 """
 Type alias for a vector of controls.
 
-```jldoctest
+```@example
 julia> const Controls = AbstractVector{<:Control}
 ```
 
@@ -164,7 +164,7 @@ const Controls = AbstractVector{<:Control}
 Type alias for a dimension. This is used to define the dimension of the state space, 
 the costate space, the control space, etc.
 
-```jldoctest
+```@example
 julia> const Dimension = Integer
 ```
 """
@@ -174,7 +174,7 @@ const Dimension = Integer
 """
 Type alias for a tangent vector to the state space.
 
-```jldoctest
+```@example
 julia> const DState = ctVector
 ```
 
@@ -185,7 +185,7 @@ const DState     = ctVector
 """
 Type alias for a tangent vector to the costate space.
 
-```jldoctest
+```@example
 julia> const DCostate = ctVector
 ```
 

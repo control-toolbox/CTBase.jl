@@ -486,7 +486,8 @@ function __get_data_plot(sol::OptimalControlSolution,
             @match time begin
                 :default => T
                 :normalized => (T .- T[1]) ./ (T[end] - T[1])
-                _ => error("Internal error, no such choice for time: $time. Use :default or :normalized")
+                :normalised => (T .- T[1]) ./ (T[end] - T[1])
+                _ => error("Internal error, no such choice for time: $time. Use :default, :normalized or :normalised")
             end
         end
         :state   => [X[i][ii] for i in 1:m]

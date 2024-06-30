@@ -4,7 +4,7 @@ $(TYPEDSIGNATURES)
 Return the HamiltonianLift of a VectorField.
 
 # Example
-```jldoctest
+```@example
 julia> HL = Lift(VectorField(x -> [x[1]^2,x[2]^2], autonomous=true, variable=false))
 julia> HL([1, 0], [0, 1])
 0
@@ -33,7 +33,7 @@ Return the HamiltonianLift of a function.
 Dependencies are specified with boolean : autonomous and variable.
 
 # Example
-```jldoctest
+```@example
 julia> H = Lift(x -> 2x)
 julia> H(1, 1)
 2
@@ -55,7 +55,7 @@ Return the HamiltonianLift of a VectorField or a function.
 Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
 
 # Example
-```jldoctest
+```@example
 julia> H = Lift(x -> 2x)
 julia> H(1, 1)
 2
@@ -84,7 +84,7 @@ $(TYPEDSIGNATURES)
 Lie derivative of a scalar function along a vector field : L_X(f) = X⋅f, in autonomous case
 
 # Example
-```jldoctest
+```@example
 julia> φ = x -> [x[2], -x[1]]
 julia> X = VectorField(φ)
 julia> f = x -> x[1]^2 + x[2]^2
@@ -102,7 +102,7 @@ $(TYPEDSIGNATURES)
 Lie derivative of a scalar function along a vector field : L_X(f) = X⋅f, in nonautonomous case
 
 # Example
-```jldoctest
+```@example
 julia> φ = (t, x, v) -> [t + x[2] + v[1], -x[1] + v[2]]
 julia> X = VectorField(φ, NonAutonomous, NonFixed)
 julia> f = (t, x, v) -> t + x[1]^2 + x[2]^2
@@ -121,7 +121,7 @@ Lie derivative of a scalar function along a function.
 In this case both functions will be considered autonomous and non-variable.
 
 # Example
-```jldoctest
+```@example
 julia> φ = x -> [x[2], -x[1]]
 julia> f = x -> x[1]^2 + x[2]^2
 julia> (φ⋅f)([1, 2])
@@ -142,7 +142,7 @@ $(TYPEDSIGNATURES)
 Lie derivative of a scalar function along a vector field.
 
 # Example
-```jldoctest
+```@example
 julia> φ = x -> [x[2], -x[1]]
 julia> X = VectorField(φ)
 julia> f = x -> x[1]^2 + x[2]^2
@@ -164,7 +164,7 @@ Lie derivative of a scalar function along a function.
 Dependencies are specified with boolean : autonomous and variable.
 
 # Example
-```jldoctest
+```@example
 julia> φ = x -> [x[2], -x[1]]
 julia> f = x -> x[1]^2 + x[2]^2
 julia> Lie(φ,f)([1, 2])
@@ -188,7 +188,7 @@ Lie derivative of a scalar function along a vector field or a function.
 Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
 
 # Example
-```jldoctest
+```@example
 julia> φ = x -> [x[2], -x[1]]
 julia> f = x -> x[1]^2 + x[2]^2
 julia> Lie(φ,f)([1, 2])
@@ -214,7 +214,7 @@ $(TYPEDSIGNATURES)
 Partial derivative wrt time of a function.
 
 # Example
-```jldoctest
+```@example
 julia> ∂ₜ((t,x) -> t*x)(0,8)
 8
 ```
@@ -231,7 +231,7 @@ $(TYPEDSIGNATURES)
 efficiently the Lie bracket of two vector fields, autonomous case
 
 # Example
-```jldoctest
+```@example
 julia> X = VectorField(x -> [x[2], -x[1]])
 julia> Y = VectorField(x -> [x[1], x[2]])
 julia> CTBase.:(⅋)(X, Y)([1, 2])
@@ -252,7 +252,7 @@ $(TYPEDSIGNATURES)
 efficiently the Lie bracket of two vector fields, nonautonomous case
 
 # Example
-```jldoctest
+```@example
 julia> X = VectorField((t, x, v) -> [t + v[1] + v[2] + x[2], -x[1]], NonFixed, NonAutonomous)
 julia> Y = VectorField((t, x, v) ->  [v[1] + v[2] + x[1], x[2]], NonFixed, NonAutonomous)
 julia> CTBase.:(⅋)(X, Y)(1, [1, 2], [2, 3])
@@ -275,7 +275,7 @@ $(TYPEDSIGNATURES)
 Lie bracket of two vector fields: [X, Y] = Lie(X, Y), autonomous case
 
 # Example
-```jldoctest
+```@example
 julia> f = x -> [x[2], 2x[1]]
 julia> g = x -> [3x[2], -x[1]]
 julia> X = VectorField(f)
@@ -294,7 +294,7 @@ $(TYPEDSIGNATURES)
 Lie bracket of two vector fields: [X, Y] = Lie(X, Y), nonautonomous case
 
 # Example
-```jldoctest
+```@example
 julia> f = (t, x, v) -> [t + x[2] + v, -2x[1] - v]
 julia> g = (t, x, v) -> [t + 3x[2] + v, -x[1] - v]
 julia> X = VectorField(f, NonAutonomous, NonFixed)
@@ -318,7 +318,7 @@ $(TYPEDSIGNATURES)
 Poisson bracket of two Hamiltonian functions (subtype of AbstractHamiltonian) : {f, g} = Poisson(f, g), autonomous case
 
 # Example
-```jldoctest
+```@example
 julia> f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
 julia> g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
 julia> F = Hamiltonian(f)
@@ -354,7 +354,7 @@ $(TYPEDSIGNATURES)
 Poisson bracket of two Hamiltonian functions (subtype of AbstractHamiltonian) : {f, g} = Poisson(f, g), non autonomous case
 
 # Example
-```jldoctest
+```@example
 julia> f = (t, x, p, v) -> t*v[1]*x[2]^2 + 2x[1]^2 + p[1]^2 + v[2]
 julia> g = (t, x, p, v) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] + t - v[2]
 julia> F = Hamiltonian(f, autonomous=false, variable=true)
@@ -385,7 +385,7 @@ $(TYPEDSIGNATURES)
 Poisson bracket of two HamiltonianLift functions : {f, g} = Poisson(f, g)
 
 # Example
-```jldoctest
+```@example
 julia> f = x -> [x[1]^2+x[2]^2, 2x[1]^2]
 julia> g = x -> [3x[2]^2, x[2]-x[1]^2]
 julia> F = Lift(f)
@@ -411,7 +411,7 @@ Poisson bracket of two functions : {f, g} = Poisson(f, g)
 Dependencies are specified with boolean : autonomous and variable.
 
 # Example
-```jldoctest
+```@example
 julia> f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
 julia> g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
 julia> Poisson(f, g)([1, 2], [2, 1])
@@ -435,7 +435,7 @@ Poisson bracket of two functions : {f, g} = Poisson(f, g)
 Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
 
 # Example
-```jldoctest
+```@example
 julia> f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
 julia> g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
 julia> Poisson(f, g)([1, 2], [2, 1])
@@ -459,7 +459,7 @@ $(TYPEDSIGNATURES)
 Poisson bracket of a function and an Hamiltonian function (subtype of AbstractHamiltonian) : {f, g} = Poisson(f, g)
 
 # Example
-```jldoctest
+```@example
 julia> f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
 julia> g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
 julia> G = Hamiltonian(g)          
@@ -482,7 +482,7 @@ $(TYPEDSIGNATURES)
 Poisson bracket of an Hamiltonian function (subtype of AbstractHamiltonian) and a function : {f, g} = Poisson(f, g), autonomous case
 
 # Example
-```jldoctest
+```@example
 julia> f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
 julia> g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
 julia> F = Hamiltonian(f)
@@ -510,7 +510,7 @@ $(TYPEDSIGNATURES)
 Macros for Lie and Poisson brackets
 
 # Example
-```jldoctest
+```@example
 julia> F0 = VectorField(x -> [x[1], x[2], (1-x[3])])
 julia> F1 = VectorField(x -> [0, -x[3], x[2]])
 julia> @Lie [F0, F1]([1, 2, 3])
@@ -566,7 +566,7 @@ $(TYPEDSIGNATURES)
 Macros for Poisson brackets
 
 # Example
-```jldoctest
+```@example
 julia> H0 = (x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2)
 julia> H1 = (x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2)
 julia> @Lie {H0, H1}([1, 2, 3], [1, 0, 7]) autonomous=true variable=false
@@ -629,7 +629,7 @@ $(TYPEDSIGNATURES)
 Macros for Lie and Poisson brackets
 
 # Example
-```jldoctest
+```@example
 julia> H0 = (t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[1]^2)
 julia> H1 = (t, x, p) -> 0.5*(x[1]^2+x[2]^2+p[2]^2)
 julia> @Lie {H0, H1}(1, [1, 2, 3], [1, 0, 7]) autonomous=false
