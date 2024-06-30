@@ -1,7 +1,7 @@
 """
 DescVarArg is a Vararg of symbols. `DescVarArg` is a type alias for a Vararg of symbols.
 
-```jldoctest
+```@example
 julia> const DescVarArg = Vararg{Symbol}
 ```
 
@@ -12,7 +12,7 @@ const DescVarArg = Vararg{Symbol}
 """
 A description is a tuple of symbols. `Description` is a type alias for a tuple of symbols.
 
-```jldoctest
+```@example
 julia> const Description = Tuple{DescVarArg}
 ```
 
@@ -22,7 +22,7 @@ See also: [`DescVarArg`](@ref).
 
 [`Base.show`](@ref) is overloaded for descriptions, that is tuple of descriptions are printed as follows:
 
-```jldoctest
+```@example
 julia> display( ( (:a, :b), (:b, :c) ) )
 (:a, :b)
 (:b, :c)
@@ -37,7 +37,7 @@ Print a tuple of descriptions.
 
 # Example
 
-```jldoctest
+```@example
 julia> display( ( (:a, :b), (:b, :c) ) )
 (:a, :b)
 (:b, :c)
@@ -57,7 +57,7 @@ $(TYPEDSIGNATURES)
 Return a tuple containing only the description `y`.
 
 # Example
-```jldoctest
+```@example
 julia> descriptions = ()
 julia> descriptions = add(descriptions, (:a,))
 (:a,)
@@ -77,7 +77,7 @@ and return the new tuple of descriptions. Throw an error if the description `y` 
 
 # Example
 
-```jldoctest
+```@example
 julia> descriptions = ()
 julia> descriptions = add(descriptions, (:a,))
 (:a,)
@@ -101,7 +101,7 @@ then the first one is returned.
 
 # Example
 
-```jldoctest
+```@example
 julia> desc_list = ((:a, :b), (:b, :c), (:a, :c))
 (:a, :b)
 (:b, :c)
@@ -131,7 +131,7 @@ Return the difference between the description `x` and the description `y`.
 
 # Example
 
-```jldoctest
+```@example
 julia> (:a, :b) \\ (:a,)
 (:b,)
 ```

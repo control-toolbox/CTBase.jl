@@ -6,7 +6,7 @@ $(TYPEDSIGNATURES)
 Expr iterator: apply `_Expr` to nodes and `f` to leaves of the AST.
 
 # Example
-```jldoctest
+```@example
 julia> id(e) = expr_it(e, Expr, x -> x)
 ```
 """
@@ -26,7 +26,7 @@ $(TYPEDSIGNATURES)
 Substitute expression `e1` by expression `e2` in expression `e`.
 
 # Examples
-```jldoctest
+```@example
 julia> e = :( ∫( r(t)^2 + 2u₁(t)) → min )
 :(∫(r(t) ^ 2 + 2 * u₁(t)) → min)
 
@@ -66,7 +66,7 @@ $(TYPEDSIGNATURES)
 Replace calls in e of the form `(...x...)(t)` by `(...y...)`.
 
 # Example
-```jldoctest
+```@example
 
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
@@ -97,7 +97,7 @@ $(TYPEDSIGNATURES)
 Replace calls in e of the form `(...x1...x2...)(t)` by `(...y1...y2...)` for all symbols `x1`, `x2`... in the vector `x`.
 
 # Example
-```jldoctest
+```@example
 
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u;
 
@@ -138,7 +138,7 @@ $(TYPEDSIGNATURES)
 Return true if e contains e1.
 
 # Example
-```jldoctest
+```@example
 julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 :(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
 
@@ -191,7 +191,7 @@ $(TYPEDSIGNATURES)
 Return true if e contains a `(...x...)(t)` call.
 
 # Example
-```jldoctest
+```@example
 julia> e = :( ∫( x[1](t)^2 + 2*u(t) ) → min )
 :(∫((x[1])(t) ^ 2 + 2 * u(t)) → min)
 
@@ -226,7 +226,7 @@ together with the appropriate value (range, updated expression...) Expressions l
 is the control and `t0` the initial time return `:other`.
 
 # Example
-```jldoctest
+```@example
 julia> t = :t; t0 = 0; tf = :tf; x = :x; u = :u; v = :v
 
 julia> constraint_type(:( ẏ(t) ), t, t0, tf, x, u, v)

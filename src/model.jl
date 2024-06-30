@@ -11,7 +11,7 @@ The model is defined by the following optional keyword argument:
 
 # Examples
 
-```jldoctest
+```@example
 julia> ocp = Model()
 julia> ocp = Model(autonomous=false)
 julia> ocp = Model(autonomous=false, variable=true)
@@ -44,7 +44,7 @@ The model is defined by the following argument:
 
 # Examples
 
-```jldoctest
+```@example
 julia> ocp = Model()
 julia> ocp = Model(NonAutonomous)
 julia> ocp = Model(Autonomous, NonFixed)
@@ -161,7 +161,7 @@ Define the variable dimension and possibly the names of each component.
     You can use variable! once to set the variable dimension when the model is `NonFixed`.
 
 # Examples
-```jldoctest
+```@example
 julia> variable!(ocp, 1, "v")
 julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
 ```
@@ -217,7 +217,7 @@ Define the state dimension and possibly the names of each component.
 
 # Examples
 
-```jldoctest
+```@example
 julia> state!(ocp, 1)
 julia> ocp.state_dimension
 1
@@ -303,7 +303,7 @@ Define the control dimension and possibly the names of each coordinate.
 
 # Examples
 
-```jldoctest
+```@example
 julia> control!(ocp, 1)
 julia> ocp.control_dimension
 1
@@ -391,7 +391,7 @@ When a time is free, then one must provide the corresponding index of the ocp va
 
 # Examples
 
-```jldoctest
+```@example
 julia> time!(ocp, t0=0,   tf=1  ) # Fixed t0 and fixed tf
 julia> time!(ocp, t0=0,   indf=2) # Fixed t0 and free  tf
 julia> time!(ocp, ind0=2, tf=1  ) # Free  t0 and fixed tf
@@ -402,7 +402,7 @@ When you plot a solution of an optimal control problem, the name of the time var
 By default, the name is "t".
 Consider you want to set the name of the time variable to "s".
 
-```jldoctest
+```@example
 julia> time!(ocp, t0=0, tf=1, name="s") # name is a String
 # or
 julia> time!(ocp, t0=0, tf=1, name=:s ) # name is a Symbol  
@@ -497,7 +497,7 @@ We denote by `n`, `m` and `q` respectively the dimension of the state, control a
 
 ## Examples
 
-```jldoctest
+```@example
 julia> constraint!(ocp, :initial; rg=1:2:5, lb=[ 0, 0, 0 ], ub=[ 1, 2, 1 ])
 julia> constraint!(ocp, :initial; rg=2:3, lb=[ 0, 0 ], ub=[ 1, 2 ])
 julia> constraint!(ocp, :final; rg=1, lb=0, ub=2)
@@ -656,7 +656,7 @@ Set the dynamics.
 
 # Example
 
-```jldoctest
+```@example
 julia> dynamics!(ocp, f)
 ```
 """
@@ -687,7 +687,7 @@ Set the criterion to the function `f`. Type can be `:mayer` or `:lagrange`. Crit
 
 # Examples
 
-```jldoctest
+```@example
 julia> objective!(ocp, :mayer, (x0, xf) -> x0[1] + xf[2])
 julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u^2) # the control is of dimension 1
 ```
@@ -737,7 +737,7 @@ Set the criterion to the function `g` and `f⁰`. Type can be `:bolza`. Criterio
 
 # Example
 
-```jldoctest
+```@example
 julia> objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u^2) # the control is of dimension 1
 ```
 """
@@ -773,7 +773,7 @@ Remove a labeled constraint.
 
 # Example
 
-```jldoctest
+```@example
 julia> remove_constraint!(ocp, :con)
 ```
 """
@@ -810,7 +810,7 @@ computation (not taking into account provided value / bounds).
 
 # Example
 
-```jldoctest
+```@example
 julia> constraint!(ocp, :initial, 0, :c0)
 julia> c = constraint(ocp, :c0)
 julia> c(1)
@@ -875,7 +875,7 @@ and update information about constraints dimensions of  `ocp`.
 
 # Example
 
-```jldoctest
+```@example
 julia> (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
 ```

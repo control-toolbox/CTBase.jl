@@ -62,7 +62,7 @@ $(TYPEDSIGNATURES)
 Foo
 
 # Example
-```jldoctest
+```@example
 Foo
 ```
 """
@@ -447,7 +447,7 @@ $(TYPEDSIGNATURES)
 Define an optimal control problem. One pass parsing of the definition.
 
 # Example
-```jldoctest
+```@example
 @def ocp begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
