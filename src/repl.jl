@@ -5,7 +5,6 @@ const ModelRepl = Vector{Expr}
     ocp_name::Symbol = gensym(:ocp)
     sol_name::Symbol = gensym(:sol)
     debug::Bool = false
-    __demo::Union{Nothing, Bool} = nothing
 end
 
 @with_kw mutable struct HistoryRepl
@@ -45,7 +44,7 @@ $(TYPEDSIGNATURES)
 
 Create a ct REPL.
 """
-function ct_repl(; debug=false, demo=false, verbose=false)
+function ct_repl(; debug=false, verbose=false)
 
     global ct_repl_is_set
     global ct_repl_data
@@ -58,16 +57,12 @@ function ct_repl(; debug=false, demo=false, verbose=false)
 
         #
         ct_repl_data.debug = debug
-        ct_repl_data.__demo = demo
 
-        # if demo, print a message
-        demo && println("\nWelcome to the demo of the ct REPL.\n")
-
-        # advice to start by setting the name of the ocp and the solution
-        println("\nType > to enter into ct repl.\n")
-        println("For a start, you can set the names of the optimal control problem and its solution.")
-        println("In ct repl, type:\n")
-        println("    ct> NAME=(ocp, sol)")
+        # # advice to start by setting the name of the ocp and the solution
+        # println("\nType > to enter into ct repl.\n")
+        # println("For a start, you can set the names of the optimal control problem and its solution.")
+        # println("In ct repl, type:\n")
+        # println("    ct> NAME=(ocp, sol)")
 
         # add initial ct_repl_data to ct_repl_history
         __add!(ct_repl_history, ct_repl_data)
@@ -267,17 +262,14 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
         return q
     end,
     :HELP => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        l = 22
+        l = 8 # 22
         n = 6
-        println("\nCommands:\n")
+        println("\nSpecial commands to interact with the ct repl:\n")
         dict = sort(collect(COMMANDS_HELPS), by = x->x[1])
-        shortcuts = Dict(value => key for (key, value) in COMMANDS_SHORTCUTS)
         for (k, v) ∈ dict
             m = length(string(k))
             s = "  "
             s *= string(k) * " "^(n-m)
-            s *= "(£" * lowercase(string(k)) * "," * " "^(n-m)
-            s *= string(shortcuts[k]) * ")" 
             r = length(s)
             s *= " "^(l-r)
             printstyled(s, color=:magenta)
@@ -298,68 +290,30 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
         end
         return q
     end,
-    :JLS => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        println("\nhttps://youtu.be/HzRF2622m9A")
-        return nothing
-    end,
 )
 
 # dict of help messages associated to ct repl commands
 COMMANDS_HELPS = Dict{Symbol, String}(
     :SOLVE => "solve the optimal control problem",
     :PLOT => "plot the solution",
-    :DEBUG => "toggle debug mode",
-    :NAME => "NAME=ocp or NAME=(ocp, sol)",
-    :UNDO => "undo",
-    :REDO => "redo",
+    #:DEBUG => "toggle debug mode",
+    :NAME => "print the name of the optimal control problem and the solution. To set them: \n\n" * 
+    "          ct> NAME=ocp\n" * 
+    "          ct> NAME=(ocp, sol)\n",
+    :UNDO => "undo last command",
+    :REDO => "redo last command",
     :HELP => "help",
-    :REPL => "return the current ct REPL",
-    :SHOW => "show optimal control problem",
-    :CLEAR => "clear optimal control problem",
-)
-
-# dict of shortcuts associated to ct repl commands
-COMMANDS_SHORTCUTS = Dict{Symbol, Symbol}(
-    :£sh => :SHOW,
-    :£s => :SOLVE,
-    :£p => :PLOT,
-    :£n => :NAME,
-    :£u => :UNDO,
-    :£r => :REDO,
-    :£h => :HELP,
-    :£d => :DEBUG,
-    :£re => :REPL,
-    :£c => :CLEAR,
+    #:REPL => "return the current ct REPL",
+    :SHOW => "show the optimal control problem",
+    :CLEAR => "clear the optimal control problem",
 )
 
 # non existing command
 __non_existing_command() = :non_existing_command
 
 # transform to a command
-function __transform_to_command(c::Symbol)::Symbol
-
-    # split c in parts
-    v = split(string(c), "£")
-    
-    if v[1] == ""
-        # if c start with £ and has only one or two more characters, use COMMANDS_SHORTCUTS
-        ((length(v[2]) == 1) || (length(v[2]) == 2)) && begin
-            c ∈ keys(COMMANDS_SHORTCUTS) && return COMMANDS_SHORTCUTS[c]
-            println("\n Invalid command: ", c)
-            return __non_existing_command()
-        end
-        # if c start with £ and has more than one character, returns the associated command
-        length(v[2]) > 2 && return Symbol(uppercase(v[2]))
-    else
-        # if c does not start with £, returns c
-        return c
-    end
-
-end
-
-function __transform_to_command(e::Expr)::Symbol
-    return __non_existing_command()
-end
+__transform_to_command(c::Symbol)::Symbol = c
+__transform_to_command(e::Expr)::Symbol   = __non_existing_command()
 
 # get code from model
 function __code(model::ModelRepl)::Expr
@@ -406,15 +360,9 @@ end
 
 # quote solve: todo: update when using real solver
 function __quote_solve(ct_repl_data::CTRepl)
-    if ct_repl_data.__demo
-        solve_q = (quote $(ct_repl_data.sol_name) = CTBase.__demo_solver(); nothing end)
-        ct_repl_data.debug && println("debug> quote solve: ", solve_q)
-        return solve_q
-    else
-        solve_q = (quote $(ct_repl_data.sol_name) = solve($(ct_repl_data.ocp_name)) end)
-        ct_repl_data.debug && println("debug> quote solve: ", solve_q)
-        return solve_q
-    end
+    solve_q = (quote $(ct_repl_data.sol_name) = solve($(ct_repl_data.ocp_name)) end)
+    ct_repl_data.debug && println("debug> quote solve: ", solve_q)
+    return solve_q
 end
 
 # quote plot: todo: update when handle correctly solution
@@ -463,54 +411,4 @@ function Base.show(io::IO, ::MIME"text/plain", ct_repl_data::CTRepl)
     println(io, "ocp_name: ", ct_repl_data.ocp_name)
     println(io, "sol_name: ", ct_repl_data.sol_name)
     println(io, "debug: ", ct_repl_data.debug)
-end
-
-function __demo_solver()
-
-    # create a solution
-    n=2
-    m=1
-    t0=0.0
-    tf=1.0
-    x0=[-1.0, 0.0]
-    xf=[0.0, 0.0]
-    a = x0[1]
-    b = x0[2]
-    C = [-(tf-t0)^3/6.0 (tf-t0)^2/2.0
-        -(tf-t0)^2/2.0 (tf-t0)]
-    D = [-a-b*(tf-t0), -b]+xf
-    p0 = C\D
-    α = p0[1]
-    β = p0[2]
-    x(t) = [a+b*(t-t0)+β*(t-t0)^2/2.0-α*(t-t0)^3/6.0, b+β*(t-t0)-α*(t-t0)^2/2.0]
-    p(t) = [α, -α*(t-t0)+β]
-    u(t) = [p(t)[2]]
-    objective = 0.5*(α^2*(tf-t0)^3/3+β^2*(tf-t0)-α*β*(tf-t0)^2)
-    #
-    N=201
-    times = range(t0, tf, N)
-    #
-
-    sol = OptimalControlSolution()
-    sol.state_dimension = n
-    sol.control_dimension = m
-    sol.times = times
-    sol.time_name="t"
-    sol.state = x
-    sol.state_name = "x"
-    sol.state_components_names = [ "x" * ctindices(i) for i ∈ range(1, n)]
-    sol.costate = p
-    sol.control = u
-    sol.control_name = "u"
-    sol.control_components_names = [ "u" ]
-    sol.objective = objective
-    sol.iterations = 0
-    sol.stopping = :dummy
-    sol.message = "ceci est un test"
-    sol.success = true
-
-    sleep(4)
-
-    return sol
-
 end
