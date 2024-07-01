@@ -15,7 +15,6 @@ makedocs(;
     pages = [
         "Introduction" => "index.md",
         "API" => ["api-ctbase.md", 
-        #"api-callbacks.md",
         "api-description.md", 
         "api-diffgeom.md",
         "api-exceptions.md", 

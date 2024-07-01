@@ -18,6 +18,7 @@ The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://githu
 You may find in this package, some tools to:
 
 - modelise an optimal control problem (see [`OptimalControlModel`](@ref)) from an abstract point of view (see [`@def`](@ref) from [Parser](@ref)) or from a functional point of view (see [Model](@ref)).
+- give tools to provide a first iterate to the solvers used to solve the optimal control problem. The first iterate is what we call an `init`, see [`OptimalControlInit`](@ref).
 - print an optimal control problem: see [Print](@ref).
 - plot a solution (see [`OptimalControlSolution`](@ref)) of an optimal control problem: see [Plot](@ref).
 - compute [Lie brackets](https://en.wikipedia.org/w/index.php?title=Lie_bracket_of_vector_fields&oldid=1163591634), [Poisson brackets](https://en.wikipedia.org/w/index.php?title=Poisson_manifold&oldid=1163991099#Formal_definition) and some other tools from [differential geometry](https://en.wikipedia.org/w/index.php?title=Differential_geometry&oldid=1165793820): see [Differential geometry](@ref).
