@@ -127,23 +127,23 @@ Initialization data for each field can be left to default or:
 
 # Constructors:
 
-- `_OptimalControlInit()`: default initialization
-- `_OptimalControlInit(state, control, variable, time)`: constant vector, function handles and / or matrices / vectors interpolated along given time grid
-- `_OptimalControlInit(sol)`: from existing solution
+- `OptimalControlInit()`: default initialization
+- `OptimalControlInit(state, control, variable, time)`: constant vector, function handles and / or matrices / vectors interpolated along given time grid
+- `OptimalControlInit(sol)`: from existing solution
 
 # Examples
 
 ```julia-repl
-julia> init = _OptimalControlInit()
-julia> init = _OptimalControlInit(state=[0.1, 0.2], control=0.3)
-julia> init = _OptimalControlInit(state=[0.1, 0.2], control=0.3, variable=0.5)
-julia> init = _OptimalControlInit(state=[0.1, 0.2], controlt=t->sin(t), variable=0.5)
-julia> init = _OptimalControlInit(state=[[0, 0], [1, 2], [5, -1]], time=[0, .3, 1.], controlt=t->sin(t))
-julia> init = _OptimalControlInit(sol)
+julia> init = OptimalControlInit()
+julia> init = OptimalControlInit(state=[0.1, 0.2], control=0.3)
+julia> init = OptimalControlInit(state=[0.1, 0.2], control=0.3, variable=0.5)
+julia> init = OptimalControlInit(state=[0.1, 0.2], controlt=t->sin(t), variable=0.5)
+julia> init = OptimalControlInit(state=[[0, 0], [1, 2], [5, -1]], time=[0, .3, 1.], controlt=t->sin(t))
+julia> init = OptimalControlInit(sol)
 ```
 
 """
-mutable struct _OptimalControlInit
+mutable struct OptimalControlInit
    
     state_init::Function
     control_init::Function
@@ -154,9 +154,9 @@ mutable struct _OptimalControlInit
     """
     $(TYPEDSIGNATURES)
 
-    _OptimalControlInit base constructor with separate explicit arguments
+    OptimalControlInit base constructor with separate explicit arguments
     """
-    function _OptimalControlInit(; state=nothing, control=nothing, variable=nothing, time=nothing, state_dim=nothing, control_dim=nothing, variable_dim=nothing)
+    function OptimalControlInit(; state=nothing, control=nothing, variable=nothing, time=nothing, state_dim=nothing, control_dim=nothing, variable_dim=nothing)
         
         init = new()
     
@@ -177,9 +177,9 @@ mutable struct _OptimalControlInit
     """
     $(TYPEDSIGNATURES)
 
-    _OptimalControlInit constructor with arguments grouped as named tuple or dict
+    OptimalControlInit constructor with arguments grouped as named tuple or dict
     """
-    function _OptimalControlInit(init_data; state_dim=nothing, control_dim=nothing, variable_dim=nothing)
+    function OptimalControlInit(init_data; state_dim=nothing, control_dim=nothing, variable_dim=nothing)
 
         # trivial case: default init
         x_init = nothing
@@ -208,97 +208,17 @@ mutable struct _OptimalControlInit
         end
 
         # call base constructor
-        return _OptimalControlInit(state=x_init, control=u_init, variable=v_init, time=t_init, state_dim=state_dim, control_dim=control_dim, variable_dim=variable_dim)
+        return OptimalControlInit(state=x_init, control=u_init, variable=v_init, time=t_init, state_dim=state_dim, control_dim=control_dim, variable_dim=variable_dim)
     
     end
 
     """
     $(TYPEDSIGNATURES)
 
-    _OptimalControlInit constructor with solution as argument (warm start)
+    OptimalControlInit constructor with solution as argument (warm start)
     """
-    function _OptimalControlInit(sol::OptimalControlSolution; unused_kwargs...)
-        return _OptimalControlInit(state=sol.state, control=sol.control, variable=sol.variable, state_dim=sol.state_dimension, control_dim=sol.control_dimension, variable_dim=sol.variable_dimension)
+    function OptimalControlInit(sol::OptimalControlSolution; unused_kwargs...)
+        return OptimalControlInit(state=sol.state, control=sol.control, variable=sol.variable, state_dim=sol.state_dimension, control_dim=sol.control_dimension, variable_dim=sol.variable_dimension)
     end
 
 end
-
-
-
-#= OLD VERSION
-"""
-$(TYPEDSIGNATURES)
-
-Initialization of the OCP solution that can be used when solving the discretized problem DOCP.
-
-# Constructors:
-
-- `OptimalControlInit()`: default initialization
-- `OptimalControlInit(x_init, u_init, v_init)`: constant vector and/or function handles
-- `OptimalControlInit(sol)`: from existing solution
-
-# Examples
-
-```julia-repl
-julia> init = OptimalControlInit()
-julia> init = OptimalControlInit(x_init=[0.1, 0.2], u_init=0.3)
-julia> init = OptimalControlInit(x_init=[0.1, 0.2], u_init=0.3, v_init=0.5)
-julia> init = OptimalControlInit(x_init=[0.1, 0.2], u_init=t->sin(t), v_init=0.5)
-julia> init = OptimalControlInit(sol)
-```
-
-"""
-mutable struct OptimalControlInit
-
-    state_init::Function
-    control_init::Function
-    variable_init::Union{Nothing, ctVector}
-    costate_init::Function
-    multipliers_init::Union{Nothing, ctVector}
-    info::Symbol
-
-    # warm start from solution
-    function OptimalControlInit(sol::OptimalControlSolution)
-
-        init = new()
-        init.info = :from_solution
-        init.state_init    = t -> sol.state(t)
-        init.control_init  = t -> sol.control(t)
-        init.variable_init = sol.variable
-        #+++ add costate and scalar multipliers
-
-        return init
-    end
-
-    # constant / functional init with explicit arguments
-    function OptimalControlInit(; state::Union{Nothing, ctVector, Function}=nothing, control::Union{Nothing, ctVector, Function}=nothing, variable::Union{Nothing, ctVector}=nothing)
-        
-        init = new()
-        init.info = :constant_or_function
-        init.state_init = (state isa Function) ? t -> state(t) : t -> state
-        init.control_init = (control isa Function) ? t -> control(t) : t -> control
-        init.variable_init = variable
-        #+++ add costate and scalar multipliers
-        
-        return init
-    end
-
-    # version with arguments as collection/iterable
-    # (may be fused with version above ?)
-    function OptimalControlInit(init)
-
-        x_init = :state    ∈ keys(init) ? init[:state]    : nothing
-        u_init = :control  ∈ keys(init) ? init[:control]  : nothing
-        v_init = :variable ∈ keys(init) ? init[:variable] : nothing
-        return OptimalControlInit(state=x_init, control=u_init, variable=v_init)
-    
-    end
-
-    # trivial version that just returns its argument
-    # used for unified syntax in caller functions
-    function OptimalControlInit(init::OptimalControlInit)
-        return init
-    end
-
-end
-=#

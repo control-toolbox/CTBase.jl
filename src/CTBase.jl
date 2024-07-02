@@ -256,7 +256,7 @@ export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, di
 export OptimalControlSolution
 
 # initialization
-export _OptimalControlInit
+export OptimalControlInit
 
 # utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
