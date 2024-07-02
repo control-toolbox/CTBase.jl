@@ -58,7 +58,7 @@ Do nothing, no variable for fixed ocp.
 
 """
 function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence, Fixed})
-    nothing
+    return nothing
 end
 
 """

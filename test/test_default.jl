@@ -1,5 +1,10 @@
 function test_default()
 
+    @testset "Audo diff" begin
+        set_AD_backend(AutoForwardDiff())
+        @test CTBase.__get_AD_backend() == AutoForwardDiff()
+    end
+
     @testset "Default value of the time dependence of the functions" begin
         @test CTBase.__fun_time_dependence() == Autonomous
     end

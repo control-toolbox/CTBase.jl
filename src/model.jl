@@ -417,7 +417,7 @@ function time!(
     name::Union{String, Symbol}=__time_name()) where VT
 
     # check if the problem has been set to Variable or NonVariable
-    VT == NonFixed && (!isnothing(ind0) || !isnothing(indf)) && __check_variable_set(ocp)
+    (VT == NonFixed) && (!isnothing(ind0) || !isnothing(indf)) && __check_variable_set(ocp)
 
     # check if indices are in 1:q
     q = ocp.variable_dimension

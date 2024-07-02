@@ -1,6 +1,7 @@
 using CTBase
 using Test
 using Plots
+using DifferentiationInterface: AutoForwardDiff
 
 # functions and types that are not exported
 const vec2vec  = CTBase.vec2vec
