@@ -408,6 +408,8 @@ end
     # initial and final times
     ocp = Model()
     __time!(ocp, 0, 1)
+    @test !CTBase.__is_initial_time_free(ocp)
+    @test !CTBase.__is_final_time_free(ocp)
     @test ocp.initial_time == 0
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
@@ -428,6 +430,8 @@ end
     ocp = Model(variable=true)
     variable!(ocp, 1)
     __time!(ocp, 0, Index(1))
+    @test !CTBase.__is_initial_time_free(ocp)
+    @test CTBase.__is_final_time_free(ocp)
     @test ocp.initial_time == 0
     @test ocp.final_time == Index(1)
     @test ocp.time_name == "t"
@@ -450,6 +454,8 @@ end
     ocp = Model(variable=true)
     variable!(ocp, 1)
     __time!(ocp, Index(1), 1)
+    @test CTBase.__is_initial_time_free(ocp)
+    @test !CTBase.__is_final_time_free(ocp)
     @test ocp.initial_time == Index(1)
     @test ocp.final_time == 1
     @test ocp.time_name == "t"
