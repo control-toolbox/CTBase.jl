@@ -1082,7 +1082,6 @@ Return the dimension of range constraints on state (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
 dim_state_range(ocp::OptimalControlModel) = ocp.dim_state_range 
-dim_state_box = dim_state_range # alias, CTDirect.jl compatibility
 
 """
 $(TYPEDSIGNATURES)
@@ -1091,7 +1090,6 @@ Return the dimension of range constraints on control (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
 dim_control_range(ocp::OptimalControlModel) = ocp.dim_control_range 
-dim_control_box = dim_control_range # alias, CTDirect.jl compatibility
 
 """
 $(TYPEDSIGNATURES)
@@ -1100,4 +1098,3 @@ Return the dimension of range constraints on variable (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
 dim_variable_range(ocp::OptimalControlModel) = ocp.dim_variable_range
-dim_variable_box = dim_variable_range # alias, CTDirect.jl compatibility
