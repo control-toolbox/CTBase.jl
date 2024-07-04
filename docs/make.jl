@@ -1,5 +1,6 @@
 using Documenter
 using CTBase
+using DocumenterMermaid
 #using Plots
 
 makedocs(;
