@@ -20,7 +20,7 @@ jobs:
           registry: control-toolbox/ct-registry
       - uses: julia-actions/julia-buildpkg@v1
         with:
-          version: '1.9'
+          version: '1.10'
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
