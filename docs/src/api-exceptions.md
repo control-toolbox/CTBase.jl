@@ -6,7 +6,6 @@
 Pages   = ["api-exceptions.md"]
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Private = false
 ```
 
 ## Documentation

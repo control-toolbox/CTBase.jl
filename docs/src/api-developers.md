@@ -6,7 +6,6 @@
 Pages   = ["api-developers.md"]
 Modules = [CTBase]
 Order = [:module, :constant, :type, :function, :macro]
-Public = false
 ```
 
 ## Documentation
