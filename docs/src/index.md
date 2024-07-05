@@ -15,7 +15,7 @@ P(<a href='https://control-toolbox.org/docs/ctproblems/stable/'>CTProblems</a>) 
 P --> B
 F --> B
 D --> B
-style B fill:#FFF0F5
+style B fill:#FBF275
 ```
 
 !!! note "Install"
