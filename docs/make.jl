@@ -1,40 +1,25 @@
 using Documenter
 using CTBase
 using DocumenterMermaid
-#using Plots
 
 makedocs(;
-    # modules=[
-    #     CTBase,
-    #     isdefined(Base, :get_extension) ?
-    #     Base.get_extension(CTBase, :CTBasePlots) :
-    #     CTBase.CTBasePlots,
-    # ],
     warnonly = [:cross_references, :autodocs_block],
     sitename = "CTBase.jl",
     format = Documenter.HTML(
         prettyurls = false,
+        size_threshold_ignore = [
+            "api.md",
+            "dev.md",
+        ],
         assets=[
             asset("https://control-toolbox.org/assets/css/documentation.css"),
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
     pages = [
-        "Introduction" => "index.md",
-        "API" => ["api-ctbase.md", 
-        #"api-callbacks.md",
-        "api-description.md", 
-        "api-diffgeom.md",
-        "api-exceptions.md", 
-        "api-init.md",
-        "api-model.md",
-        "api-parser.md",
-        "api-plot.md", 
-        "api-print.md",
-        "api-repl.md",
-        "api-types.md", 
-        "api-utils.md"],
-        "Developers" => "api-developers.md"
+        "Introduction"  => "index.md",
+        "API"           => "api.md",
+        "Developers"    => "dev.md",
     ],
     checkdocs=:none,
 )
