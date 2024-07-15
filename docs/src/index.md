@@ -13,7 +13,7 @@ O --> D(<a href='https://control-toolbox.org/OptimalControl.jl/stable/api-ctdire
 O --> F(<a href='https://control-toolbox.org/OptimalControl.jl/stable/api-ctflows.html'>CTFlows</a>)
 F --> B
 D --> B
-style F fill:#FBF275
+style B fill:#FBF275
 ```
 
 For the developers, here are the [private methods](@ref dev-ctflows).
