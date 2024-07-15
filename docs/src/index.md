@@ -15,5 +15,3 @@ F --> B
 D --> B
 style B fill:#FBF275
 ```
-
-For the developers, here are the [private methods](@ref dev-ctflows).
