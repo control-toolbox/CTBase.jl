@@ -553,13 +553,22 @@ function constraint!(
     rg::Union{OrdinalRange{<:Integer}, Index, Integer, Nothing}=nothing, 
     f::Union{Function, Nothing}=nothing, 
     lb::Union{ctVector, Nothing}=nothing, 
-    ub::Union{ctVector, Nothing}=nothing, 
+    ub::Union{ctVector, Nothing}=nothing,
+    val::Union{ctVector, Nothing}=nothing,
     label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence}
 
     __check_all_set(ocp)
     type == :variable && is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable" * ", you cannot use constraint! function with type=:variable."))
     label ∈ constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    isnothing(lb) && isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
+    isnothing(val) && isnothing(lb) && isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
+
+    # value for equality constraint
+    # if val is not nothing then lb and ub should be nothing
+    !isnothing(val) && ( !isnothing(lb) || !isnothing(ub) ) && throw(UnauthorizedCall("If val is provided then lb and ub must not be given."))
+    if !isnothing(val)
+        lb = val
+        ub = val
+    end
 
     # bounds
     isnothing(lb) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
@@ -578,13 +587,13 @@ function constraint!(
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
             if type ∈ [:initial, :final, :state]
                 rg = n == 1 ? Index(1) : 1:n
-                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $n"
+                txt = "the lower bound `lb`, the upper bound `ub` and the value `val` must be of dimension $n"
             elseif type == :control
                 rg = m == 1 ? Index(1) : 1:m
-                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $m"
+                txt = "the lower bound `lb`, the upper bound `ub` and the value `val` must be of dimension $m"
             elseif type == :variable
                 rg = q == 1 ? Index(1) : 1:q
-                txt = "the lower bound `lb` and the upper bound `ub` must be of dimension $q"
+                txt = "the lower bound `lb`, the upper bound `ub` and the value `val` must be of dimension $q"
             else
                 throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
                 ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
@@ -594,7 +603,7 @@ function constraint!(
             constraint!(ocp, type; rg=rg, lb=lb, ub=ub, label=label) end
 
         (::RangeConstraint, ::Nothing, ::ctVector, ::ctVector) => begin
-            txt = "the range `rg`, the lower bound `lb` and the upper bound `ub` must have the same dimension"
+            txt = "the range `rg`, the lower bound `lb`, the upper bound `ub` and the value `val` must have the same dimension"
             (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
             (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
             # check if the range is valid

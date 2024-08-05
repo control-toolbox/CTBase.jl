@@ -877,16 +877,16 @@ end
     __constraint!(ocp, :state, x->x, [0, 1], [1, 2], :css)
     __constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
 
-    # dimensions (not yet set)
-    @test dim_control_constraints(ocp) == nothing
-    @test dim_state_constraints(ocp) == nothing
-    @test dim_mixed_constraints(ocp) == nothing
-    @test dim_path_constraints(ocp) == nothing
-    @test dim_boundary_constraints(ocp) == nothing
-    @test dim_variable_constraints(ocp) == nothing
-    @test dim_control_range(ocp) == nothing
-    @test dim_state_range(ocp) == nothing
-    @test dim_variable_range(ocp) == nothing
+    # dimensions (not set yet)
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -962,16 +962,16 @@ end
     __constraint!(ocp, :variable, Index(3), 2, 3, :cv3)
     __constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)
 
-    # dimensions (not yet set)
-    @test dim_control_constraints(ocp) == nothing
-    @test dim_state_constraints(ocp) == nothing
-    @test dim_mixed_constraints(ocp) == nothing
-    @test dim_path_constraints(ocp) == nothing
-    @test dim_boundary_constraints(ocp) == nothing
-    @test dim_variable_constraints(ocp) == nothing
-    @test dim_control_range(ocp) == nothing
-    @test dim_state_range(ocp) == nothing
-    @test dim_variable_range(ocp) == nothing
+    # dimensions (not set yet)
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -1013,6 +1013,228 @@ end
     @test sort(vl) == sort([ 0, 0, 0, 0, 1, 2, 2 ])
     @test sort(vind) == sort([ 1, 2, 3, 4, 1, 2, 3 ])
     @test sort(vu) == sort([ 5, 5, 5, 5, 3, 4, 3 ])
+
+    # dimensions
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 1
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 7
+
+end
+
+
+@testset "val vs lb and ub, errors" begin
+    
+    ocp = Model(variable=true)
+
+    time!(ocp; t0=0, tf=1)
+    variable!(ocp, 4)
+    state!(ocp, 2)
+    control!(ocp, 1)
+
+    # error val with ub
+    @test_throws UnauthorizedCall constraint!(ocp, :initial; rg=Index(2), val=10,      ub=10,      label=:ci)
+    @test_throws UnauthorizedCall constraint!(ocp, :final;   rg=Index(1), val=1,       ub=1,       label=:cf)
+    @test_throws UnauthorizedCall constraint!(ocp, :control;              val=0,       ub=0,       label=:cu)
+    @test_throws UnauthorizedCall constraint!(ocp, :state;                val=[0, 1],  ub=[0, 1],  label=:cs)
+    @test_throws UnauthorizedCall constraint!(ocp, :boundary; f=(x0, xf, v) -> x0[2]+xf[2]+v[1], val=2, ub=2, label=:cb)
+    @test_throws UnauthorizedCall constraint!(ocp, :control;  f=(u, v) -> u+v[2], val=20, ub=20, label=:cuu)
+    @test_throws UnauthorizedCall constraint!(ocp, :state; f=(x, v) -> x+v[1:2], val=[100, 101], ub=[100, 101], label=:css)
+    @test_throws UnauthorizedCall constraint!(ocp, :mixed; f=(x, u, v) -> x[1]+u+v[2], val=-1, ub=-1, label=:cm)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; val=[ 5, 5, 5, 5 ], ub=[ 5, 5, 5, 5 ], label=:cv1)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; rg=1:2, val=[ 10, 20 ], ub=[ 10, 20 ], label=:cv2)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; rg=Index(3), val=1000, ub=1000, label=:cv3)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; f=v -> v[3]^2, val=-10, ub=-10, label=:cv4)
+
+
+    ocp = Model(variable=true)
+
+    time!(ocp; t0=0, tf=1)
+    variable!(ocp, 4)
+    state!(ocp, 2)
+    control!(ocp, 1)
+
+    # error val with lb
+    @test_throws UnauthorizedCall constraint!(ocp, :initial; rg=Index(2), val=10,      lb=10,      label=:ci)
+    @test_throws UnauthorizedCall constraint!(ocp, :final;   rg=Index(1), val=1,       lb=1,       label=:cf)
+    @test_throws UnauthorizedCall constraint!(ocp, :control;              val=0,       lb=0,       label=:cu)
+    @test_throws UnauthorizedCall constraint!(ocp, :state;                val=[0, 1],  lb=[0, 1],  label=:cs)
+    @test_throws UnauthorizedCall constraint!(ocp, :boundary; f=(x0, xf, v) -> x0[2]+xf[2]+v[1], val=2, lb=2, label=:cb)
+    @test_throws UnauthorizedCall constraint!(ocp, :control;  f=(u, v) -> u+v[2], val=20, lb=20, label=:cuu)
+    @test_throws UnauthorizedCall constraint!(ocp, :state; f=(x, v) -> x+v[1:2], val=[100, 101], lb=[100, 101], label=:css)
+    @test_throws UnauthorizedCall constraint!(ocp, :mixed; f=(x, u, v) -> x[1]+u+v[2], val=-1, lb=-1, label=:cm)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; val=[ 5, 5, 5, 5 ], lb=[ 5, 5, 5, 5 ], label=:cv1)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; rg=1:2, val=[ 10, 20 ], lb=[ 10, 20 ], label=:cv2)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; rg=Index(3), val=1000, lb=1000, label=:cv3)
+    @test_throws UnauthorizedCall constraint!(ocp, :variable; f=v -> v[3]^2, val=-10, lb=-10, label=:cv4)
+
+end
+
+@testset "val vs lb and ub, 1/2" begin
+    
+    ocp = Model(variable=true)
+
+    time!(ocp; t0=0, tf=1)
+    variable!(ocp, 4)
+    state!(ocp, 2)
+    control!(ocp, 1)
+
+    constraint!(ocp, :initial; rg=Index(2), lb=10,      ub=10,      label=:ci)
+    constraint!(ocp, :final;   rg=Index(1), lb=1,       ub=1,       label=:cf)
+    constraint!(ocp, :control;              lb=0,       ub=0,       label=:cu)
+    constraint!(ocp, :state;                lb=[0, 1],  ub=[0, 1],  label=:cs)
+    constraint!(ocp, :boundary; f=(x0, xf, v) -> x0[2]+xf[2]+v[1], lb=2, ub=2, label=:cb)
+    constraint!(ocp, :control;  f=(u, v) -> u+v[2], lb=20, ub=20, label=:cuu)
+    constraint!(ocp, :state; f=(x, v) -> x+v[1:2], lb=[100, 101], ub=[100, 101], label=:css)
+    constraint!(ocp, :mixed; f=(x, u, v) -> x[1]+u+v[2], lb=-1, ub=-1, label=:cm)
+    constraint!(ocp, :variable; lb=[ 5, 5, 5, 5 ], ub=[ 5, 5, 5, 5 ], label=:cv1)
+    constraint!(ocp, :variable; rg=1:2, lb=[ 10, 20 ], ub=[ 10, 20 ], label=:cv2)
+    constraint!(ocp, :variable; rg=Index(3), lb=1000, ub=1000, label=:cv3)
+    constraint!(ocp, :variable; f=v -> v[3]^2, lb=-10, ub=-10, label=:cv4)
+
+    # dimensions (not set yet)
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
+
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
+
+    v = [ 1, 2, 3, 4 ]
+
+    # control
+    @test sort(ξl) == sort([20])
+    @test sort(ξu) == sort([20])
+    @test sort(ξ(-1, 1, v)) == sort([ 1+v[2] ])
+
+    # state
+    @test sort(ηl) == sort([100, 101])
+    @test sort(ηu) == sort([100, 101])
+    @test sort(η(-1, [1, 1], v)) == sort([1, 1]+v[1:2])
+
+    # mixed
+    @test sort(ψl) == sort([-1])
+    @test sort(ψu) == sort([-1])
+    @test sort(ψ(-1, [1, 1], 2, v)) == sort([ 3+v[2] ])
+
+    # boundary
+    @test sort(ϕl) == sort([10, 1, 2])
+    @test sort(ϕu) == sort([10, 1, 2])
+    @test sort(ϕ([1, 3], [4, 100], v)) == sort([ 3, 4, 103+v[1] ])
+
+    # variable
+    @test sort(θl) == sort([ -10 ])
+    @test sort(θu) == sort([ -10 ])
+    @test sort(θ(v)) == sort([ v[3]^2 ])
+
+    # box constraint
+    @test sort(ul)      == sort([0])
+    @test sort(uind)    == sort([1])
+    @test sort(uu)      == sort([0])
+    @test sort(xl)      == sort([0, 1])
+    @test sort(xind)    == sort([1, 2])
+    @test sort(xu)      == sort([0, 1])
+    @test sort(vl)      == sort([ 5, 5, 5, 5, 10, 20, 1000 ])
+    @test sort(vind)    == sort([ 1, 2, 3, 4, 1,   2, 3 ])
+    @test sort(vu)      == sort([ 5, 5, 5, 5, 10, 20, 1000 ])
+
+    # dimensions
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 1
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 7
+
+end
+
+@testset "val vs lb and ub, 2/2" begin
+    
+    ocp = Model(variable=true)
+
+    time!(ocp; t0=0, tf=1)
+    variable!(ocp, 4)
+    state!(ocp, 2)
+    control!(ocp, 1)
+
+    constraint!(ocp, :initial; rg=Index(2), val=10,      label=:ci)
+    constraint!(ocp, :final;   rg=Index(1), val=1,       label=:cf)
+    constraint!(ocp, :control;              val=0,       label=:cu)
+    constraint!(ocp, :state;                val=[0, 1],  label=:cs)
+    constraint!(ocp, :boundary; f=(x0, xf, v) -> x0[2]+xf[2]+v[1], val=2, label=:cb)
+    constraint!(ocp, :control;  f=(u, v) -> u+v[2], val=20, label=:cuu)
+    constraint!(ocp, :state; f=(x, v) -> x+v[1:2], val=[100, 101], label=:css)
+    constraint!(ocp, :mixed; f=(x, u, v) -> x[1]+u+v[2], val=-1, label=:cm)
+    constraint!(ocp, :variable; val=[ 5, 5, 5, 5 ], label=:cv1)
+    constraint!(ocp, :variable; rg=1:2, val=[ 10, 20 ], label=:cv2)
+    constraint!(ocp, :variable; rg=Index(3), val=1000, label=:cv3)
+    constraint!(ocp, :variable; f=v -> v[3]^2, val=-10, label=:cv4)
+
+    # dimensions (not set yet)
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
+
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
+    (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
+
+    v = [ 1, 2, 3, 4 ]
+
+    # control
+    @test sort(ξl) == sort([20])
+    @test sort(ξu) == sort([20])
+    @test sort(ξ(-1, 1, v)) == sort([ 1+v[2] ])
+
+    # state
+    @test sort(ηl) == sort([100, 101])
+    @test sort(ηu) == sort([100, 101])
+    @test sort(η(-1, [1, 1], v)) == sort([1, 1]+v[1:2])
+
+    # mixed
+    @test sort(ψl) == sort([-1])
+    @test sort(ψu) == sort([-1])
+    @test sort(ψ(-1, [1, 1], 2, v)) == sort([ 3+v[2] ])
+
+    # boundary
+    @test sort(ϕl) == sort([10, 1, 2])
+    @test sort(ϕu) == sort([10, 1, 2])
+    @test sort(ϕ([1, 3], [4, 100], v)) == sort([ 3, 4, 103+v[1] ])
+
+    # variable
+    @test sort(θl) == sort([ -10 ])
+    @test sort(θu) == sort([ -10 ])
+    @test sort(θ(v)) == sort([ v[3]^2 ])
+
+    # box constraint
+    @test sort(ul)      == sort([0])
+    @test sort(uind)    == sort([1])
+    @test sort(uu)      == sort([0])
+    @test sort(xl)      == sort([0, 1])
+    @test sort(xind)    == sort([1, 2])
+    @test sort(xu)      == sort([0, 1])
+    @test sort(vl)      == sort([ 5, 5, 5, 5, 10, 20, 1000 ])
+    @test sort(vind)    == sort([ 1, 2, 3, 4, 1,   2, 3 ])
+    @test sort(vu)      == sort([ 5, 5, 5, 5, 10, 20, 1000 ])
 
     # dimensions
     @test dim_control_constraints(ocp) == 1
