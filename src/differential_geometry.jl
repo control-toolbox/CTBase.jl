@@ -29,7 +29,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the HamiltonianLift of a function.
+Return the Lift of a function.
 Dependencies are specified with boolean : autonomous and variable.
 
 # Example
@@ -42,16 +42,19 @@ julia> H(1, 1, 1, 1)
 2
 ```
 """
-function Lift(X::Function; autonomous::Bool=true, variable::Bool=false)::HamiltonianLift
-    time_dependence = autonomous ? Autonomous : NonAutonomous 
-    variable_dependence = variable ? NonFixed : Fixed
-    return Lift(VectorField(X, time_dependence, variable_dependence))
+function Lift(X::Function; autonomous::Bool=true, variable::Bool=false)::Function
+    return @match (autonomous, variable) begin
+        (true , false) => (   x, p   ) -> p' * X(   x   )
+        (true , true ) => (   x, p, v) -> p' * X(   x, v)
+        (false, false) => (t, x, p   ) -> p' * X(t, x   )
+        _              => (t, x, p, v) -> p' * X(t, x, v)
+    end
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Return the HamiltonianLift of a VectorField or a function.
+Return the Lift of a function.
 Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
 
 # Example
@@ -64,11 +67,11 @@ julia> H(1, 1, 1, 1)
 2
 ```
 """
-function Lift(X::Function, dependences::DataType...)::HamiltonianLift
+function Lift(X::Function, dependences::DataType...)::Function
     __check_dependencies(dependences)
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    return Lift(VectorField(X, time_dependence, variable_dependence))
+    autonomous = NonAutonomous ∈ dependences ? false : true
+    variable   = NonFixed      ∈ dependences ? true  : false
+    return Lift(X; autonomous=autonomous, variable=variable)
 end
 
 # ---------------------------------------------------------------------------

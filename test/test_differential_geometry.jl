@@ -101,6 +101,12 @@ function test_differential_geometry()
             Test.@test H(1, 1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4], 1) == 22
 
+            # overload
+            F::Function = x -> 2x
+            H_F(x, p) = Lift(F)(x, p)
+            H_F(y) = H_F(y, y)
+            Test.@test H_F(1) == 2
+
             # exceptions
             Test.@test_throws IncorrectArgument Lift(X, Int64)
     
@@ -386,12 +392,12 @@ function test_differential_geometry()
         @testset "nonautonomous case" begin
             f = (t, x) -> [t*x[1] + x[2]^2, x[1], 0]
             g = (t, x) -> [0, x[2], t*x[1]^2 + 4*x[2]]
-            F = Lift(f,NonAutonomous)
-            G = Lift(g,NonAutonomous)
+            F = Lift(f, NonAutonomous)
+            G = Lift(g, NonAutonomous)
             F_ = (t, x, p) -> p' * f(t, x)
             G_ = (t, x, p) -> p' * g(t, x)
-            Test.@test Poisson(F, G)(2, [1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G_, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) atol=1e-6
-            Test.@test Poisson(F, G_)(2, [1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G)(2, [1, 2, 3], [4, 0, 4]) atol=1e-6
+            Test.@test Poisson(F, G, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G_, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) atol=1e-6
+            Test.@test Poisson(F, G_, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) atol=1e-6
         end
 
         @testset "autonomous nonfixed case" begin
@@ -401,19 +407,19 @@ function test_differential_geometry()
             G = Lift(g, NonFixed)
             F_ = (x, p, v) -> p' * f(x, v)
             G_ = (x, p, v) -> p' * g(x, v)
-            Test.@test Poisson(F, G)([1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G_, NonFixed)([1, 2, 3], [4, 0, 4], 1) atol=1e-6
-            Test.@test Poisson(F, G_)([1, 2, 3],[4, 0, 4], 1) ≈ Poisson(F_, G)([1, 2, 3],[4, 0, 4], 1) atol=1e-6
+            Test.@test Poisson(F, G, NonFixed)([1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G_, NonFixed)([1, 2, 3], [4, 0, 4], 1) atol=1e-6
+            Test.@test Poisson(F, G_, NonFixed)([1, 2, 3],[4, 0, 4], 1) ≈ Poisson(F_, G, NonFixed)([1, 2, 3],[4, 0, 4], 1) atol=1e-6
         end
 
         @testset "nonautonomous nonfixed case" begin
             f = (t, x, v) -> [t*x[1] + v*x[2]^2, x[1], 0]
             g = (t, x, v) -> [0, x[2], t*x[1]^2 + v*4*x[2]]
-            F = Lift(f,NonAutonomous, NonFixed)
-            G = Lift(g,NonAutonomous, NonFixed)
+            F = Lift(f, NonAutonomous, NonFixed)
+            G = Lift(g, NonAutonomous, NonFixed)
             F_ = (t, x, p, v) -> p' * f(t, x, v)
             G_ = (t, x, p, v) -> p' * g(t, x, v)
-            Test.@test Poisson(F, G)(2, [1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G_, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol=1e-6
-            Test.@test Poisson(F, G_)(2, [1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G)(2, [1, 2, 3], [4, 0, 4], 1) atol=1e-6
+            Test.@test Poisson(F, G, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G_, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol=1e-6
+            Test.@test Poisson(F, G_, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) ≈ Poisson(F_, G, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol=1e-6
         end
 
     end
