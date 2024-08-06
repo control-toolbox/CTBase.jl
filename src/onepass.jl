@@ -1,5 +1,6 @@
 # onepass
 # todo:
+# - write code = ... then _wrap(code) for all p_...
 # - cannot call solve if problem not fully defined (dynamics not defined...)
 # - doc: explain projections wrt to t0, tf, t; (...x1...x2...)(t) -> ...gensym1...gensym2... (most internal first)
 # - test non autonomous cases
@@ -67,13 +68,13 @@ Foo
 ```
 """
 parse!(p, ocp, e; log=false) = begin
-    #
+    
     p.lnum = p.lnum + 1
     p.line = string(e)
     for a ∈ keys(p.aliases)
         e = subs(e, a, p.aliases[a])
     end
-    #
+    
     @match e begin
         # aliases
         :( $a = $e1 ) =>
@@ -84,7 +85,7 @@ parse!(p, ocp, e; log=false) = begin
         :( [$names] ∈ R^$n, state         ) =>    p_state!(p, ocp, a, n; components_names=names, log)
         :( ($names) ∈ R^$m, control       ) =>  p_control!(p, ocp, a, m; components_names=names, log)
         :( [$names] ∈ R^$m, control       ) =>  p_control!(p, ocp, a, m; components_names=names, log)
-        _                                 =>    p_alias!(p, ocp, a, e1; log) # alias
+        _                                   =>    p_alias!(p, ocp, a, e1; log) # alias
         end                           
         # variable                    
         :( $v ∈ R^$q, variable            ) => p_variable!(p, ocp, v, q; log)
