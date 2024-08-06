@@ -233,6 +233,7 @@ export Description, add, getFullDescription
 # exceptions
 export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
+export ExtensionError
 
 # AD
 export set_AD_backend
