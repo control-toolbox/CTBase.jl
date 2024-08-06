@@ -251,6 +251,11 @@ export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, 
 export nlp_constraints!, constraints_labels
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
 export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints, dim_boundary_constraints, dim_variable_constraints, dim_control_range, dim_state_range, dim_variable_range
+export model_expression, initial_time, initial_time_name, final_time, final_time_name, time_name
+export control_dimension, control_components_names, control_name
+export state_dimension, state_components_names, state_name
+export variable_dimension, variable_components_names, variable_name
+export lagrange, mayer, criterion, dynamics
 
 # solution
 export OptimalControlSolution
