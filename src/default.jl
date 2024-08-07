@@ -176,7 +176,7 @@ __ocp_init() = nothing
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the print level of ipopt for the direct method.
+Used to set the default value of the print level of Ipopt for the direct method.
 The default value is `5`.
 """
 __ipopt_print_level() = 5
@@ -184,7 +184,26 @@ __ipopt_print_level() = 5
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the μ strategy of ipopt for the direct method.
+Used to set the default value of the μ strategy of Ipopt for the direct method.
 The default value is `adaptive`.
 """
 __ipopt_mu_strategy() = "adaptive"
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default value of the linear solver of Ipopt for the direct method.
+The default value is `mumps`.
+"""
+__ipopt_linear_solver() = "mumps"
+
+# ------------------------------------------------------------------------------------
+# MadNLP
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default value of the linear solver of MadNLP for the direct method.
+The default value is `umfpack`.
+"""
+__madnlp_linear_solver() = "umfpack"
