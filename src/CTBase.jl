@@ -228,7 +228,7 @@ export CTCallback, CTCallbacks, PrintCallback, StopCallback
 export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # description
-export Description, add, getFullDescription
+export Description, add, getFullDescription, remove
 
 # exceptions
 export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
