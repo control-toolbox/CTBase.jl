@@ -64,6 +64,18 @@ function test_default()
         @test CTBase.__init_interpolation() isa Function
     end
 
+    @testset "Default value of the initial guess" begin
+        @test isnothing(CTBase.__ocp_init())
+    end
+
+    @testset "Default value for direct solver" begin
+        @test CTBase.__grid_size_direct() isa Integer
+        @test isnothing(CTBase.__time_grid_direct())
+        @test CTBase.__tolerance_direct() < 1
+        @test CTBase.__max_iterations_direct() isa Integer
+        @test CTBase.__linear_solver_direct() isa Symbol
+    end
+
     @testset "Default value of the print level of ipopt for the direct method" begin
         @test CTBase.__print_level_ipopt() isa Integer
         @test CTBase.__print_level_ipopt() ≤ 12

@@ -162,6 +162,57 @@ function __init_interpolation()
     return (T, U) -> Interpolations.linear_interpolation(T, U, extrapolation_bc = Interpolations.Line())
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default initial guess.
+The default value is `nothing`.
+"""
+__ocp_init() = nothing
+
+# ------------------------------------------------------------------------------------
+# Direct methods
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default grid size.
+The default value is `100`.
+"""
+__grid_size_direct() = 100
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default time grid.
+The default value is `nothing`.
+"""
+__time_grid_direct() = nothing
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default tolerance.
+The default value is `1e-8`.
+"""
+__tolerance_direct() = 1e-8
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default maximum of iterations.
+The default value is `1000`.
+"""
+__max_iterations_direct() = 1000
+
+"""
+$(TYPEDSIGNATURES)
+
+Used to set the default linear solver.
+The default value is `:ma57`.
+"""
+__linear_solver_direct() = :ma57
+
 # ------------------------------------------------------------------------------------
 # IPOPT
 
