@@ -162,21 +162,10 @@ function __init_interpolation()
     return (T, U) -> Interpolations.linear_interpolation(T, U, extrapolation_bc = Interpolations.Line())
 end
 
-# ------------------------------------------------------------------------------------
-# IPOPT
-
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the print level of ipopt for the direct method.
-The default value is `5`.
+Used to set the default initial guess.
+The default value is `nothing`.
 """
-__print_level_ipopt() = 5
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the μ strategy of ipopt for the direct method.
-The default value is `adaptive`.
-"""
-__mu_strategy_ipopt() = "adaptive"
+__ocp_init() = nothing

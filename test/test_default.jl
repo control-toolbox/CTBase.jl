@@ -64,14 +64,8 @@ function test_default()
         @test CTBase.__init_interpolation() isa Function
     end
 
-    @testset "Default value of the print level of ipopt for the direct method" begin
-        @test CTBase.__print_level_ipopt() isa Integer
-        @test CTBase.__print_level_ipopt() ≤ 12
-        @test CTBase.__print_level_ipopt() ≥ 0
-    end
-
-    @testset "Default value of the mu strategy of ipopt for the direct method" begin
-        @test CTBase.__mu_strategy_ipopt() isa String
+    @testset "Default value of the initial guess" begin
+        @test isnothing(CTBase.__ocp_init())
     end
 
 end
