@@ -20,7 +20,7 @@ e = NotImplemented("blabla")
 @test_throws ErrorException error(e)
 @test typeof(sprint(showerror, e)) == String
 
-e = ExtensionError("tatat")
+e = ExtensionError(:tata)
 @test_throws ErrorException error(e)
 @test typeof(sprint(showerror, e)) == String
 
