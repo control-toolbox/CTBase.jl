@@ -1097,8 +1097,8 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 mutable struct Index
-    val::Integer
-    Index(v::Integer) = v ≥ 1 ? new(v) : error("index must be at least 1")
+    val::Int
+    Index(v::Int) = v ≥ 1 ? new(v) : error("index must be at least 1")
 end
 Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
 Base.to_index(i::Index) = i.val
@@ -1115,7 +1115,7 @@ Base.append!(v::Vector, i::Index) = Base.append!(v, i.val)
 """
 Type alias for an index or range.
 """
-const RangeConstraint = Union{Index, OrdinalRange{<:Integer}}
+const RangeConstraint = Union{Index, OrdinalRange{<:Int}}
 
 """
 $(TYPEDEF)
