@@ -68,14 +68,4 @@ function test_default()
         @test isnothing(CTBase.__ocp_init())
     end
 
-    @testset "Default value of the print level of ipopt for the direct method" begin
-        @test CTBase.__ipopt_print_level() isa Integer
-        @test CTBase.__ipopt_print_level() ≤ 12
-        @test CTBase.__ipopt_print_level() ≥ 0
-    end
-
-    @testset "Default value of the mu strategy of ipopt for the direct method" begin
-        @test CTBase.__ipopt_mu_strategy() isa String
-    end
-
 end
