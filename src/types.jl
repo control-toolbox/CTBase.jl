@@ -1318,7 +1318,28 @@ $(TYPEDFIELDS)
     infos::Dict{Symbol, Any}=Dict{Symbol, Any}()
 end
 
-function Base.copy!(sol::OptimalControlSolution, ocp::OptimalControlModel)
+"""
+$(TYPEDSIGNATURES)
+
+Constructor from an optimal control problem.
+"""
+function OptimalControlSolution(ocp::OptimalControlModel;
+    state::Function,
+    control::Function,
+    objective::ctNumber,
+    costate::Union{Nothing, Function}=nothing,
+    times::Union{Nothing, TimesDisc}=nothing,
+    variable::Union{Nothing, Variable}=nothing,
+    iterations::Union{Nothing, Integer}=nothing,
+    stopping::Union{Nothing, Symbol}=nothing,
+    message::Union{Nothing, String}=nothing,
+    success::Union{Nothing, Bool}=nothing,
+    infos::Dict{Symbol, Any}=Dict{Symbol, Any}())::OptimalControlSolution
+
+    #
+    sol = OptimalControlSolution()
+
+    # data from ocp 
     sol.initial_time_name = ocp.initial_time_name
     sol.final_time_name = ocp.final_time_name
     sol.time_name = ocp.time_name
@@ -1331,4 +1352,20 @@ function Base.copy!(sol::OptimalControlSolution, ocp::OptimalControlModel)
     sol.variable_dimension = ocp.variable_dimension
     sol.variable_components_names = ocp.variable_components_names
     sol.variable_name = ocp.variable_name
+
+    # data from args 
+    sol.state = state
+    sol.control = control
+    sol.objective = objective 
+    sol.costate = costate 
+    sol.times = times 
+    sol.variable = variable 
+    sol.iterations = iterations 
+    sol.stopping = stopping
+    sol.message = message
+    sol.success = success
+    sol.infos = infos
+
+    return sol
+
 end
