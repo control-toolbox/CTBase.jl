@@ -174,6 +174,7 @@ p_variable!(p, ocp, v, q; components_names=nothing, log=false) = begin
     if (isnothing(components_names))
         __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
     else
+        qq==length(components_names.args) || return __throw("the number of variable components must be $qq", p.lnum, p.line)
         for i ∈ 1:qq p.aliases[components_names.args[i]] = :( $v[$i] ) end
         ss = QuoteNode(string.(components_names.args))
         __wrap(:( variable!($ocp, $q, $vv, $ss) ), p.lnum, p.line) 
@@ -236,6 +237,7 @@ p_state!(p, ocp, x, n; components_names=nothing, log=false) = begin
     if (isnothing(components_names))
         __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
     else
+        nn==length(components_names.args) || return __throw("the number of state components must be $nn", p.lnum, p.line)
         for i ∈ 1:nn p.aliases[components_names.args[i]] = :( $x[$i] ) end
         ss = QuoteNode(string.(components_names.args))
         __wrap(:( state!($ocp, $n, $xx, $ss) ), p.lnum, p.line)
@@ -253,6 +255,7 @@ p_control!(p, ocp, u, m; components_names=nothing, log=false) = begin
     if (isnothing(components_names))
         __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
     else
+        mm==length(components_names.args) || return __throw("the number of control components must be $mm", p.lnum, p.line)
         for i ∈ 1:mm p.aliases[components_names.args[i]] = :( $u[$i] ) end
         ss = QuoteNode(string.(components_names.args))
         __wrap(:( control!($ocp, $m, $uu, $ss) ), p.lnum, p.line)
