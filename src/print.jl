@@ -22,6 +22,9 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
     # check if the problem is empty
     __is_empty(ocp) && return
 
+    #
+    some_printing = false
+
     # print the code of the model if ocp.model_expression is not nothing
     if !isnothing(ocp.model_expression)
 
@@ -29,10 +32,14 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         @assert hasproperty(ocp.model_expression, :head)
 
         #
-        println(io)
-        printstyled(io, "The ", bold=true)
-        is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
-        printstyled(io, "optimal control problem is given by:\n", bold=true)
+        #println(io)
+        if __is_complete(ocp)
+            printstyled(io, "The ", bold=true)
+            is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
+            printstyled(io, "optimal control problem is given by:\n", bold=true)
+        else
+            printstyled(io, "The optimal control problem is not complete but made of:", bold=true)
+        end
         println(io)
 
         # print the code
@@ -42,11 +49,13 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
             :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
             _      => __print(code, io, tab)
         end
-    
+
+        some_printing = true
+
     end
     
     if __is_complete(ocp) # print the model if is is complete
-        
+
         # dimensions
         x_dim = ocp.state_dimension
         u_dim = ocp.control_dimension
@@ -74,7 +83,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
         #
-        println(io)
+        some_printing && println(io)
         printstyled(io, "The ", bold=true)
         is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
         printstyled(io, "optimal control problem is of the form:\n", bold=true)
@@ -185,10 +194,12 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
             print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
         end
 
+        some_printing = true
+
     end
 
     #
-    println(io)
+    some_printing && println(io)
     printstyled(io, "Declarations ", bold=true)
     printstyled(io, "(* required):\n", bold=false)
     #println(io)
