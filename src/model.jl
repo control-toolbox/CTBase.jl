@@ -1107,3 +1107,157 @@ Return the dimension of range constraints on variable (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
 dim_variable_range(ocp::OptimalControlModel) = ocp.dim_variable_range
+
+# GETTERS
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the model expression of the optimal control problem or `nothing`.
+
+"""
+model_expression(ocp::OptimalControlModel) = ocp.model_expression
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the initial time of the optimal control problem or `nothing`.
+
+"""
+initial_time(ocp::OptimalControlModel) = ocp.initial_time
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the initial time of the optimal control problem or `nothing`.
+
+"""
+initial_time_name(ocp::OptimalControlModel) = ocp.initial_time_name
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the final time of the optimal control problem or `nothing`.
+
+"""
+final_time(ocp::OptimalControlModel) = ocp.final_time
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the final time of the optimal control problem or `nothing`.
+
+"""
+final_time_name(ocp::OptimalControlModel) = ocp.final_time_name
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the time component of the optimal control problem or `nothing`.
+
+"""
+time_name(ocp::OptimalControlModel) = ocp.time_name
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimention of the control of the optimal control problem or `nothing`.
+
+"""
+control_dimension(ocp::OptimalControlModel) = ocp.control_dimension
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the control of the optimal control problem or `nothing`.
+
+"""
+control_components_names(ocp::OptimalControlModel) = ocp.control_components_names
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the control of the optimal control problem or `nothing`.
+
+"""
+control_name(ocp::OptimalControlModel) = ocp.control_name
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the state of the optimal control problem or `nothing`.
+
+"""
+state_dimension(ocp::OptimalControlModel) = ocp.state_dimension
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the state of the optimal control problem or `nothing`.
+
+"""
+state_components_names(ocp::OptimalControlModel) = ocp.state_components_names
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the state of the optimal control problem or `nothing`.
+
+"""
+state_name(ocp::OptimalControlModel) = ocp.state_name
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dimension of the variable of the optimal control problem or `nothing`.
+
+"""
+variable_dimension(ocp::OptimalControlModel) = ocp.variable_dimension
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the names of the components of the variable of the optimal control problem or `nothing`.
+
+"""
+variable_components_names(ocp::OptimalControlModel) = ocp.variable_components_names
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the name of the variable of the optimal control problem or `nothing`.
+
+"""
+variable_name(ocp::OptimalControlModel) = ocp.variable_name
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the Lagrange part of the cost of the optimal control problem or `nothing`.
+
+"""
+lagrange(ocp::OptimalControlModel) = ocp.lagrange
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the Mayer part of the cost of the optimal control problem or `nothing`.
+
+"""
+mayer(ocp::OptimalControlModel) = ocp.mayer
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the criterion (`:min` or `:max`) of the optimal control problem or `nothing`.
+
+"""
+criterion(ocp::OptimalControlModel) = ocp.criterion
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the dynamics of the optimal control problem or `nothing`.
+
+"""
+dynamics(ocp::OptimalControlModel) = ocp.dynamics
