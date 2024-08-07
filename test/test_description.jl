@@ -31,6 +31,7 @@ algorithmes = add(algorithmes, (:descent, :gradient, :fixedstep))
 x=(:a,:b,:c)
 y=(:b,)
 @test x\y == (:a, :c)
+@test remove(x, y) == (:a, :c)
 @test typeof(x\y) <: Description
 
 # inclusion and different sizes
