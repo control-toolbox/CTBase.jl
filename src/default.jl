@@ -179,7 +179,7 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the print level of ipopt for the direct method.
 The default value is `5`.
 """
-__print_level_ipopt() = 5
+__ipopt_print_level() = 5
 
 """
 $(TYPEDSIGNATURES)
@@ -187,4 +187,4 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the μ strategy of ipopt for the direct method.
 The default value is `adaptive`.
 """
-__mu_strategy_ipopt() = "adaptive"
+__ipopt_mu_strategy() = "adaptive"
