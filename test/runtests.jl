@@ -27,6 +27,7 @@ include("utils.jl")
         :model,
         :plot,
         :print,
+        :solution,
         :utils,
         :onepass,
         )
