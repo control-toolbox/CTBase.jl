@@ -153,8 +153,14 @@ Exception thrown when an extension is not loaded but the user tries to call a fu
 
 $(TYPEDFIELDS)
 """
-struct ExtensionError <: CTException
-    var::String
+mutable struct ExtensionError <: CTException
+    weakdeps::Tuple{Vararg{Symbol}}
+    function ExtensionError(weakdeps::Symbol...)
+        isempty(weakdeps) && throw(UnauthorizedCall("Please provide at least one weak dependence for the extension."))
+        e = new()
+        e.weakdeps = weakdeps
+        return e
+    end
 end
 
 """
@@ -162,4 +168,14 @@ $(TYPEDSIGNATURES)
 
 Print the exception.
 """
-Base.showerror(io::IO, e::ExtensionError) = print(io, "ExtensionError: ", e.var)
+function Base.showerror(io::IO, e::ExtensionError) 
+    print(io, "ExtensionError. Please make: ")
+    printstyled(io, "julia>", color=:green, bold=true)
+    printstyled(io, " using ", color=:magenta)
+    N = size(e.weakdeps, 1)
+    for i ∈ range(1, N)
+        wd = e.weakdeps[i]
+        i < N ? print(io, string(wd), ", ") : print(io, string(wd))
+    end
+    nothing
+end
