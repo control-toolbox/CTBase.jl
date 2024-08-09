@@ -38,7 +38,7 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
             is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
             printstyled(io, "optimal control problem is given by:\n", bold=true)
         else
-            printstyled(io, "The optimal control problem is not complete but made of:", bold=true)
+            printstyled(io, "The optimal control problem is not complete but made of:\n", bold=true)
         end
         println(io)
 
