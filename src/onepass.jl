@@ -447,7 +447,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Define an optimal control problem. One pass parsing of the definition.
+Define an optimal control problem. One pass parsing of the definition. Can be used writing either
+`ocp = @def begin ... end` or `@def ocp begin ... end`. In the second case, setting `log` to `true`
+will display the parsing steps.
 
 # Example
 ```@example
@@ -487,13 +489,21 @@ end
     -2 ≤ v(t) ≤ 3,      (2)
     ẋ(t) == [ v(t), u(t) ]
     tf → min
-end
+end true # final boolean to show parsing log
 ```
 """
+macro def(e)
+    ocp = gensym()
+    quote
+        @def $ocp $e
+        $ocp
+    end
+end
+
 macro def(ocp, e, log=false)
     try
         p0 = ParsingInfo()
-	    parse!(p0, ocp, e; log=false)
+	    parse!(p0, ocp, e; log=false) # initial pass to get the dependencies (time and variable)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
@@ -507,13 +517,5 @@ macro def(ocp, e, log=false)
         esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
-    end
-end
-
-macro def(e)
-    ocp = gensym()
-    quote
-        @def $ocp $e
-        $ocp
     end
 end
