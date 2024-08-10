@@ -4,6 +4,28 @@ function test_onepass()
 
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
+@testset "log" begin
+    println("o = @def syntax + log testset...")
+
+    oo = @def begin
+        λ ∈ R^2, variable
+        tf = λ₂
+        t ∈ [ 0, tf ], time
+    end
+    @test oo.initial_time == 0
+    @test oo.final_time == Index(2)
+
+    @def o begin
+        λ ∈ R^2, variable
+        tf = λ₂
+        t ∈ [ 0, tf ], time
+    end true
+    @test o.initial_time == 0
+    @test o.final_time == Index(2)
+end
+
+# ---------------------------------------------------------------
+# ---------------------------------------------------------------
 @testset "aliases" begin
     println("aliases testset...")
 
@@ -2268,7 +2290,7 @@ end
             x ∈ R, state
             u ∈ R, control
             ẋ(t) == x(t) + u(t) + b + c + d
-    end
+        end
         ocp
     end
     o = f(2)

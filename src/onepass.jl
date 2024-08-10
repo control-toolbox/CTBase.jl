@@ -447,11 +447,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Define an optimal control problem. One pass parsing of the definition.
+Define an optimal control problem. One pass parsing of the definition. Can be used writing either
+`ocp = @def begin ... end` or `@def ocp begin ... end`. In the second case, setting `log` to `true`
+will display the parsing steps.
 
 # Example
 ```@example
-@def ocp begin
+ocp = @def begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
     x ∈ R², state
@@ -469,12 +471,39 @@ Define an optimal control problem. One pass parsing of the definition.
     ẋ(t) == [ v(t), u(t) ]
     tf → min
 end
+
+@def ocp begin
+    tf ∈ R, variable
+    t ∈ [ 0, tf ], time
+    x ∈ R², state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    q = x₁
+    v = x₂
+    q(0) == 1
+    v(0) == 2
+    q(tf) == 0
+    v(tf) == 0
+    0 ≤ q(t) ≤ 5,       (1)
+    -2 ≤ v(t) ≤ 3,      (2)
+    ẋ(t) == [ v(t), u(t) ]
+    tf → min
+end true # final boolean to show parsing log
 ```
 """
+macro def(e)
+    ocp = gensym()
+    quote
+        @def $ocp $e
+        $ocp
+    end
+end
+
 macro def(ocp, e, log=false)
     try
         p0 = ParsingInfo()
-	    parse!(p0, ocp, e; log=false)
+	    parse!(p0, ocp, e; log=false) # initial pass to get the dependencies (time and variable)
         p = ParsingInfo(); p.t_dep = p0.t_dep; p.v = p0.v
 	    code = parse!(p, ocp, e; log=log)
 	    init = @match (__t_dep(p), __v_dep(p)) begin
@@ -484,7 +513,7 @@ macro def(ocp, e, log=false)
             _              => :( $ocp = __OCPModel(autonomous=false, variable=true) )
 	    end
         ee = QuoteNode(e)
-        code = Expr(:block, init, code, :( $ocp.model_expression=$ee ), :( $ocp )) # todo: remove returned ocp value?
+        code = Expr(:block, init, code, :( $ocp.model_expression=$ee; $ocp ))
         esc(code)
     catch ex
         :( throw($ex) ) # can be caught by user
