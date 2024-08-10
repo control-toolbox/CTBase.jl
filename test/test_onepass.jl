@@ -4,8 +4,8 @@ function test_onepass()
 
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
-@testset "log" begin
-    println("o = @def syntax + log testset...")
+@testset "o = @def syntax" begin
+    println("o = @def syntax testset...")
 
     oo = @def begin
         λ ∈ R^2, variable
@@ -14,6 +14,29 @@ function test_onepass()
     end
     @test oo.initial_time == 0
     @test oo.final_time == Index(2)
+
+    a = 1
+    f(b) = begin # closure of a, local c, and @def in function
+        c = 3
+        ocp = @def begin
+            t ∈ [ a, b ], time
+            x ∈ R, state
+            u ∈ R, control
+            ẋ(t) == x(t) + u(t) + b + c + d
+        end
+        return ocp
+    end
+    b = 2
+    o = f(b)
+    d = 4
+    x = 10
+    u = 20
+    @test o.dynamics(x, u) == x + u + b + 3 + d
+
+end
+
+@testset "log" begin
+    println("log testset...")
 
     @def o begin
         λ ∈ R^2, variable
@@ -29,7 +52,7 @@ end
 @testset "aliases" begin
     println("aliases testset...")
 
-    @def o begin
+    o = @def begin
         x = (y, z) ∈ R², state
         u = (uu1, uu2, uu3) ∈ R³, control
         v = (vv1, vv2) ∈ R², variable
@@ -38,7 +61,7 @@ end
     @test o.control_components_names == [ "uu1", "uu2", "uu3" ]
     @test o.variable_components_names == [ "vv1", "vv2" ]
 
-    @def o begin
+    o = @def begin
         x = [y, z] ∈ R², state
         u = [uu1, uu2, uu3] ∈ R³, control
         v = [vv1, vv2] ∈ R², variable
@@ -71,7 +94,7 @@ end
         [vv1, vv2] ∈ R², variable
     end
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x = ( r, v ) ∈ R², state
         u ∈ R, control
@@ -90,7 +113,7 @@ end
     @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
     @test o.lagrange(x, u) == u^2 + x[1]
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x = [ r, v ] ∈ R², state
         u ∈ R, control
@@ -109,7 +132,7 @@ end
     @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
     @test o.lagrange(x, u) == u^2 + x[1]
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x = [ r, v ] ∈ R², state
         c = [ u, b ] ∈ R², control
@@ -130,7 +153,7 @@ end
     @test o.dynamics(x, c) == [ x[2], (x[1] + 2x[2])^2 ]
     @test o.lagrange(x, c) == u^2 + x[1]
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R^3, state
         u = (u₁, v) ∈ R^2, control
@@ -167,7 +190,7 @@ end
 @testset "variable" begin
     println("variable testset...")
 
-    @def o begin
+    o = @def begin
         λ ∈ R^2, variable
         tf = λ₂
         t ∈ [ 0, tf ], time
@@ -175,35 +198,35 @@ end
     @test o.initial_time == 0
     @test o.final_time == Index(2)
     
-    @def o begin
+    o = @def begin
         λ = (λ₁, tf) ∈ R^2, variable
         t ∈ [ 0, tf ], time
     end
     @test o.initial_time == 0
     @test o.final_time == Index(2)
     
-    @def o begin
+    o = @def begin
         t0 ∈ R, variable
         t ∈ [ t0, 1 ], time
     end
     @test o.initial_time == Index(1)
     @test o.final_time == 1
     
-    @def o begin
+    o = @def begin
         tf ∈ R, variable
         t ∈ [ 0, tf ], time
     end
     @test o.initial_time == 0
     @test o.final_time == Index(1)
     
-    @def o begin
+    o = @def begin
         v ∈ R², variable
         s ∈ [ v[1], v[2] ], time
     end
     @test o.initial_time == Index(1)
     @test o.final_time == Index(2)
     
-    @def o begin
+    o = @def begin
         v ∈ R², variable
         s0 = v₁
         sf = v₂
@@ -263,7 +286,7 @@ end
     println("time testset...")
 
     t0 = 0
-    @def o t ∈ [ t0, t0 + 4 ], time
+    o = @def t ∈ [ t0, t0 + 4 ], time
     @test o.initial_time == t0
     @test o.final_time == t0 + 4
 
@@ -302,7 +325,7 @@ end
 @testset "state / control" begin
     println("state / control testset...")
 
-    @def o begin
+    o = @def begin
         x ∈ R, state
         u ∈ R, control
     end
@@ -489,7 +512,7 @@ end
 @testset "dynamics" begin
     println("dynamics testset...")
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R^3, state
         u ∈ R^2, control
@@ -500,7 +523,7 @@ end
     x = [ 1, 2, 3 ]
     u = [ -1, 2 ]
     @test o.dynamics(x, u) == [ x[1] + 2u[2], 2x[3], x[1] + u[2] ]
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -515,7 +538,7 @@ end
     w = 9
     @test o.dynamics(y, w, z) == [ y[1], y[3]^2 + w + z[1], 0, 0 ]
     
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         __s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -530,7 +553,7 @@ end
     w = 9
     @test_throws MethodError o.dynamics(y, w, z)
     
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -547,7 +570,7 @@ end
     ww = 19
     @test o.dynamics(y, ww, z) == [ y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
 
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         __t ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -573,7 +596,7 @@ end
 @testset "constraints" begin
     println("constraints testset...")
 
-    @def o begin
+    o = @def begin
         tf ∈ R, variable
         t ∈ [ 0, tf ], time
         x ∈ R², state
@@ -590,7 +613,7 @@ end
     
     n = 11
     m = 6
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R^n, state
         u ∈ R^m, control
@@ -624,7 +647,7 @@ end
     
     n = 11
     m = 6
-    @def o begin
+    o = @def begin
         z ∈ R^2, variable
         t ∈ [ 0, 1 ], time
         x ∈ R^n, state
@@ -659,7 +682,7 @@ end
     @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
     @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2].^3 + z
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R², state
         u ∈ R, control
@@ -682,7 +705,7 @@ end
     @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
     @test o.lagrange(x, u) == u^2 + x[1]
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R², state
         u ∈ R, control
@@ -703,7 +726,7 @@ end
     @test o.dynamics(x, u) == [ x[2], (x[1] + 2x[2])^2 ]
     @test o.lagrange(x, u) == u^2 + x[1]
     
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         t ∈ [ 0, 1 ], time
         x ∈ R², state
@@ -726,7 +749,7 @@ end
     @test o.dynamics(x, u, z) == [ x[2], (x[1] + 2x[2])^2 + z[1] ]
     @test o.lagrange(x, u, z) == u^2 + z[2] * x[1]
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R², state
         u ∈ R, control
@@ -746,7 +769,7 @@ end
     @test o.dynamics(x, u) == [ x[2], x[1]^2 ]
     @test o.lagrange(x, u) == u^2 + x[1]
     
-    @def o begin
+    o = @def begin
         z ∈ R, variable
         t ∈ [ 0, 1 ], time
         x ∈ R², state
@@ -768,7 +791,7 @@ end
     @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
     @test o.lagrange(x, u, z) == u^2 + z * x[1]
     
-    @def o begin
+    o = @def begin
         z ∈ R, variable
         t ∈ [ 0, 1 ], time
         x ∈ R², state
@@ -792,7 +815,7 @@ end
     @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
     @test o.lagrange(x, u, z) == u^2 + z * x[1]
     
-    @def o begin
+    o = @def begin
         z ∈ R, variable
         t ∈ [ 0, 1 ], time
         x ∈ R², state
@@ -822,7 +845,7 @@ end
     @test o.constraints[:eq3][3] == [ 0, 0 ]
     @test o.constraints[:eq3][4] == [ 1, 1 ]
 
-    @def o begin
+    o = @def begin
         v ∈ R², variable
         t ∈ [ 0, 1 ], time
         x ∈ R, state
@@ -867,7 +890,7 @@ end
     @test constraint(o, :eq14)(v) == v[1] + 2v[2]
     @test constraint(o, :eq15)(v) == v[1] + 2v[2]
     
-    @def o begin
+    o = @def begin
         v ∈ R, variable
         t ∈ [ 0, 1 ], time
         x ∈ R, state
@@ -935,7 +958,7 @@ end
     @test o.constraints[:eq14][4] == 0
     @test o.constraints[:eq15][4] == 0
     
-    @def o begin
+    o = @def begin
         v ∈ R, variable
         t ∈ [ 0, 1 ], time
         x ∈ R, state
@@ -1003,7 +1026,7 @@ end
     @test o.constraints[:eq14][4] == Inf
     @test o.constraints[:eq15][4] == Inf
 
-    @def o begin
+    o = @def begin
         v ∈ R^2, variable
         t ∈ [ 0, 1 ], time
         x ∈ R², state
@@ -1051,7 +1074,7 @@ end
     @test o.constraints[:eq9 ][4] == [ 0, 0 ]
     @test o.constraints[:eq10][4] == [ 0, 0 ]
 
-    @def o begin
+    o = @def begin
         v ∈ R^2, variable
         t ∈ [ 0, 1 ], time
         x ∈ R², state
@@ -1510,7 +1533,7 @@ end
     # min
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1534,7 +1557,7 @@ end
 
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1558,7 +1581,7 @@ end
 
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1582,7 +1605,7 @@ end
     
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1606,7 +1629,7 @@ end
     
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1630,7 +1653,7 @@ end
 
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1680,7 +1703,7 @@ end
     # max 
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1704,7 +1727,7 @@ end
 
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1728,7 +1751,7 @@ end
 
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1752,7 +1775,7 @@ end
     
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1776,7 +1799,7 @@ end
     
     t0 = 0
     tf = 1
-    @def o begin
+    o = @def begin
         t ∈ [ t0, tf ], time
         x ∈ R^2, state
         u ∈ R, control
@@ -1852,7 +1875,7 @@ end
     # -------------------------------
     # min 
     # Mayer ± Lagrange
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1866,7 +1889,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :min
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1880,7 +1903,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :min
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1894,7 +1917,7 @@ end
     @test o.lagrange(x, u) ==  2(x + u)
     @test o.criterion == :min
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1908,7 +1931,7 @@ end
     @test o.lagrange(x, u) ==  -(x + u)
     @test o.criterion == :min
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1939,7 +1962,7 @@ end
     # -------------------------------
     # max 
     # Mayer ± Lagrange
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1953,7 +1976,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :max
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1967,7 +1990,7 @@ end
     @test o.lagrange(x, u) ==  2(x + u)
     @test o.criterion == :max
 
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -1981,7 +2004,7 @@ end
     @test o.lagrange(x, u) ==  -(x + u)
     @test o.criterion == :max
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2012,7 +2035,7 @@ end
     # -------------------------------
     # min 
     # Lagrange ± Mayer
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2026,7 +2049,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :min
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2040,7 +2063,7 @@ end
     @test o.lagrange(x, u) ==  2(x + u)
     @test o.criterion == :min
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2054,7 +2077,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :min
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2085,7 +2108,7 @@ end
     # -------------------------------
     # max
     # Lagrange ± Mayer
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2099,7 +2122,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :max
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2113,7 +2136,7 @@ end
     @test o.lagrange(x, u) ==  2(x + u)
     @test o.criterion == :max
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2127,7 +2150,7 @@ end
     @test o.lagrange(x, u) ==  x + u
     @test o.criterion == :max
     
-    @def o begin
+    o = @def begin
         t ∈ [ 0, 1 ], time
         x ∈ R, state
         u ∈ R, control
@@ -2162,7 +2185,7 @@ end
 @testset "Mayer cost" begin
     println("Mayer testset...")
 
-    @def o begin
+    o = @def begin
         s ∈ [ 0, 1 ], time
         y ∈ R^4, state
         w ∈ R, control
@@ -2175,7 +2198,7 @@ end
     @test is_min(o)
     @test o.mayer(y0, yf) == y0[3] + yf[4]
 
-    @def o begin
+    o = @def begin
         s ∈ [ 0, 1 ], time
         y ∈ R^4, state
         w ∈ R, control
@@ -2188,7 +2211,7 @@ end
     @test is_max(o)
     @test o.mayer(y0, yf) == y0[3] + yf[4]
     
-    @def o begin
+    o = @def begin
         z ∈ R^2, variable
         s ∈ [ 0, z₁ ], time
         y ∈ R^4, state
@@ -2203,7 +2226,7 @@ end
     @test is_min(o)
     @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -2222,7 +2245,7 @@ end
     @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
     @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
     
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -2241,7 +2264,7 @@ end
     @test o.dynamics(y, w, z) == [ y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0 ]
     @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
 
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         s ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -2256,7 +2279,7 @@ end
     yf = 3y0
     @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
-    @def o begin
+    o = @def begin
         z ∈ R², variable
         __t ∈ [ 0, z₁ ], time
         y ∈ R⁴, state
@@ -2291,13 +2314,14 @@ end
             u ∈ R, control
             ẋ(t) == x(t) + u(t) + b + c + d
         end
-        ocp
+        return ocp
     end
-    o = f(2)
+    b = 2
+    o = f(b)
     d = 4
     x = 10
     u = 20
-    @test o.dynamics(x, u) == x + u + 2 + 3 + 4
+    @test o.dynamics(x, u) == x + u + b + 3 + d
 
 end
 
