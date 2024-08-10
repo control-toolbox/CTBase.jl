@@ -494,10 +494,11 @@ end true # final boolean to show parsing log
 """
 macro def(e)
     ocp = gensym()
-    quote
+    code = quote
         @def $ocp $e
         $ocp
     end
+    esc(code)
 end
 
 macro def(ocp, e, log=false)

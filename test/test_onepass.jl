@@ -4,8 +4,8 @@ function test_onepass()
 
 # ---------------------------------------------------------------
 # ---------------------------------------------------------------
-@testset "log" begin
-    println("o = @def syntax + log testset...")
+@testset "@def o syntax" begin
+    println("@def o syntax testset...")
 
     oo = @def begin
         λ ∈ R^2, variable
@@ -14,6 +14,29 @@ function test_onepass()
     end
     @test oo.initial_time == 0
     @test oo.final_time == Index(2)
+
+    a = 1
+    f(b) = begin # closure of a, local c, and @def in function
+        c = 3
+        ocp = @def begin
+            t ∈ [ a, b ], time
+            x ∈ R, state
+            u ∈ R, control
+            ẋ(t) == x(t) + u(t) + b + c + d
+        end
+        return ocp
+    end
+    b = 2
+    o = f(b)
+    d = 4
+    x = 10
+    u = 20
+    @test o.dynamics(x, u) == x + u + b + 3 + d
+
+end
+
+@testset "log" begin
+    println("log testset...")
 
     @def o begin
         λ ∈ R^2, variable
@@ -2291,13 +2314,14 @@ end
             u ∈ R, control
             ẋ(t) == x(t) + u(t) + b + c + d
         end
-        ocp
+        return ocp
     end
-    o = f(2)
+    b = 2
+    o = f(b)
     d = 4
     x = 10
     u = 20
-    @test o.dynamics(x, u) == x + u + 2 + 3 + 4
+    @test o.dynamics(x, u) == x + u + b + 3 + d
 
 end
 
