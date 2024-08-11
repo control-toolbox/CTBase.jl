@@ -215,6 +215,12 @@ include("repl.jl")
 #
 include("init.jl")
 
+# to be extended
+plot(sol::OptimalControlSolution, args...; kwargs...) = throw(ExtensionError(:Plots))
+
+#
+export plot
+
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
 
