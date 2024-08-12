@@ -18,7 +18,7 @@ Throw ```UnauthorizedCall``` exception if the state of an ocp is not set.
 
 """
 function __check_state_set(ocp::OptimalControlModel)
-    __is_state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before. Use state!."))
+    __is_state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before."))
 end
 
 """
@@ -28,7 +28,7 @@ Throw ```UnauthorizedCall``` exception if the control of an ocp is not set.
 
 """
 function __check_control_set(ocp::OptimalControlModel)
-    __is_control_not_set(ocp) && throw(UnauthorizedCall("the control dimension has to be set before. Use control!."))
+    __is_control_not_set(ocp) && throw(UnauthorizedCall("the control dimension has to be set before."))
 end
 
 """
@@ -38,7 +38,7 @@ Throw ```UnauthorizedCall``` exception if the time of an ocp is not set.
 
 """
 function __check_is_time_set(ocp::OptimalControlModel)
-    __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before. Use time!."))
+    __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before."))
 end
 
 """
@@ -48,7 +48,7 @@ Throw ```UnauthorizedCall``` exception if the variable of an ocp is not set.
 
 """
 function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence, NonFixed})
-    __is_variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before. Use variable!."))
+    __is_variable_not_set(ocp) && throw(UnauthorizedCall("the variable dimension has to be set before."))
 end
 
 """
