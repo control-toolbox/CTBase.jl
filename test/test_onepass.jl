@@ -2421,5 +2421,6 @@ end
     @test o.dynamics(x, u) == A * x + B * u
     @test o.lagrange(x, u) == 0.5u^2
     @test o.criterion == :min
+end
 
 end
