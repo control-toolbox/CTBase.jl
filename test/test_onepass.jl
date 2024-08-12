@@ -2389,7 +2389,65 @@ end
         ∫( u(t)^2 ) / 2 → min # forbidden
     end
 
+end
 
+# ---------------------------------------------------------------
+# ---------------------------------------------------------------
+@testset "non unicode keywords" begin
+    println("non unicode keywords testset...")
+
+    # --------------------------------
+    # min
+    t0 = 0
+    tf = 1
+    @def o begin
+        t ∈ [ t0, tf ], time
+        x ∈ R^2, state
+        u ∈ R, control
+        x(t0) == [ -1, 0 ], (1)
+        x(tf) == [  0, 0 ]
+        derivative(x)(t) == A * x(t) + B * u(t)
+        integral( 0.5u(t)^2 ) → min
+    end
+    x = [ 1, 2 ]
+    x0 = 2 * x
+    xf = 3 * x
+    u = -1
+    A = [ 0 1
+          0 0 ]
+    B = [ 0
+          1 ]
+    @test constraint(o, :eq1)(x0, xf) == x0
+    @test o.dynamics(x, u) == A * x + B * u
+    @test o.lagrange(x, u) == 0.5u^2
+    @test o.criterion == :min
+
+    @def o begin
+        z ∈ R, variable
+        t ∈ [ 0, 1 ], time
+        x ∈ R², state
+        u ∈ R, control
+        r = x₁
+        v = x₂
+        0 <= r(0) - z <= 1,            (1)
+        0 <= v(1)^2 <= 1,              (2)
+        [ 0, 0 ] <= x(0) <= [ 1, 1 ],  (♡)
+        z >= 0,                        (3)
+        ẋ(t) == [ v(t), r(t)^2 + z ]
+        ∫( u(t)^2 + z * x₁(t) ) → min
+    end
+    x0 = [ 2, 3 ]
+    xf = [ 4, 5 ]
+    x = [ 1, 2 ]
+    u = 3
+    z = 4
+    @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+    @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+    @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
+    @test constraint(o, :eq3)(z) == z
+    @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
+    @test o.lagrange(x, u, z) == u^2 + z * x[1]
+    
 end
 
 end

@@ -174,7 +174,7 @@ function variable!(
 
     # checkings
     is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable, you cannot use variable! function."))
-    __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set. Use variable! once."))
+    __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set."))
     (q  > 1) && (size(components_names, 1) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
     
     ocp.variable_dimension = q
@@ -256,7 +256,7 @@ function state!(
     components_names::Vector{String}=__state_components_names(n, name))
 
     # checkings
-    __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set. Use state! once."))
+    __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set."))
     (n  > 1) && (size(components_names, 1) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
 
     ocp.state_dimension = n
@@ -342,7 +342,7 @@ function control!(
     components_names::Vector{String}=__control_components_names(m, name))
 
     # checkings
-    __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set. Use control! once."))
+    __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set."))
     (m  > 1) && (size(components_names, 1) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
 
     ocp.control_dimension = m
@@ -425,7 +425,7 @@ function time!(
     !isnothing(indf) && !(1 ≤ indf ≤ q) && throw(IncorrectArgument("the index of tf variable must be contained in 1:$q"))
 
     # check if the function has been already called
-    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set. Use time! once."))
+    __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set."))
 
     # check consistency
     !isnothing(t0) && !isnothing(ind0) && throw(IncorrectArgument("Providing t0 and ind0 has no sense. The initial time cannot be fixed and free."))
@@ -673,7 +673,7 @@ function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: Time
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_dynamics_set(ocp) && throw(UnauthorizedCall("the dynamics has already been set. Use dynamics! once."))
+    __is_dynamics_set(ocp) && throw(UnauthorizedCall("the dynamics has already been set."))
 
     ocp.dynamics = Dynamics(f, T, V)
 
@@ -710,7 +710,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set. Use objective! once."))
+    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set."))
 
     # check the validity of the criterion
     !__is_criterion_valid(criterion) && throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
@@ -755,7 +755,7 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set. Use objective! once."))
+    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set."))
 
     # check the validity of the criterion
     !__is_criterion_valid(criterion) && throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
