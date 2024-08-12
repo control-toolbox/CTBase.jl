@@ -33,6 +33,8 @@ end
 __init_aliases(;max_dim=20) = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
     for i ∈ 1:max_dim al[Symbol(:R, ctupperscripts(i))] = :( R^$i ) end
+    al[:<=] = :≤
+    al[:>=] = :≥
     al[:derivative] = :∂
     al[:integral] = :∫
     al
