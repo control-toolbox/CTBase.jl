@@ -2447,7 +2447,33 @@ end
     @test constraint(o, :eq3)(z) == z
     @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
     @test o.lagrange(x, u, z) == u^2 + z * x[1]
-    
+
+    @def o begin
+        z ∈ R, variable
+        t ∈ [ 0, 1 ], time
+        x ∈ R², state
+        u ∈ R, control
+        r = x₁
+        v = x₂
+        0 <= r(0) - z <= 1,            (1)
+        0 <= v(1)^2 <= 1,              (2)
+        [ 0, 0 ] <= x(0) <= [ 1, 1 ],  (♡)
+        z >= 0,                        (3)
+        ẋ(t) == [ v(t), r(t)^2 + z ]
+        ∫( u(t)^2 + z * x₁(t) ) -> min
+    end
+    x0 = [ 2, 3 ]
+    xf = [ 4, 5 ]
+    x = [ 1, 2 ]
+    u = 3
+    z = 4
+    @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+    @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+    @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
+    @test constraint(o, :eq3)(z) == z
+    @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
+    @test o.lagrange(x, u, z) == u^2 + z * x[1]
+     
 end
 
 end
