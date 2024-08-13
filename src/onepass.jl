@@ -37,7 +37,7 @@ __init_aliases(;max_dim=20) = begin
     al[:>=] = :≥
     al[:derivative] = :∂
     al[:integral] = :∫
-    al[:->] = :→
+    al[:( => )] = :→
     al
 end
 
