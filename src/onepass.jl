@@ -37,6 +37,7 @@ __init_aliases(;max_dim=20) = begin
     al[:>=] = :≥
     al[:derivative] = :∂
     al[:integral] = :∫
+    al[:( => )] = :→
     al
 end
 
@@ -63,11 +64,11 @@ __v_dep(p) = !isnothing(p.v)
 """
 $(TYPEDSIGNATURES)
 
-Foo
+Parse the expression `e` and update the `ParsingInfo` structure `p`.
 
 # Example
 ```@example
-Foo
+parse!(p, :ocp, :(v ∈ R, variable))
 ```
 """
 parse!(p, ocp, e; log=false) = begin
