@@ -132,24 +132,10 @@ Return the difference between the description `x` and the description `y`.
 # Example
 
 ```@example
-julia> (:a, :b) \\ (:a,)
-(:b,)
-```
-"""
-Base.:(\)(x::Description, y::Description)::Description = Tuple(setdiff(x, y))
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the difference between the description `x` and the description `y`.
-
-# Example
-
-```@example
 julia> remove((:a, :b), (:a,))
 (:b,)
 ```
 """
 function remove(x::Description, y::Description)::Description
-    return x \ y
+    return Tuple(setdiff(x, y))
 end
