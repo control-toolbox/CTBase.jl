@@ -196,24 +196,28 @@ const DCostate   = ctVector
 #
 include("exception.jl")
 include("description.jl")
-include("callback.jl")
 include("default.jl")
 include("types.jl")
-include("utils.jl")
-#
-include("checking.jl")
-#
-include("print.jl")
-#
 include("functions.jl")
-include("model.jl")
-include("differential_geometry.jl")
+include("utils.jl")
+
+# Optimal Control Model
+include("optimal_control_model-type.jl")
+include("optimal_control_model-getters.jl")
+include("optimal_control_model-setters.jl")
+
+# Optimal Control Solution
+include("optimal_control_solution-type.jl")
+include("optimal_control_solution-getters.jl")
+include("optimal_control_solution-setters.jl")
+
 #
+include("differential_geometry.jl")
 include("ctparser_utils.jl")
 include("onepass.jl")
 include("repl.jl")
-#
 include("init.jl")
+include("print.jl")
 
 # numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
@@ -222,10 +226,6 @@ export States, Costates, Controls, State, Costate, Control, Variable, Dimension,
 export DState, DCostate
 export TimeDependence, Autonomous, NonAutonomous
 export VariableDependence, NonFixed, Fixed
-
-# callback
-export CTCallback, CTCallbacks, PrintCallback, StopCallback
-export get_priority_print_callbacks, get_priority_stop_callbacks
 
 # description
 export Description, add, getFullDescription, remove
@@ -248,18 +248,27 @@ export OptimalControlModel
 export Model
 export __OCPModel # redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
 export variable!, time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, constraint
-export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max, is_variable_dependent, is_variable_independent
-export nlp_constraints!, constraints_labels
+export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max
+export is_variable_dependent, is_variable_independent
+export nlp_constraints!, get_constraints_labels
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
-export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints, dim_boundary_constraints, dim_variable_constraints, dim_control_range, dim_state_range, dim_variable_range
-export model_expression, initial_time, initial_time_name, final_time, final_time_name, time_name
-export control_dimension, control_components_names, control_name
-export state_dimension, state_components_names, state_name
-export variable_dimension, variable_components_names, variable_name
-export lagrange, mayer, criterion, dynamics
+export get_dim_control_constraints, get_dim_state_constraints, get_dim_mixed_constraints, get_dim_path_constraints
+export get_dim_boundary_constraints, get_dim_variable_constraints, get_dim_control_range
+export get_dim_state_range, get_dim_variable_range
+export get_model_expression, get_initial_time, get_initial_time_name, get_final_time, get_final_time_name, get_time_name
+export get_control_dimension, get_control_components_names, get_control_name
+export get_state_dimension, get_state_components_names, get_state_name
+export get_variable_dimension, get_variable_components_names, get_variable_name
+export get_lagrange, get_mayer, get_criterion, get_dynamics
 
 # solution
 export OptimalControlSolution
+export get_times, get_initial_time_name, get_final_time_name, get_time_name
+export get_control_dimension, get_control_components_names, get_control_name, get_control
+export get_state_dimension, get_state_components_names, get_state_name, get_state
+export get_variable_dimension, get_variable_components_names, get_variable_name, get_variable
+export get_costate, get_objective
+export get_iterations, get_stopping, get_message, get_success, get_infos
 
 # initialization
 export OptimalControlInit

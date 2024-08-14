@@ -16,7 +16,6 @@ include("utils.jl")
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
-        :callback,
         :ctparser_utils,
         :default,
         :description,
