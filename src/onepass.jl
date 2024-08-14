@@ -38,6 +38,7 @@ __init_aliases(;max_dim=20) = begin
     al[:derivative] = :∂
     al[:integral] = :∫
     al[:( => )] = :→
+    al[:in] = :∈
     al
 end
 

@@ -53,6 +53,15 @@ end
     println("aliases testset...")
 
     @def o begin
+        x = (y, z) in R², state
+        u = (uu1, uu2, uu3) in R³, control
+        v = (vv1, vv2) in R², variable
+    end
+    @test o.state_components_names == [ "y", "z" ]
+    @test o.control_components_names == [ "uu1", "uu2", "uu3" ]
+    @test o.variable_components_names == [ "vv1", "vv2" ]
+
+    @def o begin
         x = (y, z) ∈ R², state
         u = (uu1, uu2, uu3) ∈ R³, control
         v = (vv1, vv2) ∈ R², variable
@@ -2401,13 +2410,13 @@ end
     t0 = 0
     tf = 1
     @def o begin
-        t ∈ [ t0, tf ], time
-        x ∈ R^2, state
-        u ∈ R, control
+        t in [ t0, tf ], time
+        x in R^2, state
+        u in R, control
         x(t0) == [ -1, 0 ], (1)
         x(tf) == [  0, 0 ]
         derivative(x)(t) == A * x(t) + B * u(t)
-        integral( 0.5u(t)^2 ) → min
+        integral( 0.5u(t)^2 ) => min
     end
     x = [ 1, 2 ]
     x0 = 2 * x
@@ -2423,18 +2432,18 @@ end
     @test o.criterion == :min
 
     @def o begin
-        z ∈ R, variable
-        t ∈ [ 0, 1 ], time
-        x ∈ R², state
-        u ∈ R, control
-        r = x₁
-        v = x₂
+        z in R, variable
+        t in [ 0, 1 ], time
+        x in R^2, state
+        u in R, control
+        r = x1
+        v = x2
         0 <= r(0) - z <= 1,            (1)
         0 <= v(1)^2 <= 1,              (2)
         [ 0, 0 ] <= x(0) <= [ 1, 1 ],  (♡)
         z >= 0,                        (3)
-        ẋ(t) == [ v(t), r(t)^2 + z ]
-        ∫( u(t)^2 + z * x₁(t) ) → min
+        derivative(x)(t) == [ v(t), r(t)^2 + z ]
+        integral( u(t)^2 + z * x1(t) ) => min
     end
     x0 = [ 2, 3 ]
     xf = [ 4, 5 ]
@@ -2449,18 +2458,18 @@ end
     @test o.lagrange(x, u, z) == u^2 + z * x[1]
 
     @def o begin
-        z ∈ R, variable
-        t ∈ [ 0, 1 ], time
-        x ∈ R², state
-        u ∈ R, control
-        r = x₁
-        v = x₂
+        z in R, variable
+        t in [ 0, 1 ], time
+        x in R^2, state
+        u in R, control
+        r = x1
+        v = x2
         0 <= r(0) - z <= 1,            (1)
         0 <= v(1)^2 <= 1,              (2)
         [ 0, 0 ] <= x(0) <= [ 1, 1 ],  (♡)
         z >= 0,                        (3)
-        ẋ(t) == [ v(t), r(t)^2 + z ]
-        ∫( u(t)^2 + z * x₁(t) ) => min
+        derivative(x)(t) == [ v(t), r(t)^2 + z ]
+        integral( u(t)^2 + z * x1(t) ) => min
     end
     x0 = [ 2, 3 ]
     xf = [ 4, 5 ]
