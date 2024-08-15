@@ -263,11 +263,7 @@ export get_lagrange, get_mayer, get_criterion, get_dynamics
 
 # solution
 export OptimalControlSolution
-export get_times, get_initial_time_name, get_final_time_name, get_time_name
-export get_control_dimension, get_control_components_names, get_control_name, get_control
-export get_state_dimension, get_state_components_names, get_state_name, get_state
-export get_variable_dimension, get_variable_components_names, get_variable_name, get_variable
-export get_costate, get_objective
+export get_times, get_control, get_state, get_variable, get_costate, get_objective
 export get_iterations, get_stopping, get_message, get_success, get_infos
 
 # initialization
