@@ -2436,14 +2436,14 @@ end
         t in [ 0, 1 ], time
         x in R^2, state
         u in R, control
-        r = x1
-        v = x2
+        r = x[1]
+        v = x[2]
         0 <= r(0) - z <= 1,            (1)
         0 <= v(1)^2 <= 1,              (2)
         [ 0, 0 ] <= x(0) <= [ 1, 1 ],  (♡)
         z >= 0,                        (3)
         derivative(x)(t) == [ v(t), r(t)^2 + z ]
-        integral( u(t)^2 + z * x1(t) ) => min
+        integral( u(t)^2 + z * x[1](t) ) => min
     end
     x0 = [ 2, 3 ]
     xf = [ 4, 5 ]
@@ -2462,14 +2462,14 @@ end
         t in [ 0, 1 ], time
         x in R^2, state
         u in R, control
-        r = x1
-        v = x2
+        r = x[1]
+        v = x[2]
         0 <= r(0) - z <= 1,            (1)
         0 <= v(1)^2 <= 1,              (2)
         [ 0, 0 ] <= x(0) <= [ 1, 1 ],  (♡)
         z >= 0,                        (3)
         derivative(x)(t) == [ v(t), r(t)^2 + z ]
-        integral( u(t)^2 + z * x1(t) ) => min
+        integral( u(t)^2 + z * x[1](t) ) => min
     end
     x0 = [ 2, 3 ]
     xf = [ 4, 5 ]
@@ -2483,6 +2483,34 @@ end
     @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z ]
     @test o.lagrange(x, u, z) == u^2 + z * x[1]
      
+    @def o begin
+        z in R^2, variable
+        t in [ 0, 1 ], time
+        x in R^2, state
+        u in R^2, control
+        r = x1
+        v = x2
+        0 <= r(0) - z1 <= 1,            (1)
+        0 <= v(1)^2 <= 1,               (2)
+        [ 0, 0 ] <= x(0) <= [ 1, 1 ],   (♡)
+        z1 >= 0,                        (3)
+        z2 == 1
+        u2(t) == 0
+        derivative(x)(t) == [ v(t), r(t)^2 + z1 ]
+        integral( u1(t)^2 + z1 * x1(t) ) => min
+    end
+    x0 = [ 2, 3 ]
+    xf = [ 4, 5 ]
+    x = [ 1, 2 ]
+    u = [3, 0]
+    z = [4, 1]
+    @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z[1]
+    @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+    @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
+    @test constraint(o, :eq3)(z) == z[1]
+    @test o.dynamics(x, u, z) == [ x[2], x[1]^2 + z[1] ]
+    @test o.lagrange(x, u, z) == u[1]^2 + z[1] * x[1]
+
 end
 
 end
