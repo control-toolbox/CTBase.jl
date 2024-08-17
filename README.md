@@ -20,7 +20,7 @@ The control-toolbox ecosystem gathers Julia packages for mathematical control an
 
 | **Documentation**  | **Code Status**  | **Release**  |
 |:-------------------|:-----------------|:-------------|
-| [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url] | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] | [![Release][release-img]][release-url] |
+| [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url] | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] [![pkgeval](https://juliahub.com/docs/General/CTBase/stable/pkgeval.svg)](https://juliahub.com/ui/Packages/General/CTBase) | [![Release][release-img]][release-url] |
 
 ## Installation
 
