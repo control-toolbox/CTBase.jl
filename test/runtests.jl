@@ -1,7 +1,13 @@
+#
+using Aqua
+using ForwardDiff
+using StaticArrays
+
+#
 using CTBase
-using Test
-using Plots
 using DifferentiationInterface: AutoForwardDiff
+using Plots
+using Test
 
 # functions and types that are not exported
 const vec2vec  = CTBase.vec2vec
@@ -16,6 +22,7 @@ include("utils.jl")
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
+        :aqua,
         :ctparser_utils,
         :default,
         :description,

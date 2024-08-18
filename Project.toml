@@ -1,6 +1,6 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
-authors = ["Olivier Cots <olivier.cots@enseeiht.fr>", "Jean-Baptiste Caillau <caillau@univ-cotedazur.fr>"]
+authors = ["Olivier Cots <olivier.cots@irit.fr>", "Jean-Baptiste Caillau <caillau@univ-cotedazur.fr>"]
 version = "0.13.0"
 
 [deps]
@@ -34,6 +34,7 @@ Interpolations = "0.15"
 MLStyle = "0.4"
 MacroTools = "0.5"
 Parameters = "0.12"
+Plots = "1.40"
 PrettyTables = "2.2"
 Printf = "1.8"
 Reexport = "1.2"
