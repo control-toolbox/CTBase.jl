@@ -264,7 +264,7 @@ $(TYPEDSIGNATURES)
 Return the labels of the constraints as a `Base.keys`.
 
 """
-function get_constraints_labels(ocp::OptimalControlModel)
+function constraints_labels(ocp::OptimalControlModel)
     return keys(ocp.constraints)
 end
 
@@ -324,7 +324,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear state constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
+dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
 
 """
 $(TYPEDSIGNATURES)
@@ -332,7 +332,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear control constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
+dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
 
 """
 $(TYPEDSIGNATURES)
@@ -340,7 +340,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear mixed constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
+dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
 
 """
 $(TYPEDSIGNATURES)
@@ -348,7 +348,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear path (state + control + mixed) constraints (`nothing` if one of them is not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-function get_dim_path_constraints(ocp::OptimalControlModel)
+function dim_path_constraints(ocp::OptimalControlModel)
     isnothing(ocp.dim_control_constraints) && return nothing
     isnothing(ocp.dim_state_constraints) && return nothing
     isnothing(ocp.dim_mixed_constraints) && return nothing
@@ -361,7 +361,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the boundary constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_boundary_constraints(ocp::OptimalControlModel) = ocp.dim_boundary_constraints 
+dim_boundary_constraints(ocp::OptimalControlModel) = ocp.dim_boundary_constraints 
 
 """
 $(TYPEDSIGNATURES)
@@ -369,7 +369,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear variable constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
+dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
 
 """
 $(TYPEDSIGNATURES)
@@ -377,7 +377,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of range constraints on state (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_state_range(ocp::OptimalControlModel) = ocp.dim_state_range 
+dim_state_range(ocp::OptimalControlModel) = ocp.dim_state_range 
 
 """
 $(TYPEDSIGNATURES)
@@ -385,7 +385,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of range constraints on control (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_control_range(ocp::OptimalControlModel) = ocp.dim_control_range 
+dim_control_range(ocp::OptimalControlModel) = ocp.dim_control_range 
 
 """
 $(TYPEDSIGNATURES)
@@ -393,7 +393,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of range constraints on variable (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-get_dim_variable_range(ocp::OptimalControlModel) = ocp.dim_variable_range
+dim_variable_range(ocp::OptimalControlModel) = ocp.dim_variable_range
 
 """
 $(TYPEDSIGNATURES)
@@ -401,7 +401,7 @@ $(TYPEDSIGNATURES)
 Return the model expression of the optimal control problem or `nothing`.
 
 """
-get_model_expression(ocp::OptimalControlModel) = ocp.model_expression
+model_expression(ocp::OptimalControlModel) = ocp.model_expression
 
 """
 $(TYPEDSIGNATURES)
@@ -409,7 +409,7 @@ $(TYPEDSIGNATURES)
 Return the initial time of the optimal control problem or `nothing`.
 
 """
-get_initial_time(ocp::OptimalControlModel) = ocp.initial_time
+initial_time(ocp::OptimalControlModel) = ocp.initial_time
 
 """
 $(TYPEDSIGNATURES)
@@ -417,7 +417,7 @@ $(TYPEDSIGNATURES)
 Return the name of the initial time of the optimal control problem or `nothing`.
 
 """
-get_initial_time_name(ocp::OptimalControlModel) = ocp.initial_time_name
+initial_time_name(ocp::OptimalControlModel) = ocp.initial_time_name
 
 """
 $(TYPEDSIGNATURES)
@@ -425,7 +425,7 @@ $(TYPEDSIGNATURES)
 Return the final time of the optimal control problem or `nothing`.
 
 """
-get_final_time(ocp::OptimalControlModel) = ocp.final_time
+final_time(ocp::OptimalControlModel) = ocp.final_time
 
 """
 $(TYPEDSIGNATURES)
@@ -433,7 +433,7 @@ $(TYPEDSIGNATURES)
 Return the name of the final time of the optimal control problem or `nothing`.
 
 """
-get_final_time_name(ocp::OptimalControlModel) = ocp.final_time_name
+final_time_name(ocp::OptimalControlModel) = ocp.final_time_name
 
 """
 $(TYPEDSIGNATURES)
@@ -441,7 +441,7 @@ $(TYPEDSIGNATURES)
 Return the name of the time component of the optimal control problem or `nothing`.
 
 """
-get_time_name(ocp::OptimalControlModel) = ocp.time_name
+time_name(ocp::OptimalControlModel) = ocp.time_name
 
 """
 $(TYPEDSIGNATURES)
@@ -449,7 +449,7 @@ $(TYPEDSIGNATURES)
 Return the dimention of the control of the optimal control problem or `nothing`.
 
 """
-get_control_dimension(ocp::OptimalControlModel) = ocp.control_dimension
+control_dimension(ocp::OptimalControlModel) = ocp.control_dimension
 
 """
 $(TYPEDSIGNATURES)
@@ -457,7 +457,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the control of the optimal control problem or `nothing`.
 
 """
-get_control_components_names(ocp::OptimalControlModel) = ocp.control_components_names
+control_components_names(ocp::OptimalControlModel) = ocp.control_components_names
 
 """
 $(TYPEDSIGNATURES)
@@ -465,7 +465,7 @@ $(TYPEDSIGNATURES)
 Return the name of the control of the optimal control problem or `nothing`.
 
 """
-get_control_name(ocp::OptimalControlModel) = ocp.control_name
+control_name(ocp::OptimalControlModel) = ocp.control_name
 
 """
 $(TYPEDSIGNATURES)
@@ -473,7 +473,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the state of the optimal control problem or `nothing`.
 
 """
-get_state_dimension(ocp::OptimalControlModel) = ocp.state_dimension
+state_dimension(ocp::OptimalControlModel) = ocp.state_dimension
 
 """
 $(TYPEDSIGNATURES)
@@ -481,7 +481,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the state of the optimal control problem or `nothing`.
 
 """
-get_state_components_names(ocp::OptimalControlModel) = ocp.state_components_names
+state_components_names(ocp::OptimalControlModel) = ocp.state_components_names
 
 """
 $(TYPEDSIGNATURES)
@@ -489,7 +489,7 @@ $(TYPEDSIGNATURES)
 Return the name of the state of the optimal control problem or `nothing`.
 
 """
-get_state_name(ocp::OptimalControlModel) = ocp.state_name
+state_name(ocp::OptimalControlModel) = ocp.state_name
 
 """
 $(TYPEDSIGNATURES)
@@ -497,7 +497,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the variable of the optimal control problem or `nothing`.
 
 """
-get_variable_dimension(ocp::OptimalControlModel) = ocp.variable_dimension
+variable_dimension(ocp::OptimalControlModel) = ocp.variable_dimension
 
 """
 $(TYPEDSIGNATURES)
@@ -505,7 +505,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the variable of the optimal control problem or `nothing`.
 
 """
-get_variable_components_names(ocp::OptimalControlModel) = ocp.variable_components_names
+variable_components_names(ocp::OptimalControlModel) = ocp.variable_components_names
 
 """
 $(TYPEDSIGNATURES)
@@ -513,7 +513,7 @@ $(TYPEDSIGNATURES)
 Return the name of the variable of the optimal control problem or `nothing`.
 
 """
-get_variable_name(ocp::OptimalControlModel) = ocp.variable_name
+variable_name(ocp::OptimalControlModel) = ocp.variable_name
 
 """
 $(TYPEDSIGNATURES)
@@ -521,7 +521,7 @@ $(TYPEDSIGNATURES)
 Return the Lagrange part of the cost of the optimal control problem or `nothing`.
 
 """
-get_lagrange(ocp::OptimalControlModel) = ocp.lagrange
+lagrange(ocp::OptimalControlModel) = ocp.lagrange
 
 """
 $(TYPEDSIGNATURES)
@@ -529,7 +529,7 @@ $(TYPEDSIGNATURES)
 Return the Mayer part of the cost of the optimal control problem or `nothing`.
 
 """
-get_mayer(ocp::OptimalControlModel) = ocp.mayer
+mayer(ocp::OptimalControlModel) = ocp.mayer
 
 """
 $(TYPEDSIGNATURES)
@@ -537,7 +537,7 @@ $(TYPEDSIGNATURES)
 Return the criterion (`:min` or `:max`) of the optimal control problem or `nothing`.
 
 """
-get_criterion(ocp::OptimalControlModel) = ocp.criterion
+criterion(ocp::OptimalControlModel) = ocp.criterion
 
 """
 $(TYPEDSIGNATURES)
@@ -545,4 +545,4 @@ $(TYPEDSIGNATURES)
 Return the dynamics of the optimal control problem or `nothing`.
 
 """
-get_dynamics(ocp::OptimalControlModel) = ocp.dynamics
+dynamics(ocp::OptimalControlModel) = ocp.dynamics

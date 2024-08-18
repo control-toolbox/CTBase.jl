@@ -250,21 +250,21 @@ export __OCPModel # redirection to Model to avoid confusion with other Model fun
 export variable!, time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, constraint
 export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max
 export is_variable_dependent, is_variable_independent
-export nlp_constraints!, get_constraints_labels
+export nlp_constraints!, constraints_labels
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
-export get_dim_control_constraints, get_dim_state_constraints, get_dim_mixed_constraints, get_dim_path_constraints
-export get_dim_boundary_constraints, get_dim_variable_constraints, get_dim_control_range
-export get_dim_state_range, get_dim_variable_range
-export get_model_expression, get_initial_time, get_initial_time_name, get_final_time, get_final_time_name, get_time_name
-export get_control_dimension, get_control_components_names, get_control_name
-export get_state_dimension, get_state_components_names, get_state_name
-export get_variable_dimension, get_variable_components_names, get_variable_name
-export get_lagrange, get_mayer, get_criterion, get_dynamics
+export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints
+export dim_boundary_constraints, dim_variable_constraints, dim_control_range
+export dim_state_range, dim_variable_range
+export model_expression, initial_time, initial_time_name, final_time, final_time_name, time_name
+export control_dimension, control_components_names, control_name
+export state_dimension, state_components_names, state_name
+export variable_dimension, variable_components_names, variable_name
+export lagrange, mayer, criterion, dynamics
 
 # solution
 export OptimalControlSolution
-export get_times, get_control, get_state, get_variable, get_costate, get_objective
-export get_iterations, get_stopping, get_message, get_success, get_infos
+export time_grid, control, state, variable, costate, objective
+export iterations, stopping, message, success, infos
 
 # initialization
 export OptimalControlInit

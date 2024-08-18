@@ -13,7 +13,7 @@ function __OptimalControlSolution(ocp::OptimalControlModel;
     control::Union{Nothing, Function}=nothing,
     objective::Union{Nothing, ctNumber}=nothing,
     costate::Union{Nothing, Function}=nothing,
-    times::Union{Nothing, TimesDisc}=nothing,
+    time_grid::Union{Nothing, TimesDisc}=nothing,
     variable::Union{Nothing, Variable}=nothing,
     iterations::Union{Nothing, Integer}=nothing,
     stopping::Union{Nothing, Symbol}=nothing,
@@ -43,7 +43,7 @@ function __OptimalControlSolution(ocp::OptimalControlModel;
     sol.control = control
     sol.objective = objective 
     sol.costate = costate 
-    sol.times = times 
+    sol.time_grid = time_grid 
     sol.variable = variable 
     sol.iterations = iterations 
     sol.stopping = stopping
@@ -66,7 +66,7 @@ function OptimalControlSolution(ocp::OptimalControlModel{<:TimeDependence, Fixed
     objective::ctNumber,
     variable::Union{Nothing, Variable}=nothing,
     costate::Union{Nothing, Function}=nothing,
-    times::Union{Nothing, TimesDisc}=nothing,
+    time_grid::Union{Nothing, TimesDisc}=nothing,
     iterations::Union{Nothing, Integer}=nothing,
     stopping::Union{Nothing, Symbol}=nothing,
     message::Union{Nothing, String}=nothing,
@@ -78,7 +78,7 @@ function OptimalControlSolution(ocp::OptimalControlModel{<:TimeDependence, Fixed
     control=control,
     objective=objective,
     costate=costate,
-    times=times,
+    time_grid=time_grid,
     variable=variable,
     iterations=iterations,
     stopping=stopping,
@@ -99,7 +99,7 @@ function OptimalControlSolution(ocp::OptimalControlModel{<:TimeDependence, NonFi
     objective::ctNumber,
     variable::Variable,
     costate::Union{Nothing, Function}=nothing,
-    times::Union{Nothing, TimesDisc}=nothing,
+    time_grid::Union{Nothing, TimesDisc}=nothing,
     iterations::Union{Nothing, Integer}=nothing,
     stopping::Union{Nothing, Symbol}=nothing,
     message::Union{Nothing, String}=nothing,
@@ -111,7 +111,7 @@ function OptimalControlSolution(ocp::OptimalControlModel{<:TimeDependence, NonFi
     control=control,
     objective=objective,
     costate=costate,
-    times=times,
+    time_grid=time_grid,
     variable=variable,
     iterations=iterations,
     stopping=stopping,

@@ -18,7 +18,7 @@ Type of an optimal control solution.
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlSolution <: AbstractOptimalControlSolution 
-    times::Union{Nothing, TimesDisc}=nothing
+    time_grid::Union{Nothing, TimesDisc}=nothing
     initial_time_name::Union{String, Nothing}=nothing
     final_time_name::Union{String, Nothing}=nothing
     time_name::Union{String, Nothing}=nothing

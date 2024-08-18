@@ -477,7 +477,7 @@ function constraint!(
 
     __check_all_set(ocp)
     type == :variable && is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable" * ", you cannot use constraint! function with type=:variable."))
-    label ∈ get_constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
+    label ∈ constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
     isnothing(val) && isnothing(lb) && isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
 
     # value for equality constraint

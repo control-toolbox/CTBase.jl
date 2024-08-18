@@ -855,11 +855,11 @@ end
     ocp = Model(); __time!(ocp, 0, 1); state!(ocp, 1); control!(ocp, 1)
     __constraint!(ocp, :boundary, (x0, xf) -> x0+xf, 0, 1, :cb)
     __constraint!(ocp, :control, u->u, 0, 1, :cu)
-    k = get_constraints_labels(ocp)
+    k = constraints_labels(ocp)
     @test :cb ∈ k
     @test :cu ∈ k
     remove_constraint!(ocp, :cb)
-    k = get_constraints_labels(ocp)
+    k = constraints_labels(ocp)
     @test :cb ∉ k
     @test_throws IncorrectArgument remove_constraint!(ocp, :dummy_con)
 
@@ -878,15 +878,15 @@ end
     __constraint!(ocp, :mixed, (x,u)->x[1]+u, 1, 1, :cm)
 
     # dimensions (not set yet)
-    @test get_dim_control_constraints(ocp) === nothing
-    @test get_dim_state_constraints(ocp) === nothing
-    @test get_dim_mixed_constraints(ocp) === nothing
-    @test get_dim_path_constraints(ocp) === nothing
-    @test get_dim_boundary_constraints(ocp) === nothing
-    @test get_dim_variable_constraints(ocp) === nothing
-    @test get_dim_control_range(ocp) === nothing
-    @test get_dim_state_range(ocp) === nothing
-    @test get_dim_variable_range(ocp) === nothing
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -930,15 +930,15 @@ end
     @test sort(θ(v)) == sort([ ])
 
     # dimensions (set)
-    @test get_dim_control_constraints(ocp) == 1
-    @test get_dim_state_constraints(ocp) == 2
-    @test get_dim_mixed_constraints(ocp) == 1
-    @test get_dim_path_constraints(ocp) == 4
-    @test get_dim_boundary_constraints(ocp) == 3
-    @test get_dim_variable_constraints(ocp) == 0
-    @test get_dim_control_range(ocp) == 1
-    @test get_dim_state_range(ocp) == 2
-    @test get_dim_variable_range(ocp) == 0 
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 0
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 0 
 
 end
 
@@ -963,15 +963,15 @@ end
     __constraint!(ocp, :variable, v -> v[3]^2, 0, 1, :cv4)
 
     # dimensions (not set yet)
-    @test get_dim_control_constraints(ocp) === nothing
-    @test get_dim_state_constraints(ocp) === nothing
-    @test get_dim_mixed_constraints(ocp) === nothing
-    @test get_dim_path_constraints(ocp) === nothing
-    @test get_dim_boundary_constraints(ocp) === nothing
-    @test get_dim_variable_constraints(ocp) === nothing
-    @test get_dim_control_range(ocp) === nothing
-    @test get_dim_state_range(ocp) === nothing
-    @test get_dim_variable_range(ocp) === nothing
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -1015,15 +1015,15 @@ end
     @test sort(vu) == sort([ 5, 5, 5, 5, 3, 4, 3 ])
 
     # dimensions
-    @test get_dim_control_constraints(ocp) == 1
-    @test get_dim_state_constraints(ocp) == 2
-    @test get_dim_mixed_constraints(ocp) == 1
-    @test get_dim_path_constraints(ocp) == 4
-    @test get_dim_boundary_constraints(ocp) == 3
-    @test get_dim_variable_constraints(ocp) == 1
-    @test get_dim_control_range(ocp) == 1
-    @test get_dim_state_range(ocp) == 2
-    @test get_dim_variable_range(ocp) == 7
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 1
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 7
 
 end
 
@@ -1098,15 +1098,15 @@ end
     constraint!(ocp, :variable; f=v -> v[3]^2, lb=-10, ub=-10, label=:cv4)
 
     # dimensions (not set yet)
-    @test get_dim_control_constraints(ocp) === nothing
-    @test get_dim_state_constraints(ocp) === nothing
-    @test get_dim_mixed_constraints(ocp) === nothing
-    @test get_dim_path_constraints(ocp) === nothing
-    @test get_dim_boundary_constraints(ocp) === nothing
-    @test get_dim_variable_constraints(ocp) === nothing
-    @test get_dim_control_range(ocp) === nothing
-    @test get_dim_state_range(ocp) === nothing
-    @test get_dim_variable_range(ocp) === nothing
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -1150,15 +1150,15 @@ end
     @test sort(vu)      == sort([ 5, 5, 5, 5, 10, 20, 1000 ])
 
     # dimensions
-    @test get_dim_control_constraints(ocp) == 1
-    @test get_dim_state_constraints(ocp) == 2
-    @test get_dim_mixed_constraints(ocp) == 1
-    @test get_dim_path_constraints(ocp) == 4
-    @test get_dim_boundary_constraints(ocp) == 3
-    @test get_dim_variable_constraints(ocp) == 1
-    @test get_dim_control_range(ocp) == 1
-    @test get_dim_state_range(ocp) == 2
-    @test get_dim_variable_range(ocp) == 7
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 1
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 7
 
 end
 
@@ -1185,15 +1185,15 @@ end
     constraint!(ocp, :variable; f=v -> v[3]^2, val=-10, label=:cv4)
 
     # dimensions (not set yet)
-    @test get_dim_control_constraints(ocp) === nothing
-    @test get_dim_state_constraints(ocp) === nothing
-    @test get_dim_mixed_constraints(ocp) === nothing
-    @test get_dim_path_constraints(ocp) === nothing
-    @test get_dim_boundary_constraints(ocp) === nothing
-    @test get_dim_variable_constraints(ocp) === nothing
-    @test get_dim_control_range(ocp) === nothing
-    @test get_dim_state_range(ocp) === nothing
-    @test get_dim_variable_range(ocp) === nothing
+    @test dim_control_constraints(ocp) === nothing
+    @test dim_state_constraints(ocp) === nothing
+    @test dim_mixed_constraints(ocp) === nothing
+    @test dim_path_constraints(ocp) === nothing
+    @test dim_boundary_constraints(ocp) === nothing
+    @test dim_variable_constraints(ocp) === nothing
+    @test dim_control_range(ocp) === nothing
+    @test dim_state_range(ocp) === nothing
+    @test dim_variable_range(ocp) === nothing
 
     (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu),
     (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints!(ocp)
@@ -1237,15 +1237,15 @@ end
     @test sort(vu)      == sort([ 5, 5, 5, 5, 10, 20, 1000 ])
 
     # dimensions
-    @test get_dim_control_constraints(ocp) == 1
-    @test get_dim_state_constraints(ocp) == 2
-    @test get_dim_mixed_constraints(ocp) == 1
-    @test get_dim_path_constraints(ocp) == 4
-    @test get_dim_boundary_constraints(ocp) == 3
-    @test get_dim_variable_constraints(ocp) == 1
-    @test get_dim_control_range(ocp) == 1
-    @test get_dim_state_range(ocp) == 2
-    @test get_dim_variable_range(ocp) == 7
+    @test dim_control_constraints(ocp) == 1
+    @test dim_state_constraints(ocp) == 2
+    @test dim_mixed_constraints(ocp) == 1
+    @test dim_path_constraints(ocp) == 4
+    @test dim_boundary_constraints(ocp) == 3
+    @test dim_variable_constraints(ocp) == 1
+    @test dim_control_range(ocp) == 1
+    @test dim_state_range(ocp) == 2
+    @test dim_variable_range(ocp) == 7
 
 end
 
