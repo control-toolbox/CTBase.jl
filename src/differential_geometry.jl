@@ -552,7 +552,7 @@ julia> @Lie {H0, H1}(1, [1, 2, 3], [1, 0, 7], 2)
 """
 macro Lie(expr::Expr)
 
-    fun(x) = @match (@capture(x, [a_, b_]),@capture(x, {c_, d_})) begin
+    fun(x) = @match (@capture(x, [a_, b_]), @capture(x, {c_, d_})) begin
         (true, false) => :(    Lie($a, $b))
         (false, true) => :(Poisson($c, $d))
         (false, false) => x
@@ -593,26 +593,26 @@ macro Lie(expr::Expr, arg1, arg2)
     local variable=false
 
     @match arg1 begin
-        :( Autonomous      ) => begin autonomous=true end
-        :( NonAutonomous   ) => begin autonomous=false end
-        :( autonomous = $a ) => begin autonomous=a end
-        :( NonFixed        ) => begin variable=true end
-        :( Fixed           ) => begin variable=false end
-        :( variable   = $a ) => begin variable=a end
+        :( Autonomous      ) => begin autonomous = true  end
+        :( NonAutonomous   ) => begin autonomous = false end
+        :( autonomous = $a ) => begin autonomous = a     end
+        :( NonFixed        ) => begin variable   = true  end
+        :( Fixed           ) => begin variable   = false end
+        :( variable   = $a ) => begin variable   = a     end
         _ => throw(IncorrectArgument("Invalid argument: " * string(arg1)))
     end
 
     @match arg2 begin
-        :( Autonomous      ) => begin autonomous=true end
-        :( NonAutonomous   ) => begin autonomous=false end
-        :( autonomous = $a ) => begin autonomous=a end
-        :( NonFixed        ) => begin variable=true end
-        :( Fixed           ) => begin variable=false end
-        :( variable   = $a ) => begin variable=a end
+        :( Autonomous      ) => begin autonomous = true  end
+        :( NonAutonomous   ) => begin autonomous = false end
+        :( autonomous = $a ) => begin autonomous = a     end
+        :( NonFixed        ) => begin variable   = true  end
+        :( Fixed           ) => begin variable   = false end
+        :( variable   = $a ) => begin variable   = a     end
         _ => throw(IncorrectArgument("Invalid argument: " * string(arg2)))
     end
     
-    fun(x) = @match (@capture(x, [a_, b_]),@capture(x, {c_, d_})) begin
+    fun(x) = @match (@capture(x, [a_, b_]), @capture(x, {c_, d_})) begin
         #(true, false) => :(    Lie($a, $b; autonomous=$autonomous, variable=$variable))
         (false, true) => quote 
             ($c isa Function && $d isa Function) ? 
@@ -649,12 +649,12 @@ macro Lie(expr::Expr, arg)
     local variable=false
 
     @match arg begin
-        :( Autonomous      ) => begin autonomous=true end
-        :( NonAutonomous   ) => begin autonomous=false end
-        :( autonomous = $a ) => begin autonomous=a end
-        :( NonFixed        ) => begin variable=true end
-        :( Fixed           ) => begin variable=false end
-        :( variable   = $a ) => begin variable=a end
+        :( Autonomous      ) => begin autonomous = true   end
+        :( NonAutonomous   ) => begin autonomous = false  end
+        :( autonomous = $a ) => begin autonomous = a      end
+        :( NonFixed        ) => begin variable   = true   end
+        :( Fixed           ) => begin variable   = false  end
+        :( variable   = $a ) => begin variable   = a      end
         _ => throw(IncorrectArgument("Invalid argument: " * string(arg)))
     end
 

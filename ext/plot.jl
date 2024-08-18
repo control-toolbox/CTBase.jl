@@ -470,7 +470,7 @@ Get the data for plotting.
 function __get_data_plot(sol::OptimalControlSolution, 
     xx::Union{Symbol,Tuple{Symbol,Integer}}; time::Symbol=:default)
 
-    T = sol.times
+    T = sol.time_grid
     X = sol.state.(T)
     U = sol.control.(T)
     P = sol.costate.(T)

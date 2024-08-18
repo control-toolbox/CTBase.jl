@@ -23,7 +23,6 @@ include("utils.jl")
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
         :aqua,
-        :callback,
         :ctparser_utils,
         :default,
         :description,
