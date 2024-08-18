@@ -15,7 +15,7 @@ jobs:
         pkg: [
           "control-toolbox/CTDirect.jl",
           "control-toolbox/CTFlows.jl",
-          "control-toolbox/OptimalControl.jl",
+          "control-toolbox/OptimalControl.jl"
         ]
         pkgversion: [latest, stable]
 
