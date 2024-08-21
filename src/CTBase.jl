@@ -264,7 +264,21 @@ export lagrange, mayer, criterion, dynamics
 # solution
 export OptimalControlSolution
 export time_grid, control, state, variable, costate, objective
+export state_discretized, control_discretized, costate_discretized
 export iterations, stopping, message, success, infos
+export boundary_constraints, mult_boundary_constraints
+export variable_constraints, mult_variable_constraints, mult_variable_box_lower, mult_variable_box_upper  
+export control_constraints, mult_control_constraints 
+export state_constraints, mult_state_constraints   
+export mixed_constraints, mult_mixed_constraints   
+export mult_state_box_lower, mult_state_box_upper     
+export mult_control_box_lower, mult_control_box_upper
+export time_grid!, costate!, iterations!, stopping!, message!, success!, infos!
+export boundary_constraints!, mult_boundary_constraints!
+export variable_constraints!, mult_variable_constraints!, mult_variable_box_lower!, mult_variable_box_upper!
+export control_constraints!, mult_control_constraints!, mult_control_box_lower!, mult_control_box_upper!
+export state_constraints!, mult_state_constraints!, mult_state_box_lower!, mult_state_box_upper!
+export mixed_constraints!, mult_mixed_constraints!
 
 # initialization
 export OptimalControlInit
