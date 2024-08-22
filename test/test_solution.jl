@@ -11,15 +11,27 @@ function test_solution()
         ∫( 0.5u(t)^2 ) → min
     end
 
+    times = range(0, 1, 10)
     state = t -> t 
     control = t -> 2t 
+    costate = t -> t 
     objective = 1
-    sol = OptimalControlSolution(ocp; state=state, control=control, objective=objective)
+    sol = OptimalControlSolution(ocp; 
+        state=state, 
+        control=control,
+        costate=costate, 
+        objective=objective,
+        time_grid=times)
 
     @test sol.objective == objective
     @test typeof(sol) == OptimalControlSolution
 
-    # Fixed ocp
+    # getters
+    @test all(state_discretized(sol)   .== state.(times))
+    @test all(control_discretized(sol) .== control.(times))
+    @test all(costate_discretized(sol) .== costate.(times))
+
+    # NonFixed ocp
     @def ocp begin
         v ∈ R, variable
         t ∈ [ 0, 1 ], time
