@@ -5,7 +5,7 @@ Check if actual dimension is equal to target dimension, error otherwise
 """
 function checkDim(actual_dim, target_dim)
     if !isnothing(target_dim) && actual_dim != target_dim
-        error("Init dimension mismatch: got ",actual_dim," instead of ",target_dim )
+        error("Init dimension mismatch: got ", actual_dim, " instead of ", target_dim)
     end
 end
 
@@ -25,7 +25,7 @@ Convert matrix to vector of vectors (could be expanded)
 """
 function formatData(data)
     if data isa Matrix
-        return matrix2vec(data,1)
+        return matrix2vec(data, 1)
     else
         return data
     end
@@ -53,7 +53,7 @@ Build functional initialization: default case
 """
 function buildFunctionalInit(data::Nothing, time, dim)
     # fallback to method-dependent default initialization
-    return t-> nothing
+    return t -> nothing
 end
 
 """
@@ -63,7 +63,7 @@ Build functional initialization: function case
 """
 function buildFunctionalInit(data::Function, time, dim)
     # functional initialization
-    checkDim(length(data(0)),dim)
+    checkDim(length(data(0)), dim)
     return t -> data(t)
 end
 
@@ -96,7 +96,7 @@ function buildFunctionalInit(data, time, dim)
         checkDim(length(itp(0)), dim)
         return t -> itp(t)
     else
-        error("Unrecognized initialization argument: ",typeof(data))
+        error("Unrecognized initialization argument: ", typeof(data))
     end
 end
 
@@ -109,7 +109,7 @@ function buildVectorInit(data, dim)
     if isnothing(data)
         return data
     else
-        checkDim(length(data),dim)
+        checkDim(length(data), dim)
         return data
     end
 end
@@ -144,10 +144,10 @@ julia> init = OptimalControlInit(sol)
 
 """
 mutable struct OptimalControlInit
-   
+
     state_init::Function
     control_init::Function
-    variable_init::Union{Nothing, ctVector}
+    variable_init::Union{Nothing,ctVector}
     #costate_init::Function
     #multipliers_init::Union{Nothing, ctVector}
 
@@ -156,15 +156,23 @@ mutable struct OptimalControlInit
 
     OptimalControlInit base constructor with separate explicit arguments
     """
-    function OptimalControlInit(; state=nothing, control=nothing, variable=nothing, time=nothing, state_dim=nothing, control_dim=nothing, variable_dim=nothing)
-        
+    function OptimalControlInit(;
+        state = nothing,
+        control = nothing,
+        variable = nothing,
+        time = nothing,
+        state_dim = nothing,
+        control_dim = nothing,
+        variable_dim = nothing,
+    )
+
         init = new()
-    
+
         # some matrix / vector conversions
         time = formatTimeGrid(time)
         state = formatData(state)
         control = formatData(control)
-        
+
         # set initialization for x, u, v
         init.state_init = buildFunctionalInit(state, time, state_dim)
         init.control_init = buildFunctionalInit(control, time, control_dim)
@@ -179,16 +187,18 @@ mutable struct OptimalControlInit
 
     OptimalControlInit constructor with arguments grouped as named tuple or dict
     """
-    function OptimalControlInit(init_data; state_dim=nothing, control_dim=nothing, variable_dim=nothing)
+    function OptimalControlInit(
+        init_data;
+        state_dim = nothing,
+        control_dim = nothing,
+        variable_dim = nothing,
+    )
 
         # trivial case: default init
         x_init = nothing
         u_init = nothing
         v_init = nothing
         t_init = nothing
-        x_dim = nothing
-        u_dim = nothing
-        v_dim = nothing
 
         # parse arguments
         if !isnothing(init_data)
@@ -202,14 +212,25 @@ mutable struct OptimalControlInit
                 elseif key == :time
                     t_init = init_data[:time]
                 else
-                    error("Unknown key in initialization data (allowed: state, control, variable, time, state_dim, control_dim, variable_dim): ", key)
+                    error(
+                        "Unknown key in initialization data (allowed: state, control, variable, time, state_dim, control_dim, variable_dim): ",
+                        key,
+                    )
                 end
             end
         end
 
         # call base constructor
-        return OptimalControlInit(state=x_init, control=u_init, variable=v_init, time=t_init, state_dim=state_dim, control_dim=control_dim, variable_dim=variable_dim)
-    
+        return OptimalControlInit(
+            state = x_init,
+            control = u_init,
+            variable = v_init,
+            time = t_init,
+            state_dim = state_dim,
+            control_dim = control_dim,
+            variable_dim = variable_dim,
+        )
+
     end
 
     """
@@ -218,7 +239,14 @@ mutable struct OptimalControlInit
     OptimalControlInit constructor with solution as argument (warm start)
     """
     function OptimalControlInit(sol::OptimalControlSolution; unused_kwargs...)
-        return OptimalControlInit(state=sol.state, control=sol.control, variable=sol.variable, state_dim=sol.state_dimension, control_dim=sol.control_dimension, variable_dim=sol.variable_dimension)
+        return OptimalControlInit(
+            state = sol.state,
+            control = sol.control,
+            variable = sol.variable,
+            state_dim = sol.state_dimension,
+            control_dim = sol.control_dimension,
+            variable_dim = sol.variable_dimension,
+        )
     end
 
 end

@@ -12,9 +12,9 @@ julia> id(e) = expr_it(e, Expr, x -> x)
 """
 expr_it(e, _Expr, f) =
     if e isa Expr
-    args = e.args
-    n = length(args)
-    newargs = [ expr_it(e.args[i], _Expr, f) for i ∈ 1:n ]
+        args = e.args
+        n = length(args)
+        newargs = [expr_it(e.args[i], _Expr, f) for i ∈ 1:n]
         return _Expr(e.head, newargs...)
     else
         return f(e)
@@ -50,7 +50,7 @@ julia> x0 = Symbol(x, 0); subs(e, :( \$x[1](\$(t0)) ), :( \$x0[1] ))
 :(x0[1] * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
 ```
 """
-subs(e, e1 :: Union{Symbol, Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
+subs(e, e1::Union{Symbol,Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
 
 subs(e, e1, e2) = begin
     foo(e1, e2) = (h, args...) -> begin
@@ -89,7 +89,7 @@ julia> e = :( 0.5u(t)^2 ); replace_call(e, u, t, u)
 :(0.5 * u ^ 2)
 ```
 """
-replace_call(e, x::Symbol, t, y) = replace_call(e, [ x ], t, [ y ]) 
+replace_call(e, x::Symbol, t, y) = replace_call(e, [x], t, [y])
 
 """
 $(TYPEDSIGNATURES)
@@ -113,22 +113,23 @@ julia> e = :( ((x^2)(t0) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu 
 """
 replace_call(e, x::Vector{Symbol}, t, y) = begin
     @assert length(x) == length(y)
-    foo(x, t, y) = (h, args...) -> begin
-        ee = Expr(h, args...)
-	    @match ee begin
-	    :( $eee($tt) ) && if tt == t end =>
-	        let ch = false
-	    	    for i ∈ 1:length(x)
-		            if has(eee, x[i])
-		                eee = subs(eee, x[i], y[i])
-		                ch = true # todo: unnecessary (as subs can be idempotent)?
-		            end
-		        end
- 	            ch ? eee : ee
-	        end
-	    _ => ee
+    foo(x, t, y) =
+        (h, args...) -> begin
+            ee = Expr(h, args...)
+            @match ee begin
+                :($eee($tt)) && if tt == t
+                end => let ch = false
+                    for i ∈ 1:length(x)
+                        if has(eee, x[i])
+                            eee = subs(eee, x[i], y[i])
+                            ch = true # todo: unnecessary (as subs can be idempotent)?
+                        end
+                    end
+                    ch ? eee : ee
+                end
+                _ => ee
+            end
         end
-    end
     expr_it(e, foo(x, t, y), x -> x)
 end
 
@@ -176,10 +177,10 @@ true
 has(e, e1) = begin
     foo(e1) = (h, args...) -> begin
         ee = Expr(h, args...)
-    if :yes ∈ args
-        :yes
-    else
-        ee == e1 ? :yes : ee
+        if :yes ∈ args
+            :yes
+        else
+            ee == e1 ? :yes : ee
         end
     end
     expr_it(e, foo(e1), x -> x == e1 ? :yes : x) == :yes
@@ -203,15 +204,18 @@ true
 ```
 """
 has(e, x, t) = begin
-    foo(x, t) = (h, args...) -> begin
-        ee = Expr(h, args...)
-	    if :yes ∈ args
-	        :yes
-	    else @match ee begin
-            :( $eee($tt) ) => (tt == t && has(eee, x)) ? :yes : ee
-            _ => ee end
+    foo(x, t) =
+        (h, args...) -> begin
+            ee = Expr(h, args...)
+            if :yes ∈ args
+                :yes
+            else
+                @match ee begin
+                    :($eee($tt)) => (tt == t && has(eee, x)) ? :yes : ee
+                    _ => ee
+                end
+            end
         end
-    end
     expr_it(e, foo(x, t), x -> x) == :yes
 end
 
@@ -335,39 +339,72 @@ julia> constraint_type(:( v[2]^2 + 1 ), t, t0, tf, x, u, v)
 ```
 """
 constraint_type(e, t, t0, tf, x, u, v) = begin
-    @match [ has(e, x, t0), has(e, x, tf), has(e, u, t), has(e, x, t), has(e, u, t0), has(e, u, tf), has(e, v) ] begin
-        [ true , false, false, false, false, false, _ ] => @match e begin
-            :( $y[$i:$p:$j]($s) ) && if (y == x && s == t0) end => (:initial , i:p:j   )
-            :( $y[$i:$j   ]($s) ) && if (y == x && s == t0) end => (:initial , i:j     )
-            :( $y[$i      ]($s) ) && if (y == x && s == t0) end => (:initial , i)
-            :( $y($s)           ) && if (y == x && s == t0) end => (:initial , nothing )
-	    _                                                   =>  :boundary end
-        [ false, true , false, false, false, false, _ ] => @match e begin 
-            :( $y[$i:$p:$j]($s) ) && if (y == x && s == tf) end => (:final   , i:p:j   )
-            :( $y[$i:$j   ]($s) ) && if (y == x && s == tf) end => (:final   , i:j     )
-            :( $y[$i      ]($s) ) && if (y == x && s == tf) end => (:final   , i)
-            :( $y($s) )           && if (y == x && s == tf) end => (:final   , nothing )
-	    _                                                   =>  :boundary end
-        [ true , true , false, false, false, false, _ ] => :boundary
-        [ false, false, true , false, false, false, _ ] => @match e begin
-            :( $c[$i:$p:$j]($s) ) && if (c == u && s == t) end => (:control_range, i:p:j   )
-            :( $c[$i:$j   ]($s) ) && if (c == u && s == t) end => (:control_range, i:j     )
-            :( $c[$i      ]($s) ) && if (c == u && s == t) end => (:control_range, i)
-            :( $c($s)           ) && if (c == u && s == t) end => (:control_range, nothing )
-	    _                                                  =>  :control_fun end
-        [ false, false, false, true , false, false, _ ] => @match e begin
-            :( $y[$i:$p:$j]($s) ) && if (y == x && s == t) end => (:state_range, i:p:j   )
-            :( $y[$i:$j   ]($s) ) && if (y == x && s == t) end => (:state_range, i:j     )
-            :( $y[$i      ]($s) ) && if (y == x && s == t) end => (:state_range, i)
-            :( $y($s)           ) && if (y == x && s == t) end => (:state_range, nothing )
-	    _                                                  =>  :state_fun end
-        [ false, false, true , true , false, false, _ ] => :mixed
-        [ false, false, false, false, false, false, true ] => @match e begin
-            :( $w[$i:$p:$j]     ) && if (w == v) end => (:variable_range, i:p:j   )
-            :( $w[$i:$j   ]     ) && if (w == v) end => (:variable_range, i:j     )
-            :( $w[$i      ]     ) && if (w == v) end => (:variable_range, i)
-            _                     && if (e == v) end => (:variable_range, nothing )
-	    _                                        =>  :variable_fun end
+    @match [
+        has(e, x, t0),
+        has(e, x, tf),
+        has(e, u, t),
+        has(e, x, t),
+        has(e, u, t0),
+        has(e, u, tf),
+        has(e, v),
+    ] begin
+        [true, false, false, false, false, false, _] => @match e begin
+            :($y[$i:$p:$j]($s)) && if (y == x && s == t0)
+            end => (:initial, i:p:j)
+            :($y[$i:$j]($s)) && if (y == x && s == t0)
+            end => (:initial, i:j)
+            :($y[$i]($s)) && if (y == x && s == t0)
+            end => (:initial, i)
+            :($y($s)) && if (y == x && s == t0)
+            end => (:initial, nothing)
+            _ => :boundary
+        end
+        [false, true, false, false, false, false, _] => @match e begin
+            :($y[$i:$p:$j]($s)) && if (y == x && s == tf)
+            end => (:final, i:p:j)
+            :($y[$i:$j]($s)) && if (y == x && s == tf)
+            end => (:final, i:j)
+            :($y[$i]($s)) && if (y == x && s == tf)
+            end => (:final, i)
+            :($y($s)) && if (y == x && s == tf)
+            end => (:final, nothing)
+            _ => :boundary
+        end
+        [true, true, false, false, false, false, _] => :boundary
+        [false, false, true, false, false, false, _] => @match e begin
+            :($c[$i:$p:$j]($s)) && if (c == u && s == t)
+            end => (:control_range, i:p:j)
+            :($c[$i:$j]($s)) && if (c == u && s == t)
+            end => (:control_range, i:j)
+            :($c[$i]($s)) && if (c == u && s == t)
+            end => (:control_range, i)
+            :($c($s)) && if (c == u && s == t)
+            end => (:control_range, nothing)
+            _ => :control_fun
+        end
+        [false, false, false, true, false, false, _] => @match e begin
+            :($y[$i:$p:$j]($s)) && if (y == x && s == t)
+            end => (:state_range, i:p:j)
+            :($y[$i:$j]($s)) && if (y == x && s == t)
+            end => (:state_range, i:j)
+            :($y[$i]($s)) && if (y == x && s == t)
+            end => (:state_range, i)
+            :($y($s)) && if (y == x && s == t)
+            end => (:state_range, nothing)
+            _ => :state_fun
+        end
+        [false, false, true, true, false, false, _] => :mixed
+        [false, false, false, false, false, false, true] => @match e begin
+            :($w[$i:$p:$j]) && if (w == v)
+            end => (:variable_range, i:p:j)
+            :($w[$i:$j]) && if (w == v)
+            end => (:variable_range, i:j)
+            :($w[$i]) && if (w == v)
+            end => (:variable_range, i)
+            _ && if (e == v)
+            end => (:variable_range, nothing)
+            _ => :variable_fun
+        end
         _ => :other
     end
 end

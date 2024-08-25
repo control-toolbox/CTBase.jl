@@ -28,14 +28,12 @@ julia> ocp = Model(autonomous=false, variable=true)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; 
-    autonomous::Bool=true, 
-    variable::Bool=false)
+function Model(; autonomous::Bool = true, variable::Bool = false)
 
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
 
-    return OptimalControlModel{time_dependence, variable_dependence}()
+    return OptimalControlModel{time_dependence,variable_dependence}()
 
 end
 
@@ -61,12 +59,14 @@ julia> ocp = Model(Autonomous, NonFixed)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(dependencies::DataType...)::OptimalControlModel{<:TimeDependence, <:VariableDependence}
+function Model(
+    dependencies::DataType...,
+)::OptimalControlModel{<:TimeDependence,<:VariableDependence}
     # some checkings: 
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return OptimalControlModel{time_dependence, variable_dependence}()
+    return OptimalControlModel{time_dependence,variable_dependence}()
 end
 
 """
@@ -85,16 +85,25 @@ julia> variable!(ocp, 2, "v", [ "v₁", "v₂" ])
 ```
 """
 function variable!(
-    ocp::OptimalControlModel, 
-    q::Dimension, 
-    name::String=__variable_name(), 
-    components_names::Vector{String}=__variable_components_names(q, name))
+    ocp::OptimalControlModel,
+    q::Dimension,
+    name::String = __variable_name(),
+    components_names::Vector{String} = __variable_components_names(q, name),
+)
 
     # checkings
-    is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable, you cannot use variable! function."))
+    is_fixed(ocp) && throw(
+        UnauthorizedCall("the ocp has no variable, you cannot use variable! function."),
+    )
     __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set."))
-    (q  > 1) && (size(components_names, 1) ≠ q) && throw(IncorrectArgument("the number of variable names must be equal to the variable dimension"))
-    
+    (q > 1) &&
+        (size(components_names, 1) ≠ q) &&
+        throw(
+            IncorrectArgument(
+                "the number of variable names must be equal to the variable dimension",
+            ),
+        )
+
     ocp.variable_dimension = q
     ocp.variable_components_names = components_names
     ocp.variable_name = name
@@ -102,25 +111,24 @@ function variable!(
 end
 
 function variable!(
-    ocp::OptimalControlModel, 
-    q::Dimension, 
-    name::Symbol, 
-    components_names::Vector{Symbol})
+    ocp::OptimalControlModel,
+    q::Dimension,
+    name::Symbol,
+    components_names::Vector{Symbol},
+)
     variable!(ocp, q, string(name), string.(components_names))
 end
 
 function variable!(
-    ocp::OptimalControlModel, 
-    q::Dimension, 
-    name::Symbol, 
-    components_names::Vector{String})
+    ocp::OptimalControlModel,
+    q::Dimension,
+    name::Symbol,
+    components_names::Vector{String},
+)
     variable!(ocp, q, string(name), components_names)
 end
 
-function variable!(
-    ocp::OptimalControlModel, 
-    q::Dimension, 
-    name::Symbol)
+function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol)
     variable!(ocp, q, string(name))
 end
 
@@ -168,14 +176,21 @@ julia> ocp.state_components_names
 ```
 """
 function state!(
-    ocp::OptimalControlModel, 
-    n::Dimension, 
-    name::String=__state_name(), 
-    components_names::Vector{String}=__state_components_names(n, name))
+    ocp::OptimalControlModel,
+    n::Dimension,
+    name::String = __state_name(),
+    components_names::Vector{String} = __state_components_names(n, name),
+)
 
     # checkings
     __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set."))
-    (n  > 1) && (size(components_names, 1) ≠ n) && throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
+    (n > 1) &&
+        (size(components_names, 1) ≠ n) &&
+        throw(
+            IncorrectArgument(
+                "the number of state names must be equal to the state dimension",
+            ),
+        )
 
     ocp.state_dimension = n
     ocp.state_components_names = components_names
@@ -185,27 +200,26 @@ function state!(
 end
 
 function state!(
-    ocp::OptimalControlModel, 
-    n::Dimension, 
-    name::Symbol, 
-    components_names::Vector{Symbol})
+    ocp::OptimalControlModel,
+    n::Dimension,
+    name::Symbol,
+    components_names::Vector{Symbol},
+)
 
     state!(ocp, n, string(name), string.(components_names))
 end
 
 function state!(
-    ocp::OptimalControlModel, 
-    n::Dimension, 
-    name::Symbol, 
-    components_names::Vector{String})
+    ocp::OptimalControlModel,
+    n::Dimension,
+    name::Symbol,
+    components_names::Vector{String},
+)
 
     state!(ocp, n, string(name), components_names)
 end
 
-function state!(
-    ocp::OptimalControlModel, 
-    n::Dimension, 
-    name::Symbol)
+function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
 
     state!(ocp, n, string(name))
 end
@@ -254,14 +268,21 @@ julia> ocp.control_components_names
 ```
 """
 function control!(
-    ocp::OptimalControlModel, 
-    m::Dimension, 
-    name::String=__control_name(), 
-    components_names::Vector{String}=__control_components_names(m, name))
+    ocp::OptimalControlModel,
+    m::Dimension,
+    name::String = __control_name(),
+    components_names::Vector{String} = __control_components_names(m, name),
+)
 
     # checkings
     __is_control_set(ocp) && throw(UnauthorizedCall("the control has already been set."))
-    (m  > 1) && (size(components_names, 1) ≠ m) && throw(IncorrectArgument("the number of control names must be equal to the control dimension"))
+    (m > 1) &&
+        (size(components_names, 1) ≠ m) &&
+        throw(
+            IncorrectArgument(
+                "the number of control names must be equal to the control dimension",
+            ),
+        )
 
     ocp.control_dimension = m
     ocp.control_components_names = components_names
@@ -271,27 +292,26 @@ function control!(
 end
 
 function control!(
-    ocp::OptimalControlModel, 
-    m::Dimension, 
-    name::Symbol, 
-    components_names::Vector{Symbol})
+    ocp::OptimalControlModel,
+    m::Dimension,
+    name::Symbol,
+    components_names::Vector{Symbol},
+)
 
     control!(ocp, m, string(name), string.(components_names))
 end
 
 function control!(
-    ocp::OptimalControlModel, 
-    m::Dimension, 
-    name::Symbol, 
-    components_names::Vector{String})
+    ocp::OptimalControlModel,
+    m::Dimension,
+    name::Symbol,
+    components_names::Vector{String},
+)
 
     control!(ocp, m, string(name), components_names)
 end
 
-function control!(
-    ocp::OptimalControlModel, 
-    m::Dimension, 
-    name::Symbol)
+function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol)
 
     control!(ocp, m, string(name))
 end
@@ -327,32 +347,73 @@ julia> time!(ocp, t0=0, tf=1, name=:s ) # name is a Symbol
 ```
 """
 function time!(
-    ocp::OptimalControlModel{<: TimeDependence, VT};
-    t0::Union{Time, Nothing}=nothing,
-    tf::Union{Time, Nothing}=nothing,
-    ind0::Union{Integer, Nothing}=nothing, 
-    indf::Union{Integer, Nothing}=nothing, 
-    name::Union{String, Symbol}=__time_name()) where VT
+    ocp::OptimalControlModel{<:TimeDependence,VT};
+    t0::Union{Time,Nothing} = nothing,
+    tf::Union{Time,Nothing} = nothing,
+    ind0::Union{Integer,Nothing} = nothing,
+    indf::Union{Integer,Nothing} = nothing,
+    name::Union{String,Symbol} = __time_name(),
+) where {VT}
 
     # check if the problem has been set to Variable or NonVariable
     (VT == NonFixed) && (!isnothing(ind0) || !isnothing(indf)) && __check_variable_set(ocp)
 
     # check if indices are in 1:q
     q = ocp.variable_dimension
-    !isnothing(ind0) && !(1 ≤ ind0 ≤ q) && throw(IncorrectArgument("the index of t0 variable must be contained in 1:$q"))
-    !isnothing(indf) && !(1 ≤ indf ≤ q) && throw(IncorrectArgument("the index of tf variable must be contained in 1:$q"))
+    !isnothing(ind0) &&
+        !(1 ≤ ind0 ≤ q) &&
+        throw(IncorrectArgument("the index of t0 variable must be contained in 1:$q"))
+    !isnothing(indf) &&
+        !(1 ≤ indf ≤ q) &&
+        throw(IncorrectArgument("the index of tf variable must be contained in 1:$q"))
 
     # check if the function has been already called
     __is_time_set(ocp) && throw(UnauthorizedCall("the time has already been set."))
 
     # check consistency
-    !isnothing(t0) && !isnothing(ind0) && throw(IncorrectArgument("Providing t0 and ind0 has no sense. The initial time cannot be fixed and free."))
-     isnothing(t0) &&  isnothing(ind0) && throw(IncorrectArgument("Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free)."))
-    !isnothing(tf) && !isnothing(indf) && throw(IncorrectArgument("Providing tf and indf has no sense. The final time cannot be fixed and free."))
-     isnothing(tf) &&  isnothing(indf) && throw(IncorrectArgument("Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free)."))
+    !isnothing(t0) &&
+        !isnothing(ind0) &&
+        throw(
+            IncorrectArgument(
+                "Providing t0 and ind0 has no sense. The initial time cannot be fixed and free.",
+            ),
+        )
+    isnothing(t0) &&
+        isnothing(ind0) &&
+        throw(
+            IncorrectArgument(
+                "Please either provide the value of the initial time t0 (if fixed) or its index in the variable of ocp (if free).",
+            ),
+        )
+    !isnothing(tf) &&
+        !isnothing(indf) &&
+        throw(
+            IncorrectArgument(
+                "Providing tf and indf has no sense. The final time cannot be fixed and free.",
+            ),
+        )
+    isnothing(tf) &&
+        isnothing(indf) &&
+        throw(
+            IncorrectArgument(
+                "Please either provide the value of the final time tf (if fixed) or its index in the variable of ocp (if free).",
+            ),
+        )
 
-    VT == Fixed && !isnothing(ind0) && throw(IncorrectArgument("You cannot have the initial time free (ind0 is provided) and the ocp non variable."))
-    VT == Fixed && !isnothing(indf) && throw(IncorrectArgument("You cannot have the final time free (indf is provided) and the ocp non variable."))
+    VT == Fixed &&
+        !isnothing(ind0) &&
+        throw(
+            IncorrectArgument(
+                "You cannot have the initial time free (ind0 is provided) and the ocp non variable.",
+            ),
+        )
+    VT == Fixed &&
+        !isnothing(indf) &&
+        throw(
+            IncorrectArgument(
+                "You cannot have the final time free (indf is provided) and the ocp non variable.",
+            ),
+        )
 
     #
     name = name isa String ? name : string(name)
@@ -360,35 +421,39 @@ function time!(
     # core
     @match (t0, ind0, tf, indf) begin
         (::Time, ::Nothing, ::Time, ::Nothing) => begin # (t0, tf)
-            ocp.initial_time      = t0
-            ocp.final_time        = tf
-            ocp.time_name         = name
-            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
-            ocp.final_time_name   = tf isa Integer ? string(tf) : string(round(tf, digits=2))
+            ocp.initial_time = t0
+            ocp.final_time = tf
+            ocp.time_name = name
+            ocp.initial_time_name =
+                t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
+            ocp.final_time_name =
+                tf isa Integer ? string(tf) : string(round(tf, digits = 2))
         end
         (::Nothing, ::Integer, ::Time, ::Nothing) => begin # (ind0, tf)
-            ocp.initial_time      = Index(ind0)
-            ocp.final_time        = tf
-            ocp.time_name         = name
+            ocp.initial_time = Index(ind0)
+            ocp.final_time = tf
+            ocp.time_name = name
             ocp.initial_time_name = ocp.variable_components_names[ind0]
-            ocp.final_time_name   = tf isa Integer ? string(tf) : string(round(tf, digits=2))
+            ocp.final_time_name =
+                tf isa Integer ? string(tf) : string(round(tf, digits = 2))
         end
         (::Time, ::Nothing, ::Nothing, ::Integer) => begin # (t0, indf)
-            ocp.initial_time      = t0
-            ocp.final_time        = Index(indf)
-            ocp.time_name         = name
-            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits=2))
-            ocp.final_time_name   = ocp.variable_components_names[indf]
+            ocp.initial_time = t0
+            ocp.final_time = Index(indf)
+            ocp.time_name = name
+            ocp.initial_time_name =
+                t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
+            ocp.final_time_name = ocp.variable_components_names[indf]
         end
         (::Nothing, ::Integer, ::Nothing, ::Integer) => begin # (ind0, indf)
-            ocp.initial_time      = Index(ind0)
-            ocp.final_time        = Index(indf)
-            ocp.time_name         = name
+            ocp.initial_time = Index(ind0)
+            ocp.final_time = Index(indf)
+            ocp.time_name = name
             ocp.initial_time_name = ocp.variable_components_names[ind0]
-            ocp.final_time_name   = ocp.variable_components_names[indf]
+            ocp.final_time_name = ocp.variable_components_names[indf]
         end
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
-    end 
+    end
 
     return nothing
 
@@ -466,40 +531,59 @@ julia> constraint!(ocp, :mixed; f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
 
 """
 function constraint!(
-    ocp::OptimalControlModel{T, V}, 
+    ocp::OptimalControlModel{T,V},
     type::Symbol;
-    rg::Union{OrdinalRange{<:Integer}, Index, Integer, Nothing}=nothing, 
-    f::Union{Function, Nothing}=nothing, 
-    lb::Union{ctVector, Nothing}=nothing, 
-    ub::Union{ctVector, Nothing}=nothing,
-    val::Union{ctVector, Nothing}=nothing,
-    label::Symbol=__constraint_label()) where {T <: TimeDependence, V <: VariableDependence}
+    rg::Union{OrdinalRange{<:Integer},Index,Integer,Nothing} = nothing,
+    f::Union{Function,Nothing} = nothing,
+    lb::Union{ctVector,Nothing} = nothing,
+    ub::Union{ctVector,Nothing} = nothing,
+    val::Union{ctVector,Nothing} = nothing,
+    label::Symbol = __constraint_label(),
+) where {T<:TimeDependence,V<:VariableDependence}
 
     __check_all_set(ocp)
-    type == :variable && is_fixed(ocp) && throw(UnauthorizedCall("the ocp has no variable" * ", you cannot use constraint! function with type=:variable."))
-    label ∈ constraints_labels(ocp) && throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
-    isnothing(val) && isnothing(lb) && isnothing(ub) && throw(UnauthorizedCall("Calling the constraint! function without any bounds is not authorized."))
+    type == :variable &&
+        is_fixed(ocp) &&
+        throw(
+            UnauthorizedCall(
+                "the ocp has no variable" *
+                ", you cannot use constraint! function with type=:variable.",
+            ),
+        )
+    label ∈ constraints_labels(ocp) && throw(
+        UnauthorizedCall("the constraint named " * String(label) * " already exists."),
+    )
+    isnothing(val) &&
+        isnothing(lb) &&
+        isnothing(ub) &&
+        throw(
+            UnauthorizedCall(
+                "Calling the constraint! function without any bounds is not authorized.",
+            ),
+        )
 
     # value for equality constraint
     # if val is not nothing then lb and ub should be nothing
-    !isnothing(val) && ( !isnothing(lb) || !isnothing(ub) ) && throw(UnauthorizedCall("If val is provided then lb and ub must not be given."))
+    !isnothing(val) &&
+        (!isnothing(lb) || !isnothing(ub)) &&
+        throw(UnauthorizedCall("If val is provided then lb and ub must not be given."))
     if !isnothing(val)
         lb = val
         ub = val
     end
 
     # bounds
-    isnothing(lb) && (lb = -Inf*(size(ub,1) == 1 ? 1 : ones(eltype(ub), size(ub,1))))
-    isnothing(ub) && (ub =  Inf*(size(lb,1) == 1 ? 1 : ones(eltype(lb), size(lb,1))))
+    isnothing(lb) && (lb = -Inf * (size(ub, 1) == 1 ? 1 : ones(eltype(ub), size(ub, 1))))
+    isnothing(ub) && (ub = Inf * (size(lb, 1) == 1 ? 1 : ones(eltype(lb), size(lb, 1))))
 
     # dimensions
     n = ocp.state_dimension
     m = ocp.control_dimension
     q = ocp.variable_dimension
-    
+
     # range
     (typeof(rg) <: Int) && (rg = Index(rg))
-    
+
     # core
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
@@ -513,39 +597,75 @@ function constraint!(
                 rg = q == 1 ? Index(1) : 1:q
                 txt = "the lower bound `lb`, the upper bound `ub` and the value `val` must be of dimension $q"
             else
-                throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
+                throw(
+                    IncorrectArgument(
+                        "the following type of constraint is not valid: " *
+                        String(type) *
+                        ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method.",
+                    ),
+                )
             end
             (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
             (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
-            constraint!(ocp, type; rg=rg, lb=lb, ub=ub, label=label) end
+            constraint!(ocp, type; rg = rg, lb = lb, ub = ub, label = label)
+        end
 
         (::RangeConstraint, ::Nothing, ::ctVector, ::ctVector) => begin
             txt = "the range `rg`, the lower bound `lb`, the upper bound `ub` and the value `val` must have the same dimension"
             (length(rg) != length(lb)) && throw(IncorrectArgument(txt))
             (length(rg) != length(ub)) && throw(IncorrectArgument(txt))
             # check if the range is valid
-            if type == :initial        
-                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the initial state constraint must be contained in 1:$n"))
+            if type == :initial
+                !all(1 .≤ rg .≤ n) && throw(
+                    IncorrectArgument(
+                        "the range of the initial state constraint must be contained in 1:$n",
+                    ),
+                )
             elseif type == :final
-                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the final state constraint must be contained in 1:$n"))
+                !all(1 .≤ rg .≤ n) && throw(
+                    IncorrectArgument(
+                        "the range of the final state constraint must be contained in 1:$n",
+                    ),
+                )
             elseif type == :control
-                !all(1 .≤ rg .≤ m) && throw(IncorrectArgument("the range of the control constraint must be contained in 1:$m"))
+                !all(1 .≤ rg .≤ m) && throw(
+                    IncorrectArgument(
+                        "the range of the control constraint must be contained in 1:$m",
+                    ),
+                )
             elseif type == :state
-                !all(1 .≤ rg .≤ n) && throw(IncorrectArgument("the range of the state constraint must be contained in 1:$n"))
+                !all(1 .≤ rg .≤ n) && throw(
+                    IncorrectArgument(
+                        "the range of the state constraint must be contained in 1:$n",
+                    ),
+                )
             elseif type == :variable
-                !all(1 .≤ rg .≤ q) && throw(IncorrectArgument("the range of the variable constraint must be contained in 1:$q"))
+                !all(1 .≤ rg .≤ q) && throw(
+                    IncorrectArgument(
+                        "the range of the variable constraint must be contained in 1:$q",
+                    ),
+                )
             end
             # set the constraint
             fun_rg = @match type begin
-                :initial => V == Fixed ? BoundaryConstraint((x0, xf   ) -> x0[rg], V) : BoundaryConstraint((x0, xf, v) -> x0[rg], V)
-                :final   => V == Fixed ? BoundaryConstraint((x0, xf   ) -> xf[rg], V) : BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+                :initial =>
+                    V == Fixed ? BoundaryConstraint((x0, xf) -> x0[rg], V) :
+                    BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+                :final =>
+                    V == Fixed ? BoundaryConstraint((x0, xf) -> xf[rg], V) :
+                    BoundaryConstraint((x0, xf, v) -> xf[rg], V)
                 :control || :state || :variable => rg
-                _  => throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method."))
+                _ => throw(
+                    IncorrectArgument(
+                        "the following type of constraint is not valid: " *
+                        String(type) *
+                        ". Please choose in [ :initial, :final, :control, :state, :variable ] or check the arguments of the constraint! method.",
+                    ),
+                )
             end
-            ocp.constraints[label] = (type, fun_rg, lb, ub) end
-        
+            ocp.constraints[label] = (type, fun_rg, lb, ub)
+        end
+
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
             # set the constraint
             if type == :boundary
@@ -559,9 +679,15 @@ function constraint!(
             elseif type == :variable
                 ocp.constraints[label] = (type, VariableConstraint(f), lb, ub)
             else
-                throw(IncorrectArgument("the following type of constraint is not valid: " * String(type) *
-                ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method."))
-            end end
+                throw(
+                    IncorrectArgument(
+                        "the following type of constraint is not valid: " *
+                        String(type) *
+                        ". Please choose in [ :boundary, :control, :state, :mixed ] or check the arguments of the constraint! method.",
+                    ),
+                )
+            end
+        end
 
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
@@ -587,7 +713,10 @@ Set the dynamics.
 julia> dynamics!(ocp, f)
 ```
 """
-function dynamics!(ocp::OptimalControlModel{T, V}, f::Function) where {T <: TimeDependence, V <: VariableDependence}
+function dynamics!(
+    ocp::OptimalControlModel{T,V},
+    f::Function,
+) where {T<:TimeDependence,V<:VariableDependence}
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
@@ -623,16 +752,26 @@ julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u^2) # the control is of di
 
     If you set twice the objective, only the last one will be taken into account.
 """
-function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function, 
-        criterion::Symbol=__criterion_type()) where {T <: TimeDependence, V <: VariableDependence}
+function objective!(
+    ocp::OptimalControlModel{T,V},
+    type::Symbol,
+    f::Function,
+    criterion::Symbol = __criterion_type(),
+) where {T<:TimeDependence,V<:VariableDependence}
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set."))
+    __is_objective_set(ocp) &&
+        throw(UnauthorizedCall("the objective has already been set."))
 
     # check the validity of the criterion
-    !__is_criterion_valid(criterion) && throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
-        ". Please choose in [ :min, :max ]."))
+    !__is_criterion_valid(criterion) && throw(
+        IncorrectArgument(
+            "the following criterion is not valid: " *
+            String(criterion) *
+            ". Please choose in [ :min, :max ].",
+        ),
+    )
     ocp.criterion = criterion
 
     # set the objective
@@ -641,8 +780,13 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, f::Function,
     elseif type == :lagrange
         ocp.lagrange = Lagrange(f, T, V)
     else
-        throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
-        ". Please choose in [ :mayer, :lagrange ]."))
+        throw(
+            IncorrectArgument(
+                "the following objective is not valid: " *
+                String(objective) *
+                ". Please choose in [ :mayer, :lagrange ].",
+            ),
+        )
     end
 
     return nothing
@@ -668,16 +812,27 @@ Set the criterion to the function `g` and `f⁰`. Type can be `:bolza`. Criterio
 julia> objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u^2) # the control is of dimension 1
 ```
 """
-function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f⁰::Function, 
-        criterion::Symbol=__criterion_type()) where {T <: TimeDependence, V <: VariableDependence}
+function objective!(
+    ocp::OptimalControlModel{T,V},
+    type::Symbol,
+    g::Function,
+    f⁰::Function,
+    criterion::Symbol = __criterion_type(),
+) where {T<:TimeDependence,V<:VariableDependence}
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set."))
+    __is_objective_set(ocp) &&
+        throw(UnauthorizedCall("the objective has already been set."))
 
     # check the validity of the criterion
-    !__is_criterion_valid(criterion) && throw(IncorrectArgument("the following criterion is not valid: " * String(criterion) *
-        ". Please choose in [ :min, :max ]."))
+    !__is_criterion_valid(criterion) && throw(
+        IncorrectArgument(
+            "the following criterion is not valid: " *
+            String(criterion) *
+            ". Please choose in [ :min, :max ].",
+        ),
+    )
     ocp.criterion = criterion
 
     # set the objective
@@ -685,8 +840,13 @@ function objective!(ocp::OptimalControlModel{T, V}, type::Symbol, g::Function, f
         ocp.mayer = Mayer(g, V)
         ocp.lagrange = Lagrange(f⁰, T, V)
     else
-        throw(IncorrectArgument("the following objective is not valid: " * String(objective) *
-        ". Please choose :bolza."))
+        throw(
+            IncorrectArgument(
+                "the following objective is not valid: " *
+                String(objective) *
+                ". Please choose :bolza.",
+            ),
+        )
     end
 
     return nothing
@@ -706,8 +866,13 @@ julia> remove_constraint!(ocp, :con)
 """
 function remove_constraint!(ocp::OptimalControlModel, label::Symbol)
     if !haskey(ocp.constraints, label)
-        throw(IncorrectArgument("the following constraint does not exist: " * String(label) *
-        ". Please check the list of constraints: ocp.constraints."))
+        throw(
+            IncorrectArgument(
+                "the following constraint does not exist: " *
+                String(label) *
+                ". Please check the list of constraints: ocp.constraints.",
+            ),
+        )
     end
     delete!(ocp.constraints, label)
     return nothing
