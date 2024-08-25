@@ -1,6 +1,6 @@
 using Plots
 
-function keep_series_attributes(;kwargs...)
+function keep_series_attributes(; kwargs...)
 
     series_attributes = Plots.attributes(:Series)
 
@@ -13,17 +13,17 @@ function keep_series_attributes(;kwargs...)
 
 end
 
-function print_kwargs(;kwargs...)
+function print_kwargs(; kwargs...)
     for kw ∈ kwargs
         println(kw)
     end
 end
 
-attributes = (size=(900, 600), linewidth=2, flip=true, colorbar=:best, bins=:auto)
+attributes = (size = (900, 600), linewidth = 2, flip = true, colorbar = :best, bins = :auto)
 println("\nBefore keeping series attributes\n")
-print_kwargs(;attributes...)
+print_kwargs(; attributes...)
 
-series_attributes = keep_series_attributes(;attributes...)
+series_attributes = keep_series_attributes(; attributes...)
 
 println("\nAfter keeping series attributes\n")
-print_kwargs(;series_attributes...)
+print_kwargs(; series_attributes...)

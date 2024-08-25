@@ -35,54 +35,81 @@ function nlp_constraints!(ocp::OptimalControlModel)
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    
+
     #
     constraints = ocp.constraints
 
-    ξf = Vector{ControlConstraint}(); ξl = Vector{ctNumber}(); ξu = Vector{ctNumber}()
-    ηf = Vector{StateConstraint}(); ηl = Vector{ctNumber}(); ηu = Vector{ctNumber}()
-    ψf = Vector{MixedConstraint}(); ψl = Vector{ctNumber}(); ψu = Vector{ctNumber}()
-    ϕf = Vector{BoundaryConstraint}(); ϕl = Vector{ctNumber}(); ϕu = Vector{ctNumber}()
-    θf = Vector{VariableConstraint}(); θl = Vector{ctNumber}(); θu = Vector{ctNumber}()
-    uind = Vector{Int}(); ul = Vector{ctNumber}(); uu = Vector{ctNumber}()
-    xind = Vector{Int}(); xl = Vector{ctNumber}(); xu = Vector{ctNumber}()
-    vind = Vector{Int}(); vl = Vector{ctNumber}(); vu = Vector{ctNumber}()
+    ξf = Vector{ControlConstraint}()
+    ξl = Vector{ctNumber}()
+    ξu = Vector{ctNumber}()
+    ηf = Vector{StateConstraint}()
+    ηl = Vector{ctNumber}()
+    ηu = Vector{ctNumber}()
+    ψf = Vector{MixedConstraint}()
+    ψl = Vector{ctNumber}()
+    ψu = Vector{ctNumber}()
+    ϕf = Vector{BoundaryConstraint}()
+    ϕl = Vector{ctNumber}()
+    ϕu = Vector{ctNumber}()
+    θf = Vector{VariableConstraint}()
+    θl = Vector{ctNumber}()
+    θu = Vector{ctNumber}()
+    uind = Vector{Int}()
+    ul = Vector{ctNumber}()
+    uu = Vector{ctNumber}()
+    xind = Vector{Int}()
+    xl = Vector{ctNumber}()
+    xu = Vector{ctNumber}()
+    vind = Vector{Int}()
+    vl = Vector{ctNumber}()
+    vu = Vector{ctNumber}()
 
     for (_, c) ∈ constraints
         @match c begin
-        (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary] end => begin
-            push!(ϕf, f)
-            append!(ϕl, lb)
-            append!(ϕu, ub) end
-        (:control, f::ControlConstraint, lb, ub) => begin
-            push!(ξf, f)
-            append!(ξl, lb)
-            append!(ξu, ub) end
-        (:control, rg, lb, ub) => begin
-            append!(uind, rg)
-            append!(ul, lb)
-            append!(uu, ub) end
-        (:state, f::StateConstraint, lb, ub) => begin
-            push!(ηf, f)
-            append!(ηl, lb)
-            append!(ηu, ub) end
-        (:state, rg, lb, ub) => begin
-            append!(xind, rg)
-            append!(xl, lb)
-            append!(xu, ub) end
-        (:mixed, f::MixedConstraint, lb, ub) => begin
-            push!(ψf, f)
-            append!(ψl, lb)
-            append!(ψu, ub) end
-        (:variable, f::VariableConstraint, lb, ub) => begin
-            push!(θf, f)
-            append!(θl, lb)
-            append!(θu, ub) end
-        (:variable, rg, lb, ub) => begin
-            append!(vind, rg)
-            append!(vl, lb)
-            append!(vu, ub) end
-        _ => error("Internal error") end
+            (type, f::BoundaryConstraint, lb, ub) &&
+                if type ∈ [:initial, :final, :boundary]
+                end => begin
+                push!(ϕf, f)
+                append!(ϕl, lb)
+                append!(ϕu, ub)
+            end
+            (:control, f::ControlConstraint, lb, ub) => begin
+                push!(ξf, f)
+                append!(ξl, lb)
+                append!(ξu, ub)
+            end
+            (:control, rg, lb, ub) => begin
+                append!(uind, rg)
+                append!(ul, lb)
+                append!(uu, ub)
+            end
+            (:state, f::StateConstraint, lb, ub) => begin
+                push!(ηf, f)
+                append!(ηl, lb)
+                append!(ηu, ub)
+            end
+            (:state, rg, lb, ub) => begin
+                append!(xind, rg)
+                append!(xl, lb)
+                append!(xu, ub)
+            end
+            (:mixed, f::MixedConstraint, lb, ub) => begin
+                push!(ψf, f)
+                append!(ψl, lb)
+                append!(ψu, ub)
+            end
+            (:variable, f::VariableConstraint, lb, ub) => begin
+                push!(θf, f)
+                append!(θl, lb)
+                append!(θu, ub)
+            end
+            (:variable, rg, lb, ub) => begin
+                append!(vind, rg)
+                append!(vl, lb)
+                append!(vu, ub)
+            end
+            _ => error("Internal error")
+        end
     end
 
     @assert length(ξl) == length(ξu)
@@ -165,10 +192,17 @@ function nlp_constraints!(ocp::OptimalControlModel)
     ocp.dim_boundary_constraints = length(ϕl)
     ocp.dim_variable_constraints = length(θl)
     ocp.dim_control_range = length(ul)
-    ocp.dim_state_range = length(xl) 
+    ocp.dim_state_range = length(xl)
     ocp.dim_variable_range = length(vl)
 
-    return (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu)
+    return (ξl, ξ, ξu),
+    (ηl, η, ηu),
+    (ψl, ψ, ψu),
+    (ϕl, ϕ, ϕu),
+    (θl, θ, θu),
+    (ul, uind, uu),
+    (xl, xind, xu),
+    (vl, vind, vu)
 
 end
 
@@ -177,8 +211,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model is autonomous.
 """
-is_autonomous(ocp::OptimalControlModel{Autonomous, <: VariableDependence}) = true
-is_autonomous(ocp::OptimalControlModel{NonAutonomous, <: VariableDependence}) = false
+is_autonomous(ocp::OptimalControlModel{Autonomous,<:VariableDependence}) = true
+is_autonomous(ocp::OptimalControlModel{NonAutonomous,<:VariableDependence}) = false
 
 """
 $(TYPEDSIGNATURES)
@@ -213,8 +247,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model is fixed (= has no variable).
 """
-is_fixed(ocp::OptimalControlModel{<: TimeDependence, Fixed}) = true
-is_fixed(ocp::OptimalControlModel{<: TimeDependence, NonFixed}) = false
+is_fixed(ocp::OptimalControlModel{<:TimeDependence,Fixed}) = true
+is_fixed(ocp::OptimalControlModel{<:TimeDependence,NonFixed}) = false
 
 """
 $(TYPEDSIGNATURES)
@@ -235,14 +269,14 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined with free initial time.
 """
-has_free_initial_time(ocp::OptimalControlModel) = (typeof(ocp.initial_time)==Index)
+has_free_initial_time(ocp::OptimalControlModel) = (typeof(ocp.initial_time) == Index)
 
 """
 $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined with free final time.
 """
-has_free_final_time(ocp::OptimalControlModel) = (typeof(ocp.final_time)==Index)
+has_free_final_time(ocp::OptimalControlModel) = (typeof(ocp.final_time) == Index)
 
 """
 $(TYPEDSIGNATURES)
@@ -283,35 +317,45 @@ julia> c(1)
 1
 ```
 """
-function constraint(ocp::OptimalControlModel{T, V}, label::Symbol) where {T <: TimeDependence, V <: VariableDependence}
+function constraint(
+    ocp::OptimalControlModel{T,V},
+    label::Symbol,
+) where {T<:TimeDependence,V<:VariableDependence}
     con = ocp.constraints[label]
     @match con begin
-        (:initial , f::BoundaryConstraint, _, _) => return f
-        (:final   , f::BoundaryConstraint, _, _) => return f
+        (:initial, f::BoundaryConstraint, _, _) => return f
+        (:final, f::BoundaryConstraint, _, _) => return f
         (:boundary, f::BoundaryConstraint, _, _) => return f
-        (:control , f::ControlConstraint,  _, _) => return f
-        (:control , rg,   _, _) => begin
+        (:control, f::ControlConstraint, _, _) => return f
+        (:control, rg, _, _) => begin
             C = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(u         -> u[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} => ControlConstraint((u, v)    -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} => ControlConstraint((t, u)    -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} => ControlConstraint((t, u, v) -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous,Fixed} =>
+                    ControlConstraint(u -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous,NonFixed} =>
+                    ControlConstraint((u, v) -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,Fixed} =>
+                    ControlConstraint((t, u) -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,NonFixed} =>
+                    ControlConstraint((t, u, v) -> u[rg], T, V)
                 _ => nothing
-                end
+            end
             return C
         end
-        (:state   , f::StateConstraint,    _, _) => return f
-        (:state   , rg,   _, _) => begin
+        (:state, f::StateConstraint, _, _) => return f
+        (:state, rg, _, _) => begin
             S = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(x         -> x[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} => StateConstraint((x, v)    -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} => StateConstraint((t, x)    -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} => StateConstraint((t, x, v) -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous,Fixed} => StateConstraint(x -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous,NonFixed} =>
+                    StateConstraint((x, v) -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,Fixed} =>
+                    StateConstraint((t, x) -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,NonFixed} =>
+                    StateConstraint((t, x, v) -> x[rg], T, V)
                 _ => nothing
-                end
+            end
             return S
         end
-        (:mixed   , f::MixedConstraint,    _, _) => return f
+        (:mixed, f::MixedConstraint, _, _) => return f
         (:variable, f::VariableConstraint, _, _) => return f
         (:variable, rg, _, _) => return VariableConstraint(v -> v[rg])
         _ => error("Internal error")
@@ -324,7 +368,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear state constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints 
+dim_state_constraints(ocp::OptimalControlModel) = ocp.dim_state_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -332,7 +376,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear control constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints 
+dim_control_constraints(ocp::OptimalControlModel) = ocp.dim_control_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -340,7 +384,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear mixed constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints 
+dim_mixed_constraints(ocp::OptimalControlModel) = ocp.dim_mixed_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -352,7 +396,9 @@ function dim_path_constraints(ocp::OptimalControlModel)
     isnothing(ocp.dim_control_constraints) && return nothing
     isnothing(ocp.dim_state_constraints) && return nothing
     isnothing(ocp.dim_mixed_constraints) && return nothing
-    return ocp.dim_state_constraints + ocp.dim_control_constraints + ocp.dim_mixed_constraints
+    return ocp.dim_state_constraints +
+           ocp.dim_control_constraints +
+           ocp.dim_mixed_constraints
 end
 
 """
@@ -361,7 +407,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of the boundary constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_boundary_constraints(ocp::OptimalControlModel) = ocp.dim_boundary_constraints 
+dim_boundary_constraints(ocp::OptimalControlModel) = ocp.dim_boundary_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -369,7 +415,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of nonlinear variable constraints (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints 
+dim_variable_constraints(ocp::OptimalControlModel) = ocp.dim_variable_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -377,7 +423,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of range constraints on state (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_state_range(ocp::OptimalControlModel) = ocp.dim_state_range 
+dim_state_range(ocp::OptimalControlModel) = ocp.dim_state_range
 
 """
 $(TYPEDSIGNATURES)
@@ -385,7 +431,7 @@ $(TYPEDSIGNATURES)
 Return the dimension of range constraints on control (`nothing` if not knonw).
 Information is updated after `nlp_constraints!` is called.
 """
-dim_control_range(ocp::OptimalControlModel) = ocp.dim_control_range 
+dim_control_range(ocp::OptimalControlModel) = ocp.dim_control_range
 
 """
 $(TYPEDSIGNATURES)
