@@ -20,7 +20,7 @@ Print the optimal control problem.
 function Base.show(
     io::IO,
     ::MIME"text/plain",
-    ocp::OptimalControlModel{<:TimeDependence,<:VariableDependence},
+    ocp::OptimalControlModel{<:TimeDependence, <:VariableDependence},
 )
 
     # check if the problem is empty
@@ -60,7 +60,6 @@ function Base.show(
         end
 
         some_printing = true
-
     end
 
     if __is_complete(ocp) # print the model if is is complete
@@ -86,10 +85,8 @@ function Base.show(
         _v = is_variable_dependent(ocp) ? ", " * v_name : ""
 
         # other names
-        bounds_args_names =
-            x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
-        mixed_args_names =
-            t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
+        bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
+        mixed_args_names = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
         state_args_names = t_ * x_name * "(" * t_name * ")" * _v
         control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
@@ -153,12 +150,8 @@ function Base.show(
         println(io, "")
 
         # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
-        (ξl, ξ, ξu),
-        (ηl, η, ηu),
-        (ψl, ψ, ψu),
-        (ϕl, ϕ, ϕu),
-        (ulb, uind, uub),
-        (xlb, xind, xub) = nlp_constraints!(ocp)
+        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) =
+            nlp_constraints!(ocp)
         has_constraints = false
         if !isempty(ξl) || !isempty(ulb)
             has_constraints = true
@@ -233,23 +226,13 @@ function Base.show(
             end
             v_name_space *= " ∈ " * v_space
             # print
-            print(
-                io,
-                "    where ",
-                x_name_space,
-                ", ",
-                u_name_space,
-                " and ",
-                v_name_space,
-                ".\n",
-            )
+            print(io, "    where ", x_name_space, ", ", u_name_space, " and ", v_name_space, ".\n")
         else
             # print
             print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
         end
 
         some_printing = true
-
     end
 
     #
@@ -293,7 +276,6 @@ function Base.show(
         compact_printing = true,
     )
     nothing
-
 end
 
 function Base.show_default(io::IO, ocp::OptimalControlModel)

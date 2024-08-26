@@ -112,14 +112,14 @@ $(TYPEDEF)
 
 Abstract type for hamiltonians.
 """
-abstract type AbstractHamiltonian{time_dependence,variable_dependence} end
+abstract type AbstractHamiltonian{time_dependence, variable_dependence} end
 
 """
 $(TYPEDEF)
 
 Abstract type for vectorfields.
 """
-abstract type AbstractVectorField{time_dependence,variable_dependence} end
+abstract type AbstractVectorField{time_dependence, variable_dependence} end
 
 """
 $(TYPEDEF)
@@ -190,8 +190,8 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-struct Hamiltonian{time_dependence,variable_dependence} <:
-       AbstractHamiltonian{time_dependence,variable_dependence}
+struct Hamiltonian{time_dependence, variable_dependence} <:
+       AbstractHamiltonian{time_dependence, variable_dependence}
     f::Function
 end
 
@@ -265,8 +265,8 @@ julia> V(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-struct VectorField{time_dependence,variable_dependence} <:
-       AbstractVectorField{time_dependence,variable_dependence}
+struct VectorField{time_dependence, variable_dependence} <:
+       AbstractVectorField{time_dependence, variable_dependence}
     f::Function
 end
 
@@ -340,8 +340,8 @@ julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
 [7, -3]
 ```
 """
-struct HamiltonianVectorField{time_dependence,variable_dependence} <:
-       AbstractVectorField{time_dependence,variable_dependence}
+struct HamiltonianVectorField{time_dependence, variable_dependence} <:
+       AbstractVectorField{time_dependence, variable_dependence}
     f::Function
 end
 
@@ -418,13 +418,13 @@ true
 ```
 
 """
-struct HamiltonianLift{time_dependence,variable_dependence} <:
-       AbstractHamiltonian{time_dependence,variable_dependence}
+struct HamiltonianLift{time_dependence, variable_dependence} <:
+       AbstractHamiltonian{time_dependence, variable_dependence}
     X::VectorField
     function HamiltonianLift(
-        X::VectorField{time_dependence,variable_dependence},
-    ) where {time_dependence,variable_dependence}
-        new{time_dependence,variable_dependence}(X)
+        X::VectorField{time_dependence, variable_dependence},
+    ) where {time_dependence, variable_dependence}
+        new{time_dependence, variable_dependence}(X)
     end
 end
 
@@ -504,10 +504,9 @@ julia> L(1, [1, 0], [1], [1, 2, 3])
 3
 ```
 """
-struct Lagrange{time_dependence,variable_dependence}
+struct Lagrange{time_dependence, variable_dependence}
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -577,10 +576,9 @@ julia> D(1, [1, 0], 1, [1, 2, 3])
 ```
 
 """
-struct Dynamics{time_dependence,variable_dependence}
+struct Dynamics{time_dependence, variable_dependence}
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -656,7 +654,7 @@ julia>  S(1, [1, -1], [1, 2, 3])
 ```
 
 """
-struct StateConstraint{time_dependence,variable_dependence}
+struct StateConstraint{time_dependence, variable_dependence}
     f::Function
 end
 
@@ -728,10 +726,9 @@ julia> C(1, [1, -1], [1, 2, 3])
 ```
 
 """
-struct ControlConstraint{time_dependence,variable_dependence}
+struct ControlConstraint{time_dependence, variable_dependence}
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -809,10 +806,9 @@ julia> M(1, [1, 0], 1, [1, 2, 3])
 ```
 
 """
-struct MixedConstraint{time_dependence,variable_dependence}
+struct MixedConstraint{time_dependence, variable_dependence}
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -854,7 +850,6 @@ julia> V([1, -1])
 struct VariableConstraint
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -930,10 +925,9 @@ julia> u(1, [1, 0], [1, 2, 3])
 ```
 
 """
-struct FeedbackControl{time_dependence,variable_dependence}
+struct FeedbackControl{time_dependence, variable_dependence}
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -1009,10 +1003,9 @@ julia> u(1, [1, 0], [0, 1], [1, 2, 3])
 ```
 
 """
-struct ControlLaw{time_dependence,variable_dependence}
+struct ControlLaw{time_dependence, variable_dependence}
     f::Function
 end
-
 
 """
 $(TYPEDEF)
@@ -1088,7 +1081,7 @@ julia> μ(1, [1, 0], [0, 1], [1, 2, 3])
 ```
 
 """
-struct Multiplier{time_dependence,variable_dependence}
+struct Multiplier{time_dependence, variable_dependence}
     f::Function
 end
 
@@ -1121,7 +1114,7 @@ Base.append!(v::Vector, i::Index) = Base.append!(v, i.val)
 """
 Type alias for an index or range.
 """
-const RangeConstraint = Union{Index,OrdinalRange{<:Int}}
+const RangeConstraint = Union{Index, OrdinalRange{<:Int}}
 
 """
 $(TYPEDEF)

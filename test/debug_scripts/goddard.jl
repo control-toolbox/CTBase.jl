@@ -4,7 +4,7 @@
 #
 
 # find local CTBase
-basename = '/' * joinpath(split(Base.source_path(), '/')[1:end-3])
+basename = '/' * joinpath(split(Base.source_path(), '/')[1:(end - 3)])
 println(basename)
 using Pkg;
 Pkg.activate(basename);
@@ -25,7 +25,6 @@ mf = 0.6
 
 # Problem definition
 ocp = @def verbose_threshold = 100 begin
-
     tf, variable
     t ∈ [t0, tf], time
     x ∈ R^3, state
@@ -44,7 +43,6 @@ ocp = @def verbose_threshold = 100 begin
     x'(t) == F0(x(t)) + u(t) * F1(x(t))
 
     r(tf) -> max
-
 end
 
 function F0(x)

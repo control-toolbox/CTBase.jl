@@ -11,8 +11,8 @@ $(TYPEDEF)
 A leaf of a plot tree.
 """
 struct PlotLeaf <: AbstractPlotTreeElement
-    value::Tuple{Symbol,Integer}
-    PlotLeaf(value::Tuple{Symbol,Integer}) = new(value)
+    value::Tuple{Symbol, Integer}
+    PlotLeaf(value::Tuple{Symbol, Integer}) = new(value)
 end
 
 """
@@ -21,12 +21,10 @@ $(TYPEDEF)
 A node of a plot tree.
 """
 struct PlotNode <: AbstractPlotTreeElement
-    layout::Union{Symbol,Matrix{Any}}
+    layout::Union{Symbol, Matrix{Any}}
     children::Vector{<:AbstractPlotTreeElement}
-    PlotNode(
-        layout::Union{Symbol,Matrix{Any}},
-        children::Vector{<:AbstractPlotTreeElement},
-    ) = new(layout, children)
+    PlotNode(layout::Union{Symbol, Matrix{Any}}, children::Vector{<:AbstractPlotTreeElement}) =
+        new(layout, children)
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -40,7 +38,7 @@ Update the plot `p` with the i-th component of a vectorial function of time `f(t
 - `time` can be `:default` or `:normalized`.
 """
 function __plot_time!(
-    p::Union{Plots.Plot,Plots.Subplot},
+    p::Union{Plots.Plot, Plots.Subplot},
     sol::OptimalControlSolution,
     s::Symbol,
     i::Integer,
@@ -54,9 +52,8 @@ function __plot_time!(
     t_label = @match time begin
         :default => t_label
         :normalized => "normalized " * t_label
-        _ => error(
-            "Internal error, no such choice for time: $time. Use :default or :normalized",
-        )
+        _ =>
+            error("Internal error, no such choice for time: $time. Use :default or :normalized")
     end
 
     # reset ylims: ylims=:auto
@@ -112,16 +109,7 @@ function __plot_time(
     label::String,
     kwargs...,
 )
-    return __plot_time!(
-        Plots.plot(),
-        sol,
-        s,
-        i,
-        time;
-        t_label = t_label,
-        label = label,
-        kwargs...,
-    )
+    return __plot_time!(Plots.plot(), sol, s, i, time; t_label = t_label, label = label, kwargs...)
 end
 
 """
@@ -132,7 +120,7 @@ Update the plot `p` with a vectorial function of time `f(t) ∈ Rᵈ` where `f` 
 - `time` can be `:default` or `:normalized`.
 """
 function __plot_time!(
-    p::Union{Plots.Plot,Plots.Subplot},
+    p::Union{Plots.Plot, Plots.Subplot},
     sol::OptimalControlSolution,
     d::Dimension,
     s::Symbol,
@@ -244,7 +232,6 @@ function __initial_plot(
     m = sol.control_dimension
 
     if layout == :group
-
         @match control begin
             :components => begin
                 px = Plots.plot() # state
@@ -266,9 +253,7 @@ function __initial_plot(
                 return Plots.plot(px, pp, pu, pn, layout = (2, 2); kwargs...)
             end
             _ => throw(
-                IncorrectArgument(
-                    "No such choice for control. Use :components, :norm or :all",
-                ),
+                IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
             )
         end
 
@@ -302,9 +287,7 @@ function __initial_plot(
                 l = m + 1
             end
             _ => throw(
-                IncorrectArgument(
-                    "No such choice for control. Use :components, :norm or :all",
-                ),
+                IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
             )
         end
 
@@ -327,15 +310,11 @@ function __initial_plot(
         return __plot_tree(root; kwargs...)
 
     else
-
         throw(IncorrectArgument("No such choice for layout. Use :group or :split"))
-
     end
-
 end
 
 function __keep_series_attributes(; kwargs...)
-
     series_attributes = Plots.attributes(:Series)
 
     out = []
@@ -344,7 +323,6 @@ function __keep_series_attributes(; kwargs...)
     end
 
     return out
-
 end
 
 """
@@ -371,7 +349,6 @@ function Plots.plot!(
     costate_style = (),
     kwargs...,
 )
-
     if solution_label != ""
         solution_label = " " * solution_label
     end
@@ -388,7 +365,6 @@ function Plots.plot!(
     series_attr = __keep_series_attributes(; kwargs...)
 
     if layout == :group
-
         __plot_time!(
             p[1],
             sol,
@@ -475,14 +451,11 @@ function Plots.plot!(
                 )
             end
             _ => throw(
-                IncorrectArgument(
-                    "No such choice for control. Use :components, :norm or :all",
-                ),
+                IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
             )
         end
 
     elseif layout == :split
-
         for i ∈ 1:n
             __plot_time!(
                 p[i],
@@ -496,7 +469,7 @@ function Plots.plot!(
                 state_style...,
             )
             __plot_time!(
-                p[i+n],
+                p[i + n],
                 sol,
                 :costate,
                 i,
@@ -511,7 +484,7 @@ function Plots.plot!(
             :components => begin
                 for i ∈ 1:m
                     __plot_time!(
-                        p[i+2*n],
+                        p[i + 2 * n],
                         sol,
                         :control,
                         i,
@@ -525,7 +498,7 @@ function Plots.plot!(
             end
             :norm => begin
                 __plot_time!(
-                    p[2*n+1],
+                    p[2 * n + 1],
                     sol,
                     :control_norm,
                     -1,
@@ -539,7 +512,7 @@ function Plots.plot!(
             :all => begin
                 for i ∈ 1:m
                     __plot_time!(
-                        p[i+2*n],
+                        p[i + 2 * n],
                         sol,
                         :control,
                         i,
@@ -551,7 +524,7 @@ function Plots.plot!(
                     )
                 end
                 __plot_time!(
-                    p[2*n+m+1],
+                    p[2 * n + m + 1],
                     sol,
                     :control_norm,
                     -1,
@@ -563,20 +536,15 @@ function Plots.plot!(
                 )
             end
             _ => throw(
-                IncorrectArgument(
-                    "No such choice for control. Use :components, :norm or :all",
-                ),
+                IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
             )
         end
 
     else
-
         throw(IncorrectArgument("No such choice for layout. Use :group or :split"))
-
     end
 
     return p
-
 end
 
 function __size_plot(sol::OptimalControlSolution, control::Symbol)
@@ -586,9 +554,7 @@ function __size_plot(sol::OptimalControlSolution, control::Symbol)
         :components => sol.control_dimension
         :norm => 1
         :all => sol.control_dimension + 1
-        _ => throw(
-            IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
-        )
+        _ => throw(IncorrectArgument("No such choice for control. Use :components, :norm or :all"))
     end
     return (600, 140 * (n + m))
 end
@@ -646,8 +612,8 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 """
 @recipe function f(
     sol::OptimalControlSolution,
-    xx::Union{Symbol,Tuple{Symbol,Integer}},
-    yy::Union{Symbol,Tuple{Symbol,Integer}},
+    xx::Union{Symbol, Tuple{Symbol, Integer}},
+    yy::Union{Symbol, Tuple{Symbol, Integer}},
     time::Symbol = :default,
 )
 
@@ -663,15 +629,14 @@ end
 
 function recipe_label(
     sol::OptimalControlSolution,
-    xx::Union{Symbol,Tuple{Symbol,Integer}},
-    yy::Union{Symbol,Tuple{Symbol,Integer}},
+    xx::Union{Symbol, Tuple{Symbol, Integer}},
+    yy::Union{Symbol, Tuple{Symbol, Integer}},
 )
 
     #
     label = false
     #
     if xx isa Symbol && xx == :time
-
         s, i = @match yy begin
             ::Symbol => (yy, 1)
             _ => yy
@@ -684,7 +649,6 @@ function recipe_label(
             :control_norm => "‖" * sol.control_name * "‖"
             _ => error("Internal error, no such choice for label")
         end
-
     end
     #
     return label
@@ -697,10 +661,9 @@ Get the data for plotting.
 """
 function __get_data_plot(
     sol::OptimalControlSolution,
-    xx::Union{Symbol,Tuple{Symbol,Integer}};
+    xx::Union{Symbol, Tuple{Symbol, Integer}};
     time::Symbol = :default,
 )
-
     T = sol.time_grid
     X = sol.state.(T)
     U = sol.control.(T)
@@ -729,5 +692,4 @@ function __get_data_plot(
         :control_norm => [norm(U[i]) for i = 1:m]
         _ => error("Internal error, no such choice for xx")
     end
-
 end

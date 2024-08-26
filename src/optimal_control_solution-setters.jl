@@ -10,33 +10,33 @@ Constructor from an optimal control problem. Internal.
 """
 function __OptimalControlSolution(
     ocp::OptimalControlModel;
-    state::Union{Nothing,Function} = nothing,
-    control::Union{Nothing,Function} = nothing,
-    objective::Union{Nothing,ctNumber} = nothing,
-    costate::Union{Nothing,Function} = nothing,
-    time_grid::Union{Nothing,TimesDisc} = nothing,
-    variable::Union{Nothing,Variable} = nothing,
-    iterations::Union{Nothing,Integer} = nothing,
-    stopping::Union{Nothing,Symbol} = nothing,
-    message::Union{Nothing,String} = nothing,
-    success::Union{Nothing,Bool} = nothing,
-    infos::Dict{Symbol,Any} = Dict{Symbol,Any}(),
-    boundary_constraints::Union{Nothing,ctVector} = nothing,
-    mult_boundary_constraints::Union{Nothing,ctVector} = nothing,
-    variable_constraints::Union{Nothing,ctVector} = nothing,
-    mult_variable_constraints::Union{Nothing,ctVector} = nothing,
-    mult_variable_box_lower::Union{Nothing,ctVector} = nothing,
-    mult_variable_box_upper::Union{Nothing,ctVector} = nothing,
-    control_constraints::Union{Nothing,Function} = nothing,
-    mult_control_constraints::Union{Nothing,Function} = nothing,
-    state_constraints::Union{Nothing,Function} = nothing,
-    mult_state_constraints::Union{Nothing,Function} = nothing,
-    mixed_constraints::Union{Nothing,Function} = nothing,
-    mult_mixed_constraints::Union{Nothing,Function} = nothing,
-    mult_state_box_lower::Union{Nothing,Function} = nothing,
-    mult_state_box_upper::Union{Nothing,Function} = nothing,
-    mult_control_box_lower::Union{Nothing,Function} = nothing,
-    mult_control_box_upper::Union{Nothing,Function} = nothing,
+    state::Union{Nothing, Function} = nothing,
+    control::Union{Nothing, Function} = nothing,
+    objective::Union{Nothing, ctNumber} = nothing,
+    costate::Union{Nothing, Function} = nothing,
+    time_grid::Union{Nothing, TimesDisc} = nothing,
+    variable::Union{Nothing, Variable} = nothing,
+    iterations::Union{Nothing, Integer} = nothing,
+    stopping::Union{Nothing, Symbol} = nothing,
+    message::Union{Nothing, String} = nothing,
+    success::Union{Nothing, Bool} = nothing,
+    infos::Dict{Symbol, Any} = Dict{Symbol, Any}(),
+    boundary_constraints::Union{Nothing, ctVector} = nothing,
+    mult_boundary_constraints::Union{Nothing, ctVector} = nothing,
+    variable_constraints::Union{Nothing, ctVector} = nothing,
+    mult_variable_constraints::Union{Nothing, ctVector} = nothing,
+    mult_variable_box_lower::Union{Nothing, ctVector} = nothing,
+    mult_variable_box_upper::Union{Nothing, ctVector} = nothing,
+    control_constraints::Union{Nothing, Function} = nothing,
+    mult_control_constraints::Union{Nothing, Function} = nothing,
+    state_constraints::Union{Nothing, Function} = nothing,
+    mult_state_constraints::Union{Nothing, Function} = nothing,
+    mixed_constraints::Union{Nothing, Function} = nothing,
+    mult_mixed_constraints::Union{Nothing, Function} = nothing,
+    mult_state_box_lower::Union{Nothing, Function} = nothing,
+    mult_state_box_upper::Union{Nothing, Function} = nothing,
+    mult_control_box_lower::Union{Nothing, Function} = nothing,
+    mult_control_box_upper::Union{Nothing, Function} = nothing,
 )::OptimalControlSolution
 
     #
@@ -88,7 +88,6 @@ function __OptimalControlSolution(
     sol.mult_control_box_upper = mult_control_box_upper
 
     return sol
-
 end
 
 """
@@ -97,36 +96,35 @@ $(TYPEDSIGNATURES)
 Constructor from an optimal control problem for a Fixed ocp.
 """
 function OptimalControlSolution(
-    ocp::OptimalControlModel{<:TimeDependence,Fixed};
+    ocp::OptimalControlModel{<:TimeDependence, Fixed};
     state::Function,
     control::Function,
     objective::ctNumber,
     #variable::Union{Nothing, Variable}=nothing,
-    costate::Union{Nothing,Function} = nothing,
-    time_grid::Union{Nothing,TimesDisc} = nothing,
-    iterations::Union{Nothing,Integer} = nothing,
-    stopping::Union{Nothing,Symbol} = nothing,
-    message::Union{Nothing,String} = nothing,
-    success::Union{Nothing,Bool} = nothing,
-    infos::Dict{Symbol,Any} = Dict{Symbol,Any}(),
-    boundary_constraints::Union{Nothing,ctVector} = nothing,
-    mult_boundary_constraints::Union{Nothing,ctVector} = nothing,
+    costate::Union{Nothing, Function} = nothing,
+    time_grid::Union{Nothing, TimesDisc} = nothing,
+    iterations::Union{Nothing, Integer} = nothing,
+    stopping::Union{Nothing, Symbol} = nothing,
+    message::Union{Nothing, String} = nothing,
+    success::Union{Nothing, Bool} = nothing,
+    infos::Dict{Symbol, Any} = Dict{Symbol, Any}(),
+    boundary_constraints::Union{Nothing, ctVector} = nothing,
+    mult_boundary_constraints::Union{Nothing, ctVector} = nothing,
     #variable_constraints::Union{Nothing, ctVector}=nothing,
     #mult_variable_constraints::Union{Nothing, ctVector}=nothing,
     #mult_variable_box_lower::Union{Nothing, ctVector}=nothing,
     #mult_variable_box_upper::Union{Nothing, ctVector}=nothing,
-    control_constraints::Union{Nothing,Function} = nothing,
-    mult_control_constraints::Union{Nothing,Function} = nothing,
-    state_constraints::Union{Nothing,Function} = nothing,
-    mult_state_constraints::Union{Nothing,Function} = nothing,
-    mixed_constraints::Union{Nothing,Function} = nothing,
-    mult_mixed_constraints::Union{Nothing,Function} = nothing,
-    mult_state_box_lower::Union{Nothing,Function} = nothing,
-    mult_state_box_upper::Union{Nothing,Function} = nothing,
-    mult_control_box_lower::Union{Nothing,Function} = nothing,
-    mult_control_box_upper::Union{Nothing,Function} = nothing,
+    control_constraints::Union{Nothing, Function} = nothing,
+    mult_control_constraints::Union{Nothing, Function} = nothing,
+    state_constraints::Union{Nothing, Function} = nothing,
+    mult_state_constraints::Union{Nothing, Function} = nothing,
+    mixed_constraints::Union{Nothing, Function} = nothing,
+    mult_mixed_constraints::Union{Nothing, Function} = nothing,
+    mult_state_box_lower::Union{Nothing, Function} = nothing,
+    mult_state_box_upper::Union{Nothing, Function} = nothing,
+    mult_control_box_lower::Union{Nothing, Function} = nothing,
+    mult_control_box_upper::Union{Nothing, Function} = nothing,
 )::OptimalControlSolution
-
     return __OptimalControlSolution(
         ocp;
         state = state,
@@ -157,7 +155,6 @@ function OptimalControlSolution(
         mult_control_box_lower = mult_control_box_lower,
         mult_control_box_upper = mult_control_box_upper,
     )
-
 end
 
 """
@@ -166,36 +163,35 @@ $(TYPEDSIGNATURES)
 Constructor from an optimal control problem for a NonFixed ocp.
 """
 function OptimalControlSolution(
-    ocp::OptimalControlModel{<:TimeDependence,NonFixed};
+    ocp::OptimalControlModel{<:TimeDependence, NonFixed};
     state::Function,
     control::Function,
     objective::ctNumber,
     variable::Variable,
-    costate::Union{Nothing,Function} = nothing,
-    time_grid::Union{Nothing,TimesDisc} = nothing,
-    iterations::Union{Nothing,Integer} = nothing,
-    stopping::Union{Nothing,Symbol} = nothing,
-    message::Union{Nothing,String} = nothing,
-    success::Union{Nothing,Bool} = nothing,
-    infos::Dict{Symbol,Any} = Dict{Symbol,Any}(),
-    boundary_constraints::Union{Nothing,ctVector} = nothing,
-    mult_boundary_constraints::Union{Nothing,ctVector} = nothing,
-    variable_constraints::Union{Nothing,ctVector} = nothing,
-    mult_variable_constraints::Union{Nothing,ctVector} = nothing,
-    mult_variable_box_lower::Union{Nothing,ctVector} = nothing,
-    mult_variable_box_upper::Union{Nothing,ctVector} = nothing,
-    control_constraints::Union{Nothing,Function} = nothing,
-    mult_control_constraints::Union{Nothing,Function} = nothing,
-    state_constraints::Union{Nothing,Function} = nothing,
-    mult_state_constraints::Union{Nothing,Function} = nothing,
-    mixed_constraints::Union{Nothing,Function} = nothing,
-    mult_mixed_constraints::Union{Nothing,Function} = nothing,
-    mult_state_box_lower::Union{Nothing,Function} = nothing,
-    mult_state_box_upper::Union{Nothing,Function} = nothing,
-    mult_control_box_lower::Union{Nothing,Function} = nothing,
-    mult_control_box_upper::Union{Nothing,Function} = nothing,
+    costate::Union{Nothing, Function} = nothing,
+    time_grid::Union{Nothing, TimesDisc} = nothing,
+    iterations::Union{Nothing, Integer} = nothing,
+    stopping::Union{Nothing, Symbol} = nothing,
+    message::Union{Nothing, String} = nothing,
+    success::Union{Nothing, Bool} = nothing,
+    infos::Dict{Symbol, Any} = Dict{Symbol, Any}(),
+    boundary_constraints::Union{Nothing, ctVector} = nothing,
+    mult_boundary_constraints::Union{Nothing, ctVector} = nothing,
+    variable_constraints::Union{Nothing, ctVector} = nothing,
+    mult_variable_constraints::Union{Nothing, ctVector} = nothing,
+    mult_variable_box_lower::Union{Nothing, ctVector} = nothing,
+    mult_variable_box_upper::Union{Nothing, ctVector} = nothing,
+    control_constraints::Union{Nothing, Function} = nothing,
+    mult_control_constraints::Union{Nothing, Function} = nothing,
+    state_constraints::Union{Nothing, Function} = nothing,
+    mult_state_constraints::Union{Nothing, Function} = nothing,
+    mixed_constraints::Union{Nothing, Function} = nothing,
+    mult_mixed_constraints::Union{Nothing, Function} = nothing,
+    mult_state_box_lower::Union{Nothing, Function} = nothing,
+    mult_state_box_upper::Union{Nothing, Function} = nothing,
+    mult_control_box_lower::Union{Nothing, Function} = nothing,
+    mult_control_box_upper::Union{Nothing, Function} = nothing,
 )::OptimalControlSolution
-
     return __OptimalControlSolution(
         ocp;
         state = state,
@@ -226,7 +222,6 @@ function OptimalControlSolution(
         mult_control_box_lower = mult_control_box_lower,
         mult_control_box_upper = mult_control_box_upper,
     )
-
 end
 
 # setters
@@ -241,8 +236,7 @@ $(TYPEDSIGNATURES)
 Set the time grid.
 
 """
-time_grid!(sol::OptimalControlSolution, time_grid::TimesDisc) =
-    (sol.time_grid = time_grid; nothing)
+time_grid!(sol::OptimalControlSolution, time_grid::TimesDisc) = (sol.time_grid = time_grid; nothing)
 
 """
 $(TYPEDSIGNATURES)
@@ -258,8 +252,7 @@ $(TYPEDSIGNATURES)
 Set the number of iterations.
 
 """
-iterations!(sol::OptimalControlSolution, iterations::Int) =
-    (sol.iterations = iterations; nothing)
+iterations!(sol::OptimalControlSolution, iterations::Int) = (sol.iterations = iterations; nothing)
 
 """
 $(TYPEDSIGNATURES)
@@ -267,8 +260,7 @@ $(TYPEDSIGNATURES)
 Set the stopping criterion.
 
 """
-stopping!(sol::OptimalControlSolution, stopping::Symbol) =
-    (sol.stopping = stopping; nothing)
+stopping!(sol::OptimalControlSolution, stopping::Symbol) = (sol.stopping = stopping; nothing)
 
 """
 $(TYPEDSIGNATURES)
@@ -292,7 +284,7 @@ $(TYPEDSIGNATURES)
 Set the additional infos.
 
 """
-infos!(sol::OptimalControlSolution, infos::Dict{Symbol,Any}) = (sol.infos = infos; nothing)
+infos!(sol::OptimalControlSolution, infos::Dict{Symbol, Any}) = (sol.infos = infos; nothing)
 
 """
 $(TYPEDSIGNATURES)
@@ -309,10 +301,8 @@ $(TYPEDSIGNATURES)
 Set the multipliers to the boundary constraints.
 
 """
-mult_boundary_constraints!(
-    sol::OptimalControlSolution,
-    mult_boundary_constraints::ctVector,
-) = (sol.mult_boundary_constraints = mult_boundary_constraints; nothing)
+mult_boundary_constraints!(sol::OptimalControlSolution, mult_boundary_constraints::ctVector) =
+    (sol.mult_boundary_constraints = mult_boundary_constraints; nothing)
 
 """
 $(TYPEDSIGNATURES)
@@ -329,10 +319,8 @@ $(TYPEDSIGNATURES)
 Set the multipliers to the variable constraints.
 
 """
-mult_variable_constraints!(
-    sol::OptimalControlSolution,
-    mult_variable_constraints::ctVector,
-) = (sol.mult_variable_constraints = mult_variable_constraints; nothing)
+mult_variable_constraints!(sol::OptimalControlSolution, mult_variable_constraints::ctVector) =
+    (sol.mult_variable_constraints = mult_variable_constraints; nothing)
 
 """
 $(TYPEDSIGNATURES)

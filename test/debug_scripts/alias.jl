@@ -4,7 +4,7 @@
 #
 
 # find local CTBase
-basename = '/' * joinpath(split(Base.source_path(), '/')[1:end-3])
+basename = '/' * joinpath(split(Base.source_path(), '/')[1:(end - 3)])
 println(basename)
 using Pkg;
 Pkg.activate(basename);
@@ -39,5 +39,4 @@ tf = 1.0
     0 ≤ i(t) ≤ 1
 
     v(tf) -> min
-
 end

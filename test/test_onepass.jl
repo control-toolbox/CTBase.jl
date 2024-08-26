@@ -32,7 +32,6 @@ function test_onepass()
         x = 10
         u = 20
         @test o.dynamics(x, u) == x + u + b + 3 + d
-
     end
 
     @testset "log" begin
@@ -192,7 +191,6 @@ function test_onepass()
         @test ocp.control_dimension == 3
         @test ocp.state_name == "x"
         @test ocp.state_dimension == 3
-
     end
 
     # ---------------------------------------------------------------
@@ -267,7 +265,7 @@ function test_onepass()
 
         @test_throws ParsingError @def o begin
             v, variable
-            t ∈ [t0[v], tf[v+1]], time
+            t ∈ [t0[v], tf[v + 1]], time
         end
 
         t0 = 0.0
@@ -289,7 +287,6 @@ function test_onepass()
         @test ocp isa OptimalControlModel
         @test ocp.variable_dimension == 3
         @test ocp.variable_name == "a"
-
     end
 
     # ---------------------------------------------------------------
@@ -329,7 +326,6 @@ function test_onepass()
         @test ocp.time_name == "t"
         @test ocp.initial_time == Index(1)
         @test ocp.final_time == tf
-
     end
 
     # ---------------------------------------------------------------
@@ -490,7 +486,6 @@ function test_onepass()
         @test ocp.control_dimension == 1
         @test ocp.control_name == "a"
 
-
         t0 = 5.0
         tf = 5.1
         @def ocp begin
@@ -530,7 +525,6 @@ function test_onepass()
         @test ocp.final_time == tf
         @test ocp.control_dimension == n
         @test ocp.control_name == "u"
-
     end
 
     # ---------------------------------------------------------------
@@ -614,7 +608,6 @@ function test_onepass()
         w = 11
         @test_throws MethodError o.dynamics(y, w, z)
         @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
-
     end
 
     # ---------------------------------------------------------------
@@ -1148,7 +1141,6 @@ function test_onepass()
         @test o.constraints[:eq9][3] == [0, 0]
         @test o.constraints[:eq10][3] == [0, 0]
 
-
         t0 = 9.0
         tf = 9.1
         r0 = 1.0
@@ -1253,7 +1245,6 @@ function test_onepass()
         tf = 1.0
         n = 3
         @def ocp1 begin
-
             t ∈ [t0, tf], time
             x ∈ R^n, state
             u ∈ R^n, control
@@ -1289,7 +1280,6 @@ function test_onepass()
         @test ocp2.control_dimension == n
         @test ocp2.initial_time == t0
         @test ocp2.final_time == tf
-
 
         # all used variables must be defined before each test
         xf = 11.11 * ones(4)
@@ -1332,7 +1322,6 @@ function test_onepass()
         yf_u = 2.2222 * ones(2)
 
         @def ocp4 begin
-
             t ∈ [t0, tf], time
             x ∈ R^n, state
             u ∈ R^n, control
@@ -1347,7 +1336,6 @@ function test_onepass()
         @test ocp4.control_dimension == n
         @test ocp4.initial_time == t0
         @test ocp4.final_time == tf
-
 
         # === boundary
         t0 = 0.4
@@ -1389,7 +1377,6 @@ function test_onepass()
         @test ocp6.control_dimension == n
         @test ocp6.initial_time == t0
         @test ocp6.final_time == tf
-
 
         # define more variables
         u_b = 1.0
@@ -1502,7 +1489,6 @@ function test_onepass()
         tf = 1.111
         n = 12
         @def ocp11 begin
-
             t ∈ [t0, tf], time
             x ∈ R^n, state
             u ∈ R^n, control
@@ -1555,7 +1541,6 @@ function test_onepass()
             u ∈ R, control
             ẋ(t) == f(x(t), u(t)), named_dynamics_not_allowed  # but allowed if unnamed !
         end
-
     end
 
     # ---------------------------------------------------------------
@@ -1919,7 +1904,6 @@ function test_onepass()
             ∫(0.5u(t)^2) → max
         end
         @test ocp isa OptimalControlModel
-
     end
 
     t0 = 0
@@ -1945,7 +1929,6 @@ function test_onepass()
         ẋ(t) == A * x(t) + B * u(t)
         (-0.5 + x(t)) * ∫(u(t)^2) → max
     end
-
 
     # ---------------------------------------------------------------
     # ---------------------------------------------------------------
@@ -2257,7 +2240,6 @@ function test_onepass()
             u ∈ R, control
             t * ∫(x(t) + u(t)) - 1 → max
         end
-
     end
 
     # ---------------------------------------------------------------
@@ -2377,7 +2359,6 @@ function test_onepass()
         w = 11
         @test o.dynamics(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
         @test_throws UndefVarError o.mayer(y0, yf, z)
-
     end
 
     # ---------------------------------------------------------------
@@ -2402,7 +2383,6 @@ function test_onepass()
         x = 10
         u = 20
         @test o.dynamics(x, u) == x + u + b + 3 + d
-
     end
 
     # ---------------------------------------------------------------
@@ -2474,7 +2454,6 @@ function test_onepass()
             ẋ(t) == A * x(t) + B * u(t)
             ∫(u(t)^2) / 2 → min # forbidden
         end
-
     end
 
     # ---------------------------------------------------------------
@@ -2591,7 +2570,5 @@ function test_onepass()
         @test constraint(o, :eq3)(z) == z[1]
         @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z[1]]
         @test o.lagrange(x, u, z) == u[1]^2 + z[1] * x[1]
-
     end
-
 end

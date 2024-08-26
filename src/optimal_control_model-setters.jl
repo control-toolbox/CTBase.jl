@@ -29,12 +29,10 @@ julia> ocp = Model(autonomous=false, variable=true)
 
 """
 function Model(; autonomous::Bool = true, variable::Bool = false)
-
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
 
-    return OptimalControlModel{time_dependence,variable_dependence}()
-
+    return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
 """
@@ -61,12 +59,12 @@ julia> ocp = Model(Autonomous, NonFixed)
 """
 function Model(
     dependencies::DataType...,
-)::OptimalControlModel{<:TimeDependence,<:VariableDependence}
+)::OptimalControlModel{<:TimeDependence, <:VariableDependence}
     # some checkings: 
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return OptimalControlModel{time_dependence,variable_dependence}()
+    return OptimalControlModel{time_dependence, variable_dependence}()
 end
 
 """
@@ -92,9 +90,8 @@ function variable!(
 )
 
     # checkings
-    is_fixed(ocp) && throw(
-        UnauthorizedCall("the ocp has no variable, you cannot use variable! function."),
-    )
+    is_fixed(ocp) &&
+        throw(UnauthorizedCall("the ocp has no variable, you cannot use variable! function."))
     __is_variable_set(ocp) && throw(UnauthorizedCall("the variable has already been set."))
     (q > 1) &&
         (size(components_names, 1) ≠ q) &&
@@ -186,17 +183,12 @@ function state!(
     __is_state_set(ocp) && throw(UnauthorizedCall("the state has already been set."))
     (n > 1) &&
         (size(components_names, 1) ≠ n) &&
-        throw(
-            IncorrectArgument(
-                "the number of state names must be equal to the state dimension",
-            ),
-        )
+        throw(IncorrectArgument("the number of state names must be equal to the state dimension"))
 
     ocp.state_dimension = n
     ocp.state_components_names = components_names
     ocp.state_name = name
     return nothing
-
 end
 
 function state!(
@@ -205,7 +197,6 @@ function state!(
     name::Symbol,
     components_names::Vector{Symbol},
 )
-
     state!(ocp, n, string(name), string.(components_names))
 end
 
@@ -215,12 +206,10 @@ function state!(
     name::Symbol,
     components_names::Vector{String},
 )
-
     state!(ocp, n, string(name), components_names)
 end
 
 function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
-
     state!(ocp, n, string(name))
 end
 
@@ -279,16 +268,13 @@ function control!(
     (m > 1) &&
         (size(components_names, 1) ≠ m) &&
         throw(
-            IncorrectArgument(
-                "the number of control names must be equal to the control dimension",
-            ),
+            IncorrectArgument("the number of control names must be equal to the control dimension"),
         )
 
     ocp.control_dimension = m
     ocp.control_components_names = components_names
     ocp.control_name = name
     return nothing
-
 end
 
 function control!(
@@ -297,7 +283,6 @@ function control!(
     name::Symbol,
     components_names::Vector{Symbol},
 )
-
     control!(ocp, m, string(name), string.(components_names))
 end
 
@@ -307,12 +292,10 @@ function control!(
     name::Symbol,
     components_names::Vector{String},
 )
-
     control!(ocp, m, string(name), components_names)
 end
 
 function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol)
-
     control!(ocp, m, string(name))
 end
 
@@ -347,12 +330,12 @@ julia> time!(ocp, t0=0, tf=1, name=:s ) # name is a Symbol
 ```
 """
 function time!(
-    ocp::OptimalControlModel{<:TimeDependence,VT};
-    t0::Union{Time,Nothing} = nothing,
-    tf::Union{Time,Nothing} = nothing,
-    ind0::Union{Integer,Nothing} = nothing,
-    indf::Union{Integer,Nothing} = nothing,
-    name::Union{String,Symbol} = __time_name(),
+    ocp::OptimalControlModel{<:TimeDependence, VT};
+    t0::Union{Time, Nothing} = nothing,
+    tf::Union{Time, Nothing} = nothing,
+    ind0::Union{Integer, Nothing} = nothing,
+    indf::Union{Integer, Nothing} = nothing,
+    name::Union{String, Symbol} = __time_name(),
 ) where {VT}
 
     # check if the problem has been set to Variable or NonVariable
@@ -424,25 +407,21 @@ function time!(
             ocp.initial_time = t0
             ocp.final_time = tf
             ocp.time_name = name
-            ocp.initial_time_name =
-                t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
-            ocp.final_time_name =
-                tf isa Integer ? string(tf) : string(round(tf, digits = 2))
+            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
+            ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits = 2))
         end
         (::Nothing, ::Integer, ::Time, ::Nothing) => begin # (ind0, tf)
             ocp.initial_time = Index(ind0)
             ocp.final_time = tf
             ocp.time_name = name
             ocp.initial_time_name = ocp.variable_components_names[ind0]
-            ocp.final_time_name =
-                tf isa Integer ? string(tf) : string(round(tf, digits = 2))
+            ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits = 2))
         end
         (::Time, ::Nothing, ::Nothing, ::Integer) => begin # (t0, indf)
             ocp.initial_time = t0
             ocp.final_time = Index(indf)
             ocp.time_name = name
-            ocp.initial_time_name =
-                t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
+            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
             ocp.final_time_name = ocp.variable_components_names[indf]
         end
         (::Nothing, ::Integer, ::Nothing, ::Integer) => begin # (ind0, indf)
@@ -456,7 +435,6 @@ function time!(
     end
 
     return nothing
-
 end
 
 """
@@ -531,16 +509,15 @@ julia> constraint!(ocp, :mixed; f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
 
 """
 function constraint!(
-    ocp::OptimalControlModel{T,V},
+    ocp::OptimalControlModel{T, V},
     type::Symbol;
-    rg::Union{OrdinalRange{<:Integer},Index,Integer,Nothing} = nothing,
-    f::Union{Function,Nothing} = nothing,
-    lb::Union{ctVector,Nothing} = nothing,
-    ub::Union{ctVector,Nothing} = nothing,
-    val::Union{ctVector,Nothing} = nothing,
+    rg::Union{OrdinalRange{<:Integer}, Index, Integer, Nothing} = nothing,
+    f::Union{Function, Nothing} = nothing,
+    lb::Union{ctVector, Nothing} = nothing,
+    ub::Union{ctVector, Nothing} = nothing,
+    val::Union{ctVector, Nothing} = nothing,
     label::Symbol = __constraint_label(),
-) where {T<:TimeDependence,V<:VariableDependence}
-
+) where {T <: TimeDependence, V <: VariableDependence}
     __check_all_set(ocp)
     type == :variable &&
         is_fixed(ocp) &&
@@ -550,9 +527,8 @@ function constraint!(
                 ", you cannot use constraint! function with type=:variable.",
             ),
         )
-    label ∈ constraints_labels(ocp) && throw(
-        UnauthorizedCall("the constraint named " * String(label) * " already exists."),
-    )
+    label ∈ constraints_labels(ocp) &&
+        throw(UnauthorizedCall("the constraint named " * String(label) * " already exists."))
     isnothing(val) &&
         isnothing(lb) &&
         isnothing(ub) &&
@@ -714,9 +690,9 @@ julia> dynamics!(ocp, f)
 ```
 """
 function dynamics!(
-    ocp::OptimalControlModel{T,V},
+    ocp::OptimalControlModel{T, V},
     f::Function,
-) where {T<:TimeDependence,V<:VariableDependence}
+) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
@@ -725,7 +701,6 @@ function dynamics!(
     ocp.dynamics = Dynamics(f, T, V)
 
     return nothing
-
 end
 
 """
@@ -753,16 +728,15 @@ julia> objective!(ocp, :lagrange, (x, u) -> x[1]^2 + u^2) # the control is of di
     If you set twice the objective, only the last one will be taken into account.
 """
 function objective!(
-    ocp::OptimalControlModel{T,V},
+    ocp::OptimalControlModel{T, V},
     type::Symbol,
     f::Function,
     criterion::Symbol = __criterion_type(),
-) where {T<:TimeDependence,V<:VariableDependence}
+) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_objective_set(ocp) &&
-        throw(UnauthorizedCall("the objective has already been set."))
+    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set."))
 
     # check the validity of the criterion
     !__is_criterion_valid(criterion) && throw(
@@ -790,7 +764,6 @@ function objective!(
     end
 
     return nothing
-
 end
 
 """
@@ -813,17 +786,16 @@ julia> objective!(ocp, :bolza, (x0, xf) -> x0[1] + xf[2], (x, u) -> x[1]^2 + u^2
 ```
 """
 function objective!(
-    ocp::OptimalControlModel{T,V},
+    ocp::OptimalControlModel{T, V},
     type::Symbol,
     g::Function,
     f⁰::Function,
     criterion::Symbol = __criterion_type(),
-) where {T<:TimeDependence,V<:VariableDependence}
+) where {T <: TimeDependence, V <: VariableDependence}
 
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
-    __is_objective_set(ocp) &&
-        throw(UnauthorizedCall("the objective has already been set."))
+    __is_objective_set(ocp) && throw(UnauthorizedCall("the objective has already been set."))
 
     # check the validity of the criterion
     !__is_criterion_valid(criterion) && throw(
@@ -850,7 +822,6 @@ function objective!(
     end
 
     return nothing
-
 end
 
 """

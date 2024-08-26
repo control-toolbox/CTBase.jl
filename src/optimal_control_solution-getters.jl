@@ -142,8 +142,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the variable of the optimal control solution or `nothing`.
 
 """
-variable_components_names(sol::OptimalControlSolution)::String =
-    sol.variable_components_names
+variable_components_names(sol::OptimalControlSolution)::String = sol.variable_components_names
 
 """
 $(TYPEDSIGNATURES)
@@ -235,7 +234,7 @@ $(TYPEDSIGNATURES)
 Return a dictionary of additional infos depending on the solver or `nothing`.
 
 """
-infos(sol::OptimalControlSolution)::Dict{Symbol,Any} = sol.infos
+infos(sol::OptimalControlSolution)::Dict{Symbol, Any} = sol.infos
 
 # constraints and multipliers
 
@@ -253,8 +252,7 @@ $(TYPEDSIGNATURES)
 Return the multipliers to the boundary constraints of the optimal control solution or `nothing`.
 
 """
-mult_boundary_constraints(sol::OptimalControlSolution)::ctVector =
-    sol.mult_boundary_constraints
+mult_boundary_constraints(sol::OptimalControlSolution)::ctVector = sol.mult_boundary_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -270,8 +268,7 @@ $(TYPEDSIGNATURES)
 Return the multipliers to the variable constraints of the optimal control solution or `nothing`.
 
 """
-mult_variable_constraints(sol::OptimalControlSolution)::ctVector =
-    sol.mult_variable_constraints
+mult_variable_constraints(sol::OptimalControlSolution)::ctVector = sol.mult_variable_constraints
 
 """
 $(TYPEDSIGNATURES)
@@ -303,8 +300,7 @@ $(TYPEDSIGNATURES)
 Return the multipliers to the control constraints of the optimal control solution or `nothing`.
 
 """
-mult_control_constraints(sol::OptimalControlSolution)::Function =
-    sol.mult_control_constraints
+mult_control_constraints(sol::OptimalControlSolution)::Function = sol.mult_control_constraints
 
 """
 $(TYPEDSIGNATURES)

@@ -15,7 +15,6 @@ test_goddard() = begin
 
     # Abstract model
     @def ocp begin
-
         tf ∈ R, variable
         t ∈ [t0, tf], time
         x ∈ R³, state
@@ -36,7 +35,6 @@ test_goddard() = begin
         ẋ(t) == [v(t), -D(t) / m(t) - 1 / r²(t), 0] + u(t) * [0, Tmax / m(t), -b * Tmax]
 
         r(tf) → max
-
     end
 
     F0(x) = begin
@@ -56,5 +54,4 @@ test_goddard() = begin
     u = 2
     tf = 1
     @test ocp.dynamics(x, u, tf) == F0(x) + u * F1(x)
-
 end

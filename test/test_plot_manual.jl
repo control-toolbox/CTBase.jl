@@ -19,7 +19,7 @@ xf = [0.0, 0.0]
 a = x0[1]
 b = x0[2]
 C = [
-    -(tf - t0)^3/6.0 (tf-t0)^2/2.0
+    -(tf - t0)^3/6.0 (tf - t0)^2/2.0
     -(tf - t0)^2/2.0 (tf-t0)
 ]
 D = [-a - b * (tf - t0), -b] + xf
@@ -82,7 +82,7 @@ xf = [0.0, 0.0]
 a = x0[1]
 b = x0[2]
 C = [
-    -(tf - t0)^3/6.0 (tf-t0)^2/2.0
+    -(tf - t0)^3/6.0 (tf - t0)^2/2.0
     -(tf - t0)^2/2.0 (tf-t0)
 ]
 D = [-a - b * (tf - t0), -b] + xf
@@ -121,14 +121,7 @@ sol.message = "ceci est un test"
 sol.success = true
 
 if do_plot_2
-    plot!(
-        plt,
-        sol,
-        layout = layout,
-        size = size,
-        control = control_plt,
-        solution_label = "sol2",
-    )
+    plot!(plt, sol, layout = layout, size = size, control = control_plt, solution_label = "sol2")
 else
     plt
 end
@@ -213,7 +206,6 @@ sol.iterations = 0
 sol.message = "structure: B+B0B+B0B+"
 sol.success = true
 sol.infos[:resolution] = :numerical
-
 
 plt_transfert = plot(sol, layout=:split, size=(900, 600))
 =#

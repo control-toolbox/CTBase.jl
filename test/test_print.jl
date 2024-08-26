@@ -65,5 +65,4 @@ function test_print()
     dynamics!(ocp, (t, x, u) -> x + u)
     objective!(ocp, :mayer, (t0, x0, tf, xf) -> tf)
     @test display(ocp) isa Nothing
-
 end
