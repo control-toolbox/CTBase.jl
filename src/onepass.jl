@@ -18,20 +18,20 @@ $(TYPEDEF)
 
 """
 @with_kw mutable struct ParsingInfo
-    v::Union{Symbol,Nothing} = nothing
-    t::Union{Symbol,Nothing} = nothing
-    t0::Union{Real,Symbol,Expr,Nothing} = nothing
-    tf::Union{Real,Symbol,Expr,Nothing} = nothing
-    x::Union{Symbol,Nothing} = nothing
-    u::Union{Symbol,Nothing} = nothing
-    aliases::OrderedDict{Symbol,Union{Real,Symbol,Expr}} = __init_aliases()
+    v::Union{Symbol, Nothing} = nothing
+    t::Union{Symbol, Nothing} = nothing
+    t0::Union{Real, Symbol, Expr, Nothing} = nothing
+    tf::Union{Real, Symbol, Expr, Nothing} = nothing
+    x::Union{Symbol, Nothing} = nothing
+    u::Union{Symbol, Nothing} = nothing
+    aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}} = __init_aliases()
     lnum::Integer = 0
     line::String = ""
     t_dep::Bool = false
 end
 
 __init_aliases(; max_dim = 20) = begin
-    al = OrderedDict{Symbol,Union{Real,Symbol,Expr}}()
+    al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
     for i ∈ 1:max_dim
         al[Symbol(:R, ctupperscripts(i))] = :(R^$i)
     end
@@ -85,14 +85,11 @@ parse!(p, ocp, e; log = false) = begin
     @match e begin
         # aliases
         :($a = $e1) => @match e1 begin
-            :(($names) ∈ R^$q, variable) =>
-                p_variable!(p, ocp, a, q; components_names = names, log)
+            :(($names) ∈ R^$q, variable) => p_variable!(p, ocp, a, q; components_names = names, log)
             :([$names] ∈ R^$q, variable) =>
                 p_variable!(p, ocp, a, q; components_names = names, log)
-            :(($names) ∈ R^$n, state) =>
-                p_state!(p, ocp, a, n; components_names = names, log)
-            :([$names] ∈ R^$n, state) =>
-                p_state!(p, ocp, a, n; components_names = names, log)
+            :(($names) ∈ R^$n, state) => p_state!(p, ocp, a, n; components_names = names, log)
+            :([$names] ∈ R^$n, state) => p_state!(p, ocp, a, n; components_names = names, log)
             :(($names) ∈ R^$m, control) =>
                 p_control!(p, ocp, a, m; components_names = names, log)
             :([$names] ∈ R^$m, control) =>
@@ -215,11 +212,8 @@ p_variable!(p, ocp, v, q; components_names = nothing, log = false) = begin
     if (isnothing(components_names))
         __wrap(:(variable!($ocp, $q, $vv)), p.lnum, p.line)
     else
-        qq == length(components_names.args) || return __throw(
-            "the number of variable components must be $qq",
-            p.lnum,
-            p.line,
-        )
+        qq == length(components_names.args) ||
+            return __throw("the number of variable components must be $qq", p.lnum, p.line)
         for i ∈ 1:qq
             p.aliases[components_names.args[i]] = :($v[$i])
         end # aliases from names given by the user
@@ -237,11 +231,7 @@ p_alias!(p, ocp, a, e; log = false) = begin
         p.aliases[Symbol(a, ctupperscripts(i))] = :($a^$i)
     end
     p.aliases[a] = e
-    __wrap(
-        :(LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee))),
-        p.lnum,
-        p.line,
-    )
+    __wrap(:(LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee))), p.lnum, p.line)
 end
 
 p_time!(p, ocp, t, t0, tf; log = false) = begin
@@ -333,11 +323,8 @@ p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
     if (isnothing(components_names))
         __wrap(:(control!($ocp, $m, $uu)), p.lnum, p.line)
     else
-        mm == length(components_names.args) || return __throw(
-            "the number of control components must be $mm",
-            p.lnum,
-            p.line,
-        )
+        mm == length(components_names.args) ||
+            return __throw("the number of control components must be $mm", p.lnum, p.line)
         for i ∈ 1:mm
             p.aliases[components_names.args[i]] = :($u[$i])
         end # aliases from names given by the user
@@ -353,22 +340,10 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match c_type begin
-        (:initial, rg) => :(constraint!(
-            $ocp,
-            :initial;
-            rg = $rg,
-            lb = $e1,
-            ub = $e3,
-            label = $llabel,
-        ))
-        (:final, rg) => :(constraint!(
-            $ocp,
-            :final;
-            rg = $rg,
-            lb = $e1,
-            ub = $e3,
-            label = $llabel,
-        ))
+        (:initial, rg) =>
+            :(constraint!($ocp, :initial; rg = $rg, lb = $e1, ub = $e3, label = $llabel))
+        (:final, rg) =>
+            :(constraint!($ocp, :final; rg = $rg, lb = $e1, ub = $e3, label = $llabel))
         :boundary => begin
             gs = gensym()
             x0 = gensym()
@@ -384,14 +359,8 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
                 constraint!($ocp, :boundary; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
         end
-        (:control_range, rg) => :(constraint!(
-            $ocp,
-            :control;
-            rg = $rg,
-            lb = $e1,
-            ub = $e3,
-            label = $llabel,
-        ))
+        (:control_range, rg) =>
+            :(constraint!($ocp, :control; rg = $rg, lb = $e1, ub = $e3, label = $llabel))
         :control_fun => begin
             gs = gensym()
             ut = gensym()
@@ -408,14 +377,8 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
                 constraint!($ocp, :control; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
         end
-        (:state_range, rg) => :(constraint!(
-            $ocp,
-            :state;
-            rg = $rg,
-            lb = $e1,
-            ub = $e3,
-            label = $llabel,
-        ))
+        (:state_range, rg) =>
+            :(constraint!($ocp, :state; rg = $rg, lb = $e1, ub = $e3, label = $llabel))
         :state_fun => begin
             gs = gensym()
             xt = gensym()
@@ -432,14 +395,8 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
                 constraint!($ocp, :state; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
         end
-        (:variable_range, rg) => :(constraint!(
-            $ocp,
-            :variable;
-            rg = $rg,
-            lb = $e1,
-            ub = $e3,
-            label = $llabel,
-        ))
+        (:variable_range, rg) =>
+            :(constraint!($ocp, :variable; rg = $rg, lb = $e1, ub = $e3, label = $llabel))
         :variable_fun => begin
             gs = gensym()
             args = [p.v]

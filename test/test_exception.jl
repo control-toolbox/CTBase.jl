@@ -1,5 +1,4 @@
 function test_exception()
-
     e = AmbiguousDescription((:e,))
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
@@ -23,5 +22,4 @@ function test_exception()
     e = ExtensionError(:tata)
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
-
 end

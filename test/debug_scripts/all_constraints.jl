@@ -5,9 +5,8 @@
 # ref: https://github.com/control-toolbox/CTBase.jl/issues/9
 #
 
-
 # find local CTBase
-basename = '/' * joinpath(split(Base.source_path(), '/')[1:end-3])
+basename = '/' * joinpath(split(Base.source_path(), '/')[1:(end - 3)])
 using Pkg;
 Pkg.activate(basename);
 
@@ -26,7 +25,6 @@ y0_u = 2.2222
 
 # === initial
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -39,7 +37,6 @@ y0_u = 2.2222
 end
 
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -50,7 +47,6 @@ end
     x0_b ≤ x(t0) ≤ x0_u => initial_4
     y0_b ≤ x[2:3](t0) ≤ y0_u => initial_5
 end
-
 
 # all used variables must be definedbefore each test
 xf = 11.11
@@ -63,7 +59,6 @@ yf_u = 2.2222
 
 # === final
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -76,7 +71,6 @@ yf_u = 2.2222
 end
 
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -88,10 +82,8 @@ end
     yf_b ≤ x[2:3](tf) ≤ yf_u => final_5
 end
 
-
 # === boundary
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -102,10 +94,8 @@ end
     1 ≤ x[2](t0)^2 ≤ 2
     x[2](tf)^2 == 1
     1 ≤ x[2](tf)^2 ≤ 2
-
 end
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -116,9 +106,7 @@ end
     1 ≤ x[2](t0)^2 ≤ 2 => boundary_4
     x[2](tf)^2 == 1 => boundary_5
     1 ≤ x[2](tf)^2 ≤ 2 => boundary_6
-
 end
-
 
 # define more variables
 u_b = 1.0
@@ -129,7 +117,6 @@ v_b = 5.0
 v_u = 6.0
 
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -144,7 +131,6 @@ v_u = 6.0
     1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
 end
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -159,7 +145,6 @@ end
     1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2 => control_8
 end
 
-
 # more vars
 x_b = 10.0
 x_u = 11.0
@@ -170,7 +155,6 @@ y_u = 16.0
 
 # === state
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -186,7 +170,6 @@ y_u = 16.0
 end
 
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -201,10 +184,8 @@ end
     [-1, 1] ≤ x[1:2](t) + x[3:4](t) ≤ [0, 2] => state_8
 end
 
-
 # === mixed
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -213,7 +194,6 @@ end
     [-1, 1] ≤ u[2](t) * x[1:2](t) ≤ [0, 2]
 end
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -222,11 +202,9 @@ end
     [-1, 1] ≤ u[2](t) * x[1:2](t) ≤ [0, 2] => mixed_2
 end
 
-
 # === dynamics
 
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control
@@ -235,9 +213,7 @@ end
     x'(t) == f(x(t), u(t))
 end
 
-
 @def begin
-
     t ∈ [t0, tf], time
     x ∈ R^3, state
     u ∈ R^3, control

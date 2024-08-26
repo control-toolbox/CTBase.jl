@@ -3,7 +3,6 @@ function test_differential_geometry()
     dummy_function() = nothing
 
     @testset "Lifts" begin
-
         @testset "HamiltonianLift from VectorField" begin
             HL = HamiltonianLift(
                 VectorField(x -> [x[1]^2, x[2]^2], autonomous = true, variable = false),
@@ -11,20 +10,12 @@ function test_differential_geometry()
             @test HL([1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
             HL = HamiltonianLift(
-                VectorField(
-                    (x, v) -> [x[1]^2, x[2]^2 + v],
-                    autonomous = true,
-                    variable = true,
-                ),
+                VectorField((x, v) -> [x[1]^2, x[2]^2 + v], autonomous = true, variable = true),
             )
             @test HL([1, 0], [0, 1], 1) == 1
             @test HL(1, [1, 0], [0, 1], 1) == 1
             HL = HamiltonianLift(
-                VectorField(
-                    (t, x) -> [t + x[1]^2, x[2]^2],
-                    autonomous = false,
-                    variable = false,
-                ),
+                VectorField((t, x) -> [t + x[1]^2, x[2]^2], autonomous = false, variable = false),
             )
             @test HL(1, [1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
@@ -42,11 +33,7 @@ function test_differential_geometry()
             HL = HamiltonianLift(x -> [x[1]^2, x[2]^2], autonomous = true, variable = false)
             @test HL([1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
-            HL = HamiltonianLift(
-                (x, v) -> [x[1]^2, x[2]^2 + v],
-                autonomous = true,
-                variable = true,
-            )
+            HL = HamiltonianLift((x, v) -> [x[1]^2, x[2]^2 + v], autonomous = true, variable = true)
             @test HL([1, 0], [0, 1], 1) == 1
             @test HL(1, [1, 0], [0, 1], 1) == 1
             HL = HamiltonianLift(
@@ -71,11 +58,7 @@ function test_differential_geometry()
             HL = HamiltonianLift((t, x) -> [t + x[1]^2, x[2]^2], NonAutonomous, Fixed)
             @test HL(1, [1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
-            HL = HamiltonianLift(
-                (t, x, v) -> [t + x[1]^2, x[2]^2 + v],
-                NonAutonomous,
-                NonFixed,
-            )
+            HL = HamiltonianLift((t, x, v) -> [t + x[1]^2, x[2]^2 + v], NonAutonomous, NonFixed)
             @test HL(1, [1, 0], [0, 1], 1) == 1
         end
 
@@ -108,7 +91,6 @@ function test_differential_geometry()
             H = Lift(X)
             Test.@test H(1, 1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4], 1) == 22
-
         end
 
         @testset "from Function" begin
@@ -145,9 +127,7 @@ function test_differential_geometry()
 
             # exceptions
             Test.@test_throws IncorrectArgument Lift(X, Int64)
-
         end
-
     end # tests for Lift
 
     @testset "Directional derivative of a scalar function" begin
@@ -209,7 +189,6 @@ function test_differential_geometry()
         f = (t, x, v) -> t + x^2
         Test.@test (X ⋅ f)(1, 1, 1) == 8
         Test.@test Lie(φ, f, NonAutonomous, NonFixed)(1, 1, 1) == 8
-
     end
 
     @testset "Directional derivative of a vector field" begin
@@ -250,18 +229,12 @@ function test_differential_geometry()
         Test.@test CTBase.:(⅋)(X, Y)([1, 2], [2, 3]) == [7, -1]
 
         # nonautonomous, nonfixed, dim 2
-        X = VectorField(
-            (t, x, v) -> [t + v[1] + v[2] + x[2], -x[1]],
-            NonFixed,
-            NonAutonomous,
-        )
+        X = VectorField((t, x, v) -> [t + v[1] + v[2] + x[2], -x[1]], NonFixed, NonAutonomous)
         Y = VectorField((t, x, v) -> [v[1] + v[2] + x[1], x[2]], NonFixed, NonAutonomous)
         Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2], [2, 3]) == [8, -1]
-
     end
 
     @testset "Lie bracket - length 2" begin
-
         @testset "autonomous case" begin
             f = x -> [x[2], 2x[1]]
             g = x -> [3x[2], -x[1]]
@@ -311,7 +284,6 @@ function test_differential_geometry()
         end
 
         @testset "intrinsic definition" begin
-
             X = VectorField(x -> [x[2]^2, -2x[1] * x[2]])
             Y = VectorField(x -> [x[1] * (1 + x[2]), 3x[2]^3])
             f = x -> x[1]^4 + 2x[2]^3
@@ -319,7 +291,6 @@ function test_differential_geometry()
 
             # check real intrinsic order 2 definition of Lie bracket
             Test.@test ((@Lie [X, Y]) ⋅ f)(x) == ((X ⋅ (Y ⋅ f))(x) - (Y ⋅ (X ⋅ f))(x))
-
         end
     end
 
@@ -411,11 +382,9 @@ function test_differential_geometry()
             Test.@test Poisson(F, G)([1, 2], [2, 1], [4, 4]) ==
                        -Poisson(G, F)([1, 2], [2, 1], [4, 4]) # anticommutativity
             Test.@test Poisson(F₊G, H)([1, 2], [2, 1], [4, 4]) ==
-                       Poisson(F, H)([1, 2], [2, 1], [4, 4]) +
-                       Poisson(G, H)([1, 2], [2, 1], [4, 4]) # bilinearity 1
+                       Poisson(F, H)([1, 2], [2, 1], [4, 4]) + Poisson(G, H)([1, 2], [2, 1], [4, 4]) # bilinearity 1
             Test.@test Poisson(H, F₊G)([1, 2], [2, 1], [4, 4]) ==
-                       Poisson(H, F)([1, 2], [2, 1], [4, 4]) +
-                       Poisson(H, G)([1, 2], [2, 1], [4, 4]) # bilinearity 2
+                       Poisson(H, F)([1, 2], [2, 1], [4, 4]) + Poisson(H, G)([1, 2], [2, 1], [4, 4]) # bilinearity 2
             Test.@test Poisson(FG, H)([1, 2], [2, 1], [4, 4]) ==
                        Poisson(F, H)([1, 2], [2, 1], [4, 4]) * G([1, 2], [2, 1], [4, 4]) +
                        F([1, 2], [2, 1], [4, 4]) * Poisson(G, H)([1, 2], [2, 1], [4, 4]) # Liebniz's rule
@@ -454,10 +423,8 @@ function test_differential_geometry()
                        Poisson(H, F)(2, [1, 2], [2, 1], [4, 4]) +
                        Poisson(H, G)(2, [1, 2], [2, 1], [4, 4]) # bilinearity 2
             Test.@test Poisson(FG, H)(2, [1, 2], [2, 1], [4, 4]) ==
-                       Poisson(F, H)(2, [1, 2], [2, 1], [4, 4]) *
-                       G(2, [1, 2], [2, 1], [4, 4]) +
-                       F(2, [1, 2], [2, 1], [4, 4]) *
-                       Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # Liebniz's rule
+                       Poisson(F, H)(2, [1, 2], [2, 1], [4, 4]) * G(2, [1, 2], [2, 1], [4, 4]) +
+                       F(2, [1, 2], [2, 1], [4, 4]) * Poisson(G, H)(2, [1, 2], [2, 1], [4, 4]) # Liebniz's rule
             Test.@test Poisson(F, Poisson(G, H))(2, [1, 2], [2, 1], [4, 4]) +
                        Poisson(G, Poisson(H, F))(2, [1, 2], [2, 1], [4, 4]) +
                        Poisson(H, Poisson(F, G))(2, [1, 2], [2, 1], [4, 4]) == 0 # Jacobi identity
@@ -465,7 +432,6 @@ function test_differential_geometry()
     end
 
     @testset "poisson bracket of Lifts" begin
-
         @testset "autonomous case" begin
             f = x -> [x[1] + x[2]^2, x[1], 0]
             g = x -> [0, x[2], x[1]^2 + 4 * x[2]]
@@ -473,10 +439,10 @@ function test_differential_geometry()
             G = Lift(g)
             F_ = (x, p) -> p' * f(x)
             G_ = (x, p) -> p' * g(x)
-            Test.@test Poisson(F, G)([1, 2, 3], [4, 0, 4]) ≈
-                       Poisson(F_, G_)([1, 2, 3], [4, 0, 4]) atol = 1e-6
-            Test.@test Poisson(F, G_)([1, 2, 3], [4, 0, 4]) ≈
-                       Poisson(F_, G)([1, 2, 3], [4, 0, 4]) atol = 1e-6
+            Test.@test Poisson(F, G)([1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G_)([1, 2, 3], [4, 0, 4]) atol =
+                1e-6
+            Test.@test Poisson(F, G_)([1, 2, 3], [4, 0, 4]) ≈ Poisson(F_, G)([1, 2, 3], [4, 0, 4]) atol =
+                1e-6
         end
 
         @testset "nonautonomous case" begin
@@ -519,7 +485,6 @@ function test_differential_geometry()
                        Poisson(F_, G, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol =
                 1e-6
         end
-
     end
 
     # macros
@@ -601,7 +566,6 @@ function test_differential_geometry()
         get_F0 = () -> F0
         F011___ = @Lie [[get_F0(), F1], F1]
         Test.@test F011_(t, x, v) ≈ F011___(t, x, v) atol = 1e-6
-
     end
 
     @testset "poisson macro" begin
@@ -758,8 +722,7 @@ function test_differential_geometry()
         Test.@test @Lie [F0, F1](x) + 4 * [F1, F2](x) == [8, -8, -2]
         Test.@test @Lie [F0, F1](x) - [F1, F2](x) == [-2, -3, -2]
         Test.@test @Lie [F0, F1](x) .* [F1, F2](x) == [0, 4, 0]
-        Test.@test @Lie [1, 1, 1] + ([[F0, F1], F1](x) + [F1, F2](x) + [1, 1, 1]) ==
-                        [4, 5, -5]
+        Test.@test @Lie [1, 1, 1] + ([[F0, F1], F1](x) + [F1, F2](x) + [1, 1, 1]) == [4, 5, -5]
 
         # nonautonomous nonfixed
         F0 = VectorField(
@@ -772,8 +735,7 @@ function test_differential_geometry()
         Test.@test @Lie [F0, F1](t, x, v) + 4 * [F1, F2](t, x, v) == [8, -8, -2]
         Test.@test @Lie [F0, F1](t, x, v) - [F1, F2](t, x, v) == [-2, -3, -2]
         Test.@test @Lie [F0, F1](t, x, v) .* [F1, F2](t, x, v) == [0, 4, 0]
-        Test.@test @Lie [1, 1, 1] +
-                        ([[F0, F1], F1](t, x, v) + [F1, F2](t, x, v) + [1, 1, 1]) ==
+        Test.@test @Lie [1, 1, 1] + ([[F0, F1], F1](t, x, v) + [F1, F2](t, x, v) + [1, 1, 1]) ==
                         [4, 5, -5]
 
         # poisson
@@ -805,8 +767,6 @@ function test_differential_geometry()
         Test.@test @Lie {H0, H1}(t, x, p, v) + 4 * {H1, H2}(t, x, p, v) == -15
         Test.@test @Lie {H0, H1}(t, x, p, v) - {H1, H2}(t, x, p, v) == 7.5
         Test.@test @Lie {H0, H1}(t, x, p, v) * {H1, H2}(t, x, p, v) == -13.5
-        Test.@test @Lie 4 + ({{H0, H1}, H1}(t, x, p, v) + -2 * {H1, H2}(t, x, p, v) + 21) ==
-                        39
+        Test.@test @Lie 4 + ({{H0, H1}, H1}(t, x, p, v) + -2 * {H1, H2}(t, x, p, v) + 21) == 39
     end
-
 end # test_differential_geometry

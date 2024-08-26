@@ -32,11 +32,4 @@ plt = plot(sol, size = (700, 450), time = :default)
 
 # second plot
 style = (linestyle = :dash,)
-plot!(
-    plt,
-    sol2,
-    time = :default,
-    state_style = style,
-    costate_style = style,
-    control_style = style,
-)
+plot!(plt, sol2, time = :default, state_style = style, costate_style = style, control_style = style)

@@ -1,7 +1,6 @@
 using Plots
 
 function keep_series_attributes(; kwargs...)
-
     series_attributes = Plots.attributes(:Series)
 
     out = []
@@ -10,7 +9,6 @@ function keep_series_attributes(; kwargs...)
     end
 
     return out
-
 end
 
 function print_kwargs(; kwargs...)

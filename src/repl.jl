@@ -24,7 +24,6 @@ Update the model adding the expression e. It must be public since in the ct repl
 is quoted each time an expression is parsed and is valid. 
 """
 function ct_repl_update_model(e::Expr)
-
     ct_repl_data.debug && (println("debug> expression to add: ", e))
 
     # update model
@@ -36,7 +35,6 @@ function ct_repl_update_model(e::Expr)
 
     #
     return nothing
-
 end
 
 """
@@ -45,7 +43,6 @@ $(TYPEDSIGNATURES)
 Create a ct REPL.
 """
 function ct_repl(; debug = false, verbose = false)
-
     global ct_repl_is_set
     global ct_repl_data
     global ct_repl_history
@@ -95,32 +92,26 @@ function ct_repl(; debug = false, verbose = false)
                     command = __transform_to_command(c)
                     ct_repl_data.debug &&
                         println("debug> command: ", command, " and argument: ", a)
-                    command ∈ keys(COMMANDS_ACTIONS) && (
-                        return COMMANDS_ACTIONS[command](ct_repl_data, a, ct_repl_history)
-                    )
+                    command ∈ keys(COMMANDS_ACTIONS) &&
+                        (return COMMANDS_ACTIONS[command](ct_repl_data, a, ct_repl_history))
                 end
                 :($c) => begin
                     command = __transform_to_command(c)
                     ct_repl_data.debug && println("debug> command: ", command)
-                    command ∈ keys(COMMANDS_ACTIONS) && (
-                        return COMMANDS_ACTIONS[command](ct_repl_data, ct_repl_history)
-                    )
+                    command ∈ keys(COMMANDS_ACTIONS) &&
+                        (return COMMANDS_ACTIONS[command](ct_repl_data, ct_repl_history))
                 end
                 _ => nothing
             end
 
             # check if s finishes with a ";". If yes then remove it and return nothing at the end
             return_nothing = endswith(s, ";") ? true : false
-            return_nothing && (s = s[1:end-1])
+            return_nothing && (s = s[1:(end - 1)])
             e = Meta.parse(s)
 
             #
-            return_nothing &&
-                ct_repl_data.debug &&
-                println("\ndebug> new parsing string: ", s)
-            return_nothing &&
-                ct_repl_data.debug &&
-                println("debug> new expression parsed: ", e)
+            return_nothing && ct_repl_data.debug && println("\ndebug> new parsing string: ", s)
+            return_nothing && ct_repl_data.debug && println("debug> new expression parsed: ", e)
 
             if e isa Expr
 
@@ -149,8 +140,7 @@ function ct_repl(; debug = false, verbose = false)
                     $ocp_q # define the ocp
                     ct_repl_update_model($ee) # add the expression in the model
                     # ----------------------------------------------------------------
-                    $return_nothing ? nothing :
-                    begin
+                    $return_nothing ? nothing : begin
                         println("\n", string($ct_repl_data.ocp_name))
                         $(ct_repl_data.ocp_name)
                     end
@@ -158,12 +148,9 @@ function ct_repl(; debug = false, verbose = false)
                 return q
 
             else
-
                 println(txt_invalid)
                 return nothing
-
             end
-
         end # parse_to_expr
 
         # makerepl command
@@ -184,7 +171,6 @@ function ct_repl(; debug = false, verbose = false)
             println("ct repl is already set.")
         end
     end
-
 end
 
 # ----------------------------------------------------------------  
@@ -199,7 +185,7 @@ end
 
 function NAME_ACTION_FUNCTION(
     ct_repl_data::CTRepl,
-    name::Union{Symbol,Expr},
+    name::Union{Symbol, Expr},
     ct_repl_history::HistoryRepl,
 )
     ocp_name = ct_repl_data.ocp_name
@@ -220,10 +206,8 @@ function NAME_ACTION_FUNCTION(
     ct_repl_data.debug && println("debug> sol name: ", ct_repl_data.sol_name)
     __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
     qo1 =
-        ct_repl_data.ocp_name ≠ ocp_name ?
-        :($(ct_repl_data.ocp_name) = "no optimal control") : :()
-    qs1 =
-        ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
+        ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
+    qs1 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
     qo2 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = $(ocp_name)) : :()
     qs2 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = $(sol_name)) : :()
     name_q = (
@@ -244,7 +228,7 @@ function NAME_ACTION_FUNCTION(
 end
 
 # dict of actions associated to ct repl commands
-COMMANDS_ACTIONS = Dict{Symbol,Function}(
+COMMANDS_ACTIONS = Dict{Symbol, Function}(
     :SHOW =>
         (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
             q = quote
@@ -326,7 +310,7 @@ COMMANDS_ACTIONS = Dict{Symbol,Function}(
 )
 
 # dict of help messages associated to ct repl commands
-COMMANDS_HELPS = Dict{Symbol,String}(
+COMMANDS_HELPS = Dict{Symbol, String}(
     :SOLVE => "solve the optimal control problem",
     :PLOT => "plot the solution",
     #:DEBUG => "toggle debug mode",

@@ -1,5 +1,4 @@
 function test_aqua()
-
     @testset "Aqua.jl" begin
         Aqua.test_all(
             CTBase;
@@ -20,5 +19,4 @@ function test_aqua()
             piracies = true,
         )
     end
-
 end

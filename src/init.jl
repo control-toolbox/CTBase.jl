@@ -144,10 +144,9 @@ julia> init = OptimalControlInit(sol)
 
 """
 mutable struct OptimalControlInit
-
     state_init::Function
     control_init::Function
-    variable_init::Union{Nothing,ctVector}
+    variable_init::Union{Nothing, ctVector}
     #costate_init::Function
     #multipliers_init::Union{Nothing, ctVector}
 
@@ -165,7 +164,6 @@ mutable struct OptimalControlInit
         control_dim = nothing,
         variable_dim = nothing,
     )
-
         init = new()
 
         # some matrix / vector conversions
@@ -179,7 +177,6 @@ mutable struct OptimalControlInit
         init.variable_init = buildVectorInit(variable, variable_dim)
 
         return init
-
     end
 
     """
@@ -230,7 +227,6 @@ mutable struct OptimalControlInit
             control_dim = control_dim,
             variable_dim = variable_dim,
         )
-
     end
 
     """
@@ -248,5 +244,4 @@ mutable struct OptimalControlInit
             variable_dim = sol.variable_dimension,
         )
     end
-
 end

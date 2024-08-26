@@ -157,11 +157,9 @@ function nlp_constraints_original(ocp::OptimalControlModel)
     (ul, uind, uu),
     (xl, xind, xu),
     (vl, vind, vu)
-
 end
 
 function test_alloc_bad(ocp, N)
-
     println("    getters and setters")
     begin
         function get_state(XU, i, n, m)
@@ -173,15 +171,15 @@ function test_alloc_bad(ocp, N)
         end
 
         function set_control_constraint!(C, i, ξ, nξ, nc)
-            C[(i-1)*nc+1:(i-1)*nc+nξ] = ξ
+            C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = ξ
         end
 
         function set_state_constraint!(C, i, η, nη, nξ, nc)
-            C[(i-1)*nc+nξ+1:(i-1)*nc+nξ+nη] = η
+            C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = η
         end
 
         function set_mixed_constraint!(C, i, ψ, nψ, nξ, nη, nc)
-            C[(i-1)*nc+nξ+nη+1:(i-1)*nc+nξ+nη+nψ] = ψ
+            C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = ψ
         end
     end
 
@@ -226,7 +224,6 @@ function test_alloc_bad(ocp, N)
     println("   end for loop")
 
     nothing
-
 end
 
 # --------------------------------------------------------------------
@@ -408,41 +405,38 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
     (uind, ul, uu),
     (xind, xl, xu),
     (vind, vl, vu)
-
 end
 
 function test_alloc_good(ocp, N)
-
     begin
-
         println("    getters and setters")
         begin
             function get_state(XU, i, n, m)
                 if n == 1
-                    return XU[(i-1)*(n+m)+1]
+                    return XU[(i - 1) * (n + m) + 1]
                 else
-                    return @view XU[(i-1)*(n+m)+1:(i-1)*(n+m)+n]
+                    return @view XU[((i - 1) * (n + m) + 1):((i - 1) * (n + m) + n)]
                 end
             end
 
             function get_control(XU, i, n, m)
                 if m == 1
-                    return XU[(i-1)*(n+m)+n+1]
+                    return XU[(i - 1) * (n + m) + n + 1]
                 else
-                    return @view XU[(i-1)*(n+m)+n+1:(i-1)*(n+m)+n+m]
+                    return @view XU[((i - 1) * (n + m) + n + 1):((i - 1) * (n + m) + n + m)]
                 end
             end
 
             function set_control_constraint!(C, i, valξ, nξ, nc)
-                C[(i-1)*nc+1:(i-1)*nc+nξ] = valξ
+                C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = valξ
             end
 
             function set_state_constraint!(C, i, valη, nη, nξ, nc)
-                C[(i-1)*nc+nξ+1:(i-1)*nc+nξ+nη] = valη
+                C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = valη
             end
 
             function set_mixed_constraint!(C, i, valψ, nψ, nξ, nη, nc)
-                C[(i-1)*nc+nξ+nη+1:(i-1)*nc+nξ+nη+nψ] = valψ
+                C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = valψ
             end
         end
 
@@ -510,24 +504,23 @@ function test_alloc_good(ocp, N)
                 nothing
                 =#
             t = times[i]
-            x[:] = XU[(i-1)*(n+m)+1:(i-1)*(n+m)+n]
-            u[:] = @view XU[(i-1)*(n+m)+n+1:(i-1)*(n+m)+n+m]
+            x[:] = XU[((i - 1) * (n + m) + 1):((i - 1) * (n + m) + n)]
+            u[:] = @view XU[((i - 1) * (n + m) + n + 1):((i - 1) * (n + m) + n + m)]
             ξ!(valξ, t, u, v)
             η!(valη, t, x, v)
             ψ!(valψ, t, x, u, v)
             #set_control_constraint!(C, i, valξ, nξ, nc)
-            C[(i-1)*nc+1:(i-1)*nc+nξ] = valξ
+            C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = valξ
             #set_state_constraint!(C, i, valη, nη, nξ, nc)
-            C[(i-1)*nc+nξ+1:(i-1)*nc+nξ+nη] = valη
+            C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = valη
             #set_mixed_constraint!(C, i, valψ, nψ, nξ, nη, nc)
-            C[(i-1)*nc+nξ+nη+1:(i-1)*nc+nξ+nη+nψ] = valψ
+            C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = valψ
             #end
         end
         println("   end for loop")
 
         nothing
     end
-
 end
 
 N = 10000

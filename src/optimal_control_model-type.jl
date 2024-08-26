@@ -10,37 +10,37 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModel{
-    time_dependence<:TimeDependence,
-    variable_dependence<:VariableDependence,
+    time_dependence <: TimeDependence,
+    variable_dependence <: VariableDependence,
 } <: AbstractOptimalControlModel
-    model_expression::Union{Nothing,Expr} = nothing
-    initial_time::Union{Time,Index,Nothing} = nothing
-    initial_time_name::Union{String,Nothing} = nothing
-    final_time::Union{Time,Index,Nothing} = nothing
-    final_time_name::Union{String,Nothing} = nothing
-    time_name::Union{String,Nothing} = nothing
-    control_dimension::Union{Dimension,Nothing} = nothing
-    control_components_names::Union{Vector{String},Nothing} = nothing
-    control_name::Union{String,Nothing} = nothing
-    state_dimension::Union{Dimension,Nothing} = nothing
-    state_components_names::Union{Vector{String},Nothing} = nothing
-    state_name::Union{String,Nothing} = nothing
-    variable_dimension::Union{Dimension,Nothing} = nothing
-    variable_components_names::Union{Vector{String},Nothing} = nothing
-    variable_name::Union{String,Nothing} = nothing
-    lagrange::Union{Lagrange,Nothing} = nothing
-    mayer::Union{Mayer,Nothing} = nothing
-    criterion::Union{Symbol,Nothing} = nothing
-    dynamics::Union{Dynamics,Nothing} = nothing
-    constraints::Dict{Symbol,Tuple{Vararg{Any}}} = Dict{Symbol,Tuple{Vararg{Any}}}()
-    dim_control_constraints::Union{Dimension,Nothing} = nothing
-    dim_state_constraints::Union{Dimension,Nothing} = nothing
-    dim_mixed_constraints::Union{Dimension,Nothing} = nothing
-    dim_boundary_constraints::Union{Dimension,Nothing} = nothing
-    dim_variable_constraints::Union{Dimension,Nothing} = nothing
-    dim_control_range::Union{Dimension,Nothing} = nothing
-    dim_state_range::Union{Dimension,Nothing} = nothing
-    dim_variable_range::Union{Dimension,Nothing} = nothing
+    model_expression::Union{Nothing, Expr} = nothing
+    initial_time::Union{Time, Index, Nothing} = nothing
+    initial_time_name::Union{String, Nothing} = nothing
+    final_time::Union{Time, Index, Nothing} = nothing
+    final_time_name::Union{String, Nothing} = nothing
+    time_name::Union{String, Nothing} = nothing
+    control_dimension::Union{Dimension, Nothing} = nothing
+    control_components_names::Union{Vector{String}, Nothing} = nothing
+    control_name::Union{String, Nothing} = nothing
+    state_dimension::Union{Dimension, Nothing} = nothing
+    state_components_names::Union{Vector{String}, Nothing} = nothing
+    state_name::Union{String, Nothing} = nothing
+    variable_dimension::Union{Dimension, Nothing} = nothing
+    variable_components_names::Union{Vector{String}, Nothing} = nothing
+    variable_name::Union{String, Nothing} = nothing
+    lagrange::Union{Lagrange, Nothing} = nothing
+    mayer::Union{Mayer, Nothing} = nothing
+    criterion::Union{Symbol, Nothing} = nothing
+    dynamics::Union{Dynamics, Nothing} = nothing
+    constraints::Dict{Symbol, Tuple{Vararg{Any}}} = Dict{Symbol, Tuple{Vararg{Any}}}()
+    dim_control_constraints::Union{Dimension, Nothing} = nothing
+    dim_state_constraints::Union{Dimension, Nothing} = nothing
+    dim_mixed_constraints::Union{Dimension, Nothing} = nothing
+    dim_boundary_constraints::Union{Dimension, Nothing} = nothing
+    dim_variable_constraints::Union{Dimension, Nothing} = nothing
+    dim_control_range::Union{Dimension, Nothing} = nothing
+    dim_state_range::Union{Dimension, Nothing} = nothing
+    dim_variable_range::Union{Dimension, Nothing} = nothing
 end
 
 # ----------------------------------------------------------------------
@@ -243,16 +243,14 @@ function __check_dependencies(dependencies::Tuple{Vararg{DataType}})
         ),
     )
     size(dependencies, 1) > 2 && throw(
-        IncorrectArgument(
-            "the number of arguments about dependencies must be equal at most to 2",
-        ),
+        IncorrectArgument("the number of arguments about dependencies must be equal at most to 2"),
     )
-    size(filter(p -> !(p <: Union{TimeDependence,VariableDependence}), dependencies), 1) >
-    0 && throw(
-        IncorrectArgument(
-            "wrong type arguments, possible arguments are: NonAutonomous, Autonomous, Fixed, NonFixed",
-        ),
-    )
+    size(filter(p -> !(p <: Union{TimeDependence, VariableDependence}), dependencies), 1) > 0 &&
+        throw(
+            IncorrectArgument(
+                "wrong type arguments, possible arguments are: NonAutonomous, Autonomous, Fixed, NonFixed",
+            ),
+        )
 end
 
 """
@@ -262,8 +260,7 @@ Throw ```UnauthorizedCall``` exception if the state of an ocp is not set.
 
 """
 function __check_state_set(ocp::OptimalControlModel)
-    __is_state_not_set(ocp) &&
-        throw(UnauthorizedCall("the state dimension has to be set before."))
+    __is_state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before."))
 end
 
 """
@@ -284,8 +281,7 @@ Throw ```UnauthorizedCall``` exception if the time of an ocp is not set.
 
 """
 function __check_is_time_set(ocp::OptimalControlModel)
-    __is_time_not_set(ocp) &&
-        throw(UnauthorizedCall("the time dimension has to be set before."))
+    __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before."))
 end
 
 """
@@ -294,7 +290,7 @@ $(TYPEDSIGNATURES)
 Throw ```UnauthorizedCall``` exception if the variable of an ocp is not set.
 
 """
-function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence,NonFixed})
+function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence, NonFixed})
     __is_variable_not_set(ocp) &&
         throw(UnauthorizedCall("the variable dimension has to be set before."))
 end
@@ -305,7 +301,7 @@ $(TYPEDSIGNATURES)
 Do nothing, no variable for fixed ocp.
 
 """
-function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence,Fixed})
+function __check_variable_set(ocp::OptimalControlModel{<:TimeDependence, Fixed})
     return nothing
 end
 

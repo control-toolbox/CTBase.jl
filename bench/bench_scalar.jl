@@ -1,7 +1,6 @@
 using BenchmarkTools
 
 function tt()
-
     function bench_scalar(y)
         x = 0
         for i = 1:y
@@ -62,5 +61,4 @@ function tt()
     end
 
     @benchmark bench_scalar_6()
-
 end

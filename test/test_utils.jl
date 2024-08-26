@@ -1,7 +1,5 @@
 function test_utils()
-
     @testset "AD" begin
-
         x0 = 1.0
 
         f = x -> cos(x)
@@ -23,11 +21,9 @@ function test_utils()
         g = x -> [cos(x[1]) + sin(x[2])]
         @test CTBase.ctjacobian(g, [x0, x0]) ≈ [-sin(x0) cos(x0)] atol = 1e-10
         @test CTBase.__ctjacobian(g, [x0, x0]) ≈ [-sin(x0) cos(x0)] atol = 1e-10
-
     end
 
     @testset "Other" begin
-
         v = [1.0; 2.0; 3.0; 4.0; 5.0; 6.0]
         n = 2
         u = vec2vec(v, n)
@@ -81,7 +77,5 @@ function test_utils()
         @test_throws IncorrectArgument CTBase.ctupperscripts(-1)
         @test CTBase.ctupperscripts(019) == "¹⁹"
         @test CTBase.ctupperscripts(109) == "¹⁰⁹"
-
     end
-
 end

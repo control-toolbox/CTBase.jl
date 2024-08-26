@@ -54,5 +54,4 @@ function test_solution()
     @test sol.variable == variable
     @test typeof(sol) == OptimalControlSolution
     @test_throws UndefKeywordError OptimalControlSolution(ocp; state, control, objective)
-
 end

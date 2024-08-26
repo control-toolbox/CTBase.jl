@@ -148,11 +148,7 @@ $(TYPEDSIGNATURES)
 Return the interpolation of `f` at `x`.
 """
 function ctinterpolate(x, f) # default for interpolation of the initialization
-    return Interpolations.linear_interpolation(
-        x,
-        f,
-        extrapolation_bc = Interpolations.Line(),
-    )
+    return Interpolations.linear_interpolation(x, f, extrapolation_bc = Interpolations.Line())
 end
 
 """
@@ -175,8 +171,8 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 """
 function vec2vec(x::Vector{<:ctNumber}, n::Integer)::Vector{<:Vector{<:ctNumber}}
     y = [x[1:n]]
-    for i = n+1:n:length(x)-n+1
-        y = vcat(y, [x[i:i+n-1]])
+    for i = (n + 1):n:(length(x) - n + 1)
+        y = vcat(y, [x[i:(i + n - 1)]])
     end
     return y
 end

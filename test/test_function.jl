@@ -1,5 +1,4 @@
 function test_function()
-
     ∅ = Vector{Real}()
     dummy_function() = nothing
 
@@ -13,10 +12,7 @@ function test_function()
             (x0, xf) -> [xf[2] - x0[1], 2xf[1] + x0[2]^2],
             Int64,
         )
-        B = BoundaryConstraint(
-            (x0, xf) -> [xf[2] - x0[1], 2xf[1] + x0[2]^2],
-            variable = false,
-        )
+        B = BoundaryConstraint((x0, xf) -> [xf[2] - x0[1], 2xf[1] + x0[2]^2], variable = false)
         @test B([0, 0], [1, 1]) == [1, 2]
         @test B([0, 0], [1, 1], ∅) == [1, 2]
         B = BoundaryConstraint(
@@ -30,10 +26,7 @@ function test_function()
         @test Mayer(dummy_function, Fixed) == Mayer(dummy_function, variable = false)
         @test Mayer(dummy_function, NonFixed) == Mayer(dummy_function, variable = true)
 
-        @test_throws IncorrectArgument Mayer(
-            (x0, xf) -> [xf[2] - x0[1], 2xf[1] + x0[2]^2],
-            Int64,
-        )
+        @test_throws IncorrectArgument Mayer((x0, xf) -> [xf[2] - x0[1], 2xf[1] + x0[2]^2], Int64)
         G = Mayer((x0, xf) -> [xf[2] - x0[1]], variable = false)
         @test_throws MethodError G([0, 0], [1, 1])
         G = Mayer((x0, xf) -> xf[2] - x0[1], variable = false)
@@ -64,18 +57,10 @@ function test_function()
         @test_throws MethodError H(t, [1, 0], [0, 1])
         @test_throws MethodError H([1, 0], [0, 1], v)
         @test H(t, [1, 0], [0, 1], v) == 3
-        H = Hamiltonian(
-            (x, p, v) -> x[1]^2 + 2p[2] + v[3],
-            autonomous = true,
-            variable = true,
-        )
+        H = Hamiltonian((x, p, v) -> x[1]^2 + 2p[2] + v[3], autonomous = true, variable = true)
         @test H([1, 0], [0, 1], [1, 2, 3]) == 6
         @test H(t, [1, 0], [0, 1], [1, 2, 3]) == 6
-        H = Hamiltonian(
-            (t, x, p) -> t + x[1]^2 + 2p[2],
-            autonomous = false,
-            variable = false,
-        )
+        H = Hamiltonian((t, x, p) -> t + x[1]^2 + 2p[2], autonomous = false, variable = false)
         @test H(1, [1, 0], [0, 1]) == 4
         @test H(1, [1, 0], [0, 1], v) == 4
         H = Hamiltonian(
@@ -156,11 +141,7 @@ function test_function()
         @test_throws MethodError V(t, [1, -1])
         @test_throws MethodError V([1, -1], v)
         @test V(t, [1, -1], v) == [1, -2]
-        V = VectorField(
-            (x, v) -> [x[1]^2, 2x[2] + v[3]],
-            autonomous = true,
-            variable = true,
-        )
+        V = VectorField((x, v) -> [x[1]^2, 2x[2] + v[3]], autonomous = true, variable = true)
         @test V([1, -1], [1, 2, 3]) == [1, 1]
         @test V(t, [1, -1], [1, 2, 3]) == [1, 1]
         V = VectorField((t, x) -> [t + x[1]^2, 2x[2]], autonomous = false, variable = false)
@@ -201,11 +182,7 @@ function test_function()
         L = Lagrange((t, x, u) -> t + 2x[2] - u[1]^2, autonomous = false, variable = false)
         @test L(1, [1, 0], [1]) == 0
         @test L(1, [1, 0], [1], v) == 0
-        L = Lagrange(
-            (t, x, u, v) -> t + 2x[2] - u[1]^2 + v[3],
-            autonomous = false,
-            variable = true,
-        )
+        L = Lagrange((t, x, u, v) -> t + 2x[2] - u[1]^2 + v[3], autonomous = false, variable = true)
         @test L(1, [1, 0], [1], [1, 2, 3]) == 3
     end
 
@@ -231,18 +208,10 @@ function test_function()
         @test_throws MethodError D(t, [1, 0], 1)
         @test_throws MethodError D([1, 0], 1, v)
         @test D(t, [1, 0], 1, v) == [-1, 1]
-        D = Dynamics(
-            (x, u, v) -> [2x[2] - u^2 + v[3], x[1]],
-            autonomous = true,
-            variable = true,
-        )
+        D = Dynamics((x, u, v) -> [2x[2] - u^2 + v[3], x[1]], autonomous = true, variable = true)
         @test D([1, 0], 1, [1, 2, 3]) == [2, 1]
         @test D(t, [1, 0], 1, [1, 2, 3]) == [2, 1]
-        D = Dynamics(
-            (t, x, u) -> [t + 2x[2] - u^2, x[1]],
-            autonomous = false,
-            variable = false,
-        )
+        D = Dynamics((t, x, u) -> [t + 2x[2] - u^2, x[1]], autonomous = false, variable = false)
         @test D(1, [1, 0], 1) == [0, 1]
         @test D(1, [1, 0], 1, v) == [0, 1]
         D = Dynamics(
@@ -274,18 +243,10 @@ function test_function()
         @test_throws MethodError S(t, [1, -1])
         @test_throws MethodError S([1, -1], v)
         @test S(t, [1, -1], v) == [1, -2]
-        S = StateConstraint(
-            (x, v) -> [x[1]^2, 2x[2] + v[3]],
-            autonomous = true,
-            variable = true,
-        )
+        S = StateConstraint((x, v) -> [x[1]^2, 2x[2] + v[3]], autonomous = true, variable = true)
         @test S([1, -1], [1, 2, 3]) == [1, 1]
         @test S(t, [1, -1], [1, 2, 3]) == [1, 1]
-        S = StateConstraint(
-            (t, x) -> [t + x[1]^2, 2x[2]],
-            autonomous = false,
-            variable = false,
-        )
+        S = StateConstraint((t, x) -> [t + x[1]^2, 2x[2]], autonomous = false, variable = false)
         @test S(1, [1, -1]) == [2, -2]
         @test S(1, [1, -1], v) == [2, -2]
         S = StateConstraint(
@@ -317,18 +278,10 @@ function test_function()
         @test_throws MethodError C(t, [1, -1])
         @test_throws MethodError C([1, -1], v)
         @test C(t, [1, -1], v) == [1, -2]
-        C = ControlConstraint(
-            (u, v) -> [u[1]^2, 2u[2] + v[3]],
-            autonomous = true,
-            variable = true,
-        )
+        C = ControlConstraint((u, v) -> [u[1]^2, 2u[2] + v[3]], autonomous = true, variable = true)
         @test C([1, -1], [1, 2, 3]) == [1, 1]
         @test C(t, [1, -1], [1, 2, 3]) == [1, 1]
-        C = ControlConstraint(
-            (t, u) -> [t + u[1]^2, 2u[2]],
-            autonomous = false,
-            variable = false,
-        )
+        C = ControlConstraint((t, u) -> [t + u[1]^2, 2u[2]], autonomous = false, variable = false)
         @test C(1, [1, -1]) == [2, -2]
         @test C(1, [1, -1], v) == [2, -2]
         C = ControlConstraint(
@@ -353,11 +306,7 @@ function test_function()
         # dim x = 2, dim u = 1, dim output = 2
         @test_throws IncorrectArgument MixedConstraint((x, u) -> [2x[2] - u^2, x[1]], Int64)
         @test_throws IncorrectArgument MixedConstraint((x, u) -> [2x[2] - u^2, x[1]], Int64)
-        M = MixedConstraint(
-            (x, u) -> [2x[2] - u^2, x[1]],
-            autonomous = true,
-            variable = false,
-        )
+        M = MixedConstraint((x, u) -> [2x[2] - u^2, x[1]], autonomous = true, variable = false)
         @test M([1, 0], 1) == [-1, 1]
         t = 1
         v = Real[]
@@ -412,18 +361,10 @@ function test_function()
         @test_throws MethodError u(t, [1, 0])
         @test_throws MethodError u([1, 0], v)
         @test u(t, [1, 0], v) == 1
-        u = FeedbackControl(
-            (x, v) -> x[1]^2 + 2x[2] + v[3],
-            autonomous = true,
-            variable = true,
-        )
+        u = FeedbackControl((x, v) -> x[1]^2 + 2x[2] + v[3], autonomous = true, variable = true)
         @test u([1, 0], [1, 2, 3]) == 4
         @test u(t, [1, 0], [1, 2, 3]) == 4
-        u = FeedbackControl(
-            (t, x) -> t + x[1]^2 + 2x[2],
-            autonomous = false,
-            variable = false,
-        )
+        u = FeedbackControl((t, x) -> t + x[1]^2 + 2x[2], autonomous = false, variable = false)
         @test u(1, [1, 0]) == 2
         @test u(1, [1, 0], v) == 2
         u = FeedbackControl(
@@ -433,7 +374,6 @@ function test_function()
         )
         @test u(1, [1, 0], [1, 2, 3]) == 5
     end
-
 
     @testset "ControlLaw" begin
         @test ControlLaw(dummy_function, Autonomous, Fixed) ==
@@ -456,18 +396,10 @@ function test_function()
         @test_throws MethodError u(t, [1, 0], [0, 1])
         @test_throws MethodError u([1, 0], [0, 1], v)
         @test u(t, [1, 0], [0, 1], v) == 3
-        u = ControlLaw(
-            (x, p, v) -> x[1]^2 + 2p[2] + v[3],
-            autonomous = true,
-            variable = true,
-        )
+        u = ControlLaw((x, p, v) -> x[1]^2 + 2p[2] + v[3], autonomous = true, variable = true)
         @test u([1, 0], [0, 1], [1, 2, 3]) == 6
         @test u(t, [1, 0], [0, 1], [1, 2, 3]) == 6
-        u = ControlLaw(
-            (t, x, p) -> t + x[1]^2 + 2p[2],
-            autonomous = false,
-            variable = false,
-        )
+        u = ControlLaw((t, x, p) -> t + x[1]^2 + 2p[2], autonomous = false, variable = false)
         @test u(1, [1, 0], [0, 1]) == 4
         @test u(1, [1, 0], [0, 1], v) == 4
         u = ControlLaw(
@@ -499,18 +431,10 @@ function test_function()
         @test_throws MethodError μ(t, [1, 0], [0, 1])
         @test_throws MethodError μ([1, 0], [0, 1], v)
         @test μ(t, [1, 0], [0, 1], v) == 3
-        μ = Multiplier(
-            (x, p, v) -> x[1]^2 + 2p[2] + v[3],
-            autonomous = true,
-            variable = true,
-        )
+        μ = Multiplier((x, p, v) -> x[1]^2 + 2p[2] + v[3], autonomous = true, variable = true)
         @test μ([1, 0], [0, 1], [1, 2, 3]) == 6
         @test μ(t, [1, 0], [0, 1], [1, 2, 3]) == 6
-        μ = Multiplier(
-            (t, x, p) -> t + x[1]^2 + 2p[2],
-            autonomous = false,
-            variable = false,
-        )
+        μ = Multiplier((t, x, p) -> t + x[1]^2 + 2p[2], autonomous = false, variable = false)
         @test μ(1, [1, 0], [0, 1]) == 4
         @test μ(1, [1, 0], [0, 1], v) == 4
         μ = Multiplier(
@@ -520,5 +444,4 @@ function test_function()
         )
         @test μ(1, [1, 0], [0, 1], [1, 2, 3]) == 7
     end
-
 end

@@ -159,9 +159,7 @@ mutable struct ExtensionError <: CTException
     weakdeps::Tuple{Vararg{Symbol}}
     function ExtensionError(weakdeps::Symbol...)
         isempty(weakdeps) && throw(
-            UnauthorizedCall(
-                "Please provide at least one weak dependence for the extension.",
-            ),
+            UnauthorizedCall("Please provide at least one weak dependence for the extension."),
         )
         e = new()
         e.weakdeps = weakdeps
