@@ -1,16 +1,16 @@
 module CTBasePlots
 
-    #
-    using DocStringExtensions
-    using MLStyle # pattern matching
+#
+using DocStringExtensions
+using MLStyle # pattern matching
 
-    #
-    using CTBase
-    using Plots
-    using LinearAlgebra
-    import Plots: plot, plot!
+#
+using CTBase
+using Plots
+using LinearAlgebra
+import Plots: plot, plot!
 
-    # --------------------------------------------------------------------------------------------------
-    include("plot.jl")
+# --------------------------------------------------------------------------------------------------
+include("plot.jl")
 
 end

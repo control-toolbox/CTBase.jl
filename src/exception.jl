@@ -23,7 +23,8 @@ $(TYPEDSIGNATURES)
 
 Print the exception.
 """
-Base.showerror(io::IO, e::AmbiguousDescription) = print(io, "AmbiguousDescription: the description ", e.var, " is ambiguous / incorrect")
+Base.showerror(io::IO, e::AmbiguousDescription) =
+    print(io, "AmbiguousDescription: the description ", e.var, " is ambiguous / incorrect")
 
 """
 $(TYPEDEF)
@@ -63,7 +64,8 @@ $(TYPEDSIGNATURES)
 
 Print the exception.
 """
-Base.showerror(io::IO, e::IncorrectMethod) = print(io, "IncorrectMethod: ", e.var, " is not an existing method")
+Base.showerror(io::IO, e::IncorrectMethod) =
+    print(io, "IncorrectMethod: ", e.var, " is not an existing method")
 
 """
 $(TYPEDEF)
@@ -156,7 +158,9 @@ $(TYPEDFIELDS)
 mutable struct ExtensionError <: CTException
     weakdeps::Tuple{Vararg{Symbol}}
     function ExtensionError(weakdeps::Symbol...)
-        isempty(weakdeps) && throw(UnauthorizedCall("Please provide at least one weak dependence for the extension."))
+        isempty(weakdeps) && throw(
+            UnauthorizedCall("Please provide at least one weak dependence for the extension."),
+        )
         e = new()
         e.weakdeps = weakdeps
         return e
@@ -168,10 +172,10 @@ $(TYPEDSIGNATURES)
 
 Print the exception.
 """
-function Base.showerror(io::IO, e::ExtensionError) 
+function Base.showerror(io::IO, e::ExtensionError)
     print(io, "ExtensionError. Please make: ")
-    printstyled(io, "julia>", color=:green, bold=true)
-    printstyled(io, " using ", color=:magenta)
+    printstyled(io, "julia>", color = :green, bold = true)
+    printstyled(io, " using ", color = :magenta)
     N = size(e.weakdeps, 1)
     for i ∈ range(1, N)
         wd = e.weakdeps[i]

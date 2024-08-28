@@ -7,7 +7,7 @@
 
 __print(e::Expr, io::IO, l::Int) = begin
     @match e begin
-        :( ($a, $b) ) => println(io, " "^l, a, ", ", b)
+        :(($a, $b)) => println(io, " "^l, a, ", ", b)
         _ => println(io, " "^l, e)
     end
 end
@@ -17,7 +17,11 @@ $(TYPEDSIGNATURES)
 
 Print the optimal control problem.
 """
-function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeDependence, <: VariableDependence})
+function Base.show(
+    io::IO,
+    ::MIME"text/plain",
+    ocp::OptimalControlModel{<:TimeDependence, <:VariableDependence},
+)
 
     # check if the problem is empty
     __is_empty(ocp) && return
@@ -34,26 +38,30 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         #
         #println(io)
         if __is_complete(ocp)
-            printstyled(io, "The ", bold=true)
-            is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
-            printstyled(io, "optimal control problem is given by:\n", bold=true)
+            printstyled(io, "The ", bold = true)
+            is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold = true) :
+            printstyled(io, "(autonomous) ", bold = true)
+            printstyled(io, "optimal control problem is given by:\n", bold = true)
         else
-            printstyled(io, "The optimal control problem is not complete but made of:\n", bold=true)
+            printstyled(
+                io,
+                "The optimal control problem is not complete but made of:\n",
+                bold = true,
+            )
         end
         println(io)
 
         # print the code
-        tab  = 4
+        tab = 4
         code = striplines(ocp.model_expression)
         @match code.head begin
             :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
-            _      => __print(code, io, tab)
+            _ => __print(code, io, tab)
         end
 
         some_printing = true
-
     end
-    
+
     if __is_complete(ocp) # print the model if is is complete
 
         # dimensions
@@ -84,36 +92,66 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
 
         #
         some_printing && println(io)
-        printstyled(io, "The ", bold=true)
-        is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold=true) : printstyled(io, "(autonomous) ", bold=true)
-        printstyled(io, "optimal control problem is of the form:\n", bold=true)
+        printstyled(io, "The ", bold = true)
+        is_time_dependent(ocp) ? printstyled(io, "(non autonomous) ", bold = true) :
+        printstyled(io, "(autonomous) ", bold = true)
+        printstyled(io, "optimal control problem is of the form:\n", bold = true)
         println(io)
 
         # J
-        printstyled(io, "    minimize  ", color=:blue); print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
+        printstyled(io, "    minimize  ", color = :blue)
+        print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
 
         # Mayer
-        !isnothing(ocp.mayer) && print(io, "g(" *  bounds_args_names * ")")
+        !isnothing(ocp.mayer) && print(io, "g(" * bounds_args_names * ")")
         (!isnothing(ocp.mayer) && !isnothing(ocp.lagrange)) && print(io, " + ")
 
         # Lagrange
         if !isnothing(ocp.lagrange)
-            println(io, '\u222B', " f⁰(" * mixed_args_names * ") d" * t_name * ", over [" * t0_name * ", " * tf_name * "]")
+            println(
+                io,
+                '\u222B',
+                " f⁰(" *
+                mixed_args_names *
+                ") d" *
+                t_name *
+                ", over [" *
+                t0_name *
+                ", " *
+                tf_name *
+                "]",
+            )
         else
             println(io, "")
         end
 
         # constraints
         println(io, "")
-        printstyled(io, "    subject to\n", color=:blue)
+        printstyled(io, "    subject to\n", color = :blue)
         println(io, "")
 
         # dynamics
-        println(io, "        " * x_name, '\u0307', "(" * t_name * ") = f(" * mixed_args_names * "), " * t_name * " in [" * t0_name * ", " * tf_name * "] a.e.,")
+        println(
+            io,
+            "        " * x_name,
+            '\u0307',
+            "(" *
+            t_name *
+            ") = f(" *
+            mixed_args_names *
+            "), " *
+            t_name *
+            " in [" *
+            t0_name *
+            ", " *
+            tf_name *
+            "] a.e.,",
+        )
         println(io, "")
 
         # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
-        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints!(ocp)
+        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) =
+            nlp_constraints!(ocp)
         has_constraints = false
         if !isempty(ξl) || !isempty(ulb)
             has_constraints = true
@@ -142,8 +180,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
             x_name_space = x_name * "(" * t_name * ")"
         else
             x_name_space = x_name * "(" * t_name * ")"
-            if xi_names != [ x_name * ctindices(i) for i ∈ range(1, x_dim) ]
-                x_name_space *= " = (" 
+            if xi_names != [x_name * ctindices(i) for i ∈ range(1, x_dim)]
+                x_name_space *= " = ("
                 for i ∈ 1:x_dim
                     x_name_space *= xi_names[i] * "(" * t_name * ")"
                     i < x_dim && (x_name_space *= ", ")
@@ -158,8 +196,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
             u_name_space = u_name * "(" * t_name * ")"
         else
             u_name_space = u_name * "(" * t_name * ")"
-            if ui_names != [ u_name * ctindices(i) for i ∈ range(1, u_dim) ]
-                u_name_space *= " = (" 
+            if ui_names != [u_name * ctindices(i) for i ∈ range(1, u_dim)]
+                u_name_space *= " = ("
                 for i ∈ 1:u_dim
                     u_name_space *= ui_names[i] * "(" * t_name * ")"
                     i < u_dim && (u_name_space *= ", ")
@@ -177,8 +215,8 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
                 v_name_space = v_name
             else
                 v_name_space = v_name
-                if vi_names != [ v_name * ctindices(i) for i ∈ range(1, v_dim) ]
-                    v_name_space *= " = (" 
+                if vi_names != [v_name * ctindices(i) for i ∈ range(1, v_dim)]
+                    v_name_space *= " = ("
                     for i ∈ 1:v_dim
                         v_name_space *= vi_names[i]
                         i < v_dim && (v_name_space *= ", ")
@@ -195,51 +233,49 @@ function Base.show(io::IO, ::MIME"text/plain", ocp::OptimalControlModel{<: TimeD
         end
 
         some_printing = true
-
     end
 
     #
     some_printing && println(io)
-    printstyled(io, "Declarations ", bold=true)
-    printstyled(io, "(* required):\n", bold=false)
+    printstyled(io, "Declarations ", bold = true)
+    printstyled(io, "(* required):\n", bold = false)
     #println(io)
-    
+
     # print table of settings
-    header = [ "times*", "state*", "control*"]
+    header = ["times*", "state*", "control*"]
     #is_variable_dependent(ocp) && push!(header, "variable")
     push!(header, "variable")
     push!(header, "dynamics*", "objective*", "constraints")
-    data = hcat(__is_time_not_set(ocp)      ? "X" : "V",
-                __is_state_not_set(ocp)     ? "X" : "V", 
-                __is_control_not_set(ocp)   ? "X" : "V")
+    data = hcat(
+        __is_time_not_set(ocp) ? "X" : "V",
+        __is_state_not_set(ocp) ? "X" : "V",
+        __is_control_not_set(ocp) ? "X" : "V",
+    )
     #is_variable_dependent(ocp) && 
     begin
-        (data = hcat(data, 
-                __is_variable_not_set(ocp)  ? "X" : "V")) 
+        (data = hcat(data, __is_variable_not_set(ocp) ? "X" : "V"))
     end
-    data = hcat(data, 
-                __is_dynamics_not_set(ocp)  ? "X" : "V",
-                __is_objective_not_set(ocp) ? "X" : "V",
-                isempty(ocp.constraints)    ? "X" : "V")
+    data = hcat(
+        data,
+        __is_dynamics_not_set(ocp) ? "X" : "V",
+        __is_objective_not_set(ocp) ? "X" : "V",
+        isempty(ocp.constraints) ? "X" : "V",
+    )
     println("")
-    h1 = Highlighter(
-    (data, i, j) -> data[i, j] == "X",
-    bold       = true,
-    foreground = :red )
-    h2 = Highlighter(
-    (data, i, j) -> data[i, j] == "V",
-    bold       = true,
-    foreground = :green )
-    pretty_table(io, data; 
-        tf=tf_unicode_rounded, 
-        header=header, 
-        header_crayon=crayon"yellow", 
-        crop=:none, 
-        highlighters=(h1, h2),
-        alignment=:c,
-        compact_printing=true)
+    h1 = Highlighter((data, i, j) -> data[i, j] == "X", bold = true, foreground = :red)
+    h2 = Highlighter((data, i, j) -> data[i, j] == "V", bold = true, foreground = :green)
+    pretty_table(
+        io,
+        data;
+        tf = tf_unicode_rounded,
+        header = header,
+        header_crayon = crayon"yellow",
+        crop = :none,
+        highlighters = (h1, h2),
+        alignment = :c,
+        compact_printing = true,
+    )
     nothing
-
 end
 
 function Base.show_default(io::IO, ocp::OptimalControlModel)
