@@ -84,7 +84,7 @@ parse!(p, ocp, e; log=false) = begin
         :( [$names] ∈ R^$n, state         ) =>    p_state!(p, ocp, a, n; components_names=names, log)
         :( ($names) ∈ R^$m, control       ) =>  p_control!(p, ocp, a, m; components_names=names, log)
         :( [$names] ∈ R^$m, control       ) =>  p_control!(p, ocp, a, m; components_names=names, log)
-        _                                 =>    p_alias!(p, ocp, a, e1; log) # alias
+        _                                   =>  p_alias!(p, ocp, a, e1; log) # alias
         end                           
         # variable                    
         :( $v ∈ R^$q, variable            ) => p_variable!(p, ocp, v, q; log)
@@ -172,13 +172,14 @@ p_variable!(p, ocp, v, q; components_names=nothing, log=false) = begin
     for i ∈ 1:qq p.aliases[Symbol(v, ctindices(i))] = :( $v[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(v, ctupperscripts(i))] = :( $v^$i  ) end
     if (isnothing(components_names))
-        __wrap(:( variable!($ocp, $q, $vv) ), p.lnum, p.line)
+        code = :( variable!($ocp, $q, $vv) )
     else
         qq==length(components_names.args) || return __throw("the number of variable components must be $qq", p.lnum, p.line)
         for i ∈ 1:qq p.aliases[components_names.args[i]] = :( $v[$i] ) end
         ss = QuoteNode(string.(components_names.args))
-        __wrap(:( variable!($ocp, $q, $vv, $ss) ), p.lnum, p.line) 
+        code = :( variable!($ocp, $q, $vv, $ss) )
     end
+    return __wrap(code, p.lnum, p.line) 
 end
 
 p_alias!(p, ocp, a, e; log=false) = begin
@@ -188,7 +189,8 @@ p_alias!(p, ocp, a, e; log=false) = begin
     ee = QuoteNode(e)
     for i ∈ 1:9 p.aliases[Symbol(a, ctupperscripts(i))] = :( $a^$i  ) end
     p.aliases[a] = e
-    __wrap(:( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) ), p.lnum, p.line)
+    code = :( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) )
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_time!(p, ocp, t, t0, tf; log=false) = begin
@@ -222,7 +224,7 @@ p_time!(p, ocp, t, t0, tf; log=false) = begin
             _                                                        =>
 	            return __throw("bad time declaration", p.lnum, p.line) end
     end
-    __wrap(code, p.lnum, p.line)
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_state!(p, ocp, x, n; components_names=nothing, log=false) = begin
@@ -235,13 +237,14 @@ p_state!(p, ocp, x, n; components_names=nothing, log=false) = begin
     for i ∈ 1:9  p.aliases[Symbol(x, ctupperscripts(i))] = :( $x^$i  ) end
     p.aliases[Symbol(Unicode.normalize(string(x,"̇")))] = :( ∂($x) )
     if (isnothing(components_names))
-        __wrap(:( state!($ocp, $n, $xx) ), p.lnum, p.line)
+        code = :( state!($ocp, $n, $xx) )
     else
         nn==length(components_names.args) || return __throw("the number of state components must be $nn", p.lnum, p.line)
         for i ∈ 1:nn p.aliases[components_names.args[i]] = :( $x[$i] ) end
         ss = QuoteNode(string.(components_names.args))
-        __wrap(:( state!($ocp, $n, $xx, $ss) ), p.lnum, p.line)
+        code = :( state!($ocp, $n, $xx, $ss) )
     end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_control!(p, ocp, u, m; components_names=nothing, log=false) = begin
@@ -253,13 +256,14 @@ p_control!(p, ocp, u, m; components_names=nothing, log=false) = begin
     for i ∈ 1:mm p.aliases[Symbol(u, ctindices(i))] = :( $u[$i] ) end
     for i ∈ 1:9  p.aliases[Symbol(u, ctupperscripts(i))] = :( $u^$i  ) end
     if (isnothing(components_names))
-        __wrap(:( control!($ocp, $m, $uu) ), p.lnum, p.line)
+        code = :( control!($ocp, $m, $uu) )
     else
         mm==length(components_names.args) || return __throw("the number of control components must be $mm", p.lnum, p.line)
         for i ∈ 1:mm p.aliases[components_names.args[i]] = :( $u[$i] ) end
         ss = QuoteNode(string.(components_names.args))
-        __wrap(:( control!($ocp, $m, $uu, $ss) ), p.lnum, p.line)
+        code = :( control!($ocp, $m, $uu, $ss) )
     end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
@@ -335,7 +339,7 @@ p_constraint!(p, ocp, e1, e2, e3, label=gensym(); log=false) = begin
             end end
         _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end
-    __wrap(code, p.lnum, p.line)
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
@@ -353,12 +357,13 @@ p_dynamics!(p, ocp, x, t, e, label=nothing; log=false) = begin
     p.t_dep = p.t_dep || has(e, t)
     gs = gensym()
     args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
-    __wrap(quote
+    code = quote
         function $gs($(args...))
             $e
         end
         dynamics!($ocp, $gs)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_lagrange!(p, ocp, e, type; log=false) = begin
@@ -373,12 +378,13 @@ p_lagrange!(p, ocp, e, type; log=false) = begin
     ttype = QuoteNode(type)
     gs = gensym()
     args = [ ]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
-    __wrap(quote
+    code = quote
         function $gs($(args...))
             $e
         end
         objective!($ocp, :lagrange, $gs, $ttype)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_mayer!(p, ocp, e, type; log=false) = begin
@@ -394,12 +400,13 @@ p_mayer!(p, ocp, e, type; log=false) = begin
     e = replace_call(e, p.x, p.tf, xf)
     ttype = QuoteNode(type)
     args = [ x0, xf ]; __v_dep(p) && push!(args, p.v)
-    __wrap(quote
+    code = quote
         function $gs($(args...))
             $e
         end
         objective!($ocp, :mayer, $gs, $ttype)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_bolza!(p, ocp, e1, e2, type; log=false) = begin
@@ -422,7 +429,7 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
     p.t_dep = p.t_dep || has(e2, p.t)
     args2 = [ ]; __t_dep(p) && push!(args2, p.t); push!(args2, xt, ut); __v_dep(p) && push!(args2, p.v)
     ttype = QuoteNode(type)
-    __wrap(quote
+    code = quote
         function $gs1($(args1...))
             $e1
         end
@@ -430,7 +437,8 @@ p_bolza!(p, ocp, e1, e2, type; log=false) = begin
             $e2
         end
         objective!($ocp, :bolza, $gs1, $gs2, $ttype)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 """
