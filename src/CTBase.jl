@@ -34,6 +34,9 @@ using ReplMaker
 using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
+# to suppress ambiguities 
+using SparseArrays, StaticArrays
+
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
 # const AbstractVector{T} = AbstractArray{T,1}.
