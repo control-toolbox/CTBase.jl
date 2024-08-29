@@ -1,10 +1,14 @@
+#
+using Aqua
+
+#
 using CTBase
-using Test
-using Plots
 using DifferentiationInterface: AutoForwardDiff
+using Plots
+using Test
 
 # functions and types that are not exported
-const vec2vec  = CTBase.vec2vec
+const vec2vec = CTBase.vec2vec
 const subs = CTBase.subs
 const has = CTBase.has
 const replace_call = CTBase.replace_call
@@ -16,23 +20,24 @@ include("utils.jl")
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (
-        :callback,
+        :aqua,
         :ctparser_utils,
         :default,
         :description,
         :differential_geometry,
         :exception,
         :function,
-	    :goddard,
+        :goddard,
         :model,
         :plot,
         :print,
         :solution,
         :utils,
         :onepass,
-        )
+    )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
+            println("testing: ", string(name))
             include("$(test_name).jl")
             @eval $test_name()
         end

@@ -1,5 +1,4 @@
 function test_default()
-
     @testset "Audo diff" begin
         set_AD_backend(AutoForwardDiff())
         @test CTBase.__get_AD_backend() == AutoForwardDiff()
@@ -23,17 +22,17 @@ function test_default()
 
     @testset "Default value of the state names of the Optimal Control Problem" begin
         @test CTBase.__state_name() == "x"
-        @test CTBase.__state_components_names(2,CTBase.__state_name()) == ["x₁", "x₂"]
+        @test CTBase.__state_components_names(2, CTBase.__state_name()) == ["x₁", "x₂"]
     end
 
     @testset "Default value of the control names of the Optimal Control Problem" begin
         @test CTBase.__control_name() == "u"
-        @test CTBase.__control_components_names(2,CTBase.__control_name()) == ["u₁", "u₂"]
+        @test CTBase.__control_components_names(2, CTBase.__control_name()) == ["u₁", "u₂"]
     end
 
     @testset "Default value of the variable names of the Optimal Control Problem" begin
         @test CTBase.__variable_name() == "v"
-        @test CTBase.__variable_components_names(2,CTBase.__variable_name()) == ["v₁", "v₂"]
+        @test CTBase.__variable_components_names(2, CTBase.__variable_name()) == ["v₁", "v₂"]
     end
 
     @testset "Default value of the time name of the Optimal Control Problem" begin
@@ -67,5 +66,4 @@ function test_default()
     @testset "Default value of the initial guess" begin
         @test isnothing(CTBase.__ocp_init())
     end
-
 end

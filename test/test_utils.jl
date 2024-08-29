@@ -1,41 +1,39 @@
 function test_utils()
-
     @testset "AD" begin
-
         x0 = 1.0
 
         f = x -> cos(x)
-        @test CTBase.ctgradient(f, x0)   ≈ -sin(x0) atol=1e-10
-        @test CTBase.__ctgradient(f, x0) ≈ -sin(x0) atol=1e-10
-        @test CTBase.ctgradient(VectorField(f), x0) ≈ -sin(x0) atol=1e-10
-        @test CTBase.__ctgradient(VectorField(f), x0) ≈ -sin(x0) atol=1e-10
+        @test CTBase.ctgradient(f, x0) ≈ -sin(x0) atol = 1e-10
+        @test CTBase.__ctgradient(f, x0) ≈ -sin(x0) atol = 1e-10
+        @test CTBase.ctgradient(VectorField(f), x0) ≈ -sin(x0) atol = 1e-10
+        @test CTBase.__ctgradient(VectorField(f), x0) ≈ -sin(x0) atol = 1e-10
 
         f = x -> [cos(x)]
-        @test CTBase.ctjacobian(f, x0)   ≈ [-sin(x0);;] atol=1e-10
-        @test CTBase.__ctjacobian(f, x0) ≈ [-sin(x0);;] atol=1e-10
-        @test CTBase.ctjacobian(VectorField(f), x0)   ≈ [-sin(x0);;] atol=1e-10
-        @test CTBase.__ctjacobian(VectorField(f), x0) ≈ [-sin(x0);;] atol=1e-10
+        @test CTBase.ctjacobian(f, x0) ≈ [-sin(x0);;] atol = 1e-10
+        @test CTBase.__ctjacobian(f, x0) ≈ [-sin(x0);;] atol = 1e-10
+        @test CTBase.ctjacobian(VectorField(f), x0) ≈ [-sin(x0);;] atol = 1e-10
+        @test CTBase.__ctjacobian(VectorField(f), x0) ≈ [-sin(x0);;] atol = 1e-10
 
         g = x -> cos(x[1]) + sin(x[2])
-        @test CTBase.ctgradient(g, [x0, x0])   ≈ [-sin(x0), cos(x0)] atol=1e-10
-        @test CTBase.__ctgradient(g, [x0, x0]) ≈ [-sin(x0), cos(x0)] atol=1e-10
+        @test CTBase.ctgradient(g, [x0, x0]) ≈ [-sin(x0), cos(x0)] atol = 1e-10
+        @test CTBase.__ctgradient(g, [x0, x0]) ≈ [-sin(x0), cos(x0)] atol = 1e-10
 
         g = x -> [cos(x[1]) + sin(x[2])]
-        @test CTBase.ctjacobian(g, [x0, x0])   ≈ [-sin(x0) cos(x0)] atol=1e-10
-        @test CTBase.__ctjacobian(g, [x0, x0]) ≈ [-sin(x0) cos(x0)] atol=1e-10
-
+        @test CTBase.ctjacobian(g, [x0, x0]) ≈ [-sin(x0) cos(x0)] atol = 1e-10
+        @test CTBase.__ctjacobian(g, [x0, x0]) ≈ [-sin(x0) cos(x0)] atol = 1e-10
     end
 
     @testset "Other" begin
-        
         v = [1.0; 2.0; 3.0; 4.0; 5.0; 6.0]
         n = 2
         u = vec2vec(v, n)
         w = vec2vec(u)
         @test v == w
 
-        A = [ 0 1
-            2 3 ]
+        A = [
+            0 1
+            2 3
+        ]
 
         V = CTBase.matrix2vec(A)
         @test V[1] == [0, 1]
@@ -79,7 +77,5 @@ function test_utils()
         @test_throws IncorrectArgument CTBase.ctupperscripts(-1)
         @test CTBase.ctupperscripts(019) == "¹⁹"
         @test CTBase.ctupperscripts(109) == "¹⁰⁹"
- 
     end
-
 end

@@ -8,8 +8,8 @@ const ModelRepl = Vector{Expr}
 end
 
 @with_kw mutable struct HistoryRepl
-    index::Int=0
-    ct_repl_datas_data::Vector{CTRepl}=Vector{CTRepl}()
+    index::Int = 0
+    ct_repl_datas_data::Vector{CTRepl} = Vector{CTRepl}()
 end
 
 #
@@ -24,8 +24,7 @@ Update the model adding the expression e. It must be public since in the ct repl
 is quoted each time an expression is parsed and is valid. 
 """
 function ct_repl_update_model(e::Expr)
-
-    ct_repl_data.debug && (println("debug> expression to add: ", e))    
+    ct_repl_data.debug && (println("debug> expression to add: ", e))
 
     # update model
     __update!(ct_repl_data.model, e)
@@ -36,7 +35,6 @@ function ct_repl_update_model(e::Expr)
 
     #
     return nothing
-
 end
 
 """
@@ -44,8 +42,7 @@ $(TYPEDSIGNATURES)
 
 Create a ct REPL.
 """
-function ct_repl(; debug=false, verbose=false)
-
+function ct_repl(; debug = false, verbose = false)
     global ct_repl_is_set
     global ct_repl_data
     global ct_repl_history
@@ -68,8 +65,9 @@ function ct_repl(; debug=false, verbose=false)
         __add!(ct_repl_history, ct_repl_data)
 
         # text invalid
-        txt_invalid = "\nInvalid expression.\n\nType HELP to see the list of commands or enter a " *
-                        "valid expression to update the model."
+        txt_invalid =
+            "\nInvalid expression.\n\nType HELP to see the list of commands or enter a " *
+            "valid expression to update the model."
 
         function parse_to_expr(s::AbstractString)
 
@@ -90,28 +88,31 @@ function ct_repl(; debug=false, verbose=false)
 
             # test if e is a command
             @match e begin
-                :( $c = $a ) => begin
+                :($c = $a) => begin
                     command = __transform_to_command(c)
-                    ct_repl_data.debug && println("debug> command: ", command, " and argument: ", a)
-                    command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, a, ct_repl_history))
+                    ct_repl_data.debug &&
+                        println("debug> command: ", command, " and argument: ", a)
+                    command ∈ keys(COMMANDS_ACTIONS) &&
+                        (return COMMANDS_ACTIONS[command](ct_repl_data, a, ct_repl_history))
                 end
-                :( $c ) => begin
+                :($c) => begin
                     command = __transform_to_command(c)
                     ct_repl_data.debug && println("debug> command: ", command)
-                    command ∈ keys(COMMANDS_ACTIONS) && (return COMMANDS_ACTIONS[command](ct_repl_data, ct_repl_history))
+                    command ∈ keys(COMMANDS_ACTIONS) &&
+                        (return COMMANDS_ACTIONS[command](ct_repl_data, ct_repl_history))
                 end
                 _ => nothing
             end
 
             # check if s finishes with a ";". If yes then remove it and return nothing at the end
             return_nothing = endswith(s, ";") ? true : false
-            return_nothing && (s = s[1:end-1])
+            return_nothing && (s = s[1:(end - 1)])
             e = Meta.parse(s)
 
             #
             return_nothing && ct_repl_data.debug && println("\ndebug> new parsing string: ", s)
             return_nothing && ct_repl_data.debug && println("debug> new expression parsed: ", e)
-            
+
             if e isa Expr
 
                 #
@@ -124,7 +125,7 @@ function ct_repl(; debug=false, verbose=false)
                 #
                 ct_repl_data.debug && (println("debug> try to add expression: ", e))
                 q = quote
-                    try 
+                    try
                         $ocp_q_for_test # test if the expression is valid
                     catch ex
                         $(ct_repl_data.debug) && (println("debug> exception thrown: ", ex))
@@ -139,7 +140,7 @@ function ct_repl(; debug=false, verbose=false)
                     $ocp_q # define the ocp
                     ct_repl_update_model($ee) # add the expression in the model
                     # ----------------------------------------------------------------
-                    $return_nothing ? nothing : begin 
+                    $return_nothing ? nothing : begin
                         println("\n", string($ct_repl_data.ocp_name))
                         $(ct_repl_data.ocp_name)
                     end
@@ -147,23 +148,22 @@ function ct_repl(; debug=false, verbose=false)
                 return q
 
             else
-
                 println(txt_invalid)
                 return nothing
-
             end
-
         end # parse_to_expr
 
         # makerepl command
-        initrepl(parse_to_expr,
-                prompt_text="ct> ",
-                prompt_color = :magenta,
-                start_key='>',
-                mode_name="ct_mode",
-                valid_input_checker=complete_julia,
-                startup_text=false)
-            
+        initrepl(
+            parse_to_expr,
+            prompt_text = "ct> ",
+            prompt_color = :magenta,
+            start_key = '>',
+            mode_name = "ct_mode",
+            valid_input_checker = complete_julia,
+            startup_text = false,
+        )
+
         return nothing
 
     else
@@ -171,7 +171,6 @@ function ct_repl(; debug=false, verbose=false)
             println("ct repl is already set.")
         end
     end
-
 end
 
 # ----------------------------------------------------------------  
@@ -184,7 +183,11 @@ function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, ct_repl_history::HistoryRepl
     println("Solution name: ", ct_repl_data.sol_name)
 end
 
-function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, name::Union{Symbol, Expr}, ct_repl_history::HistoryRepl)
+function NAME_ACTION_FUNCTION(
+    ct_repl_data::CTRepl,
+    name::Union{Symbol, Expr},
+    ct_repl_history::HistoryRepl,
+)
     ocp_name = ct_repl_data.ocp_name
     sol_name = ct_repl_data.sol_name
     if isa(name, Symbol)
@@ -192,7 +195,9 @@ function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, name::Union{Symbol, Expr}, c
     elseif isa(name, Expr)
         name = (name.args[1], name.args[2])
     else
-        println("\nname error\n\nType HELP to see the list of commands or enter a valid expression to update the model.")
+        println(
+            "\nname error\n\nType HELP to see the list of commands or enter a valid expression to update the model.",
+        )
         return nothing
     end
     ct_repl_data.ocp_name = name[1]
@@ -200,96 +205,108 @@ function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, name::Union{Symbol, Expr}, c
     ct_repl_data.debug && println("debug> ocp name: ", ct_repl_data.ocp_name)
     ct_repl_data.debug && println("debug> sol name: ", ct_repl_data.sol_name)
     __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
-    qo1 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
+    qo1 =
+        ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
     qs1 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
     qo2 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = $(ocp_name)) : :()
     qs2 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = $(sol_name)) : :()
-    name_q = (quote
-                $(qo1)
-                $(qs1)
-                try 
-                    $(qo2)
-                    $(qs2)
-                    nothing
-                catch e
-                    nothing
-                end
-                end)
+    name_q = (
+        quote
+            $(qo1)
+            $(qs1)
+            try
+                $(qo2)
+                $(qs2)
+                nothing
+            catch e
+                nothing
+            end
+        end
+    )
     ct_repl_data.debug && println("debug> new name quote: ", name_q)
     return name_q
 end
 
 # dict of actions associated to ct repl commands
 COMMANDS_ACTIONS = Dict{Symbol, Function}(
-    :SHOW => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        q = quote
-            println("\n", string($ct_repl_data.ocp_name))
-            $(ct_repl_data.ocp_name)
-        end
-        return q
-    end,
-    :SOLVE => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        return __quote_solve(ct_repl_data)
-    end,
-    :PLOT => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        return __quote_plot(ct_repl_data)
-    end,
-    :DEBUG => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        ct_repl_data.debug = !ct_repl_data.debug
-        println("\n debug mode: " * (ct_repl_data.debug ? "on" : "off"))
-        __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
-        return nothing
-    end,
+    :SHOW =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            q = quote
+                println("\n", string($ct_repl_data.ocp_name))
+                $(ct_repl_data.ocp_name)
+            end
+            return q
+        end,
+    :SOLVE =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            return __quote_solve(ct_repl_data)
+        end,
+    :PLOT =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            return __quote_plot(ct_repl_data)
+        end,
+    :DEBUG =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            ct_repl_data.debug = !ct_repl_data.debug
+            println("\n debug mode: " * (ct_repl_data.debug ? "on" : "off"))
+            __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
+            return nothing
+        end,
     :NAME => NAME_ACTION_FUNCTION,
-    :UNDO => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        ct_repl_data_ = __undo!(ct_repl_history)
-        __copy!(ct_repl_data, ct_repl_data_)
-        ocp_q = __quote_ocp(ct_repl_data)
-        q = quote
-            $ocp_q
-            nothing
-        end
-        return q
-    end,
-    :REDO => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        ct_repl_data_ = __redo!(ct_repl_history)
-        __copy!(ct_repl_data, ct_repl_data_)
-        ocp_q = __quote_ocp(ct_repl_data)
-        q = quote
-            $ocp_q
-            nothing
-        end
-        return q
-    end,
-    :HELP => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        l = 8 # 22
-        n = 6
-        println("\nSpecial commands to interact with the ct repl:\n")
-        dict = sort(collect(COMMANDS_HELPS), by = x->x[1])
-        for (k, v) ∈ dict
-            m = length(string(k))
-            s = "  "
-            s *= string(k) * " "^(n-m)
-            r = length(s)
-            s *= " "^(l-r)
-            printstyled(s, color=:magenta)
-            printstyled(": ", v, "\n")
-        end
-        return nothing
-    end,
-    :REPL => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        return :($ct_repl_data)
-    end,
-    :CLEAR => (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
-        ct_repl_data.model = ModelRepl()
-        __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
-        ocp_q = __quote_ocp(ct_repl_data)
-        q = quote
-            $ocp_q
-            nothing
-        end
-        return q
-    end,
+    :UNDO =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            ct_repl_data_ = __undo!(ct_repl_history)
+            __copy!(ct_repl_data, ct_repl_data_)
+            ocp_q = __quote_ocp(ct_repl_data)
+            q = quote
+                $ocp_q
+                nothing
+            end
+            return q
+        end,
+    :REDO =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            ct_repl_data_ = __redo!(ct_repl_history)
+            __copy!(ct_repl_data, ct_repl_data_)
+            ocp_q = __quote_ocp(ct_repl_data)
+            q = quote
+                $ocp_q
+                nothing
+            end
+            return q
+        end,
+    :HELP =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            l = 8 # 22
+            n = 6
+            println("\nSpecial commands to interact with the ct repl:\n")
+            dict = sort(collect(COMMANDS_HELPS), by = x -> x[1])
+            for (k, v) ∈ dict
+                m = length(string(k))
+                s = "  "
+                s *= string(k) * " "^(n - m)
+                r = length(s)
+                s *= " "^(l - r)
+                printstyled(s, color = :magenta)
+                printstyled(": ", v, "\n")
+            end
+            return nothing
+        end,
+    :REPL =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            return :($ct_repl_data)
+        end,
+    :CLEAR =>
+        (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
+            ct_repl_data.model = ModelRepl()
+            __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
+            ocp_q = __quote_ocp(ct_repl_data)
+            q = quote
+                $ocp_q
+                nothing
+            end
+            return q
+        end,
 )
 
 # dict of help messages associated to ct repl commands
@@ -297,9 +314,10 @@ COMMANDS_HELPS = Dict{Symbol, String}(
     :SOLVE => "solve the optimal control problem",
     :PLOT => "plot the solution",
     #:DEBUG => "toggle debug mode",
-    :NAME => "print the name of the optimal control problem and the solution. To set them: \n\n" * 
-    "          ct> NAME=ocp\n" * 
-    "          ct> NAME=(ocp, sol)\n",
+    :NAME =>
+        "print the name of the optimal control problem and the solution. To set them: \n\n" *
+        "          ct> NAME=ocp\n" *
+        "          ct> NAME=(ocp, sol)\n",
     :UNDO => "undo last command",
     :REDO => "redo last command",
     :HELP => "help",
@@ -313,7 +331,7 @@ __non_existing_command() = :non_existing_command
 
 # transform to a command
 __transform_to_command(c::Symbol)::Symbol = c
-__transform_to_command(e::Expr)::Symbol   = __non_existing_command()
+__transform_to_command(e::Expr)::Symbol = __non_existing_command()
 
 # get code from model
 function __code(model::ModelRepl)::Expr
@@ -333,16 +351,20 @@ end
 
 # make @def ocp quote
 function __quote_ocp(ct_repl_data::CTRepl)
-    code  = __code(ct_repl_data.model)
-    ocp_q = quote @def $(ct_repl_data.ocp_name) $(code) end
+    code = __code(ct_repl_data.model)
+    ocp_q = quote
+        @def $(ct_repl_data.ocp_name) $(code)
+    end
     ct_repl_data.debug && println("debug> code: ", code)
     ct_repl_data.debug && println("debug> quote code: ", ocp_q)
     return ocp_q
 end
 
 function __quote_ocp(ct_repl_data::CTRepl, e::Expr)
-    code  = __code(ct_repl_data.model, e)
-    ocp_q = quote @def $(ct_repl_data.ocp_name) $(code) end
+    code = __code(ct_repl_data.model, e)
+    ocp_q = quote
+        @def $(ct_repl_data.ocp_name) $(code)
+    end
     ct_repl_data.debug && println("debug> code: ", code)
     ct_repl_data.debug && println("debug> quote code: ", ocp_q)
     return ocp_q
@@ -350,9 +372,11 @@ end
 
 # get ocp quote
 function __quote_anonym_ocp(ct_repl_data::CTRepl, e::Expr)
-    code  = __code(ct_repl_data.model, e)
+    code = __code(ct_repl_data.model, e)
     ocp = gensym()
-    ocp_q = quote @def $ocp $code end
+    ocp_q = quote
+        @def $ocp $code
+    end
     ct_repl_data.debug && println("debug> code: ", code)
     ct_repl_data.debug && println("debug> quote code: ", ocp_q)
     return ocp_q
@@ -360,7 +384,11 @@ end
 
 # quote solve: todo: update when using real solver
 function __quote_solve(ct_repl_data::CTRepl)
-    solve_q = (quote $(ct_repl_data.sol_name) = solve($(ct_repl_data.ocp_name)) end)
+    solve_q = (
+        quote
+            $(ct_repl_data.sol_name) = solve($(ct_repl_data.ocp_name))
+        end
+    )
     ct_repl_data.debug && println("debug> quote solve: ", solve_q)
     return solve_q
 end
@@ -369,7 +397,7 @@ end
 function __quote_plot(ct_repl_data::CTRepl)
     plot_q = quote
         if @isdefined($(ct_repl_data.sol_name))
-            plot($(ct_repl_data.sol_name), size=(600, 500))
+            plot($(ct_repl_data.sol_name), size = (600, 500))
         else
             println("\nNo solution available.")
         end
@@ -392,7 +420,8 @@ end
 
 # go to next model in ct_repl_history
 function __redo!(ct_repl_history::HistoryRepl)
-    ct_repl_history.index < length(ct_repl_history.ct_repl_datas_data) && (ct_repl_history.index += 1)
+    ct_repl_history.index < length(ct_repl_history.ct_repl_datas_data) &&
+        (ct_repl_history.index += 1)
     return ct_repl_history.ct_repl_datas_data[ct_repl_history.index]
 end
 

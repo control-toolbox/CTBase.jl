@@ -12,16 +12,55 @@
 [doc-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [doc-stable-url]: https://control-toolbox.org/CTBase.jl/stable/
 
-[release-img]: https://img.shields.io/github/v/release/control-toolbox/CTBase.jl.svg?style=round-square
+[release-img]: https://juliahub.com/docs/General/CTBase/stable/version.svg
 [release-url]: https://github.com/control-toolbox/CTBase.jl/releases
 
-The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox). 
-The control-toolbox ecosystem gathers `Julia` packages for mathematical control and applications. The root package is [`OptimalControl.jl`](https://github.com/control-toolbox/OptimalControl.jl) which aims to provide tools to modelise and solve optimal control problems by direct and indirect methods. [![doc OptimalControl.jl](https://img.shields.io/badge/doc-OptimalControl.jl-blue)](http://control-toolbox.org/OptimalControl.jl)
+[pkg-eval-img]: https://juliahub.com/docs/General/CTBase/stable/pkgeval.svg
+[pkg-eval-url]: https://juliahub.com/ui/Packages/General/CTBase
 
-| **Documentation**  | **Code Status**  | **Release**  |
-|:-------------------|:-----------------|:-------------|
-| [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url] | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] | [![Release][release-img]][release-url] |
+[deps-img]: https://juliahub.com/docs/General/CTBase/stable/deps.svg
+[deps-url]: https://juliahub.com/ui/Packages/General/CTBase?t=2
+
+[licence-img]: https://img.shields.io/badge/License-MIT-yellow.svg
+[licence-url]: https://github.com/control-toolbox/CTBase.jl/blob/master/LICENSE
+
+[aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
+[aqua-url]: https://github.com/JuliaTesting/Aqua.jl
+
+The CTBase.jl package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox). 
+The control-toolbox ecosystem gathers Julia packages for mathematical control and applications. The root package is [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl) which aims to provide tools to modelise and solve optimal control problems with ordinary differential equations by direct and indirect methods. 
+
+[![doc OptimalControl.jl](https://img.shields.io/badge/Documentation-OptimalControl.jl-blue)](http://control-toolbox.org/OptimalControl.jl)
+
+| **Name**          | **Badge**         |
+:-------------------|:------------------|
+| Documentation     | [![Documentation][doc-stable-img]][doc-stable-url] [![Documentation][doc-dev-img]][doc-dev-url]                   | 
+| Code Status       | [![Build Status][ci-img]][ci-url] [![Covering Status][co-img]][co-url] [![pkgeval][pkg-eval-img]][pkg-eval-url] [![Aqua.jl][aqua-img]][aqua-url] |
+| Dependencies      | [![deps][deps-img]][deps-url] |
+| Licence           | [![License: MIT][licence-img]][licence-url]   |
+| Release           | [![Release][release-img]][release-url]        |
 
 ## Installation
 
-To install a package from the control-toolbox ecosystem, please visit the [installation page](https://github.com/control-toolbox#installation).
+To install CTBase.jl please 
+<a href="https://docs.julialang.org/en/v1/manual/getting-started/">open Julia's interactive session (known as REPL)</a> 
+and press <kbd>]</kbd> key in the REPL to use the package mode, then add the package:
+
+```julia
+julia> ]
+pkg> add CTBase
+```
+
+## Contributing
+
+[issue-url]: https://github.com/control-toolbox/CTBase.jl/issues
+[first-good-issue-url]: https://github.com/control-toolbox/CTBase.jl/contribute
+
+If you think you found a bug or if you have a feature request / suggestion, feel free to open an [issue][issue-url].
+Before opening a pull request, please start an issue or a discussion on the topic. 
+
+Contributions are welcomed, check out [how to contribute to a Github project](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project). 
+If it is your first contribution, you can also check [this first contribution tutorial](https://github.com/firstcontributions/first-contributions).
+You can find first good issues (if any 🙂) [here][first-good-issue-url]. You may find other packages to contribute to at the [control-toolbox organization](https://github.com/control-toolbox).
+
+If you want to ask a question, feel free to start a discussion [here](https://github.com/orgs/control-toolbox/discussions). This forum is for general discussion about this repository and the [control-toolbox organization](https://github.com/control-toolbox).
