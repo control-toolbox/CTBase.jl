@@ -44,7 +44,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the control of the optimal control solution or `nothing`.
 
 """
-control_components_names(sol::OptimalControlSolution)::String = sol.control_components_names
+control_components_names(sol::OptimalControlSolution) = sol.control_components_names
 
 """
 $(TYPEDSIGNATURES)
@@ -93,7 +93,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the state of the optimal control solution or `nothing`.
 
 """
-state_components_names(sol::OptimalControlSolution)::String = sol.state_components_names
+state_components_names(sol::OptimalControlSolution) = sol.state_components_names
 
 """
 $(TYPEDSIGNATURES)
@@ -142,7 +142,7 @@ $(TYPEDSIGNATURES)
 Return the names of the components of the variable of the optimal control solution or `nothing`.
 
 """
-variable_components_names(sol::OptimalControlSolution)::String = sol.variable_components_names
+variable_components_names(sol::OptimalControlSolution) = sol.variable_components_names
 
 """
 $(TYPEDSIGNATURES)

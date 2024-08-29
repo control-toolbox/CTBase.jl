@@ -14,9 +14,6 @@ const has = CTBase.has
 const replace_call = CTBase.replace_call
 const constraint_type = CTBase.constraint_type
 
-# 
-include("utils.jl")
-
 #
 @testset verbose = true showtiming = true "Base" begin
     for name ∈ (

@@ -29,11 +29,11 @@ function Base.show(
     #
     some_printing = false
 
-    # print the code of the model if ocp.model_expression is not nothing
-    if !isnothing(ocp.model_expression)
+    # print the code of the model if model_expression(ocp) is not nothing
+    if !isnothing(model_expression(ocp))
 
         # some checks
-        @assert hasproperty(ocp.model_expression, :head)
+        @assert hasproperty(model_expression(ocp), :head)
 
         #
         #println(io)
@@ -53,7 +53,7 @@ function Base.show(
 
         # print the code
         tab = 4
-        code = striplines(ocp.model_expression)
+        code = striplines(model_expression(ocp))
         @match code.head begin
             :block => [__print(code.args[i], io, tab) for i ∈ eachindex(code.args)]
             _ => __print(code, io, tab)
@@ -65,20 +65,20 @@ function Base.show(
     if __is_complete(ocp) # print the model if is is complete
 
         # dimensions
-        x_dim = ocp.state_dimension
-        u_dim = ocp.control_dimension
-        v_dim = is_variable_dependent(ocp) ? ocp.variable_dimension : -1
+        x_dim = state_dimension(ocp)
+        u_dim = control_dimension(ocp)
+        v_dim = is_variable_dependent(ocp) ? variable_dimension(ocp) : -1
 
         # names
-        t_name = ocp.time_name
-        t0_name = ocp.initial_time_name
-        tf_name = ocp.final_time_name
-        x_name = ocp.state_name
-        u_name = ocp.control_name
-        v_name = is_variable_dependent(ocp) ? ocp.variable_name : ""
-        xi_names = ocp.state_components_names
-        ui_names = ocp.control_components_names
-        vi_names = is_variable_dependent(ocp) ? ocp.variable_components_names : []
+        t_name = time_name(ocp)
+        t0_name = initial_time_name(ocp)
+        tf_name = final_time_name(ocp)
+        x_name = state_name(ocp)
+        u_name = control_name(ocp)
+        v_name = is_variable_dependent(ocp) ? variable_name(ocp) : ""
+        xi_names = state_components_names(ocp)
+        ui_names = control_components_names(ocp)
+        vi_names = is_variable_dependent(ocp) ? variable_components_names(ocp) : []
 
         # dependencies
         t_ = is_time_dependent(ocp) ? t_name * ", " : ""
@@ -103,11 +103,11 @@ function Base.show(
         print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
 
         # Mayer
-        !isnothing(ocp.mayer) && print(io, "g(" * bounds_args_names * ")")
-        (!isnothing(ocp.mayer) && !isnothing(ocp.lagrange)) && print(io, " + ")
+        !isnothing(mayer(ocp)) && print(io, "g(" * bounds_args_names * ")")
+        (!isnothing(mayer(ocp)) && !isnothing(lagrange(ocp))) && print(io, " + ")
 
         # Lagrange
-        if !isnothing(ocp.lagrange)
+        if !isnothing(lagrange(ocp))
             println(
                 io,
                 '\u222B',

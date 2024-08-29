@@ -43,18 +43,18 @@ function __OptimalControlSolution(
     sol = OptimalControlSolution()
 
     # data from ocp 
-    sol.initial_time_name = ocp.initial_time_name
-    sol.final_time_name = ocp.final_time_name
-    sol.time_name = ocp.time_name
-    sol.control_dimension = ocp.control_dimension
-    sol.control_components_names = ocp.control_components_names
-    sol.control_name = ocp.control_name
-    sol.state_dimension = ocp.state_dimension
-    sol.state_components_names = ocp.state_components_names
-    sol.state_name = ocp.state_name
-    sol.variable_dimension = ocp.variable_dimension
-    sol.variable_components_names = ocp.variable_components_names
-    sol.variable_name = ocp.variable_name
+    sol.initial_time_name = initial_time_name(ocp)
+    sol.final_time_name = final_time_name(ocp)
+    sol.time_name = time_name(ocp)
+    sol.control_dimension = control_dimension(ocp)
+    sol.control_components_names = control_components_names(ocp)
+    sol.control_name = control_name(ocp)
+    sol.state_dimension = state_dimension(ocp)
+    sol.state_components_names = state_components_names(ocp)
+    sol.state_name = state_name(ocp)
+    sol.variable_dimension = variable_dimension(ocp)
+    sol.variable_components_names = variable_components_names(ocp)
+    sol.variable_name = variable_name(ocp)
 
     # data from args 
     sol.state = state

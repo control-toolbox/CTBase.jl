@@ -239,9 +239,9 @@ mutable struct OptimalControlInit
             state = sol.state,
             control = sol.control,
             variable = sol.variable,
-            state_dim = sol.state_dimension,
-            control_dim = sol.control_dimension,
-            variable_dim = sol.variable_dimension,
+            state_dim = state_dimension(sol),
+            control_dim = control_dimension(sol),
+            variable_dim = variable_dimension(sol),
         )
     end
 end

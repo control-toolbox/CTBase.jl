@@ -207,88 +207,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return `true` if the model is autonomous.
-"""
-is_autonomous(ocp::OptimalControlModel{Autonomous, <:VariableDependence}) = true
-is_autonomous(ocp::OptimalControlModel{NonAutonomous, <:VariableDependence}) = false
+Return the constraints of the ocp or nothing.
 
 """
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined as time dependent.
-"""
-is_time_dependent(ocp::OptimalControlModel) = !is_autonomous(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined as time independent.
-"""
-is_time_independent(ocp::OptimalControlModel) = !is_time_dependent(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the criterion type of `ocp` is `:min`.
-"""
-is_min(ocp::OptimalControlModel) = ocp.criterion == :min
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the criterion type of `ocp` is `:max`.
-"""
-is_max(ocp::OptimalControlModel) = !is_min(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model is fixed (= has no variable).
-"""
-is_fixed(ocp::OptimalControlModel{<:TimeDependence, Fixed}) = true
-is_fixed(ocp::OptimalControlModel{<:TimeDependence, NonFixed}) = false
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined as variable dependent.
-"""
-is_variable_dependent(ocp::OptimalControlModel) = !is_fixed(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined as variable independent.
-"""
-is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined with free initial time.
-"""
-has_free_initial_time(ocp::OptimalControlModel) = (typeof(ocp.initial_time) == Index)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined with free final time.
-"""
-has_free_final_time(ocp::OptimalControlModel) = (typeof(ocp.final_time) == Index)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined with lagrange cost.
-"""
-has_lagrange_cost(ocp::OptimalControlModel) = !isnothing(ocp.lagrange)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return `true` if the model has been defined with mayer cost.
-"""
-has_mayer_cost(ocp::OptimalControlModel) = !isnothing(ocp.mayer)
+function constraints(ocp::OptimalControlModel)
+    return ocp.constraints
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -587,3 +511,89 @@ Return the dynamics of the optimal control problem or `nothing`.
 
 """
 dynamics(ocp::OptimalControlModel) = ocp.dynamics
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model is autonomous.
+"""
+is_autonomous(ocp::OptimalControlModel{Autonomous, <:VariableDependence}) = true
+is_autonomous(ocp::OptimalControlModel{NonAutonomous, <:VariableDependence}) = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined as time dependent.
+"""
+is_time_dependent(ocp::OptimalControlModel) = !is_autonomous(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined as time independent.
+"""
+is_time_independent(ocp::OptimalControlModel) = !is_time_dependent(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the criterion type of `ocp` is `:min`.
+"""
+is_min(ocp::OptimalControlModel) = criterion(ocp) == :min
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the criterion type of `ocp` is `:max`.
+"""
+is_max(ocp::OptimalControlModel) = !is_min(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model is fixed (= has no variable).
+"""
+is_fixed(ocp::OptimalControlModel{<:TimeDependence, Fixed}) = true
+is_fixed(ocp::OptimalControlModel{<:TimeDependence, NonFixed}) = false
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined as variable dependent.
+"""
+is_variable_dependent(ocp::OptimalControlModel) = !is_fixed(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined as variable independent.
+"""
+is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with free initial time.
+"""
+has_free_initial_time(ocp::OptimalControlModel) = (typeof(initial_time(ocp)) == Index)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with free final time.
+"""
+has_free_final_time(ocp::OptimalControlModel) = (typeof(final_time(ocp)) == Index)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with lagrange cost.
+"""
+has_lagrange_cost(ocp::OptimalControlModel) = !isnothing(lagrange(ocp))
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if the model has been defined with mayer cost.
+"""
+has_mayer_cost(ocp::OptimalControlModel) = !isnothing(mayer(ocp))
