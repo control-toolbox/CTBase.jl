@@ -1,7 +1,5 @@
 #
 using Aqua
-using ForwardDiff
-using StaticArrays
 
 #
 using CTBase
@@ -39,6 +37,7 @@ include("utils.jl")
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
+            println("testing: ", string(name))
             include("$(test_name).jl")
             @eval $test_name()
         end
