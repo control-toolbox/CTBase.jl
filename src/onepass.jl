@@ -622,7 +622,7 @@ macro def(ocp, e, log = false)
             _ => :($ocp = __OCPModel(autonomous = false, variable = true))
         end
         ee = QuoteNode(e)
-        code = Expr(:block, init, code, :($ocp.model_expression! = $ee; $ocp))
+        code = Expr(:block, init, code, :($ocp.model_expression = $ee; $ocp))
         esc(code)
     catch ex
         :(throw($ex)) # can be caught by user
