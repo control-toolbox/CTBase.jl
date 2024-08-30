@@ -228,8 +228,8 @@ function __initial_plot(
 )
 
     # parameters
-    n = sol.state_dimension
-    m = sol.control_dimension
+    n = state_dimension(sol)
+    m = control_dimension(sol)
 
     if layout == :group
         @match control begin
@@ -354,12 +354,12 @@ function Plots.plot!(
     end
 
     #
-    n = sol.state_dimension
-    m = sol.control_dimension
-    x_labels = sol.state_components_names
-    u_labels = sol.control_components_names
-    u_label = sol.control_name
-    t_label = sol.time_name
+    n = state_dimension(sol)
+    m = control_dimension(sol)
+    x_labels = state_components_names(sol)
+    u_labels = control_components_names(sol)
+    u_label = control_name(sol)
+    t_label = time_name(sol)
 
     # split series attributes 
     series_attr = __keep_series_attributes(; kwargs...)
@@ -548,12 +548,12 @@ function Plots.plot!(
 end
 
 function __size_plot(sol::OptimalControlSolution, control::Symbol)
-    n = sol.state_dimension
-    #m = sol.control_dimension
+    n = state_dimension(sol)
+    #m = control_dimension(sol)
     m = @match control begin
-        :components => sol.control_dimension
+        :components => control_dimension(sol)
         :norm => 1
-        :all => sol.control_dimension + 1
+        :all => control_dimension(sol) + 1
         _ => throw(IncorrectArgument("No such choice for control. Use :components, :norm or :all"))
     end
     return (600, 140 * (n + m))
@@ -643,10 +643,10 @@ function recipe_label(
         end
 
         label = @match s begin
-            :state => sol.state_components_names[i]
-            :control => sol.control_components_names[i]
-            :costate => "p" * sol.state_components_names[i]
-            :control_norm => "‖" * sol.control_name * "‖"
+            :state => state_components_names(sol)[i]
+            :control => control_components_names(sol)[i]
+            :costate => "p" * state_components_names(sol)[i]
+            :control_norm => "‖" * control_name(sol) * "‖"
             _ => error("Internal error, no such choice for label")
         end
     end
@@ -664,10 +664,10 @@ function __get_data_plot(
     xx::Union{Symbol, Tuple{Symbol, Integer}};
     time::Symbol = :default,
 )
-    T = sol.time_grid
-    X = sol.state.(T)
-    U = sol.control.(T)
-    P = sol.costate.(T)
+    T = time_grid(sol)
+    X = state(sol).(T)
+    U = control(sol).(T)
+    P = costate(sol).(T)
 
     vv, ii = @match xx begin
         ::Symbol => (xx, 1)

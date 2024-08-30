@@ -12,8 +12,8 @@ function test_onepass()
             tf = λ₂
             t ∈ [0, tf], time
         end
-        @test oo.initial_time == 0
-        @test oo.final_time == Index(2)
+        @test initial_time(oo) == 0
+        @test final_time(oo) == Index(2)
 
         a = 1
         f(b) = begin # closure of a, local c, and @def in function
@@ -31,7 +31,7 @@ function test_onepass()
         d = 4
         x = 10
         u = 20
-        @test o.dynamics(x, u) == x + u + b + 3 + d
+        @test dynamics(o)(x, u) == x + u + b + 3 + d
     end
 
     @testset "log" begin
@@ -42,8 +42,8 @@ function test_onepass()
             tf = λ₂
             t ∈ [0, tf], time
         end true
-        @test o.initial_time == 0
-        @test o.final_time == Index(2)
+        @test initial_time(o) == 0
+        @test final_time(o) == Index(2)
     end
 
     # ---------------------------------------------------------------
@@ -56,27 +56,27 @@ function test_onepass()
             u = (uu1, uu2, uu3) in R³, control
             v = (vv1, vv2) in R², variable
         end
-        @test o.state_components_names == ["y", "z"]
-        @test o.control_components_names == ["uu1", "uu2", "uu3"]
-        @test o.variable_components_names == ["vv1", "vv2"]
+        @test state_components_names(o) == ["y", "z"]
+        @test control_components_names(o) == ["uu1", "uu2", "uu3"]
+        @test variable_components_names(o) == ["vv1", "vv2"]
 
         @def o begin
             x = (y, z) ∈ R², state
             u = (uu1, uu2, uu3) ∈ R³, control
             v = (vv1, vv2) ∈ R², variable
         end
-        @test o.state_components_names == ["y", "z"]
-        @test o.control_components_names == ["uu1", "uu2", "uu3"]
-        @test o.variable_components_names == ["vv1", "vv2"]
+        @test state_components_names(o) == ["y", "z"]
+        @test control_components_names(o) == ["uu1", "uu2", "uu3"]
+        @test variable_components_names(o) == ["vv1", "vv2"]
 
         @def o begin
             x = [y, z] ∈ R², state
             u = [uu1, uu2, uu3] ∈ R³, control
             v = [vv1, vv2] ∈ R², variable
         end
-        @test o.state_components_names == ["y", "z"]
-        @test o.control_components_names == ["uu1", "uu2", "uu3"]
-        @test o.variable_components_names == ["vv1", "vv2"]
+        @test state_components_names(o) == ["y", "z"]
+        @test control_components_names(o) == ["uu1", "uu2", "uu3"]
+        @test variable_components_names(o) == ["vv1", "vv2"]
 
         @test_throws ParsingError @def o begin # a name must be provided
             (y, z) ∈ R², state
@@ -118,8 +118,8 @@ function test_onepass()
         u = 3
         @test constraint(o, :eq1)(x0, xf) == x0[1]
         @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test o.dynamics(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test o.lagrange(x, u) == u^2 + x[1]
+        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -137,8 +137,8 @@ function test_onepass()
         u = 3
         @test constraint(o, :eq1)(x0, xf) == x0[1]
         @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test o.dynamics(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test o.lagrange(x, u) == u^2 + x[1]
+        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -158,8 +158,8 @@ function test_onepass()
         c = [u, 0]
         @test constraint(o, :eq1)(x0, xf) == x0[1]
         @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test o.dynamics(x, c) == [x[2], (x[1] + 2x[2])^2]
-        @test o.lagrange(x, c) == u^2 + x[1]
+        @test dynamics(o)(x, c) == [x[2], (x[1] + 2x[2])^2]
+        @test lagrange(o)(x, c) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -167,11 +167,11 @@ function test_onepass()
             u = (u₁, v) ∈ R^2, control
             ẋ(t) == [x[1](t) + 2v(t), 2x[3](t), x[1](t) + v(t)]
         end
-        @test o.state_dimension == 3
-        @test o.control_dimension == 2
+        @test state_dimension(o) == 3
+        @test control_dimension(o) == 2
         x = [1, 2, 3]
         u = [-1, 2]
-        @test o.dynamics(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
+        @test dynamics(o)(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
 
         t0 = 0.0
         tf = 0.1
@@ -184,13 +184,13 @@ function test_onepass()
             a = x₃
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_name == "u"
-        @test ocp.control_dimension == 3
-        @test ocp.state_name == "x"
-        @test ocp.state_dimension == 3
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_name(ocp) == "u"
+        @test control_dimension(ocp) == 3
+        @test state_name(ocp) == "x"
+        @test state_dimension(ocp) == 3
     end
 
     # ---------------------------------------------------------------
@@ -203,36 +203,36 @@ function test_onepass()
             tf = λ₂
             t ∈ [0, tf], time
         end
-        @test o.initial_time == 0
-        @test o.final_time == Index(2)
+        @test initial_time(o) == 0
+        @test final_time(o) == Index(2)
 
         @def o begin
             λ = (λ₁, tf) ∈ R^2, variable
             t ∈ [0, tf], time
         end
-        @test o.initial_time == 0
-        @test o.final_time == Index(2)
+        @test initial_time(o) == 0
+        @test final_time(o) == Index(2)
 
         @def o begin
             t0 ∈ R, variable
             t ∈ [t0, 1], time
         end
-        @test o.initial_time == Index(1)
-        @test o.final_time == 1
+        @test initial_time(o) == Index(1)
+        @test final_time(o) == 1
 
         @def o begin
             tf ∈ R, variable
             t ∈ [0, tf], time
         end
-        @test o.initial_time == 0
-        @test o.final_time == Index(1)
+        @test initial_time(o) == 0
+        @test final_time(o) == Index(1)
 
         @def o begin
             v ∈ R², variable
             s ∈ [v[1], v[2]], time
         end
-        @test o.initial_time == Index(1)
-        @test o.final_time == Index(2)
+        @test initial_time(o) == Index(1)
+        @test final_time(o) == Index(2)
 
         @def o begin
             v ∈ R², variable
@@ -240,8 +240,8 @@ function test_onepass()
             sf = v₂
             s ∈ [s0, sf], time
         end
-        @test o.initial_time == Index(1)
-        @test o.final_time == Index(2)
+        @test initial_time(o) == Index(1)
+        @test final_time(o) == Index(2)
 
         @test_throws IncorrectArgument @def o begin
             t0 ∈ R², variable
@@ -275,8 +275,8 @@ function test_onepass()
             a ∈ R, variable
         end
         @test ocp isa OptimalControlModel
-        @test ocp.variable_dimension == 1
-        @test ocp.variable_name == "a"
+        @test variable_dimension(ocp) == 1
+        @test variable_name(ocp) == "a"
 
         t0 = 0.0
         tf = 0.1
@@ -285,8 +285,8 @@ function test_onepass()
             a ∈ R³, variable
         end
         @test ocp isa OptimalControlModel
-        @test ocp.variable_dimension == 3
-        @test ocp.variable_name == "a"
+        @test variable_dimension(ocp) == 3
+        @test variable_name(ocp) == "a"
     end
 
     # ---------------------------------------------------------------
@@ -296,16 +296,16 @@ function test_onepass()
 
         t0 = 0
         @def o t ∈ [t0, t0 + 4], time
-        @test o.initial_time == t0
-        @test o.final_time == t0 + 4
+        @test initial_time(o) == t0
+        @test final_time(o) == t0 + 4
 
         @test_throws ParsingError @def o t ∈ 1
 
         @def ocp t ∈ [0.0, 1.0], time
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == 0.0
-        @test ocp.final_time == 1.0
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == 0.0
+        @test final_time(ocp) == 1.0
 
         t0 = 3.0
         @def ocp begin
@@ -313,9 +313,9 @@ function test_onepass()
             t ∈ [t0, tf], time
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == Index(1)
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == Index(1)
 
         tf = 3.14
         @def ocp begin
@@ -323,9 +323,9 @@ function test_onepass()
             t ∈ [t0, tf], time
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == Index(1)
-        @test ocp.final_time == tf
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == Index(1)
+        @test final_time(ocp) == tf
     end
 
     # ---------------------------------------------------------------
@@ -337,8 +337,8 @@ function test_onepass()
             x ∈ R, state
             u ∈ R, control
         end
-        @test o.state_dimension == 1
-        @test o.control_dimension == 1
+        @test state_dimension(o) == 1
+        @test control_dimension(o) == 1
 
         # state
         t0 = 1.0
@@ -348,11 +348,11 @@ function test_onepass()
             u ∈ R, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == 1
-        @test ocp.state_name == "u"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == 1
+        @test state_name(ocp) == "u"
 
         t0 = 2.0
         tf = 2.1
@@ -361,11 +361,11 @@ function test_onepass()
             v ∈ R^4, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == 4
-        @test ocp.state_name == "v"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == 4
+        @test state_name(ocp) == "v"
 
         t0 = 3.0
         tf = 3.1
@@ -374,11 +374,11 @@ function test_onepass()
             w ∈ R^3, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == 3
-        @test ocp.state_name == "w"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == 3
+        @test state_name(ocp) == "w"
 
         t0 = 4.0
         tf = 4.1
@@ -387,11 +387,11 @@ function test_onepass()
             a ∈ R, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == 1
-        @test ocp.state_name == "a"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == 1
+        @test state_name(ocp) == "a"
 
         t0 = 5.0
         tf = 5.1
@@ -400,11 +400,11 @@ function test_onepass()
             b ∈ R¹, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == 1
-        @test ocp.state_name == "b"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == 1
+        @test state_name(ocp) == "b"
 
         t0 = 6.0
         tf = 6.1
@@ -413,11 +413,11 @@ function test_onepass()
             u ∈ R⁹, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == 9
-        @test ocp.state_name == "u"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == 9
+        @test state_name(ocp) == "u"
 
         n = 3
         t0 = 7.0
@@ -427,11 +427,11 @@ function test_onepass()
             u ∈ R^n, state
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.state_dimension == n
-        @test ocp.state_name == "u"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test state_dimension(ocp) == n
+        @test state_name(ocp) == "u"
 
         # control
         t0 = 1.0
@@ -441,11 +441,11 @@ function test_onepass()
             u ∈ R, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == 1
-        @test ocp.control_name == "u"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == 1
+        @test control_name(ocp) == "u"
 
         t0 = 2.0
         tf = 2.1
@@ -454,11 +454,11 @@ function test_onepass()
             v ∈ R^4, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == 4
-        @test ocp.control_name == "v"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == 4
+        @test control_name(ocp) == "v"
 
         t0 = 3.0
         tf = 3.1
@@ -467,11 +467,11 @@ function test_onepass()
             w ∈ R^3, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == 3
-        @test ocp.control_name == "w"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == 3
+        @test control_name(ocp) == "w"
 
         t0 = 4.0
         tf = 4.1
@@ -480,11 +480,11 @@ function test_onepass()
             a ∈ R, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == 1
-        @test ocp.control_name == "a"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == 1
+        @test control_name(ocp) == "a"
 
         t0 = 5.0
         tf = 5.1
@@ -493,11 +493,11 @@ function test_onepass()
             b ∈ R¹, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == 1
-        @test ocp.control_name == "b"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == 1
+        @test control_name(ocp) == "b"
 
         t0 = 6.0
         tf = 6.1
@@ -506,11 +506,11 @@ function test_onepass()
             u ∈ R⁹, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == 9
-        @test ocp.control_name == "u"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == 9
+        @test control_name(ocp) == "u"
 
         n = 3
         t0 = 7.0
@@ -520,11 +520,11 @@ function test_onepass()
             u ∈ R^n, control
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_dimension == n
-        @test ocp.control_name == "u"
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_dimension(ocp) == n
+        @test control_name(ocp) == "u"
     end
 
     # ---------------------------------------------------------------
@@ -538,11 +538,11 @@ function test_onepass()
             u ∈ R^2, control
             ẋ(t) == [x[1](t) + 2u[2](t), 2x[3](t), x[1](t) + u[2](t)]
         end
-        @test o.state_dimension == 3
-        @test o.control_dimension == 2
+        @test state_dimension(o) == 3
+        @test control_dimension(o) == 2
         x = [1, 2, 3]
         u = [-1, 2]
-        @test o.dynamics(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
+        @test dynamics(o)(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
         @def o begin
             z ∈ R², variable
             s ∈ [0, z₁], time
@@ -556,7 +556,7 @@ function test_onepass()
         z = [5, 6]
         y = [1, 2, 3, 4]
         w = 9
-        @test o.dynamics(y, w, z) == [y[1], y[3]^2 + w + z[1], 0, 0]
+        @test dynamics(o)(y, w, z) == [y[1], y[3]^2 + w + z[1], 0, 0]
 
         @def o begin
             z ∈ R², variable
@@ -571,7 +571,7 @@ function test_onepass()
         z = [5, 6]
         y = [1, 2, 3, 4]
         w = 9
-        @test_throws MethodError o.dynamics(y, w, z)
+        @test_throws MethodError dynamics(o)(y, w, z)
 
         @def o begin
             z ∈ R², variable
@@ -588,7 +588,7 @@ function test_onepass()
         y0 = y
         yf = 3y0
         ww = 19
-        @test o.dynamics(y, ww, z) == [y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test dynamics(o)(y, ww, z) == [y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
 
         @def o begin
             z ∈ R², variable
@@ -606,8 +606,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 11
-        @test_throws MethodError o.dynamics(y, w, z)
-        @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
+        @test_throws MethodError dynamics(o)(y, w, z)
+        @test mayer(o)(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
     end
 
     # ---------------------------------------------------------------
@@ -721,8 +721,8 @@ function test_onepass()
         u = 3
         @test constraint(o, :eq1)(x0, xf) == x0[1]
         @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test o.dynamics(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test o.lagrange(x, u) == u^2 + x[1]
+        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -742,8 +742,8 @@ function test_onepass()
         u = 3
         @test constraint(o, :eq1)(x0, xf) == x0[1]
         @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test o.dynamics(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test o.lagrange(x, u) == u^2 + x[1]
+        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             z ∈ R², variable
@@ -765,8 +765,8 @@ function test_onepass()
         z = [4, 5]
         @test constraint(o, :eq1)(x0, xf, z) == x0[1]
         @test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
-        @test o.dynamics(x, u, z) == [x[2], (x[1] + 2x[2])^2 + z[1]]
-        @test o.lagrange(x, u, z) == u^2 + z[2] * x[1]
+        @test dynamics(o)(x, u, z) == [x[2], (x[1] + 2x[2])^2 + z[1]]
+        @test lagrange(o)(x, u, z) == u^2 + z[2] * x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -785,8 +785,8 @@ function test_onepass()
         u = 3
         @test constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
         @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test o.dynamics(x, u) == [x[2], x[1]^2]
-        @test o.lagrange(x, u) == u^2 + x[1]
+        @test dynamics(o)(x, u) == [x[2], x[1]^2]
+        @test lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             z ∈ R, variable
@@ -807,8 +807,8 @@ function test_onepass()
         z = 4
         @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
         @test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
-        @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z]
-        @test o.lagrange(x, u, z) == u^2 + z * x[1]
+        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z ∈ R, variable
@@ -831,8 +831,8 @@ function test_onepass()
         @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
         @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
         @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
-        @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z]
-        @test o.lagrange(x, u, z) == u^2 + z * x[1]
+        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z ∈ R, variable
@@ -855,14 +855,14 @@ function test_onepass()
         @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
         @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
         @test constraint(o, :eq3)(x0, xf, z) == x0
-        @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z]
-        @test o.lagrange(x, u, z) == u^2 + z * x[1]
-        @test o.constraints[:eq1][3] == 0
-        @test o.constraints[:eq1][4] == 1
-        @test o.constraints[:eq2][3] == 0
-        @test o.constraints[:eq2][4] == 1
-        @test o.constraints[:eq3][3] == [0, 0]
-        @test o.constraints[:eq3][4] == [1, 1]
+        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
+        @test constraints(o)[:eq1][3] == 0
+        @test constraints(o)[:eq1][4] == 1
+        @test constraints(o)[:eq2][3] == 0
+        @test constraints(o)[:eq2][4] == 1
+        @test constraints(o)[:eq3][3] == [0, 0]
+        @test constraints(o)[:eq3][4] == [1, 1]
 
         @def o begin
             v ∈ R², variable
@@ -946,36 +946,36 @@ function test_onepass()
             v ≤ 0, (15)
         end
 
-        @test o.constraints[:eq1][3] == -Inf
-        @test o.constraints[:eq2][3] == -Inf
-        @test o.constraints[:eq3][3] == -Inf
-        @test o.constraints[:eq4][3] == -Inf
-        @test o.constraints[:eq5][3] == -Inf
-        @test o.constraints[:eq6][3] == -Inf
-        @test o.constraints[:eq7][3] == -Inf
-        @test o.constraints[:eq8][3] == -Inf
-        @test o.constraints[:eq9][3] == -Inf
-        @test o.constraints[:eq10][3] == -Inf
-        @test o.constraints[:eq11][3] == -Inf
-        @test o.constraints[:eq12][3] == -Inf
-        @test o.constraints[:eq13][3] == -Inf
-        @test o.constraints[:eq14][3] == -Inf
-        @test o.constraints[:eq15][3] == -Inf
-        @test o.constraints[:eq1][4] == 0
-        @test o.constraints[:eq2][4] == 0
-        @test o.constraints[:eq3][4] == 0
-        @test o.constraints[:eq4][4] == 0
-        @test o.constraints[:eq5][4] == 0
-        @test o.constraints[:eq6][4] == 0
-        @test o.constraints[:eq7][4] == 0
-        @test o.constraints[:eq8][4] == 0
-        @test o.constraints[:eq9][4] == 0
-        @test o.constraints[:eq10][4] == 0
-        @test o.constraints[:eq11][4] == 0
-        @test o.constraints[:eq12][4] == 0
-        @test o.constraints[:eq13][4] == 0
-        @test o.constraints[:eq14][4] == 0
-        @test o.constraints[:eq15][4] == 0
+        @test constraints(o)[:eq1][3] == -Inf
+        @test constraints(o)[:eq2][3] == -Inf
+        @test constraints(o)[:eq3][3] == -Inf
+        @test constraints(o)[:eq4][3] == -Inf
+        @test constraints(o)[:eq5][3] == -Inf
+        @test constraints(o)[:eq6][3] == -Inf
+        @test constraints(o)[:eq7][3] == -Inf
+        @test constraints(o)[:eq8][3] == -Inf
+        @test constraints(o)[:eq9][3] == -Inf
+        @test constraints(o)[:eq10][3] == -Inf
+        @test constraints(o)[:eq11][3] == -Inf
+        @test constraints(o)[:eq12][3] == -Inf
+        @test constraints(o)[:eq13][3] == -Inf
+        @test constraints(o)[:eq14][3] == -Inf
+        @test constraints(o)[:eq15][3] == -Inf
+        @test constraints(o)[:eq1][4] == 0
+        @test constraints(o)[:eq2][4] == 0
+        @test constraints(o)[:eq3][4] == 0
+        @test constraints(o)[:eq4][4] == 0
+        @test constraints(o)[:eq5][4] == 0
+        @test constraints(o)[:eq6][4] == 0
+        @test constraints(o)[:eq7][4] == 0
+        @test constraints(o)[:eq8][4] == 0
+        @test constraints(o)[:eq9][4] == 0
+        @test constraints(o)[:eq10][4] == 0
+        @test constraints(o)[:eq11][4] == 0
+        @test constraints(o)[:eq12][4] == 0
+        @test constraints(o)[:eq13][4] == 0
+        @test constraints(o)[:eq14][4] == 0
+        @test constraints(o)[:eq15][4] == 0
 
         @def o begin
             v ∈ R, variable
@@ -1014,36 +1014,36 @@ function test_onepass()
             v ≥ 0, (15)
         end
 
-        @test o.constraints[:eq1][3] == 0
-        @test o.constraints[:eq2][3] == 0
-        @test o.constraints[:eq3][3] == 0
-        @test o.constraints[:eq4][3] == 0
-        @test o.constraints[:eq5][3] == 0
-        @test o.constraints[:eq6][3] == 0
-        @test o.constraints[:eq7][3] == 0
-        @test o.constraints[:eq8][3] == 0
-        @test o.constraints[:eq9][3] == 0
-        @test o.constraints[:eq10][3] == 0
-        @test o.constraints[:eq11][3] == 0
-        @test o.constraints[:eq12][3] == 0
-        @test o.constraints[:eq13][3] == 0
-        @test o.constraints[:eq14][3] == 0
-        @test o.constraints[:eq15][3] == 0
-        @test o.constraints[:eq1][4] == Inf
-        @test o.constraints[:eq2][4] == Inf
-        @test o.constraints[:eq3][4] == Inf
-        @test o.constraints[:eq4][4] == Inf
-        @test o.constraints[:eq5][4] == Inf
-        @test o.constraints[:eq6][4] == Inf
-        @test o.constraints[:eq7][4] == Inf
-        @test o.constraints[:eq8][4] == Inf
-        @test o.constraints[:eq9][4] == Inf
-        @test o.constraints[:eq10][4] == Inf
-        @test o.constraints[:eq11][4] == Inf
-        @test o.constraints[:eq12][4] == Inf
-        @test o.constraints[:eq13][4] == Inf
-        @test o.constraints[:eq14][4] == Inf
-        @test o.constraints[:eq15][4] == Inf
+        @test constraints(o)[:eq1][3] == 0
+        @test constraints(o)[:eq2][3] == 0
+        @test constraints(o)[:eq3][3] == 0
+        @test constraints(o)[:eq4][3] == 0
+        @test constraints(o)[:eq5][3] == 0
+        @test constraints(o)[:eq6][3] == 0
+        @test constraints(o)[:eq7][3] == 0
+        @test constraints(o)[:eq8][3] == 0
+        @test constraints(o)[:eq9][3] == 0
+        @test constraints(o)[:eq10][3] == 0
+        @test constraints(o)[:eq11][3] == 0
+        @test constraints(o)[:eq12][3] == 0
+        @test constraints(o)[:eq13][3] == 0
+        @test constraints(o)[:eq14][3] == 0
+        @test constraints(o)[:eq15][3] == 0
+        @test constraints(o)[:eq1][4] == Inf
+        @test constraints(o)[:eq2][4] == Inf
+        @test constraints(o)[:eq3][4] == Inf
+        @test constraints(o)[:eq4][4] == Inf
+        @test constraints(o)[:eq5][4] == Inf
+        @test constraints(o)[:eq6][4] == Inf
+        @test constraints(o)[:eq7][4] == Inf
+        @test constraints(o)[:eq8][4] == Inf
+        @test constraints(o)[:eq9][4] == Inf
+        @test constraints(o)[:eq10][4] == Inf
+        @test constraints(o)[:eq11][4] == Inf
+        @test constraints(o)[:eq12][4] == Inf
+        @test constraints(o)[:eq13][4] == Inf
+        @test constraints(o)[:eq14][4] == Inf
+        @test constraints(o)[:eq15][4] == Inf
 
         @def o begin
             v ∈ R^2, variable
@@ -1072,26 +1072,26 @@ function test_onepass()
             [v₁^2, 0] ≤ [0, 0], (10)
         end
 
-        @test o.constraints[:eq1][3] == -[Inf, Inf]
-        @test o.constraints[:eq2][3] == -[Inf, Inf]
-        @test o.constraints[:eq3][3] == -[Inf, Inf]
-        @test o.constraints[:eq4][3] == -[Inf, Inf]
-        @test o.constraints[:eq5][3] == -[Inf, Inf]
-        @test o.constraints[:eq6][3] == -[Inf, Inf]
-        @test o.constraints[:eq7][3] == -[Inf, Inf]
-        @test o.constraints[:eq8][3] == -[Inf, Inf]
-        @test o.constraints[:eq9][3] == -[Inf, Inf]
-        @test o.constraints[:eq10][3] == -[Inf, Inf]
-        @test o.constraints[:eq1][4] == [0, 0]
-        @test o.constraints[:eq2][4] == [0, 0]
-        @test o.constraints[:eq3][4] == [0, 0]
-        @test o.constraints[:eq4][4] == [0, 0]
-        @test o.constraints[:eq5][4] == [0, 0]
-        @test o.constraints[:eq6][4] == [0, 0]
-        @test o.constraints[:eq7][4] == [0, 0]
-        @test o.constraints[:eq8][4] == [0, 0]
-        @test o.constraints[:eq9][4] == [0, 0]
-        @test o.constraints[:eq10][4] == [0, 0]
+        @test constraints(o)[:eq1][3] == -[Inf, Inf]
+        @test constraints(o)[:eq2][3] == -[Inf, Inf]
+        @test constraints(o)[:eq3][3] == -[Inf, Inf]
+        @test constraints(o)[:eq4][3] == -[Inf, Inf]
+        @test constraints(o)[:eq5][3] == -[Inf, Inf]
+        @test constraints(o)[:eq6][3] == -[Inf, Inf]
+        @test constraints(o)[:eq7][3] == -[Inf, Inf]
+        @test constraints(o)[:eq8][3] == -[Inf, Inf]
+        @test constraints(o)[:eq9][3] == -[Inf, Inf]
+        @test constraints(o)[:eq10][3] == -[Inf, Inf]
+        @test constraints(o)[:eq1][4] == [0, 0]
+        @test constraints(o)[:eq2][4] == [0, 0]
+        @test constraints(o)[:eq3][4] == [0, 0]
+        @test constraints(o)[:eq4][4] == [0, 0]
+        @test constraints(o)[:eq5][4] == [0, 0]
+        @test constraints(o)[:eq6][4] == [0, 0]
+        @test constraints(o)[:eq7][4] == [0, 0]
+        @test constraints(o)[:eq8][4] == [0, 0]
+        @test constraints(o)[:eq9][4] == [0, 0]
+        @test constraints(o)[:eq10][4] == [0, 0]
 
         @def o begin
             v ∈ R^2, variable
@@ -1120,26 +1120,26 @@ function test_onepass()
             [v₁^2, 0] ≥ [0, 0], (10)
         end
 
-        @test o.constraints[:eq1][4] == [Inf, Inf]
-        @test o.constraints[:eq2][4] == [Inf, Inf]
-        @test o.constraints[:eq3][4] == [Inf, Inf]
-        @test o.constraints[:eq4][4] == [Inf, Inf]
-        @test o.constraints[:eq5][4] == [Inf, Inf]
-        @test o.constraints[:eq6][4] == [Inf, Inf]
-        @test o.constraints[:eq7][4] == [Inf, Inf]
-        @test o.constraints[:eq8][4] == [Inf, Inf]
-        @test o.constraints[:eq9][4] == [Inf, Inf]
-        @test o.constraints[:eq10][4] == [Inf, Inf]
-        @test o.constraints[:eq1][3] == [0, 0]
-        @test o.constraints[:eq2][3] == [0, 0]
-        @test o.constraints[:eq3][3] == [0, 0]
-        @test o.constraints[:eq4][3] == [0, 0]
-        @test o.constraints[:eq5][3] == [0, 0]
-        @test o.constraints[:eq6][3] == [0, 0]
-        @test o.constraints[:eq7][3] == [0, 0]
-        @test o.constraints[:eq8][3] == [0, 0]
-        @test o.constraints[:eq9][3] == [0, 0]
-        @test o.constraints[:eq10][3] == [0, 0]
+        @test constraints(o)[:eq1][4] == [Inf, Inf]
+        @test constraints(o)[:eq2][4] == [Inf, Inf]
+        @test constraints(o)[:eq3][4] == [Inf, Inf]
+        @test constraints(o)[:eq4][4] == [Inf, Inf]
+        @test constraints(o)[:eq5][4] == [Inf, Inf]
+        @test constraints(o)[:eq6][4] == [Inf, Inf]
+        @test constraints(o)[:eq7][4] == [Inf, Inf]
+        @test constraints(o)[:eq8][4] == [Inf, Inf]
+        @test constraints(o)[:eq9][4] == [Inf, Inf]
+        @test constraints(o)[:eq10][4] == [Inf, Inf]
+        @test constraints(o)[:eq1][3] == [0, 0]
+        @test constraints(o)[:eq2][3] == [0, 0]
+        @test constraints(o)[:eq3][3] == [0, 0]
+        @test constraints(o)[:eq4][3] == [0, 0]
+        @test constraints(o)[:eq5][3] == [0, 0]
+        @test constraints(o)[:eq6][3] == [0, 0]
+        @test constraints(o)[:eq7][3] == [0, 0]
+        @test constraints(o)[:eq8][3] == [0, 0]
+        @test constraints(o)[:eq9][3] == [0, 0]
+        @test constraints(o)[:eq10][3] == [0, 0]
 
         t0 = 9.0
         tf = 9.1
@@ -1163,13 +1163,13 @@ function test_onepass()
             mf ≤ m(t) ≤ m0, (5)
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_name == "u"
-        @test ocp.control_dimension == 2
-        @test ocp.state_name == "x"
-        @test ocp.state_dimension == 3
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_name(ocp) == "u"
+        @test control_dimension(ocp) == 2
+        @test state_name(ocp) == "x"
+        @test state_dimension(ocp) == 3
 
         @def ocp begin
             t ∈ [t0, tf], time
@@ -1185,13 +1185,13 @@ function test_onepass()
             mf ≤ m(t) ≤ m0
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "t"
-        @test ocp.initial_time == t0
-        @test ocp.final_time == tf
-        @test ocp.control_name == "u"
-        @test ocp.control_dimension == 2
-        @test ocp.state_name == "x"
-        @test ocp.state_dimension == 3
+        @test time_name(ocp) == "t"
+        @test initial_time(ocp) == t0
+        @test final_time(ocp) == tf
+        @test control_name(ocp) == "u"
+        @test control_dimension(ocp) == 2
+        @test state_name(ocp) == "x"
+        @test state_dimension(ocp) == 3
 
         # dyslexic definition:  t -> u -> x -> t
         u0 = 9.0
@@ -1215,13 +1215,13 @@ function test_onepass()
             bf ≤ b(u) ≤ b0
         end
         @test ocp isa OptimalControlModel
-        @test ocp.time_name == "u"
-        @test ocp.initial_time == u0
-        @test ocp.final_time == uf
-        @test ocp.control_name == "x"
-        @test ocp.control_dimension == 2
-        @test ocp.state_name == "t"
-        @test ocp.state_dimension == 3
+        @test time_name(ocp) == "u"
+        @test initial_time(ocp) == u0
+        @test final_time(ocp) == uf
+        @test control_name(ocp) == "x"
+        @test control_dimension(ocp) == 2
+        @test state_name(ocp) == "t"
+        @test state_dimension(ocp) == 3
 
         #
         # test all constraints on @def macro
@@ -1255,10 +1255,10 @@ function test_onepass()
             y0_b ≤ x[2:3](t0) ≤ y0_u
         end
         @test ocp1 isa OptimalControlModel
-        @test ocp1.state_dimension == n
-        @test ocp1.control_dimension == n
-        @test ocp1.initial_time == t0
-        @test ocp1.final_time == tf
+        @test state_dimension(ocp1) == n
+        @test control_dimension(ocp1) == n
+        @test initial_time(ocp1) == t0
+        @test final_time(ocp1) == tf
 
         t0 = 0.1
         tf = 1.1
@@ -1276,10 +1276,10 @@ function test_onepass()
             [1, 2] ≤ x[2:3](t0) ≤ [3, 4], initial_5
         end
         @test ocp2 isa OptimalControlModel
-        @test ocp2.state_dimension == n
-        @test ocp2.control_dimension == n
-        @test ocp2.initial_time == t0
-        @test ocp2.final_time == tf
+        @test state_dimension(ocp2) == n
+        @test control_dimension(ocp2) == n
+        @test initial_time(ocp2) == t0
+        @test final_time(ocp2) == tf
 
         # all used variables must be defined before each test
         xf = 11.11 * ones(4)
@@ -1305,10 +1305,10 @@ function test_onepass()
             yf_b ≤ x[2:3](tf) ≤ yf_u
         end
         @test ocp3 isa OptimalControlModel
-        @test ocp3.state_dimension == n
-        @test ocp3.control_dimension == n
-        @test ocp3.initial_time == t0
-        @test ocp3.final_time == tf
+        @test state_dimension(ocp3) == n
+        @test control_dimension(ocp3) == n
+        @test initial_time(ocp3) == t0
+        @test final_time(ocp3) == tf
 
         t0 = 0.3
         tf = 1.3
@@ -1332,10 +1332,10 @@ function test_onepass()
             yf_b ≤ x[2:3](tf) ≤ yf_u, final_5
         end
         @test ocp4 isa OptimalControlModel
-        @test ocp4.state_dimension == n
-        @test ocp4.control_dimension == n
-        @test ocp4.initial_time == t0
-        @test ocp4.final_time == tf
+        @test state_dimension(ocp4) == n
+        @test control_dimension(ocp4) == n
+        @test initial_time(ocp4) == t0
+        @test final_time(ocp4) == tf
 
         # === boundary
         t0 = 0.4
@@ -1353,10 +1353,10 @@ function test_onepass()
             1 ≤ x[2](tf)^2 ≤ 2
         end
         @test ocp5 isa OptimalControlModel
-        @test ocp5.state_dimension == n
-        @test ocp5.control_dimension == n
-        @test ocp5.initial_time == t0
-        @test ocp5.final_time == tf
+        @test state_dimension(ocp5) == n
+        @test control_dimension(ocp5) == n
+        @test initial_time(ocp5) == t0
+        @test final_time(ocp5) == tf
 
         t0 = 0.5
         tf = 1.5
@@ -1373,10 +1373,10 @@ function test_onepass()
             1 ≤ x[2](tf)^2 ≤ 2, boundary_6
         end
         @test ocp6 isa OptimalControlModel
-        @test ocp6.state_dimension == n
-        @test ocp6.control_dimension == n
-        @test ocp6.initial_time == t0
-        @test ocp6.final_time == tf
+        @test state_dimension(ocp6) == n
+        @test control_dimension(ocp6) == n
+        @test initial_time(ocp6) == t0
+        @test final_time(ocp6) == tf
 
         # define more variables
         u_b = 1.0
@@ -1401,10 +1401,10 @@ function test_onepass()
             1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2
         end
         @test ocp7 isa OptimalControlModel
-        @test ocp7.state_dimension == n
-        @test ocp7.control_dimension == n
-        @test ocp7.initial_time == t0
-        @test ocp7.final_time == tf
+        @test state_dimension(ocp7) == n
+        @test control_dimension(ocp7) == n
+        @test initial_time(ocp7) == t0
+        @test final_time(ocp7) == tf
 
         t0 = 0.7
         tf = 1.7
@@ -1426,10 +1426,10 @@ function test_onepass()
             1 ≤ u[1](t)^2 + u[2](t)^2 ≤ 2, control_8
         end
         @test ocp8 isa OptimalControlModel
-        @test ocp8.state_dimension == n
-        @test ocp8.control_dimension == n
-        @test ocp8.initial_time == t0
-        @test ocp8.final_time == tf
+        @test state_dimension(ocp8) == n
+        @test control_dimension(ocp8) == n
+        @test initial_time(ocp8) == t0
+        @test final_time(ocp8) == tf
 
         # more vars
         x_b = 10.0
@@ -1457,10 +1457,10 @@ function test_onepass()
             [-1, 1] ≤ x[1:2](t) + x[3:4](t) ≤ [0, 2]
         end
         @test ocp9 isa OptimalControlModel
-        @test ocp9.state_dimension == n
-        @test ocp9.control_dimension == n
-        @test ocp9.initial_time == t0
-        @test ocp9.final_time == tf
+        @test state_dimension(ocp9) == n
+        @test control_dimension(ocp9) == n
+        @test initial_time(ocp9) == t0
+        @test final_time(ocp9) == tf
 
         t0 = 0.9
         tf = 1.9
@@ -1479,10 +1479,10 @@ function test_onepass()
             [-1, 1] ≤ x[1:2](t) + x[3:4](t) ≤ [0, 2], state_8
         end
         @test ocp10 isa OptimalControlModel
-        @test ocp10.state_dimension == n
-        @test ocp10.control_dimension == n
-        @test ocp10.initial_time == t0
-        @test ocp10.final_time == tf
+        @test state_dimension(ocp10) == n
+        @test control_dimension(ocp10) == n
+        @test initial_time(ocp10) == t0
+        @test final_time(ocp10) == tf
 
         # === mixed
         t0 = 0.111
@@ -1496,10 +1496,10 @@ function test_onepass()
             [-1, 1] ≤ u[2](t) * x[1:2](t) ≤ [0, 2]
         end
         @test ocp11 isa OptimalControlModel
-        @test ocp11.state_dimension == n
-        @test ocp11.control_dimension == n
-        @test ocp11.initial_time == t0
-        @test ocp11.final_time == tf
+        @test state_dimension(ocp11) == n
+        @test control_dimension(ocp11) == n
+        @test initial_time(ocp11) == t0
+        @test final_time(ocp11) == tf
 
         @def ocp12 begin
             t ∈ [t0, tf], time
@@ -1509,10 +1509,10 @@ function test_onepass()
             [-1, 1] ≤ u[2](t) * x[1:2](t) ≤ [0, 2], mixed_2
         end
         @test ocp12 isa OptimalControlModel
-        @test ocp12.state_dimension == n
-        @test ocp12.control_dimension == n
-        @test ocp12.initial_time == t0
-        @test ocp12.final_time == tf
+        @test state_dimension(ocp12) == n
+        @test control_dimension(ocp12) == n
+        @test initial_time(ocp12) == t0
+        @test final_time(ocp12) == tf
 
         # === dynamics
 
@@ -1525,10 +1525,10 @@ function test_onepass()
             ẋ(t) == 2x(t) + u(t)^2
         end
         @test ocp13 isa OptimalControlModel
-        @test ocp13.state_dimension == 1
-        @test ocp13.control_dimension == 1
-        @test ocp13.initial_time == t0
-        @test ocp13.final_time == tf
+        @test state_dimension(ocp13) == 1
+        @test control_dimension(ocp13) == 1
+        @test initial_time(ocp13) == t0
+        @test final_time(ocp13) == tf
 
         # some syntax (even parseable) are not allowed
         # this is the actual exhaustive list
@@ -1574,9 +1574,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :min
 
         t0 = 0
         tf = 1
@@ -1602,9 +1602,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == -0.5u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == -0.5u^2
+        @test criterion(o) == :min
 
         t0 = 0
         tf = 1
@@ -1630,9 +1630,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :min
 
         t0 = 0
         tf = 1
@@ -1658,9 +1658,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :min
 
         t0 = 0
         tf = 1
@@ -1686,9 +1686,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == -0.5u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == -0.5u^2
+        @test criterion(o) == :min
 
         t0 = 0
         tf = 1
@@ -1714,9 +1714,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == (-0.5 + tf) * u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == (-0.5 + tf) * u^2
+        @test criterion(o) == :min
 
         t0 = 0
         tf = 1
@@ -1768,9 +1768,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :max
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :max
 
         t0 = 0
         tf = 1
@@ -1796,9 +1796,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == -0.5u^2
-        @test o.criterion == :max
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == -0.5u^2
+        @test criterion(o) == :max
 
         t0 = 0
         tf = 1
@@ -1824,9 +1824,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :max
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :max
 
         t0 = 0
         tf = 1
@@ -1852,9 +1852,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :max
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :max
 
         t0 = 0
         tf = 1
@@ -1880,9 +1880,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == -0.5u^2
-        @test o.criterion == :max
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == -0.5u^2
+        @test criterion(o) == :max
 
         # -----------------------------------
         t0 = 0.0
@@ -1948,9 +1948,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 3xf
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 3xf
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -1962,9 +1962,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -1976,9 +1976,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == 2(x + u)
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == 2(x + u)
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -1990,9 +1990,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == -(x + u)
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == -(x + u)
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -2004,9 +2004,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == -2(x + u)
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == -2(x + u)
+        @test criterion(o) == :min
 
         @test_throws ParsingError @def o begin
             t ∈ [0, 1], time
@@ -2035,9 +2035,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 5xf
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == x0 + 5xf
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :max
 
         @def o begin
             t ∈ [0, 1], time
@@ -2049,9 +2049,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == 2(x + u)
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == 2(x + u)
+        @test criterion(o) == :max
 
         @def o begin
             t ∈ [0, 1], time
@@ -2063,9 +2063,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == -(x + u)
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == -(x + u)
+        @test criterion(o) == :max
 
         @def o begin
             t ∈ [0, 1], time
@@ -2077,9 +2077,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == -2(x + u)
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == -2(x + u)
+        @test criterion(o) == :max
 
         @test_throws ParsingError @def o begin
             t ∈ [0, 1], time
@@ -2108,9 +2108,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -2122,9 +2122,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == 2(x + u)
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == 2(x + u)
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -2136,9 +2136,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == -(x0 + 2xf)
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :min
 
         @def o begin
             t ∈ [0, 1], time
@@ -2150,9 +2150,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == -(x0 + 2xf)
-        @test o.lagrange(x, u) == 2(x + u)
-        @test o.criterion == :min
+        @test mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test lagrange(o)(x, u) == 2(x + u)
+        @test criterion(o) == :min
 
         @test_throws ParsingError @def o begin
             t ∈ [0, 1], time
@@ -2181,9 +2181,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :max
 
         @def o begin
             t ∈ [0, 1], time
@@ -2195,9 +2195,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == x0 + 2xf
-        @test o.lagrange(x, u) == 2(x + u)
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == x0 + 2xf
+        @test lagrange(o)(x, u) == 2(x + u)
+        @test criterion(o) == :max
 
         @def o begin
             t ∈ [0, 1], time
@@ -2209,9 +2209,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == -(x0 + 2xf)
-        @test o.lagrange(x, u) == x + u
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test lagrange(o)(x, u) == x + u
+        @test criterion(o) == :max
 
         @def o begin
             t ∈ [0, 1], time
@@ -2223,9 +2223,9 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test o.mayer(x0, xf) == -(x0 + 2xf)
-        @test o.lagrange(x, u) == 2(x + u)
-        @test o.criterion == :max
+        @test mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test lagrange(o)(x, u) == 2(x + u)
+        @test criterion(o) == :max
 
         @test_throws ParsingError @def o begin
             t ∈ [0, 1], time
@@ -2258,7 +2258,7 @@ function test_onepass()
         y0 = [1, 2, 3, 4]
         yf = 2 * [1, 2, 3, 4]
         @test is_min(o)
-        @test o.mayer(y0, yf) == y0[3] + yf[4]
+        @test mayer(o)(y0, yf) == y0[3] + yf[4]
 
         @def o begin
             s ∈ [0, 1], time
@@ -2271,7 +2271,7 @@ function test_onepass()
         y0 = [1, 2, 3, 4]
         yf = 2 * [1, 2, 3, 4]
         @test is_max(o)
-        @test o.mayer(y0, yf) == y0[3] + yf[4]
+        @test mayer(o)(y0, yf) == y0[3] + yf[4]
 
         @def o begin
             z ∈ R^2, variable
@@ -2286,7 +2286,7 @@ function test_onepass()
         y0 = [1, 2, 3, 4]
         yf = 2 * [1, 2, 3, 4]
         @test is_min(o)
-        @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
+        @test mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
 
         @def o begin
             z ∈ R², variable
@@ -2304,8 +2304,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 7
-        @test o.dynamics(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
-        @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
+        @test dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
 
         @def o begin
             z ∈ R², variable
@@ -2323,8 +2323,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 7
-        @test o.dynamics(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
-        @test o.mayer(y0, yf, z) == y0[3] + yf[4] + z[2]
+        @test dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
 
         @def o begin
             z ∈ R², variable
@@ -2339,7 +2339,7 @@ function test_onepass()
         z = [5, 6]
         y0 = y
         yf = 3y0
-        @test o.mayer(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
+        @test mayer(o)(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
         @def o begin
             z ∈ R², variable
@@ -2357,8 +2357,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 11
-        @test o.dynamics(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
-        @test_throws UndefVarError o.mayer(y0, yf, z)
+        @test dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test_throws UndefVarError mayer(o)(y0, yf, z)
     end
 
     # ---------------------------------------------------------------
@@ -2382,7 +2382,7 @@ function test_onepass()
         d = 4
         x = 10
         u = 20
-        @test o.dynamics(x, u) == x + u + b + 3 + d
+        @test dynamics(o)(x, u) == x + u + b + 3 + d
     end
 
     # ---------------------------------------------------------------
@@ -2487,9 +2487,9 @@ function test_onepass()
             1
         ]
         @test constraint(o, :eq1)(x0, xf) == x0
-        @test o.dynamics(x, u) == A * x + B * u
-        @test o.lagrange(x, u) == 0.5u^2
-        @test o.criterion == :min
+        @test dynamics(o)(x, u) == A * x + B * u
+        @test lagrange(o)(x, u) == 0.5u^2
+        @test criterion(o) == :min
 
         @def o begin
             z in R, variable
@@ -2514,8 +2514,8 @@ function test_onepass()
         @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
         @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
         @test constraint(o, :eq3)(z) == z
-        @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z]
-        @test o.lagrange(x, u, z) == u^2 + z * x[1]
+        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z in R, variable
@@ -2540,8 +2540,8 @@ function test_onepass()
         @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
         @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
         @test constraint(o, :eq3)(z) == z
-        @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z]
-        @test o.lagrange(x, u, z) == u^2 + z * x[1]
+        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z in R^2, variable
@@ -2568,7 +2568,7 @@ function test_onepass()
         @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
         @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
         @test constraint(o, :eq3)(z) == z[1]
-        @test o.dynamics(x, u, z) == [x[2], x[1]^2 + z[1]]
-        @test o.lagrange(x, u, z) == u[1]^2 + z[1] * x[1]
+        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z[1]]
+        @test lagrange(o)(x, u, z) == u[1]^2 + z[1] * x[1]
     end
 end
