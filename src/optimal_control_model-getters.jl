@@ -570,6 +570,13 @@ is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
 """
 $(TYPEDSIGNATURES)
 
+Return `true` if functions defining the ocp are in-place. Return nothing if this information has not yet been set.
+"""
+is_in_place(ocp::OptimalControlModel) = ocp.in_place
+
+"""
+$(TYPEDSIGNATURES)
+
 Return `true` if the model has been defined with free initial time.
 """
 has_free_initial_time(ocp::OptimalControlModel) = (typeof(initial_time(ocp)) == Index)

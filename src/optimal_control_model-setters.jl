@@ -36,11 +36,13 @@ julia> ocp = Model(autonomous=false, variable=true)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; autonomous::Bool = true, variable::Bool = false)
+function Model(; autonomous::Bool = true, variable::Bool = false, in_place::Bool = false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
+    ocp = OptimalControlModel{time_dependence, variable_dependence}()
+    ocp.in_place = in_place
 
-    return OptimalControlModel{time_dependence, variable_dependence}()
+    return ocp
 end
 
 """

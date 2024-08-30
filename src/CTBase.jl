@@ -26,7 +26,7 @@ import ForwardDiff
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using MLStyle # pattern matching
 using Parameters # @with_kw: to have default values in struct
-using Printf # to print an Opt imalControlModel
+using Printf # to print an OptimalControlModel
 using DataStructures # OrderedDict for aliases
 using Unicode # unicode primitives
 using PrettyTables # to print a table
@@ -259,8 +259,11 @@ export Model
 export __OCPModel # redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
 export variable!,
     time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, model_expression!
-export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max
+export is_autonomous, is_fixed
+export is_time_independent, is_time_dependent
+export is_min, is_max
 export is_variable_dependent, is_variable_independent
+export is_in_place
 export nlp_constraints!, constraints, constraints_labels, constraint
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
 export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints

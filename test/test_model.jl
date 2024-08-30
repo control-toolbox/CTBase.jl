@@ -1,6 +1,43 @@
 function test_model() # 30 55 185
     ∅ = Vector{Real}()
 
+    @testset "is_in_place" begin
+        ocp = Model()
+        @test !is_in_place(ocp)
+        ocp = Model(; in_place = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; in_place = true)
+        @test is_in_place(ocp)
+
+        ocp = Model(; autonomous = true, variable = true)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = true, variable = true, in_place = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = true, variable = true, in_place = true)
+        @test is_in_place(ocp)
+
+        ocp = Model(; autonomous = false, variable = true)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = false, variable = true, in_place = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = false, variable = true, in_place = true)
+        @test is_in_place(ocp)
+
+        ocp = Model(; autonomous = true, variable = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = true, variable = false, in_place = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = true, variable = false, in_place = true)
+        @test is_in_place(ocp)
+
+        ocp = Model(; autonomous = false, variable = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = false, variable = false, in_place = false)
+        @test !is_in_place(ocp)
+        ocp = Model(; autonomous = false, variable = false, in_place = true)
+        @test is_in_place(ocp)
+    end
+
     @testset "variable!" begin
         ocp = Model(variable = false)
 
