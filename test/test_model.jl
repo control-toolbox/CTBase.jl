@@ -962,7 +962,7 @@ function test_model() # 30 55 185
         constraint!(ocp_bis, :control, f = dummy, ub = 1, lb = 1, label = :c1)
         constraint!(ocp_bis, :variable, rg = 1:2:3, ub = [0, 0], label = :c2)
 
-        @test ocp.constraints == ocp_bis.constraints
+        @test constraints(ocp) == constraints(ocp_bis)
 
         ocp_ter = Model(variable = true)
         time!(ocp_ter; t0 = 0, tf = 1)
@@ -982,7 +982,7 @@ function test_model() # 30 55 185
         constraint!(ocp_quad, :control, f = dummy, lb = 1, label = :c1)
         constraint!(ocp_quad, :state, rg = 1:2:3, lb = [0, 0], ub = [0, 0], label = :c2)
 
-        @test ocp_ter.constraints == ocp_quad.constraints
+        @test constraints(ocp_ter) == constraints(ocp_quad)
 
         ocp_error = ocp_error = Model(variable = true)
         time!(ocp_error; t0 = 0, tf = 1)

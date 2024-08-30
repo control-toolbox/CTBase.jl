@@ -236,9 +236,9 @@ mutable struct OptimalControlInit
     """
     function OptimalControlInit(sol::OptimalControlSolution; unused_kwargs...)
         return OptimalControlInit(
-            state = sol.state,
-            control = sol.control,
-            variable = sol.variable,
+            state = state(sol),
+            control = control(sol),
+            variable = variable(sol),
             state_dim = state_dimension(sol),
             control_dim = control_dimension(sol),
             variable_dim = variable_dimension(sol),

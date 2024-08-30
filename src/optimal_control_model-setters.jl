@@ -8,6 +8,14 @@
 """
 $(TYPEDSIGNATURES)
 
+Set the model expression of the optimal control problem or `nothing`.
+
+"""
+model_expression!(ocp::OptimalControlModel, model_expression::Expr) = (ocp.model_expression = model_expression; nothing)
+
+"""
+$(TYPEDSIGNATURES)
+
 Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:

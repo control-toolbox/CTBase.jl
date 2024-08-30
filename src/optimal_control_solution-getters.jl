@@ -77,7 +77,7 @@ julia> u  = control_discretized(sol)
 julia> u0 = u[1] # control at initial time
 ```
 """
-control_discretized(sol::OptimalControlSolution) = sol.control.(sol.time_grid)
+control_discretized(sol::OptimalControlSolution) = control(sol).(sol.time_grid)
 
 """
 $(TYPEDSIGNATURES)
@@ -126,7 +126,7 @@ julia> x  = state_discretized(sol)
 julia> x0 = x[1] # state at initial time
 ```
 """
-state_discretized(sol::OptimalControlSolution) = sol.state.(sol.time_grid)
+state_discretized(sol::OptimalControlSolution) = state(sol).(sol.time_grid)
 
 """
 $(TYPEDSIGNATURES)

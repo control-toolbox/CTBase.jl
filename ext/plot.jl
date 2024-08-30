@@ -664,10 +664,10 @@ function __get_data_plot(
     xx::Union{Symbol, Tuple{Symbol, Integer}};
     time::Symbol = :default,
 )
-    T = sol.time_grid
-    X = sol.state.(T)
-    U = sol.control.(T)
-    P = sol.costate.(T)
+    T = time_grid(sol)
+    X = state(sol).(T)
+    U = control(sol).(T)
+    P = costate(sol).(T)
 
     vv, ii = @match xx begin
         ::Symbol => (xx, 1)

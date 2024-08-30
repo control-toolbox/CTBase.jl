@@ -36,9 +36,6 @@ function nlp_constraints!(ocp::OptimalControlModel)
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
 
-    #
-    constraints = ocp.constraints
-
     ξf = Vector{ControlConstraint}()
     ξl = Vector{ctNumber}()
     ξu = Vector{ctNumber}()
@@ -64,7 +61,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
     vl = Vector{ctNumber}()
     vu = Vector{ctNumber}()
 
-    for (_, c) ∈ constraints
+    for (_, c) ∈ constraints(ocp)
         @match c begin
             (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary]
             end => begin

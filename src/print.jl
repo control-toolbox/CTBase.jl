@@ -259,7 +259,7 @@ function Base.show(
         data,
         __is_dynamics_not_set(ocp) ? "X" : "V",
         __is_objective_not_set(ocp) ? "X" : "V",
-        isempty(ocp.constraints) ? "X" : "V",
+        isempty(constraints(ocp)) ? "X" : "V",
     )
     println("")
     h1 = Highlighter((data, i, j) -> data[i, j] == "X", bold = true, foreground = :red)
