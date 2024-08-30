@@ -2,7 +2,7 @@ function test_aqua()
     @testset "Aqua.jl" begin
         Aqua.test_all(
             CTBase;
-            ambiguities=false,
+            ambiguities = false,
             #stale_deps=(ignore=[:SomePackage],),
             deps_compat = (ignore = [:LinearAlgebra, :Unicode],),
             piracies = true,
