@@ -248,7 +248,7 @@ p_time!(p, ocp, t, t0, tf; log = false) = begin
             end => :(time!($ocp; ind0 = $i, tf = $tf, name = $tt))
             :($v1) && if (v1 == p.v)
             end => quote
-                (variable_dimension($ocp) ≠ 1) && throw(
+                ($ocp.variable_dimension ≠ 1) && throw(
                     IncorrectArgument("variable must be of dimension one for a time"),
                 )
                 time!($ocp; ind0 = 1, tf = $tf, name = $tt)
@@ -260,7 +260,7 @@ p_time!(p, ocp, t, t0, tf; log = false) = begin
             end => :(time!($ocp; t0 = $t0, indf = $i, name = $tt))
             :($v1) && if (v1 == p.v)
             end => quote
-                (variable_dimension($ocp) ≠ 1) && throw(
+                ($ocp.variable_dimension ≠ 1) && throw(
                     IncorrectArgument("variable must be of dimension one for a time"),
                 )
                 time!($ocp; t0 = $t0, indf = 1, name = $tt)
@@ -622,7 +622,7 @@ macro def(ocp, e, log = false)
             _ => :($ocp = __OCPModel(autonomous = false, variable = true))
         end
         ee = QuoteNode(e)
-        code = Expr(:block, init, code, :(model_expression!($ocp, $ee); $ocp))
+        code = Expr(:block, init, code, :($ocp.model_expression! = $ee; $ocp))
         esc(code)
     catch ex
         :(throw($ex)) # can be caught by user
