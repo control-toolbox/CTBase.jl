@@ -43,18 +43,18 @@ function __OptimalControlSolution(
     sol = OptimalControlSolution()
 
     # data from ocp 
-    sol.initial_time_name = ocp.initial_time_name
-    sol.final_time_name = ocp.final_time_name
-    sol.time_name = ocp.time_name
-    sol.control_dimension = ocp.control_dimension
-    sol.control_components_names = ocp.control_components_names
-    sol.control_name = ocp.control_name
-    sol.state_dimension = ocp.state_dimension
-    sol.state_components_names = ocp.state_components_names
-    sol.state_name = ocp.state_name
-    sol.variable_dimension = ocp.variable_dimension
-    sol.variable_components_names = ocp.variable_components_names
-    sol.variable_name = ocp.variable_name
+    sol.initial_time_name = initial_time_name(ocp)
+    sol.final_time_name = final_time_name(ocp)
+    sol.time_name = time_name(ocp)
+    sol.control_dimension = control_dimension(ocp)
+    sol.control_components_names = control_components_names(ocp)
+    sol.control_name = control_name(ocp)
+    sol.state_dimension = state_dimension(ocp)
+    sol.state_components_names = state_components_names(ocp)
+    sol.state_name = state_name(ocp)
+    sol.variable_dimension = variable_dimension(ocp)
+    sol.variable_components_names = variable_components_names(ocp)
+    sol.variable_name = variable_name(ocp)
 
     # data from args 
     sol.state = state
@@ -100,7 +100,7 @@ function OptimalControlSolution(
     state::Function,
     control::Function,
     objective::ctNumber,
-    #variable::Union{Nothing, Variable}=nothing,
+    variable::Union{Nothing, Variable}=nothing,
     costate::Union{Nothing, Function} = nothing,
     time_grid::Union{Nothing, TimesDisc} = nothing,
     iterations::Union{Nothing, Integer} = nothing,
@@ -110,10 +110,10 @@ function OptimalControlSolution(
     infos::Dict{Symbol, Any} = Dict{Symbol, Any}(),
     boundary_constraints::Union{Nothing, ctVector} = nothing,
     mult_boundary_constraints::Union{Nothing, ctVector} = nothing,
-    #variable_constraints::Union{Nothing, ctVector}=nothing,
-    #mult_variable_constraints::Union{Nothing, ctVector}=nothing,
-    #mult_variable_box_lower::Union{Nothing, ctVector}=nothing,
-    #mult_variable_box_upper::Union{Nothing, ctVector}=nothing,
+    variable_constraints::Union{Nothing, ctVector}=nothing,
+    mult_variable_constraints::Union{Nothing, ctVector}=nothing,
+    mult_variable_box_lower::Union{Nothing, ctVector}=nothing,
+    mult_variable_box_upper::Union{Nothing, ctVector}=nothing,
     control_constraints::Union{Nothing, Function} = nothing,
     mult_control_constraints::Union{Nothing, Function} = nothing,
     state_constraints::Union{Nothing, Function} = nothing,
@@ -132,7 +132,7 @@ function OptimalControlSolution(
         objective = objective,
         costate = costate,
         time_grid = time_grid,
-        #variable=variable,
+        variable=variable,
         iterations = iterations,
         stopping = stopping,
         message = message,
@@ -140,10 +140,10 @@ function OptimalControlSolution(
         infos = infos,
         boundary_constraints = boundary_constraints,
         mult_boundary_constraints = mult_boundary_constraints,
-        #variable_constraints = variable_constraints,
-        #mult_variable_constraints = mult_variable_constraints,
-        #mult_variable_box_lower = mult_variable_box_lower,
-        #mult_variable_box_upper = mult_variable_box_upper,
+        variable_constraints = variable_constraints,
+        mult_variable_constraints = mult_variable_constraints,
+        mult_variable_box_lower = mult_variable_box_lower,
+        mult_variable_box_upper = mult_variable_box_upper,
         control_constraints = control_constraints,
         mult_control_constraints = mult_control_constraints,
         state_constraints = state_constraints,

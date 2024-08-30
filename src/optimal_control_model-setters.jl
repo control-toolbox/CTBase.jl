@@ -8,6 +8,14 @@
 """
 $(TYPEDSIGNATURES)
 
+Set the model expression of the optimal control problem or `nothing`.
+
+"""
+model_expression!(ocp::OptimalControlModel, model_expression::Expr) = (ocp.model_expression = model_expression; nothing)
+
+"""
+$(TYPEDSIGNATURES)
+
 Return a new `OptimalControlModel` instance, that is a model of an optimal control problem.
 
 The model is defined by the following optional keyword argument:
@@ -142,33 +150,33 @@ Define the state dimension and possibly the names of each component.
 
 ```@example
 julia> state!(ocp, 1)
-julia> ocp.state_dimension
+julia> state_dimension(ocp)
 1
-julia> ocp.state_components_names
+julia> state_components_names(ocp)
 ["x"]
 
 julia> state!(ocp, 1, "y")
-julia> ocp.state_dimension
+julia> state_dimension(ocp)
 1
-julia> ocp.state_components_names
+julia> state_components_names(ocp)
 ["y"]
 
 julia> state!(ocp, 2)
-julia> ocp.state_dimension
+julia> state_dimension(ocp)
 2
-julia> ocp.state_components_names
+julia> state_components_names(ocp)
 ["x₁", "x₂"]
 
 julia> state!(ocp, 2, :y)
-julia> ocp.state_dimension
+julia> state_dimension(ocp)
 2
-julia> ocp.state_components_names
+julia> state_components_names(ocp)
 ["y₁", "y₂"]
 
 julia> state!(ocp, 2, "y")
-julia> ocp.state_dimension
+julia> state_dimension(ocp)
 2
-julia> ocp.state_components_names
+julia> state_components_names(ocp)
 ["y₁", "y₂"]
 ```
 """
@@ -226,33 +234,33 @@ Define the control dimension and possibly the names of each coordinate.
 
 ```@example
 julia> control!(ocp, 1)
-julia> ocp.control_dimension
+julia> control_dimension(ocp)
 1
-julia> ocp.control_components_names
+julia> control_components_names(ocp)
 ["u"]
 
 julia> control!(ocp, 1, "v")
-julia> ocp.control_dimension
+julia> control_dimension(ocp)
 1
-julia> ocp.control_components_names
+julia> control_components_names(ocp)
 ["v"]
 
 julia> control!(ocp, 2)
-julia> ocp.control_dimension
+julia> control_dimension(ocp)
 2
-julia> ocp.control_components_names
+julia> control_components_names(ocp)
 ["u₁", "u₂"]
 
 julia> control!(ocp, 2, :v)
-julia> ocp.control_dimension
+julia> control_dimension(ocp)
 2
-julia> ocp.control_components_names
+julia> control_components_names(ocp)
 ["v₁", "v₂"]
 
 julia> control!(ocp, 2, "v")
-julia> ocp.control_dimension
+julia> control_dimension(ocp)
 2
-julia> ocp.control_components_names
+julia> control_components_names(ocp)
 ["v₁", "v₂"]
 ```
 """
@@ -342,7 +350,7 @@ function time!(
     (VT == NonFixed) && (!isnothing(ind0) || !isnothing(indf)) && __check_variable_set(ocp)
 
     # check if indices are in 1:q
-    q = ocp.variable_dimension
+    q = variable_dimension(ocp)
     !isnothing(ind0) &&
         !(1 ≤ ind0 ≤ q) &&
         throw(IncorrectArgument("the index of t0 variable must be contained in 1:$q"))
@@ -414,7 +422,7 @@ function time!(
             ocp.initial_time = Index(ind0)
             ocp.final_time = tf
             ocp.time_name = name
-            ocp.initial_time_name = ocp.variable_components_names[ind0]
+            ocp.initial_time_name = variable_components_names(ocp)[ind0]
             ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits = 2))
         end
         (::Time, ::Nothing, ::Nothing, ::Integer) => begin # (t0, indf)
@@ -422,14 +430,14 @@ function time!(
             ocp.final_time = Index(indf)
             ocp.time_name = name
             ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
-            ocp.final_time_name = ocp.variable_components_names[indf]
+            ocp.final_time_name = variable_components_names(ocp)[indf]
         end
         (::Nothing, ::Integer, ::Nothing, ::Integer) => begin # (ind0, indf)
             ocp.initial_time = Index(ind0)
             ocp.final_time = Index(indf)
             ocp.time_name = name
-            ocp.initial_time_name = ocp.variable_components_names[ind0]
-            ocp.final_time_name = ocp.variable_components_names[indf]
+            ocp.initial_time_name = variable_components_names(ocp)[ind0]
+            ocp.final_time_name = variable_components_names(ocp)[indf]
         end
         _ => throw(IncorrectArgument("Provided arguments are inconsistent."))
     end
@@ -553,9 +561,9 @@ function constraint!(
     isnothing(ub) && (ub = Inf * (size(lb, 1) == 1 ? 1 : ones(eltype(lb), size(lb, 1))))
 
     # dimensions
-    n = ocp.state_dimension
-    m = ocp.control_dimension
-    q = ocp.variable_dimension
+    n = state_dimension(ocp)
+    m = control_dimension(ocp)
+    q = variable_dimension(ocp)
 
     # range
     (typeof(rg) <: Int) && (rg = Index(rg))

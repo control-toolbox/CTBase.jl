@@ -197,8 +197,8 @@ function test_alloc_bad(ocp, N)
     begin
         v = Real[]
 
-        n = ocp.state_dimension
-        m = ocp.control_dimension
+        n = state_dimension(ocp)
+        m = control_dimension(ocp)
 
         times = LinRange(0, 1, N)
         XU = ones(N * (n + m))
@@ -456,8 +456,8 @@ function test_alloc_good(ocp, N)
         begin
             v = Real[]
 
-            n = ocp.state_dimension
-            m = ocp.control_dimension
+            n = state_dimension(ocp)
+            m = control_dimension(ocp)
 
             times = LinRange(0, 1, N)
             XU = zeros(N * (n + m))

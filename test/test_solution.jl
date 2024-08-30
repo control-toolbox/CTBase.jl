@@ -12,26 +12,26 @@ function test_solution()
     end
 
     times = range(0, 1, 10)
-    state = t -> t
-    control = t -> 2t
-    costate = t -> t
-    objective = 1
+    x = t -> t
+    u = t -> 2t
+    p = t -> t
+    obj = 1
     sol = OptimalControlSolution(
         ocp;
-        state = state,
-        control = control,
-        costate = costate,
-        objective = objective,
+        state = x,
+        control = u,
+        costate = p,
+        objective = obj,
         time_grid = times,
     )
 
-    @test sol.objective == objective
+    @test objective(sol) == obj
     @test typeof(sol) == OptimalControlSolution
 
     # getters
-    @test all(state_discretized(sol) .== state.(times))
-    @test all(control_discretized(sol) .== control.(times))
-    @test all(costate_discretized(sol) .== costate.(times))
+    @test all(state_discretized(sol) .== x.(times))
+    @test all(control_discretized(sol) .== u.(times))
+    @test all(costate_discretized(sol) .== p.(times))
 
     # NonFixed ocp
     @def ocp begin
@@ -45,13 +45,13 @@ function test_solution()
         ∫(0.5u(t)^2) → min
     end
 
-    state = t -> t
-    control = t -> 2t
-    objective = 1
-    variable = 1
-    sol = OptimalControlSolution(ocp; state, control, objective, variable)
+    x = t -> t
+    u = t -> 2t
+    obj = 1
+    v = 1
+    sol = OptimalControlSolution(ocp; state = x, control = u, objective = obj, variable = v)
 
-    @test sol.variable == variable
+    @test variable(sol) == v
     @test typeof(sol) == OptimalControlSolution
-    @test_throws UndefKeywordError OptimalControlSolution(ocp; state, control, objective)
+    @test_throws UndefKeywordError OptimalControlSolution(ocp; x, u, obj)
 end

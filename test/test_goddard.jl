@@ -53,5 +53,5 @@ test_goddard() = begin
     x = x0
     u = 2
     tf = 1
-    @test ocp.dynamics(x, u, tf) == F0(x) + u * F1(x)
+    @test dynamics(ocp)(x, u, tf) == F0(x) + u * F1(x)
 end
