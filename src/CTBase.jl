@@ -258,7 +258,14 @@ export OptimalControlModel
 export Model
 export __OCPModel # redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
 export variable!,
-    time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, model_expression!
+    time!,
+    constraint!,
+    dynamics!,
+    objective!,
+    state!,
+    control!,
+    remove_constraint!,
+    model_expression!
 export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max
 export is_variable_dependent, is_variable_independent
 export nlp_constraints!, constraints, constraints_labels, constraint
