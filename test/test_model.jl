@@ -5,9 +5,21 @@ function test_model() # 30 55 185
         ocp = Model(variable = false)
 
         @test_throws UnauthorizedCall variable!(ocp, 1)
-        @test_throws UnauthorizedCall constraint!(ocp, :variable, rg = 2:3, lb = [0, 3], ub = [0, 3])
+        @test_throws UnauthorizedCall constraint!(
+            ocp,
+            :variable,
+            rg = 2:3,
+            lb = [0, 3],
+            ub = [0, 3],
+        )
         @test_throws UnauthorizedCall constraint!(ocp, :variable, lb = 0, ub = 1) # the variable here is of dimension 1
-        @test_throws UnauthorizedCall constraint!(ocp, :variable, rg = 1:2, lb = [0, 0], ub = [1, 2])
+        @test_throws UnauthorizedCall constraint!(
+            ocp,
+            :variable,
+            rg = 1:2,
+            lb = [0, 0],
+            ub = [1, 2],
+        )
         @test_throws UnauthorizedCall constraint!(ocp, :variable, lb = [3, 0, 1], ub = [3, 0, 1])
 
         ocp = Model(variable = true)
@@ -75,8 +87,20 @@ function test_model() # 30 55 185
             end
 
             # constraint! 1
-            @test_throws UnauthorizedCall constraint!(ocp, :initial, rg = 1:2:5, lb = [0, 0, 0], ub = [0, 0, 0])
-            @test_throws UnauthorizedCall constraint!(ocp, :initial, rg = 2:3, lb = [0, 0], ub = [0, 0])
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :initial,
+                rg = 1:2:5,
+                lb = [0, 0, 0],
+                ub = [0, 0, 0],
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :initial,
+                rg = 2:3,
+                lb = [0, 0],
+                ub = [0, 0],
+            )
             @test_throws UnauthorizedCall constraint!(ocp, :final, rg = 2, lb = 0, ub = 0)
 
             # constraint! 2
@@ -84,11 +108,29 @@ function test_model() # 30 55 185
             @test_throws UnauthorizedCall constraint!(ocp, :final, lb = 2, ub = 2) # if the state is of dimension 1
 
             # constraint! 3
-            @test_throws UnauthorizedCall constraint!(ocp, :initial, rg = 2:3, lb = [0, 0], ub = [1, 2])
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :initial,
+                rg = 2:3,
+                lb = [0, 0],
+                ub = [1, 2],
+            )
             @test_throws UnauthorizedCall constraint!(ocp, :final, rg = 1, lb = 0, ub = 2)
             @test_throws UnauthorizedCall constraint!(ocp, :control, rg = 1, lb = 0, ub = 2)
-            @test_throws UnauthorizedCall constraint!(ocp, :state, rg = 2:3, lb = [0, 0], ub = [1, 2])
-            @test_throws UnauthorizedCall constraint!(ocp, :initial, rg = 1:2:5, lb = [0, 0, 0], ub = [1, 2, 1])
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :state,
+                rg = 2:3,
+                lb = [0, 0],
+                ub = [1, 2],
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :initial,
+                rg = 1:2:5,
+                lb = [0, 0, 0],
+                ub = [1, 2, 1],
+            )
 
             # constraint! 4
             @test_throws UnauthorizedCall constraint!(ocp, :initial, lb = [0, 0, 0], ub = [1, 2, 1])
@@ -98,29 +140,101 @@ function test_model() # 30 55 185
 
             # constraint! 5
             # variable independent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :boundary, f = (x0, xf) -> x0[3] + xf[2], lb = 0, ub = 1)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :boundary,
+                f = (x0, xf) -> x0[3] + xf[2],
+                lb = 0,
+                ub = 1,
+            )
 
             # variable dependent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :boundary, f = (x0, xf, v) -> x0[3] + xf[2] * v[1], lb = 0, ub = 1)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :boundary,
+                f = (x0, xf, v) -> x0[3] + xf[2] * v[1],
+                lb = 0,
+                ub = 1,
+            )
 
             # time independent and variable independent ocp
             @test_throws UnauthorizedCall constraint!(ocp, :control, f = u -> 2u, lb = 0, ub = 1)
-            @test_throws UnauthorizedCall constraint!(ocp, :state, f = x -> x - 1, lb = [0, 0, 0], ub = [1, 2, 1])
-            @test_throws UnauthorizedCall constraint!(ocp, :mixed, f = (x, u) -> x[1] - u, lb = 0, ub = 1)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :state,
+                f = x -> x - 1,
+                lb = [0, 0, 0],
+                ub = [1, 2, 1],
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :mixed,
+                f = (x, u) -> x[1] - u,
+                lb = 0,
+                ub = 1,
+            )
 
             # time dependent and variable independent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :control, f = (t, u) -> 2u, lb = 0, ub = 1)
-            @test_throws UnauthorizedCall constraint!(ocp, :state, f = (t, x) -> x - t, lb = [0, 0, 0], ub = [1, 2, 1])
-            @test_throws UnauthorizedCall constraint!(ocp, :mixed, f = (t, x, u) -> x[1] - u, lb = 0, ub = 1)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :control,
+                f = (t, u) -> 2u,
+                lb = 0,
+                ub = 1,
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :state,
+                f = (t, x) -> x - t,
+                lb = [0, 0, 0],
+                ub = [1, 2, 1],
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :mixed,
+                f = (t, x, u) -> x[1] - u,
+                lb = 0,
+                ub = 1,
+            )
 
             # time independent and variable dependent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :control, f = (u, v) -> 2u * v[1], lb = 0, ub = 1)
-            @test_throws UnauthorizedCall constraint!(ocp, :state, f = (x, v) -> x - v[1], lb = [0, 0, 0], ub = [1, 2, 1])
-            @test_throws UnauthorizedCall constraint!(ocp, :mixed, f = (x, u, v) -> x[1] - v[2] * u, lb = 0, ub = 1)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :control,
+                f = (u, v) -> 2u * v[1],
+                lb = 0,
+                ub = 1,
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :state,
+                f = (x, v) -> x - v[1],
+                lb = [0, 0, 0],
+                ub = [1, 2, 1],
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :mixed,
+                f = (x, u, v) -> x[1] - v[2] * u,
+                lb = 0,
+                ub = 1,
+            )
 
             # time dependent and variable dependent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :control, f = (t, u, v) -> 2u + v[2], lb = 0, ub = 1)
-            @test_throws UnauthorizedCall constraint!(ocp, :state, f = (t, x, v) -> x - t * v[1], lb = [0, 0, 0], ub = [1, 2, 1])
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :control,
+                f = (t, u, v) -> 2u + v[2],
+                lb = 0,
+                ub = 1,
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :state,
+                f = (t, x, v) -> x - t * v[1],
+                lb = [0, 0, 0],
+                ub = [1, 2, 1],
+            )
             @test_throws UnauthorizedCall constraint!(
                 ocp,
                 :mixed,
@@ -157,10 +271,22 @@ function test_model() # 30 55 185
                 lb = [0, 0, 0],
                 ub = [0, 0, 0],
             )
-            @test_throws UnauthorizedCall constraint!(ocp, :mixed, f = (x, u) -> x[1] - u, lb = 0, ub = 0)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :mixed,
+                f = (x, u) -> x[1] - u,
+                lb = 0,
+                ub = 0,
+            )
 
             # time dependent and variable independent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :control, f = (t, u) -> 2u, lb = 1, ub = 1)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :control,
+                f = (t, u) -> 2u,
+                lb = 1,
+                ub = 1,
+            )
             @test_throws UnauthorizedCall constraint!(
                 ocp,
                 :state,
@@ -168,11 +294,25 @@ function test_model() # 30 55 185
                 lb = [0, 0, 0],
                 ub = [0, 0, 0],
             )
-            @test_throws UnauthorizedCall constraint!(ocp, :mixed, f = (t, x, u) -> x[1] - u, lb = 0, ub = 0)
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :mixed,
+                f = (t, x, u) -> x[1] - u,
+                lb = 0,
+                ub = 0,
+            )
 
             # time independent and variable dependent ocp
-            @test_throws UnauthorizedCall constraint!(ocp, :control, f = (u, v) -> 2u * v[1], lb = 1, ub = 1)
-            @test_throws UnauthorizedCall constraint!(ocp, :state,
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :control,
+                f = (u, v) -> 2u * v[1],
+                lb = 1,
+                ub = 1,
+            )
+            @test_throws UnauthorizedCall constraint!(
+                ocp,
+                :state,
                 f = (x, v) -> x - v[2],
                 lb = [0, 0, 0],
                 ub = [0, 0, 0],
@@ -595,7 +735,13 @@ function test_model() # 30 55 185
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 1)
         control!(ocp, 1)
-        @test_throws IncorrectArgument constraint!(ocp, :initial, lb = [0, 1], ub = [0, 1], label = :c0)
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :initial,
+            lb = [0, 1],
+            ub = [0, 1],
+            label = :c0,
+        )
         constraint!(ocp, :initial, lb = 0, ub = 0, label = :c0)
         constraint!(ocp, :final, lb = 1, ub = 1, label = :cf)
         @test constraint(ocp, :c0)(12, ∅) == 12
@@ -644,8 +790,22 @@ function test_model() # 30 55 185
         x = [12, 13]
         x0 = [0, 1]
         xf = [1, 2]
-        @test_throws IncorrectArgument constraint!(ocp, :initial, rg = 2, lb = x0, ub = x0, label = :c0)
-        @test_throws IncorrectArgument constraint!(ocp, :final, rg = 2, lb = xf, ub = xf, label = :cf)
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :initial,
+            rg = 2,
+            lb = x0,
+            ub = x0,
+            label = :c0,
+        )
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :final,
+            rg = 2,
+            lb = xf,
+            ub = xf,
+            label = :cf,
+        )
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -722,10 +882,38 @@ function test_model() # 30 55 185
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
-        @test_throws IncorrectArgument constraint!(ocp, :initial, rg = 2, lb = [0, 1], ub = [1, 2], label = :c0)
-        @test_throws IncorrectArgument constraint!(ocp, :final, rg = 2, lb = [1, 2], ub = [2, 3], label = :cf)
-        @test_throws IncorrectArgument constraint!(ocp, :control, rg = 2, lb = [0, 1], ub = [1, 2], label = :cu)
-        @test_throws IncorrectArgument constraint!(ocp, :state, rg = 2, lb = [0, 1], ub = [1, 2], label = :cs)
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :initial,
+            rg = 2,
+            lb = [0, 1],
+            ub = [1, 2],
+            label = :c0,
+        )
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :final,
+            rg = 2,
+            lb = [1, 2],
+            ub = [2, 3],
+            label = :cf,
+        )
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :control,
+            rg = 2,
+            lb = [0, 1],
+            ub = [1, 2],
+            label = :cu,
+        )
+        @test_throws IncorrectArgument constraint!(
+            ocp,
+            :state,
+            rg = 2,
+            lb = [0, 1],
+            ub = [1, 2],
+            label = :cs,
+        )
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -767,10 +955,10 @@ function test_model() # 30 55 185
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
-        constraint!(ocp, :boundary, f = (x0, xf) -> x0[1] + xf[1], lb = 0, ub = 0, label=:cb)
+        constraint!(ocp, :boundary, f = (x0, xf) -> x0[1] + xf[1], lb = 0, ub = 0, label = :cb)
         constraint!(ocp, :control, f = u -> u[1], lb = 0, ub = 0, label = :cu)
         constraint!(ocp, :state, f = x -> x[1], lb = 0, ub = 0, label = :cs)
-        constraint!(ocp, :mixed, f = (x, u) -> x[1] + u[1], lb = 1, ub = 1, label=:cm)
+        constraint!(ocp, :mixed, f = (x, u) -> x[1] + u[1], lb = 1, ub = 1, label = :cm)
         @test constraint(ocp, :cb)([13, 14], [16, 17]) == 13 + 16
         @test constraint(ocp, :cu)([12, 13]) == 12
         @test constraint(ocp, :cs)([12, 13]) == 12
@@ -780,10 +968,24 @@ function test_model() # 30 55 185
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 3)
         control!(ocp, 3)
-        constraint!(ocp, :boundary, f = (x0, xf) -> [x0[1] + xf[1], x0[2] + xf[2]], lb = [0, 0], ub = [0, 0], label = :cb)
+        constraint!(
+            ocp,
+            :boundary,
+            f = (x0, xf) -> [x0[1] + xf[1], x0[2] + xf[2]],
+            lb = [0, 0],
+            ub = [0, 0],
+            label = :cb,
+        )
         constraint!(ocp, :control, f = u -> u[1:2], lb = [0, 0], ub = [0, 0], label = :cu)
         constraint!(ocp, :state, f = x -> x[1:2], lb = [0, 0], ub = [0, 0], label = :cs)
-        constraint!(ocp, :mixed, f = (x, u) -> [x[1] + u[1], x[2] + u[2]], lb = [0, 0], ub = [0, 0], label = :cm)
+        constraint!(
+            ocp,
+            :mixed,
+            f = (x, u) -> [x[1] + u[1], x[2] + u[2]],
+            lb = [0, 0],
+            ub = [0, 0],
+            label = :cm,
+        )
         @test constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13 + 17, 14 + 18]
         @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
         @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
@@ -795,7 +997,14 @@ function test_model() # 30 55 185
         state!(ocp, 2)
         control!(ocp, 1)
         constraint!(ocp, :control, f = u -> u, lb = 0, ub = 1, label = :c)
-        @test_throws UnauthorizedCall constraint!(ocp, :control, f = u -> u, lb = 0, ub = 1, label = :c)
+        @test_throws UnauthorizedCall constraint!(
+            ocp,
+            :control,
+            f = u -> u,
+            lb = 0,
+            ub = 1,
+            label = :c,
+        )
     end
 
     @testset "constraint! 6" begin
@@ -816,10 +1025,10 @@ function test_model() # 30 55 185
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
-        constraint!(ocp, :boundary, f = (x0, xf) -> x0[1] + xf[1], lb = 0, ub = 1, label=:cb)
+        constraint!(ocp, :boundary, f = (x0, xf) -> x0[1] + xf[1], lb = 0, ub = 1, label = :cb)
         constraint!(ocp, :control, f = u -> u[1], lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, f = x -> x[1], lb = 0, ub = 1, label = :cs)
-        constraint!(ocp, :mixed, f = (x, u) -> x[1] + u[1], lb = 1, ub = 1, label=:cm)
+        constraint!(ocp, :mixed, f = (x, u) -> x[1] + u[1], lb = 1, ub = 1, label = :cm)
         @test constraint(ocp, :cb)([13, 14], [16, 17]) == 13 + 16
         @test constraint(ocp, :cu)([12, 13]) == 12
         @test constraint(ocp, :cs)([12, 13]) == 12
@@ -839,7 +1048,14 @@ function test_model() # 30 55 185
         )
         constraint!(ocp, :control, f = u -> u[1:2], lb = [0, 0], ub = [1, 1], label = :cu)
         constraint!(ocp, :state, f = x -> x[1:2], lb = [0, 0], ub = [1, 1], label = :cs)
-        constraint!(ocp, :mixed, f = (x, u) -> [x[1] + u[1], x[2] + u[2]], lb = [0, 0], ub = [1, 1], label = :cm)
+        constraint!(
+            ocp,
+            :mixed,
+            f = (x, u) -> [x[1] + u[1], x[2] + u[2]],
+            lb = [0, 0],
+            ub = [1, 1],
+            label = :cm,
+        )
         @test constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13 + 17, 14 + 18]
         @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
         @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
@@ -861,7 +1077,14 @@ function test_model() # 30 55 185
         constraint!(ocp, :variable, rg = 1, lb = 0, ub = 1, label = :eq2)
         constraint!(ocp, :variable, rg = 1:2, lb = [0, 0], ub = [1, 2], label = :eq3)
         constraint!(ocp, :variable, rg = 1:2:4, lb = [0, 0], ub = [-1, 1], label = :eq4)
-        constraint!(ocp, :variable, f = v -> v .^ 2, lb = [0, 0, 0, 0], ub = [1, 0, 1, 0], label = :eq5)
+        constraint!(
+            ocp,
+            :variable,
+            f = v -> v .^ 2,
+            lb = [0, 0, 0, 0],
+            ub = [1, 0, 1, 0],
+            label = :eq5,
+        )
         @test constraint(ocp, :eq1)(v) == v
         @test constraint(ocp, :eq2)(v) == v[1]
         @test constraint(ocp, :eq3)(v) == v[1:2]
@@ -881,14 +1104,21 @@ function test_model() # 30 55 185
         state!(ocp, 1)
         control!(ocp, 1)
         constraint!(ocp, :boundary, f = (x0, xf, v) -> x0 + xf + v[1], lb = 0, ub = 1, label = :cb)
-        constraint!(ocp, :control, f = (u, v) -> u + v[1], lb = 0, ub = 1, label=:cu)
-        constraint!(ocp, :state, f = (x, v) -> x + v[1], lb = 0, ub = 1, label=:cs)
+        constraint!(ocp, :control, f = (u, v) -> u + v[1], lb = 0, ub = 1, label = :cu)
+        constraint!(ocp, :state, f = (x, v) -> x + v[1], lb = 0, ub = 1, label = :cs)
         constraint!(ocp, :mixed, f = (x, u, v) -> x + u + v[1], lb = 1, ub = 1, label = :cm)
         constraint!(ocp, :variable, lb = [0, 0, 0, 0], ub = [0, 0, 0, 0], label = :eq1)
         constraint!(ocp, :variable, rg = 1, lb = 0, ub = 0, label = :eq2)
         constraint!(ocp, :variable, rg = 1:2, lb = [0, 0], ub = [0, 0], label = :eq3)
         constraint!(ocp, :variable, rg = 1:2:4, lb = [0, 0], ub = [0, 0], label = :eq4)
-        constraint!(ocp, :variable, f = v -> v .^ 2, lb = [0, 0, 0, 0], ub = [0, 0, 0, 0], label = :eq5)
+        constraint!(
+            ocp,
+            :variable,
+            f = v -> v .^ 2,
+            lb = [0, 0, 0, 0],
+            ub = [0, 0, 0, 0],
+            label = :eq5,
+        )
         @test constraint(ocp, :cb)(x0, xf, v) == x0 + xf + v[1]
         @test constraint(ocp, :cu)(u, v) == u + v[1]
         @test constraint(ocp, :cs)(x, v) == x + v[1]
@@ -970,7 +1200,7 @@ function test_model() # 30 55 185
         control!(ocp_ter, 1)
         variable!(ocp_ter, 1)
         constraint!(ocp_ter, :variable, lb = 1, ub = 1, label = :c0)
-        constraint!(ocp_ter, :control, f= dummy, lb = 1, ub = Inf, label = :c1)
+        constraint!(ocp_ter, :control, f = dummy, lb = 1, ub = Inf, label = :c1)
         constraint!(ocp_ter, :state, rg = 1:2:3, lb = [0, 0], ub = [0, 0], label = :c2)
 
         ocp_quad = Model(variable = true)
@@ -1044,10 +1274,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, rg = 1, lb = 1, ub = 1, label = :cf)
         constraint!(ocp, :control, lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, lb = [0, 1], ub = [1, 2], label = :cs)
-        constraint!(ocp, :boundary, f = (x0, xf) -> x0[2] + xf[2], lb = 0, ub = 1, label=:cb)
+        constraint!(ocp, :boundary, f = (x0, xf) -> x0[2] + xf[2], lb = 0, ub = 1, label = :cb)
         constraint!(ocp, :control, f = u -> u, lb = 0, ub = 1, label = :cuu)
         constraint!(ocp, :state, f = x -> x, lb = [0, 1], ub = [1, 2], label = :css)
-        constraint!(ocp, :mixed, f = (x, u) -> x[1] + u, lb = 1, ub = 1, label=:cm)
+        constraint!(ocp, :mixed, f = (x, u) -> x[1] + u, lb = 1, ub = 1, label = :cm)
 
         # dimensions (not set yet)
         @test dim_control_constraints(ocp) === nothing
@@ -1129,7 +1359,14 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, rg = 1, lb = 1, ub = 1, label = :cf)
         constraint!(ocp, :control, lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, lb = [0, 1], ub = [1, 2], label = :cs)
-        constraint!(ocp, :boundary, f = (x0, xf, v) -> x0[2] + xf[2] + v[1], lb = 0, ub = 1, label = :cb)
+        constraint!(
+            ocp,
+            :boundary,
+            f = (x0, xf, v) -> x0[2] + xf[2] + v[1],
+            lb = 0,
+            ub = 1,
+            label = :cb,
+        )
         constraint!(ocp, :control, f = (u, v) -> u + v[2], lb = 0, ub = 1, label = :cuu)
         constraint!(ocp, :state, f = (x, v) -> x + v[1:2], lb = [0, 1], ub = [1, 2], label = :css)
         constraint!(ocp, :mixed, f = (x, u, v) -> x[1] + u + v[2], lb = 1, ub = 1, label = :cm)
