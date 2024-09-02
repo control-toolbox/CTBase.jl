@@ -39,6 +39,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
     ξf = Vector{ControlConstraint}()
     ξl = Vector{ctNumber}()
     ξu = Vector{ctNumber}()
+    ξs = Vector{Int64}()
     ηf = Vector{StateConstraint}()
     ηl = Vector{ctNumber}()
     ηu = Vector{ctNumber}()
@@ -63,14 +64,14 @@ function nlp_constraints!(ocp::OptimalControlModel)
 
     for (_, c) ∈ constraints(ocp)
         @match c begin
-            (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary]
-            end => begin
+            (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary] end => begin
                 push!(ϕf, f)
                 append!(ϕl, lb)
                 append!(ϕu, ub)
             end
             (:control, f::ControlConstraint, lb, ub) => begin
                 push!(ξf, f)
+                push!(ξs, length(lb))
                 append!(ξl, lb)
                 append!(ξu, ub)
             end
@@ -109,6 +110,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
     end
 
     @assert length(ξl) == length(ξu)
+    @assert length(ξf) == length(ξs)
     @assert length(ηl) == length(ηu)
     @assert length(ψl) == length(ψu)
     @assert length(ϕl) == length(ϕu)
@@ -123,11 +125,21 @@ function nlp_constraints!(ocp::OptimalControlModel)
         j = 1
         for i ∈ 1:length(ξf)
             vali = ξf[i](t, u, v)
-            li = length(vali)
+            li = ξs[i] # could be length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function ξ!(val, t, u, v) # nonlinear control constraints (in place)
+        j = 1
+        for i ∈ 1:length(ξf)
+            li = ξs[i]
+            ξf[i](val[j:(j + li - 1)], t, u, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function η(t, x, v) # nonlinear state constraints
