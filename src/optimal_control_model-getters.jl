@@ -37,27 +37,38 @@ function nlp_constraints!(ocp::OptimalControlModel)
     __check_all_set(ocp)
 
     ξf = Vector{ControlConstraint}()
+    ξs = Vector{Int64}()
     ξl = Vector{ctNumber}()
     ξu = Vector{ctNumber}()
-    ξs = Vector{Int64}()
+
     ηf = Vector{StateConstraint}()
+    ηs = Vector{Int64}()
     ηl = Vector{ctNumber}()
     ηu = Vector{ctNumber}()
+
     ψf = Vector{MixedConstraint}()
+    ψs = Vector{Int64}()
     ψl = Vector{ctNumber}()
     ψu = Vector{ctNumber}()
+
     ϕf = Vector{BoundaryConstraint}()
+    ϕs = Vector{Int64}()
     ϕl = Vector{ctNumber}()
     ϕu = Vector{ctNumber}()
+
     θf = Vector{VariableConstraint}()
+    θs = Vector{Int64}()
     θl = Vector{ctNumber}()
     θu = Vector{ctNumber}()
+
     uind = Vector{Int}()
     ul = Vector{ctNumber}()
     uu = Vector{ctNumber}()
+
     xind = Vector{Int}()
     xl = Vector{ctNumber}()
     xu = Vector{ctNumber}()
+
     vind = Vector{Int}()
     vl = Vector{ctNumber}()
     vu = Vector{ctNumber}()
@@ -66,6 +77,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         @match c begin
             (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary] end => begin
                 push!(ϕf, f)
+                push!(ϕs, length(lb))
                 append!(ϕl, lb)
                 append!(ϕu, ub)
             end
@@ -82,6 +94,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
             end
             (:state, f::StateConstraint, lb, ub) => begin
                 push!(ηf, f)
+                push!(ηs, length(lb))
                 append!(ηl, lb)
                 append!(ηu, ub)
             end
@@ -92,11 +105,13 @@ function nlp_constraints!(ocp::OptimalControlModel)
             end
             (:mixed, f::MixedConstraint, lb, ub) => begin
                 push!(ψf, f)
+                push!(ψs, length(lb))
                 append!(ψl, lb)
                 append!(ψu, ub)
             end
             (:variable, f::VariableConstraint, lb, ub) => begin
                 push!(θf, f)
+                push!(θs, length(lb))
                 append!(θl, lb)
                 append!(θu, ub)
             end
@@ -112,9 +127,13 @@ function nlp_constraints!(ocp::OptimalControlModel)
     @assert length(ξl) == length(ξu)
     @assert length(ξf) == length(ξs)
     @assert length(ηl) == length(ηu)
+    @assert length(ηf) == length(ηs)
     @assert length(ψl) == length(ψu)
+    @assert length(ψf) == length(ψs)
     @assert length(ϕl) == length(ϕu)
+    @assert length(ϕf) == length(ϕs)
     @assert length(θl) == length(θu)
+    @assert length(θf) == length(θs)
     @assert length(ul) == length(uu)
     @assert length(xl) == length(xu)
     @assert length(vl) == length(vu)
@@ -124,8 +143,8 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ξf)
+            li = ξs[i]
             vali = ξf[i](t, u, v)
-            li = ξs[i] # could be length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
@@ -147,12 +166,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ηf)
+            li = ηs[i]
             vali = ηf[i](t, x, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function η!(val, t, x, v) # nonlinear state constraints (in place)
+        j = 1
+        for i ∈ 1:length(ηf)
+            li = ηs[i]
+            ηf[i](val[j:(j + li - 1)], t, x, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function ψ(t, x, u, v) # nonlinear mixed constraints
@@ -160,12 +189,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ψf)
+            li = ψs[i]
             vali = ψf[i](t, x, u, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function ψ!(val, t, x, u, v) # nonlinear mixed constraints (in place)
+        j = 1
+        for i ∈ 1:length(ψf)
+            li = ψs[i]
+            ψf[i](val[j:(j + li - 1)], t, x, u, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function ϕ(x0, xf, v) # nonlinear boundary constraints
@@ -173,12 +212,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ϕf)
+            li = ϕs[i]
             vali = ϕf[i](x0, xf, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function ϕ!(val, x0, xf, v) # nonlinear boundary constraints
+        j = 1
+        for i ∈ 1:length(ϕf)
+            li = ϕs[i]
+            ϕf[i](val[j:(j + li - 1)], x0, xf, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function θ(v) # nonlinear variable constraints
@@ -186,12 +235,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(θf)
+            li = θs[i]
             vali = θf[i](v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function θ!(val, v) # nonlinear variable constraints
+        j = 1
+        for i ∈ 1:length(θf)
+            li = θs[i]
+            θf[i](val[j:(j + li - 1)], v)
+            j = j + li
+        end
+        return nothing
     end
 
     ocp.dim_control_constraints = length(ξl)
@@ -203,14 +262,26 @@ function nlp_constraints!(ocp::OptimalControlModel)
     ocp.dim_state_range = length(xl)
     ocp.dim_variable_range = length(vl)
 
-    return (ξl, ξ, ξu),
-    (ηl, η, ηu),
-    (ψl, ψ, ψu),
-    (ϕl, ϕ, ϕu),
-    (θl, θ, θu),
-    (ul, uind, uu),
-    (xl, xind, xu),
-    (vl, vind, vu)
+    if is_in_place(ocp)
+        res = (ξl, ξ!, ξu),
+              (ηl, η!, ηu),
+              (ψl, ψ!, ψu),
+              (ϕl, ϕ!, ϕu),
+              (θl, θ!, θu),
+              (ul, uind, uu),
+              (xl, xind, xu),
+              (vl, vind, vu)
+    else
+        res = (ξl, ξ, ξu),
+              (ηl, η, ηu),
+              (ψl, ψ, ψu),
+              (ϕl, ϕ, ϕu),
+              (θl, θ, θu),
+              (ul, uind, uu),
+              (xl, xind, xu),
+              (vl, vind, vu)
+    end
+    return res
 end
 
 """
