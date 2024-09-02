@@ -11,7 +11,8 @@ $(TYPEDSIGNATURES)
 Set the model expression of the optimal control problem or `nothing`.
 
 """
-model_expression!(ocp::OptimalControlModel, model_expression::Expr) = (ocp.model_expression = model_expression; nothing)
+model_expression!(ocp::OptimalControlModel, model_expression::Expr) =
+    (ocp.model_expression = model_expression; nothing)
 
 """
 $(TYPEDSIGNATURES)
