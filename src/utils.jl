@@ -20,7 +20,7 @@ function ctindices(i::Integer)::String
         throw(IncorrectArgument("the indice must be positive"))
     end
     s = ""
-    for d ∈ digits(i)
+    for d in digits(i)
         s = ctindice(d) * s
     end
     return s
@@ -62,7 +62,7 @@ function ctupperscripts(i::Integer)::String
         throw(IncorrectArgument("the upperscript must be positive"))
     end
     s = ""
-    for d ∈ digits(i)
+    for d in digits(i)
         s = ctupperscript(d) * s
     end
     return s
@@ -73,7 +73,7 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-function ctgradient(f::Function, x::ctNumber; backend = __get_AD_backend())
+function ctgradient(f::Function, x::ctNumber; backend=__get_AD_backend())
     extras = prepare_derivative(f, backend, x)
     return derivative(f, backend, x, extras)
 end
@@ -87,7 +87,7 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-function ctgradient(f::Function, x; backend = __get_AD_backend())
+function ctgradient(f::Function, x; backend=__get_AD_backend())
     extras = prepare_gradient(f, backend, x)
     return gradient(f, backend, x, extras)
 end
@@ -110,7 +110,7 @@ $(TYPEDSIGNATURES)
 
 Return the Jacobian of `f` at `x`.
 """
-function ctjacobian(f::Function, x::ctNumber; backend = __get_AD_backend())
+function ctjacobian(f::Function, x::ctNumber; backend=__get_AD_backend())
     f_number_to_number = only ∘ f ∘ only
     extras = prepare_derivative(f_number_to_number, backend, x)
     der = derivative(f_number_to_number, backend, x, extras)
@@ -126,7 +126,7 @@ $(TYPEDSIGNATURES)
 
 Return the Jacobian of `f` at `x`.
 """
-function ctjacobian(f::Function, x; backend = __get_AD_backend())
+function ctjacobian(f::Function, x; backend=__get_AD_backend())
     extras = prepare_jacobian(f, backend, x)
     return jacobian(f, backend, x, extras)
 end
@@ -148,7 +148,7 @@ $(TYPEDSIGNATURES)
 Return the interpolation of `f` at `x`.
 """
 function ctinterpolate(x, f) # default for interpolation of the initialization
-    return Interpolations.linear_interpolation(x, f, extrapolation_bc = Interpolations.Line())
+    return Interpolations.linear_interpolation(x, f; extrapolation_bc=Interpolations.Line())
 end
 
 """
@@ -171,7 +171,7 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 """
 function vec2vec(x::Vector{<:ctNumber}, n::Integer)::Vector{<:Vector{<:ctNumber}}
     y = [x[1:n]]
-    for i = (n + 1):n:(length(x) - n + 1)
+    for i in (n + 1):n:(length(x) - n + 1)
         y = vcat(y, [x[i:(i + n - 1)]])
     end
     return y
@@ -207,19 +207,18 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 **Note.** `dim` ∈ {1, 2} is the dimension along which the matrix is transformed.
 """
 function matrix2vec(
-    x::Matrix{<:ctNumber},
-    dim::Integer = __matrix_dimension_stock(),
+    x::Matrix{<:ctNumber}, dim::Integer=__matrix_dimension_stock()
 )::Vector{<:Vector{<:ctNumber}}
     m, n = size(x)
     y = nothing
     if dim == 1
         y = [x[1, :]]
-        for i = 2:m
+        for i in 2:m
             y = vcat(y, [x[i, :]])
         end
     else
         y = [x[:, 1]]
-        for j = 2:n
+        for j in 2:n
             y = vcat(y, [x[:, j]])
         end
     end

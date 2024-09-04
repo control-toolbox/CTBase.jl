@@ -3,26 +3,26 @@ using BenchmarkTools
 function tt()
     function bench_scalar(y)
         x = 0
-        for i = 1:y
+        for i in 1:y
             x += 1.0
         end
-        x
+        return x
     end
 
     function bench_scalar_2()
         x = 0
-        for i = 1:z
+        for i in 1:z
             x += 1.0
         end
-        x
+        return x
     end
 
     function bench_scalar_3(z)
         x = 0
-        for i = 1:z
+        for i in 1:z
             x += w
         end
-        x
+        return x
     end
 
     w = 1.0
@@ -33,18 +33,18 @@ function tt()
 
     function bench_scalar_4()
         x = 0
-        for i = 1:zz
+        for i in 1:zz
             x += 1.0
         end
-        x
+        return x
     end
 
     function bench_scalar_5(z)
         x = 0
-        for i = 1:z
+        for i in 1:z
             x += ww
         end
-        x
+        return x
     end
 
     ww = 1.0
@@ -52,12 +52,12 @@ function tt()
     display(@benchmark bench_scalar_4())
     display(@benchmark bench_scalar_5(zz))
 
-    function bench_scalar_6(z = z)
+    function bench_scalar_6(z=z)
         x = 0
-        for i = 1:z
+        for i in 1:z
             x += 1.0
         end
-        x
+        return x
     end
 
     @benchmark bench_scalar_6()

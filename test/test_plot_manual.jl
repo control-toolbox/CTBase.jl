@@ -46,7 +46,7 @@ sol.time_grid = times
 sol.time_name = "t"
 sol.state = x
 sol.state_name = "x"
-sol.state_components_names = ["x" * ctindices(i) for i ∈ range(1, n)]
+sol.state_components_names = ["x" * ctindices(i) for i in range(1, n)]
 sol.costate = p
 sol.control = u
 sol.control_name = "u"
@@ -59,13 +59,13 @@ sol.success = true
 
 #
 plt = plot(
-    sol,
-    layout = layout,
-    control = control_plt,
-    size = size,
-    flip = true,
-    linewidth = 5,
-    solution_label = "sol1",
+    sol;
+    layout=layout,
+    control=control_plt,
+    size=size,
+    flip=true,
+    linewidth=5,
+    solution_label="sol1",
 )
 #plot(sol, layout=:group)
 #ps=plot(sol, :time, (:state, 1))
@@ -109,7 +109,7 @@ sol.time_grid = times
 sol.time_name = "t"
 sol.state = x
 sol.state_name = "y"
-sol.state_components_names = ["y" * ctindices(i) for i ∈ range(1, n)]
+sol.state_components_names = ["y" * ctindices(i) for i in range(1, n)]
 sol.costate = p
 sol.control = u
 sol.control_name = "v"
@@ -121,7 +121,7 @@ sol.message = "ceci est un test"
 sol.success = true
 
 if do_plot_2
-    plot!(plt, sol, layout = layout, size = size, control = control_plt, solution_label = "sol2")
+    plot!(plt, sol; layout=layout, size=size, control=control_plt, solution_label="sol2")
 else
     plt
 end

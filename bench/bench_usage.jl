@@ -6,11 +6,7 @@ struct Fun_dim_usage_each_call
 end
 
 function (F::Fun_dim_usage_each_call)(
-    t::Real,
-    x::Vector{<:Real},
-    u::Vector{<:Real},
-    args...;
-    kwargs...,
+    t::Real, x::Vector{<:Real}, u::Vector{<:Real}, args...; kwargs...
 )
     x_ = length(x) == 1 ? (x[1],) : (x,)
     u_ = length(u) == 1 ? (u[1],) : (u,)
@@ -34,16 +30,12 @@ F = Fun_dim_usage_each_call((t, x, u) -> x + u[1])
 @benchmark F(t, x, u)
 
 # fun with dimension usage handled by parameterization
-struct Fun_dim_usage_parametrization{dim_x, dim_u}
+struct Fun_dim_usage_parametrization{dim_x,dim_u}
     f::Function
 end
 
-function (F::Fun_dim_usage_parametrization{1, 1})(
-    t::Real,
-    x::Vector{<:Real},
-    u::Vector{<:Real},
-    args...;
-    kwargs...,
+function (F::Fun_dim_usage_parametrization{1,1})(
+    t::Real, x::Vector{<:Real}, u::Vector{<:Real}, args...; kwargs...
 )
     return [F.f(t, x[1], u[1], args...; kwargs...)]
 end
@@ -51,11 +43,11 @@ end
 # bench fun with dimension usage handled by parameterization
 
 # x, u scalar
-F = Fun_dim_usage_parametrization{1, 1}((t, x, u) -> x + u)
+F = Fun_dim_usage_parametrization{1,1}((t, x, u) -> x + u)
 @benchmark F(t, x, u)
 
 # x scalar, u vector
-F = Fun_dim_usage_parametrization{1, 1}((t, x, u) -> x + u[1])
+F = Fun_dim_usage_parametrization{1,1}((t, x, u) -> x + u[1])
 @benchmark F(t, x, u)
 
 # direct call to the function
