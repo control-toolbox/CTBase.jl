@@ -4,7 +4,7 @@ function keep_series_attributes(; kwargs...)
     series_attributes = Plots.attributes(:Series)
 
     out = []
-    for kw ∈ kwargs
+    for kw in kwargs
         kw[1] ∈ series_attributes && push!(out, kw)
     end
 
@@ -12,7 +12,7 @@ function keep_series_attributes(; kwargs...)
 end
 
 function print_kwargs(; kwargs...)
-    for kw ∈ kwargs
+    for kw in kwargs
         println(kw)
     end
 end

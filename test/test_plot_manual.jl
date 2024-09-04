@@ -18,19 +18,16 @@ x0 = [-1.0, 0.0]
 xf = [0.0, 0.0]
 a = x0[1]
 b = x0[2]
-C = [
-    -(tf - t0)^3/6.0 (tf - t0)^2/2.0
-    -(tf - t0)^2/2.0 (tf-t0)
-]
+C = [-(tf - t0)^3/6.0 (tf - t0)^2/2.0
+     -(tf - t0)^2/2.0 (tf-t0)]
 D = [-a - b * (tf - t0), -b] + xf
 p0 = C \ D
 α = p0[1]
 β = p0[2]
-x =
-    t -> [
-        a + b * (t - t0) + β * (t - t0)^2 / 2.0 - α * (t - t0)^3 / 6.0,
-        b + β * (t - t0) - α * (t - t0)^2 / 2.0,
-    ]
+x = t -> [
+    a + b * (t - t0) + β * (t - t0)^2 / 2.0 - α * (t - t0)^3 / 6.0,
+    b + β * (t - t0) - α * (t - t0)^2 / 2.0
+]
 p = t -> [α, -α * (t - t0) + β]
 u = t -> [p(t)[2]]
 objective = 0.5 * (α^2 * (tf - t0)^3 / 3 + β^2 * (tf - t0) - α * β * (tf - t0)^2)
@@ -46,7 +43,7 @@ sol.time_grid = times
 sol.time_name = "t"
 sol.state = x
 sol.state_name = "x"
-sol.state_components_names = ["x" * ctindices(i) for i ∈ range(1, n)]
+sol.state_components_names = ["x" * ctindices(i) for i in range(1, n)]
 sol.costate = p
 sol.control = u
 sol.control_name = "u"
@@ -59,13 +56,13 @@ sol.success = true
 
 #
 plt = plot(
-    sol,
+    sol;
     layout = layout,
     control = control_plt,
     size = size,
     flip = true,
     linewidth = 5,
-    solution_label = "sol1",
+    solution_label = "sol1"
 )
 #plot(sol, layout=:group)
 #ps=plot(sol, :time, (:state, 1))
@@ -81,19 +78,16 @@ x0 = [-1.0, -1.0]
 xf = [0.0, 0.0]
 a = x0[1]
 b = x0[2]
-C = [
-    -(tf - t0)^3/6.0 (tf - t0)^2/2.0
-    -(tf - t0)^2/2.0 (tf-t0)
-]
+C = [-(tf - t0)^3/6.0 (tf - t0)^2/2.0
+     -(tf - t0)^2/2.0 (tf-t0)]
 D = [-a - b * (tf - t0), -b] + xf
 p0 = C \ D
 α = p0[1]
 β = p0[2]
-x =
-    t -> [
-        a + b * (t - t0) + β * (t - t0)^2 / 2.0 - α * (t - t0)^3 / 6.0,
-        b + β * (t - t0) - α * (t - t0)^2 / 2.0,
-    ]
+x = t -> [
+    a + b * (t - t0) + β * (t - t0)^2 / 2.0 - α * (t - t0)^3 / 6.0,
+    b + β * (t - t0) - α * (t - t0)^2 / 2.0
+]
 p = t -> [α, -α * (t - t0) + β]
 u = t -> [p(t)[2]]
 objective = 0.5 * (α^2 * (tf - t0)^3 / 3 + β^2 * (tf - t0) - α * β * (tf - t0)^2)
@@ -109,7 +103,7 @@ sol.time_grid = times
 sol.time_name = "t"
 sol.state = x
 sol.state_name = "y"
-sol.state_components_names = ["y" * ctindices(i) for i ∈ range(1, n)]
+sol.state_components_names = ["y" * ctindices(i) for i in range(1, n)]
 sol.costate = p
 sol.control = u
 sol.control_name = "v"
@@ -121,7 +115,8 @@ sol.message = "ceci est un test"
 sol.success = true
 
 if do_plot_2
-    plot!(plt, sol, layout = layout, size = size, control = control_plt, solution_label = "sol2")
+    plot!(plt, sol; layout = layout, size = size,
+        control = control_plt, solution_label = "sol2")
 else
     plt
 end

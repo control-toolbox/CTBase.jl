@@ -6,11 +6,11 @@ struct Fun_dim_usage_each_call
 end
 
 function (F::Fun_dim_usage_each_call)(
-    t::Real,
-    x::Vector{<:Real},
-    u::Vector{<:Real},
-    args...;
-    kwargs...,
+        t::Real,
+        x::Vector{<:Real},
+        u::Vector{<:Real},
+        args...;
+        kwargs...
 )
     x_ = length(x) == 1 ? (x[1],) : (x,)
     u_ = length(u) == 1 ? (u[1],) : (u,)
@@ -39,11 +39,11 @@ struct Fun_dim_usage_parametrization{dim_x, dim_u}
 end
 
 function (F::Fun_dim_usage_parametrization{1, 1})(
-    t::Real,
-    x::Vector{<:Real},
-    u::Vector{<:Real},
-    args...;
-    kwargs...,
+        t::Real,
+        x::Vector{<:Real},
+        u::Vector{<:Real},
+        args...;
+        kwargs...
 )
     return [F.f(t, x[1], u[1], args...; kwargs...)]
 end

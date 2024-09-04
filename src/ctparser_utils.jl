@@ -113,23 +113,22 @@ julia> e = :( ((x^2)(t0) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu 
 """
 replace_call(e, x::Vector{Symbol}, t, y) = begin
     @assert length(x) == length(y)
-    foo(x, t, y) =
-        (h, args...) -> begin
-            ee = Expr(h, args...)
-            @match ee begin
-                :($eee($tt)) && if tt == t
-                end => let ch = false
-                    for i ∈ 1:length(x)
-                        if has(eee, x[i])
-                            eee = subs(eee, x[i], y[i])
-                            ch = true # todo: unnecessary (as subs can be idempotent)?
-                        end
+    foo(x, t, y) = (h, args...) -> begin
+        ee = Expr(h, args...)
+        @match ee begin
+            :($eee($tt)) && if tt == t
+            end => let ch = false
+                for i = 1:length(x)
+                    if has(eee, x[i])
+                        eee = subs(eee, x[i], y[i])
+                        ch = true # todo: unnecessary (as subs can be idempotent)?
                     end
-                    ch ? eee : ee
                 end
-                _ => ee
+                ch ? eee : ee
             end
+            _ => ee
         end
+    end
     expr_it(e, foo(x, t, y), x -> x)
 end
 
@@ -344,7 +343,7 @@ constraint_type(e, t, t0, tf, x, u, v) = begin
         has(e, x, t),
         has(e, u, t0),
         has(e, u, tf),
-        has(e, v),
+        has(e, v)
     ] begin
         [true, false, false, false, false, false, _] => @match e begin
             :($y[($i):($p):($j)]($s)) && if (y == x && s == t0)

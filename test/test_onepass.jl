@@ -1565,14 +1565,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2
@@ -1593,14 +1589,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == -0.5u^2
@@ -1621,14 +1613,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2
@@ -1649,14 +1637,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2
@@ -1677,14 +1661,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == -0.5u^2
@@ -1705,14 +1685,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == (-0.5 + tf) * u^2
@@ -1759,14 +1735,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2
@@ -1787,14 +1759,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == -0.5u^2
@@ -1815,14 +1783,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2
@@ -1843,14 +1807,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2
@@ -1871,14 +1831,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == -0.5u^2
@@ -2478,14 +2434,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = -1
-        A = [
-            0 1
-            0 0
-        ]
-        B = [
-            0
-            1
-        ]
+        A = [0 1
+             0 0]
+        B = [0
+             1]
         @test constraint(o, :eq1)(x0, xf) == x0
         @test dynamics(o)(x, u) == A * x + B * u
         @test lagrange(o)(x, u) == 0.5u^2

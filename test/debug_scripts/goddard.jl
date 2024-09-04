@@ -24,7 +24,7 @@ m0 = 1
 mf = 0.6
 
 # Problem definition
-ocp = @def verbose_threshold = 100 begin
+ocp = @def verbose_threshold=100 begin
     tf, variable
     t ∈ [t0, tf], time
     x ∈ R^3, state

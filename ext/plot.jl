@@ -23,8 +23,10 @@ A node of a plot tree.
 struct PlotNode <: AbstractPlotTreeElement
     layout::Union{Symbol, Matrix{Any}}
     children::Vector{<:AbstractPlotTreeElement}
-    PlotNode(layout::Union{Symbol, Matrix{Any}}, children::Vector{<:AbstractPlotTreeElement}) =
+    function PlotNode(
+            layout::Union{Symbol, Matrix{Any}}, children::Vector{<:AbstractPlotTreeElement})
         new(layout, children)
+    end
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -38,22 +40,21 @@ Update the plot `p` with the i-th component of a vectorial function of time `f(t
 - `time` can be `:default` or `:normalized`.
 """
 function __plot_time!(
-    p::Union{Plots.Plot, Plots.Subplot},
-    sol::OptimalControlSolution,
-    s::Symbol,
-    i::Integer,
-    time::Symbol;
-    t_label,
-    label::String,
-    kwargs...,
+        p::Union{Plots.Plot, Plots.Subplot},
+        sol::OptimalControlSolution,
+        s::Symbol,
+        i::Integer,
+        time::Symbol;
+        t_label,
+        label::String,
+        kwargs...
 )
 
     # t_label depends if time is normalized or not
     t_label = @match time begin
         :default => t_label
         :normalized => "normalized " * t_label
-        _ =>
-            error("Internal error, no such choice for time: $time. Use :default or :normalized")
+        _ => error("Internal error, no such choice for time: $time. Use :default or :normalized")
     end
 
     # reset ylims: ylims=:auto
@@ -66,7 +67,7 @@ function __plot_time!(
         ylims = :auto,
         xlabel = t_label,
         label = label,
-        kwargs...,
+        kwargs...
     ) # use simple plot
 
     # change ylims if the gap between min and max is less than a tol
@@ -74,7 +75,7 @@ function __plot_time!(
     ymin = Inf
     ymax = -Inf
 
-    for s ∈ p.series_list
+    for s in p.series_list
         y = s[:y]
         ymin = min(minimum(y), ymin)
         ymax = max(maximum(y), ymax)
@@ -101,15 +102,16 @@ Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f
 - `time` can be `:default` or `:normalized`.
 """
 function __plot_time(
-    sol::OptimalControlSolution,
-    s::Symbol,
-    i::Integer,
-    time::Symbol;
-    t_label,
-    label::String,
-    kwargs...,
+        sol::OptimalControlSolution,
+        s::Symbol,
+        i::Integer,
+        time::Symbol;
+        t_label,
+        label::String,
+        kwargs...
 )
-    return __plot_time!(Plots.plot(), sol, s, i, time; t_label = t_label, label = label, kwargs...)
+    return __plot_time!(
+        Plots.plot(), sol, s, i, time; t_label = t_label, label = label, kwargs...)
 end
 
 """
@@ -120,15 +122,15 @@ Update the plot `p` with a vectorial function of time `f(t) ∈ Rᵈ` where `f` 
 - `time` can be `:default` or `:normalized`.
 """
 function __plot_time!(
-    p::Union{Plots.Plot, Plots.Subplot},
-    sol::OptimalControlSolution,
-    d::Dimension,
-    s::Symbol,
-    time::Symbol;
-    t_label,
-    labels::Vector{String},
-    title::String,
-    kwargs...,
+        p::Union{Plots.Plot, Plots.Subplot},
+        sol::OptimalControlSolution,
+        d::Dimension,
+        s::Symbol,
+        time::Symbol;
+        t_label,
+        labels::Vector{String},
+        title::String,
+        kwargs...
 )
 
     #
@@ -149,14 +151,14 @@ Plot a vectorial function of time `f(t) ∈ Rᵈ` where `f` is given by the symb
 The argument `s` can be `:state`, `:control` or `:costate`.
 """
 function __plot_time(
-    sol::OptimalControlSolution,
-    d::Dimension,
-    s::Symbol,
-    time::Symbol;
-    t_label,
-    labels::Vector{String},
-    title::String,
-    kwargs...,
+        sol::OptimalControlSolution,
+        d::Dimension,
+        s::Symbol,
+        time::Symbol;
+        t_label,
+        labels::Vector{String},
+        title::String,
+        kwargs...
 )
     return __plot_time!(
         Plots.plot(),
@@ -167,7 +169,7 @@ function __plot_time(
         t_label = t_label,
         labels = labels,
         title = title,
-        kwargs...,
+        kwargs...
     )
 end
 
@@ -200,7 +202,7 @@ function __plot_tree(node::PlotNode, depth::Integer = 0; kwargs...)
     #
     subplots = ()
     #
-    for c ∈ node.children
+    for c in node.children
         pc = __plot_tree(c, depth + 1)
         subplots = (subplots..., pc)
     end
@@ -221,10 +223,10 @@ $(TYPEDSIGNATURES)
 Initial plot.
 """
 function __initial_plot(
-    sol::OptimalControlSolution;
-    layout::Symbol = :split,
-    control::Symbol = :components,
-    kwargs...,
+        sol::OptimalControlSolution;
+        layout::Symbol = :split,
+        control::Symbol = :components,
+        kwargs...
 )
 
     # parameters
@@ -237,20 +239,20 @@ function __initial_plot(
                 px = Plots.plot() # state
                 pp = Plots.plot() # costate
                 pu = Plots.plot() # control
-                return Plots.plot(px, pp, pu, layout = (1, 3); kwargs...)
+                return Plots.plot(px, pp, pu; layout = (1, 3), kwargs...)
             end
             :norm => begin
                 px = Plots.plot() # state
                 pp = Plots.plot() # costate
                 pn = Plots.plot() # control norm
-                return Plots.plot(px, pp, pn, layout = (1, 3); kwargs...)
+                return Plots.plot(px, pp, pn; layout = (1, 3), kwargs...)
             end
             :all => begin
                 px = Plots.plot() # state
                 pp = Plots.plot() # costate
                 pu = Plots.plot() # control
                 pn = Plots.plot() # control norm
-                return Plots.plot(px, pp, pu, pn, layout = (2, 2); kwargs...)
+                return Plots.plot(px, pp, pu, pn; layout = (2, 2), kwargs...)
             end
             _ => throw(
                 IncorrectArgument("No such choice for control. Use :components, :norm or :all"),
@@ -264,14 +266,14 @@ function __initial_plot(
         costate_plots = Vector{PlotLeaf}()
         control_plots = Vector{PlotLeaf}()
 
-        for i ∈ 1:n
+        for i = 1:n
             push!(state_plots, PlotLeaf((:state, i)))
             push!(costate_plots, PlotLeaf((:costate, i)))
         end
         l = m
         @match control begin
             :components => begin
-                for i ∈ 1:m
+                for i = 1:m
                     push!(control_plots, PlotLeaf((:control, i)))
                 end
             end
@@ -280,7 +282,7 @@ function __initial_plot(
                 l = 1
             end
             :all => begin
-                for i ∈ 1:m
+                for i = 1:m
                     push!(control_plots, PlotLeaf((:control, i)))
                 end
                 push!(control_plots, PlotLeaf((:control_norm, -1)))
@@ -298,12 +300,10 @@ function __initial_plot(
         node_xp = PlotNode(:row, [node_x, node_p])
 
         #
-        r = round(n / (n + l), digits = 2)
+        r = round(n / (n + l); digits = 2)
         a = __width(r)
-        @eval lay = @layout [
-            $a
-            b
-        ]
+        @eval lay = @layout [$a
+                             b]
         root = PlotNode(lay, [node_xp, node_u])
 
         # plot
@@ -318,7 +318,7 @@ function __keep_series_attributes(; kwargs...)
     series_attributes = Plots.attributes(:Series)
 
     out = []
-    for kw ∈ kwargs
+    for kw in kwargs
         kw[1] ∈ series_attributes && push!(out, kw)
     end
 
@@ -338,16 +338,16 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
 function Plots.plot!(
-    p::Plots.Plot,
-    sol::OptimalControlSolution;
-    layout::Symbol = :split,
-    control::Symbol = :components,
-    time::Symbol = :default,
-    solution_label::String = "",
-    state_style = (),
-    control_style = (),
-    costate_style = (),
-    kwargs...,
+        p::Plots.Plot,
+        sol::OptimalControlSolution;
+        layout::Symbol = :split,
+        control::Symbol = :components,
+        time::Symbol = :default,
+        solution_label::String = "",
+        state_style = (),
+        control_style = (),
+        costate_style = (),
+        kwargs...
 )
     if solution_label != ""
         solution_label = " " * solution_label
@@ -376,7 +376,7 @@ function Plots.plot!(
             title = "state",
             lims = :auto,
             series_attr...,
-            state_style...,
+            state_style...
         )
         __plot_time!(
             p[2],
@@ -389,7 +389,7 @@ function Plots.plot!(
             title = "costate",
             lims = :auto,
             series_attr...,
-            costate_style...,
+            costate_style...
         )
         @match control begin
             :components => begin
@@ -404,7 +404,7 @@ function Plots.plot!(
                     title = "control",
                     lims = :auto,
                     series_attr...,
-                    control_style...,
+                    control_style...
                 )
             end
             :norm => begin
@@ -419,7 +419,7 @@ function Plots.plot!(
                     title = "control norm",
                     lims = :auto,
                     series_attr...,
-                    control_style...,
+                    control_style...
                 )
             end
             :all => begin
@@ -434,7 +434,7 @@ function Plots.plot!(
                     title = "control",
                     lims = :auto,
                     series_attr...,
-                    control_style...,
+                    control_style...
                 )
                 __plot_time!(
                     p[4],
@@ -447,7 +447,7 @@ function Plots.plot!(
                     title = "control norm",
                     lims = :auto,
                     series_attr...,
-                    control_style...,
+                    control_style...
                 )
             end
             _ => throw(
@@ -456,7 +456,7 @@ function Plots.plot!(
         end
 
     elseif layout == :split
-        for i ∈ 1:n
+        for i = 1:n
             __plot_time!(
                 p[i],
                 sol,
@@ -466,7 +466,7 @@ function Plots.plot!(
                 t_label = t_label,
                 label = x_labels[i] * solution_label,
                 series_attr...,
-                state_style...,
+                state_style...
             )
             __plot_time!(
                 p[i + n],
@@ -477,12 +477,12 @@ function Plots.plot!(
                 t_label = t_label,
                 label = "p" * x_labels[i] * solution_label,
                 series_attr...,
-                costate_style...,
+                costate_style...
             )
         end
         @match control begin
             :components => begin
-                for i ∈ 1:m
+                for i = 1:m
                     __plot_time!(
                         p[i + 2 * n],
                         sol,
@@ -492,7 +492,7 @@ function Plots.plot!(
                         t_label = t_label,
                         label = u_labels[i] * solution_label,
                         series_attr...,
-                        control_style...,
+                        control_style...
                     )
                 end
             end
@@ -506,11 +506,11 @@ function Plots.plot!(
                     t_label = t_label,
                     label = "‖" * u_label * "‖" * solution_label,
                     series_attr...,
-                    control_style...,
+                    control_style...
                 )
             end
             :all => begin
-                for i ∈ 1:m
+                for i = 1:m
                     __plot_time!(
                         p[i + 2 * n],
                         sol,
@@ -520,7 +520,7 @@ function Plots.plot!(
                         t_label = t_label,
                         label = u_labels[i] * solution_label,
                         series_attr...,
-                        control_style...,
+                        control_style...
                     )
                 end
                 __plot_time!(
@@ -532,7 +532,7 @@ function Plots.plot!(
                     t_label = t_label,
                     label = "‖" * u_label * "‖" * solution_label,
                     series_attr...,
-                    control_style...,
+                    control_style...
                 )
             end
             _ => throw(
@@ -570,16 +570,16 @@ Plot the optimal control solution `sol` using the layout `layout`.
 - The keyword arguments `state_style`, `control_style` and `costate_style` are passed to the `plot` function of the `Plots` package. The `state_style` is passed to the plot of the state, the `control_style` is passed to the plot of the control and the `costate_style` is passed to the plot of the costate.
 """
 function Plots.plot(
-    sol::OptimalControlSolution;
-    layout::Symbol = :split,
-    control::Symbol = :components,
-    time::Symbol = :default,
-    size = __size_plot(sol, control),
-    solution_label::String = "",
-    state_style = (),
-    control_style = (),
-    costate_style = (),
-    kwargs...,
+        sol::OptimalControlSolution;
+        layout::Symbol = :split,
+        control::Symbol = :components,
+        time::Symbol = :default,
+        size = __size_plot(sol, control),
+        solution_label::String = "",
+        state_style = (),
+        control_style = (),
+        costate_style = (),
+        kwargs...
 )
     #
     p = __initial_plot(sol; layout = layout, control = control, size = size, kwargs...)
@@ -594,7 +594,7 @@ function Plots.plot(
         state_style = state_style,
         control_style = control_style,
         costate_style = costate_style,
-        kwargs...,
+        kwargs...
     )
 end
 
@@ -611,15 +611,15 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 - The argument `yy` can be `:state`, `:control` or `:costate`.
 """
 @recipe function f(
-    sol::OptimalControlSolution,
-    xx::Union{Symbol, Tuple{Symbol, Integer}},
-    yy::Union{Symbol, Tuple{Symbol, Integer}},
-    time::Symbol = :default,
+        sol::OptimalControlSolution,
+        xx::Union{Symbol, Tuple{Symbol, Integer}},
+        yy::Union{Symbol, Tuple{Symbol, Integer}},
+        time::Symbol = :default
 )
 
     #
-    x = __get_data_plot(sol, xx, time = time)
-    y = __get_data_plot(sol, yy, time = time)
+    x = __get_data_plot(sol, xx; time = time)
+    y = __get_data_plot(sol, yy; time = time)
 
     #
     label = recipe_label(sol, xx, yy)
@@ -628,9 +628,9 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 end
 
 function recipe_label(
-    sol::OptimalControlSolution,
-    xx::Union{Symbol, Tuple{Symbol, Integer}},
-    yy::Union{Symbol, Tuple{Symbol, Integer}},
+        sol::OptimalControlSolution,
+        xx::Union{Symbol, Tuple{Symbol, Integer}},
+        yy::Union{Symbol, Tuple{Symbol, Integer}}
 )
 
     #
@@ -660,9 +660,9 @@ $(TYPEDSIGNATURES)
 Get the data for plotting.
 """
 function __get_data_plot(
-    sol::OptimalControlSolution,
-    xx::Union{Symbol, Tuple{Symbol, Integer}};
-    time::Symbol = :default,
+        sol::OptimalControlSolution,
+        xx::Union{Symbol, Tuple{Symbol, Integer}};
+        time::Symbol = :default
 )
     T = time_grid(sol)
     X = state(sol).(T)

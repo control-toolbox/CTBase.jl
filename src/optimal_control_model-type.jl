@@ -11,7 +11,7 @@ $(TYPEDFIELDS)
 """
 @with_kw mutable struct OptimalControlModel{
     time_dependence <: TimeDependence,
-    variable_dependence <: VariableDependence,
+    variable_dependence <: VariableDependence
 } <: AbstractOptimalControlModel
     model_expression::Union{Nothing, Expr} = nothing
     initial_time::Union{Time, Index, Nothing} = nothing
@@ -55,7 +55,7 @@ function __is_variable_not_set(ocp::OptimalControlModel)
     conditions = [
         isnothing(ocp.variable_dimension),
         isnothing(ocp.variable_name),
-        isnothing(ocp.variable_components_names),
+        isnothing(ocp.variable_components_names)
     ]
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.variable_dimension)
@@ -77,7 +77,7 @@ function __is_time_not_set(ocp::OptimalControlModel)
         isnothing(ocp.initial_time_name),
         isnothing(ocp.final_time),
         isnothing(ocp.final_time_name),
-        isnothing(ocp.time_name),
+        isnothing(ocp.time_name)
     ]
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.initial_time)
@@ -97,7 +97,7 @@ function __is_state_not_set(ocp::OptimalControlModel)
     conditions = [
         isnothing(ocp.state_dimension),
         isnothing(ocp.state_name),
-        isnothing(ocp.state_components_names),
+        isnothing(ocp.state_components_names)
     ]
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.state_dimension)
@@ -117,7 +117,7 @@ function __is_control_not_set(ocp::OptimalControlModel)
     conditions = [
         isnothing(ocp.control_dimension),
         isnothing(ocp.control_name),
-        isnothing(ocp.control_components_names),
+        isnothing(ocp.control_components_names)
     ]
     @assert all(conditions) || !any(conditions) # either all or none
     return isnothing(ocp.control_dimension)
@@ -234,22 +234,23 @@ Throw ```IncorrectArgument``` exception if dependencies arguments are incorrect.
 function __check_dependencies(dependencies::Tuple{Vararg{DataType}})
     size(filter(p -> p <: VariableDependence, dependencies), 1) > 1 && throw(
         IncorrectArgument(
-            "the number of arguments about variable dependence must be equal at most to 1",
-        ),
+        "the number of arguments about variable dependence must be equal at most to 1",
+    ),
     )
     size(filter(p -> p <: TimeDependence, dependencies), 1) > 1 && throw(
         IncorrectArgument(
-            "the number of arguments about time dependence must be equal at most to 1",
-        ),
+        "the number of arguments about time dependence must be equal at most to 1",
+    ),
     )
     size(dependencies, 1) > 2 && throw(
         IncorrectArgument("the number of arguments about dependencies must be equal at most to 2"),
     )
-    size(filter(p -> !(p <: Union{TimeDependence, VariableDependence}), dependencies), 1) > 0 &&
+    size(filter(p -> !(p <: Union{TimeDependence, VariableDependence}), dependencies), 1) >
+    0 &&
         throw(
             IncorrectArgument(
-                "wrong type arguments, possible arguments are: NonAutonomous, Autonomous, Fixed, NonFixed",
-            ),
+            "wrong type arguments, possible arguments are: NonAutonomous, Autonomous, Fixed, NonFixed",
+        ),
         )
 end
 
@@ -260,7 +261,8 @@ Throw ```UnauthorizedCall``` exception if the state of an ocp is not set.
 
 """
 function __check_state_set(ocp::OptimalControlModel)
-    __is_state_not_set(ocp) && throw(UnauthorizedCall("the state dimension has to be set before."))
+    __is_state_not_set(ocp) &&
+        throw(UnauthorizedCall("the state dimension has to be set before."))
 end
 
 """
@@ -281,7 +283,8 @@ Throw ```UnauthorizedCall``` exception if the time of an ocp is not set.
 
 """
 function __check_is_time_set(ocp::OptimalControlModel)
-    __is_time_not_set(ocp) && throw(UnauthorizedCall("the time dimension has to be set before."))
+    __is_time_not_set(ocp) &&
+        throw(UnauthorizedCall("the time dimension has to be set before."))
 end
 
 """

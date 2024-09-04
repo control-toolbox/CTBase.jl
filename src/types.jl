@@ -422,7 +422,8 @@ struct HamiltonianLift{time_dependence, variable_dependence} <:
        AbstractHamiltonian{time_dependence, variable_dependence}
     X::VectorField
     function HamiltonianLift(
-        X::VectorField{time_dependence, variable_dependence},
+            X::VectorField{
+            time_dependence, variable_dependence},
     ) where {time_dependence, variable_dependence}
         new{time_dependence, variable_dependence}(X)
     end

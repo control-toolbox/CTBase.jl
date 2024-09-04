@@ -18,7 +18,7 @@ function bench(file::String)
     println("Benching $file_name.jl\n")
 
     file_name_output = joinpath("bench", file_name * ".md")
-    open(file_name_output, write = true, append = false) do f
+    open(file_name_output; write = true, append = false) do f
         write(f, "# Benchmarks for $file_name.jl\n\n")
         write(f, "```julia\n")
     end
@@ -35,7 +35,7 @@ function bench(file::String)
         println("Expr  : ", expr)
         #dump(expr)
 
-        open(file_name_output, write = true, append = true) do f
+        open(file_name_output; write = true, append = true) do f
             if has_displayed
                 write(f, "```julia\n")
                 has_displayed = false
@@ -53,8 +53,8 @@ function bench(file::String)
                     :(display($benchname)) => begin
                         has_displayed = true
                         doBenchMarking(quote
-                            $benchname
-                        end, f)
+                                $benchname
+                            end, f)
                         expr = :()
                     end
                     _ => begin

@@ -61,7 +61,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
     vl = Vector{ctNumber}()
     vu = Vector{ctNumber}()
 
-    for (_, c) ∈ constraints(ocp)
+    for (_, c) in constraints(ocp)
         @match c begin
             (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary]
             end => begin
@@ -121,7 +121,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ξl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i ∈ 1:length(ξf)
+        for i = 1:length(ξf)
             vali = ξf[i](t, u, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -134,7 +134,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ηl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i ∈ 1:length(ηf)
+        for i = 1:length(ηf)
             vali = ηf[i](t, x, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -147,7 +147,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ψl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i ∈ 1:length(ψf)
+        for i = 1:length(ψf)
             vali = ψf[i](t, x, u, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -160,7 +160,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ϕl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i ∈ 1:length(ϕf)
+        for i = 1:length(ϕf)
             vali = ϕf[i](x0, xf, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -173,7 +173,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(θl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i ∈ 1:length(θf)
+        for i = 1:length(θf)
             vali = θf[i](v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -237,8 +237,8 @@ julia> c(1)
 ```
 """
 function constraint(
-    ocp::OptimalControlModel{T, V},
-    label::Symbol,
+        ocp::OptimalControlModel{T, V},
+        label::Symbol
 ) where {T <: TimeDependence, V <: VariableDependence}
     con = ocp.constraints[label]
     @match con begin
@@ -248,13 +248,14 @@ function constraint(
         (:control, f::ControlConstraint, _, _) => return f
         (:control, rg, _, _) => begin
             C = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(u -> u[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} =>
-                    ControlConstraint((u, v) -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} =>
-                    ControlConstraint((t, u) -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} =>
-                    ControlConstraint((t, u, v) -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(
+                    u -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => ControlConstraint(
+                    (u, v) -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, Fixed} => ControlConstraint(
+                    (t, u) -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, NonFixed} => ControlConstraint(
+                    (t, u, v) -> u[rg], T, V)
                 _ => nothing
             end
             return C
@@ -262,13 +263,14 @@ function constraint(
         (:state, f::StateConstraint, _, _) => return f
         (:state, rg, _, _) => begin
             S = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(x -> x[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} =>
-                    StateConstraint((x, v) -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} =>
-                    StateConstraint((t, x) -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} =>
-                    StateConstraint((t, x, v) -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(
+                    x -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => StateConstraint(
+                    (x, v) -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, Fixed} => StateConstraint(
+                    (t, x) -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous, NonFixed} => StateConstraint(
+                    (t, x, v) -> x[rg], T, V)
                 _ => nothing
             end
             return S
@@ -314,7 +316,8 @@ function dim_path_constraints(ocp::OptimalControlModel)
     isnothing(ocp.dim_control_constraints) && return nothing
     isnothing(ocp.dim_state_constraints) && return nothing
     isnothing(ocp.dim_mixed_constraints) && return nothing
-    return ocp.dim_state_constraints + ocp.dim_control_constraints + ocp.dim_mixed_constraints
+    return ocp.dim_state_constraints + ocp.dim_control_constraints +
+           ocp.dim_mixed_constraints
 end
 
 """

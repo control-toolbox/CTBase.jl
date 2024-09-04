@@ -15,13 +15,13 @@ module CTBase
 import Base
 using DocStringExtensions
 using DifferentiationInterface:
-    AutoForwardDiff,
-    derivative,
-    gradient,
-    jacobian,
-    prepare_derivative,
-    prepare_gradient,
-    prepare_jacobian
+                                AutoForwardDiff,
+                                derivative,
+                                gradient,
+                                jacobian,
+                                prepare_derivative,
+                                prepare_gradient,
+                                prepare_jacobian
 import ForwardDiff
 using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
 using MLStyle # pattern matching
@@ -251,29 +251,32 @@ export set_AD_backend
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
-export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
+export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint,
+       VariableConstraint
 
 # model
 export OptimalControlModel
 export Model
 export __OCPModel # redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
 export variable!,
-    time!,
-    constraint!,
-    dynamics!,
-    objective!,
-    state!,
-    control!,
-    remove_constraint!,
-    model_expression!
+       time!,
+       constraint!,
+       dynamics!,
+       objective!,
+       state!,
+       control!,
+       remove_constraint!,
+       model_expression!
 export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max
 export is_variable_dependent, is_variable_independent
 export nlp_constraints!, constraints, constraints_labels, constraint
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
-export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints
+export dim_control_constraints, dim_state_constraints, dim_mixed_constraints,
+       dim_path_constraints
 export dim_boundary_constraints, dim_variable_constraints, dim_control_range
 export dim_state_range, dim_variable_range
-export model_expression, initial_time, initial_time_name, final_time, final_time_name, time_name
+export model_expression, initial_time, initial_time_name, final_time, final_time_name,
+       time_name
 export control_dimension, control_components_names, control_name
 export state_dimension, state_components_names, state_name
 export variable_dimension, variable_components_names, variable_name
@@ -286,7 +289,7 @@ export state_discretized, control_discretized, costate_discretized
 export iterations, stopping, message, success, infos
 export boundary_constraints, mult_boundary_constraints
 export variable_constraints,
-    mult_variable_constraints, mult_variable_box_lower, mult_variable_box_upper
+       mult_variable_constraints, mult_variable_box_lower, mult_variable_box_upper
 export control_constraints, mult_control_constraints
 export state_constraints, mult_state_constraints
 export mixed_constraints, mult_mixed_constraints
@@ -295,10 +298,11 @@ export mult_control_box_lower, mult_control_box_upper
 export time_grid!, costate!, iterations!, stopping!, message!, success!, infos!
 export boundary_constraints!, mult_boundary_constraints!
 export variable_constraints!,
-    mult_variable_constraints!, mult_variable_box_lower!, mult_variable_box_upper!
+       mult_variable_constraints!, mult_variable_box_lower!, mult_variable_box_upper!
 export control_constraints!,
-    mult_control_constraints!, mult_control_box_lower!, mult_control_box_upper!
-export state_constraints!, mult_state_constraints!, mult_state_box_lower!, mult_state_box_upper!
+       mult_control_constraints!, mult_control_box_lower!, mult_control_box_upper!
+export state_constraints!, mult_state_constraints!, mult_state_box_lower!,
+       mult_state_box_upper!
 export mixed_constraints!, mult_mixed_constraints!
 
 # initialization

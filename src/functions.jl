@@ -218,7 +218,8 @@ function (F::Hamiltonian{Autonomous, Fixed})(x::State, p::Costate)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+function (F::Hamiltonian{Autonomous, Fixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctNumber
     return F.f(x, p)
 end
 
@@ -227,10 +228,10 @@ function (F::Hamiltonian{Autonomous, NonFixed})(x::State, p::Costate, v::Variabl
 end
 
 function (F::Hamiltonian{Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return F.f(x, p, v)
 end
@@ -240,19 +241,19 @@ function (F::Hamiltonian{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::
 end
 
 function (F::Hamiltonian{NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return F.f(t, x, p)
 end
 
 function (F::Hamiltonian{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return F.f(t, x, p, v)
 end
@@ -344,23 +345,24 @@ function (H::HamiltonianLift{Autonomous, Fixed})(x::State, p::Costate)::ctNumber
 end
 
 function (H::HamiltonianLift{Autonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return p' * H.X(x)
 end
 
-function (H::HamiltonianLift{Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctNumber
+function (H::HamiltonianLift{Autonomous, NonFixed})(
+        x::State, p::Costate, v::Variable)::ctNumber
     return p' * H.X(x, v)
 end
 
 function (H::HamiltonianLift{Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return p' * H.X(x, v)
 end
@@ -370,19 +372,19 @@ function (H::HamiltonianLift{NonAutonomous, Fixed})(t::Time, x::State, p::Costat
 end
 
 function (H::HamiltonianLift{NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return p' * H.X(t, x)
 end
 
 function (H::HamiltonianLift{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctNumber
     return p' * H.X(t, x, v)
 end
@@ -403,7 +405,8 @@ julia> Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p
 ```
 
 """
-function HamiltonianVectorField(f::Function; autonomous::Bool = true, variable::Bool = false)
+function HamiltonianVectorField(
+        f::Function; autonomous::Bool = true, variable::Bool = false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
     return HamiltonianVectorField{time_dependence, variable_dependence}(f)
@@ -475,60 +478,60 @@ julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
 ```
 """
 function (F::HamiltonianVectorField{Autonomous, Fixed})(
-    x::State,
-    p::Costate,
+        x::State,
+        p::Costate
 )::Tuple{DState, DCostate}
     return F.f(x, p)
 end
 
 function (F::HamiltonianVectorField{Autonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::Tuple{DState, DCostate}
     return F.f(x, p)
 end
 
 function (F::HamiltonianVectorField{Autonomous, NonFixed})(
-    x::State,
-    p::Costate,
-    v::Variable,
+        x::State,
+        p::Costate,
+        v::Variable
 )::Tuple{DState, DCostate}
     return F.f(x, p, v)
 end
 
 function (F::HamiltonianVectorField{Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::Tuple{DState, DCostate}
     return F.f(x, p, v)
 end
 
 function (F::HamiltonianVectorField{NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
+        t::Time,
+        x::State,
+        p::Costate
 )::Tuple{DState, DCostate}
     return F.f(t, x, p)
 end
 
 function (F::HamiltonianVectorField{NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::Tuple{DState, DCostate}
     return F.f(t, x, p)
 end
 
 function (F::HamiltonianVectorField{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::Tuple{DState, DCostate}
     return F.f(t, x, p, v)
 end
@@ -746,7 +749,8 @@ function (F::Lagrange{Autonomous, Fixed})(x::State, u::Control)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{Autonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{Autonomous, Fixed})(
+        t::Time, x::State, u::Control, v::Variable)::ctNumber
     return F.f(x, u)
 end
 
@@ -754,7 +758,8 @@ function (F::Lagrange{Autonomous, NonFixed})(x::State, u::Control, v::Variable):
     return F.f(x, u, v)
 end
 
-function (F::Lagrange{Autonomous, NonFixed})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{Autonomous, NonFixed})(
+        t::Time, x::State, u::Control, v::Variable)::ctNumber
     return F.f(x, u, v)
 end
 
@@ -762,15 +767,16 @@ function (F::Lagrange{NonAutonomous, Fixed})(t::Time, x::State, u::Control)::ctN
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{NonAutonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{NonAutonomous, Fixed})(
+        t::Time, x::State, u::Control, v::Variable)::ctNumber
     return F.f(t, x, u)
 end
 
 function (F::Lagrange{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+        t::Time,
+        x::State,
+        u::Control,
+        v::Variable
 )::ctNumber
     return F.f(t, x, u, v)
 end
@@ -854,7 +860,8 @@ function (F::Dynamics{Autonomous, Fixed})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{Autonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{Autonomous, Fixed})(
+        t::Time, x::State, u::Control, v::Variable)::ctVector
     return F.f(x, u)
 end
 
@@ -862,7 +869,8 @@ function (F::Dynamics{Autonomous, NonFixed})(x::State, u::Control, v::Variable):
     return F.f(x, u, v)
 end
 
-function (F::Dynamics{Autonomous, NonFixed})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{Autonomous, NonFixed})(
+        t::Time, x::State, u::Control, v::Variable)::ctVector
     return F.f(x, u, v)
 end
 
@@ -870,15 +878,16 @@ function (F::Dynamics{NonAutonomous, Fixed})(t::Time, x::State, u::Control)::ctV
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{NonAutonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{NonAutonomous, Fixed})(
+        t::Time, x::State, u::Control, v::Variable)::ctVector
     return F.f(t, x, u)
 end
 
 function (F::Dynamics{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+        t::Time,
+        x::State,
+        u::Control,
+        v::Variable
 )::ctVector
     return F.f(t, x, u, v)
 end
@@ -974,7 +983,8 @@ function (F::StateConstraint{Autonomous, NonFixed})(x::State, v::Variable)::ctVe
     return F.f(x, v)
 end
 
-function (F::StateConstraint{Autonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{Autonomous, NonFixed})(
+        t::Time, x::State, v::Variable)::ctVector
     return F.f(x, v)
 end
 
@@ -982,11 +992,13 @@ function (F::StateConstraint{NonAutonomous, Fixed})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{NonAutonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{NonAutonomous, Fixed})(
+        t::Time, x::State, v::Variable)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{NonAutonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{NonAutonomous, NonFixed})(
+        t::Time, x::State, v::Variable)::ctVector
     return F.f(t, x, v)
 end
 
@@ -1070,7 +1082,8 @@ function (F::ControlConstraint{Autonomous, Fixed})(u::Control)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{Autonomous, Fixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{Autonomous, Fixed})(
+        t::Time, u::Control, v::Variable)::ctVector
     return F.f(u)
 end
 
@@ -1078,7 +1091,8 @@ function (F::ControlConstraint{Autonomous, NonFixed})(u::Control, v::Variable)::
     return F.f(u, v)
 end
 
-function (F::ControlConstraint{Autonomous, NonFixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{Autonomous, NonFixed})(
+        t::Time, u::Control, v::Variable)::ctVector
     return F.f(u, v)
 end
 
@@ -1086,11 +1100,13 @@ function (F::ControlConstraint{NonAutonomous, Fixed})(t::Time, u::Control)::ctVe
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{NonAutonomous, Fixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{NonAutonomous, Fixed})(
+        t::Time, u::Control, v::Variable)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{NonAutonomous, NonFixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{NonAutonomous, NonFixed})(
+        t::Time, u::Control, v::Variable)::ctVector
     return F.f(t, u, v)
 end
 
@@ -1180,23 +1196,24 @@ function (F::MixedConstraint{Autonomous, Fixed})(x::State, u::Control)::ctVector
 end
 
 function (F::MixedConstraint{Autonomous, Fixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+        t::Time,
+        x::State,
+        u::Control,
+        v::Variable
 )::ctVector
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{Autonomous, NonFixed})(x::State, u::Control, v::Variable)::ctVector
+function (F::MixedConstraint{Autonomous, NonFixed})(
+        x::State, u::Control, v::Variable)::ctVector
     return F.f(x, u, v)
 end
 
 function (F::MixedConstraint{Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+        t::Time,
+        x::State,
+        u::Control,
+        v::Variable
 )::ctVector
     return F.f(x, u, v)
 end
@@ -1206,19 +1223,19 @@ function (F::MixedConstraint{NonAutonomous, Fixed})(t::Time, x::State, u::Contro
 end
 
 function (F::MixedConstraint{NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+        t::Time,
+        x::State,
+        u::Control,
+        v::Variable
 )::ctVector
     return F.f(t, x, u)
 end
 
 function (F::MixedConstraint{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+        t::Time,
+        x::State,
+        u::Control,
+        v::Variable
 )::ctVector
     return F.f(t, x, u, v)
 end
@@ -1335,7 +1352,8 @@ function (F::FeedbackControl{Autonomous, NonFixed})(x::State, v::Variable)::ctVe
     return F.f(x, v)
 end
 
-function (F::FeedbackControl{Autonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{Autonomous, NonFixed})(
+        t::Time, x::State, v::Variable)::ctVector
     return F.f(x, v)
 end
 
@@ -1343,11 +1361,13 @@ function (F::FeedbackControl{NonAutonomous, Fixed})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{NonAutonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{NonAutonomous, Fixed})(
+        t::Time, x::State, v::Variable)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{NonAutonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{NonAutonomous, NonFixed})(
+        t::Time, x::State, v::Variable)::ctVector
     return F.f(t, x, v)
 end
 
@@ -1438,7 +1458,8 @@ function (F::ControlLaw{Autonomous, Fixed})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{Autonomous, Fixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p)
 end
 
@@ -1446,7 +1467,8 @@ function (F::ControlLaw{Autonomous, NonFixed})(x::State, p::Costate, v::Variable
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{Autonomous, NonFixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -1454,15 +1476,16 @@ function (F::ControlLaw{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::c
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{NonAutonomous, Fixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(t, x, p)
 end
 
 function (F::ControlLaw{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctVector
     return F.f(t, x, p, v)
 end
@@ -1554,7 +1577,8 @@ function (F::Multiplier{Autonomous, Fixed})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{Autonomous, Fixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p)
 end
 
@@ -1562,7 +1586,8 @@ function (F::Multiplier{Autonomous, NonFixed})(x::State, p::Costate, v::Variable
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{Autonomous, NonFixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(x, p, v)
 end
 
@@ -1570,15 +1595,16 @@ function (F::Multiplier{NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::c
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{NonAutonomous, Fixed})(
+        t::Time, x::State, p::Costate, v::Variable)::ctVector
     return F.f(t, x, p)
 end
 
 function (F::Multiplier{NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+        t::Time,
+        x::State,
+        p::Costate,
+        v::Variable
 )::ctVector
     return F.f(t, x, p, v)
 end

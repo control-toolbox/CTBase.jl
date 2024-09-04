@@ -20,7 +20,7 @@ function ctindices(i::Integer)::String
         throw(IncorrectArgument("the indice must be positive"))
     end
     s = ""
-    for d ∈ digits(i)
+    for d in digits(i)
         s = ctindice(d) * s
     end
     return s
@@ -62,7 +62,7 @@ function ctupperscripts(i::Integer)::String
         throw(IncorrectArgument("the upperscript must be positive"))
     end
     s = ""
-    for d ∈ digits(i)
+    for d in digits(i)
         s = ctupperscript(d) * s
     end
     return s
@@ -148,7 +148,8 @@ $(TYPEDSIGNATURES)
 Return the interpolation of `f` at `x`.
 """
 function ctinterpolate(x, f) # default for interpolation of the initialization
-    return Interpolations.linear_interpolation(x, f, extrapolation_bc = Interpolations.Line())
+    return Interpolations.linear_interpolation(
+        x, f; extrapolation_bc = Interpolations.Line())
 end
 
 """
@@ -207,8 +208,8 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 **Note.** `dim` ∈ {1, 2} is the dimension along which the matrix is transformed.
 """
 function matrix2vec(
-    x::Matrix{<:ctNumber},
-    dim::Integer = __matrix_dimension_stock(),
+        x::Matrix{<:ctNumber},
+        dim::Integer = __matrix_dimension_stock()
 )::Vector{<:Vector{<:ctNumber}}
     m, n = size(x)
     y = nothing

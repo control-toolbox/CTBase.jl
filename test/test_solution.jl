@@ -22,7 +22,7 @@ function test_solution()
         control = u,
         costate = p,
         objective = obj,
-        time_grid = times,
+        time_grid = times
     )
 
     @test objective(sol) == obj

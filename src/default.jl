@@ -69,8 +69,10 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the variables.
 The default value is `["v"]` for a one dimensional variable, and `["v₁", "v₂", ...]` for a multi dimensional variable.
 """
-__variable_components_names(q::Dimension, name::String) =
-    q > 1 ? [name * ctindices(i) for i ∈ range(1, q)] : [name]
+__variable_components_names(q::Dimension, name::String) = q > 1 ?
+                                                          [name * ctindices(i)
+                                                           for i in range(1, q)] :
+                                                          [name]
 
 """
 $(TYPEDSIGNATURES)
@@ -86,8 +88,10 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the states.
 The default value is `["x"]` for a one dimensional state, and `["x₁", "x₂", ...]` for a multi dimensional state.
 """
-__state_components_names(n::Dimension, name::String) =
-    n > 1 ? [name * ctindices(i) for i ∈ range(1, n)] : [name]
+__state_components_names(n::Dimension, name::String) = n > 1 ?
+                                                       [name * ctindices(i)
+                                                        for i in range(1, n)] :
+                                                       [name]
 
 """
 $(TYPEDSIGNATURES)
@@ -103,8 +107,10 @@ $(TYPEDSIGNATURES)
 Used to set the default value of the names of the controls.
 The default value is `["u"]` for a one dimensional control, and `["u₁", "u₂", ...]` for a multi dimensional control.
 """
-__control_components_names(m::Dimension, name::String) =
-    m > 1 ? [name * ctindices(i) for i ∈ range(1, m)] : [name]
+__control_components_names(m::Dimension, name::String) = m > 1 ?
+                                                         [name * ctindices(i)
+                                                          for i in range(1, m)] :
+                                                         [name]
 
 """
 $(TYPEDSIGNATURES)
@@ -162,8 +168,8 @@ Used to set the default interpolation function used for initialisation.
 The default value is `Interpolations.linear_interpolation`, which means that the initial guess is linearly interpolated.
 """
 function __init_interpolation()
-    return (T, U) ->
-        Interpolations.linear_interpolation(T, U, extrapolation_bc = Interpolations.Line())
+    return (T, U) -> Interpolations.linear_interpolation(
+        T, U; extrapolation_bc = Interpolations.Line())
 end
 
 """

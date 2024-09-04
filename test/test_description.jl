@@ -19,7 +19,8 @@ function test_description()
     @test getFullDescription((:descent,), algorithmes) == (:descent, :bfgs, :bissection)
     @test getFullDescription((:bfgs,), algorithmes) == (:descent, :bfgs, :bissection)
     @test getFullDescription((:bissection,), algorithmes) == (:descent, :bfgs, :bissection)
-    @test getFullDescription((:backtracking,), algorithmes) == (:descent, :bfgs, :backtracking)
+    @test getFullDescription((:backtracking,), algorithmes) ==
+          (:descent, :bfgs, :backtracking)
     @test getFullDescription((:fixedstep,), algorithmes) == (:descent, :bfgs, :fixedstep)
     @test getFullDescription((:fixedstep, :gradient), algorithmes) ==
           (:descent, :gradient, :fixedstep)

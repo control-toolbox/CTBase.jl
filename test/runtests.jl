@@ -15,8 +15,8 @@ const replace_call = CTBase.replace_call
 const constraint_type = CTBase.constraint_type
 
 #
-@testset verbose = true showtiming = true "Base" begin
-    for name ∈ (
+@testset verbose=true showtiming=true "Base" begin
+    for name in (
         :aqua,
         :ctparser_utils,
         :default,
@@ -30,7 +30,7 @@ const constraint_type = CTBase.constraint_type
         :print,
         :solution,
         :utils,
-        :onepass,
+        :onepass
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
