@@ -171,15 +171,15 @@ function test_alloc_bad(ocp, N)
         end
 
         function set_control_constraint!(C, i, ξ, nξ, nc)
-            C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = ξ
+            return C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = ξ
         end
 
         function set_state_constraint!(C, i, η, nη, nξ, nc)
-            C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = η
+            return C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = η
         end
 
         function set_mixed_constraint!(C, i, ψ, nψ, nξ, nη, nc)
-            C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = ψ
+            return C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = ψ
         end
     end
 
@@ -223,7 +223,7 @@ function test_alloc_bad(ocp, N)
     end
     println("   end for loop")
 
-    nothing
+    return nothing
 end
 
 # --------------------------------------------------------------------
@@ -346,7 +346,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         #for i ∈ eachindex(val)
         #    val[i] = u[1]+t
         #end
-        nothing
+        return nothing
     end
 
     function η!(val, t, x, v, N = ηfn)
@@ -358,7 +358,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         #for i ∈ eachindex(val)
         #    val[i] = x[1]+t
         #end
-        nothing
+        return nothing
     end
 
     function ψ!(val, t, x, u, v, N = ψfn)
@@ -370,7 +370,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         #for i ∈ eachindex(val)
         #    val[i] = x[1]+t+u[1]
         #end
-        nothing
+        return nothing
     end
 
     function ϕ!(val, x0, xf, v, N = ϕfn)
@@ -382,7 +382,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         #for i ∈ eachindex(val)
         #    val[i] = x0[1]+xf[1]
         #end
-        nothing
+        return nothing
     end
 
     function θ!(val, v, N = θfn)
@@ -394,7 +394,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         #for i ∈ eachindex(val)
         #    val[i] = 0
         #end
-        nothing
+        return nothing
     end
 
     return (ξl, ξ!, ξu),
@@ -428,15 +428,15 @@ function test_alloc_good(ocp, N)
             end
 
             function set_control_constraint!(C, i, valξ, nξ, nc)
-                C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = valξ
+                return C[((i - 1) * nc + 1):((i - 1) * nc + nξ)] = valξ
             end
 
             function set_state_constraint!(C, i, valη, nη, nξ, nc)
-                C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = valη
+                return C[((i - 1) * nc + nξ + 1):((i - 1) * nc + nξ + nη)] = valη
             end
 
             function set_mixed_constraint!(C, i, valψ, nψ, nξ, nη, nc)
-                C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = valψ
+                return C[((i - 1) * nc + nξ + nη + 1):((i - 1) * nc + nξ + nη + nψ)] = valψ
             end
         end
 

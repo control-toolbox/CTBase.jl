@@ -182,7 +182,7 @@ end
 function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, ct_repl_history::HistoryRepl)
     println("")
     println("Optimal control problem name: ", ct_repl_data.ocp_name)
-    println("Solution name: ", ct_repl_data.sol_name)
+    return println("Solution name: ", ct_repl_data.sol_name)
 end
 
 function NAME_ACTION_FUNCTION(
@@ -340,7 +340,7 @@ function __code(model::ModelRepl, e::Expr)
 end
 
 function __update!(model::ModelRepl, e::Expr)
-    push!(model, e)
+    return push!(model, e)
 end
 
 # make @def ocp quote
@@ -403,7 +403,7 @@ end
 # add model to ct_repl_history
 function __add!(ct_repl_history::HistoryRepl, ct_repl_data::CTRepl)
     push!(ct_repl_history.ct_repl_datas_data, deepcopy(ct_repl_data))
-    ct_repl_history.index += 1
+    return ct_repl_history.index += 1
 end
 
 # go to previous model in ct_repl_history
@@ -424,7 +424,7 @@ function __copy!(ct_repl_data::CTRepl, ct_repl_data_to_copy::CTRepl)
     ct_repl_data.model = deepcopy(ct_repl_data_to_copy.model)
     ct_repl_data.ocp_name = ct_repl_data_to_copy.ocp_name
     ct_repl_data.sol_name = ct_repl_data_to_copy.sol_name
-    ct_repl_data.debug = ct_repl_data_to_copy.debug
+    return ct_repl_data.debug = ct_repl_data_to_copy.debug
 end
 
 function Base.show(io::IO, ::MIME"text/plain", ct_repl_data::CTRepl)
@@ -433,5 +433,5 @@ function Base.show(io::IO, ::MIME"text/plain", ct_repl_data::CTRepl)
     println(io, "model: ", ct_repl_data.model)
     println(io, "ocp_name: ", ct_repl_data.ocp_name)
     println(io, "sol_name: ", ct_repl_data.sol_name)
-    println(io, "debug: ", ct_repl_data.debug)
+    return println(io, "debug: ", ct_repl_data.debug)
 end

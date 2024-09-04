@@ -6,7 +6,7 @@ function tt()
         for i in 1:y
             x += 1.0
         end
-        x
+        return x
     end
 
     function bench_scalar_2()
@@ -14,7 +14,7 @@ function tt()
         for i in 1:z
             x += 1.0
         end
-        x
+        return x
     end
 
     function bench_scalar_3(z)
@@ -22,7 +22,7 @@ function tt()
         for i in 1:z
             x += w
         end
-        x
+        return x
     end
 
     w = 1.0
@@ -36,7 +36,7 @@ function tt()
         for i in 1:zz
             x += 1.0
         end
-        x
+        return x
     end
 
     function bench_scalar_5(z)
@@ -44,7 +44,7 @@ function tt()
         for i in 1:z
             x += ww
         end
-        x
+        return x
     end
 
     ww = 1.0
@@ -57,7 +57,7 @@ function tt()
         for i in 1:z
             x += 1.0
         end
-        x
+        return x
     end
 
     @benchmark bench_scalar_6()

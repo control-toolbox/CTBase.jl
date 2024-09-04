@@ -3,7 +3,7 @@ const __default_AD_backend = Ref(AutoForwardDiff())
 
 function set_AD_backend(AD)
     global __default_AD_backend[] = AD
-    nothing
+    return nothing
 end
 
 """

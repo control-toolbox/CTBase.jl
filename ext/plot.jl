@@ -25,7 +25,7 @@ struct PlotNode <: AbstractPlotTreeElement
     children::Vector{<:AbstractPlotTreeElement}
     function PlotNode(
             layout::Union{Symbol, Matrix{Any}}, children::Vector{<:AbstractPlotTreeElement})
-        new(layout, children)
+        return new(layout, children)
     end
 end
 

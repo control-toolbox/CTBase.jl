@@ -234,7 +234,7 @@ function p_alias!(p, ocp, a, e; log = false)
         p.aliases[Symbol(a, ctupperscripts(i))] = :($a^$i)
     end
     p.aliases[a] = e
-    __wrap(
+    return __wrap(
         :(LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee))), p.lnum, p.line)
 end
 
@@ -277,7 +277,7 @@ function p_time!(p, ocp, t, t0, tf; log = false)
             _ => return __throw("bad time declaration", p.lnum, p.line)
         end
     end
-    __wrap(code, p.lnum, p.line)
+    return __wrap(code, p.lnum, p.line)
 end
 
 function p_state!(p, ocp, x, n; components_names = nothing, log = false)
@@ -358,7 +358,7 @@ function p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    return $ee2
                 end
                 constraint!($ocp, :boundary; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -376,7 +376,7 @@ function p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    return $ee2
                 end
                 constraint!($ocp, :control; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -394,7 +394,7 @@ function p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    return $ee2
                 end
                 constraint!($ocp, :state; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -406,7 +406,7 @@ function p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false)
             args = [p.v]
             quote
                 function $gs($(args...))
-                    $e2
+                    return $e2
                 end
                 constraint!($ocp, :variable; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -423,14 +423,14 @@ function p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    return $ee2
                 end
                 constraint!($ocp, :mixed; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
         end
         _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end
-    __wrap(code, p.lnum, p.line)
+    return __wrap(code, p.lnum, p.line)
 end
 
 function p_dynamics!(p, ocp, x, t, e, label = nothing; log = false)
@@ -453,7 +453,7 @@ function p_dynamics!(p, ocp, x, t, e, label = nothing; log = false)
     __v_dep(p) && push!(args, p.v)
     __wrap(quote
             function $gs($(args...))
-                $e
+                return $e
             end
             dynamics!($ocp, $gs)
         end, p.lnum, p.line)
@@ -476,7 +476,7 @@ function p_lagrange!(p, ocp, e, type; log = false)
     __v_dep(p) && push!(args, p.v)
     __wrap(quote
             function $gs($(args...))
-                $e
+                return $e
             end
             objective!($ocp, :lagrange, $gs, $ttype)
         end, p.lnum, p.line)
@@ -502,7 +502,7 @@ function p_mayer!(p, ocp, e, type; log = false)
     __v_dep(p) && push!(args, p.v)
     __wrap(quote
             function $gs($(args...))
-                $e
+                return $e
             end
             objective!($ocp, :mayer, $gs, $ttype)
         end, p.lnum, p.line)
@@ -534,10 +534,10 @@ function p_bolza!(p, ocp, e1, e2, type; log = false)
     ttype = QuoteNode(type)
     __wrap(quote
             function $gs1($(args1...))
-                $e1
+                return $e1
             end
             function $gs2($(args2...))
-                $e2
+                return $e2
             end
             objective!($ocp, :bolza, $gs1, $gs2, $ttype)
         end, p.lnum, p.line)
@@ -608,7 +608,7 @@ macro def(e)
         @def $ocp $e
         $ocp
     end
-    esc(code)
+    return esc(code)
 end
 
 macro def(ocp, e, log = false)

@@ -16,7 +16,7 @@ function test_plot()
     α = p0[1]
     β = p0[2]
     function x(t)
-        [
+        return [
             a + b * (t - t0) + β * (t - t0)^2 / 2.0 - α * (t - t0)^3 / 6.0,
             b + β * (t - t0) - α * (t - t0)^2 / 2.0
         ]

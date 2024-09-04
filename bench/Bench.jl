@@ -10,7 +10,7 @@ function doBenchMarking(expr, f)
     show(f, "text/plain", eval(quote
         $expr
     end))
-    write(f, "\n```\n\n")
+    return write(f, "\n```\n\n")
 end
 
 function bench(file::String)
@@ -20,7 +20,7 @@ function bench(file::String)
     file_name_output = joinpath("bench", file_name * ".md")
     open(file_name_output; write = true, append = false) do f
         write(f, "# Benchmarks for $file_name.jl\n\n")
-        write(f, "```julia\n")
+        return write(f, "```julia\n")
     end
 
     has_displayed = false
@@ -67,5 +67,5 @@ function bench(file::String)
         return expr
     end
 
-    include(mapexpr, file)
+    return include(mapexpr, file)
 end

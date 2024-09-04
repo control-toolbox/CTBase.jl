@@ -1,3 +1,3 @@
 style = "sciml"
-separate_kwargs_with_semicolon=true
-align_assignment=true
+separate_kwargs_with_semicolon = true
+always_use_return = true

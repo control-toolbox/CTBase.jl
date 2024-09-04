@@ -121,7 +121,7 @@ function variable!(
         name::Symbol,
         components_names::Vector{Symbol}
 )
-    variable!(ocp, q, string(name), string.(components_names))
+    return variable!(ocp, q, string(name), string.(components_names))
 end
 
 function variable!(
@@ -130,11 +130,11 @@ function variable!(
         name::Symbol,
         components_names::Vector{String}
 )
-    variable!(ocp, q, string(name), components_names)
+    return variable!(ocp, q, string(name), components_names)
 end
 
 function variable!(ocp::OptimalControlModel, q::Dimension, name::Symbol)
-    variable!(ocp, q, string(name))
+    return variable!(ocp, q, string(name))
 end
 
 """
@@ -205,7 +205,7 @@ function state!(
         name::Symbol,
         components_names::Vector{Symbol}
 )
-    state!(ocp, n, string(name), string.(components_names))
+    return state!(ocp, n, string(name), string.(components_names))
 end
 
 function state!(
@@ -214,11 +214,11 @@ function state!(
         name::Symbol,
         components_names::Vector{String}
 )
-    state!(ocp, n, string(name), components_names)
+    return state!(ocp, n, string(name), components_names)
 end
 
 function state!(ocp::OptimalControlModel, n::Dimension, name::Symbol)
-    state!(ocp, n, string(name))
+    return state!(ocp, n, string(name))
 end
 
 """
@@ -291,7 +291,7 @@ function control!(
         name::Symbol,
         components_names::Vector{Symbol}
 )
-    control!(ocp, m, string(name), string.(components_names))
+    return control!(ocp, m, string(name), string.(components_names))
 end
 
 function control!(
@@ -300,11 +300,11 @@ function control!(
         name::Symbol,
         components_names::Vector{String}
 )
-    control!(ocp, m, string(name), components_names)
+    return control!(ocp, m, string(name), components_names)
 end
 
 function control!(ocp::OptimalControlModel, m::Dimension, name::Symbol)
-    control!(ocp, m, string(name))
+    return control!(ocp, m, string(name))
 end
 
 """

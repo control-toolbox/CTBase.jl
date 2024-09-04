@@ -181,5 +181,5 @@ function Base.showerror(io::IO, e::ExtensionError)
         wd = e.weakdeps[i]
         i < N ? print(io, string(wd), ", ") : print(io, string(wd))
     end
-    nothing
+    return nothing
 end

@@ -277,11 +277,11 @@ function Base.show(
         alignment = :c,
         compact_printing = true
     )
-    nothing
+    return nothing
 end
 
 function Base.show_default(io::IO, ocp::OptimalControlModel)
-    print(io, typeof(ocp))
+    return print(io, typeof(ocp))
     #show(io, MIME("text/plain"), ocp)
 end
 
@@ -296,10 +296,10 @@ $(TYPEDSIGNATURES)
 Prints the solution.
 """
 function Base.show(io::IO, ::MIME"text/plain", sol::OptimalControlSolution)
-    print(io, typeof(sol))
+    return print(io, typeof(sol))
 end
 
 function Base.show_default(io::IO, sol::OptimalControlSolution)
-    print(io, typeof(sol))
+    return print(io, typeof(sol))
     #show(io, MIME("text/plain"), sol)
 end
