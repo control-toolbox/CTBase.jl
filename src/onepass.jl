@@ -32,7 +32,7 @@ end
 
 __init_aliases(; max_dim = 20) = begin
     al = OrderedDict{Symbol, Union{Real, Symbol, Expr}}()
-    for i = 1:max_dim
+    for i in 1:max_dim
         al[Symbol(:R, ctupperscripts(i))] = :(R^$i)
     end
     al[:<=] = :≤
@@ -203,13 +203,13 @@ function p_variable!(p, ocp, v, q; components_names = nothing, log = false)
     p.v = v
     vv = QuoteNode(v)
     qq = q isa Integer ? q : 9
-    for i = 1:qq
+    for i in 1:qq
         p.aliases[Symbol(v, ctindices(i))] = :($v[$i])
     end # make: v₁, v₂... if the variable is named v
-    for i = 1:qq
+    for i in 1:qq
         p.aliases[Symbol(v, i)] = :($v[$i])
     end # make: v1, v2... if the variable is named v
-    for i = 1:9
+    for i in 1:9
         p.aliases[Symbol(v, ctupperscripts(i))] = :($v^$i)
     end # make: v¹, v²... if the variable is named v
     if (isnothing(components_names))
@@ -217,7 +217,7 @@ function p_variable!(p, ocp, v, q; components_names = nothing, log = false)
     else
         qq == length(components_names.args) ||
             return __throw("the number of variable components must be $qq", p.lnum, p.line)
-        for i = 1:qq
+        for i in 1:qq
             p.aliases[components_names.args[i]] = :($v[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
@@ -230,7 +230,7 @@ function p_alias!(p, ocp, a, e; log = false)
     a isa Symbol || return __throw("forbidden alias name: $a", p.lnum, p.line)
     aa = QuoteNode(a)
     ee = QuoteNode(e)
-    for i = 1:9
+    for i in 1:9
         p.aliases[Symbol(a, ctupperscripts(i))] = :($a^$i)
     end
     p.aliases[a] = e
@@ -286,13 +286,13 @@ function p_state!(p, ocp, x, n; components_names = nothing, log = false)
     p.x = x
     xx = QuoteNode(x)
     nn = n isa Integer ? n : 9
-    for i = 1:nn
+    for i in 1:nn
         p.aliases[Symbol(x, ctindices(i))] = :($x[$i])
     end # make: x₁, x₂... if the state is named x
-    for i = 1:nn
+    for i in 1:nn
         p.aliases[Symbol(x, i)] = :($x[$i])
     end # make: x1, x2... if the state is named x
-    for i = 1:9
+    for i in 1:9
         p.aliases[Symbol(x, ctupperscripts(i))] = :($x^$i)
     end # make: x¹, x²... if the state is named x
     p.aliases[Symbol(Unicode.normalize(string(x, "̇")))] = :(∂($x))
@@ -301,7 +301,7 @@ function p_state!(p, ocp, x, n; components_names = nothing, log = false)
     else
         nn == length(components_names.args) ||
             return __throw("the number of state components must be $nn", p.lnum, p.line)
-        for i = 1:nn
+        for i in 1:nn
             p.aliases[components_names.args[i]] = :($x[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
@@ -315,13 +315,13 @@ function p_control!(p, ocp, u, m; components_names = nothing, log = false)
     p.u = u
     uu = QuoteNode(u)
     mm = m isa Integer ? m : 9
-    for i = 1:mm
+    for i in 1:mm
         p.aliases[Symbol(u, ctindices(i))] = :($u[$i])
     end # make: u₁, u₂... if the control is named u
-    for i = 1:mm
+    for i in 1:mm
         p.aliases[Symbol(u, i)] = :($u[$i])
     end # make: u1, u2... if the control is named u
-    for i = 1:9
+    for i in 1:9
         p.aliases[Symbol(u, ctupperscripts(i))] = :($u^$i)
     end # make: u¹, u²... if the control is named u
     if (isnothing(components_names))
@@ -329,7 +329,7 @@ function p_control!(p, ocp, u, m; components_names = nothing, log = false)
     else
         mm == length(components_names.args) ||
             return __throw("the number of control components must be $mm", p.lnum, p.line)
-        for i = 1:mm
+        for i in 1:mm
             p.aliases[components_names.args[i]] = :($u[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))

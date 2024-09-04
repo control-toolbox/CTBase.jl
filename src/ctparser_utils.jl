@@ -14,7 +14,7 @@ expr_it(e, _Expr, f) =
     if e isa Expr
         args = e.args
         n = length(args)
-        newargs = [expr_it(e.args[i], _Expr, f) for i ∈ 1:n]
+        newargs = [expr_it(e.args[i], _Expr, f) for i in 1:n]
         return _Expr(e.head, newargs...)
     else
         return f(e)
@@ -118,7 +118,7 @@ replace_call(e, x::Vector{Symbol}, t, y) = begin
         @match ee begin
             :($eee($tt)) && if tt == t
             end => let ch = false
-                for i = 1:length(x)
+                for i in 1:length(x)
                     if has(eee, x[i])
                         eee = subs(eee, x[i], y[i])
                         ch = true # todo: unnecessary (as subs can be idempotent)?

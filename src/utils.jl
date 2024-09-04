@@ -172,7 +172,7 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 """
 function vec2vec(x::Vector{<:ctNumber}, n::Integer)::Vector{<:Vector{<:ctNumber}}
     y = [x[1:n]]
-    for i = (n + 1):n:(length(x) - n + 1)
+    for i in (n + 1):n:(length(x) - n + 1)
         y = vcat(y, [x[i:(i + n - 1)]])
     end
     return y
@@ -215,12 +215,12 @@ function matrix2vec(
     y = nothing
     if dim == 1
         y = [x[1, :]]
-        for i = 2:m
+        for i in 2:m
             y = vcat(y, [x[i, :]])
         end
     else
         y = [x[:, 1]]
-        for j = 2:n
+        for j in 2:n
             y = vcat(y, [x[:, j]])
         end
     end

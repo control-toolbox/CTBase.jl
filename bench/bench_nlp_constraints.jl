@@ -111,7 +111,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
 
     function ξ(t, u, v)
         val = Vector{ctNumber}()
-        for i = 1:length(ξf)
+        for i in 1:length(ξf)
             append!(val, ξf[i](t, u, v))
         end
         return val
@@ -119,7 +119,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
 
     function η(t, x, v)
         val = Vector{ctNumber}()
-        for i = 1:length(ηf)
+        for i in 1:length(ηf)
             append!(val, ηf[i](t, x, v))
         end
         return val
@@ -127,7 +127,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
 
     function ψ(t, x, u, v)
         val = Vector{ctNumber}()
-        for i = 1:length(ψf)
+        for i in 1:length(ψf)
             append!(val, ψf[i](t, x, u, v))
         end
         return val
@@ -135,7 +135,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
 
     function ϕ(x0, xf, v)
         val = Vector{ctNumber}()
-        for i = 1:length(ϕf)
+        for i in 1:length(ϕf)
             append!(val, ϕf[i](x0, xf, v))
         end
         return val
@@ -143,7 +143,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
 
     function θ(v)
         val = Vector{ctNumber}()
-        for i = 1:length(θf)
+        for i in 1:length(θf)
             append!(val, θf[i](v))
         end
         return val
@@ -212,7 +212,7 @@ function test_alloc_bad(ocp, N)
 
     println("   start for loop")
     begin
-        for i = 1:N
+        for i in 1:N
             t = times[i]
             x = get_state(XU, i, n, m)
             u = get_control(XU, i, n, m)
@@ -337,7 +337,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
 
     function ξ!(val, t, u, v, N = ξfn)
         offset = 0
-        for i = 1:N
+        for i in 1:N
             #val[rg(1+offset,ξn[i]+offset)] = 
             z = ξf[i](t, u, v)[:]
             val[rg(1 + offset, ξn[i] + offset)] = z
@@ -351,7 +351,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
 
     function η!(val, t, x, v, N = ηfn)
         offset = 0
-        for i = 1:N
+        for i in 1:N
             val[rg(1 + offset, ηn[i] + offset)] = ηf[i](t, x, v)
             offset += ηn[i]
         end
@@ -363,7 +363,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
 
     function ψ!(val, t, x, u, v, N = ψfn)
         offset = 0
-        for i = 1:N
+        for i in 1:N
             val[rg(1 + offset, ψn[i] + offset)] = ψf[i](t, x, u, v)
             offset += ψn[i]
         end
@@ -375,7 +375,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
 
     function ϕ!(val, x0, xf, v, N = ϕfn)
         offset = 0
-        for i = 1:N
+        for i in 1:N
             val[rg(1 + offset, ϕn[i] + offset)] = ϕf[i](x0, xf, v)
             offset += ϕn[i]
         end
@@ -387,7 +387,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
 
     function θ!(val, v, N = θfn)
         offset = 0
-        for i = 1:N
+        for i in 1:N
             val[rg(1 + offset, θn[i] + offset)] = θf[i](v)
             offset += θn[i]
         end
@@ -478,7 +478,7 @@ function test_alloc_good(ocp, N)
 
         t = 0
         println("   start for loop")
-        for i = 1:N
+        for i in 1:N
             #=
             if i==-1 #|| i==2
                 println("    i = ", i)

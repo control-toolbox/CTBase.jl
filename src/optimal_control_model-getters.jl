@@ -121,7 +121,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ξl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i = 1:length(ξf)
+        for i in 1:length(ξf)
             vali = ξf[i](t, u, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -134,7 +134,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ηl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i = 1:length(ηf)
+        for i in 1:length(ηf)
             vali = ηf[i](t, x, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -147,7 +147,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ψl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i = 1:length(ψf)
+        for i in 1:length(ψf)
             vali = ψf[i](t, x, u, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -160,7 +160,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(ϕl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i = 1:length(ϕf)
+        for i in 1:length(ϕf)
             vali = ϕf[i](x0, xf, v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
@@ -173,7 +173,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         dim = length(θl)
         val = zeros(ctNumber, dim)
         j = 1
-        for i = 1:length(θf)
+        for i in 1:length(θf)
             vali = θf[i](v)
             li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali

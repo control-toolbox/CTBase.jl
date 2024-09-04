@@ -4,7 +4,7 @@ function test_ctparser_utils()
     @test subs(e, :r, :(x[1])) == :(∫((x[1])(t)^2 + 2 * u₁(t)) → min)
 
     e = :(∫(u₁(t)^2 + 2u₂(t)) → min)
-    for i = 1:2
+    for i in 1:2
         e = subs(e, Symbol(:u, Char(8320 + i)), :(u[$i]))
     end
     @test e == :(∫((u[1])(t)^2 + 2 * (u[2])(t)) → min)

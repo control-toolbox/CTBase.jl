@@ -62,7 +62,7 @@ function test_model() # 30 55 185
     end
 
     @testset "time, state and control set or not" begin
-        for i = 1:7
+        for i in 1:7
             ocp = Model()
 
             i == 2 && begin

@@ -183,7 +183,7 @@ function Base.show(
             x_name_space = x_name * "(" * t_name * ")"
             if xi_names != [x_name * ctindices(i) for i in range(1, x_dim)]
                 x_name_space *= " = ("
-                for i = 1:x_dim
+                for i in 1:x_dim
                     x_name_space *= xi_names[i] * "(" * t_name * ")"
                     i < x_dim && (x_name_space *= ", ")
                 end
@@ -199,7 +199,7 @@ function Base.show(
             u_name_space = u_name * "(" * t_name * ")"
             if ui_names != [u_name * ctindices(i) for i in range(1, u_dim)]
                 u_name_space *= " = ("
-                for i = 1:u_dim
+                for i in 1:u_dim
                     u_name_space *= ui_names[i] * "(" * t_name * ")"
                     i < u_dim && (u_name_space *= ", ")
                 end
@@ -218,7 +218,7 @@ function Base.show(
                 v_name_space = v_name
                 if vi_names != [v_name * ctindices(i) for i in range(1, v_dim)]
                     v_name_space *= " = ("
-                    for i = 1:v_dim
+                    for i in 1:v_dim
                         v_name_space *= vi_names[i]
                         i < v_dim && (v_name_space *= ", ")
                     end

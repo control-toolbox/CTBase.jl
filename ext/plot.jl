@@ -266,14 +266,14 @@ function __initial_plot(
         costate_plots = Vector{PlotLeaf}()
         control_plots = Vector{PlotLeaf}()
 
-        for i = 1:n
+        for i in 1:n
             push!(state_plots, PlotLeaf((:state, i)))
             push!(costate_plots, PlotLeaf((:costate, i)))
         end
         l = m
         @match control begin
             :components => begin
-                for i = 1:m
+                for i in 1:m
                     push!(control_plots, PlotLeaf((:control, i)))
                 end
             end
@@ -282,7 +282,7 @@ function __initial_plot(
                 l = 1
             end
             :all => begin
-                for i = 1:m
+                for i in 1:m
                     push!(control_plots, PlotLeaf((:control, i)))
                 end
                 push!(control_plots, PlotLeaf((:control_norm, -1)))
@@ -456,7 +456,7 @@ function Plots.plot!(
         end
 
     elseif layout == :split
-        for i = 1:n
+        for i in 1:n
             __plot_time!(
                 p[i],
                 sol,
@@ -482,7 +482,7 @@ function Plots.plot!(
         end
         @match control begin
             :components => begin
-                for i = 1:m
+                for i in 1:m
                     __plot_time!(
                         p[i + 2 * n],
                         sol,
@@ -510,7 +510,7 @@ function Plots.plot!(
                 )
             end
             :all => begin
-                for i = 1:m
+                for i in 1:m
                     __plot_time!(
                         p[i + 2 * n],
                         sol,
@@ -686,10 +686,10 @@ function __get_data_plot(
                 )
             end
         end
-        :state => [X[i][ii] for i = 1:m]
-        :control => [U[i][ii] for i = 1:m]
-        :costate => [P[i][ii] for i = 1:m]
-        :control_norm => [norm(U[i]) for i = 1:m]
+        :state => [X[i][ii] for i in 1:m]
+        :control => [U[i][ii] for i in 1:m]
+        :costate => [P[i][ii] for i in 1:m]
+        :control_norm => [norm(U[i]) for i in 1:m]
         _ => error("Internal error, no such choice for xx")
     end
 end
