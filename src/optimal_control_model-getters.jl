@@ -63,8 +63,9 @@ function nlp_constraints!(ocp::OptimalControlModel)
 
     for (_, c) in constraints(ocp)
         @match c begin
-            (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary]
-            end => begin
+            (type, f::BoundaryConstraint, lb, ub) &&
+                if type ∈ [:initial, :final, :boundary]
+                end => begin
                 push!(ϕf, f)
                 append!(ϕl, lb)
                 append!(ϕu, ub)
@@ -192,12 +193,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
     ocp.dim_variable_range = length(vl)
 
     return (ξl, ξ, ξu),
-    (ηl, η, ηu),
-    (ψl, ψ, ψu),
-    (ϕl, ϕ, ϕu),
-    (θl, θ, θu),
-    (ul, uind, uu),
-    (xl, xind, xu),
+    (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu),
     (vl, vind, vu)
 end
 
@@ -237,9 +233,8 @@ julia> c(1)
 ```
 """
 function constraint(
-        ocp::OptimalControlModel{T, V},
-        label::Symbol
-) where {T <: TimeDependence, V <: VariableDependence}
+    ocp::OptimalControlModel{T,V}, label::Symbol
+) where {T<:TimeDependence,V<:VariableDependence}
     con = ocp.constraints[label]
     @match con begin
         (:initial, f::BoundaryConstraint, _, _) => return f
@@ -248,14 +243,14 @@ function constraint(
         (:control, f::ControlConstraint, _, _) => return f
         (:control, rg, _, _) => begin
             C = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(
-                    u -> u[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} => ControlConstraint(
-                    (u, v) -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} => ControlConstraint(
-                    (t, u) -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} => ControlConstraint(
-                    (t, u, v) -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous,Fixed} =>
+                    ControlConstraint(u -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous,NonFixed} =>
+                    ControlConstraint((u, v) -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,Fixed} =>
+                    ControlConstraint((t, u) -> u[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,NonFixed} =>
+                    ControlConstraint((t, u, v) -> u[rg], T, V)
                 _ => nothing
             end
             return C
@@ -263,14 +258,13 @@ function constraint(
         (:state, f::StateConstraint, _, _) => return f
         (:state, rg, _, _) => begin
             S = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(
-                    x -> x[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} => StateConstraint(
-                    (x, v) -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} => StateConstraint(
-                    (t, x) -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} => StateConstraint(
-                    (t, x, v) -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous,Fixed} => StateConstraint(x -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous,NonFixed} =>
+                    StateConstraint((x, v) -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,Fixed} =>
+                    StateConstraint((t, x) -> x[rg], T, V)
+                ::OptimalControlModel{NonAutonomous,NonFixed} =>
+                    StateConstraint((t, x, v) -> x[rg], T, V)
                 _ => nothing
             end
             return S
@@ -316,7 +310,8 @@ function dim_path_constraints(ocp::OptimalControlModel)
     isnothing(ocp.dim_control_constraints) && return nothing
     isnothing(ocp.dim_state_constraints) && return nothing
     isnothing(ocp.dim_mixed_constraints) && return nothing
-    return ocp.dim_state_constraints + ocp.dim_control_constraints +
+    return ocp.dim_state_constraints +
+           ocp.dim_control_constraints +
            ocp.dim_mixed_constraints
 end
 
@@ -517,8 +512,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model is autonomous.
 """
-is_autonomous(ocp::OptimalControlModel{Autonomous, <:VariableDependence}) = true
-is_autonomous(ocp::OptimalControlModel{NonAutonomous, <:VariableDependence}) = false
+is_autonomous(ocp::OptimalControlModel{Autonomous,<:VariableDependence}) = true
+is_autonomous(ocp::OptimalControlModel{NonAutonomous,<:VariableDependence}) = false
 
 """
 $(TYPEDSIGNATURES)
@@ -553,8 +548,8 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model is fixed (= has no variable).
 """
-is_fixed(ocp::OptimalControlModel{<:TimeDependence, Fixed}) = true
-is_fixed(ocp::OptimalControlModel{<:TimeDependence, NonFixed}) = false
+is_fixed(ocp::OptimalControlModel{<:TimeDependence,Fixed}) = true
+is_fixed(ocp::OptimalControlModel{<:TimeDependence,NonFixed}) = false
 
 """
 $(TYPEDSIGNATURES)

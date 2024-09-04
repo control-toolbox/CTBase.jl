@@ -18,13 +18,13 @@ $(TYPEDSIGNATURES)
 Print the optimal control problem.
 """
 function Base.show(
-        io::IO,
-        ::MIME"text/plain",
-        ocp::OptimalControlModel{<:TimeDependence, <:VariableDependence}
+    io::IO,
+    ::MIME"text/plain",
+    ocp::OptimalControlModel{<:TimeDependence,<:VariableDependence},
 )
 
     # check if the problem is empty
-    __is_empty(ocp) && return
+    __is_empty(ocp) && return nothing
 
     #
     some_printing = false
@@ -38,15 +38,16 @@ function Base.show(
         #
         #println(io)
         if __is_complete(ocp)
-            printstyled(io, "The "; bold = true)
-            is_time_dependent(ocp) ? printstyled(io, "(non autonomous) "; bold = true) :
-            printstyled(io, "(autonomous) "; bold = true)
-            printstyled(io, "optimal control problem is given by:\n"; bold = true)
+            printstyled(io, "The "; bold=true)
+            if is_time_dependent(ocp)
+                printstyled(io, "(non autonomous) "; bold=true)
+            else
+                printstyled(io, "(autonomous) "; bold=true)
+            end
+            printstyled(io, "optimal control problem is given by:\n"; bold=true)
         else
             printstyled(
-                io,
-                "The optimal control problem is not complete but made of:\n";
-                bold = true
+                io, "The optimal control problem is not complete but made of:\n"; bold=true
             )
         end
         println(io)
@@ -85,23 +86,26 @@ function Base.show(
         _v = is_variable_dependent(ocp) ? ", " * v_name : ""
 
         # other names
-        bounds_args_names = x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" *
-                            _v
-        mixed_args_names = t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name *
-                           ")" * _v
+        bounds_args_names =
+            x_name * "(" * t0_name * "), " * x_name * "(" * tf_name * ")" * _v
+        mixed_args_names =
+            t_ * x_name * "(" * t_name * "), " * u_name * "(" * t_name * ")" * _v
         state_args_names = t_ * x_name * "(" * t_name * ")" * _v
         control_args_names = t_ * u_name * "(" * t_name * ")" * _v
 
         #
         some_printing && println(io)
-        printstyled(io, "The "; bold = true)
-        is_time_dependent(ocp) ? printstyled(io, "(non autonomous) "; bold = true) :
-        printstyled(io, "(autonomous) "; bold = true)
-        printstyled(io, "optimal control problem is of the form:\n"; bold = true)
+        printstyled(io, "The "; bold=true)
+        if is_time_dependent(ocp)
+            printstyled(io, "(non autonomous) "; bold=true)
+        else
+            printstyled(io, "(autonomous) "; bold=true)
+        end
+        printstyled(io, "optimal control problem is of the form:\n"; bold=true)
         println(io)
 
         # J
-        printstyled(io, "    minimize  "; color = :blue)
+        printstyled(io, "    minimize  "; color=:blue)
         print(io, "J(" * x_name * ", " * u_name * _v * ") = ")
 
         # Mayer
@@ -121,7 +125,7 @@ function Base.show(
                 t0_name *
                 ", " *
                 tf_name *
-                "]"
+                "]",
             )
         else
             println(io, "")
@@ -129,7 +133,7 @@ function Base.show(
 
         # constraints
         println(io, "")
-        printstyled(io, "    subject to\n"; color = :blue)
+        printstyled(io, "    subject to\n"; color=:blue)
         println(io, "")
 
         # dynamics
@@ -147,12 +151,14 @@ function Base.show(
             t0_name *
             ", " *
             tf_name *
-            "] a.e.,"
+            "] a.e.,",
         )
         println(io, "")
 
         # other constraints: control, state, mixed, boundary, bounds on u, bounds on x
-        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints!(ocp)
+        (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (ulb, uind, uub), (xlb, xind, xub) = nlp_constraints!(
+            ocp
+        )
         has_constraints = false
         if !isempty(ξl) || !isempty(ulb)
             has_constraints = true
@@ -227,8 +233,16 @@ function Base.show(
             end
             v_name_space *= " ∈ " * v_space
             # print
-            print(io, "    where ", x_name_space, ", ",
-                u_name_space, " and ", v_name_space, ".\n")
+            print(
+                io,
+                "    where ",
+                x_name_space,
+                ", ",
+                u_name_space,
+                " and ",
+                v_name_space,
+                ".\n",
+            )
         else
             # print
             print(io, "    where ", x_name_space, " and ", u_name_space, ".\n")
@@ -239,8 +253,8 @@ function Base.show(
 
     #
     some_printing && println(io)
-    printstyled(io, "Declarations "; bold = true)
-    printstyled(io, "(* required):\n"; bold = false)
+    printstyled(io, "Declarations "; bold=true)
+    printstyled(io, "(* required):\n"; bold=false)
     #println(io)
 
     # print table of settings
@@ -251,7 +265,7 @@ function Base.show(
     data = hcat(
         __is_time_not_set(ocp) ? "X" : "V",
         __is_state_not_set(ocp) ? "X" : "V",
-        __is_control_not_set(ocp) ? "X" : "V"
+        __is_control_not_set(ocp) ? "X" : "V",
     )
     #is_variable_dependent(ocp) && 
     begin
@@ -261,21 +275,21 @@ function Base.show(
         data,
         __is_dynamics_not_set(ocp) ? "X" : "V",
         __is_objective_not_set(ocp) ? "X" : "V",
-        isempty(constraints(ocp)) ? "X" : "V"
+        isempty(constraints(ocp)) ? "X" : "V",
     )
     println("")
-    h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold = true, foreground = :red)
-    h2 = Highlighter((data, i, j) -> data[i, j] == "V"; bold = true, foreground = :green)
+    h1 = Highlighter((data, i, j) -> data[i, j] == "X"; bold=true, foreground=:red)
+    h2 = Highlighter((data, i, j) -> data[i, j] == "V"; bold=true, foreground=:green)
     pretty_table(
         io,
         data;
-        tf = tf_unicode_rounded,
-        header = header,
-        header_crayon = crayon"yellow",
-        crop = :none,
-        highlighters = (h1, h2),
-        alignment = :c,
-        compact_printing = true
+        tf=tf_unicode_rounded,
+        header=header,
+        header_crayon=crayon"yellow",
+        crop=:none,
+        highlighters=(h1, h2),
+        alignment=:c,
+        compact_printing=true,
     )
     return nothing
 end

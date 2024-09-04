@@ -150,12 +150,7 @@ function nlp_constraints_original(ocp::OptimalControlModel)
     end
 
     return (ξl, ξ, ξu),
-    (ηl, η, ηu),
-    (ψl, ψ, ψu),
-    (ϕl, ϕ, ϕu),
-    (θl, θ, θu),
-    (ul, uind, uu),
-    (xl, xind, xu),
+    (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu),
     (vl, vind, vu)
 end
 
@@ -184,14 +179,9 @@ function test_alloc_bad(ocp, N)
     end
 
     println("   call nlp_constraints_original")
-    (ξl, ξ, ξu),
-    (ηl, η, ηu),
-    (ψl, ψ, ψu),
-    (ϕl, ϕ, ϕu),
-    (θl, θ, θu),
-    (ul, uind, uu),
-    (xl, xind, xu),
-    (vl, vind, vu) = nlp_constraints_original(ocp)
+    (ξl, ξ, ξu), (ηl, η, ηu), (ψl, ψ, ψu), (ϕl, ϕ, ϕu), (θl, θ, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints_original(
+        ocp
+    )
 
     println("   declare variables")
     begin
@@ -335,7 +325,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
     ϕfn = length(ϕf)
     θfn = length(θf)
 
-    function ξ!(val, t, u, v, N = ξfn)
+    function ξ!(val, t, u, v, N=ξfn)
         offset = 0
         for i in 1:N
             #val[rg(1+offset,ξn[i]+offset)] = 
@@ -349,7 +339,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         return nothing
     end
 
-    function η!(val, t, x, v, N = ηfn)
+    function η!(val, t, x, v, N=ηfn)
         offset = 0
         for i in 1:N
             val[rg(1 + offset, ηn[i] + offset)] = ηf[i](t, x, v)
@@ -361,7 +351,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         return nothing
     end
 
-    function ψ!(val, t, x, u, v, N = ψfn)
+    function ψ!(val, t, x, u, v, N=ψfn)
         offset = 0
         for i in 1:N
             val[rg(1 + offset, ψn[i] + offset)] = ψf[i](t, x, u, v)
@@ -373,7 +363,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         return nothing
     end
 
-    function ϕ!(val, x0, xf, v, N = ϕfn)
+    function ϕ!(val, x0, xf, v, N=ϕfn)
         offset = 0
         for i in 1:N
             val[rg(1 + offset, ϕn[i] + offset)] = ϕf[i](x0, xf, v)
@@ -385,7 +375,7 @@ function nlp_constraints_optimized(ocp::OptimalControlModel)
         return nothing
     end
 
-    function θ!(val, v, N = θfn)
+    function θ!(val, v, N=θfn)
         offset = 0
         for i in 1:N
             val[rg(1 + offset, θn[i] + offset)] = θf[i](v)
@@ -442,14 +432,9 @@ function test_alloc_good(ocp, N)
 
         println("   call nlp_constraints_optimized")
         begin
-            (ξl, ξ!, ξu),
-            (ηl, η!, ηu),
-            (ψl, ψ!, ψu),
-            (ϕl, ϕ!, ϕu),
-            (θl, θ!, θu),
-            (ul, uind, uu),
-            (xl, xind, xu),
-            (vl, vind, vu) = nlp_constraints_optimized(ocp)
+            (ξl, ξ!, ξu), (ηl, η!, ηu), (ψl, ψ!, ψu), (ϕl, ϕ!, ϕu), (θl, θ!, θu), (ul, uind, uu), (xl, xind, xu), (vl, vind, vu) = nlp_constraints_optimized(
+                ocp
+            )
         end
 
         println("   declare variables")

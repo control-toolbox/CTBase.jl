@@ -89,8 +89,11 @@ ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
 ```
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
-    y ∈ x ? throw(IncorrectArgument("the description $y is already in $x")) :
-    return (x..., y)
+    if y ∈ x
+        throw(IncorrectArgument("the description $y is already in $x"))
+    else
+        return (x..., y)
+    end
 end
 
 """
@@ -112,7 +115,8 @@ julia> getFullDescription((:a,), desc_list)
 ```
 """
 function getFullDescription(
-        desc::Description, desc_list::Tuple{Vararg{Description}})::Description
+    desc::Description, desc_list::Tuple{Vararg{Description}}
+)::Description
     n = size(desc_list, 1)
     table = zeros(Int8, n, 2)
     for i in range(1, n)

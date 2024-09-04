@@ -52,7 +52,7 @@ function tt()
     display(@benchmark bench_scalar_4())
     display(@benchmark bench_scalar_5(zz))
 
-    function bench_scalar_6(z = z)
+    function bench_scalar_6(z=z)
         x = 0
         for i in 1:z
             x += 1.0

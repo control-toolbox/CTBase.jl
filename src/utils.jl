@@ -73,7 +73,7 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-function ctgradient(f::Function, x::ctNumber; backend = __get_AD_backend())
+function ctgradient(f::Function, x::ctNumber; backend=__get_AD_backend())
     extras = prepare_derivative(f, backend, x)
     return derivative(f, backend, x, extras)
 end
@@ -87,7 +87,7 @@ $(TYPEDSIGNATURES)
 
 Return the gradient of `f` at `x`.
 """
-function ctgradient(f::Function, x; backend = __get_AD_backend())
+function ctgradient(f::Function, x; backend=__get_AD_backend())
     extras = prepare_gradient(f, backend, x)
     return gradient(f, backend, x, extras)
 end
@@ -110,7 +110,7 @@ $(TYPEDSIGNATURES)
 
 Return the Jacobian of `f` at `x`.
 """
-function ctjacobian(f::Function, x::ctNumber; backend = __get_AD_backend())
+function ctjacobian(f::Function, x::ctNumber; backend=__get_AD_backend())
     f_number_to_number = only ∘ f ∘ only
     extras = prepare_derivative(f_number_to_number, backend, x)
     der = derivative(f_number_to_number, backend, x, extras)
@@ -126,7 +126,7 @@ $(TYPEDSIGNATURES)
 
 Return the Jacobian of `f` at `x`.
 """
-function ctjacobian(f::Function, x; backend = __get_AD_backend())
+function ctjacobian(f::Function, x; backend=__get_AD_backend())
     extras = prepare_jacobian(f, backend, x)
     return jacobian(f, backend, x, extras)
 end
@@ -148,8 +148,7 @@ $(TYPEDSIGNATURES)
 Return the interpolation of `f` at `x`.
 """
 function ctinterpolate(x, f) # default for interpolation of the initialization
-    return Interpolations.linear_interpolation(
-        x, f; extrapolation_bc = Interpolations.Line())
+    return Interpolations.linear_interpolation(x, f; extrapolation_bc=Interpolations.Line())
 end
 
 """
@@ -208,8 +207,7 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 **Note.** `dim` ∈ {1, 2} is the dimension along which the matrix is transformed.
 """
 function matrix2vec(
-        x::Matrix{<:ctNumber},
-        dim::Integer = __matrix_dimension_stock()
+    x::Matrix{<:ctNumber}, dim::Integer=__matrix_dimension_stock()
 )::Vector{<:Vector{<:ctNumber}}
     m, n = size(x)
     y = nothing

@@ -17,7 +17,7 @@ function print_kwargs(; kwargs...)
     end
 end
 
-attributes = (size = (900, 600), linewidth = 2, flip = true, colorbar = :best, bins = :auto)
+attributes = (size=(900, 600), linewidth=2, flip=true, colorbar=:best, bins=:auto)
 println("\nBefore keeping series attributes\n")
 print_kwargs(; attributes...)
 

@@ -50,7 +50,7 @@ julia> x0 = Symbol(x, 0); subs(e, :( \$x[1](\$(t0)) ), :( \$x0[1] ))
 :(x0[1] * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
 ```
 """
-subs(e, e1::Union{Symbol, Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
+subs(e, e1::Union{Symbol,Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
 
 subs(e, e1, e2) = begin
     foo(e1, e2) = (h, args...) -> begin
@@ -113,22 +113,23 @@ julia> e = :( ((x^2)(t0) + u[1])(t) ); replace_call(e, [ x, u ], t , [ :xx, :uu 
 """
 replace_call(e, x::Vector{Symbol}, t, y) = begin
     @assert length(x) == length(y)
-    foo(x, t, y) = (h, args...) -> begin
-        ee = Expr(h, args...)
-        @match ee begin
-            :($eee($tt)) && if tt == t
-            end => let ch = false
-                for i in 1:length(x)
-                    if has(eee, x[i])
-                        eee = subs(eee, x[i], y[i])
-                        ch = true # todo: unnecessary (as subs can be idempotent)?
+    foo(x, t, y) =
+        (h, args...) -> begin
+            ee = Expr(h, args...)
+            @match ee begin
+                :($eee($tt)) && if tt == t
+                end => let ch = false
+                    for i in 1:length(x)
+                        if has(eee, x[i])
+                            eee = subs(eee, x[i], y[i])
+                            ch = true # todo: unnecessary (as subs can be idempotent)?
+                        end
                     end
+                    ch ? eee : ee
                 end
-                ch ? eee : ee
+                _ => ee
             end
-            _ => ee
         end
-    end
     expr_it(e, foo(x, t, y), x -> x)
 end
 
@@ -203,17 +204,18 @@ true
 ```
 """
 has(e, x, t) = begin
-    foo(x, t) = (h, args...) -> begin
-        ee = Expr(h, args...)
-        if :yes ∈ args
-            :yes
-        else
-            @match ee begin
-                :($eee($tt)) => (tt == t && has(eee, x)) ? :yes : ee
-                _ => ee
+    foo(x, t) =
+        (h, args...) -> begin
+            ee = Expr(h, args...)
+            if :yes ∈ args
+                :yes
+            else
+                @match ee begin
+                    :($eee($tt)) => (tt == t && has(eee, x)) ? :yes : ee
+                    _ => ee
+                end
             end
         end
-    end
     expr_it(e, foo(x, t), x -> x) == :yes
 end
 
@@ -343,7 +345,7 @@ constraint_type(e, t, t0, tf, x, u, v) = begin
         has(e, x, t),
         has(e, u, t0),
         has(e, u, tf),
-        has(e, v)
+        has(e, v),
     ] begin
         [true, false, false, false, false, false, _] => @match e begin
             :($y[($i):($p):($j)]($s)) && if (y == x && s == t0)

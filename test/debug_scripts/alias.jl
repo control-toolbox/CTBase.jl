@@ -13,7 +13,7 @@ using CTBase
 
 tf = 1.0
 
-@def verbose_threshold=80 debug=true begin
+@def verbose_threshold = 80 debug = true begin
     t0, variable
     t ∈ [t0, tf], time
     x ∈ R⁹, state

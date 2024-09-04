@@ -7,9 +7,11 @@ function doBenchMarking(expr, f)
     write(f, string(expr) * "\n")
     write(f, "```\n\n")
     write(f, "```bash\n")
-    show(f, "text/plain", eval(quote
-        $expr
-    end))
+    show(f, "text/plain", eval(
+        quote
+            $expr
+        end,
+    ))
     return write(f, "\n```\n\n")
 end
 
@@ -18,7 +20,7 @@ function bench(file::String)
     println("Benching $file_name.jl\n")
 
     file_name_output = joinpath("bench", file_name * ".md")
-    open(file_name_output; write = true, append = false) do f
+    open(file_name_output; write=true, append=false) do f
         write(f, "# Benchmarks for $file_name.jl\n\n")
         return write(f, "```julia\n")
     end
@@ -35,15 +37,15 @@ function bench(file::String)
         println("Expr  : ", expr)
         #dump(expr)
 
-        open(file_name_output; write = true, append = true) do f
+        open(file_name_output; write=true, append=true) do f
             if has_displayed
                 write(f, "```julia\n")
                 has_displayed = false
             end
 
             if hasproperty(expr, :head) &&
-               expr.head == :macrocall &&
-               expr.args[1] == Symbol("@benchmark")
+                expr.head == :macrocall &&
+                expr.args[1] == Symbol("@benchmark")
                 has_displayed = true
                 doBenchMarking(expr, f)
                 expr = :()
@@ -52,9 +54,12 @@ function bench(file::String)
                 MLStyle.@match expr begin
                     :(display($benchname)) => begin
                         has_displayed = true
-                        doBenchMarking(quote
+                        doBenchMarking(
+                            quote
                                 $benchname
-                            end, f)
+                            end,
+                            f,
+                        )
                         expr = :()
                     end
                     _ => begin
