@@ -634,6 +634,12 @@ function constraint!(
                 )
             end
             # set the constraint
+            BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
+            ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
+            StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
+            MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
+            VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
+
             fun_rg = @match type begin
                 :initial =>
                     if is_in_place(ocp)
