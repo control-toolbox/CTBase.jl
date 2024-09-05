@@ -572,6 +572,12 @@ function constraint!(
     (typeof(rg) <: Int) && (rg = Index(rg))
 
     # core
+    BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
+    ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
+    StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
+    MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
+    VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
+
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
             if type ∈ [:initial, :final, :state]
@@ -665,13 +671,7 @@ function constraint!(
         end
 
         (::Nothing, ::Function, ::ctVector, ::ctVector) => begin 
-            BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
-            ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
-            StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
-            MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
-            VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
-            
-            # set the constraint
+                       # set the constraint
             if type == :boundary
                 ocp.constraints[label] = (type, BoundaryConstraint_(f, V), lb, ub)
             elseif type == :control
