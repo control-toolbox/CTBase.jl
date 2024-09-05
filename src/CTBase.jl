@@ -251,7 +251,9 @@ export set_AD_backend
 # functions
 export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
+export Mayer!, Lagrange!, Dynamics!
 export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
+export BoundaryConstraint!, StateConstraint!, ControlConstraint!, MixedConstraint!, VariableConstraint!
 
 # model
 export OptimalControlModel
