@@ -633,13 +633,8 @@ function constraint!(
                     ),
                 )
             end
-            # set the constraint
-            BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
-            ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
-            StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
-            MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
-            VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
 
+            # set the constraint
             fun_rg = @match type begin
                 :initial =>
                     if is_in_place(ocp)
@@ -669,7 +664,13 @@ function constraint!(
             ocp.constraints[label] = (type, fun_rg, lb, ub)
         end
 
-        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin 
+            BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
+            ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
+            StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
+            MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
+            VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
+            
             # set the constraint
             if type == :boundary
                 ocp.constraints[label] = (type, BoundaryConstraint_(f, V), lb, ub)

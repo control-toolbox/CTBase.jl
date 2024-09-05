@@ -378,8 +378,8 @@ function constraint(
         (:mixed, f::MixedConstraint_, _, _) => return f
         (:variable, f::VariableConstraint_, _, _) => return f
         (:variable, rg, _, _) => return ( is_in_place(ocp) ?
-            VariableConstraint!((r, v) -> (r[:] = view(v, rg); nothing), T, V) :
-            VariableConstraint(v -> v[rg], T, V) )
+            VariableConstraint!((r, v) -> (r[:] = view(v, rg); nothing)) :
+            VariableConstraint(v -> v[rg]) )
         _ => error("Internal error")
     end
 end
