@@ -1222,7 +1222,7 @@ function ControlConstraint(f::Function, dependencies::DataType...)
     return ControlConstraint{time_dependence, variable_dependence}(f)
 end
 
-function ControlConstraint!(f!::Function, dependencies::DataType...)
+function ControlConstraint!(f!::Function, dependencies::DataType...) # todo: useless? only use version above? 
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
@@ -1297,7 +1297,7 @@ function (F::ControlConstraint!{Autonomous, Fixed})(r::ctVector, t::Time, u::Con
 end
 
 function (F::ControlConstraint!{Autonomous, NonFixed})(r::ctVector, u::Control, v::Variable)::Nothing
-    return F.f!(u, v)
+    return F.f!(r, u, v)
 end
 
 function (F::ControlConstraint!{Autonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
