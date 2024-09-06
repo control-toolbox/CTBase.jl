@@ -247,3 +247,17 @@ $(TYPEDSIGNATURES)
 Adapt `view` to treat uniformly scalars.
 """
 __view(x::AbstractVector, rg::AbstractRange) = view(x, rg) # Allows StepRange
+
+"""
+$(TYPEDSIGNATURES)
+
+Tranform in place function to out of place. Pass the result size and type (default = `Float64`).
+"""
+function to_out_of_place(f!, n; T = Float64)
+    function f(x...)
+        r = zeros(T, n)
+        f!(r, x...)
+        return r
+    end
+    return f
+end

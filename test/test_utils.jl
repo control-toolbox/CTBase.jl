@@ -78,4 +78,21 @@ function test_utils()
         @test CTBase.ctupperscripts(019) == "¹⁹"
         @test CTBase.ctupperscripts(109) == "¹⁰⁹"
     end
+
+    @testset "to_out_of_place" begin
+
+    function f1!(r, x)
+        r[1] = x
+        r[2] = x + 1
+        return nothing
+    end
+    @test to_out_of_place(f1!, 2)(1.0) == [1.0, 2.0]
+
+    function f2!(r, x, y)
+        r[:] = x + y
+        return nothing
+    end
+    @test to_out_of_place(f2!, 1; T = Int32)(1, 2) == 3 
+
+    end
 end
