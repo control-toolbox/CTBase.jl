@@ -2,8 +2,6 @@
 #
 # Model getters.
 #
-# todo: use copyto! instead of r[:] = view(u, rg) in nlp_constraints!
-#
 
 """
 $(TYPEDSIGNATURES)
@@ -341,16 +339,16 @@ function constraint(
         (:control, rg, _, _) => begin
             C = @match ocp begin
                 ::OptimalControlModel{Autonomous, Fixed} => is_in_place(ocp) ?
-                    ControlConstraint!((r, u) -> (r[:] = view(u, rg); nothing), T, V) :
+                    ControlConstraint!((r, u) -> (r[:] .= __view(u, rg); nothing), T, V) :
                     ControlConstraint(u -> u[rg], T, V)
                 ::OptimalControlModel{Autonomous, NonFixed} => is_in_place(ocp) ?
-                    ControlConstraint!((r, u, v) -> (r[:] = view(u, rg); nothing), T, V) :
+                    ControlConstraint!((r, u, v) -> (r[:] .= __view(u, rg); nothing), T, V) :
                     ControlConstraint((u, v) -> u[rg], T, V)
                 ::OptimalControlModel{NonAutonomous, Fixed} => is_in_place(ocp) ?
-                    ControlConstraint!((r, t, u) -> (r[:] = view(u, rg); nothing), T, V) :
+                    ControlConstraint!((r, t, u) -> (r[:] .= __view(u, rg); nothing), T, V) :
                     ControlConstraint((t, u) -> u[rg], T, V)
                 ::OptimalControlModel{NonAutonomous, NonFixed} => is_in_place(ocp) ?
-                    ControlConstraint!((r, t, u, v) -> (r[:] = view(u, rg); nothing), T, V) :
+                    ControlConstraint!((r, t, u, v) -> (r[:] .= __view(u, rg); nothing), T, V) :
                     ControlConstraint((t, u, v) -> u[rg], T, V)
                 _ => nothing
             end
@@ -360,16 +358,16 @@ function constraint(
         (:state, rg, _, _) => begin
             S = @match ocp begin
                 ::OptimalControlModel{Autonomous, Fixed} => is_in_place(ocp) ?
-                    StateConstraint!((r, x) -> (r[:] = view(x, rg); nothing), T, V) :
+                    StateConstraint!((r, x) -> (r[:] .= __view(x, rg); nothing), T, V) :
                     StateConstraint(x -> x[rg], T, V)
                 ::OptimalControlModel{Autonomous, NonFixed} => is_in_place(ocp) ?
-                    StateConstraint!((r, x, v) -> (r[:] = view(x, rg); nothing), T, V) :
+                    StateConstraint!((r, x, v) -> (r[:] .= __view(x, rg); nothing), T, V) :
                     StateConstraint((x, v) -> x[rg], T, V)
                 ::OptimalControlModel{NonAutonomous, Fixed} => is_in_place(ocp) ?
-                    StateConstraint!((r, t, x) -> (r[:] = view(x, rg); nothing), T, V) :
+                    StateConstraint!((r, t, x) -> (r[:] .= __view(x, rg); nothing), T, V) :
                     StateConstraint((t, x) -> x[rg], T, V)
                 ::OptimalControlModel{NonAutonomous, NonFixed} => is_in_place(ocp) ?
-                    StateConstraint!((r, t, x, v) -> (r[:] = view(x, rg); nothing), T, V) :
+                    StateConstraint!((r, t, x, v) -> (r[:] .= __view(x, rg); nothing), T, V) :
                     StateConstraint((t, x, v) -> x[rg], T, V)
                 _ => nothing
             end
@@ -378,7 +376,7 @@ function constraint(
         (:mixed, f::MixedConstraint_, _, _) => return f
         (:variable, f::VariableConstraint_, _, _) => return f
         (:variable, rg, _, _) => return ( is_in_place(ocp) ?
-            VariableConstraint!((r, v) -> (r[:] = view(v, rg); nothing)) :
+            VariableConstraint!((r, v) -> (r[:] .= __view(v, rg); nothing)) :
             VariableConstraint(v -> v[rg]) )
         _ => error("Internal error")
     end

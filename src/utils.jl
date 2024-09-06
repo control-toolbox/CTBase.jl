@@ -198,7 +198,6 @@ Return `expand(matrix2vec(x, 1))`
 """
 expand(x::Matrix{<:ctNumber}) = expand(matrix2vec(x, 1))
 
-# transform a Matrix{<:ctNumber} to a Vector{<:Vector{<:ctNumber}}
 """
 $(TYPEDSIGNATURES)
 
@@ -225,3 +224,26 @@ function matrix2vec(
     end
     return y
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Adapt `view` to treat uniformly scalars.
+
+**Note.** Throws an error if `rg` is not one (or `Index(1)`).
+"""
+__view(x::Number, rg) = x[rg]
+
+"""
+$(TYPEDSIGNATURES)
+
+Adapt `view` to treat uniformly scalars.
+"""
+__view(x::AbstractVector, rg::Integer) = x[rg]
+
+"""
+$(TYPEDSIGNATURES)
+
+Adapt `view` to treat uniformly scalars.
+"""
+__view(x::AbstractVector, rg::AbstractRange) = view(x, rg) # Allows StepRange
