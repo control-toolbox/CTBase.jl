@@ -781,8 +781,8 @@ function test_model() # 30 55 185
         )
         constraint!(ocp, :initial, lb = 0, ub = 0, label = :c0)
         constraint!(ocp, :final, lb = 1, ub = 1, label = :cf)
-        @test constraint(ocp, :c0)(12, ∅) == 12
-        @test constraint(ocp, :cf)(∅, 12) == 12
+        @test __constraint(ocp, :c0)(12, ∅) == 12
+        @test __constraint(ocp, :cf)(∅, 12) == 12
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -790,8 +790,8 @@ function test_model() # 30 55 185
         control!(ocp, 1)
         constraint!(ocp, :initial, lb = [0, 1], ub = [0, 1], label = :c0)
         constraint!(ocp, :final, lb = [1, 2], ub = [1, 2], label = :cf)
-        @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
-        @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
+        @test __constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+        @test __constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
 
         # constraint already exists
         ocp = Model()
@@ -812,13 +812,13 @@ function test_model() # 30 55 185
         xf = 1
         constraint!(ocp, :initial, rg = 1, lb = x0, ub = x0, label = :c0)
         constraint!(ocp, :final, rg = 1, lb = xf, ub = xf, label = :cf)
-        @test constraint(ocp, :c0)(x, ∅) == x
-        @test constraint(ocp, :cf)(∅, x) == x
+        @test __constraint(ocp, :c0)(x, ∅) == x
+        @test __constraint(ocp, :cf)(∅, x) == x
 
         constraint!(ocp, :initial, rg = 1, lb = x0, ub = x0, label = :c00)
         constraint!(ocp, :final, rg = 1, lb = xf, ub = xf, label = :cff)
-        @test constraint(ocp, :c00)(x, ∅) == x
-        @test constraint(ocp, :cff)(∅, x) == x
+        @test __constraint(ocp, :c00)(x, ∅) == x
+        @test __constraint(ocp, :cff)(∅, x) == x
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -853,8 +853,8 @@ function test_model() # 30 55 185
         xf = [1, 2]
         constraint!(ocp, :initial, rg = 1:2, lb = x0, ub = x0, label = :c0)
         constraint!(ocp, :final, rg = 1:2, lb = xf, ub = xf, label = :cf)
-        @test constraint(ocp, :c0)(x, ∅) == x[1:2]
-        @test constraint(ocp, :cf)(∅, x) == x[1:2]
+        @test __constraint(ocp, :c0)(x, ∅) == x[1:2]
+        @test __constraint(ocp, :cf)(∅, x) == x[1:2]
 
         # constraint already exists
         ocp = Model()
@@ -874,10 +874,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, lb = 1, ub = 2, label = :cf)
         constraint!(ocp, :control, lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, lb = 0, ub = 1, label = :cs)
-        @test constraint(ocp, :c0)(12, ∅) == 12
-        @test constraint(ocp, :cf)(∅, 12) == 12
-        @test constraint(ocp, :cu)(12) == 12
-        @test constraint(ocp, :cs)(12) == 12
+        @test __constraint(ocp, :c0)(12, ∅) == 12
+        @test __constraint(ocp, :cf)(∅, 12) == 12
+        @test __constraint(ocp, :cu)(12) == 12
+        @test __constraint(ocp, :cs)(12) == 12
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -887,10 +887,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, lb = [1, 2], ub = [2, 3], label = :cf)
         constraint!(ocp, :control, lb = [0, 1], ub = [1, 2], label = :cu)
         constraint!(ocp, :state, lb = [0, 1], ub = [1, 2], label = :cs)
-        @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
-        @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
-        @test constraint(ocp, :cu)([12, 13]) == [12, 13]
-        @test constraint(ocp, :cs)([12, 13]) == [12, 13]
+        @test __constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+        @test __constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
+        @test __constraint(ocp, :cu)([12, 13]) == [12, 13]
+        @test __constraint(ocp, :cs)([12, 13]) == [12, 13]
 
         # constraint already exists
         ocp = Model()
@@ -910,10 +910,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, rg = 1, lb = 1, ub = 2, label = :cf)
         constraint!(ocp, :control, rg = 1, lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, rg = 1, lb = 0, ub = 1, label = :cs)
-        @test constraint(ocp, :c0)(12, ∅) == 12
-        @test constraint(ocp, :cf)(∅, 12) == 12
-        @test constraint(ocp, :cu)(12) == 12
-        @test constraint(ocp, :cs)(12) == 12
+        @test __constraint(ocp, :c0)(12, ∅) == 12
+        @test __constraint(ocp, :cf)(∅, 12) == 12
+        @test __constraint(ocp, :cu)(12) == 12
+        @test __constraint(ocp, :cs)(12) == 12
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -960,10 +960,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, rg = 1:2, lb = [1, 2], ub = [2, 3], label = :cf)
         constraint!(ocp, :control, rg = 1:2, lb = [0, 1], ub = [1, 2], label = :cu)
         constraint!(ocp, :state, rg = 1:2, lb = [0, 1], ub = [1, 2], label = :cs)
-        @test constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
-        @test constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
-        @test constraint(ocp, :cu)([12, 13]) == [12, 13]
-        @test constraint(ocp, :cs)([12, 13]) == [12, 13]
+        @test __constraint(ocp, :c0)([12, 13], ∅) == [12, 13]
+        @test __constraint(ocp, :cf)(∅, [12, 13]) == [12, 13]
+        @test __constraint(ocp, :cu)([12, 13]) == [12, 13]
+        @test __constraint(ocp, :cs)([12, 13]) == [12, 13]
 
         # constraint already exists
         ocp = Model()
@@ -983,10 +983,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :control, f = u -> u, lb = 0, ub = 0, label = :cu)
         constraint!(ocp, :state, f = x -> x, lb = 0, ub = 0, label = :cs)
         constraint!(ocp, :mixed, f = (x, u) -> x + u, lb = 1, ub = 1, label = :cm)
-        @test constraint(ocp, :cb)(12, 13) == 12 + 13
-        @test constraint(ocp, :cu)(12) == 12
-        @test constraint(ocp, :cs)(12) == 12
-        @test constraint(ocp, :cm)(12, 13) == 12 + 13
+        @test __constraint(ocp, :cb)(12, 13) == 12 + 13
+        @test __constraint(ocp, :cu)(12) == 12
+        @test __constraint(ocp, :cs)(12) == 12
+        @test __constraint(ocp, :cm)(12, 13) == 12 + 13
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -996,10 +996,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :control, f = u -> u[1], lb = 0, ub = 0, label = :cu)
         constraint!(ocp, :state, f = x -> x[1], lb = 0, ub = 0, label = :cs)
         constraint!(ocp, :mixed, f = (x, u) -> x[1] + u[1], lb = 1, ub = 1, label = :cm)
-        @test constraint(ocp, :cb)([13, 14], [16, 17]) == 13 + 16
-        @test constraint(ocp, :cu)([12, 13]) == 12
-        @test constraint(ocp, :cs)([12, 13]) == 12
-        @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12 + 14
+        @test __constraint(ocp, :cb)([13, 14], [16, 17]) == 13 + 16
+        @test __constraint(ocp, :cu)([12, 13]) == 12
+        @test __constraint(ocp, :cs)([12, 13]) == 12
+        @test __constraint(ocp, :cm)([12, 13], [14, 15]) == 12 + 14
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -1023,10 +1023,10 @@ function test_model() # 30 55 185
             ub = [0, 0],
             label = :cm,
         )
-        @test constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13 + 17, 14 + 18]
-        @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
-        @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
-        @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12 + 15, 13 + 16]
+        @test __constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13 + 17, 14 + 18]
+        @test __constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
+        @test __constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
+        @test __constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12 + 15, 13 + 16]
 
         # constraint already exists
         ocp = Model()
@@ -1053,10 +1053,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :control, f = u -> u, lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, f = x -> x, lb = 0, ub = 1, label = :cs)
         constraint!(ocp, :mixed, f = (x, u) -> x + u, lb = 1, ub = 1, label = :cm)
-        @test constraint(ocp, :cb)(12, 13) == 12 + 13
-        @test constraint(ocp, :cu)(12) == 12
-        @test constraint(ocp, :cs)(12) == 12
-        @test constraint(ocp, :cm)(12, 13) == 12 + 13
+        @test __constraint(ocp, :cb)(12, 13) == 12 + 13
+        @test __constraint(ocp, :cu)(12) == 12
+        @test __constraint(ocp, :cs)(12) == 12
+        @test __constraint(ocp, :cm)(12, 13) == 12 + 13
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -1066,10 +1066,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :control, f = u -> u[1], lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, f = x -> x[1], lb = 0, ub = 1, label = :cs)
         constraint!(ocp, :mixed, f = (x, u) -> x[1] + u[1], lb = 1, ub = 1, label = :cm)
-        @test constraint(ocp, :cb)([13, 14], [16, 17]) == 13 + 16
-        @test constraint(ocp, :cu)([12, 13]) == 12
-        @test constraint(ocp, :cs)([12, 13]) == 12
-        @test constraint(ocp, :cm)([12, 13], [14, 15]) == 12 + 14
+        @test __constraint(ocp, :cb)([13, 14], [16, 17]) == 13 + 16
+        @test __constraint(ocp, :cu)([12, 13]) == 12
+        @test __constraint(ocp, :cs)([12, 13]) == 12
+        @test __constraint(ocp, :cm)([12, 13], [14, 15]) == 12 + 14
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
@@ -1093,10 +1093,10 @@ function test_model() # 30 55 185
             ub = [1, 1],
             label = :cm,
         )
-        @test constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13 + 17, 14 + 18]
-        @test constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
-        @test constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
-        @test constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12 + 15, 13 + 16]
+        @test __constraint(ocp, :cb)([13, 14, 15], [17, 18, 19]) == [13 + 17, 14 + 18]
+        @test __constraint(ocp, :cu)([12, 13, 14]) == [12, 13]
+        @test __constraint(ocp, :cs)([12, 13, 14]) == [12, 13]
+        @test __constraint(ocp, :cm)([12, 13, 14], [15, 16, 17]) == [12 + 15, 13 + 16]
     end
 
     @testset "constraint! 7" begin
@@ -1122,11 +1122,11 @@ function test_model() # 30 55 185
             ub = [1, 0, 1, 0],
             label = :eq5,
         )
-        @test constraint(ocp, :eq1)(v) == v
-        @test constraint(ocp, :eq2)(v) == v[1]
-        @test constraint(ocp, :eq3)(v) == v[1:2]
-        @test constraint(ocp, :eq4)(v) == v[1:2:4]
-        @test constraint(ocp, :eq5)(v) == v .^ 2
+        @test __constraint(ocp, :eq1)(v) == v
+        @test __constraint(ocp, :eq2)(v) == v[1]
+        @test __constraint(ocp, :eq3)(v) == v[1:2]
+        @test __constraint(ocp, :eq4)(v) == v[1:2:4]
+        @test __constraint(ocp, :eq5)(v) == v .^ 2
     end
 
     @testset "constraint! 8" begin
@@ -1156,15 +1156,15 @@ function test_model() # 30 55 185
             ub = [0, 0, 0, 0],
             label = :eq5,
         )
-        @test constraint(ocp, :cb)(x0, xf, v) == x0 + xf + v[1]
-        @test constraint(ocp, :cu)(u, v) == u + v[1]
-        @test constraint(ocp, :cs)(x, v) == x + v[1]
-        @test constraint(ocp, :cm)(x, u, v) == x + u + v[1]
-        @test constraint(ocp, :eq1)(v) == v
-        @test constraint(ocp, :eq2)(v) == v[1]
-        @test constraint(ocp, :eq3)(v) == v[1:2]
-        @test constraint(ocp, :eq4)(v) == v[1:2:4]
-        @test constraint(ocp, :eq5)(v) == v .^ 2
+        @test __constraint(ocp, :cb)(x0, xf, v) == x0 + xf + v[1]
+        @test __constraint(ocp, :cu)(u, v) == u + v[1]
+        @test __constraint(ocp, :cs)(x, v) == x + v[1]
+        @test __constraint(ocp, :cm)(x, u, v) == x + u + v[1]
+        @test __constraint(ocp, :eq1)(v) == v
+        @test __constraint(ocp, :eq2)(v) == v[1]
+        @test __constraint(ocp, :eq3)(v) == v[1:2]
+        @test __constraint(ocp, :eq4)(v) == v[1:2:4]
+        @test __constraint(ocp, :eq5)(v) == v .^ 2
     end
 
     @testset "constraint! 9" begin
@@ -1173,28 +1173,28 @@ function test_model() # 30 55 185
         state!(ocp, 1)
         control!(ocp, 1)
         dynamics!(ocp, (x, u) -> x + u)
-        @test dynamics(ocp)(1, 2) == 3
+        @test __dynamics(ocp)(1, 2) == 3
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         dynamics!(ocp, (x, u) -> x[1] + u[1])
-        @test dynamics(ocp)([1, 2], [3, 4]) == 4
+        @test __dynamics(ocp)([1, 2], [3, 4]) == 4
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         dynamics!(ocp, (x, u) -> [x[1] + u[1], x[2] + u[2]])
-        @test dynamics(ocp)([1, 2], [3, 4]) == [4, 6]
+        @test __dynamics(ocp)([1, 2], [3, 4]) == [4, 6]
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 1)
         dynamics!(ocp, (x, u) -> [x[1] + u, x[2] + u])
-        @test dynamics(ocp)([1, 2], 3) == [4, 5]
+        @test __dynamics(ocp)([1, 2], 3) == [4, 5]
     end
 
     @testset "constraint! 10" begin
@@ -1204,8 +1204,8 @@ function test_model() # 30 55 185
         control!(ocp, 1)
         constraint!(ocp, :initial, lb = 0, ub = 1, label = :c0)
         constraint!(ocp, :final, lb = 1, ub = 2, label = :cf)
-        @test constraint(ocp, :c0)(12, ∅) == 12
-        @test constraint(ocp, :cf)(∅, 12) == 12
+        @test __constraint(ocp, :c0)(12, ∅) == 12
+        @test __constraint(ocp, :cf)(∅, 12) == 12
     end
 
     @testset "constraint! 11" begin
@@ -1888,60 +1888,60 @@ function test_model() # 30 55 185
         state!(ocp, 1)
         control!(ocp, 1)
         objective!(ocp, :lagrange, (x, u) -> 0.5u^2)
-        @test lagrange(ocp)(1, 2) == 2
+        @test __lagrange(ocp)(1, 2) == 2
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
-        @test lagrange(ocp)([1, 2], [3, 4]) == 4.5
+        @test __lagrange(ocp)([1, 2], [3, 4]) == 4.5
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 1)
         control!(ocp, 1)
         objective!(ocp, :mayer, (x0, xf) -> 0.5x0^2)
-        @test mayer(ocp)(2, 3) == 2
+        @test __mayer(ocp)(2, 3) == 2
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
-        @test mayer(ocp)([2, 3], [5, 6]) == 2
+        @test __mayer(ocp)([2, 3], [5, 6]) == 2
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 1)
         control!(ocp, 1)
         objective!(ocp, :bolza, (x0, xf) -> 0.5x0^2, (x, u) -> 0.5u^2)
-        @test mayer(ocp)(2, 3) == 2
-        @test lagrange(ocp)(1, 2) == 2
+        @test __mayer(ocp)(2, 3) == 2
+        @test __lagrange(ocp)(1, 2) == 2
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         objective!(ocp, :bolza, (x0, xf) -> 0.5x0[1]^2, (x, u) -> 0.5u[1]^2)
-        @test mayer(ocp)([2, 3], [5, 6]) == 2
-        @test lagrange(ocp)([1, 2], [3, 4]) == 4.5
+        @test __mayer(ocp)([2, 3], [5, 6]) == 2
+        @test __lagrange(ocp)([1, 2], [3, 4]) == 4.5
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         objective!(ocp, :lagrange, (x, u) -> 0.5u[1]^2)
-        @test lagrange(ocp)([1, 2], [3, 4]) == 4.5
-        @test isnothing(mayer(ocp))
+        @test __lagrange(ocp)([1, 2], [3, 4]) == 4.5
+        @test isnothing(__mayer(ocp))
 
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
         state!(ocp, 2)
         control!(ocp, 2)
         objective!(ocp, :mayer, (x0, xf) -> 0.5x0[1]^2)
-        @test mayer(ocp)([2, 3], [5, 6]) == 2
-        @test isnothing(lagrange(ocp))
+        @test __mayer(ocp)([2, 3], [5, 6]) == 2
+        @test isnothing(__lagrange(ocp))
     end
 
     @testset "redeclarations" begin

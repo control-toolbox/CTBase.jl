@@ -608,7 +608,16 @@ macro def(e)
     esc(code)
 end
 
-macro def(ocp, e, log = false)
+macro __def(e) # todo: remove after in place test
+    ocp = gensym()
+    code = quote
+        @def $ocp $e false true # Force in place
+        $ocp
+    end
+    esc(code)
+end
+
+macro def(ocp, e, log = false, in_place = false) # todo: default to in_place 
     try
         p0 = ParsingInfo()
         parse!(p0, ocp, e; log = false) # initial pass to get the dependencies (time and variable)
@@ -617,10 +626,10 @@ macro def(ocp, e, log = false)
         p.v = p0.v
         code = parse!(p, ocp, e; log = log)
         init = @match (__t_dep(p), __v_dep(p)) begin
-            (false, false) => :($ocp = __OCPModel())
-            (true, false) => :($ocp = __OCPModel(autonomous = false))
-            (false, true) => :($ocp = __OCPModel(variable = true))
-            _ => :($ocp = __OCPModel(autonomous = false, variable = true))
+            (false, false) => :($ocp = __OCPModel(; in_place = $in_place))
+            (true, false) => :($ocp = __OCPModel(autonomous = false; in_place = $in_place))
+            (false, true) => :($ocp = __OCPModel(variable = true; in_place = $in_place))
+            _ => :($ocp = __OCPModel(autonomous = false, variable = true; in_place = $in_place))
         end
         ee = QuoteNode(e)
         code = Expr(:block, init, code, :($ocp.model_expression = $ee; $ocp))
