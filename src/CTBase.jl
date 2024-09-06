@@ -313,7 +313,6 @@ export replace_call, constraint_type
 
 # onepass
 export @def
-export @__def # todo: remove after in place tests
 
 # repl
 export ct_repl, ct_repl_update_model
