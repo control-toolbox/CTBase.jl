@@ -86,13 +86,13 @@ function test_utils()
         r[2] = x + 1
         return nothing
     end
-    @test to_out_of_place(f1!, 2)(1.0) == [1.0, 2.0]
+    @test CTBase.to_out_of_place(f1!, 2)(1.0) == [1.0, 2.0]
 
     function f2!(r, x, y)
         r[:] = x + y
         return nothing
     end
-    @test to_out_of_place(f2!, 1; T = Int32)(1, 2) == 3 
+    @test CTBase.to_out_of_place(f2!, 1; T = Int32)(1, 2) == 3 
 
     end
 end

@@ -261,3 +261,8 @@ function to_out_of_place(f!, n; T = Float64)
     end
     return f
 end
+
+# Adapt getters to test in place
+#__constraint(ocp, x...) = retrieve con length(lb) from dict; is_in_place(ocp) ? to_out_of_place(ocp, n)) : ocp
+
+"""
