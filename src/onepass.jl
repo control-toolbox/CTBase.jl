@@ -286,13 +286,13 @@ p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
     nn = n isa Integer ? n : 9
     for i ∈ 1:nn
         p.aliases[Symbol(x, ctindices(i))] = :($x[$i])
-    end # make: x₁, x₂... if the state is named x
+    end # Make x₁, x₂... if the state is named x
     for i ∈ 1:nn
         p.aliases[Symbol(x, i)] = :($x[$i])
-    end # make: x1, x2... if the state is named x
+    end # Make x1, x2... if the state is named x
     for i ∈ 1:9
         p.aliases[Symbol(x, ctupperscripts(i))] = :($x^$i)
-    end # make: x¹, x²... if the state is named x
+    end # Make x¹, x²... if the state is named x
     p.aliases[Symbol(Unicode.normalize(string(x, "̇")))] = :(∂($x))
     if (isnothing(components_names))
         code = :( state!($ocp, $n, $xx) )
@@ -301,7 +301,8 @@ p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
             return __throw("the number of state components must be $nn", p.lnum, p.line)
         for i ∈ 1:nn
             p.aliases[components_names.args[i]] = :($x[$i])
-        end # aliases from names given by the user
+            # todo: add aliases for state components (scalar) derivatives
+        end # Aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
         code = :( state!($ocp, $n, $xx, $ss) )
     end
