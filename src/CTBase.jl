@@ -11,7 +11,6 @@ $(EXPORTS)
 """
 module CTBase
 
-# using
 import Base
 using DocStringExtensions
 using DifferentiationInterface:
@@ -23,18 +22,18 @@ using DifferentiationInterface:
     prepare_gradient,
     prepare_jacobian
 import ForwardDiff
-using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-using MLStyle # pattern matching
+using Interpolations: linear_interpolation, Line, Interpolations # For default interpolation
+using MLStyle # Pattern matching
 using Parameters # @with_kw: to have default values in struct
-using Printf # to print an OptimalControlModel
+using Printf # To print an OptimalControlModel
 using DataStructures # OrderedDict for aliases
-using Unicode # unicode primitives
-using PrettyTables # to print a table
+using Unicode # Unicode primitives
+using PrettyTables # To print a table
 using ReplMaker
 using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
-# to suppress ambiguities 
+# To suppress ambiguities 
 using SparseArrays, StaticArrays
 
 # --------------------------------------------------------------------------------------------------

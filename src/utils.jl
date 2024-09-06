@@ -252,16 +252,27 @@ __view(x::AbstractVector, rg::AbstractRange) = view(x, rg) # Allows StepRange
 $(TYPEDSIGNATURES)
 
 Tranform in place function to out of place. Pass the result size and type (default = `Float64`).
+Return a scalar when the result has size one.
 """
 function to_out_of_place(f!, n; T = Float64)
     function f(x...)
         r = zeros(T, n)
         f!(r, x...)
-        return r
+        return n == 1 ? r[1] : r
     end
     return f
 end
 
 # Adapt getters to test in place
-#function __constraint(ocp, x...)
-#retrieve con length(lb) from dict; is_in_place(ocp) ? to_out_of_place(ocp, n)) : ocp
+function __constraint(ocp, label)
+    if is_in_place(ocp)
+        n = length(constraints(ocp)[label][3]) # Size of lb 
+        return to_out_of_place(constraint(ocp, label), n)    
+    else
+        return constraint(ocp, label)
+    end
+end
+
+__dynamics(ocp) = is_in_place(ocp) ? to_out_of_place(dynamics(ocp), state_dimension(ocp)) : dynamics(ocp)
+__lagrange(ocp) = is_in_place(ocp) ? to_out_of_place(lagrange(ocp), 1) : lagrange(ocp)
+__mayer(ocp) = is_in_place(ocp) ? to_out_of_place(mayer(ocp), 1) : mayer(ocp)

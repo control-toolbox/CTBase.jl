@@ -89,7 +89,7 @@ function test_utils()
     @test CTBase.to_out_of_place(f1!, 2)(1.0) == [1.0, 2.0]
 
     function f2!(r, x, y)
-        r[:] = x + y
+        r[:] .= x + y
         return nothing
     end
     @test CTBase.to_out_of_place(f2!, 1; T = Int32)(1, 2) == 3 
