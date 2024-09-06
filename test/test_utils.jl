@@ -94,5 +94,13 @@ function test_utils()
     end
     @test CTBase.to_out_of_place(f2!, 1; T = Int32)(1, 2) == 3 
 
+    function f3!(r, x; y = 1)
+        r[:] .= x + y
+        return nothing
+    end
+    @test CTBase.to_out_of_place(f3!, 1; T = Int32)(1; y = 2) == 3 
+
+    @test isnothing( CTBase.to_out_of_place(nothing, 1) )
+
     end
 end

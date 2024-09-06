@@ -252,15 +252,15 @@ __view(x::AbstractVector, rg::AbstractRange) = view(x, rg) # Allows StepRange
 $(TYPEDSIGNATURES)
 
 Tranform in place function to out of place. Pass the result size and type (default = `Float64`).
-Return a scalar when the result has size one.
+Return a scalar when the result has size one. If `f!` is `nothing`, return `nothing`.
 """
 function to_out_of_place(f!, n; T = Float64)
-    function f(x...)
+    function f(args...; kwargs...)
         r = zeros(T, n)
-        f!(r, x...)
+        f!(r, args...; kwargs...)
         return n == 1 ? r[1] : r
     end
-    return f
+    return isnothing(f!) ? nothing : f
 end
 
 # Adapt getters to test in place
