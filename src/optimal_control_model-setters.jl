@@ -569,7 +569,7 @@ function constraint!(
     q = variable_dimension(ocp)
 
     # range
-    (typeof(rg) <: Int) && (rg = Index(rg))
+    (typeof(rg) <: Int) && (rg = Index(rg)) # todo: scalar range
 
     # core
     BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
@@ -581,7 +581,7 @@ function constraint!(
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
             if type ∈ [:initial, :final, :state]
-                rg = n == 1 ? Index(1) : 1:n
+                rg = n == 1 ? Index(1) : 1:n # todo: scalar range
                 txt = "the lower bound `lb`, the upper bound `ub` and the value `val` must be of dimension $n"
             elseif type == :control
                 rg = m == 1 ? Index(1) : 1:m
