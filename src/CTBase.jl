@@ -275,6 +275,7 @@ export control_dimension, control_components_names, control_name
 export state_dimension, state_components_names, state_name
 export variable_dimension, variable_components_names, variable_name
 export lagrange, mayer, criterion, dynamics
+export __constraint, __lagrange, __mayer, __criterion, __dynamics # todo: remove after in place tests
 
 # solution
 export OptimalControlSolution
