@@ -246,6 +246,13 @@ $(TYPEDSIGNATURES)
 
 Adapt `view` to treat uniformly scalars.
 """
+__view(x::AbstractVector, rg::Index) = x[rg]
+
+"""
+$(TYPEDSIGNATURES)
+
+Adapt `view` to treat uniformly scalars.
+"""
 __view(x::AbstractVector, rg::AbstractRange) = view(x, rg) # Allows StepRange
 
 """
