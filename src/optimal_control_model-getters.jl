@@ -339,7 +339,7 @@ function constraint(
         (:control, rg, _, _) => begin
             C = @match ocp begin
                 ::OptimalControlModel{Autonomous, Fixed} => is_in_place(ocp) ?
-                    ControlConstraint!((r, u) -> (r[:] .= __view(u, rg); nothing), T, V) :
+                    ControlConstraint!((r, u) -> (r[:] .= __view(u, rg); nothing), T, V) : # todo: CC!{T, V}(fun) syntax?
                     ControlConstraint(u -> u[rg], T, V)
                 ::OptimalControlModel{Autonomous, NonFixed} => is_in_place(ocp) ?
                     ControlConstraint!((r, u, v) -> (r[:] .= __view(u, rg); nothing), T, V) :
