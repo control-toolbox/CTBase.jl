@@ -2156,7 +2156,7 @@ function test_model() # 30 55 185
         @test sort(ϕl) == sort([10, 1, 2])
         @test sort(ϕu) == sort([10, 1, 2])
         r = [0., 0., 0.]
-        ϕ!(r, [1, 3], [4, 100], v))
+        ϕ!(r, [1, 3], [4, 100], v)
         @test r == sort([3, 4, 103 + v[1]])
 
         # variable
@@ -2257,7 +2257,7 @@ function test_model() # 30 55 185
         @test sort(ϕl) == sort([10, 1, 2])
         @test sort(ϕu) == sort([10, 1, 2])
         r = [0., 0., 0.]
-        ϕ!(r, [1, 3], [4, 100], v))
+        ϕ!(r, [1, 3], [4, 100], v)
         @test r == sort([3, 4, 103 + v[1]])
 
         # variable
