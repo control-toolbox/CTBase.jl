@@ -1650,7 +1650,7 @@ function test_model() # 30 55 185
         @test sort(ϕl) == sort([10, 1, 0])
         @test sort(ϕu) == sort([10, 1, 1])
         r = [0., 0., 0.]
-        ϕ!(r, [1, 3], [4, 100], v) == sort([3, 4, 103 + v[1]])
+        ϕ!(r, [1, 3], [4, 100], v) 
         @test r == sort([3, 4, 103 + v[1]])
 
         # variable
@@ -2142,7 +2142,7 @@ function test_model() # 30 55 185
         @test sort(ηl) == sort([100, 101])
         @test sort(ηu) == sort([100, 101])
         r = [0., 0.]
-        η!(r, -1, [1, 1], v))
+        η!(r, -1, [1, 1], v)
         @test r == sort([1, 1] + v[1:2])
 
         # mixed
