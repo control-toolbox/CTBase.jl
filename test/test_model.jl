@@ -1492,10 +1492,10 @@ function test_model() # 30 55 185
         constraint!(ocp, :final, rg = 1, lb = 1, ub = 1, label = :cf)
         constraint!(ocp, :control, lb = 0, ub = 1, label = :cu)
         constraint!(ocp, :state, lb = [0, 1], ub = [1, 2], label = :cs)
-        constraint!(ocp, :boundary, f = (r, x0, xf) -> (r[:] = x0[2] + xf[2]; nothing), lb = 0, ub = 1, label = :cb)
-        constraint!(ocp, :control, f = (r, u) -> (r[:] = u; nothing), lb = 0, ub = 1, label = :cuu)
-        constraint!(ocp, :state, f = (r, x) -> (r[:] = x; nothing), lb = [0, 1], ub = [1, 2], label = :css)
-        constraint!(ocp, :mixed, f = (r, x, u) -> (r[:] = x[1] + u; nothing), lb = 1, ub = 1, label = :cm)
+        constraint!(ocp, :boundary, f = (r, x0, xf) -> (r[:] .= x0[2] + xf[2]; nothing), lb = 0, ub = 1, label = :cb)
+        constraint!(ocp, :control, f = (r, u) -> (r[:] .= u; nothing), lb = 0, ub = 1, label = :cuu)
+        constraint!(ocp, :state, f = (r, x) -> (r[:] .= x; nothing), lb = [0, 1], ub = [1, 2], label = :css)
+        constraint!(ocp, :mixed, f = (r, x, u) -> (r[:] .= x[1] + u; nothing), lb = 1, ub = 1, label = :cm)
 
         # dimensions (not set yet)
         @test dim_control_constraints(ocp) === nothing
@@ -1531,21 +1531,21 @@ function test_model() # 30 55 185
         @test sort(ηu) == sort([1, 2])
         r = [0., 0.]
         η!(r, -1, [1, 1], v)
-        @test r == sort([1, 1])
+        @test sort(r) == sort([1, 1])
 
         # mixed
         @test sort(ψl) == sort([1])
         @test sort(ψu) == sort([1])
         r = [0.]
         ψ!(r, -1, [1, 1], 2, v)
-        @test r == sort([3])
+        @test sort(r) == sort([3])
 
         # boundary
         @test sort(ϕl) == sort([10, 1, 0])
         @test sort(ϕu) == sort([10, 1, 1])
         r = [0., 0., 0.]
         ϕ!(r, [1, 3], [4, 100], v)
-        @test r == sort([3, 4, 103])
+        @test sort(r) == sort([3, 4, 103])
 
         # box constraint
         @test sort(ul) == sort([0])
@@ -1563,7 +1563,7 @@ function test_model() # 30 55 185
         @test sort(θu) == sort([])
         r = Real[]
         θ!(r, v)
-        @test r == sort([])
+        @test sort(r) == sort([])
 
         # dimensions (set)
         @test dim_control_constraints(ocp) == 1
@@ -1590,18 +1590,18 @@ function test_model() # 30 55 185
         constraint!(
             ocp,
             :boundary,
-            f = (r, x0, xf, v) -> (r[:] = x0[2] + xf[2] + v[1]; nothing),
+            f = (r, x0, xf, v) -> (r[:] .= x0[2] + xf[2] + v[1]; nothing),
             lb = 0,
             ub = 1,
             label = :cb,
         )
-        constraint!(ocp, :control, f = (r, u, v) -> (r[:] = u + v[2]; nothing), lb = 0, ub = 1, label = :cuu)
-        constraint!(ocp, :state, f = (r, x, v) -> (r[:] = x + v[1:2]; nothing), lb = [0, 1], ub = [1, 2], label = :css)
-        constraint!(ocp, :mixed, f = (r, x, u, v) -> (r[:] = x[1] + u + v[2]; nothing), lb = 1, ub = 1, label = :cm)
+        constraint!(ocp, :control, f = (r, u, v) -> (r[:] .= u + v[2]; nothing), lb = 0, ub = 1, label = :cuu)
+        constraint!(ocp, :state, f = (r, x, v) -> (r[:] .= x + v[1:2]; nothing), lb = [0, 1], ub = [1, 2], label = :css)
+        constraint!(ocp, :mixed, f = (r, x, u, v) -> (r[:] .= x[1] + u + v[2]; nothing), lb = 1, ub = 1, label = :cm)
         constraint!(ocp, :variable, lb = [0, 0, 0, 0], ub = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable, rg = 1:2, lb = [1, 2], ub = [3, 4], label = :cv2)
         constraint!(ocp, :variable, rg = 3, lb = 2, ub = 3, label = :cv3)
-        constraint!(ocp, :variable, f = (r, v) -> (r[:] = v[3]^2; nothing), lb = 0, ub = 1, label = :cv4)
+        constraint!(ocp, :variable, f = (r, v) -> (r[:] .= v[3]^2; nothing), lb = 0, ub = 1, label = :cv4)
 
         # dimensions (not set yet)
         @test dim_control_constraints(ocp) === nothing
@@ -1630,35 +1630,35 @@ function test_model() # 30 55 185
         @test sort(ξu) == sort([1])
         r = [0.]
         ξ!(r, -1, 1, v)
-        @test r == sort([1 + v[2]])
+        @test sort(r) == sort([1 + v[2]])
 
         # state
         @test sort(ηl) == sort([0, 1])
         @test sort(ηu) == sort([1, 2])
         r = [0., 0.]
         η!(r, -1, [1, 1], v)
-        @test r == sort([1, 1] + v[1:2])
+        @test sort(r) == sort([1, 1] + v[1:2])
 
         # mixed
         @test sort(ψl) == sort([1])
         @test sort(ψu) == sort([1])
         r = [0.]
         ψ!(r, -1, [1, 1], 2, v)
-        @test r == sort([3 + v[2]])
+        @test sort(r) == sort([3 + v[2]])
 
         # boundary
         @test sort(ϕl) == sort([10, 1, 0])
         @test sort(ϕu) == sort([10, 1, 1])
         r = [0., 0., 0.]
-        ϕ!(r, [1, 3], [4, 100], v)) == sort([3, 4, 103 + v[1]])
-        @test r == sort([3, 4, 103 + v[1]])
+        ϕ!(r, [1, 3], [4, 100], v)
+        @test sort(r) == sort([3, 4, 103 + v[1]])
 
         # variable
         @test sort(θl) == sort([0])
         @test sort(θu) == sort([1])
         r = [0.]
         θ!(r, v)
-        @test r == sort([v[3]^2])
+        @test sort(r) == sort([v[3]^2])
 
         # box constraint
         @test sort(ul) == sort([0])
@@ -2089,25 +2089,25 @@ function test_model() # 30 55 185
         constraint!(
             ocp,
             :boundary;
-            f = (r, x0, xf, v) -> (r[:] = x0[2] + xf[2] + v[1]; nothing),
+            f = (r, x0, xf, v) -> (r[:] .= x0[2] + xf[2] + v[1]; nothing),
             lb = 2,
             ub = 2,
             label = :cb,
         )
-        constraint!(ocp, :control; f = (r, u, v) -> (r[:] = u + v[2]; nothing), lb = 20, ub = 20, label = :cuu)
+        constraint!(ocp, :control; f = (r, u, v) -> (r[:] .= u + v[2]; nothing), lb = 20, ub = 20, label = :cuu)
         constraint!(
             ocp,
             :state;
-            f = (r, x, v) -> (r[:] = x + v[1:2]; nothing),
+            f = (r, x, v) -> (r[:] .= x + v[1:2]; nothing),
             lb = [100, 101],
             ub = [100, 101],
             label = :css,
         )
-        constraint!(ocp, :mixed; f = (r, x, u, v) -> (r[:] = x[1] + u + v[2]; nothing), lb = -1, ub = -1, label = :cm)
+        constraint!(ocp, :mixed; f = (r, x, u, v) -> (r[:] .= x[1] + u + v[2]; nothing), lb = -1, ub = -1, label = :cm)
         constraint!(ocp, :variable; lb = [5, 5, 5, 5], ub = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable; rg = 1:2, lb = [10, 20], ub = [10, 20], label = :cv2)
         constraint!(ocp, :variable; rg = Index(3), lb = 1000, ub = 1000, label = :cv3)
-        constraint!(ocp, :variable; f = (r, v) -> (r[:] = v[3]^2; nothing), lb = -10, ub = -10, label = :cv4)
+        constraint!(ocp, :variable; f = (r, v) -> (r[:] .= v[3]^2; nothing), lb = -10, ub = -10, label = :cv4)
 
         # dimensions (not set yet)
         @test dim_control_constraints(ocp) === nothing
@@ -2136,35 +2136,35 @@ function test_model() # 30 55 185
         @test sort(ξu) == sort([20])
         r = [0.]
         ξ!(r, -1, 1, v)
-        @test r == sort([1 + v[2]])
+        @test sort(r) == sort([1 + v[2]])
 
         # state
         @test sort(ηl) == sort([100, 101])
         @test sort(ηu) == sort([100, 101])
         r = [0., 0.]
-        η!(r, -1, [1, 1], v))
-        @test r == sort([1, 1] + v[1:2])
+        η!(r, -1, [1, 1], v)
+        @test sort(r) == sort([1, 1] + v[1:2])
 
         # mixed
         @test sort(ψl) == sort([-1])
         @test sort(ψu) == sort([-1])
         r = [0.]
         ψ!(r, -1, [1, 1], 2, v)
-        @test r == sort([3 + v[2]])
+        @test sort(r) == sort([3 + v[2]])
 
         # boundary
         @test sort(ϕl) == sort([10, 1, 2])
         @test sort(ϕu) == sort([10, 1, 2])
         r = [0., 0., 0.]
-        ϕ!(r, [1, 3], [4, 100], v))
-        @test r == sort([3, 4, 103 + v[1]])
+        ϕ!(r, [1, 3], [4, 100], v)
+        @test sort(r) == sort([3, 4, 103 + v[1]])
 
         # variable
         @test sort(θl) == sort([-10])
         @test sort(θu) == sort([-10])
         r = [0.]
         θ!(r, v)
-        @test r == sort([v[3]^2])
+        @test sort(r) == sort([v[3]^2])
 
         # box constraint
         @test sort(ul) == sort([0])
@@ -2201,14 +2201,14 @@ function test_model() # 30 55 185
         constraint!(ocp, :final; rg = Index(1), val = 1, label = :cf)
         constraint!(ocp, :control; val = 0, label = :cu)
         constraint!(ocp, :state; val = [0, 1], label = :cs)
-        constraint!(ocp, :boundary; f = (r, x0, xf, v) -> (r[:] = x0[2] + xf[2] + v[1]; nothing), val = 2, label = :cb)
-        constraint!(ocp, :control; f = (r, u, v) -> (r[:] = u + v[2]; nothing), val = 20, label = :cuu)
-        constraint!(ocp, :state; f = (r, x, v) -> (r[:] = x + v[1:2]; nothing), val = [100, 101], label = :css)
-        constraint!(ocp, :mixed; f = (r, x, u, v) -> (r[:] = x[1] + u + v[2]; nothing), val = -1, label = :cm)
+        constraint!(ocp, :boundary; f = (r, x0, xf, v) -> (r[:] .= x0[2] + xf[2] + v[1]; nothing), val = 2, label = :cb)
+        constraint!(ocp, :control; f = (r, u, v) -> (r[:] .= u + v[2]; nothing), val = 20, label = :cuu)
+        constraint!(ocp, :state; f = (r, x, v) -> (r[:] .= x + v[1:2]; nothing), val = [100, 101], label = :css)
+        constraint!(ocp, :mixed; f = (r, x, u, v) -> (r[:] .= x[1] + u + v[2]; nothing), val = -1, label = :cm)
         constraint!(ocp, :variable; val = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable; rg = 1:2, val = [10, 20], label = :cv2)
         constraint!(ocp, :variable; rg = Index(3), val = 1000, label = :cv3)
-        constraint!(ocp, :variable; f = (r, v) -> (r[:] = v[3]^2; nothing), val = -10, label = :cv4)
+        constraint!(ocp, :variable; f = (r, v) -> (r[:] .= v[3]^2; nothing), val = -10, label = :cv4)
 
         # dimensions (not set yet)
         @test dim_control_constraints(ocp) === nothing
@@ -2237,35 +2237,35 @@ function test_model() # 30 55 185
         @test sort(ξu) == sort([20])
         r = [0.]
         ξ!(r, -1, 1, v)
-        @test r == sort([1 + v[2]])
+        @test sort(r) == sort([1 + v[2]])
 
         # state
         @test sort(ηl) == sort([100, 101])
         @test sort(ηu) == sort([100, 101])
         r = [0., 0.]
         η!(r, -1, [1, 1], v)
-        @test r == sort([1, 1] + v[1:2])
+        @test sort(r) == sort([1, 1] + v[1:2])
 
         # mixed
         @test sort(ψl) == sort([-1])
         @test sort(ψu) == sort([-1])
         r = [0.]
         ψ!(r, -1, [1, 1], 2, v)
-        @test r == sort([3 + v[2]])
+        @test sort(r) == sort([3 + v[2]])
 
         # boundary
         @test sort(ϕl) == sort([10, 1, 2])
         @test sort(ϕu) == sort([10, 1, 2])
         r = [0., 0., 0.]
-        ϕ!(r, [1, 3], [4, 100], v))
-        @test r == sort([3, 4, 103 + v[1]])
+        ϕ!(r, [1, 3], [4, 100], v)
+        @test sort(r) == sort([3, 4, 103 + v[1]])
 
         # variable
         @test sort(θl) == sort([-10])
         @test sort(θu) == sort([-10])
         r = [0.]
         θ!(r, v)
-        @test r == sort([v[3]^2])
+        @test sort(r) == sort([v[3]^2])
 
         # box constraint
         @test sort(ul) == sort([0])
