@@ -162,7 +162,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         j = 1
         for i ∈ 1:length(ξf)
             li = ξs[i]
-            ξf[i](view(val, j:(j + li - 1)), t, u, v)
+            ξf[i](@view(val[j:(j + li - 1)]), t, u, v)
             j = j + li
         end
         return nothing
@@ -185,7 +185,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         j = 1
         for i ∈ 1:length(ηf)
             li = ηs[i]
-            ηf[i](view(val, j:(j + li - 1)), t, x, v)
+            ηf[i](@view(val[j:(j + li - 1)]), t, x, v)
             j = j + li
         end
         return nothing
@@ -208,7 +208,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         j = 1
         for i ∈ 1:length(ψf)
             li = ψs[i]
-            ψf[i](view(val, j:(j + li - 1)), t, x, u, v)
+            ψf[i](@view(val[j:(j + li - 1)]), t, x, u, v)
             j = j + li
         end
         return nothing
@@ -231,7 +231,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         j = 1
         for i ∈ 1:length(ϕf)
             li = ϕs[i]
-            ϕf[i](view(val, j:(j + li - 1)), x0, xf, v)
+            ϕf[i](@view(val[j:(j + li - 1)]), x0, xf, v)
             j = j + li
         end
         return nothing
@@ -254,7 +254,7 @@ function nlp_constraints!(ocp::OptimalControlModel)
         j = 1
         for i ∈ 1:length(θf)
             li = θs[i]
-            θf[i](view(val, j:(j + li - 1)), v)
+            θf[i](@view(val[j:(j + li - 1)]), v)
             j = j + li
         end
         return nothing
