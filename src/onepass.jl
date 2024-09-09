@@ -210,7 +210,7 @@ p_variable!(p, ocp, v, q; components_names = nothing, log = false) = begin
         p.aliases[Symbol(v, ctupperscripts(i))] = :($v^$i)
     end # make: v¹, v²... if the variable is named v
     if (isnothing(components_names))
-        __wrap(:(variable!($ocp, $q, $vv)), p.lnum, p.line)
+        code = :( variable!($ocp, $q, $vv) )
     else
         qq == length(components_names.args) ||
             return __throw("the number of variable components must be $qq", p.lnum, p.line)
@@ -218,8 +218,9 @@ p_variable!(p, ocp, v, q; components_names = nothing, log = false) = begin
             p.aliases[components_names.args[i]] = :($v[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
-        __wrap(:(variable!($ocp, $q, $vv, $ss)), p.lnum, p.line)
+        code = :( variable!($ocp, $q, $vv, $ss) )
     end
+    return __wrap(code, p.lnum, p.line) 
 end
 
 p_alias!(p, ocp, a, e; log = false) = begin
@@ -231,7 +232,8 @@ p_alias!(p, ocp, a, e; log = false) = begin
         p.aliases[Symbol(a, ctupperscripts(i))] = :($a^$i)
     end
     p.aliases[a] = e
-    __wrap(:(LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee))), p.lnum, p.line)
+    code = :( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) )
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_time!(p, ocp, t, t0, tf; log = false) = begin
@@ -273,7 +275,7 @@ p_time!(p, ocp, t, t0, tf; log = false) = begin
             _ => return __throw("bad time declaration", p.lnum, p.line)
         end
     end
-    __wrap(code, p.lnum, p.line)
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
@@ -284,25 +286,27 @@ p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
     nn = n isa Integer ? n : 9
     for i ∈ 1:nn
         p.aliases[Symbol(x, ctindices(i))] = :($x[$i])
-    end # make: x₁, x₂... if the state is named x
+    end # Make x₁, x₂... if the state is named x
     for i ∈ 1:nn
         p.aliases[Symbol(x, i)] = :($x[$i])
-    end # make: x1, x2... if the state is named x
+    end # Make x1, x2... if the state is named x
     for i ∈ 1:9
         p.aliases[Symbol(x, ctupperscripts(i))] = :($x^$i)
-    end # make: x¹, x²... if the state is named x
+    end # Make x¹, x²... if the state is named x
     p.aliases[Symbol(Unicode.normalize(string(x, "̇")))] = :(∂($x))
     if (isnothing(components_names))
-        __wrap(:(state!($ocp, $n, $xx)), p.lnum, p.line)
+        code = :( state!($ocp, $n, $xx) )
     else
         nn == length(components_names.args) ||
             return __throw("the number of state components must be $nn", p.lnum, p.line)
         for i ∈ 1:nn
             p.aliases[components_names.args[i]] = :($x[$i])
-        end # aliases from names given by the user
+            # todo: add aliases for state components (scalar) derivatives
+        end # Aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
-        __wrap(:(state!($ocp, $n, $xx, $ss)), p.lnum, p.line)
+        code = :( state!($ocp, $n, $xx, $ss) )
     end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
@@ -321,7 +325,7 @@ p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
         p.aliases[Symbol(u, ctupperscripts(i))] = :($u^$i)
     end # make: u¹, u²... if the control is named u
     if (isnothing(components_names))
-        __wrap(:(control!($ocp, $m, $uu)), p.lnum, p.line)
+        code = :( control!($ocp, $m, $uu) )
     else
         mm == length(components_names.args) ||
             return __throw("the number of control components must be $mm", p.lnum, p.line)
@@ -329,8 +333,9 @@ p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
             p.aliases[components_names.args[i]] = :($u[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
-        __wrap(:(control!($ocp, $m, $uu, $ss)), p.lnum, p.line)
+        code = :( control!($ocp, $m, $uu, $ss) )
     end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
@@ -348,13 +353,15 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             gs = gensym()
             x0 = gensym()
             xf = gensym()
+            r = gensym()
             ee2 = replace_call(e2, p.x, p.t0, x0)
             ee2 = replace_call(ee2, p.x, p.tf, xf)
-            args = [x0, xf]
+            args = [r, x0, xf]
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    @views $r[:] .= $ee2
+                    return nothing
                 end
                 constraint!($ocp, :boundary; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -364,15 +371,17 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
         :control_fun => begin
             gs = gensym()
             ut = gensym()
+            r = gensym()
             ee2 = replace_call(e2, p.u, p.t, ut)
             p.t_dep = p.t_dep || has(ee2, p.t)
-            args = []
+            args = [r]
             __t_dep(p) && push!(args, p.t)
             push!(args, ut)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    @views $r[:] .= $ee2
+                    return nothing
                 end
                 constraint!($ocp, :control; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -382,15 +391,17 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
         :state_fun => begin
             gs = gensym()
             xt = gensym()
+            r = gensym()
             ee2 = replace_call(e2, p.x, p.t, xt)
             p.t_dep = p.t_dep || has(ee2, p.t)
-            args = []
+            args = [r]
             __t_dep(p) && push!(args, p.t)
             push!(args, xt)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    @views $r[:] .= $ee2
+                    return nothing
                 end
                 constraint!($ocp, :state; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -399,10 +410,12 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             :(constraint!($ocp, :variable; rg = $rg, lb = $e1, ub = $e3, label = $llabel))
         :variable_fun => begin
             gs = gensym()
-            args = [p.v]
+            r = gensym()
+            args = [r, p.v]
             quote
                 function $gs($(args...))
-                    $e2
+                    @views $r[:] .= $e2
+                    return nothing
                 end
                 constraint!($ocp, :variable; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
@@ -411,22 +424,24 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             gs = gensym()
             xt = gensym()
             ut = gensym()
+            r = gensym()
             ee2 = replace_call(e2, [p.x, p.u], p.t, [xt, ut])
             p.t_dep = p.t_dep || has(ee2, p.t)
-            args = []
+            args = [r]
             __t_dep(p) && push!(args, p.t)
             push!(args, xt, ut)
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $ee2
+                    @views $r[:] .= $ee2
+                    return nothing
                 end
                 constraint!($ocp, :mixed; f = $gs, lb = $e1, ub = $e3, label = $llabel)
             end
         end
         _ => return __throw("bad constraint declaration", p.lnum, p.line)
     end
-    __wrap(code, p.lnum, p.line)
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_dynamics!(p, ocp, x, t, e, label = nothing; log = false) = begin
@@ -443,16 +458,16 @@ p_dynamics!(p, ocp, x, t, e, label = nothing; log = false) = begin
     e = replace_call(e, [p.x, p.u], p.t, [xt, ut])
     p.t_dep = p.t_dep || has(e, t)
     gs = gensym()
-    args = []
-    __t_dep(p) && push!(args, p.t)
-    push!(args, xt, ut)
-    __v_dep(p) && push!(args, p.v)
-    __wrap(quote
+    r = gensym()
+    args = [r]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
+    code = quote
         function $gs($(args...))
-            $e
+            @views $r[:] .= $e
+            return nothing
         end
         dynamics!($ocp, $gs)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_lagrange!(p, ocp, e, type; log = false) = begin
@@ -466,16 +481,16 @@ p_lagrange!(p, ocp, e, type; log = false) = begin
     p.t_dep = p.t_dep || has(e, p.t)
     ttype = QuoteNode(type)
     gs = gensym()
-    args = []
-    __t_dep(p) && push!(args, p.t)
-    push!(args, xt, ut)
-    __v_dep(p) && push!(args, p.v)
-    __wrap(quote
+    r = gensym()
+    args = [r]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
+    code = quote
         function $gs($(args...))
-            $e
+            @views $r[:] .= $e
+            return nothing
         end
         objective!($ocp, :lagrange, $gs, $ttype)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_mayer!(p, ocp, e, type; log = false) = begin
@@ -491,17 +506,19 @@ p_mayer!(p, ocp, e, type; log = false) = begin
     gs = gensym()
     x0 = gensym()
     xf = gensym()
+    r = gensym()
     e = replace_call(e, p.x, p.t0, x0)
     e = replace_call(e, p.x, p.tf, xf)
     ttype = QuoteNode(type)
-    args = [x0, xf]
-    __v_dep(p) && push!(args, p.v)
-    __wrap(quote
+    args = [r, x0, xf]; __v_dep(p) && push!(args, p.v)
+    code = quote
         function $gs($(args...))
-            $e
+            @views $r[:] .= $e
+            return nothing
         end
         objective!($ocp, :mayer, $gs, $ttype)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_bolza!(p, ocp, e1, e2, type; log = false) = begin
@@ -514,29 +531,34 @@ p_bolza!(p, ocp, e1, e2, type; log = false) = begin
     gs1 = gensym()
     x0 = gensym()
     xf = gensym()
+    r1 = gensym()
     e1 = replace_call(e1, p.x, p.t0, x0)
     e1 = replace_call(e1, p.x, p.tf, xf)
-    args1 = [x0, xf]
+    args1 = [r1, x0, xf]
     __v_dep(p) && push!(args1, p.v)
     gs2 = gensym()
     xt = gensym()
     ut = gensym()
+    r2 = gensym()
     e2 = replace_call(e2, [p.x, p.u], p.t, [xt, ut])
     p.t_dep = p.t_dep || has(e2, p.t)
-    args2 = []
+    args2 = [r2]
     __t_dep(p) && push!(args2, p.t)
     push!(args2, xt, ut)
     __v_dep(p) && push!(args2, p.v)
     ttype = QuoteNode(type)
-    __wrap(quote
+    code = quote
         function $gs1($(args1...))
-            $e1
+            $r1[:] .= $e1
+            return nothing
         end
         function $gs2($(args2...))
-            $e2
+            $r2[:] .= $e2
+            return nothing
         end
         objective!($ocp, :bolza, $gs1, $gs2, $ttype)
-    end, p.lnum, p.line)
+    end
+    return __wrap(code, p.lnum, p.line)
 end
 
 """
@@ -615,11 +637,12 @@ macro def(ocp, e, log = false)
         p.t_dep = p0.t_dep
         p.v = p0.v
         code = parse!(p, ocp, e; log = log)
+        in_place = true # todo: remove?
         init = @match (__t_dep(p), __v_dep(p)) begin
-            (false, false) => :($ocp = __OCPModel())
-            (true, false) => :($ocp = __OCPModel(autonomous = false))
-            (false, true) => :($ocp = __OCPModel(variable = true))
-            _ => :($ocp = __OCPModel(autonomous = false, variable = true))
+            (false, false) => :($ocp = __OCPModel(; in_place = $in_place))
+            (true, false) => :($ocp = __OCPModel(autonomous = false; in_place = $in_place))
+            (false, true) => :($ocp = __OCPModel(variable = true; in_place = $in_place))
+            _ => :($ocp = __OCPModel(autonomous = false, variable = true; in_place = $in_place))
         end
         ee = QuoteNode(e)
         code = Expr(:block, init, code, :($ocp.model_expression = $ee; $ocp))

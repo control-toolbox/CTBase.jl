@@ -198,7 +198,6 @@ Return `expand(matrix2vec(x, 1))`
 """
 expand(x::Matrix{<:ctNumber}) = expand(matrix2vec(x, 1))
 
-# transform a Matrix{<:ctNumber} to a Vector{<:Vector{<:ctNumber}}
 """
 $(TYPEDSIGNATURES)
 
@@ -225,3 +224,32 @@ function matrix2vec(
     end
     return y
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Tranform in place function to out of place. Pass the result size and type (default = `Float64`).
+Return a scalar when the result has size one. If `f!` is `nothing`, return `nothing`.
+"""
+function to_out_of_place(f!, n; T = Float64)
+    function f(args...; kwargs...)
+        r = zeros(T, n)
+        f!(r, args...; kwargs...)
+        return n == 1 ? r[1] : r
+    end
+    return isnothing(f!) ? nothing : f
+end
+
+# Adapt getters to test in place
+function __constraint(ocp, label)
+    if is_in_place(ocp)
+        n = length(constraints(ocp)[label][3]) # Size of lb 
+        return to_out_of_place(constraint(ocp, label), n)    
+    else
+        return constraint(ocp, label)
+    end
+end
+
+__dynamics(ocp) = is_in_place(ocp) ? to_out_of_place(dynamics(ocp), state_dimension(ocp)) : dynamics(ocp)
+__lagrange(ocp) = is_in_place(ocp) ? to_out_of_place(lagrange(ocp), 1) : lagrange(ocp)
+__mayer(ocp) = is_in_place(ocp) ? to_out_of_place(mayer(ocp), 1) : mayer(ocp)

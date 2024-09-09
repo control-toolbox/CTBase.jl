@@ -17,6 +17,11 @@ function BoundaryConstraint(f::Function; variable::Bool = false)
     return BoundaryConstraint{variable_dependence}(f)
 end
 
+function BoundaryConstraint!(f!::Function; variable::Bool = false)
+    variable_dependence = variable ? NonFixed : Fixed
+    return BoundaryConstraint!{variable_dependence}(f!)
+end
+
 """
 
 $(TYPEDSIGNATURES)
@@ -34,6 +39,12 @@ function BoundaryConstraint(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return BoundaryConstraint{variable_dependence}(f)
+end
+
+function BoundaryConstraint!(f!::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return BoundaryConstraint!{variable_dependence}(f!)
 end
 
 """
@@ -66,6 +77,18 @@ function (F::BoundaryConstraint{NonFixed})(x0::State, xf::State, v::Variable)::c
     return F.f(x0, xf, v)
 end
 
+function (F::BoundaryConstraint!{Fixed})(r::ctVector, x0::State, xf::State)::Nothing
+    return F.f!(r, x0, xf)
+end
+
+function (F::BoundaryConstraint!{Fixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+    return F.f!(r, x0, xf)
+end
+
+function (F::BoundaryConstraint!{NonFixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+    return F.f!(r, x0, xf, v)
+end
+
 # --------------------------------------------------------------------------------------------------
 """
 
@@ -85,6 +108,11 @@ function Mayer(f::Function; variable::Bool = false)
     return Mayer{variable_dependence}(f)
 end
 
+function Mayer!(f!::Function; variable::Bool = false)
+    variable_dependence = variable ? NonFixed : Fixed
+    return Mayer!{variable_dependence}(f!)
+end
+
 """
 
 $(TYPEDSIGNATURES)
@@ -102,6 +130,12 @@ function Mayer(f::Function, dependencies::DataType...)
     __check_dependencies(dependencies)
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Mayer{variable_dependence}(f)
+end
+
+function Mayer!(f!::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return Mayer!{variable_dependence}(f!)
 end
 
 """
@@ -132,6 +166,18 @@ end
 
 function (F::Mayer{NonFixed})(x0::State, xf::State, v::Variable)::ctNumber
     return F.f(x0, xf, v)
+end
+
+function (F::Mayer!{Fixed})(r::ctVector, x0::State, xf::State)::Nothing
+    return F.f!(r, x0, xf)
+end
+
+function (F::Mayer!{Fixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+    return F.f!(r, x0, xf)
+end
+
+function (F::Mayer!{NonFixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+    return F.f!(r, x0, xf, v)
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -672,6 +718,12 @@ function Lagrange(f::Function; autonomous::Bool = true, variable::Bool = false)
     return Lagrange{time_dependence, variable_dependence}(f)
 end
 
+function Lagrange!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return Lagrange!{time_dependence, variable_dependence}(f!)
+end
+
 """
 
 $(TYPEDSIGNATURES)
@@ -698,6 +750,13 @@ function Lagrange(f::Function, dependencies::DataType...)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Lagrange{time_dependence, variable_dependence}(f)
+end
+
+function Lagrange!(f!::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return Lagrange!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -775,6 +834,40 @@ function (F::Lagrange{NonAutonomous, NonFixed})(
     return F.f(t, x, u, v)
 end
 
+function (F::Lagrange!{Autonomous, Fixed})(r::ctVector, x::State, u::Control)::Nothing
+    return F.f!(r, x, u)
+end
+
+function (F::Lagrange!{Autonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u)
+end
+
+function (F::Lagrange!{Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u, v)
+end
+
+function (F::Lagrange!{Autonomous, NonFixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u, v)
+end
+
+function (F::Lagrange!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::Lagrange!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::Lagrange!{NonAutonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
+    return F.f!(r, t, x, u, v)
+end
+
 # --------------------------------------------------------------------------------------------------
 """
 
@@ -794,6 +887,12 @@ function Dynamics(f::Function; autonomous::Bool = true, variable::Bool = false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
     return Dynamics{time_dependence, variable_dependence}(f)
+end
+
+function Dynamics!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return Dynamics!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -819,6 +918,13 @@ function Dynamics(f::Function, dependencies::DataType...)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return Dynamics{time_dependence, variable_dependence}(f)
+end
+
+function Dynamics!(f!::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return Dynamics!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -883,6 +989,40 @@ function (F::Dynamics{NonAutonomous, NonFixed})(
     return F.f(t, x, u, v)
 end
 
+function (F::Dynamics!{Autonomous, Fixed})(r::ctVector, x::State, u::Control)::Nothing
+    return F.f!(r, x, u)
+end
+
+function (F::Dynamics!{Autonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u)
+end
+
+function (F::Dynamics!{Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u, v)
+end
+
+function (F::Dynamics!{Autonomous, NonFixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u, v)
+end
+
+function (F::Dynamics!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::Dynamics!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::Dynamics!{NonAutonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
+    return F.f!(r, t, x, u, v)
+end
+
 # --------------------------------------------------------------------------------------------------
 """
 
@@ -902,6 +1042,12 @@ function StateConstraint(f::Function; autonomous::Bool = true, variable::Bool = 
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
     return StateConstraint{time_dependence, variable_dependence}(f)
+end
+
+function StateConstraint!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return StateConstraint!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -927,6 +1073,13 @@ function StateConstraint(f::Function, dependencies::DataType...)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return StateConstraint{time_dependence, variable_dependence}(f)
+end
+
+function StateConstraint!(f!::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return StateConstraint!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -990,6 +1143,34 @@ function (F::StateConstraint{NonAutonomous, NonFixed})(t::Time, x::State, v::Var
     return F.f(t, x, v)
 end
 
+function (F::StateConstraint!{Autonomous, Fixed})(r::ctVector, x::State)::Nothing
+    return F.f!(r, x)
+end
+
+function (F::StateConstraint!{Autonomous, Fixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+    return F.f!(r, x)
+end
+
+function (F::StateConstraint!{Autonomous, NonFixed})(r::ctVector, x::State, v::Variable)::Nothing
+    return F.f!(r, x, v)
+end
+
+function (F::StateConstraint!{Autonomous, NonFixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+    return F.f!(r, x, v)
+end
+
+function (F::StateConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State)::Nothing
+    return F.f!(r, t, x)
+end
+
+function (F::StateConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+    return F.f!(r, t, x)
+end
+
+function (F::StateConstraint!{NonAutonomous, NonFixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+    return F.f!(r, t, x, v)
+end
+
 # --------------------------------------------------------------------------------------------------
 
 """
@@ -1010,6 +1191,12 @@ function ControlConstraint(f::Function; autonomous::Bool = true, variable::Bool 
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
     return ControlConstraint{time_dependence, variable_dependence}(f)
+end
+
+function ControlConstraint!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return ControlConstraint!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -1033,6 +1220,13 @@ function ControlConstraint(f::Function, dependencies::DataType...)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return ControlConstraint{time_dependence, variable_dependence}(f)
+end
+
+function ControlConstraint!(f!::Function, dependencies::DataType...) # todo: useless? only use version above? 
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return ControlConstraint!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -1094,6 +1288,34 @@ function (F::ControlConstraint{NonAutonomous, NonFixed})(t::Time, u::Control, v:
     return F.f(t, u, v)
 end
 
+function (F::ControlConstraint!{Autonomous, Fixed})(r::ctVector, u::Control)::Nothing
+    return F.f!(r, u)
+end
+
+function (F::ControlConstraint!{Autonomous, Fixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+    return F.f!(r, u)
+end
+
+function (F::ControlConstraint!{Autonomous, NonFixed})(r::ctVector, u::Control, v::Variable)::Nothing
+    return F.f!(r, u, v)
+end
+
+function (F::ControlConstraint!{Autonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+    return F.f!(r, u, v)
+end
+
+function (F::ControlConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, u::Control)::Nothing
+    return F.f!(r, t, u)
+end
+
+function (F::ControlConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+    return F.f!(r, t, u)
+end
+
+function (F::ControlConstraint!{NonAutonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+    return F.f!(r, t, u, v)
+end
+
 # --------------------------------------------------------------------------------------------------
 """
 
@@ -1113,6 +1335,12 @@ function MixedConstraint(f::Function; autonomous::Bool = true, variable::Bool = 
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
     return MixedConstraint{time_dependence, variable_dependence}(f)
+end
+
+function MixedConstraint!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+    time_dependence = autonomous ? Autonomous : NonAutonomous
+    variable_dependence = variable ? NonFixed : Fixed
+    return MixedConstraint!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -1138,6 +1366,13 @@ function MixedConstraint(f::Function, dependencies::DataType...)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
     return MixedConstraint{time_dependence, variable_dependence}(f)
+end
+
+function MixedConstraint!(f!::Function, dependencies::DataType...)
+    __check_dependencies(dependencies)
+    time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
+    variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
+    return MixedConstraint!{time_dependence, variable_dependence}(f!)
 end
 
 """
@@ -1223,6 +1458,58 @@ function (F::MixedConstraint{NonAutonomous, NonFixed})(
     return F.f(t, x, u, v)
 end
 
+function (F::MixedConstraint!{Autonomous, Fixed})(r::ctVector, x::State, u::Control)::Nothing
+    return F.f!(r, x, u)
+end
+
+function (F::MixedConstraint!{Autonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
+    return F.f!(r, x, u)
+end
+
+function (F::MixedConstraint!{Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+    return F.f!(r, x, u, v)
+end
+
+function (F::MixedConstraint!{Autonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
+    return F.f!(r, x, u, v)
+end
+
+function (F::MixedConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::MixedConstraint!{NonAutonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::MixedConstraint!{NonAutonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
+    return F.f!(r, t, x, u, v)
+end
+
 # --------------------------------------------------------------------------------------------------
 """
 
@@ -1238,6 +1525,10 @@ julia> V([1, -1])
 """
 function (F::VariableConstraint)(v::Variable)::ctVector
     return F.f(v)
+end
+
+function (F::VariableConstraint!)(r::ctVector, v::Variable)::Nothing
+    return F.f!(r, v)
 end
 
 # --------------------------------------------------------------------------------------------------

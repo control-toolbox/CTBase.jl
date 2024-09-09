@@ -11,7 +11,6 @@ $(EXPORTS)
 """
 module CTBase
 
-# using
 import Base
 using DocStringExtensions
 using DifferentiationInterface:
@@ -23,18 +22,18 @@ using DifferentiationInterface:
     prepare_gradient,
     prepare_jacobian
 import ForwardDiff
-using Interpolations: linear_interpolation, Line, Interpolations # for default interpolation
-using MLStyle # pattern matching
+using Interpolations: linear_interpolation, Line, Interpolations # For default interpolation
+using MLStyle # Pattern matching
 using Parameters # @with_kw: to have default values in struct
-using Printf # to print an Opt imalControlModel
+using Printf # To print an OptimalControlModel
 using DataStructures # OrderedDict for aliases
-using Unicode # unicode primitives
-using PrettyTables # to print a table
+using Unicode # Unicode primitives
+using PrettyTables # To print a table
 using ReplMaker
 using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
-# to suppress ambiguities 
+# To suppress ambiguities 
 using SparseArrays, StaticArrays
 
 # --------------------------------------------------------------------------------------------------
@@ -229,7 +228,7 @@ include("repl.jl")
 include("init.jl")
 include("print.jl")
 
-# numeric types
+# Numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
 
 export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
@@ -237,10 +236,10 @@ export DState, DCostate
 export TimeDependence, Autonomous, NonAutonomous
 export VariableDependence, NonFixed, Fixed
 
-# description
+# Description
 export Description, add, getFullDescription, remove
 
-# exceptions
+# Exceptions
 export CTException, ParsingError, AmbiguousDescription, IncorrectMethod
 export IncorrectArgument, IncorrectOutput, NotImplemented, UnauthorizedCall
 export ExtensionError
@@ -248,26 +247,24 @@ export ExtensionError
 # AD
 export set_AD_backend
 
-# functions
+# Functions
 export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
+export Mayer!, Lagrange!, Dynamics!
 export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
+export BoundaryConstraint!, StateConstraint!, ControlConstraint!, MixedConstraint!, VariableConstraint!
 
-# model
+# Model
 export OptimalControlModel
 export Model
-export __OCPModel # redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
+export __OCPModel # todo: to be updated, redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
 export variable!,
-    time!,
-    constraint!,
-    dynamics!,
-    objective!,
-    state!,
-    control!,
-    remove_constraint!,
-    model_expression!
-export is_autonomous, is_fixed, is_time_independent, is_time_dependent, is_min, is_max
+    time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, model_expression!
+export is_autonomous, is_fixed
+export is_time_independent, is_time_dependent
+export is_min, is_max
 export is_variable_dependent, is_variable_independent
+export is_in_place
 export nlp_constraints!, constraints, constraints_labels, constraint
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
 export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints
@@ -278,8 +275,9 @@ export control_dimension, control_components_names, control_name
 export state_dimension, state_components_names, state_name
 export variable_dimension, variable_components_names, variable_name
 export lagrange, mayer, criterion, dynamics
+export __constraint, __lagrange, __mayer, __dynamics # todo: remove after in place tests
 
-# solution
+# Solution
 export OptimalControlSolution
 export time_grid, control, state, variable, costate, objective
 export state_discretized, control_discretized, costate_discretized
@@ -301,13 +299,13 @@ export control_constraints!,
 export state_constraints!, mult_state_constraints!, mult_state_box_lower!, mult_state_box_upper!
 export mixed_constraints!, mult_mixed_constraints!
 
-# initialization
+# Initialization
 export OptimalControlInit
 
-# utils
+# Utils
 export ctgradient, ctjacobian, ctinterpolate, ctindices, ctupperscripts
 
-# differential geometry
+# Differential geometry
 export Lie, @Lie, Poisson, HamiltonianLift, AbstractHamiltonian, Lift, ⋅, ∂ₜ
 
 # ctparser_utils

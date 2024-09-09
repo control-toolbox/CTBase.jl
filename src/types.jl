@@ -57,6 +57,10 @@ struct BoundaryConstraint{variable_dependence}
     f::Function
 end
 
+struct BoundaryConstraint!{variable_dependence}
+    f!::Function
+end
+
 """
 $(TYPEDEF)
 
@@ -107,6 +111,10 @@ struct Mayer{variable_dependence}
     f::Function
 end
 
+struct Mayer!{variable_dependence}
+    f!::Function
+end
+
 """
 $(TYPEDEF)
 
@@ -117,7 +125,7 @@ abstract type AbstractHamiltonian{time_dependence, variable_dependence} end
 """
 $(TYPEDEF)
 
-Abstract type for vectorfields.
+Abstract type for vector fields.
 """
 abstract type AbstractVectorField{time_dependence, variable_dependence} end
 
@@ -508,6 +516,10 @@ struct Lagrange{time_dependence, variable_dependence}
     f::Function
 end
 
+struct Lagrange!{time_dependence, variable_dependence}
+    f!::Function
+end
+
 """
 $(TYPEDEF)
 
@@ -578,6 +590,10 @@ julia> D(1, [1, 0], 1, [1, 2, 3])
 """
 struct Dynamics{time_dependence, variable_dependence}
     f::Function
+end
+
+struct Dynamics!{time_dependence, variable_dependence}
+    f!::Function
 end
 
 """
@@ -658,6 +674,10 @@ struct StateConstraint{time_dependence, variable_dependence}
     f::Function
 end
 
+struct StateConstraint!{time_dependence, variable_dependence}
+    f!::Function
+end
+
 """
 $(TYPEDEF)
 
@@ -728,6 +748,10 @@ julia> C(1, [1, -1], [1, 2, 3])
 """
 struct ControlConstraint{time_dependence, variable_dependence}
     f::Function
+end
+
+struct ControlConstraint!{time_dependence, variable_dependence}
+    f!::Function
 end
 
 """
@@ -810,6 +834,10 @@ struct MixedConstraint{time_dependence, variable_dependence}
     f::Function
 end
 
+struct MixedConstraint!{time_dependence, variable_dependence}
+    f!::Function
+end
+
 """
 $(TYPEDEF)
 
@@ -849,6 +877,10 @@ julia> V([1, -1])
 """
 struct VariableConstraint
     f::Function
+end
+
+struct VariableConstraint!
+    f!::Function
 end
 
 """

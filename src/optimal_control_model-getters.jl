@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 #
-# Interaction with the Model that get data. Getters.
+# Model getters.
 #
 
 """
@@ -17,7 +17,8 @@ Return a 6-tuple of tuples:
 - `(xl, xind, xu)` are state linear constraints of a subset of indices
 - `(vl, vind, vu)` are variable linear constraints of a subset of indices
 
-and update information about constraints dimensions of  `ocp`.
+and update information about constraints dimensions of  `ocp`. Functions `ξ`, `η`, `ψ`, `ϕ`, `θ` are used to evaluate the constraints at given time and state, control, or variable values. These functions are in place when the problem is
+defined as in place, that is when `is_in_place(ocp)`.
 
 !!! note
 
@@ -36,41 +37,60 @@ function nlp_constraints!(ocp::OptimalControlModel)
     # we check if the dimensions and times have been set
     __check_all_set(ocp)
 
-    ξf = Vector{ControlConstraint}()
+    ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
+    StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
+    MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
+    BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
+    VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
+
+    ξf = Vector{ControlConstraint_}()
+    ξs = Vector{Int64}()
     ξl = Vector{ctNumber}()
     ξu = Vector{ctNumber}()
-    ηf = Vector{StateConstraint}()
+
+    ηf = Vector{StateConstraint_}()
+    ηs = Vector{Int64}()
     ηl = Vector{ctNumber}()
     ηu = Vector{ctNumber}()
-    ψf = Vector{MixedConstraint}()
+
+    ψf = Vector{MixedConstraint_}()
+    ψs = Vector{Int64}()
     ψl = Vector{ctNumber}()
     ψu = Vector{ctNumber}()
-    ϕf = Vector{BoundaryConstraint}()
+
+    ϕf = Vector{BoundaryConstraint_}()
+    ϕs = Vector{Int64}()
     ϕl = Vector{ctNumber}()
     ϕu = Vector{ctNumber}()
-    θf = Vector{VariableConstraint}()
+
+    θf = Vector{VariableConstraint_}()
+    θs = Vector{Int64}()
     θl = Vector{ctNumber}()
     θu = Vector{ctNumber}()
+
     uind = Vector{Int}()
     ul = Vector{ctNumber}()
     uu = Vector{ctNumber}()
+
     xind = Vector{Int}()
     xl = Vector{ctNumber}()
     xu = Vector{ctNumber}()
+
     vind = Vector{Int}()
     vl = Vector{ctNumber}()
     vu = Vector{ctNumber}()
 
     for (_, c) ∈ constraints(ocp)
         @match c begin
-            (type, f::BoundaryConstraint, lb, ub) && if type ∈ [:initial, :final, :boundary]
-            end => begin
+            (type, f::BoundaryConstraint_, lb, ub) && if type ∈ [:initial, :final, :boundary] end => begin
                 push!(ϕf, f)
+                push!(ϕs, length(lb))
                 append!(ϕl, lb)
                 append!(ϕu, ub)
             end
-            (:control, f::ControlConstraint, lb, ub) => begin
+            (:control, f::ControlConstraint_, lb, ub) => begin
                 push!(ξf, f)
+                push!(ξs, length(lb))
                 append!(ξl, lb)
                 append!(ξu, ub)
             end
@@ -79,8 +99,9 @@ function nlp_constraints!(ocp::OptimalControlModel)
                 append!(ul, lb)
                 append!(uu, ub)
             end
-            (:state, f::StateConstraint, lb, ub) => begin
+            (:state, f::StateConstraint_, lb, ub) => begin
                 push!(ηf, f)
+                push!(ηs, length(lb))
                 append!(ηl, lb)
                 append!(ηu, ub)
             end
@@ -89,13 +110,15 @@ function nlp_constraints!(ocp::OptimalControlModel)
                 append!(xl, lb)
                 append!(xu, ub)
             end
-            (:mixed, f::MixedConstraint, lb, ub) => begin
+            (:mixed, f::MixedConstraint_, lb, ub) => begin
                 push!(ψf, f)
+                push!(ψs, length(lb))
                 append!(ψl, lb)
                 append!(ψu, ub)
             end
-            (:variable, f::VariableConstraint, lb, ub) => begin
+            (:variable, f::VariableConstraint_, lb, ub) => begin
                 push!(θf, f)
+                push!(θs, length(lb))
                 append!(θl, lb)
                 append!(θu, ub)
             end
@@ -109,10 +132,15 @@ function nlp_constraints!(ocp::OptimalControlModel)
     end
 
     @assert length(ξl) == length(ξu)
+    @assert length(ξf) == length(ξs)
     @assert length(ηl) == length(ηu)
+    @assert length(ηf) == length(ηs)
     @assert length(ψl) == length(ψu)
+    @assert length(ψf) == length(ψs)
     @assert length(ϕl) == length(ϕu)
+    @assert length(ϕf) == length(ϕs)
     @assert length(θl) == length(θu)
+    @assert length(θf) == length(θs)
     @assert length(ul) == length(uu)
     @assert length(xl) == length(xu)
     @assert length(vl) == length(vu)
@@ -122,12 +150,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ξf)
+            li = ξs[i]
             vali = ξf[i](t, u, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function ξ!(val, t, u, v) # nonlinear control constraints (in place)
+        j = 1
+        for i ∈ 1:length(ξf)
+            li = ξs[i]
+            ξf[i](@view(val[j:(j + li - 1)]), t, u, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function η(t, x, v) # nonlinear state constraints
@@ -135,12 +173,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ηf)
+            li = ηs[i]
             vali = ηf[i](t, x, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function η!(val, t, x, v) # nonlinear state constraints (in place)
+        j = 1
+        for i ∈ 1:length(ηf)
+            li = ηs[i]
+            ηf[i](@view(val[j:(j + li - 1)]), t, x, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function ψ(t, x, u, v) # nonlinear mixed constraints
@@ -148,12 +196,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ψf)
+            li = ψs[i]
             vali = ψf[i](t, x, u, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function ψ!(val, t, x, u, v) # nonlinear mixed constraints (in place)
+        j = 1
+        for i ∈ 1:length(ψf)
+            li = ψs[i]
+            ψf[i](@view(val[j:(j + li - 1)]), t, x, u, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function ϕ(x0, xf, v) # nonlinear boundary constraints
@@ -161,12 +219,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(ϕf)
+            li = ϕs[i]
             vali = ϕf[i](x0, xf, v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function ϕ!(val, x0, xf, v) # nonlinear boundary constraints
+        j = 1
+        for i ∈ 1:length(ϕf)
+            li = ϕs[i]
+            ϕf[i](@view(val[j:(j + li - 1)]), x0, xf, v)
+            j = j + li
+        end
+        return nothing
     end
 
     function θ(v) # nonlinear variable constraints
@@ -174,12 +242,22 @@ function nlp_constraints!(ocp::OptimalControlModel)
         val = zeros(ctNumber, dim)
         j = 1
         for i ∈ 1:length(θf)
+            li = θs[i]
             vali = θf[i](v)
-            li = length(vali)
             val[j:(j + li - 1)] .= vali # .= also allows scalar value for vali
             j = j + li
         end
         return val
+    end
+
+    function θ!(val, v) # nonlinear variable constraints
+        j = 1
+        for i ∈ 1:length(θf)
+            li = θs[i]
+            θf[i](@view(val[j:(j + li - 1)]), v)
+            j = j + li
+        end
+        return nothing
     end
 
     ocp.dim_control_constraints = length(ξl)
@@ -191,14 +269,20 @@ function nlp_constraints!(ocp::OptimalControlModel)
     ocp.dim_state_range = length(xl)
     ocp.dim_variable_range = length(vl)
 
-    return (ξl, ξ, ξu),
-    (ηl, η, ηu),
-    (ψl, ψ, ψu),
-    (ϕl, ϕ, ϕu),
-    (θl, θ, θu),
-    (ul, uind, uu),
-    (xl, xind, xu),
-    (vl, vind, vu)
+    ξ_ = is_in_place(ocp) ? ξ! : ξ
+    η_ = is_in_place(ocp) ? η! : η
+    ψ_ = is_in_place(ocp) ? ψ! : ψ
+    ϕ_ = is_in_place(ocp) ? ϕ! : ϕ
+    θ_ = is_in_place(ocp) ? θ! : θ
+
+    return (ξl, ξ_, ξu),
+           (ηl, η_, ηu),
+           (ψl, ψ_, ψu),
+           (ϕl, ϕ_, ϕu),
+           (θl, θ_, θu),
+           (ul, uind, uu),
+           (xl, xind, xu),
+           (vl, vind, vu)
 end
 
 """
@@ -241,41 +325,59 @@ function constraint(
     label::Symbol,
 ) where {T <: TimeDependence, V <: VariableDependence}
     con = ocp.constraints[label]
+    BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
+    ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
+    StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
+    MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
+    VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
+
     @match con begin
-        (:initial, f::BoundaryConstraint, _, _) => return f
-        (:final, f::BoundaryConstraint, _, _) => return f
-        (:boundary, f::BoundaryConstraint, _, _) => return f
-        (:control, f::ControlConstraint, _, _) => return f
+        (:initial, f::BoundaryConstraint_, _, _) => return f
+        (:final, f::BoundaryConstraint_, _, _) => return f
+        (:boundary, f::BoundaryConstraint_, _, _) => return f
+        (:control, f::ControlConstraint_, _, _) => return f
         (:control, rg, _, _) => begin
             C = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => ControlConstraint(u -> u[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} =>
+                ::OptimalControlModel{Autonomous, Fixed} => is_in_place(ocp) ?
+                    ControlConstraint!((r, u) -> (@views r[:] .= u[rg]; nothing), T, V) : # todo: CC!{T, V}(fun) syntax?
+                    ControlConstraint(u -> u[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => is_in_place(ocp) ?
+                    ControlConstraint!((r, u, v) -> (@views r[:] .= u[rg]; nothing), T, V) :
                     ControlConstraint((u, v) -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} =>
+                ::OptimalControlModel{NonAutonomous, Fixed} => is_in_place(ocp) ?
+                    ControlConstraint!((r, t, u) -> (@views r[:] .= u[rg]; nothing), T, V) :
                     ControlConstraint((t, u) -> u[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} =>
+                ::OptimalControlModel{NonAutonomous, NonFixed} => is_in_place(ocp) ?
+                    ControlConstraint!((r, t, u, v) -> (@views r[:] .= u[rg]; nothing), T, V) :
                     ControlConstraint((t, u, v) -> u[rg], T, V)
                 _ => nothing
             end
             return C
         end
-        (:state, f::StateConstraint, _, _) => return f
+        (:state, f::StateConstraint_, _, _) => return f
         (:state, rg, _, _) => begin
             S = @match ocp begin
-                ::OptimalControlModel{Autonomous, Fixed} => StateConstraint(x -> x[rg], T, V)
-                ::OptimalControlModel{Autonomous, NonFixed} =>
+                ::OptimalControlModel{Autonomous, Fixed} => is_in_place(ocp) ?
+                    StateConstraint!((r, x) -> (@views r[:] .= x[rg]; nothing), T, V) :
+                    StateConstraint(x -> x[rg], T, V)
+                ::OptimalControlModel{Autonomous, NonFixed} => is_in_place(ocp) ?
+                    StateConstraint!((r, x, v) -> (@views r[:] .= x[rg]; nothing), T, V) :
                     StateConstraint((x, v) -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, Fixed} =>
+                ::OptimalControlModel{NonAutonomous, Fixed} => is_in_place(ocp) ?
+                    StateConstraint!((r, t, x) -> (@views r[:] .= x[rg]; nothing), T, V) :
                     StateConstraint((t, x) -> x[rg], T, V)
-                ::OptimalControlModel{NonAutonomous, NonFixed} =>
+                ::OptimalControlModel{NonAutonomous, NonFixed} => is_in_place(ocp) ?
+                    StateConstraint!((r, t, x, v) -> (@views r[:] .= x[rg]; nothing), T, V) :
                     StateConstraint((t, x, v) -> x[rg], T, V)
                 _ => nothing
             end
             return S
         end
-        (:mixed, f::MixedConstraint, _, _) => return f
-        (:variable, f::VariableConstraint, _, _) => return f
-        (:variable, rg, _, _) => return VariableConstraint(v -> v[rg])
+        (:mixed, f::MixedConstraint_, _, _) => return f
+        (:variable, f::VariableConstraint_, _, _) => return f
+        (:variable, rg, _, _) => return ( is_in_place(ocp) ?
+            VariableConstraint!((r, v) -> (@views r[:] .= v[rg]; nothing)) :
+            VariableConstraint(v -> v[rg]) )
         _ => error("Internal error")
     end
 end
@@ -566,6 +668,13 @@ $(TYPEDSIGNATURES)
 Return `true` if the model has been defined as variable independent.
 """
 is_variable_independent(ocp::OptimalControlModel) = !is_variable_dependent(ocp)
+
+"""
+$(TYPEDSIGNATURES)
+
+Return `true` if functions defining the ocp are in-place. Return nothing if this information has not yet been set.
+"""
+is_in_place(ocp::OptimalControlModel) = ocp.in_place
 
 """
 $(TYPEDSIGNATURES)

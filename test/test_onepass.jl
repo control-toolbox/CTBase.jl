@@ -31,7 +31,7 @@ function test_onepass()
         d = 4
         x = 10
         u = 20
-        @test dynamics(o)(x, u) == x + u + b + 3 + d
+        @test __dynamics(o)(x, u) == x + u + b + 3 + d
     end
 
     @testset "log" begin
@@ -116,10 +116,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = 3
-        @test constraint(o, :eq1)(x0, xf) == x0[1]
-        @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test lagrange(o)(x, u) == u^2 + x[1]
+        @test __constraint(o, :eq1)(x0, xf) == x0[1]
+        @test __constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+        @test __dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test __lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -135,10 +135,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = 3
-        @test constraint(o, :eq1)(x0, xf) == x0[1]
-        @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test lagrange(o)(x, u) == u^2 + x[1]
+        @test __constraint(o, :eq1)(x0, xf) == x0[1]
+        @test __constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+        @test __dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test __lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -156,10 +156,10 @@ function test_onepass()
         xf = 3 * x
         u = 3
         c = [u, 0]
-        @test constraint(o, :eq1)(x0, xf) == x0[1]
-        @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test dynamics(o)(x, c) == [x[2], (x[1] + 2x[2])^2]
-        @test lagrange(o)(x, c) == u^2 + x[1]
+        @test __constraint(o, :eq1)(x0, xf) == x0[1]
+        @test __constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+        @test __dynamics(o)(x, c) == [x[2], (x[1] + 2x[2])^2]
+        @test __lagrange(o)(x, c) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -171,7 +171,7 @@ function test_onepass()
         @test control_dimension(o) == 2
         x = [1, 2, 3]
         u = [-1, 2]
-        @test dynamics(o)(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
+        @test __dynamics(o)(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
 
         t0 = 0.0
         tf = 0.1
@@ -542,7 +542,7 @@ function test_onepass()
         @test control_dimension(o) == 2
         x = [1, 2, 3]
         u = [-1, 2]
-        @test dynamics(o)(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
+        @test __dynamics(o)(x, u) == [x[1] + 2u[2], 2x[3], x[1] + u[2]]
         @def o begin
             z ∈ R², variable
             s ∈ [0, z₁], time
@@ -556,7 +556,7 @@ function test_onepass()
         z = [5, 6]
         y = [1, 2, 3, 4]
         w = 9
-        @test dynamics(o)(y, w, z) == [y[1], y[3]^2 + w + z[1], 0, 0]
+        @test __dynamics(o)(y, w, z) == [y[1], y[3]^2 + w + z[1], 0, 0]
 
         @def o begin
             z ∈ R², variable
@@ -571,7 +571,7 @@ function test_onepass()
         z = [5, 6]
         y = [1, 2, 3, 4]
         w = 9
-        @test_throws MethodError dynamics(o)(y, w, z)
+        @test_throws MethodError __dynamics(o)(y, w, z)
 
         @def o begin
             z ∈ R², variable
@@ -588,7 +588,7 @@ function test_onepass()
         y0 = y
         yf = 3y0
         ww = 19
-        @test dynamics(o)(y, ww, z) == [y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test __dynamics(o)(y, ww, z) == [y[1] + ww^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
 
         @def o begin
             z ∈ R², variable
@@ -606,8 +606,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 11
-        @test_throws MethodError dynamics(o)(y, w, z)
-        @test mayer(o)(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
+        @test_throws MethodError __dynamics(o)(y, w, z)
+        @test __mayer(o)(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
     end
 
     # ---------------------------------------------------------------
@@ -628,7 +628,7 @@ function test_onepass()
         tf = 2
         x0 = [1, 2]
         xf = [3, 4]
-        @test constraint(o, :eq1)(x0, xf, tf) == x0[1] + (xf[1] + 2xf[2]^3) - tf^2
+        @test __constraint(o, :eq1)(x0, xf, tf) == x0[1] + (xf[1] + 2xf[2]^3) - tf^2
 
         n = 11
         m = 6
@@ -647,22 +647,22 @@ function test_onepass()
             [0, 0] ≤ u[1:2](t) ≤ [1, 1], (7)
             [0, 0] ≤ u[1:2:4](t) ≤ [1, 1], (8)
             0 ≤ u₂(t)^2 ≤ 1, (9)
-            u₁(t) * x[1:2](t) == 1, (10)
-            0 ≤ u₁(t) * x[1:2](t) .^ 3 ≤ 1, (11)
+            u₁(t) * x[1:2](t) == [1, 1], (10)
+            [0, 0] ≤ u₁(t) * x[1:2](t) .^ 3 ≤ [1, 1], (11)
         end
         x = Vector{Float64}(1:n)
         u = 2 * Vector{Float64}(1:m)
-        @test constraint(o, :eq1)(x) == x[1]
-        @test constraint(o, :eq2)(x) == x
-        @test constraint(o, :eq3)(x) == x[1:2]
-        @test constraint(o, :eq4)(x) == x[1:2:4]
-        @test constraint(o, :eq5)(x) == x[2]^2
-        @test constraint(o, :eq6)(u) == u
-        @test constraint(o, :eq7)(u) == u[1:2]
-        @test constraint(o, :eq8)(u) == u[1:2:4]
-        @test constraint(o, :eq9)(u) == u[2]^2
-        @test constraint(o, :eq10)(x, u) == u[1] * x[1:2]
-        @test constraint(o, :eq11)(x, u) == u[1] * x[1:2] .^ 3
+        @test __constraint(o, :eq1)(x) == x[1]
+        @test __constraint(o, :eq2)(x) == x
+        @test __constraint(o, :eq3)(x) == x[1:2]
+        @test __constraint(o, :eq4)(x) == x[1:2:4]
+        @test __constraint(o, :eq5)(x) == x[2]^2
+        @test __constraint(o, :eq6)(u) == u
+        @test __constraint(o, :eq7)(u) == u[1:2]
+        @test __constraint(o, :eq8)(u) == u[1:2:4]
+        @test __constraint(o, :eq9)(u) == u[2]^2
+        @test __constraint(o, :eq10)(x, u) == u[1] * x[1:2]
+        @test __constraint(o, :eq11)(x, u) == u[1] * x[1:2] .^ 3
 
         n = 11
         m = 6
@@ -682,24 +682,24 @@ function test_onepass()
             [0, 0] ≤ u[1:2](t) ≤ [1, 1], (7)
             [0, 0] ≤ u[1:2:4](t) ≤ [1, 1], (8)
             0 ≤ u₂(t)^2 ≤ 1, (9)
-            u₁(t) * x[1:2](t) + z + f() == 1, (10)
-            0 ≤ u₁(t) * x[1:2](t) .^ 3 + z ≤ 1, (11)
+            u₁(t) * x[1:2](t) + z + f() == [1, 1], (10)
+            [0, 0] ≤ u₁(t) * x[1:2](t) .^ 3 + z ≤ [1, 1], (11)
         end
         f() = [1, 1]
         z = 3 * Vector{Float64}(1:2)
         x = Vector{Float64}(1:n)
         u = 2 * Vector{Float64}(1:m)
-        @test constraint(o, :eq1)(x, z) == x[1]
-        @test constraint(o, :eq2)(x, z) == x
-        @test constraint(o, :eq3)(x, z) == x[1:2] - [z[1], 1]
-        @test constraint(o, :eq4)(x, z) == x[1:2:4]
-        @test constraint(o, :eq5)(x, z) == x[2]^2
-        @test constraint(o, :eq6)(u, z) == u
-        @test constraint(o, :eq7)(u, z) == u[1:2]
-        @test constraint(o, :eq8)(u, z) == u[1:2:4]
-        @test constraint(o, :eq9)(u, z) == u[2]^2
-        @test constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
-        @test constraint(o, :eq11)(x, u, z) == u[1] * x[1:2] .^ 3 + z
+        @test __constraint(o, :eq1)(x, z) == x[1]
+        @test __constraint(o, :eq2)(x, z) == x
+        @test __constraint(o, :eq3)(x, z) == x[1:2] - [z[1], 1]
+        @test __constraint(o, :eq4)(x, z) == x[1:2:4]
+        @test __constraint(o, :eq5)(x, z) == x[2]^2
+        @test __constraint(o, :eq6)(u, z) == u
+        @test __constraint(o, :eq7)(u, z) == u[1:2]
+        @test __constraint(o, :eq8)(u, z) == u[1:2:4]
+        @test __constraint(o, :eq9)(u, z) == u[2]^2
+        @test __constraint(o, :eq10)(x, u, z) == u[1] * x[1:2] + z + f()
+        @test __constraint(o, :eq11)(x, u, z) == u[1] * x[1:2] .^ 3 + z
 
         @def o begin
             t ∈ [0, 1], time
@@ -719,10 +719,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = 3
-        @test constraint(o, :eq1)(x0, xf) == x0[1]
-        @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test lagrange(o)(x, u) == u^2 + x[1]
+        @test __constraint(o, :eq1)(x0, xf) == x0[1]
+        @test __constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+        @test __dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test __lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -740,10 +740,10 @@ function test_onepass()
         x0 = 2 * x
         xf = 3 * x
         u = 3
-        @test constraint(o, :eq1)(x0, xf) == x0[1]
-        @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
-        @test lagrange(o)(x, u) == u^2 + x[1]
+        @test __constraint(o, :eq1)(x0, xf) == x0[1]
+        @test __constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+        @test __dynamics(o)(x, u) == [x[2], (x[1] + 2x[2])^2]
+        @test __lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             z ∈ R², variable
@@ -763,10 +763,10 @@ function test_onepass()
         xf = 3 * [1, 2]
         u = 3
         z = [4, 5]
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1]
-        @test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
-        @test dynamics(o)(x, u, z) == [x[2], (x[1] + 2x[2])^2 + z[1]]
-        @test lagrange(o)(x, u, z) == u^2 + z[2] * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1]
+        @test __constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
+        @test __dynamics(o)(x, u, z) == [x[2], (x[1] + 2x[2])^2 + z[1]]
+        @test __lagrange(o)(x, u, z) == u^2 + z[2] * x[1]
 
         @def o begin
             t ∈ [0, 1], time
@@ -783,10 +783,10 @@ function test_onepass()
         xf = [4, 5]
         x = [1, 2]
         u = 3
-        @test constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
-        @test constraint(o, Symbol("♡"))(x0, xf) == x0[2]
-        @test dynamics(o)(x, u) == [x[2], x[1]^2]
-        @test lagrange(o)(x, u) == u^2 + x[1]
+        @test __constraint(o, :eq1)(x0, xf) == x0[1]^2 + xf[2]
+        @test __constraint(o, Symbol("♡"))(x0, xf) == x0[2]
+        @test __dynamics(o)(x, u) == [x[2], x[1]^2]
+        @test __lagrange(o)(x, u) == u^2 + x[1]
 
         @def o begin
             z ∈ R, variable
@@ -805,10 +805,10 @@ function test_onepass()
         x = [1, 2]
         u = 3
         z = 4
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-        @test constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
-        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
-        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+        @test __constraint(o, Symbol("♡"))(x0, xf, z) == x0[2]
+        @test __dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test __lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z ∈ R, variable
@@ -828,11 +828,11 @@ function test_onepass()
         x = [1, 2]
         u = 3
         z = 4
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-        @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-        @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
-        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
-        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+        @test __constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+        @test __constraint(o, Symbol("♡"))(x0, xf, z) == x0
+        @test __dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test __lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z ∈ R, variable
@@ -852,11 +852,11 @@ function test_onepass()
         x = [1, 2]
         u = 3
         z = 4
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-        @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-        @test constraint(o, :eq3)(x0, xf, z) == x0
-        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
-        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+        @test __constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+        @test __constraint(o, :eq3)(x0, xf, z) == x0
+        @test __dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test __lagrange(o)(x, u, z) == u^2 + z * x[1]
         @test constraints(o)[:eq1][3] == 0
         @test constraints(o)[:eq1][4] == 1
         @test constraints(o)[:eq2][3] == 0
@@ -894,20 +894,20 @@ function test_onepass()
         u = 4
         v = [5, 6]
         z = v[1] + 2v[2]
-        @test constraint(o, :eq1)(x0, xf, v) == x0 - v[1]
-        @test constraint(o, :eq2)(x0, xf, v) == xf - v[1]
-        @test constraint(o, :eq3)(x0, xf, v) == x0 - v[1]
-        @test constraint(o, :eq4)(x0, xf, v) == xf - v[1]
-        @test constraint(o, :eq5)(x0, xf, v) == x0 + xf - v[2]
-        @test constraint(o, :eq6)(x0, xf, v) == x0 + xf - v[2]
-        @test constraint(o, :eq7)(x, v) == x - v[1]
-        @test constraint(o, :eq9)(x, v) == x - z
-        @test constraint(o, :eq10)(u, v) == u - z
-        @test constraint(o, :eq11)(x, u, v) == x + u - z
-        @test constraint(o, :eq12)(v) == v[1]
-        @test constraint(o, :eq13)(v) == v[1]
-        @test constraint(o, :eq14)(v) == v[1] + 2v[2]
-        @test constraint(o, :eq15)(v) == v[1] + 2v[2]
+        @test __constraint(o, :eq1)(x0, xf, v) == x0 - v[1]
+        @test __constraint(o, :eq2)(x0, xf, v) == xf - v[1]
+        @test __constraint(o, :eq3)(x0, xf, v) == x0 - v[1]
+        @test __constraint(o, :eq4)(x0, xf, v) == xf - v[1]
+        @test __constraint(o, :eq5)(x0, xf, v) == x0 + xf - v[2]
+        @test __constraint(o, :eq6)(x0, xf, v) == x0 + xf - v[2]
+        @test __constraint(o, :eq7)(x, v) == x - v[1]
+        @test __constraint(o, :eq9)(x, v) == x - z
+        @test __constraint(o, :eq10)(u, v) == u - z
+        @test __constraint(o, :eq11)(x, u, v) == x + u - z
+        @test __constraint(o, :eq12)(v) == v[1]
+        @test __constraint(o, :eq13)(v) == v[1]
+        @test __constraint(o, :eq14)(v) == v[1] + 2v[2]
+        @test __constraint(o, :eq15)(v) == v[1] + 2v[2]
 
         @def o begin
             v ∈ R, variable
@@ -1573,9 +1573,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :min
 
         t0 = 0
@@ -1601,9 +1601,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == -0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == -0.5u^2
         @test criterion(o) == :min
 
         t0 = 0
@@ -1629,9 +1629,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :min
 
         t0 = 0
@@ -1657,9 +1657,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :min
 
         t0 = 0
@@ -1685,9 +1685,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == -0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == -0.5u^2
         @test criterion(o) == :min
 
         t0 = 0
@@ -1713,9 +1713,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == (-0.5 + tf) * u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == (-0.5 + tf) * u^2
         @test criterion(o) == :min
 
         t0 = 0
@@ -1767,9 +1767,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :max
 
         t0 = 0
@@ -1795,9 +1795,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == -0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == -0.5u^2
         @test criterion(o) == :max
 
         t0 = 0
@@ -1823,9 +1823,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :max
 
         t0 = 0
@@ -1851,9 +1851,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :max
 
         t0 = 0
@@ -1879,9 +1879,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == -0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == -0.5u^2
         @test criterion(o) == :max
 
         # -----------------------------------
@@ -1948,8 +1948,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 3xf
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == x0 + 3xf
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :min
 
         @def o begin
@@ -1962,8 +1962,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :min
 
         @def o begin
@@ -1976,8 +1976,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == 2(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == 2(x + u)
         @test criterion(o) == :min
 
         @def o begin
@@ -1990,8 +1990,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == -(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == -(x + u)
         @test criterion(o) == :min
 
         @def o begin
@@ -2004,8 +2004,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == -2(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == -2(x + u)
         @test criterion(o) == :min
 
         @test_throws ParsingError @def o begin
@@ -2035,8 +2035,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 5xf
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == x0 + 5xf
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :max
 
         @def o begin
@@ -2049,8 +2049,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == 2(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == 2(x + u)
         @test criterion(o) == :max
 
         @def o begin
@@ -2063,8 +2063,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == -(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == -(x + u)
         @test criterion(o) == :max
 
         @def o begin
@@ -2077,8 +2077,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == -2(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == -2(x + u)
         @test criterion(o) == :max
 
         @test_throws ParsingError @def o begin
@@ -2108,8 +2108,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :min
 
         @def o begin
@@ -2122,8 +2122,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == 2(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == 2(x + u)
         @test criterion(o) == :min
 
         @def o begin
@@ -2136,8 +2136,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == -(x0 + 2xf)
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :min
 
         @def o begin
@@ -2150,8 +2150,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == -(x0 + 2xf)
-        @test lagrange(o)(x, u) == 2(x + u)
+        @test __mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test __lagrange(o)(x, u) == 2(x + u)
         @test criterion(o) == :min
 
         @test_throws ParsingError @def o begin
@@ -2181,8 +2181,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :max
 
         @def o begin
@@ -2195,8 +2195,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == x0 + 2xf
-        @test lagrange(o)(x, u) == 2(x + u)
+        @test __mayer(o)(x0, xf) == x0 + 2xf
+        @test __lagrange(o)(x, u) == 2(x + u)
         @test criterion(o) == :max
 
         @def o begin
@@ -2209,8 +2209,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == -(x0 + 2xf)
-        @test lagrange(o)(x, u) == x + u
+        @test __mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test __lagrange(o)(x, u) == x + u
         @test criterion(o) == :max
 
         @def o begin
@@ -2223,8 +2223,8 @@ function test_onepass()
         u = 2
         x0 = 3
         xf = 4
-        @test mayer(o)(x0, xf) == -(x0 + 2xf)
-        @test lagrange(o)(x, u) == 2(x + u)
+        @test __mayer(o)(x0, xf) == -(x0 + 2xf)
+        @test __lagrange(o)(x, u) == 2(x + u)
         @test criterion(o) == :max
 
         @test_throws ParsingError @def o begin
@@ -2258,7 +2258,7 @@ function test_onepass()
         y0 = [1, 2, 3, 4]
         yf = 2 * [1, 2, 3, 4]
         @test is_min(o)
-        @test mayer(o)(y0, yf) == y0[3] + yf[4]
+        @test __mayer(o)(y0, yf) == y0[3] + yf[4]
 
         @def o begin
             s ∈ [0, 1], time
@@ -2271,7 +2271,7 @@ function test_onepass()
         y0 = [1, 2, 3, 4]
         yf = 2 * [1, 2, 3, 4]
         @test is_max(o)
-        @test mayer(o)(y0, yf) == y0[3] + yf[4]
+        @test __mayer(o)(y0, yf) == y0[3] + yf[4]
 
         @def o begin
             z ∈ R^2, variable
@@ -2286,7 +2286,7 @@ function test_onepass()
         y0 = [1, 2, 3, 4]
         yf = 2 * [1, 2, 3, 4]
         @test is_min(o)
-        @test mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
+        @test __mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
 
         @def o begin
             z ∈ R², variable
@@ -2304,8 +2304,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 7
-        @test dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
-        @test mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
+        @test __dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test __mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
 
         @def o begin
             z ∈ R², variable
@@ -2323,8 +2323,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 7
-        @test dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
-        @test mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
+        @test __dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test __mayer(o)(y0, yf, z) == y0[3] + yf[4] + z[2]
 
         @def o begin
             z ∈ R², variable
@@ -2339,7 +2339,7 @@ function test_onepass()
         z = [5, 6]
         y0 = y
         yf = 3y0
-        @test mayer(o)(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
+        @test __mayer(o)(y0, yf, z) == y0[1] + y0[4]^3 + z[2] + yf[2]
 
         @def o begin
             z ∈ R², variable
@@ -2357,8 +2357,8 @@ function test_onepass()
         y0 = y
         yf = 3y0
         w = 11
-        @test dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
-        @test_throws UndefVarError mayer(o)(y0, yf, z)
+        @test __dynamics(o)(y, w, z) == [y[1] + w^2 + y[4]^3 + z[2], y[3]^2, 0, 0]
+        @test_throws UndefVarError __mayer(o)(y0, yf, z)
     end
 
     # ---------------------------------------------------------------
@@ -2382,7 +2382,7 @@ function test_onepass()
         d = 4
         x = 10
         u = 20
-        @test dynamics(o)(x, u) == x + u + b + 3 + d
+        @test __dynamics(o)(x, u) == x + u + b + 3 + d
     end
 
     # ---------------------------------------------------------------
@@ -2486,9 +2486,9 @@ function test_onepass()
             0
             1
         ]
-        @test constraint(o, :eq1)(x0, xf) == x0
-        @test dynamics(o)(x, u) == A * x + B * u
-        @test lagrange(o)(x, u) == 0.5u^2
+        @test __constraint(o, :eq1)(x0, xf) == x0
+        @test __dynamics(o)(x, u) == A * x + B * u
+        @test __lagrange(o)(x, u) == 0.5u^2
         @test criterion(o) == :min
 
         @def o begin
@@ -2510,12 +2510,12 @@ function test_onepass()
         x = [1, 2]
         u = 3
         z = 4
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-        @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-        @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
-        @test constraint(o, :eq3)(z) == z
-        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
-        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+        @test __constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+        @test __constraint(o, Symbol("♡"))(x0, xf, z) == x0
+        @test __constraint(o, :eq3)(z) == z
+        @test __dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test __lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z in R, variable
@@ -2536,12 +2536,12 @@ function test_onepass()
         x = [1, 2]
         u = 3
         z = 4
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z
-        @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-        @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
-        @test constraint(o, :eq3)(z) == z
-        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
-        @test lagrange(o)(x, u, z) == u^2 + z * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1] - z
+        @test __constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+        @test __constraint(o, Symbol("♡"))(x0, xf, z) == x0
+        @test __constraint(o, :eq3)(z) == z
+        @test __dynamics(o)(x, u, z) == [x[2], x[1]^2 + z]
+        @test __lagrange(o)(x, u, z) == u^2 + z * x[1]
 
         @def o begin
             z in R^2, variable
@@ -2564,11 +2564,11 @@ function test_onepass()
         x = [1, 2]
         u = [3, 0]
         z = [4, 1]
-        @test constraint(o, :eq1)(x0, xf, z) == x0[1] - z[1]
-        @test constraint(o, :eq2)(x0, xf, z) == xf[2]^2
-        @test constraint(o, Symbol("♡"))(x0, xf, z) == x0
-        @test constraint(o, :eq3)(z) == z[1]
-        @test dynamics(o)(x, u, z) == [x[2], x[1]^2 + z[1]]
-        @test lagrange(o)(x, u, z) == u[1]^2 + z[1] * x[1]
+        @test __constraint(o, :eq1)(x0, xf, z) == x0[1] - z[1]
+        @test __constraint(o, :eq2)(x0, xf, z) == xf[2]^2
+        @test __constraint(o, Symbol("♡"))(x0, xf, z) == x0
+        @test __constraint(o, :eq3)(z) == z[1]
+        @test __dynamics(o)(x, u, z) == [x[2], x[1]^2 + z[1]]
+        @test __lagrange(o)(x, u, z) == u[1]^2 + z[1] * x[1]
     end
 end

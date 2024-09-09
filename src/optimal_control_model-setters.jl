@@ -3,8 +3,6 @@
 # Interaction with the Model that affect it. Setters / Constructors.
 #
 
-# todo: use design pattern to generate functions in nlp_constraints!
-
 """
 $(TYPEDSIGNATURES)
 
@@ -37,11 +35,13 @@ julia> ocp = Model(autonomous=false, variable=true)
     - If the time dependence of the model is defined as nonautonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of time and state, and possibly control. If the model is defined as autonomous, then, the dynamics function, the lagrange cost and the path constraints must be defined as functions of state, and possibly control.
 
 """
-function Model(; autonomous::Bool = true, variable::Bool = false)
+function Model(; autonomous::Bool = true, variable::Bool = false, in_place::Bool = false)
     time_dependence = autonomous ? Autonomous : NonAutonomous
     variable_dependence = variable ? NonFixed : Fixed
+    ocp = OptimalControlModel{time_dependence, variable_dependence}()
+    ocp.in_place = in_place
 
-    return OptimalControlModel{time_dependence, variable_dependence}()
+    return ocp
 end
 
 """
@@ -67,13 +67,13 @@ julia> ocp = Model(Autonomous, NonFixed)
 
 """
 function Model(
-    dependencies::DataType...,
+    dependencies::DataType...; in_place::Bool = false,
 )::OptimalControlModel{<:TimeDependence, <:VariableDependence}
     # some checkings: 
     __check_dependencies(dependencies)
     time_dependence = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
     variable_dependence = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return OptimalControlModel{time_dependence, variable_dependence}()
+    return OptimalControlModel{time_dependence, variable_dependence}(; in_place = in_place)
 end
 
 """
@@ -567,13 +567,19 @@ function constraint!(
     q = variable_dimension(ocp)
 
     # range
-    (typeof(rg) <: Int) && (rg = Index(rg))
+    (typeof(rg) <: Int) && (rg = Index(rg)) # todo: scalar range
 
     # core
+    BoundaryConstraint_ = is_in_place(ocp) ? BoundaryConstraint! : BoundaryConstraint
+    ControlConstraint_ = is_in_place(ocp) ? ControlConstraint! : ControlConstraint
+    StateConstraint_ = is_in_place(ocp) ? StateConstraint! : StateConstraint
+    MixedConstraint_ = is_in_place(ocp) ? MixedConstraint! : MixedConstraint
+    VariableConstraint_ = is_in_place(ocp) ? VariableConstraint! : VariableConstraint
+
     @match (rg, f, lb, ub) begin
         (::Nothing, ::Nothing, ::ctVector, ::ctVector) => begin
             if type ∈ [:initial, :final, :state]
-                rg = n == 1 ? Index(1) : 1:n
+                rg = n == 1 ? Index(1) : 1:n # todo: scalar range
                 txt = "the lower bound `lb`, the upper bound `ub` and the value `val` must be of dimension $n"
             elseif type == :control
                 rg = m == 1 ? Index(1) : 1:m
@@ -631,14 +637,25 @@ function constraint!(
                     ),
                 )
             end
+
             # set the constraint
             fun_rg = @match type begin
                 :initial =>
-                    V == Fixed ? BoundaryConstraint((x0, xf) -> x0[rg], V) :
-                    BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+                    if is_in_place(ocp)
+                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= x0[rg]; nothing), V) :
+                        BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= x0[rg]; nothing), V)
+                    else
+                        V == Fixed ? BoundaryConstraint((x0, xf) -> x0[rg], V) :
+                        BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+                    end
                 :final =>
-                    V == Fixed ? BoundaryConstraint((x0, xf) -> xf[rg], V) :
-                    BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+                    if is_in_place(ocp)
+                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= xf[rg]; nothing), V) :
+                        BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= xf[rg]; nothing), V)
+                    else
+                        V == Fixed ? BoundaryConstraint((x0, xf) -> xf[rg], V) :
+                        BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+                    end
                 :control || :state || :variable => rg
                 _ => throw(
                     IncorrectArgument(
@@ -651,18 +668,18 @@ function constraint!(
             ocp.constraints[label] = (type, fun_rg, lb, ub)
         end
 
-        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
-            # set the constraint
+        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin 
+                       # set the constraint
             if type == :boundary
-                ocp.constraints[label] = (type, BoundaryConstraint(f, V), lb, ub)
+                ocp.constraints[label] = (type, BoundaryConstraint_(f, V), lb, ub)
             elseif type == :control
-                ocp.constraints[label] = (type, ControlConstraint(f, T, V), lb, ub)
+                  ocp.constraints[label] = (type, ControlConstraint_(f, T, V), lb, ub)
             elseif type == :state
-                ocp.constraints[label] = (type, StateConstraint(f, T, V), lb, ub)
+                ocp.constraints[label] = (type, StateConstraint_(f, T, V), lb, ub)
             elseif type == :mixed
-                ocp.constraints[label] = (type, MixedConstraint(f, T, V), lb, ub)
+                ocp.constraints[label] = (type, MixedConstraint_(f, T, V), lb, ub)
             elseif type == :variable
-                ocp.constraints[label] = (type, VariableConstraint(f), lb, ub)
+                ocp.constraints[label] = (type, VariableConstraint_(f), lb, ub)
             else
                 throw(
                     IncorrectArgument(
@@ -707,7 +724,8 @@ function dynamics!(
     __check_all_set(ocp)
     __is_dynamics_set(ocp) && throw(UnauthorizedCall("the dynamics has already been set."))
 
-    ocp.dynamics = Dynamics(f, T, V)
+    Dynamics_ = is_in_place(ocp) ? Dynamics! : Dynamics
+    ocp.dynamics = Dynamics_(f, T, V)
 
     return nothing
 end
@@ -758,10 +776,12 @@ function objective!(
     ocp.criterion = criterion
 
     # set the objective
+    Mayer_ = is_in_place(ocp) ? Mayer! : Mayer
+    Lagrange_ = is_in_place(ocp) ? Lagrange! : Lagrange
     if type == :mayer
-        ocp.mayer = Mayer(f, V)
+        ocp.mayer = Mayer_(f, V)
     elseif type == :lagrange
-        ocp.lagrange = Lagrange(f, T, V)
+        ocp.lagrange = Lagrange_(f, T, V)
     else
         throw(
             IncorrectArgument(
@@ -817,9 +837,11 @@ function objective!(
     ocp.criterion = criterion
 
     # set the objective
+    Mayer_ = is_in_place(ocp) ? Mayer! : Mayer
+    Lagrange_ = is_in_place(ocp) ? Lagrange! : Lagrange
     if type == :bolza
-        ocp.mayer = Mayer(g, V)
-        ocp.lagrange = Lagrange(f⁰, T, V)
+        ocp.mayer = Mayer_(g, V) 
+        ocp.lagrange = Lagrange_(f⁰, T, V)
     else
         throw(
             IncorrectArgument(

@@ -28,10 +28,10 @@ $(TYPEDFIELDS)
     variable_dimension::Union{Dimension, Nothing} = nothing
     variable_components_names::Union{Vector{String}, Nothing} = nothing
     variable_name::Union{String, Nothing} = nothing
-    lagrange::Union{Lagrange, Nothing} = nothing
-    mayer::Union{Mayer, Nothing} = nothing
+    lagrange::Union{Lagrange, Lagrange!, Nothing} = nothing
+    mayer::Union{Mayer, Mayer!, Nothing} = nothing
     criterion::Union{Symbol, Nothing} = nothing
-    dynamics::Union{Dynamics, Nothing} = nothing
+    dynamics::Union{Dynamics, Dynamics!, Nothing} = nothing
     constraints::Dict{Symbol, Tuple{Vararg{Any}}} = Dict{Symbol, Tuple{Vararg{Any}}}()
     dim_control_constraints::Union{Dimension, Nothing} = nothing
     dim_state_constraints::Union{Dimension, Nothing} = nothing
@@ -41,6 +41,7 @@ $(TYPEDFIELDS)
     dim_control_range::Union{Dimension, Nothing} = nothing
     dim_state_range::Union{Dimension, Nothing} = nothing
     dim_variable_range::Union{Dimension, Nothing} = nothing
+    in_place::Union{Bool, Nothing} = nothing 
 end
 
 # ----------------------------------------------------------------------
