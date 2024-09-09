@@ -228,36 +228,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Adapt `view` to treat uniformly scalars.
-
-**Note.** Throws an error if `rg` is not one (or `Index(1)`).
-"""
-__view(x::Number, rg) = x[rg]
-
-"""
-$(TYPEDSIGNATURES)
-
-Adapt `view` to treat uniformly scalars.
-"""
-__view(x::AbstractVector, rg::Integer) = x[rg]
-
-"""
-$(TYPEDSIGNATURES)
-
-Adapt `view` to treat uniformly scalars.
-"""
-__view(x::AbstractVector, rg::Index) = x[rg]
-
-"""
-$(TYPEDSIGNATURES)
-
-Adapt `view` to treat uniformly scalars.
-"""
-__view(x::AbstractVector, rg::AbstractRange) = view(x, rg) # Allows StepRange
-
-"""
-$(TYPEDSIGNATURES)
-
 Tranform in place function to out of place. Pass the result size and type (default = `Float64`).
 Return a scalar when the result has size one. If `f!` is `nothing`, return `nothing`.
 """

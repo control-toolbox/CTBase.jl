@@ -642,16 +642,16 @@ function constraint!(
             fun_rg = @match type begin
                 :initial =>
                     if is_in_place(ocp)
-                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (r[:] .= __view(x0, rg); nothing), V) :
-                        BoundaryConstraint!((r, x0, xf, v) -> (r[:] .= __view(x0, rg); nothing), V)
+                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= x0[rg]; nothing), V) :
+                        BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= x0[rg]; nothing), V)
                     else
                         V == Fixed ? BoundaryConstraint((x0, xf) -> x0[rg], V) :
                         BoundaryConstraint((x0, xf, v) -> x0[rg], V)
                     end
                 :final =>
                     if is_in_place(ocp)
-                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (r[:] .= __view(xf, rg); nothing), V) :
-                        BoundaryConstraint!((r, x0, xf, v) -> (r[:] .= __view(xf, rg); nothing), V)
+                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= xf[rg]; nothing), V) :
+                        BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= xf[rg]; nothing), V)
                     else
                         V == Fixed ? BoundaryConstraint((x0, xf) -> xf[rg], V) :
                         BoundaryConstraint((x0, xf, v) -> xf[rg], V)
