@@ -360,7 +360,7 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $r[:] .= $ee2
+                    @views $r[:] .= $ee2
                     return nothing
                 end
                 constraint!($ocp, :boundary; f = $gs, lb = $e1, ub = $e3, label = $llabel)
@@ -380,7 +380,7 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $r[:] .= $ee2
+                    @views $r[:] .= $ee2
                     return nothing
                 end
                 constraint!($ocp, :control; f = $gs, lb = $e1, ub = $e3, label = $llabel)
@@ -400,7 +400,7 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $r[:] .= $ee2
+                    @views $r[:] .= $ee2
                     return nothing
                 end
                 constraint!($ocp, :state; f = $gs, lb = $e1, ub = $e3, label = $llabel)
@@ -414,7 +414,7 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             args = [r, p.v]
             quote
                 function $gs($(args...))
-                    $r[:] .= $e2
+                    @views $r[:] .= $e2
                     return nothing
                 end
                 constraint!($ocp, :variable; f = $gs, lb = $e1, ub = $e3, label = $llabel)
@@ -433,7 +433,7 @@ p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
             __v_dep(p) && push!(args, p.v)
             quote
                 function $gs($(args...))
-                    $r[:] .= $ee2
+                    @views $r[:] .= $ee2
                     return nothing
                 end
                 constraint!($ocp, :mixed; f = $gs, lb = $e1, ub = $e3, label = $llabel)
@@ -462,7 +462,7 @@ p_dynamics!(p, ocp, x, t, e, label = nothing; log = false) = begin
     args = [r]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
     code = quote
         function $gs($(args...))
-            $r[:] .= $e
+            @views $r[:] .= $e
             return nothing
         end
         dynamics!($ocp, $gs)
@@ -485,7 +485,7 @@ p_lagrange!(p, ocp, e, type; log = false) = begin
     args = [r]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
     code = quote
         function $gs($(args...))
-            $r[:] .= $e
+            @views $r[:] .= $e
             return nothing
         end
         objective!($ocp, :lagrange, $gs, $ttype)
@@ -513,7 +513,7 @@ p_mayer!(p, ocp, e, type; log = false) = begin
     args = [r, x0, xf]; __v_dep(p) && push!(args, p.v)
     code = quote
         function $gs($(args...))
-            $r[:] .= $e
+            @views $r[:] .= $e
             return nothing
         end
         objective!($ocp, :mayer, $gs, $ttype)
