@@ -41,7 +41,7 @@ $(TYPEDFIELDS)
     dim_control_range::Union{Dimension, Nothing} = nothing
     dim_state_range::Union{Dimension, Nothing} = nothing
     dim_variable_range::Union{Dimension, Nothing} = nothing
-    in_place::Union{Bool, Nothing} = nothing 
+    in_place::Union{Bool, Nothing} = nothing
 end
 
 # ----------------------------------------------------------------------
