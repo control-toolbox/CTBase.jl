@@ -838,15 +838,32 @@ function (F::Lagrange!{Autonomous, Fixed})(r::ctVector, x::State, u::Control)::N
     return F.f!(r, x, u)
 end
 
-function (F::Lagrange!{Autonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{Autonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::Lagrange!{Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{Autonomous, NonFixed})(
+    r::ctVector,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::Lagrange!{Autonomous, NonFixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{Autonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
@@ -854,7 +871,13 @@ function (F::Lagrange!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u:
     return F.f!(r, t, x, u)
 end
 
-function (F::Lagrange!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{NonAutonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, t, x, u)
 end
 
@@ -993,15 +1016,32 @@ function (F::Dynamics!{Autonomous, Fixed})(r::ctVector, x::State, u::Control)::N
     return F.f!(r, x, u)
 end
 
-function (F::Dynamics!{Autonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{Autonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::Dynamics!{Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{Autonomous, NonFixed})(
+    r::ctVector,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::Dynamics!{Autonomous, NonFixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{Autonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
@@ -1009,7 +1049,13 @@ function (F::Dynamics!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u:
     return F.f!(r, t, x, u)
 end
 
-function (F::Dynamics!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{NonAutonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, t, x, u)
 end
 
@@ -1147,7 +1193,12 @@ function (F::StateConstraint!{Autonomous, Fixed})(r::ctVector, x::State)::Nothin
     return F.f!(r, x)
 end
 
-function (F::StateConstraint!{Autonomous, Fixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{Autonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    v::Variable,
+)::Nothing
     return F.f!(r, x)
 end
 
@@ -1155,7 +1206,12 @@ function (F::StateConstraint!{Autonomous, NonFixed})(r::ctVector, x::State, v::V
     return F.f!(r, x, v)
 end
 
-function (F::StateConstraint!{Autonomous, NonFixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{Autonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, v)
 end
 
@@ -1163,11 +1219,21 @@ function (F::StateConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::St
     return F.f!(r, t, x)
 end
 
-function (F::StateConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{NonAutonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    v::Variable,
+)::Nothing
     return F.f!(r, t, x)
 end
 
-function (F::StateConstraint!{NonAutonomous, NonFixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{NonAutonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    v::Variable,
+)::Nothing
     return F.f!(r, t, x, v)
 end
 
@@ -1292,15 +1358,29 @@ function (F::ControlConstraint!{Autonomous, Fixed})(r::ctVector, u::Control)::No
     return F.f!(r, u)
 end
 
-function (F::ControlConstraint!{Autonomous, Fixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{Autonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, u)
 end
 
-function (F::ControlConstraint!{Autonomous, NonFixed})(r::ctVector, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{Autonomous, NonFixed})(
+    r::ctVector,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, u, v)
 end
 
-function (F::ControlConstraint!{Autonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{Autonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, u, v)
 end
 
@@ -1308,11 +1388,21 @@ function (F::ControlConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, u::
     return F.f!(r, t, u)
 end
 
-function (F::ControlConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{NonAutonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, t, u)
 end
 
-function (F::ControlConstraint!{NonAutonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{NonAutonomous, NonFixed})(
+    r::ctVector,
+    t::Time,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, t, u, v)
 end
 
@@ -1472,7 +1562,12 @@ function (F::MixedConstraint!{Autonomous, Fixed})(
     return F.f!(r, x, u)
 end
 
-function (F::MixedConstraint!{Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+function (F::MixedConstraint!{Autonomous, NonFixed})(
+    r::ctVector,
+    x::State,
+    u::Control,
+    v::Variable,
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
@@ -1486,7 +1581,12 @@ function (F::MixedConstraint!{Autonomous, NonFixed})(
     return F.f!(r, x, u, v)
 end
 
-function (F::MixedConstraint!{NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
+function (F::MixedConstraint!{NonAutonomous, Fixed})(
+    r::ctVector,
+    t::Time,
+    x::State,
+    u::Control,
+)::Nothing
     return F.f!(r, t, x, u)
 end
 

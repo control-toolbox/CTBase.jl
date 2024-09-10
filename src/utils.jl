@@ -244,12 +244,13 @@ end
 function __constraint(ocp, label)
     if is_in_place(ocp)
         n = length(constraints(ocp)[label][3]) # Size of lb 
-        return to_out_of_place(constraint(ocp, label), n)    
+        return to_out_of_place(constraint(ocp, label), n)
     else
         return constraint(ocp, label)
     end
 end
 
-__dynamics(ocp) = is_in_place(ocp) ? to_out_of_place(dynamics(ocp), state_dimension(ocp)) : dynamics(ocp)
+__dynamics(ocp) =
+    is_in_place(ocp) ? to_out_of_place(dynamics(ocp), state_dimension(ocp)) : dynamics(ocp)
 __lagrange(ocp) = is_in_place(ocp) ? to_out_of_place(lagrange(ocp), 1) : lagrange(ocp)
 __mayer(ocp) = is_in_place(ocp) ? to_out_of_place(mayer(ocp), 1) : mayer(ocp)

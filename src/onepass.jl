@@ -210,7 +210,7 @@ p_variable!(p, ocp, v, q; components_names = nothing, log = false) = begin
         p.aliases[Symbol(v, ctupperscripts(i))] = :($v^$i)
     end # make: v¹, v²... if the variable is named v
     if (isnothing(components_names))
-        code = :( variable!($ocp, $q, $vv) )
+        code = :(variable!($ocp, $q, $vv))
     else
         qq == length(components_names.args) ||
             return __throw("the number of variable components must be $qq", p.lnum, p.line)
@@ -218,9 +218,9 @@ p_variable!(p, ocp, v, q; components_names = nothing, log = false) = begin
             p.aliases[components_names.args[i]] = :($v[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
-        code = :( variable!($ocp, $q, $vv, $ss) )
+        code = :(variable!($ocp, $q, $vv, $ss))
     end
-    return __wrap(code, p.lnum, p.line) 
+    return __wrap(code, p.lnum, p.line)
 end
 
 p_alias!(p, ocp, a, e; log = false) = begin
@@ -232,7 +232,7 @@ p_alias!(p, ocp, a, e; log = false) = begin
         p.aliases[Symbol(a, ctupperscripts(i))] = :($a^$i)
     end
     p.aliases[a] = e
-    code = :( LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)) )
+    code = :(LineNumberNode(0, "alias: " * string($aa) * " = " * string($ee)))
     return __wrap(code, p.lnum, p.line)
 end
 
@@ -295,7 +295,7 @@ p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
     end # Make x¹, x²... if the state is named x
     p.aliases[Symbol(Unicode.normalize(string(x, "̇")))] = :(∂($x))
     if (isnothing(components_names))
-        code = :( state!($ocp, $n, $xx) )
+        code = :(state!($ocp, $n, $xx))
     else
         nn == length(components_names.args) ||
             return __throw("the number of state components must be $nn", p.lnum, p.line)
@@ -304,7 +304,7 @@ p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
             # todo: add aliases for state components (scalar) derivatives
         end # Aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
-        code = :( state!($ocp, $n, $xx, $ss) )
+        code = :(state!($ocp, $n, $xx, $ss))
     end
     return __wrap(code, p.lnum, p.line)
 end
@@ -325,7 +325,7 @@ p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
         p.aliases[Symbol(u, ctupperscripts(i))] = :($u^$i)
     end # make: u¹, u²... if the control is named u
     if (isnothing(components_names))
-        code = :( control!($ocp, $m, $uu) )
+        code = :(control!($ocp, $m, $uu))
     else
         mm == length(components_names.args) ||
             return __throw("the number of control components must be $mm", p.lnum, p.line)
@@ -333,7 +333,7 @@ p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
             p.aliases[components_names.args[i]] = :($u[$i])
         end # aliases from names given by the user
         ss = QuoteNode(string.(components_names.args))
-        code = :( control!($ocp, $m, $uu, $ss) )
+        code = :(control!($ocp, $m, $uu, $ss))
     end
     return __wrap(code, p.lnum, p.line)
 end
@@ -459,7 +459,10 @@ p_dynamics!(p, ocp, x, t, e, label = nothing; log = false) = begin
     p.t_dep = p.t_dep || has(e, t)
     gs = gensym()
     r = gensym()
-    args = [r]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
+    args = [r]
+    __t_dep(p) && push!(args, p.t)
+    push!(args, xt, ut)
+    __v_dep(p) && push!(args, p.v)
     code = quote
         function $gs($(args...))
             @views $r[:] .= $e
@@ -482,7 +485,10 @@ p_lagrange!(p, ocp, e, type; log = false) = begin
     ttype = QuoteNode(type)
     gs = gensym()
     r = gensym()
-    args = [r]; __t_dep(p) && push!(args, p.t); push!(args, xt, ut); __v_dep(p) && push!(args, p.v)
+    args = [r]
+    __t_dep(p) && push!(args, p.t)
+    push!(args, xt, ut)
+    __v_dep(p) && push!(args, p.v)
     code = quote
         function $gs($(args...))
             @views $r[:] .= $e
@@ -510,7 +516,8 @@ p_mayer!(p, ocp, e, type; log = false) = begin
     e = replace_call(e, p.x, p.t0, x0)
     e = replace_call(e, p.x, p.tf, xf)
     ttype = QuoteNode(type)
-    args = [r, x0, xf]; __v_dep(p) && push!(args, p.v)
+    args = [r, x0, xf]
+    __v_dep(p) && push!(args, p.v)
     code = quote
         function $gs($(args...))
             @views $r[:] .= $e

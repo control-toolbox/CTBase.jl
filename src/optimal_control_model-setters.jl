@@ -67,7 +67,8 @@ julia> ocp = Model(Autonomous, NonFixed)
 
 """
 function Model(
-    dependencies::DataType...; in_place::Bool = false,
+    dependencies::DataType...;
+    in_place::Bool = false,
 )::OptimalControlModel{<:TimeDependence, <:VariableDependence}
     # some checkings: 
     __check_dependencies(dependencies)
@@ -640,22 +641,22 @@ function constraint!(
 
             # set the constraint
             fun_rg = @match type begin
-                :initial =>
-                    if is_in_place(ocp)
-                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= x0[rg]; nothing), V) :
-                        BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= x0[rg]; nothing), V)
-                    else
-                        V == Fixed ? BoundaryConstraint((x0, xf) -> x0[rg], V) :
-                        BoundaryConstraint((x0, xf, v) -> x0[rg], V)
-                    end
-                :final =>
-                    if is_in_place(ocp)
-                        V == Fixed ? BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= xf[rg]; nothing), V) :
-                        BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= xf[rg]; nothing), V)
-                    else
-                        V == Fixed ? BoundaryConstraint((x0, xf) -> xf[rg], V) :
-                        BoundaryConstraint((x0, xf, v) -> xf[rg], V)
-                    end
+                :initial => if is_in_place(ocp)
+                    V == Fixed ?
+                    BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= x0[rg]; nothing), V) :
+                    BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= x0[rg]; nothing), V)
+                else
+                    V == Fixed ? BoundaryConstraint((x0, xf) -> x0[rg], V) :
+                    BoundaryConstraint((x0, xf, v) -> x0[rg], V)
+                end
+                :final => if is_in_place(ocp)
+                    V == Fixed ?
+                    BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= xf[rg]; nothing), V) :
+                    BoundaryConstraint!((r, x0, xf, v) -> (@views r[:] .= xf[rg]; nothing), V)
+                else
+                    V == Fixed ? BoundaryConstraint((x0, xf) -> xf[rg], V) :
+                    BoundaryConstraint((x0, xf, v) -> xf[rg], V)
+                end
                 :control || :state || :variable => rg
                 _ => throw(
                     IncorrectArgument(
@@ -668,12 +669,12 @@ function constraint!(
             ocp.constraints[label] = (type, fun_rg, lb, ub)
         end
 
-        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin 
-                       # set the constraint
+        (::Nothing, ::Function, ::ctVector, ::ctVector) => begin
+            # set the constraint
             if type == :boundary
                 ocp.constraints[label] = (type, BoundaryConstraint_(f, V), lb, ub)
             elseif type == :control
-                  ocp.constraints[label] = (type, ControlConstraint_(f, T, V), lb, ub)
+                ocp.constraints[label] = (type, ControlConstraint_(f, T, V), lb, ub)
             elseif type == :state
                 ocp.constraints[label] = (type, StateConstraint_(f, T, V), lb, ub)
             elseif type == :mixed
@@ -840,7 +841,7 @@ function objective!(
     Mayer_ = is_in_place(ocp) ? Mayer! : Mayer
     Lagrange_ = is_in_place(ocp) ? Lagrange! : Lagrange
     if type == :bolza
-        ocp.mayer = Mayer_(g, V) 
+        ocp.mayer = Mayer_(g, V)
         ocp.lagrange = Lagrange_(f⁰, T, V)
     else
         throw(
