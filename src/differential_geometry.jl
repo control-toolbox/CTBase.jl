@@ -95,7 +95,7 @@ julia> (X⋅f)([1, 2])
 0
 ```
 """
-function ⋅(X::VectorField{Autonomous, <:VariableDependence}, f::Function)::Function
+function ⋅(X::VectorField{<:Function, Autonomous, <:VariableDependence}, f::Function)::Function
     return (x, args...) -> ctgradient(y -> f(y, args...), x)' * X(x, args...)
 end
 
@@ -113,7 +113,7 @@ julia> (X⋅f)(1, [1, 2], [2, 1])
 10
 ```
 """
-function ⋅(X::VectorField{NonAutonomous, <:VariableDependence}, f::Function)::Function
+function ⋅(X::VectorField{<:Function, NonAutonomous, <:VariableDependence}, f::Function)::Function
     return (t, x, args...) -> ctgradient(y -> f(t, y, args...), x)' * X(t, x, args...)
 end
 
@@ -242,9 +242,9 @@ julia> CTBase.:(⅋)(X, Y)([1, 2])
 ```
 """
 function ⅋(
-    X::VectorField{Autonomous, V},
-    Y::VectorField{Autonomous, V},
-)::VectorField{Autonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function, Autonomous, V},
+    Y::VectorField{<:Function, Autonomous, V},
+)::VectorField{<:Function, Autonomous, V} where {V <: VariableDependence}
     return VectorField(
         (x, args...) ->
             x isa ctNumber ? ctgradient(y -> Y(y, args...), x) * X(x, args...) :
@@ -269,9 +269,9 @@ julia> CTBase.:(⅋)(X, Y)(1, [1, 2], [2, 3])
 ```
 """
 function ⅋(
-    X::VectorField{NonAutonomous, V},
-    Y::VectorField{NonAutonomous, V},
-)::VectorField{NonAutonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function, NonAutonomous, V},
+    Y::VectorField{<:Function, NonAutonomous, V},
+)::VectorField{<:Function, NonAutonomous, V} where {V <: VariableDependence}
     return VectorField(
         (t, x, args...) ->
             x isa ctNumber ? ctgradient(y -> Y(t, y, args...), x) * X(t, x, args...) :
@@ -300,9 +300,9 @@ julia> Lie(X, Y)([1, 2])
 ```
 """
 function Lie(
-    X::VectorField{Autonomous, V},
-    Y::VectorField{Autonomous, V},
-)::VectorField{Autonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function, Autonomous, V},
+    Y::VectorField{<:Function, Autonomous, V},
+)::VectorField{<:Function, Autonomous, V} where {V <: VariableDependence}
     return VectorField((x, args...) -> (X ⅋ Y)(x, args...) - (Y ⅋ X)(x, args...), Autonomous, V)
 end
 
@@ -322,9 +322,9 @@ julia> Lie(X, Y)(1, [1, 2], 1)
 ```
 """
 function Lie(
-    X::VectorField{NonAutonomous, V},
-    Y::VectorField{NonAutonomous, V},
-)::VectorField{NonAutonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function, NonAutonomous, V},
+    Y::VectorField{<:Function, NonAutonomous, V},
+)::VectorField{<:Function, NonAutonomous, V} where {V <: VariableDependence}
     return VectorField(
         (t, x, args...) -> (X ⅋ Y)(t, x, args...) - (Y ⅋ X)(t, x, args...),
         NonAutonomous,
@@ -359,7 +359,7 @@ julia> Poisson(F, g)([1, 2], [2, 1])
 function Poisson(
     f::AbstractHamiltonian{Autonomous, V},
     g::AbstractHamiltonian{Autonomous, V},
-)::Hamiltonian{Autonomous, V} where {V <: VariableDependence}
+)::Hamiltonian{<:Function, Autonomous, V} where {V <: VariableDependence}
     function fg(x, p, args...)
         n = size(x, 1)
         ff, gg = @match n begin
@@ -399,7 +399,7 @@ julia> Poisson(f, g, NonAutonomous, NonFixed)(2, [1, 2], [2, 1], [4, 4])
 function Poisson(
     f::AbstractHamiltonian{NonAutonomous, V},
     g::AbstractHamiltonian{NonAutonomous, V},
-)::Hamiltonian{NonAutonomous, V} where {V <: VariableDependence}
+)::Hamiltonian{<:Function, NonAutonomous, V} where {V <: VariableDependence}
     function fg(t, x, p, args...)
         n = size(x, 1)
         ff, gg = @match n begin
@@ -440,7 +440,7 @@ julia> Poisson(F, G)(2, [1, 2], [2, 1], [4, 4])
 function Poisson(
     f::HamiltonianLift{T, V},
     g::HamiltonianLift{T, V},
-)::HamiltonianLift{T, V} where {T <: TimeDependence, V <: VariableDependence}
+)::HamiltonianLift{<:VectorField, T, V} where {T <: TimeDependence, V <: VariableDependence}
     return HamiltonianLift(Lie(f.X, g.X))
 end
 
@@ -468,11 +468,11 @@ function Poisson(
     autonomous::Bool = true,
     variable::Bool = false,
 )::Hamiltonian
-    time_dependence = autonomous ? Autonomous : NonAutonomous
-    variable_dependence = variable ? NonFixed : Fixed
+    TD = autonomous ? Autonomous : NonAutonomous
+    VD = variable ? NonFixed : Fixed
     return Poisson(
-        Hamiltonian(f, time_dependence, variable_dependence),
-        Hamiltonian(g, time_dependence, variable_dependence),
+        Hamiltonian(f, TD, VD),
+        Hamiltonian(g, TD, VD),
     )
 end
 
@@ -496,11 +496,11 @@ julia> Poisson(f, g, NonAutonomous, NonFixed)(2, [1, 2], [2, 1], [4, 4])
 """
 function Poisson(f::Function, g::Function, dependences::DataType...)::Hamiltonian
     __check_dependencies(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
+    TD = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
+    VD = NonFixed ∈ dependences ? NonFixed : Fixed
     return Poisson(
-        Hamiltonian(f, time_dependence, variable_dependence),
-        Hamiltonian(g, time_dependence, variable_dependence),
+        Hamiltonian(f, TD, VD),
+        Hamiltonian(g, TD, VD),
     )
 end
 
@@ -525,9 +525,9 @@ julia> Poisson(f, G)(2, [1, 2], [2, 1], [4, 4])
 """
 function Poisson(
     f::Function,
-    g::AbstractHamiltonian{T, V},
-)::Hamiltonian where {T <: TimeDependence, V <: VariableDependence}
-    return Poisson(Hamiltonian(f, T, V), g)
+    g::AbstractHamiltonian{TD, VD},
+)::Hamiltonian where {TD <: TimeDependence, VD <: VariableDependence}
+    return Poisson(Hamiltonian(f, TD, VD), g)
 end
 
 """
@@ -550,10 +550,10 @@ julia> Poisson(F, g)(2, [1, 2], [2, 1], [4, 4])
 ```
 """
 function Poisson(
-    f::AbstractHamiltonian{T, V},
+    f::AbstractHamiltonian{TD, VD},
     g::Function,
-)::Hamiltonian where {T <: TimeDependence, V <: VariableDependence}
-    return Poisson(f, Hamiltonian(g, T, V))
+)::Hamiltonian where {TD <: TimeDependence, VD <: VariableDependence}
+    return Poisson(f, Hamiltonian(g, TD, VD))
 end
 
 # ---------------------------------------------------------------------------
