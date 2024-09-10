@@ -252,14 +252,22 @@ export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
 export Mayer!, Lagrange!, Dynamics!
 export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
-export BoundaryConstraint!, StateConstraint!, ControlConstraint!, MixedConstraint!, VariableConstraint!
+export BoundaryConstraint!,
+    StateConstraint!, ControlConstraint!, MixedConstraint!, VariableConstraint!
 
 # Model
 export OptimalControlModel
 export Model
 export __OCPModel # todo: to be updated, redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
 export variable!,
-    time!, constraint!, dynamics!, objective!, state!, control!, remove_constraint!, model_expression!
+    time!,
+    constraint!,
+    dynamics!,
+    objective!,
+    state!,
+    control!,
+    remove_constraint!,
+    model_expression!
 export is_autonomous, is_fixed
 export is_time_independent, is_time_dependent
 export is_min, is_max
