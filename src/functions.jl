@@ -35,17 +35,8 @@ julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]
 ```
 
 """
-function BoundaryConstraint(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return BoundaryConstraint{typeof(f), VD}(f)
-end
-
-function BoundaryConstraint!(f!::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return BoundaryConstraint!{typeof(f!), VD}(f!)
-end
+BoundaryConstraint(f::Function, VD::Type{<:VariableDependence}) = BoundaryConstraint{typeof(f), VD}(f)
+BoundaryConstraint!(f!::Function, VD::Type{<:VariableDependence}) = BoundaryConstraint!{typeof(f!), VD}(f!)
 
 """
 
@@ -126,17 +117,8 @@ julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], NonFixed)
 ```
 
 """
-function Mayer(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Mayer{typeof(f),VD}(f)
-end
-
-function Mayer!(f!::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Mayer!{typeof(f!), VD}(f!)
-end
+Mayer(f::Function, VD::Type{<:VariableDependence}) = Mayer{typeof(f),VD}(f)
+Mayer!(f!::Function, VD::Type{<:VariableDependence}) = Mayer!{typeof(f!), VD}(f!)
 
 """
 
@@ -213,12 +195,7 @@ julia> H = Hamiltonian((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3]], NonAutonomous, Non
 ```
 
 """
-function Hamiltonian(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Hamiltonian{typeof(f), TD, VD}(f)
-end
+Hamiltonian(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Hamiltonian{typeof(f), TD, VD}(f)
 
 """
 
@@ -227,10 +204,6 @@ $(TYPEDSIGNATURES)
 Return the value of the Hamiltonian.
 
 ```@example
-julia> Hamiltonian((x, p) -> x + p, Int64)
-IncorrectArgument 
-julia> Hamiltonian((x, p) -> x + p, Int64)
-IncorrectArgument
 julia> H = Hamiltonian((x, p) -> [x[1]^2+2p[2]]) # autonomous=true, variable=false
 julia> H([1, 0], [0, 1])
 MethodError # H must return a scalar
@@ -333,20 +306,13 @@ Return an ```HamiltonianLift``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> HamiltonianLift(HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]], Int64))
-IncorrectArgument 
 julia> HL = HamiltonianLift(x -> [x[1]^2,x[2]^2], Autonomous, Fixed)
 julia> HL = HamiltonianLift((x, v) -> [x[1]^2,x[2]^2+v], Autonomous, NonFixed)
 julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], NonAutonomous, Fixed)
 julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], NonAutonomous, NonFixed)
 ```
 """
-function HamiltonianLift(f::Function, dependences::DataType...)
-    __check_dependencies(dependences)
-    TD = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependences ? NonFixed : Fixed
-    return HamiltonianLift(VectorField(f, TD, VD))
-end
+HamiltonianLift(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = HamiltonianLift(VectorField(f, TD, VD))
 
 """
 
@@ -357,8 +323,6 @@ Return the value of the HamiltonianLift.
 ## Examples
 
 ```@example
-julia> HamiltonianLift(HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]], Int64))
-IncorrectArgument 
 julia> H = HamiltonianLift(VectorField(x -> [x[1]^2, 2x[2]]))
 julia> H([1, 2], [1, 1])
 5
@@ -463,10 +427,6 @@ Return an ```HamiltonianVectorField``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-IncorrectArgument
-julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-IncorrectArgument
 julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2]) # autonomous=true, variable=false
 julia> Hv = HamiltonianVectorField((x, p, v) -> [x[1]^2+2p[2]+v[3], x[2]-3p[2]^2+v[4]], NonFixed)
 julia> Hv = HamiltonianVectorField((t, x, p) -> [t+x[1]^2+2p[2], x[2]-3p[2]^2], NonAutonomous)
@@ -474,12 +434,7 @@ julia> Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p
 ```
 
 """
-function HamiltonianVectorField(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return HamiltonianVectorField{typeof(f), TD, VD}(f)
-end
+HamiltonianVectorField(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = HamiltonianVectorField{typeof(f), TD, VD}(f)
 
 """
 
@@ -490,10 +445,6 @@ Return the value of the HamiltonianVectorField.
 ## Examples
 
 ```@example
-julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-IncorrectArgument
-julia> HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2], Int64)
-IncorrectArgument
 julia> Hv = HamiltonianVectorField((x, p) -> [x[1]^2+2p[2], x[2]-3p[2]^2]) # autonomous=true, variable=false
 julia> Hv([1, 0], [0, 1])
 [3, -3]
@@ -609,10 +560,6 @@ Return a ```VectorField``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> VectorField(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
-julia> VectorField(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
 julia> V = VectorField(x -> [x[1]^2, 2x[2]]) # autonomous=true, variable=false
 julia> V = VectorField((x, v) -> [x[1]^2, 2x[2]+v[3]], NonFixed)
 julia> V = VectorField((t, x) -> [t+x[1]^2, 2x[2]], NonAutonomous)
@@ -620,12 +567,7 @@ julia> V = VectorField((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], NonAutonomous, NonFi
 ```
 
 """
-function VectorField(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return VectorField{typeof(f), TD, VD}(f)
-end
+VectorField(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = VectorField{typeof(f), TD, VD}(f)
 
 """
 
@@ -636,10 +578,6 @@ Return the value of the VectorField.
 ## Examples
 
 ```@example
-julia> VectorField(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
-julia> VectorField(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
 julia> V = VectorField(x -> [x[1]^2, 2x[2]]) # autonomous=true, variable=false
 julia> V([1, -1])
 [1, -2]
@@ -732,10 +670,6 @@ Return a ```Lagrange``` cost of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> Lagrange((x, u) -> 2x[2]-u[1]^2, Int64)
-IncorrectArgument
-julia> Lagrange((x, u) -> 2x[2]-u[1]^2, Int64)
-IncorrectArgument
 julia> L = Lagrange((x, u) -> [2x[2]-u[1]^2], autonomous=true, variable=false)
 julia> L = Lagrange((x, u) -> 2x[2]-u[1]^2, autonomous=true, variable=false)
 julia> L = Lagrange((x, u, v) -> 2x[2]-u[1]^2+v[3], autonomous=true, variable=true)
@@ -745,19 +679,8 @@ julia> L = Lagrange((t, x, u, v) -> t+2x[2]-u[1]^2+v[3], autonomous=false, varia
 ```
 
 """
-function Lagrange(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Lagrange{typeof(f), TD, VD}(f)
-end
-
-function Lagrange!(f!::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Lagrange!{typeof(f!), TD, VD}(f!)
-end
+Lagrange(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Lagrange{typeof(f), TD, VD}(f)
+Lagrange!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Lagrange!{typeof(f!), TD, VD}(f!)
 
 """
 
@@ -768,10 +691,6 @@ Return the value of the Lagrange function.
 ## Examples
 
 ```@example
-julia> Lagrange((x, u) -> 2x[2]-u[1]^2, Int64)
-IncorrectArgument
-julia> Lagrange((x, u) -> 2x[2]-u[1]^2, Int64)
-IncorrectArgument
 julia> L = Lagrange((x, u) -> [2x[2]-u[1]^2], autonomous=true, variable=false)
 julia> L([1, 0], [1])
 MethodError
@@ -903,29 +822,14 @@ Return the ```Dynamics``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> Dynamics((x, u) -> [2x[2]-u^2, x[1]], Int64)
-IncorrectArgument
-julia> Dynamics((x, u) -> [2x[2]-u^2, x[1]], Int64)
-IncorrectArgument
 julia> D = Dynamics((x, u) -> [2x[2]-u^2, x[1]], Autonomous, Fixed)
 julia> D = Dynamics((x, u, v) -> [2x[2]-u^2+v[3], x[1]], Autonomous, NonFixed)
 julia> D = Dynamics((t, x, u) -> [t+2x[2]-u^2, x[1]], NonAutonomous, Fixed)
 julia> D = Dynamics((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], NonAutonomous, NonFixed)
 ```
 """
-function Dynamics(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Dynamics{typeof(f), TD, VD}(f)
-end
-
-function Dynamics!(f!::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Dynamics!{typeof(f!), TD, VD}(f!)
-end
+Dynamics(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Dynamics{typeof(f), TD, VD}(f)
+Dynamics!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Dynamics!{typeof(f!), TD, VD}(f!)
 
 """
 
@@ -1058,29 +962,14 @@ Return the ```StateConstraint``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> StateConstraint(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
-julia> StateConstraint(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
 julia> S = StateConstraint(x -> [x[1]^2, 2x[2]], Autonomous, Fixed)
 julia> S = StateConstraint((x, v) -> [x[1]^2, 2x[2]+v[3]], Autonomous, NonFixed)
 julia> S = StateConstraint((t, x) -> [t+x[1]^2, 2x[2]], NonAutonomous, Fixed)
 julia> S = StateConstraint((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], NonAutonomous, NonFixed)
 ```
 """
-function StateConstraint(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return StateConstraint{typeof(f), TD, VD}(f)
-end
-
-function StateConstraint!(f!::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return StateConstraint!{typeof(f!), TD, VD}(f!)
-end
+StateConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = StateConstraint{typeof(f), TD, VD}(f)
+StateConstraint!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = StateConstraint!{typeof(f!), TD, VD}(f!)
 
 """
 
@@ -1089,10 +978,6 @@ $(TYPEDSIGNATURES)
 Return the value of the StateConstraint function.
 
 ```@example
-julia> StateConstraint(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
-julia> StateConstraint(x -> [x[1]^2, 2x[2]], Int64)
-IncorrectArgument
 julia> S = StateConstraint(x -> [x[1]^2, 2x[2]], autonomous=true, variable=false)
 julia> S([1, -1])
 [1, -2]
@@ -1207,27 +1092,14 @@ Return the ```StateConstraint``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> IncorrectArgument ControlConstraint(u -> [u[1]^2, 2u[2]], Int64)
-julia> IncorrectArgument ControlConstraint(u -> [u[1]^2, 2u[2]], Int64)
 julia> C = ControlConstraint(u -> [u[1]^2, 2u[2]], Autonomous, Fixed)
 julia> C = ControlConstraint((u, v) -> [u[1]^2, 2u[2]+v[3]], Autonomous, NonFixed)
 julia> C = ControlConstraint((t, u) -> [t+u[1]^2, 2u[2]], NonAutonomous, Fixed)
 julia> C = ControlConstraint((t, u, v) -> [t+u[1]^2, 2u[2]+v[3]], NonAutonomous, NonFixed)
 ```
 """
-function ControlConstraint(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return ControlConstraint{typeof(f), TD, VD}(f)
-end
-
-function ControlConstraint!(f!::Function, dependencies::DataType...) # todo: useless? only use version above? 
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return ControlConstraint!{typeof(f!), TD, VD}(f!)
-end
+ControlConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = ControlConstraint{typeof(f), TD, VD}(f)
+ControlConstraint!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = ControlConstraint!{typeof(f!), TD, VD}(f!)
 
 """
 
@@ -1236,8 +1108,6 @@ $(TYPEDSIGNATURES)
 Return the value of the ControlConstraint function.
 
 ```@example
-julia> IncorrectArgument ControlConstraint(u -> [u[1]^2, 2u[2]], Int64)
-julia> IncorrectArgument ControlConstraint(u -> [u[1]^2, 2u[2]], Int64)
 julia> C = ControlConstraint(u -> [u[1]^2, 2u[2]], autonomous=true, variable=false)
 julia> C([1, -1])
 [1, -2]
@@ -1351,29 +1221,14 @@ Return the ```MixedConstraint``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
-IncorrectArgument
-julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
-IncorrectArgument
 julia> M = MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Autonomous, Fixed)
 julia> M = MixedConstraint((x, u, v) -> [2x[2]-u^2+v[3], x[1]], Autonomous, NonFixed)
 julia> M = MixedConstraint((t, x, u) -> [t+2x[2]-u^2, x[1]], NonAutonomous, Fixed)
 julia> M = MixedConstraint((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], NonAutonomous, NonFixed)
 ```
 """
-function MixedConstraint(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return MixedConstraint{typeof(f), TD, VD}(f)
-end
-
-function MixedConstraint!(f!::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return MixedConstraint!{typeof(f!), TD, VD}(f!)
-end
+MixedConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = MixedConstraint{typeof(f), TD, VD}(f)
+MixedConstraint!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = MixedConstraint!{typeof(f!), TD, VD}(f!)
 
 """
 
@@ -1382,10 +1237,6 @@ $(TYPEDSIGNATURES)
 Return the value of the MixedConstraint function.
 
 ```@example
-julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
-IncorrectArgument
-julia> MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], Int64)
-IncorrectArgument
 julia> M = MixedConstraint((x, u) -> [2x[2]-u^2, x[1]], autonomous=true, variable=false)
 julia> M([1, 0], 1)
 [-1, 1]
@@ -1560,22 +1411,13 @@ Return the ```FeedbackControl``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
-IncorrectArgument
-julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
-IncorrectArgument
 julia> u = FeedbackControl(x -> x[1]^2+2x[2], Autonomous, Fixed)
 julia> u = FeedbackControl((x, v) -> x[1]^2+2x[2]+v[3], Autonomous, NonFixed)
 julia> u = FeedbackControl((t, x) -> t+x[1]^2+2x[2], NonAutonomous, Fixed)
 julia> u = FeedbackControl((t, x, v) -> t+x[1]^2+2x[2]+v[3], NonAutonomous, NonFixed)
 ```
 """
-function FeedbackControl(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return FeedbackControl{typeof(f), TD, VD}(f)
-end
+FeedbackControl(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = FeedbackControl{typeof(f), TD, VD}(f)
 
 """
 
@@ -1584,10 +1426,6 @@ $(TYPEDSIGNATURES)
 Return the value of the FeedbackControl function.
 
 ```@example
-julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
-IncorrectArgument
-julia> FeedbackControl(x -> x[1]^2+2x[2], Int64)
-IncorrectArgument
 julia> u = FeedbackControl(x -> x[1]^2+2x[2], autonomous=true, variable=false)
 julia> u([1, 0])
 1
@@ -1671,22 +1509,13 @@ Return the ```ControlLaw``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
-julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
 julia> u = ControlLaw((x, p) -> x[1]^2+2p[2], Autonomous, Fixed)
 julia> u = ControlLaw((x, p, v) -> x[1]^2+2p[2]+v[3], Autonomous, NonFixed)
 julia> u = ControlLaw((t, x, p) -> t+x[1]^2+2p[2], NonAutonomous, Fixed)
 julia> u = ControlLaw((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], NonAutonomous, NonFixed)
 ```
 """
-function ControlLaw(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return ControlLaw{typeof(f), TD, VD}(f)
-end
+ControlLaw(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = ControlLaw{typeof(f), TD, VD}(f)
 
 """
 
@@ -1695,10 +1524,6 @@ $(TYPEDSIGNATURES)
 Return the value of the ControlLaw function.
 
 ```@example
-julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
-julia> ControlLaw((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
 julia> u = ControlLaw((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
 julia> u([1, 0], [0, 1])
 3
@@ -1787,22 +1612,13 @@ Return the ```Multiplier``` of a function.
 Dependencies are specified with DataType, Autonomous, NonAutonomous and Fixed, NonFixed.
 
 ```@example
-julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
-julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
 julia> μ = Multiplier((x, p) -> x[1]^2+2p[2], Autonomous, Fixed)
 julia> μ = Multiplier((x, p, v) -> x[1]^2+2p[2]+v[3], Autonomous, NonFixed)
 julia> μ = Multiplier((t, x, p) -> t+x[1]^2+2p[2], NonAutonomous, Fixed)
 julia> μ = Multiplier((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], NonAutonomous, NonFixed)
 ```
 """
-function Multiplier(f::Function, dependencies::DataType...)
-    __check_dependencies(dependencies)
-    TD = NonAutonomous ∈ dependencies ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependencies ? NonFixed : Fixed
-    return Multiplier{typeof(f), TD, VD}(f)
-end
+Multiplier(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Multiplier{typeof(f), TD, VD}(f)
 
 """
 
@@ -1811,10 +1627,6 @@ $(TYPEDSIGNATURES)
 Return the value of the Multiplier function.
 
 ```@example
-julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
-julia> Multiplier((x, p) -> x[1]^2+2p[2], Int64)
-IncorrectArgument
 julia> μ = Multiplier((x, p) -> x[1]^2+2p[2], autonomous=true, variable=false)
 julia> μ([1, 0], [0, 1])
 3

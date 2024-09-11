@@ -51,29 +51,6 @@ function Lift(X::Function; autonomous::Bool = true, variable::Bool = false)::Fun
     end
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Return the Lift of a function.
-Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
-
-# Example
-```@example
-julia> H = Lift(x -> 2x)
-julia> H(1, 1)
-2
-julia> H = Lift((t, x, v) -> 2x + t - v, NonAutonomous, NonFixed)
-julia> H(1, 1, 1, 1)
-2
-```
-"""
-function Lift(X::Function, dependences::DataType...)::Function
-    __check_dependencies(dependences)
-    autonomous = NonAutonomous ∈ dependences ? false : true
-    variable = NonFixed ∈ dependences ? true : false
-    return Lift(X; autonomous = autonomous, variable = variable)
-end
-
 # ---------------------------------------------------------------------------
 # Lie derivative of a scalar function along a vector field or a function: L_X(f) = X⋅f
 
@@ -179,34 +156,7 @@ julia> Lie(φ, f, autonomous=false, variable=true)(1, [1, 2], [2, 1])
 ```
 """
 function Lie(X::Function, f::Function; autonomous::Bool = true, variable::Bool = false)::Function
-    time_dependence = autonomous ? Autonomous : NonAutonomous
-    variable_dependence = variable ? NonFixed : Fixed
-    return Lie(VectorField(X, time_dependence, variable_dependence), f)
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Lie derivative of a scalar function along a vector field or a function.
-Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
-
-# Example
-```@example
-julia> φ = x -> [x[2], -x[1]]
-julia> f = x -> x[1]^2 + x[2]^2
-julia> Lie(φ,f)([1, 2])
-0
-julia> φ = (t, x, v) -> [t + x[2] + v[1], -x[1] + v[2]]
-julia> f = (t, x, v) -> t + x[1]^2 + x[2]^2
-julia> Lie(φ, f, NonAutonomous, NonFixed)(1, [1, 2], [2, 1])
-10
-```
-"""
-function Lie(X::Function, f::Function, dependences::DataType...)::Function
-    __check_dependencies(dependences)
-    time_dependence = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    variable_dependence = NonFixed ∈ dependences ? NonFixed : Fixed
-    return Lie(VectorField(X, time_dependence, variable_dependence), f)
+    return Lie(VectorField(X; autonomous=autonomous, variable=variable), f)
 end
 
 # ---------------------------------------------------------------------------
@@ -468,39 +418,9 @@ function Poisson(
     autonomous::Bool = true,
     variable::Bool = false,
 )::Hamiltonian
-    TD = autonomous ? Autonomous : NonAutonomous
-    VD = variable ? NonFixed : Fixed
     return Poisson(
-        Hamiltonian(f, TD, VD),
-        Hamiltonian(g, TD, VD),
-    )
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Poisson bracket of two functions : {f, g} = Poisson(f, g)
-Dependencies are specified with DataType : Autonomous, NonAutonomous and Fixed, NonFixed.
-
-# Example
-```@example
-julia> f = (x, p) -> x[2]^2 + 2x[1]^2 + p[1]^2
-julia> g = (x, p) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1]
-julia> Poisson(f, g)([1, 2], [2, 1])
--20            
-julia> f = (t, x, p, v) -> t*v[1]*x[2]^2 + 2x[1]^2 + p[1]^2 + v[2]
-julia> g = (t, x, p, v) -> 3x[2]^2 + -x[1]^2 + p[2]^2 + p[1] + t - v[2]
-julia> Poisson(f, g, NonAutonomous, NonFixed)(2, [1, 2], [2, 1], [4, 4])
--76
-```
-"""
-function Poisson(f::Function, g::Function, dependences::DataType...)::Hamiltonian
-    __check_dependencies(dependences)
-    TD = NonAutonomous ∈ dependences ? NonAutonomous : Autonomous
-    VD = NonFixed ∈ dependences ? NonFixed : Fixed
-    return Poisson(
-        Hamiltonian(f, TD, VD),
-        Hamiltonian(g, TD, VD),
+        Hamiltonian(f, autonomous=autonomous, variable=variable),
+        Hamiltonian(g, autonomous=autonomous, variable=variable),
     )
 end
 
@@ -644,20 +564,8 @@ macro Lie(expr::Expr, arg1, arg2)
     local variable = false
 
     @match arg1 begin
-        :(Autonomous) => begin
-            autonomous = true
-        end
-        :(NonAutonomous) => begin
-            autonomous = false
-        end
         :(autonomous = $a) => begin
             autonomous = a
-        end
-        :(NonFixed) => begin
-            variable = true
-        end
-        :(Fixed) => begin
-            variable = false
         end
         :(variable = $a) => begin
             variable = a
@@ -666,20 +574,8 @@ macro Lie(expr::Expr, arg1, arg2)
     end
 
     @match arg2 begin
-        :(Autonomous) => begin
-            autonomous = true
-        end
-        :(NonAutonomous) => begin
-            autonomous = false
-        end
         :(autonomous = $a) => begin
             autonomous = a
-        end
-        :(NonFixed) => begin
-            variable = true
-        end
-        :(Fixed) => begin
-            variable = false
         end
         :(variable = $a) => begin
             variable = a
@@ -723,20 +619,8 @@ macro Lie(expr::Expr, arg)
     local variable = false
 
     @match arg begin
-        :(Autonomous) => begin
-            autonomous = true
-        end
-        :(NonAutonomous) => begin
-            autonomous = false
-        end
         :(autonomous = $a) => begin
             autonomous = a
-        end
-        :(NonFixed) => begin
-            variable = true
-        end
-        :(Fixed) => begin
-            variable = false
         end
         :(variable = $a) => begin
             variable = a
