@@ -49,16 +49,16 @@ function test_differential_geometry()
                 variable = true,
             )
             @test HL(1, [1, 0], [0, 1], 1) == 1
-            HL = HamiltonianLift(x -> [x[1]^2, x[2]^2], Autonomous, Fixed)
+            HL = HamiltonianLift(x -> [x[1]^2, x[2]^2], autonomous=true, variable=false)
             @test HL([1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
-            HL = HamiltonianLift((x, v) -> [x[1]^2, x[2]^2 + v], Autonomous, NonFixed)
+            HL = HamiltonianLift((x, v) -> [x[1]^2, x[2]^2 + v], autonomous=true, variable=true)
             @test HL([1, 0], [0, 1], 1) == 1
             @test HL(1, [1, 0], [0, 1], 1) == 1
-            HL = HamiltonianLift((t, x) -> [t + x[1]^2, x[2]^2], NonAutonomous, Fixed)
+            HL = HamiltonianLift((t, x) -> [t + x[1]^2, x[2]^2], autonomous=false, variable=false)
             @test HL(1, [1, 0], [0, 1]) == 0
             @test HL(1, [1, 0], [0, 1], 1) == 0
-            HL = HamiltonianLift((t, x, v) -> [t + x[1]^2, x[2]^2 + v], NonAutonomous, NonFixed)
+            HL = HamiltonianLift((t, x, v) -> [t + x[1]^2, x[2]^2 + v], autonomous=false, variable=true)
             @test HL(1, [1, 0], [0, 1], 1) == 1
         end
 
@@ -73,13 +73,13 @@ function test_differential_geometry()
             Test.@test_throws MethodError H(1, [1, 2])
 
             # nonautonomous case
-            X = VectorField((t, x) -> 2x, NonAutonomous)
+            X = VectorField((t, x) -> 2x, autonomous=false, variable=false)
             H = Lift(X)
             Test.@test H(1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4]) == 22
 
             # autonomous nonfixed case
-            X = VectorField((x, v) -> 2x, NonFixed)
+            X = VectorField((x, v) -> 2x, autonomous=true, variable=true)
             H = Lift(X)
             Test.@test H(1, 1, 1) == 2
             Test.@test H([1, 2], [3, 4], 1) == 22
@@ -87,7 +87,7 @@ function test_differential_geometry()
             Test.@test_throws MethodError H(1, [1, 2])
 
             # nonautonomous nonfixed case
-            X = VectorField((t, x, v) -> 2x, NonAutonomous, NonFixed)
+            X = VectorField((t, x, v) -> 2x, autonomous=false, variable=true)
             H = Lift(X)
             Test.@test H(1, 1, 1, 1) == 2
             Test.@test H(1, [1, 2], [3, 4], 1) == 22
@@ -124,9 +124,6 @@ function test_differential_geometry()
             H_F(x, p) = Lift(F)(x, p)
             H_F(y) = H_F(y, y)
             Test.@test H_F(1) == 2
-
-            # exceptions
-            Test.@test_throws IncorrectArgument Lift(X, Int64)
         end
     end # tests for Lift
 
@@ -150,45 +147,45 @@ function test_differential_geometry()
 
         # nonautonomous, dim 2
         φ = (t, x) -> [t + x[2], -x[1]]
-        X = VectorField(φ, NonAutonomous)
+        X = VectorField(φ, autonomous=false, variable=false)
         f = (t, x) -> t + x[1]^2 + x[2]^2
         Test.@test (X ⋅ f)(1, [1, 2]) == 2
-        Test.@test Lie(φ, f, NonAutonomous)(1, [1, 2]) == 2
+        Test.@test Lie(φ, f, autonomous=false, variable=false)(1, [1, 2]) == 2
 
         # nonautonomous, dim 1
         φ = (t, x) -> 2x + t
-        X = VectorField(φ, NonAutonomous)
+        X = VectorField(φ, autonomous=false, variable=false)
         f = (t, x) -> t + x^2
         Test.@test (X ⋅ f)(1, 1) == 6
-        Test.@test Lie(φ, f, NonAutonomous)(1, 1) == 6
+        Test.@test Lie(φ, f, autonomous=false, variable=false)(1, 1) == 6
 
         # autonomous, nonfixed, dim 2
         φ = (x, v) -> [x[2] + v[1], -x[1] + v[2]]
-        X = VectorField(φ, NonFixed)
+        X = VectorField(φ, autonomous=true, variable=true)
         f = (x, v) -> x[1]^2 + x[2]^2
         Test.@test (X ⋅ f)([1, 2], [2, 1]) == 8
-        Test.@test Lie(φ, f, NonFixed)([1, 2], [2, 1]) == 8
+        Test.@test Lie(φ, f, autonomous=true, variable=true)([1, 2], [2, 1]) == 8
 
         # autonomous, nonfixed, dim 1
         φ = (x, v) -> 2x + v
-        X = VectorField(φ, NonFixed)
+        X = VectorField(φ, autonomous=true, variable=true)
         f = (x, v) -> x^2
         Test.@test (X ⋅ f)(1, 1) == 6
-        Test.@test Lie(φ, f, NonFixed)(1, 1) == 6
+        Test.@test Lie(φ, f, autonomous=true, variable=true)(1, 1) == 6
 
         # nonautonomous, nonfixed, dim 2
         φ = (t, x, v) -> [t + x[2] + v[1], -x[1] + v[2]]
-        X = VectorField(φ, NonAutonomous, NonFixed)
+        X = VectorField(φ, autonomous=false, variable=true)
         f = (t, x, v) -> t + x[1]^2 + x[2]^2
         Test.@test (X ⋅ f)(1, [1, 2], [2, 1]) == 10
-        Test.@test Lie(φ, f, NonAutonomous, NonFixed)(1, [1, 2], [2, 1]) == 10
+        Test.@test Lie(φ, f, autonomous=false, variable=true)(1, [1, 2], [2, 1]) == 10
 
         # nonautonomous, nonfixed, dim 1
         φ = (t, x, v) -> 2x + t + v
-        X = VectorField(φ, NonAutonomous, NonFixed)
+        X = VectorField(φ, autonomous=false, variable=true)
         f = (t, x, v) -> t + x^2
         Test.@test (X ⋅ f)(1, 1, 1) == 8
-        Test.@test Lie(φ, f, NonAutonomous, NonFixed)(1, 1, 1) == 8
+        Test.@test Lie(φ, f, autonomous=false, variable=true)(1, 1, 1) == 8
     end
 
     @testset "Directional derivative of a vector field" begin
@@ -204,33 +201,33 @@ function test_differential_geometry()
         Test.@test CTBase.:(⅋)(X, Y)(1) == 6
 
         # nonautonomous, dim 2
-        X = VectorField((t, x) -> [t + x[2], -x[1]], NonAutonomous)
-        Y = VectorField((t, x) -> [t + x[1], x[2]], NonAutonomous)
+        X = VectorField((t, x) -> [t + x[2], -x[1]], autonomous=false, variable=false)
+        Y = VectorField((t, x) -> [t + x[1], x[2]], autonomous=false, variable=false)
         Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2]) == [3, -1]
 
         # nonautonomous, dim 1
-        X = VectorField((t, x) -> 2x + t, NonAutonomous)
-        Y = VectorField((t, x) -> 3x + t, NonAutonomous)
+        X = VectorField((t, x) -> 2x + t, autonomous=false, variable=false)
+        Y = VectorField((t, x) -> 3x + t, autonomous=false, variable=false)
         Test.@test CTBase.:(⅋)(X, Y)(1, 1) == 9
 
         # autonomous, nonfixed, dim 1
-        X = VectorField((x, v) -> 2x + v, NonFixed)
-        Y = VectorField((x, v) -> 3x + v, NonFixed)
+        X = VectorField((x, v) -> 2x + v, autonomous=true, variable=true)
+        Y = VectorField((x, v) -> 3x + v, autonomous=true, variable=true)
         Test.@test CTBase.:(⅋)(X, Y)(1, 1) == 9
 
         # nonautonomous, nonfixed, dim 1
-        X = VectorField((t, x, v) -> t + 2x + v, NonAutonomous, NonFixed)
-        Y = VectorField((t, x, v) -> t + 3x + v, NonAutonomous, NonFixed)
+        X = VectorField((t, x, v) -> t + 2x + v, autonomous=false, variable=true)
+        Y = VectorField((t, x, v) -> t + 3x + v, autonomous=false, variable=true)
         Test.@test CTBase.:(⅋)(X, Y)(1, 1, 1) == 12
 
         # autonomous, nonfixed, dim 2
-        X = VectorField((x, v) -> [v[1] + v[2] + x[2], -x[1]], NonFixed)
-        Y = VectorField((x, v) -> [v[1] + v[2] + x[1], x[2]], NonFixed)
+        X = VectorField((x, v) -> [v[1] + v[2] + x[2], -x[1]], autonomous=true, variable=true)
+        Y = VectorField((x, v) -> [v[1] + v[2] + x[1], x[2]], autonomous=true, variable=true)
         Test.@test CTBase.:(⅋)(X, Y)([1, 2], [2, 3]) == [7, -1]
 
         # nonautonomous, nonfixed, dim 2
-        X = VectorField((t, x, v) -> [t + v[1] + v[2] + x[2], -x[1]], NonFixed, NonAutonomous)
-        Y = VectorField((t, x, v) -> [v[1] + v[2] + x[1], x[2]], NonFixed, NonAutonomous)
+        X = VectorField((t, x, v) -> [t + v[1] + v[2] + x[2], -x[1]], autonomous=false, variable=true)
+        Y = VectorField((t, x, v) -> [v[1] + v[2] + x[1], x[2]], autonomous=false, variable=true)
         Test.@test CTBase.:(⅋)(X, Y)(1, [1, 2], [2, 3]) == [8, -1]
     end
 
@@ -246,15 +243,15 @@ function test_differential_geometry()
         @testset "nonautonomous case" begin
             f = (t, x) -> [t + x[2], -2x[1]]
             g = (t, x) -> [t + 3x[2], -x[1]]
-            X = VectorField(f, NonAutonomous)
-            Y = VectorField(g, NonAutonomous)
+            X = VectorField(f, autonomous=false, variable=false)
+            Y = VectorField(g, autonomous=false, variable=false)
             Test.@test Lie(X, Y)(1, [1, 2]) == [-5, 11]
         end
 
         @testset "autonomous nonfixed case" begin
             f = (x, v) -> [x[2] + v, 2x[1]]
             g = (x, v) -> [3x[2], v - x[1]]
-            X = VectorField(f, NonFixed)
+            X = VectorField(f, autonomous=true, variable=true)
             Y = VectorField(g, variable = true)
             Test.@test Lie(X, Y)([1, 2], 1) == [6, -15]
         end
@@ -262,8 +259,8 @@ function test_differential_geometry()
         @testset "nonautonomous nonfixed case" begin
             f = (t, x, v) -> [t + x[2] + v, -2x[1] - v]
             g = (t, x, v) -> [t + 3x[2] + v, -x[1] - v]
-            X = VectorField(f, NonAutonomous, NonFixed)
-            Y = VectorField(g, NonAutonomous, NonFixed)
+            X = VectorField(f, autonomous=false, variable=true)
+            Y = VectorField(g, autonomous=false, variable=true)
             Test.@test Lie(X, Y)(1, [1, 2], 1) == [-7, 12]
         end
 
@@ -448,41 +445,41 @@ function test_differential_geometry()
         @testset "nonautonomous case" begin
             f = (t, x) -> [t * x[1] + x[2]^2, x[1], 0]
             g = (t, x) -> [0, x[2], t * x[1]^2 + 4 * x[2]]
-            F = Lift(f, NonAutonomous)
-            G = Lift(g, NonAutonomous)
+            F = Lift(f, autonomous=false, variable=false)
+            G = Lift(g, autonomous=false, variable=false)
             F_ = (t, x, p) -> p' * f(t, x)
             G_ = (t, x, p) -> p' * g(t, x)
-            Test.@test Poisson(F, G, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) ≈
-                       Poisson(F_, G_, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) atol = 1e-6
-            Test.@test Poisson(F, G_, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) ≈
-                       Poisson(F_, G, NonAutonomous)(2, [1, 2, 3], [4, 0, 4]) atol = 1e-6
+            Test.@test Poisson(F, G, autonomous=false, variable=false)(2, [1, 2, 3], [4, 0, 4]) ≈
+                       Poisson(F_, G_, autonomous=false, variable=false)(2, [1, 2, 3], [4, 0, 4]) atol = 1e-6
+            Test.@test Poisson(F, G_, autonomous=false, variable=false)(2, [1, 2, 3], [4, 0, 4]) ≈
+                       Poisson(F_, G, autonomous=false, variable=false)(2, [1, 2, 3], [4, 0, 4]) atol = 1e-6
         end
 
         @testset "autonomous nonfixed case" begin
             f = (x, v) -> [x[1] + v * x[2]^2, x[1], 0]
             g = (x, v) -> [0, x[2], x[1]^2 + v * 4 * x[2]]
-            F = Lift(f, NonFixed)
-            G = Lift(g, NonFixed)
+            F = Lift(f, autonomous=true, variable=true)
+            G = Lift(g, autonomous=true, variable=true)
             F_ = (x, p, v) -> p' * f(x, v)
             G_ = (x, p, v) -> p' * g(x, v)
-            Test.@test Poisson(F, G, NonFixed)([1, 2, 3], [4, 0, 4], 1) ≈
-                       Poisson(F_, G_, NonFixed)([1, 2, 3], [4, 0, 4], 1) atol = 1e-6
-            Test.@test Poisson(F, G_, NonFixed)([1, 2, 3], [4, 0, 4], 1) ≈
-                       Poisson(F_, G, NonFixed)([1, 2, 3], [4, 0, 4], 1) atol = 1e-6
+            Test.@test Poisson(F, G, autonomous=true, variable=true)([1, 2, 3], [4, 0, 4], 1) ≈
+                       Poisson(F_, G_, autonomous=true, variable=true)([1, 2, 3], [4, 0, 4], 1) atol = 1e-6
+            Test.@test Poisson(F, G_, autonomous=true, variable=true)([1, 2, 3], [4, 0, 4], 1) ≈
+                       Poisson(F_, G, autonomous=true, variable=true)([1, 2, 3], [4, 0, 4], 1) atol = 1e-6
         end
 
         @testset "nonautonomous nonfixed case" begin
             f = (t, x, v) -> [t * x[1] + v * x[2]^2, x[1], 0]
             g = (t, x, v) -> [0, x[2], t * x[1]^2 + v * 4 * x[2]]
-            F = Lift(f, NonAutonomous, NonFixed)
-            G = Lift(g, NonAutonomous, NonFixed)
+            F = Lift(f, autonomous=false, variable=true)
+            G = Lift(g, autonomous=false, variable=true)
             F_ = (t, x, p, v) -> p' * f(t, x, v)
             G_ = (t, x, p, v) -> p' * g(t, x, v)
-            Test.@test Poisson(F, G, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) ≈
-                       Poisson(F_, G_, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol =
+            Test.@test Poisson(F, G, autonomous=false, variable=true)(2, [1, 2, 3], [4, 0, 4], 1) ≈
+                       Poisson(F_, G_, autonomous=false, variable=true)(2, [1, 2, 3], [4, 0, 4], 1) atol =
                 1e-6
-            Test.@test Poisson(F, G_, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) ≈
-                       Poisson(F_, G, NonAutonomous, NonFixed)(2, [1, 2, 3], [4, 0, 4], 1) atol =
+            Test.@test Poisson(F, G_, autonomous=false, variable=true)(2, [1, 2, 3], [4, 0, 4], 1) ≈
+                       Poisson(F_, G, autonomous=false, variable=true)(2, [1, 2, 3], [4, 0, 4], 1) atol =
                 1e-6
         end
     end
@@ -516,9 +513,9 @@ function test_differential_geometry()
         Test.@test F011_(x) ≈ F011___(x) atol = 1e-6
 
         # nonautonomous
-        F0 = VectorField((t, x) -> [-Γ * x[1], -Γ * x[2], γ * (1 - x[3])], NonAutonomous)
-        F1 = VectorField((t, x) -> [0, -x[3], x[2]], NonAutonomous)
-        F2 = VectorField((t, x) -> [x[3], 0, -x[1]], NonAutonomous)
+        F0 = VectorField((t, x) -> [-Γ * x[1], -Γ * x[2], γ * (1 - x[3])], autonomous=false, variable=false)
+        F1 = VectorField((t, x) -> [0, -x[3], x[2]], autonomous=false, variable=false)
+        F2 = VectorField((t, x) -> [x[3], 0, -x[1]], autonomous=false, variable=false)
         F01_ = Lie(F0, F1)
         F011_ = Lie(F01_, F1)
         F01__ = @Lie [F0, F1]
@@ -532,9 +529,9 @@ function test_differential_geometry()
         Test.@test F011_(t, x) ≈ F011___(t, x) atol = 1e-6
 
         # autonomous nonfixed
-        F0 = VectorField((x, v) -> [-Γ * x[1], -Γ * x[2], γ * (1 - x[3])], NonFixed)
-        F1 = VectorField((x, v) -> [0, -x[3], x[2]], NonFixed)
-        F2 = VectorField((x, v) -> [x[3], 0, -x[1]], NonFixed)
+        F0 = VectorField((x, v) -> [-Γ * x[1], -Γ * x[2], γ * (1 - x[3])], autonomous=true, variable=true)
+        F1 = VectorField((x, v) -> [0, -x[3], x[2]], autonomous=true, variable=true)
+        F2 = VectorField((x, v) -> [x[3], 0, -x[1]], autonomous=true, variable=true)
         F01_ = Lie(F0, F1)
         F011_ = Lie(F01_, F1)
         F01__ = @Lie [F0, F1]
@@ -550,11 +547,11 @@ function test_differential_geometry()
         # nonautonomous nonfixed
         F0 = VectorField(
             (t, x, v) -> [-Γ * x[1], -Γ * x[2], γ * (1 - x[3])],
-            NonAutonomous,
-            NonFixed,
+            autonomous=false,
+            variable=true,
         )
-        F1 = VectorField((t, x, v) -> [0, -x[3], x[2]], NonAutonomous, NonFixed)
-        F2 = VectorField((t, x, v) -> [x[3], 0, -x[1]], NonAutonomous, NonFixed)
+        F1 = VectorField((t, x, v) -> [0, -x[3], x[2]], autonomous=false, variable=true)
+        F2 = VectorField((t, x, v) -> [x[3], 0, -x[1]], autonomous=false, variable=true)
         F01_ = Lie(F0, F1)
         F011_ = Lie(F01_, F1)
         F01__ = @Lie [F0, F1]
@@ -593,7 +590,7 @@ function test_differential_geometry()
 
         # nonautonomous
         H0 = Hamiltonian((t, x, p) -> 0.5 * (x[1]^2 + x[2]^2 + p[1]^2), autonomous = false)
-        H1 = Hamiltonian((t, x, p) -> 0.5 * (x[1]^2 + x[2]^2 + p[2]^2), NonAutonomous)
+        H1 = Hamiltonian((t, x, p) -> 0.5 * (x[1]^2 + x[2]^2 + p[2]^2), autonomous=false, variable=false)
         P01 = Poisson(H0, H1)
         P011 = Poisson(P01, H1)
         P01_ = @Lie {H0, H1}
@@ -625,8 +622,8 @@ function test_differential_geometry()
         )
         H1 = Hamiltonian(
             (t, x, p, v) -> 0.5 * (x[1]^2 + x[2]^2 + p[2]^2 + v),
-            NonAutonomous,
-            NonFixed,
+            autonomous=false,
+            variable=true,
         )
         P01 = Poisson(H0, H1)
         P011 = Poisson(P01, H1)
@@ -674,7 +671,7 @@ function test_differential_geometry()
         Test.@test P01_val ≈ P01_(t, x, p) atol = 1e-6
         Test.@test P011(t, x, p) ≈ P011_(t, x, p) atol = 1e-6
         get_H0 = () -> H0
-        P011__ = @Lie {{get_H0(), H1}, H1} NonAutonomous
+        P011__ = @Lie {{get_H0(), H1}, H1} autonomous=false variable=false
         Test.@test P011_(t, x, p) ≈ P011__(t, x, p) atol = 1e-6
 
         # autonomous nonfixed
@@ -687,7 +684,7 @@ function test_differential_geometry()
         Test.@test P01(x, p, v) ≈ P01_(x, p, v) atol = 1e-6
         Test.@test P011(x, p, v) ≈ P011_(x, p, v) atol = 1e-6
         get_H0 = () -> H0
-        P011__ = @Lie {{get_H0(), H1}, H1} NonFixed
+        P011__ = @Lie {{get_H0(), H1}, H1} autonomous=true variable=true
         Test.@test P011_(x, p, v) ≈ P011__(x, p, v) atol = 1e-6
 
         # nonautonomous nonfixed
@@ -696,11 +693,11 @@ function test_differential_geometry()
         P01 = Poisson(H0, H1; autonomous = false, variable = true)
         P011 = Poisson(P01, H1)
         P01_ = @Lie {H0, H1} autonomous = false variable = true
-        P011_ = @Lie {{H0, H1}, H1} NonAutonomous NonFixed
+        P011_ = @Lie {{H0, H1}, H1} autonomous=false variable=true
         Test.@test P01(t, x, p, v) ≈ P01_(t, x, p, v) atol = 1e-6
         Test.@test P011(t, x, p, v) ≈ P011_(t, x, p, v) atol = 1e-6
         get_H0 = () -> H0
-        P011__ = @Lie {{get_H0(), H1}, H1} NonAutonomous NonFixed
+        P011__ = @Lie {{get_H0(), H1}, H1} autonomous=false variable=true
         Test.@test P011_(t, x, p, v) ≈ P011__(t, x, p, v) atol = 1e-6
     end
 
@@ -727,11 +724,11 @@ function test_differential_geometry()
         # nonautonomous nonfixed
         F0 = VectorField(
             (t, x, v) -> [-Γ * x[1], -Γ * x[2], γ * (1 - x[3])],
-            NonAutonomous,
-            NonFixed,
+            autonomous=false,
+            variable=true,
         )
-        F1 = VectorField((t, x, v) -> [0, -x[3], x[2]], NonAutonomous, NonFixed)
-        F2 = VectorField((t, x, v) -> [x[3], 0, -x[1]], NonAutonomous, NonFixed)
+        F1 = VectorField((t, x, v) -> [0, -x[3], x[2]], autonomous=false, variable=true)
+        F2 = VectorField((t, x, v) -> [x[3], 0, -x[1]], autonomous=false, variable=true)
         Test.@test @Lie [F0, F1](t, x, v) + 4 * [F1, F2](t, x, v) == [8, -8, -2]
         Test.@test @Lie [F0, F1](t, x, v) - [F1, F2](t, x, v) == [-2, -3, -2]
         Test.@test @Lie [F0, F1](t, x, v) .* [F1, F2](t, x, v) == [0, 4, 0]

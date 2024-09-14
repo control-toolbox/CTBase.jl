@@ -1,12 +1,40 @@
-# --------------------------------------------------------------------------------------------------
-# functions
-#
 """
 $(TYPEDEF)
-
-Abstract type for functions.
 """
-abstract type AbstractCTFunction <: Function end
+abstract type AbstractOptimalControlModel end
+
+"""
+$(TYPEDEF)
+"""
+abstract type TimeDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type Autonomous <: TimeDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type NonAutonomous <: TimeDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type VariableDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type NonFixed <: VariableDependence end
+
+"""
+$(TYPEDEF)
+"""
+abstract type Fixed <: VariableDependence end
+
+# --------------------------------------------------------------------------------------------------
+# Callable types
 
 """
 $(TYPEDEF)
@@ -53,12 +81,12 @@ julia> B([0, 0], [1, 1], [1, 2, 3])
 [4, 1]
 ```
 """
-struct BoundaryConstraint{variable_dependence}
-    f::Function
+struct BoundaryConstraint{TF<:Function, VD<:VariableDependence}
+    f::TF
 end
 
-struct BoundaryConstraint!{variable_dependence}
-    f!::Function
+struct BoundaryConstraint!{TF<:Function, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -107,12 +135,12 @@ julia> G([0, 0], [1, 1], [1, 2, 3])
 4
 ```
 """
-struct Mayer{variable_dependence}
-    f::Function
+struct Mayer{TF<:Function, VD<:VariableDependence}
+    f::TF
 end
 
-struct Mayer!{variable_dependence}
-    f!::Function
+struct Mayer!{TF<:Function, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -120,14 +148,14 @@ $(TYPEDEF)
 
 Abstract type for hamiltonians.
 """
-abstract type AbstractHamiltonian{time_dependence, variable_dependence} end
+abstract type AbstractHamiltonian{TD<:TimeDependence, VD<:VariableDependence} end
 
 """
 $(TYPEDEF)
 
 Abstract type for vector fields.
 """
-abstract type AbstractVectorField{time_dependence, variable_dependence} end
+abstract type AbstractVectorField{TD<:TimeDependence, VD<:VariableDependence} end
 
 """
 $(TYPEDEF)
@@ -198,9 +226,8 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-struct Hamiltonian{time_dependence, variable_dependence} <:
-       AbstractHamiltonian{time_dependence, variable_dependence}
-    f::Function
+struct Hamiltonian{TF<:Function, TD<:TimeDependence, VD<:VariableDependence} <: AbstractHamiltonian{TD, VD}
+    f::TF
 end
 
 """
@@ -273,9 +300,8 @@ julia> V(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-struct VectorField{time_dependence, variable_dependence} <:
-       AbstractVectorField{time_dependence, variable_dependence}
-    f::Function
+struct VectorField{TF<:Function, TD<:TimeDependence, VD<:VariableDependence} <: AbstractVectorField{TD, VD}
+    f::TF
 end
 
 """
@@ -348,9 +374,8 @@ julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
 [7, -3]
 ```
 """
-struct HamiltonianVectorField{time_dependence, variable_dependence} <:
-       AbstractVectorField{time_dependence, variable_dependence}
-    f::Function
+struct HamiltonianVectorField{TF<:Function, TD<:TimeDependence, VD<:VariableDependence} <: AbstractVectorField{TD, VD}
+    f::TF
 end
 
 """
@@ -426,13 +451,12 @@ true
 ```
 
 """
-struct HamiltonianLift{time_dependence, variable_dependence} <:
-       AbstractHamiltonian{time_dependence, variable_dependence}
-    X::VectorField
+struct HamiltonianLift{TV<:VectorField, TD<:TimeDependence, VD<:VariableDependence} <: AbstractHamiltonian{TD, VD}
+    X::TV
     function HamiltonianLift(
-        X::VectorField{time_dependence, variable_dependence},
-    ) where {time_dependence, variable_dependence}
-        new{time_dependence, variable_dependence}(X)
+        X::VectorField{<:Function, TD, VD},
+    ) where {TD<:TimeDependence, VD<:VariableDependence}
+        new{typeof(X), TD, VD}(X)
     end
 end
 
@@ -512,12 +536,12 @@ julia> L(1, [1, 0], [1], [1, 2, 3])
 3
 ```
 """
-struct Lagrange{time_dependence, variable_dependence}
-    f::Function
+struct Lagrange{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
-struct Lagrange!{time_dependence, variable_dependence}
-    f!::Function
+struct Lagrange!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -588,12 +612,12 @@ julia> D(1, [1, 0], 1, [1, 2, 3])
 ```
 
 """
-struct Dynamics{time_dependence, variable_dependence}
-    f::Function
+struct Dynamics{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
-struct Dynamics!{time_dependence, variable_dependence}
-    f!::Function
+struct Dynamics!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -670,12 +694,12 @@ julia>  S(1, [1, -1], [1, 2, 3])
 ```
 
 """
-struct StateConstraint{time_dependence, variable_dependence}
-    f::Function
+struct StateConstraint{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
-struct StateConstraint!{time_dependence, variable_dependence}
-    f!::Function
+struct StateConstraint!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -746,12 +770,12 @@ julia> C(1, [1, -1], [1, 2, 3])
 ```
 
 """
-struct ControlConstraint{time_dependence, variable_dependence}
-    f::Function
+struct ControlConstraint{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
-struct ControlConstraint!{time_dependence, variable_dependence}
-    f!::Function
+struct ControlConstraint!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -830,12 +854,12 @@ julia> M(1, [1, 0], 1, [1, 2, 3])
 ```
 
 """
-struct MixedConstraint{time_dependence, variable_dependence}
-    f::Function
+struct MixedConstraint{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
-struct MixedConstraint!{time_dependence, variable_dependence}
-    f!::Function
+struct MixedConstraint!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f!::TF
 end
 
 """
@@ -875,12 +899,12 @@ julia> V([1, -1])
 ```
 
 """
-struct VariableConstraint
-    f::Function
+struct VariableConstraint{TF<:Function}
+    f::TF
 end
 
-struct VariableConstraint!
-    f!::Function
+struct VariableConstraint!{TF<:Function}
+    f!::TF
 end
 
 """
@@ -957,8 +981,8 @@ julia> u(1, [1, 0], [1, 2, 3])
 ```
 
 """
-struct FeedbackControl{time_dependence, variable_dependence}
-    f::Function
+struct FeedbackControl{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
 """
@@ -1035,8 +1059,8 @@ julia> u(1, [1, 0], [0, 1], [1, 2, 3])
 ```
 
 """
-struct ControlLaw{time_dependence, variable_dependence}
-    f::Function
+struct ControlLaw{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
 """
@@ -1113,8 +1137,8 @@ julia> μ(1, [1, 0], [0, 1], [1, 2, 3])
 ```
 
 """
-struct Multiplier{time_dependence, variable_dependence}
-    f::Function
+struct Multiplier{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+    f::TF
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -1151,38 +1175,3 @@ Base.getindex(x::StaticArrays.TrivialView, i::CTBase.Index) = Base.getindex(x, i
 Type alias for an index or range.
 """
 const RangeConstraint = Union{Index, OrdinalRange{<:Int}}
-
-"""
-$(TYPEDEF)
-"""
-abstract type AbstractOptimalControlModel end
-
-"""
-$(TYPEDEF)
-"""
-abstract type TimeDependence end
-
-"""
-$(TYPEDEF)
-"""
-abstract type Autonomous <: TimeDependence end
-
-"""
-$(TYPEDEF)
-"""
-abstract type NonAutonomous <: TimeDependence end
-
-"""
-$(TYPEDEF)
-"""
-abstract type VariableDependence end
-
-"""
-$(TYPEDEF)
-"""
-abstract type NonFixed <: VariableDependence end
-
-"""
-$(TYPEDEF)
-"""
-abstract type Fixed <: VariableDependence end
