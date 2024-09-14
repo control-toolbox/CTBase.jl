@@ -11,8 +11,8 @@ $(TYPEDEF)
 A leaf of a plot tree.
 """
 struct PlotLeaf <: AbstractPlotTreeElement
-    value::Tuple{Symbol, Integer}
-    PlotLeaf(value::Tuple{Symbol, Integer}) = new(value)
+    value::Tuple{Symbol, Int}
+    PlotLeaf(value::Tuple{Symbol, Int}) = new(value)
 end
 
 """
@@ -41,7 +41,7 @@ function __plot_time!(
     p::Union{Plots.Plot, Plots.Subplot},
     sol::OptimalControlSolution,
     s::Symbol,
-    i::Integer,
+    i::Int,
     time::Symbol;
     t_label,
     label::String,
@@ -103,7 +103,7 @@ Plot the i-th component of a vectorial function of time `f(t) ∈ Rᵈ` where `f
 function __plot_time(
     sol::OptimalControlSolution,
     s::Symbol,
-    i::Integer,
+    i::Int,
     time::Symbol;
     t_label,
     label::String,
@@ -187,7 +187,7 @@ $(TYPEDSIGNATURES)
 
 Plot a leaf.
 """
-function __plot_tree(leaf::PlotLeaf, depth::Integer; kwargs...)
+function __plot_tree(leaf::PlotLeaf, depth::Int; kwargs...)
     return Plots.plot()
 end
 
@@ -196,7 +196,7 @@ $(TYPEDSIGNATURES)
 
 Plot a node.
 """
-function __plot_tree(node::PlotNode, depth::Integer = 0; kwargs...)
+function __plot_tree(node::PlotNode, depth::Int = 0; kwargs...)
     #
     subplots = ()
     #
@@ -612,8 +612,8 @@ corresponding respectively to the argument `xx` and the argument `yy`.
 """
 @recipe function f(
     sol::OptimalControlSolution,
-    xx::Union{Symbol, Tuple{Symbol, Integer}},
-    yy::Union{Symbol, Tuple{Symbol, Integer}},
+    xx::Union{Symbol, Tuple{Symbol, Int}},
+    yy::Union{Symbol, Tuple{Symbol, Int}},
     time::Symbol = :default,
 )
 
@@ -629,8 +629,8 @@ end
 
 function recipe_label(
     sol::OptimalControlSolution,
-    xx::Union{Symbol, Tuple{Symbol, Integer}},
-    yy::Union{Symbol, Tuple{Symbol, Integer}},
+    xx::Union{Symbol, Tuple{Symbol, Int}},
+    yy::Union{Symbol, Tuple{Symbol, Int}},
 )
 
     #
@@ -661,7 +661,7 @@ Get the data for plotting.
 """
 function __get_data_plot(
     sol::OptimalControlSolution,
-    xx::Union{Symbol, Tuple{Symbol, Integer}};
+    xx::Union{Symbol, Tuple{Symbol, Int}};
     time::Symbol = :default,
 )
     T = time_grid(sol)

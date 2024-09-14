@@ -435,17 +435,6 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall time!(ocp; ind0 = 1, tf = 1)
     end
 
-    @testset "Index" begin
-        @test Index(1) == Index(1)
-        @test Index(1) ≤ Index(2)
-        @test Index(1) < Index(2)
-        v = [10, 20]
-        @test v[Index(1)] == v[1]
-        @test_throws MethodError v[Index(1):Index(2)]
-        x = 1
-        @test x[Index(1)] == x
-    end
-
     @testset "time and variable dependence" begin
         ocp = Model()
         @test is_autonomous(ocp)
@@ -650,8 +639,8 @@ function test_model() # 30 55 185
         # initial and final times
         ocp = Model()
         time!(ocp; t0 = 0, tf = 1)
-        @test !CTBase.__is_initial_time_free(ocp)
-        @test !CTBase.__is_final_time_free(ocp)
+        @test !CTBase.has_free_initial_time(ocp)
+        @test !CTBase.has_free_final_time(ocp)
         @test initial_time(ocp) == 0
         @test final_time(ocp) == 1
         @test time_name(ocp) == "t"
@@ -672,47 +661,47 @@ function test_model() # 30 55 185
         ocp = Model(variable = true)
         variable!(ocp, 1)
         time!(ocp; t0 = 0, indf = 1)
-        @test !CTBase.__is_initial_time_free(ocp)
-        @test CTBase.__is_final_time_free(ocp)
+        @test !CTBase.has_free_initial_time(ocp)
+        @test CTBase.has_free_final_time(ocp)
         @test initial_time(ocp) == 0
-        @test final_time(ocp) == Index(1)
+        @test final_time(ocp) == 1
         @test time_name(ocp) == "t"
 
         ocp = Model(variable = true)
         variable!(ocp, 1)
         time!(ocp; t0 = 0, indf = 1, name = "s")
         @test initial_time(ocp) == 0
-        @test final_time(ocp) == Index(1)
+        @test final_time(ocp) == 1
         @test time_name(ocp) == "s"
 
         ocp = Model(variable = true)
         variable!(ocp, 1)
         time!(ocp; t0 = 0, indf = 1, name = :s)
         @test initial_time(ocp) == 0
-        @test final_time(ocp) == Index(1)
+        @test final_time(ocp) == 1
         @test time_name(ocp) == "s"
 
         # final time
         ocp = Model(variable = true)
         variable!(ocp, 1)
         time!(ocp; ind0 = 1, tf = 1)
-        @test CTBase.__is_initial_time_free(ocp)
-        @test !CTBase.__is_final_time_free(ocp)
-        @test initial_time(ocp) == Index(1)
+        @test CTBase.has_free_initial_time(ocp)
+        @test !CTBase.has_free_final_time(ocp)
+        @test initial_time(ocp) == 1
         @test final_time(ocp) == 1
         @test time_name(ocp) == "t"
 
         ocp = Model(variable = true)
         variable!(ocp, 1)
         time!(ocp; ind0 = 1, tf = 1, name = "s")
-        @test initial_time(ocp) == Index(1)
+        @test initial_time(ocp) == 1
         @test final_time(ocp) == 1
         @test time_name(ocp) == "s"
 
         ocp = Model(variable = true)
         variable!(ocp, 1)
         time!(ocp; ind0 = 1, tf = 1, name = :s)
-        @test initial_time(ocp) == Index(1)
+        @test initial_time(ocp) == 1
         @test final_time(ocp) == 1
         @test time_name(ocp) == "s"
     end
@@ -1743,7 +1732,7 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall constraint!(
             ocp,
             :initial;
-            rg = Index(2),
+            rg = 2,
             val = 10,
             ub = 10,
             label = :ci,
@@ -1751,7 +1740,7 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall constraint!(
             ocp,
             :final;
-            rg = Index(1),
+            rg = 1,
             val = 1,
             ub = 1,
             label = :cf,
@@ -1814,7 +1803,7 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall constraint!(
             ocp,
             :variable;
-            rg = Index(3),
+            rg = 3,
             val = 1000,
             ub = 1000,
             label = :cv3,
@@ -1839,7 +1828,7 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall constraint!(
             ocp,
             :initial;
-            rg = Index(2),
+            rg = 2,
             val = 10,
             lb = 10,
             label = :ci,
@@ -1847,7 +1836,7 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall constraint!(
             ocp,
             :final;
-            rg = Index(1),
+            rg = 1,
             val = 1,
             lb = 1,
             label = :cf,
@@ -1910,7 +1899,7 @@ function test_model() # 30 55 185
         @test_throws UnauthorizedCall constraint!(
             ocp,
             :variable;
-            rg = Index(3),
+            rg = 3,
             val = 1000,
             lb = 1000,
             label = :cv3,
@@ -1933,8 +1922,8 @@ function test_model() # 30 55 185
         state!(ocp, 2)
         control!(ocp, 1)
 
-        constraint!(ocp, :initial; rg = Index(2), lb = 10, ub = 10, label = :ci)
-        constraint!(ocp, :final; rg = Index(1), lb = 1, ub = 1, label = :cf)
+        constraint!(ocp, :initial; rg = 2, lb = 10, ub = 10, label = :ci)
+        constraint!(ocp, :final; rg = 1, lb = 1, ub = 1, label = :cf)
         constraint!(ocp, :control; lb = 0, ub = 0, label = :cu)
         constraint!(ocp, :state; lb = [0, 1], ub = [0, 1], label = :cs)
         constraint!(
@@ -1957,7 +1946,7 @@ function test_model() # 30 55 185
         constraint!(ocp, :mixed; f = (x, u, v) -> x[1] + u + v[2], lb = -1, ub = -1, label = :cm)
         constraint!(ocp, :variable; lb = [5, 5, 5, 5], ub = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable; rg = 1:2, lb = [10, 20], ub = [10, 20], label = :cv2)
-        constraint!(ocp, :variable; rg = Index(3), lb = 1000, ub = 1000, label = :cv3)
+        constraint!(ocp, :variable; rg = 3, lb = 1000, ub = 1000, label = :cv3)
         constraint!(ocp, :variable; f = v -> v[3]^2, lb = -10, ub = -10, label = :cv4)
 
         # dimensions (not set yet)
@@ -2038,8 +2027,8 @@ function test_model() # 30 55 185
         state!(ocp, 2)
         control!(ocp, 1)
 
-        constraint!(ocp, :initial; rg = Index(2), val = 10, label = :ci)
-        constraint!(ocp, :final; rg = Index(1), val = 1, label = :cf)
+        constraint!(ocp, :initial; rg = 2, val = 10, label = :ci)
+        constraint!(ocp, :final; rg = 1, val = 1, label = :cf)
         constraint!(ocp, :control; val = 0, label = :cu)
         constraint!(ocp, :state; val = [0, 1], label = :cs)
         constraint!(ocp, :boundary; f = (x0, xf, v) -> x0[2] + xf[2] + v[1], val = 2, label = :cb)
@@ -2048,7 +2037,7 @@ function test_model() # 30 55 185
         constraint!(ocp, :mixed; f = (x, u, v) -> x[1] + u + v[2], val = -1, label = :cm)
         constraint!(ocp, :variable; val = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable; rg = 1:2, val = [10, 20], label = :cv2)
-        constraint!(ocp, :variable; rg = Index(3), val = 1000, label = :cv3)
+        constraint!(ocp, :variable; rg = 3, val = 1000, label = :cv3)
         constraint!(ocp, :variable; f = v -> v[3]^2, val = -10, label = :cv4)
 
         # dimensions (not set yet)
@@ -2129,8 +2118,8 @@ function test_model() # 30 55 185
         state!(ocp, 2)
         control!(ocp, 1)
 
-        constraint!(ocp, :initial; rg = Index(2), lb = 10, ub = 10, label = :ci)
-        constraint!(ocp, :final; rg = Index(1), lb = 1, ub = 1, label = :cf)
+        constraint!(ocp, :initial; rg = 2, lb = 10, ub = 10, label = :ci)
+        constraint!(ocp, :final; rg = 1, lb = 1, ub = 1, label = :cf)
         constraint!(ocp, :control; lb = 0, ub = 0, label = :cu)
         constraint!(ocp, :state; lb = [0, 1], ub = [0, 1], label = :cs)
         constraint!(
@@ -2167,7 +2156,7 @@ function test_model() # 30 55 185
         )
         constraint!(ocp, :variable; lb = [5, 5, 5, 5], ub = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable; rg = 1:2, lb = [10, 20], ub = [10, 20], label = :cv2)
-        constraint!(ocp, :variable; rg = Index(3), lb = 1000, ub = 1000, label = :cv3)
+        constraint!(ocp, :variable; rg = 3, lb = 1000, ub = 1000, label = :cv3)
         constraint!(
             ocp,
             :variable;
@@ -2265,8 +2254,8 @@ function test_model() # 30 55 185
         state!(ocp, 2)
         control!(ocp, 1)
 
-        constraint!(ocp, :initial; rg = Index(2), val = 10, label = :ci)
-        constraint!(ocp, :final; rg = Index(1), val = 1, label = :cf)
+        constraint!(ocp, :initial; rg = 2, val = 10, label = :ci)
+        constraint!(ocp, :final; rg = 1, val = 1, label = :cf)
         constraint!(ocp, :control; val = 0, label = :cu)
         constraint!(ocp, :state; val = [0, 1], label = :cs)
         constraint!(
@@ -2299,7 +2288,7 @@ function test_model() # 30 55 185
         )
         constraint!(ocp, :variable; val = [5, 5, 5, 5], label = :cv1)
         constraint!(ocp, :variable; rg = 1:2, val = [10, 20], label = :cv2)
-        constraint!(ocp, :variable; rg = Index(3), val = 1000, label = :cv3)
+        constraint!(ocp, :variable; rg = 3, val = 1000, label = :cv3)
         constraint!(
             ocp,
             :variable;

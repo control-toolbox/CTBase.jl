@@ -13,7 +13,7 @@ function test_onepass()
             t ∈ [0, tf], time
         end
         @test initial_time(oo) == 0
-        @test final_time(oo) == Index(2)
+        @test final_time(oo) == 2
 
         a = 1
         f(b) = begin # closure of a, local c, and @def in function
@@ -43,7 +43,7 @@ function test_onepass()
             t ∈ [0, tf], time
         end true
         @test initial_time(o) == 0
-        @test final_time(o) == Index(2)
+        @test final_time(o) == 2
     end
 
     # ---------------------------------------------------------------
@@ -204,20 +204,20 @@ function test_onepass()
             t ∈ [0, tf], time
         end
         @test initial_time(o) == 0
-        @test final_time(o) == Index(2)
+        @test final_time(o) == 2
 
         @def o begin
             λ = (λ₁, tf) ∈ R^2, variable
             t ∈ [0, tf], time
         end
         @test initial_time(o) == 0
-        @test final_time(o) == Index(2)
+        @test final_time(o) == 2
 
         @def o begin
             t0 ∈ R, variable
             t ∈ [t0, 1], time
         end
-        @test initial_time(o) == Index(1)
+        @test initial_time(o) == 1
         @test final_time(o) == 1
 
         @def o begin
@@ -225,14 +225,14 @@ function test_onepass()
             t ∈ [0, tf], time
         end
         @test initial_time(o) == 0
-        @test final_time(o) == Index(1)
+        @test final_time(o) == 1
 
         @def o begin
             v ∈ R², variable
             s ∈ [v[1], v[2]], time
         end
-        @test initial_time(o) == Index(1)
-        @test final_time(o) == Index(2)
+        @test initial_time(o) == 1
+        @test final_time(o) == 2
 
         @def o begin
             v ∈ R², variable
@@ -240,8 +240,8 @@ function test_onepass()
             sf = v₂
             s ∈ [s0, sf], time
         end
-        @test initial_time(o) == Index(1)
-        @test final_time(o) == Index(2)
+        @test initial_time(o) == 1
+        @test final_time(o) == 2
 
         @test_throws IncorrectArgument @def o begin
             t0 ∈ R², variable
@@ -315,7 +315,7 @@ function test_onepass()
         @test ocp isa OptimalControlModel
         @test time_name(ocp) == "t"
         @test initial_time(ocp) == t0
-        @test final_time(ocp) == Index(1)
+        @test final_time(ocp) == 1
 
         tf = 3.14
         @def ocp begin
@@ -324,7 +324,7 @@ function test_onepass()
         end
         @test ocp isa OptimalControlModel
         @test time_name(ocp) == "t"
-        @test initial_time(ocp) == Index(1)
+        @test initial_time(ocp) == 1
         @test final_time(ocp) == tf
     end
 

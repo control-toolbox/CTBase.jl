@@ -479,9 +479,10 @@ model_expression(ocp::OptimalControlModel) = ocp.model_expression
 $(TYPEDSIGNATURES)
 
 Return the initial time of the optimal control problem or `nothing`.
+If the initial time is free, return the index of the initial time in the variable.
 
 """
-initial_time(ocp::OptimalControlModel) = ocp.initial_time
+initial_time(ocp::OptimalControlModel) = __get_value(ocp.initial_time)
 
 """
 $(TYPEDSIGNATURES)
@@ -495,9 +496,10 @@ initial_time_name(ocp::OptimalControlModel) = ocp.initial_time_name
 $(TYPEDSIGNATURES)
 
 Return the final time of the optimal control problem or `nothing`.
+If the final time is free, return the index of the final time in the variable.
 
 """
-final_time(ocp::OptimalControlModel) = ocp.final_time
+final_time(ocp::OptimalControlModel) = __get_value(ocp.final_time)
 
 """
 $(TYPEDSIGNATURES)
@@ -689,14 +691,14 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined with free initial time.
 """
-has_free_initial_time(ocp::OptimalControlModel) = (typeof(initial_time(ocp)) == Index)
+has_free_initial_time(ocp::OptimalControlModel) = ocp.initial_time isa Val
 
 """
 $(TYPEDSIGNATURES)
 
 Return `true` if the model has been defined with free final time.
 """
-has_free_final_time(ocp::OptimalControlModel) = (typeof(final_time(ocp)) == Index)
+has_free_final_time(ocp::OptimalControlModel) = ocp.final_time isa Val
 
 """
 $(TYPEDSIGNATURES)

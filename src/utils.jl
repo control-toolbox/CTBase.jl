@@ -3,7 +3,7 @@ $(TYPEDSIGNATURES)
 
 Return `i` ∈ [0, 9] as a subscript.
 """
-function ctindice(i::Integer)::Char
+function ctindice(i::Int)::Char
     if i < 0 || i > 9
         throw(IncorrectArgument("the indice must be between 0 and 9"))
     end
@@ -15,7 +15,7 @@ $(TYPEDSIGNATURES)
 
 Return `i` > 0 as a subscript.
 """
-function ctindices(i::Integer)::String
+function ctindices(i::Int)::String
     if i < 0
         throw(IncorrectArgument("the indice must be positive"))
     end
@@ -31,7 +31,7 @@ $(TYPEDSIGNATURES)
 
 Return `i` ∈ [0, 9] as an upperscript.
 """
-function ctupperscript(i::Integer)::Char
+function ctupperscript(i::Int)::Char
     if i < 0 || i > 9
         throw(IncorrectArgument("the upperscript must be between 0 and 9"))
     end
@@ -57,7 +57,7 @@ $(TYPEDSIGNATURES)
 
 Return `i` > 0 as an upperscript.
 """
-function ctupperscripts(i::Integer)::String
+function ctupperscripts(i::Int)::String
     if i < 0
         throw(IncorrectArgument("the upperscript must be positive"))
     end
@@ -169,7 +169,7 @@ $(TYPEDSIGNATURES)
 
 Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 """
-function vec2vec(x::Vector{<:ctNumber}, n::Integer)::Vector{<:Vector{<:ctNumber}}
+function vec2vec(x::Vector{<:ctNumber}, n::Int)::Vector{<:Vector{<:ctNumber}}
     y = [x[1:n]]
     for i = (n + 1):n:(length(x) - n + 1)
         y = vcat(y, [x[i:(i + n - 1)]])
@@ -207,7 +207,7 @@ Transforms `x` to a Vector{<:Vector{<:ctNumber}}.
 """
 function matrix2vec(
     x::Matrix{<:ctNumber},
-    dim::Integer = __matrix_dimension_stock(),
+    dim::Int = __matrix_dimension_stock(),
 )::Vector{<:Vector{<:ctNumber}}
     m, n = size(x)
     y = nothing
@@ -254,3 +254,8 @@ __dynamics(ocp) =
     is_in_place(ocp) ? to_out_of_place(dynamics(ocp), state_dimension(ocp)) : dynamics(ocp)
 __lagrange(ocp) = is_in_place(ocp) ? to_out_of_place(lagrange(ocp), 1) : lagrange(ocp)
 __mayer(ocp) = is_in_place(ocp) ? to_out_of_place(mayer(ocp), 1) : mayer(ocp)
+
+# Get the value of a number
+__get_value(x::Float64) = x
+__get_value(n::Int64) = n
+__get_value(::Val{N}) where {N} = N
