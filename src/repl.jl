@@ -42,7 +42,7 @@ $(TYPEDSIGNATURES)
 
 Create a ct REPL.
 """
-function ct_repl(; debug = false, verbose = false)
+function ct_repl(; debug=false, verbose=false)
     global ct_repl_is_set
     global ct_repl_data
     global ct_repl_history
@@ -92,14 +92,16 @@ function ct_repl(; debug = false, verbose = false)
                     command = __transform_to_command(c)
                     ct_repl_data.debug &&
                         println("debug> command: ", command, " and argument: ", a)
-                    command ∈ keys(COMMANDS_ACTIONS) &&
-                        (return COMMANDS_ACTIONS[command](ct_repl_data, a, ct_repl_history))
+                    command ∈ keys(COMMANDS_ACTIONS) && (
+                        return COMMANDS_ACTIONS[command](ct_repl_data, a, ct_repl_history)
+                    )
                 end
                 :($c) => begin
                     command = __transform_to_command(c)
                     ct_repl_data.debug && println("debug> command: ", command)
-                    command ∈ keys(COMMANDS_ACTIONS) &&
-                        (return COMMANDS_ACTIONS[command](ct_repl_data, ct_repl_history))
+                    command ∈ keys(COMMANDS_ACTIONS) && (
+                        return COMMANDS_ACTIONS[command](ct_repl_data, ct_repl_history)
+                    )
                 end
                 _ => nothing
             end
@@ -110,8 +112,12 @@ function ct_repl(; debug = false, verbose = false)
             e = Meta.parse(s)
 
             #
-            return_nothing && ct_repl_data.debug && println("\ndebug> new parsing string: ", s)
-            return_nothing && ct_repl_data.debug && println("debug> new expression parsed: ", e)
+            return_nothing &&
+                ct_repl_data.debug &&
+                println("\ndebug> new parsing string: ", s)
+            return_nothing &&
+                ct_repl_data.debug &&
+                println("debug> new expression parsed: ", e)
 
             if e isa Expr
 
@@ -130,7 +136,7 @@ function ct_repl(; debug = false, verbose = false)
                     catch ex
                         $(ct_repl_data.debug) && (println("debug> exception thrown: ", ex))
                         println($txt_invalid)
-                        return
+                        return nothing
                     end
                     # test is ok
                     $(ct_repl_data.debug) && (println("debug> eval ocp quote ok "))
@@ -140,9 +146,13 @@ function ct_repl(; debug = false, verbose = false)
                     $ocp_q # define the ocp
                     ct_repl_update_model($ee) # add the expression in the model
                     # ----------------------------------------------------------------
-                    $return_nothing ? nothing : begin
+                    if $return_nothing
+                        nothing
+                    else
+                        begin
                         println("\n", string($ct_repl_data.ocp_name))
                         $(ct_repl_data.ocp_name)
+                    end
                     end
                 end
                 return q
@@ -155,13 +165,13 @@ function ct_repl(; debug = false, verbose = false)
 
         # makerepl command
         initrepl(
-            parse_to_expr,
-            prompt_text = "ct> ",
-            prompt_color = :magenta,
-            start_key = '>',
-            mode_name = "ct_mode",
-            valid_input_checker = complete_julia,
-            startup_text = false,
+            parse_to_expr;
+            prompt_text="ct> ",
+            prompt_color=:magenta,
+            start_key='>',
+            mode_name="ct_mode",
+            valid_input_checker=complete_julia,
+            startup_text=false,
         )
 
         return nothing
@@ -180,13 +190,11 @@ end
 function NAME_ACTION_FUNCTION(ct_repl_data::CTRepl, ct_repl_history::HistoryRepl)
     println("")
     println("Optimal control problem name: ", ct_repl_data.ocp_name)
-    println("Solution name: ", ct_repl_data.sol_name)
+    return println("Solution name: ", ct_repl_data.sol_name)
 end
 
 function NAME_ACTION_FUNCTION(
-    ct_repl_data::CTRepl,
-    name::Union{Symbol, Expr},
-    ct_repl_history::HistoryRepl,
+    ct_repl_data::CTRepl, name::Union{Symbol,Expr}, ct_repl_history::HistoryRepl
 )
     ocp_name = ct_repl_data.ocp_name
     sol_name = ct_repl_data.sol_name
@@ -205,9 +213,13 @@ function NAME_ACTION_FUNCTION(
     ct_repl_data.debug && println("debug> ocp name: ", ct_repl_data.ocp_name)
     ct_repl_data.debug && println("debug> sol name: ", ct_repl_data.sol_name)
     __add!(ct_repl_history, ct_repl_data) # update ct_repl_history
-    qo1 =
-        ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = "no optimal control") : :()
-    qs1 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
+    qo1 = if ct_repl_data.ocp_name ≠ ocp_name
+        :($(ct_repl_data.ocp_name) = "no optimal control")
+    else
+        :()
+    end
+    qs1 =
+        ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = "no solution") : :()
     qo2 = ct_repl_data.ocp_name ≠ ocp_name ? :($(ct_repl_data.ocp_name) = $(ocp_name)) : :()
     qs2 = ct_repl_data.sol_name ≠ sol_name ? :($(ct_repl_data.sol_name) = $(sol_name)) : :()
     name_q = (
@@ -228,7 +240,7 @@ function NAME_ACTION_FUNCTION(
 end
 
 # dict of actions associated to ct repl commands
-COMMANDS_ACTIONS = Dict{Symbol, Function}(
+COMMANDS_ACTIONS = Dict{Symbol,Function}(
     :SHOW =>
         (ct_repl_data::CTRepl, ct_repl_history::HistoryRepl) -> begin
             q = quote
@@ -280,14 +292,14 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
             l = 8 # 22
             n = 6
             println("\nSpecial commands to interact with the ct repl:\n")
-            dict = sort(collect(COMMANDS_HELPS), by = x -> x[1])
-            for (k, v) ∈ dict
+            dict = sort(collect(COMMANDS_HELPS); by=x -> x[1])
+            for (k, v) in dict
                 m = length(string(k))
                 s = "  "
                 s *= string(k) * " "^(n - m)
                 r = length(s)
                 s *= " "^(l - r)
-                printstyled(s, color = :magenta)
+                printstyled(s; color=:magenta)
                 printstyled(": ", v, "\n")
             end
             return nothing
@@ -310,7 +322,7 @@ COMMANDS_ACTIONS = Dict{Symbol, Function}(
 )
 
 # dict of help messages associated to ct repl commands
-COMMANDS_HELPS = Dict{Symbol, String}(
+COMMANDS_HELPS = Dict{Symbol,String}(
     :SOLVE => "solve the optimal control problem",
     :PLOT => "plot the solution",
     #:DEBUG => "toggle debug mode",
@@ -346,7 +358,7 @@ function __code(model::ModelRepl, e::Expr)
 end
 
 function __update!(model::ModelRepl, e::Expr)
-    push!(model, e)
+    return push!(model, e)
 end
 
 # make @def ocp quote
@@ -397,7 +409,7 @@ end
 function __quote_plot(ct_repl_data::CTRepl)
     plot_q = quote
         if @isdefined($(ct_repl_data.sol_name))
-            plot($(ct_repl_data.sol_name), size = (600, 500))
+            plot($(ct_repl_data.sol_name); size=(600, 500))
         else
             println("\nNo solution available.")
         end
@@ -409,7 +421,7 @@ end
 # add model to ct_repl_history
 function __add!(ct_repl_history::HistoryRepl, ct_repl_data::CTRepl)
     push!(ct_repl_history.ct_repl_datas_data, deepcopy(ct_repl_data))
-    ct_repl_history.index += 1
+    return ct_repl_history.index += 1
 end
 
 # go to previous model in ct_repl_history
@@ -430,7 +442,7 @@ function __copy!(ct_repl_data::CTRepl, ct_repl_data_to_copy::CTRepl)
     ct_repl_data.model = deepcopy(ct_repl_data_to_copy.model)
     ct_repl_data.ocp_name = ct_repl_data_to_copy.ocp_name
     ct_repl_data.sol_name = ct_repl_data_to_copy.sol_name
-    ct_repl_data.debug = ct_repl_data_to_copy.debug
+    return ct_repl_data.debug = ct_repl_data_to_copy.debug
 end
 
 function Base.show(io::IO, ::MIME"text/plain", ct_repl_data::CTRepl)
@@ -439,5 +451,5 @@ function Base.show(io::IO, ::MIME"text/plain", ct_repl_data::CTRepl)
     println(io, "model: ", ct_repl_data.model)
     println(io, "ocp_name: ", ct_repl_data.ocp_name)
     println(io, "sol_name: ", ct_repl_data.sol_name)
-    println(io, "debug: ", ct_repl_data.debug)
+    return println(io, "debug: ", ct_repl_data.debug)
 end
