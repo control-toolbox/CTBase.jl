@@ -146,7 +146,7 @@ julia> init = OptimalControlInit(sol)
 mutable struct OptimalControlInit
     state_init::Function
     control_init::Function
-    variable_init::Union{Nothing, ctVector}
+    variable_init::Union{Nothing,ctVector}
     #costate_init::Function
     #multipliers_init::Union{Nothing, ctVector}
 
@@ -156,13 +156,13 @@ mutable struct OptimalControlInit
     OptimalControlInit base constructor with separate explicit arguments
     """
     function OptimalControlInit(;
-        state = nothing,
-        control = nothing,
-        variable = nothing,
-        time = nothing,
-        state_dim = nothing,
-        control_dim = nothing,
-        variable_dim = nothing,
+        state=nothing,
+        control=nothing,
+        variable=nothing,
+        time=nothing,
+        state_dim=nothing,
+        control_dim=nothing,
+        variable_dim=nothing,
     )
         init = new()
 
@@ -185,10 +185,7 @@ mutable struct OptimalControlInit
     OptimalControlInit constructor with arguments grouped as named tuple or dict
     """
     function OptimalControlInit(
-        init_data;
-        state_dim = nothing,
-        control_dim = nothing,
-        variable_dim = nothing,
+        init_data; state_dim=nothing, control_dim=nothing, variable_dim=nothing
     )
 
         # trivial case: default init
@@ -218,14 +215,14 @@ mutable struct OptimalControlInit
         end
 
         # call base constructor
-        return OptimalControlInit(
-            state = x_init,
-            control = u_init,
-            variable = v_init,
-            time = t_init,
-            state_dim = state_dim,
-            control_dim = control_dim,
-            variable_dim = variable_dim,
+        return OptimalControlInit(;
+            state=x_init,
+            control=u_init,
+            variable=v_init,
+            time=t_init,
+            state_dim=state_dim,
+            control_dim=control_dim,
+            variable_dim=variable_dim,
         )
     end
 
@@ -235,13 +232,13 @@ mutable struct OptimalControlInit
     OptimalControlInit constructor with solution as argument (warm start)
     """
     function OptimalControlInit(sol::OptimalControlSolution; unused_kwargs...)
-        return OptimalControlInit(
-            state = state(sol),
-            control = control(sol),
-            variable = variable(sol),
-            state_dim = state_dimension(sol),
-            control_dim = control_dimension(sol),
-            variable_dim = variable_dimension(sol),
+        return OptimalControlInit(;
+            state=state(sol),
+            control=control(sol),
+            variable=variable(sol),
+            state_dim=state_dimension(sol),
+            control_dim=control_dimension(sol),
+            variable_dim=variable_dimension(sol),
         )
     end
 end

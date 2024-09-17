@@ -17,12 +17,7 @@ function test_solution()
     p = t -> t
     obj = 1
     sol = OptimalControlSolution(
-        ocp;
-        state = x,
-        control = u,
-        costate = p,
-        objective = obj,
-        time_grid = times,
+        ocp; state=x, control=u, costate=p, objective=obj, time_grid=times
     )
 
     @test objective(sol) == obj
@@ -49,7 +44,7 @@ function test_solution()
     u = t -> 2t
     obj = 1
     v = 1
-    sol = OptimalControlSolution(ocp; state = x, control = u, objective = obj, variable = v)
+    sol = OptimalControlSolution(ocp; state=x, control=u, objective=obj, variable=v)
 
     @test variable(sol) == v
     @test typeof(sol) == OptimalControlSolution
