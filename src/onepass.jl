@@ -25,7 +25,7 @@ $(TYPEDEF)
     x::Union{Symbol, Nothing} = nothing
     u::Union{Symbol, Nothing} = nothing
     aliases::OrderedDict{Symbol, Union{Real, Symbol, Expr}} = __init_aliases()
-    lnum::Integer = 0
+    lnum::Int = 0
     line::String = ""
     t_dep::Bool = false
 end
@@ -199,7 +199,7 @@ p_variable!(p, ocp, v, q; components_names = nothing, log = false) = begin
     v isa Symbol || return __throw("forbidden variable name: $v", p.lnum, p.line)
     p.v = v
     vv = QuoteNode(v)
-    qq = q isa Integer ? q : 9
+    qq = q isa Int ? q : 9
     for i ∈ 1:qq
         p.aliases[Symbol(v, ctindices(i))] = :($v[$i])
     end # make: v₁, v₂... if the variable is named v
@@ -283,7 +283,7 @@ p_state!(p, ocp, x, n; components_names = nothing, log = false) = begin
     x isa Symbol || return __throw("forbidden state name: $x", p.lnum, p.line)
     p.x = x
     xx = QuoteNode(x)
-    nn = n isa Integer ? n : 9
+    nn = n isa Int ? n : 9
     for i ∈ 1:nn
         p.aliases[Symbol(x, ctindices(i))] = :($x[$i])
     end # Make x₁, x₂... if the state is named x
@@ -314,7 +314,7 @@ p_control!(p, ocp, u, m; components_names = nothing, log = false) = begin
     u isa Symbol || return __throw("forbidden control name: $u", p.lnum, p.line)
     p.u = u
     uu = QuoteNode(u)
-    mm = m isa Integer ? m : 9
+    mm = m isa Int ? m : 9
     for i ∈ 1:mm
         p.aliases[Symbol(u, ctindices(i))] = :($u[$i])
     end # make: u₁, u₂... if the control is named u
@@ -341,7 +341,7 @@ end
 p_constraint!(p, ocp, e1, e2, e3, label = gensym(); log = false) = begin
     c_type = constraint_type(e2, p.t, p.t0, p.tf, p.x, p.u, p.v)
     log && println("constraint ($c_type): $e1 ≤ $e2 ≤ $e3,    ($label)")
-    label isa Integer && (label = Symbol(:eq, label))
+    label isa Int && (label = Symbol(:eq, label))
     label isa Symbol || return __throw("forbidden label: $label", p.lnum, p.line)
     llabel = QuoteNode(label)
     code = @match c_type begin

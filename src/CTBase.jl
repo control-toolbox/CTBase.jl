@@ -33,9 +33,6 @@ using ReplMaker
 using MacroTools: @capture, postwalk, striplines
 using LinearAlgebra
 
-# To suppress ambiguities 
-using SparseArrays, StaticArrays
-
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
 # const AbstractVector{T} = AbstractArray{T,1}.
@@ -174,10 +171,10 @@ Type alias for a dimension. This is used to define the dimension of the state sp
 the costate space, the control space, etc.
 
 ```@example
-julia> const Dimension = Integer
+julia> const Dimension = Int
 ```
 """
-const Dimension = Integer
+const Dimension = Int
 
 #
 """
@@ -231,7 +228,7 @@ include("print.jl")
 # Numeric types
 export ctNumber, ctVector, Time, Times, TimesDisc
 
-export States, Costates, Controls, State, Costate, Control, Variable, Dimension, Index
+export States, Costates, Controls, State, Costate, Control, Variable, Dimension
 export DState, DCostate
 export TimeDependence, Autonomous, NonAutonomous
 export VariableDependence, NonFixed, Fixed

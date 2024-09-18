@@ -14,9 +14,9 @@ $(TYPEDFIELDS)
     variable_dependence <: VariableDependence,
 } <: AbstractOptimalControlModel
     model_expression::Union{Nothing, Expr} = nothing
-    initial_time::Union{Time, Index, Nothing} = nothing
+    initial_time::Union{Time, Val, Nothing} = nothing
     initial_time_name::Union{String, Nothing} = nothing
-    final_time::Union{Time, Index, Nothing} = nothing
+    final_time::Union{Time, Val, Nothing} = nothing
     final_time_name::Union{String, Nothing} = nothing
     time_name::Union{String, Nothing} = nothing
     control_dimension::Union{Dimension, Nothing} = nothing
@@ -183,18 +183,6 @@ __is_empty(ocp::OptimalControlModel) = begin
     isnothing(ocp.variable_components_names) &&
     isempty(ocp.constraints)
 end
-
-"""
-$(TYPEDSIGNATURES)
-
-"""
-__is_initial_time_free(ocp) = ocp.initial_time isa Index
-
-"""
-$(TYPEDSIGNATURES)
-
-"""
-__is_final_time_free(ocp) = ocp.final_time isa Index
 
 """
 $(TYPEDSIGNATURES)

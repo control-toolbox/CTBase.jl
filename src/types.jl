@@ -1141,37 +1141,7 @@ struct Multiplier{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
     f::TF
 end
 
-# --------------------------------------------------------------------------------------------------
-# model
-#
-"""
-$(TYPEDEF)
-
-**Fields**
-
-$(TYPEDFIELDS)
-"""
-mutable struct Index
-    val::Int
-    Index(v::Int) = v ≥ 1 ? new(v) : error("index must be at least 1")
-end
-Base.:(==)(i::Index, j::Index) = i.val == j.val # needed, as this is not the default behaviour for composite types
-Base.to_index(i::Index) = i.val
-Base.isless(i::Index, j::Index) = i.val ≤ j.val
-Base.isless(i::Index, j::Real) = i.val ≤ j
-Base.isless(i::Real, j::Index) = i ≤ j.val
-Base.length(i::Index) = 1
-Base.iterate(i::Index, state = 0) = state == 0 ? (i, 1) : nothing
-Base.IteratorSize(::Type{Index}) = Base.HasLength()
-Base.append!(v::Vector, i::Index) = Base.append!(v, i.val)
-Base.getindex(x::AbstractArray, i::Index) = Base.getindex(x, i.val)
-Base.getindex(x::Real, i::Index) = x[i.val]
-
-# to suppress ambiguities
-Base.getindex(x::SparseArrays.ReadOnly, i::CTBase.Index) = Base.getindex(x, i.val)
-Base.getindex(x::StaticArrays.TrivialView, i::CTBase.Index) = Base.getindex(x, i.val)
-
 """
 Type alias for an index or range.
 """
-const RangeConstraint = Union{Index, OrdinalRange{<:Int}}
+const RangeConstraint = Union{Int, OrdinalRange{<:Int}}
