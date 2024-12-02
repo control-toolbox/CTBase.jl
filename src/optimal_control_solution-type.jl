@@ -84,5 +84,9 @@ export export_ocp_solution
 export import_ocp_solution
 
 # placeholders (see extension CTBaseLoadSave)
-function export_ocp_solution end
-function import_ocp_solution end
+function export_ocp_solution(args...; kwargs...) 
+    error("Requires JLD2 and JSON3 packages")
+end
+function import_ocp_solution(args...; kwargs...)
+    error("Requires JLD2 and JSON3 packages")
+end

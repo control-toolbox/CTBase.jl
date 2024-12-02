@@ -12,9 +12,9 @@ function test_solution()
     end
 
     times = range(0, 1, 10)
-    x = t -> t
+    x = t -> [t, t+1]
     u = t -> 2t
-    p = t -> t
+    p = t -> [t, t-1]
     obj = 1
     sol = OptimalControlSolution(
         ocp;
@@ -33,6 +33,12 @@ function test_solution()
     @test all(control_discretized(sol) .== u.(times))
     @test all(costate_discretized(sol) .== p.(times))
 
+    # test export / read solution in JSON format (NB. requires time grid in solution !)
+    println(sol.time_grid)
+    export_ocp_solution(sol; filename_prefix = "solution_test", format = :JSON)
+    sol_reloaded = import_ocp_solution(ocp; filename_prefix = "solution_test", format = :JSON)
+    @test sol.objective == sol_reloaded.objective
+
     # NonFixed ocp
     @def ocp begin
         v ∈ R, variable
@@ -45,7 +51,7 @@ function test_solution()
         ∫(0.5u(t)^2) → min
     end
 
-    x = t -> t
+    x = t -> [t, t+1]
     u = t -> 2t
     obj = 1
     v = 1
@@ -55,19 +61,9 @@ function test_solution()
     @test typeof(sol) == OptimalControlSolution
     @test_throws UndefKeywordError OptimalControlSolution(ocp; x, u, obj)
 
-
     # test save / load solution in JLD2 format
-    @testset verbose = true showtiming = true ":save_load :JLD2" begin
-        export_ocp_solution(sol; filename_prefix = "solution_test")
-        sol_reloaded = import_ocp_solution(ocp; filename_prefix = "solution_test")
-        @test sol.objective == sol_reloaded.objective
-    end
-
-    # test export / read solution in JSON format
-    @testset verbose = true showtiming = true ":export_read :JSON" begin
-        export_ocp_solution(sol; filename_prefix = "solution_test", format = :JSON)
-        sol_reloaded = import_ocp_solution(ocp; filename_prefix = "solution_test", format = :JSON)
-        @test sol.objective == sol_reloaded.objective
-    end
+    export_ocp_solution(sol; filename_prefix = "solution_test")
+    sol_reloaded = import_ocp_solution(ocp; filename_prefix = "solution_test")
+    @test sol.objective == sol_reloaded.objective
 
 end

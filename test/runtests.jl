@@ -5,6 +5,7 @@ using Aqua
 using CTBase
 using DifferentiationInterface: AutoForwardDiff
 using Plots
+using JLD2, JSON3
 using Test
 
 # functions and types that are not exported
