@@ -79,3 +79,10 @@ $(TYPEDFIELDS)
     mult_control_box_lower::Union{Nothing, Function} = nothing
     mult_control_box_upper::Union{Nothing, Function} = nothing
 end
+
+export export_ocp_solution
+export import_ocp_solution
+
+# placeholders (see extension CTBaseLoadSave)
+function export_ocp_solution end
+function import_ocp_solution end

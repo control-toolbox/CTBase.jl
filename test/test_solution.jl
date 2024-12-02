@@ -54,4 +54,20 @@ function test_solution()
     @test variable(sol) == v
     @test typeof(sol) == OptimalControlSolution
     @test_throws UndefKeywordError OptimalControlSolution(ocp; x, u, obj)
+
+
+    # test save / load solution in JLD2 format
+    @testset verbose = true showtiming = true ":save_load :JLD2" begin
+        export_ocp_solution(sol; filename_prefix = "solution_test")
+        sol_reloaded = import_ocp_solution(ocp; filename_prefix = "solution_test")
+        @test sol.objective == sol_reloaded.objective
+    end
+
+    # test export / read solution in JSON format
+    @testset verbose = true showtiming = true ":export_read :JSON" begin
+        export_ocp_solution(sol; filename_prefix = "solution_test", format = :JSON)
+        sol_reloaded = import_ocp_solution(ocp; filename_prefix = "solution_test", format = :JSON)
+        @test sol.objective == sol_reloaded.objective
+    end
+
 end
