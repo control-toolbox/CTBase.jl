@@ -326,4 +326,8 @@ export @def
 export ct_repl, ct_repl_update_model
 isdefined(Base, :active_repl) && ct_repl()
 
+# load and save solution
+export export_ocp_solution
+export import_ocp_solution
+
 end
