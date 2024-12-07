@@ -11,7 +11,7 @@ $(EXPORTS)
 """
 module CTBase
 
-import Base
+using Base: Base
 using DocStringExtensions
 using DifferentiationInterface:
     AutoForwardDiff,
@@ -21,7 +21,7 @@ using DifferentiationInterface:
     prepare_derivative,
     prepare_gradient,
     prepare_jacobian
-import ForwardDiff
+using ForwardDiff: ForwardDiff
 using Interpolations: linear_interpolation, Line, Interpolations # For default interpolation
 using MLStyle # Pattern matching
 using Parameters # @with_kw: to have default values in struct
@@ -57,7 +57,7 @@ julia> const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}}
 
 See also: [`ctNumber`](@ref), [`State`](@ref), [`Costate`](@ref), [`Control`](@ref), [`Variable`](@ref).
 """
-const ctVector = Union{ctNumber, AbstractVector{<:ctNumber}} # [] must be defined as Vector{Real}()
+const ctVector = Union{ctNumber,AbstractVector{<:ctNumber}} # [] must be defined as Vector{Real}()
 
 """
 Type alias for a time.
@@ -90,7 +90,7 @@ julia> const TimesDisc = Union{Times, StepRangeLen}
 
 See also: [`Time`](@ref), [`Times`](@ref).
 """
-const TimesDisc = Union{Times, StepRangeLen}
+const TimesDisc = Union{Times,StepRangeLen}
 
 """
 Type alias for a state in Rⁿ.
@@ -251,7 +251,8 @@ export set_AD_backend
 export Hamiltonian, HamiltonianVectorField, VectorField
 export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
 export Mayer!, Lagrange!, Dynamics!
-export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
+export BoundaryConstraint,
+    StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
 export BoundaryConstraint!,
     StateConstraint!, ControlConstraint!, MixedConstraint!, VariableConstraint!
 
@@ -275,10 +276,12 @@ export is_variable_dependent, is_variable_independent
 export is_in_place
 export nlp_constraints!, constraints, constraints_labels, constraint
 export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
-export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints
+export dim_control_constraints,
+    dim_state_constraints, dim_mixed_constraints, dim_path_constraints
 export dim_boundary_constraints, dim_variable_constraints, dim_control_range
 export dim_state_range, dim_variable_range
-export model_expression, initial_time, initial_time_name, final_time, final_time_name, time_name
+export model_expression,
+    initial_time, initial_time_name, final_time, final_time_name, time_name
 export control_dimension, control_components_names, control_name
 export state_dimension, state_components_names, state_name
 export variable_dimension, variable_components_names, variable_name
@@ -304,7 +307,8 @@ export variable_constraints!,
     mult_variable_constraints!, mult_variable_box_lower!, mult_variable_box_upper!
 export control_constraints!,
     mult_control_constraints!, mult_control_box_lower!, mult_control_box_upper!
-export state_constraints!, mult_state_constraints!, mult_state_box_lower!, mult_state_box_upper!
+export state_constraints!,
+    mult_state_constraints!, mult_state_box_lower!, mult_state_box_upper!
 export mixed_constraints!, mult_mixed_constraints!
 
 # Initialization

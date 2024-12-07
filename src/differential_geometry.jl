@@ -42,7 +42,7 @@ julia> H(1, 1, 1, 1)
 2
 ```
 """
-function Lift(X::Function; autonomous::Bool = true, variable::Bool = false)::Function
+function Lift(X::Function; autonomous::Bool=true, variable::Bool=false)::Function
     return @match (autonomous, variable) begin
         (true, false) => (x, p) -> p' * X(x)
         (true, true) => (x, p, v) -> p' * X(x, v)
@@ -72,7 +72,9 @@ julia> (X⋅f)([1, 2])
 0
 ```
 """
-function ⋅(X::VectorField{<:Function, Autonomous, <:VariableDependence}, f::Function)::Function
+function ⋅(
+    X::VectorField{<:Function,Autonomous,<:VariableDependence}, f::Function
+)::Function
     return (x, args...) -> ctgradient(y -> f(y, args...), x)' * X(x, args...)
 end
 
@@ -90,7 +92,9 @@ julia> (X⋅f)(1, [1, 2], [2, 1])
 10
 ```
 """
-function ⋅(X::VectorField{<:Function, NonAutonomous, <:VariableDependence}, f::Function)::Function
+function ⋅(
+    X::VectorField{<:Function,NonAutonomous,<:VariableDependence}, f::Function
+)::Function
     return (t, x, args...) -> ctgradient(y -> f(t, y, args...), x)' * X(t, x, args...)
 end
 
@@ -155,7 +159,9 @@ julia> Lie(φ, f, autonomous=false, variable=true)(1, [1, 2], [2, 1])
 10
 ```
 """
-function Lie(X::Function, f::Function; autonomous::Bool = true, variable::Bool = false)::Function
+function Lie(
+    X::Function, f::Function; autonomous::Bool=true, variable::Bool=false
+)::Function
     return Lie(VectorField(X; autonomous=autonomous, variable=variable), f)
 end
 
@@ -192,13 +198,14 @@ julia> CTBase.:(⅋)(X, Y)([1, 2])
 ```
 """
 function ⅋(
-    X::VectorField{<:Function, Autonomous, V},
-    Y::VectorField{<:Function, Autonomous, V},
-)::VectorField{<:Function, Autonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function,Autonomous,V}, Y::VectorField{<:Function,Autonomous,V}
+)::VectorField{<:Function,Autonomous,V} where {V<:VariableDependence}
     return VectorField(
-        (x, args...) ->
-            x isa ctNumber ? ctgradient(y -> Y(y, args...), x) * X(x, args...) :
-            ctjacobian(y -> Y(y, args...), x) * X(x, args...),
+        (x, args...) -> if x isa ctNumber
+            ctgradient(y -> Y(y, args...), x) * X(x, args...)
+        else
+            ctjacobian(y -> Y(y, args...), x) * X(x, args...)
+        end,
         Autonomous,
         V,
     )
@@ -219,13 +226,14 @@ julia> CTBase.:(⅋)(X, Y)(1, [1, 2], [2, 3])
 ```
 """
 function ⅋(
-    X::VectorField{<:Function, NonAutonomous, V},
-    Y::VectorField{<:Function, NonAutonomous, V},
-)::VectorField{<:Function, NonAutonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function,NonAutonomous,V}, Y::VectorField{<:Function,NonAutonomous,V}
+)::VectorField{<:Function,NonAutonomous,V} where {V<:VariableDependence}
     return VectorField(
-        (t, x, args...) ->
-            x isa ctNumber ? ctgradient(y -> Y(t, y, args...), x) * X(t, x, args...) :
-            ctjacobian(y -> Y(t, y, args...), x) * X(t, x, args...),
+        (t, x, args...) -> if x isa ctNumber
+            ctgradient(y -> Y(t, y, args...), x) * X(t, x, args...)
+        else
+            ctjacobian(y -> Y(t, y, args...), x) * X(t, x, args...)
+        end,
         NonAutonomous,
         V,
     )
@@ -250,10 +258,11 @@ julia> Lie(X, Y)([1, 2])
 ```
 """
 function Lie(
-    X::VectorField{<:Function, Autonomous, V},
-    Y::VectorField{<:Function, Autonomous, V},
-)::VectorField{<:Function, Autonomous, V} where {V <: VariableDependence}
-    return VectorField((x, args...) -> (X ⅋ Y)(x, args...) - (Y ⅋ X)(x, args...), Autonomous, V)
+    X::VectorField{<:Function,Autonomous,V}, Y::VectorField{<:Function,Autonomous,V}
+)::VectorField{<:Function,Autonomous,V} where {V<:VariableDependence}
+    return VectorField(
+        (x, args...) -> (X ⅋ Y)(x, args...) - (Y ⅋ X)(x, args...), Autonomous, V
+    )
 end
 
 """
@@ -272,13 +281,10 @@ julia> Lie(X, Y)(1, [1, 2], 1)
 ```
 """
 function Lie(
-    X::VectorField{<:Function, NonAutonomous, V},
-    Y::VectorField{<:Function, NonAutonomous, V},
-)::VectorField{<:Function, NonAutonomous, V} where {V <: VariableDependence}
+    X::VectorField{<:Function,NonAutonomous,V}, Y::VectorField{<:Function,NonAutonomous,V}
+)::VectorField{<:Function,NonAutonomous,V} where {V<:VariableDependence}
     return VectorField(
-        (t, x, args...) -> (X ⅋ Y)(t, x, args...) - (Y ⅋ X)(t, x, args...),
-        NonAutonomous,
-        V,
+        (t, x, args...) -> (X ⅋ Y)(t, x, args...) - (Y ⅋ X)(t, x, args...), NonAutonomous, V
     )
 end
 
@@ -307,9 +313,8 @@ julia> Poisson(F, g)([1, 2], [2, 1])
 ```
 """
 function Poisson(
-    f::AbstractHamiltonian{Autonomous, V},
-    g::AbstractHamiltonian{Autonomous, V},
-)::Hamiltonian{<:Function, Autonomous, V} where {V <: VariableDependence}
+    f::AbstractHamiltonian{Autonomous,V}, g::AbstractHamiltonian{Autonomous,V}
+)::Hamiltonian{<:Function,Autonomous,V} where {V<:VariableDependence}
     function fg(x, p, args...)
         n = size(x, 1)
         ff, gg = @match n begin
@@ -347,9 +352,8 @@ julia> Poisson(f, g, NonAutonomous, NonFixed)(2, [1, 2], [2, 1], [4, 4])
 ```
 """
 function Poisson(
-    f::AbstractHamiltonian{NonAutonomous, V},
-    g::AbstractHamiltonian{NonAutonomous, V},
-)::Hamiltonian{<:Function, NonAutonomous, V} where {V <: VariableDependence}
+    f::AbstractHamiltonian{NonAutonomous,V}, g::AbstractHamiltonian{NonAutonomous,V}
+)::Hamiltonian{<:Function,NonAutonomous,V} where {V<:VariableDependence}
     function fg(t, x, p, args...)
         n = size(x, 1)
         ff, gg = @match n begin
@@ -388,9 +392,8 @@ julia> Poisson(F, G)(2, [1, 2], [2, 1], [4, 4])
 ```
 """
 function Poisson(
-    f::HamiltonianLift{T, V},
-    g::HamiltonianLift{T, V},
-)::HamiltonianLift{<:VectorField, T, V} where {T <: TimeDependence, V <: VariableDependence}
+    f::HamiltonianLift{T,V}, g::HamiltonianLift{T,V}
+)::HamiltonianLift{<:VectorField,T,V} where {T<:TimeDependence,V<:VariableDependence}
     return HamiltonianLift(Lie(f.X, g.X))
 end
 
@@ -413,14 +416,11 @@ julia> Poisson(f, g, autonomous=false, variable=true)(2, [1, 2], [2, 1], [4, 4])
 ```
 """
 function Poisson(
-    f::Function,
-    g::Function;
-    autonomous::Bool = true,
-    variable::Bool = false,
+    f::Function, g::Function; autonomous::Bool=true, variable::Bool=false
 )::Hamiltonian
     return Poisson(
-        Hamiltonian(f, autonomous=autonomous, variable=variable),
-        Hamiltonian(g, autonomous=autonomous, variable=variable),
+        Hamiltonian(f; autonomous=autonomous, variable=variable),
+        Hamiltonian(g; autonomous=autonomous, variable=variable),
     )
 end
 
@@ -444,9 +444,8 @@ julia> Poisson(f, G)(2, [1, 2], [2, 1], [4, 4])
 ```
 """
 function Poisson(
-    f::Function,
-    g::AbstractHamiltonian{TD, VD},
-)::Hamiltonian where {TD <: TimeDependence, VD <: VariableDependence}
+    f::Function, g::AbstractHamiltonian{TD,VD}
+)::Hamiltonian where {TD<:TimeDependence,VD<:VariableDependence}
     return Poisson(Hamiltonian(f, TD, VD), g)
 end
 
@@ -470,9 +469,8 @@ julia> Poisson(F, g)(2, [1, 2], [2, 1], [4, 4])
 ```
 """
 function Poisson(
-    f::AbstractHamiltonian{TD, VD},
-    g::Function,
-)::Hamiltonian where {TD <: TimeDependence, VD <: VariableDependence}
+    f::AbstractHamiltonian{TD,VD}, g::Function
+)::Hamiltonian where {TD<:TimeDependence,VD<:VariableDependence}
     return Poisson(f, Hamiltonian(g, TD, VD))
 end
 
@@ -583,15 +581,19 @@ macro Lie(expr::Expr, arg1, arg2)
         _ => throw(IncorrectArgument("Invalid argument: " * string(arg2)))
     end
 
-    fun(x) = @match (@capture(x, [a_, b_]), @capture(x, {c_, d_})) begin
-        #(true, false) => :(    Lie($a, $b; autonomous=$autonomous, variable=$variable))
-        (false, true) => quote
-            ($c isa Function && $d isa Function) ?
-            Poisson($c, $d; autonomous = $autonomous, variable = $variable) :
-            Poisson($c, $d)
+    function fun(x)
+        @match (@capture(x, [a_, b_]), @capture(x, {c_, d_})) begin
+            #(true, false) => :(    Lie($a, $b; autonomous=$autonomous, variable=$variable))
+            (false, true) => quote
+                if ($c isa Function && $d isa Function)
+                    Poisson($c, $d; autonomous=$autonomous, variable=$variable)
+                else
+                    Poisson($c, $d)
+                end
+            end
+            (false, false) => x
+            _ => error("internal error")
         end
-        (false, false) => x
-        _ => error("internal error")
     end
 
     return esc(postwalk(fun, expr))
@@ -628,15 +630,19 @@ macro Lie(expr::Expr, arg)
         _ => throw(IncorrectArgument("Invalid argument: " * string(arg)))
     end
 
-    fun(x) = @match (@capture(x, [a_, b_]), @capture(x, {c_, d_})) begin
-        #(true, false) => :(    Lie($a, $b; autonomous=$autonomous, variable=$variable))
-        (false, true) => quote
-            ($c isa Function && $d isa Function) ?
-            Poisson($c, $d; autonomous = $autonomous, variable = $variable) :
-            Poisson($c, $d)
+    function fun(x)
+        @match (@capture(x, [a_, b_]), @capture(x, {c_, d_})) begin
+            #(true, false) => :(    Lie($a, $b; autonomous=$autonomous, variable=$variable))
+            (false, true) => quote
+                if ($c isa Function && $d isa Function)
+                    Poisson($c, $d; autonomous=$autonomous, variable=$variable)
+                else
+                    Poisson($c, $d)
+                end
+            end
+            (false, false) => x
+            _ => error("internal error")
         end
-        (false, false) => x
-        _ => error("internal error")
     end
 
     return esc(postwalk(fun, expr))
