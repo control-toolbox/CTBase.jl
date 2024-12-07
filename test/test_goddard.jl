@@ -1,4 +1,4 @@
-test_goddard() = begin
+function test_goddard()
 
     # Parameters
     Cd = 310

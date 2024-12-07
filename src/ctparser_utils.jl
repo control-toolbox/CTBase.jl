@@ -14,7 +14,7 @@ expr_it(e, _Expr, f) =
     if e isa Expr
         args = e.args
         n = length(args)
-        newargs = [expr_it(e.args[i], _Expr, f) for i ∈ 1:n]
+        newargs = [expr_it(e.args[i], _Expr, f) for i in 1:n]
         return _Expr(e.head, newargs...)
     else
         return f(e)
@@ -50,7 +50,7 @@ julia> x0 = Symbol(x, 0); subs(e, :( \$x[1](\$(t0)) ), :( \$x0[1] ))
 :(x0[1] * (2 * x(tf)) - (x[2])(tf) * (2 * x(0)))
 ```
 """
-subs(e, e1::Union{Symbol, Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
+subs(e, e1::Union{Symbol,Real}, e2) = expr_it(e, Expr, x -> x == e1 ? e2 : x) # optimised for some litterals (including symbols)
 
 subs(e, e1, e2) = begin
     foo(e1, e2) = (h, args...) -> begin
@@ -119,7 +119,7 @@ replace_call(e, x::Vector{Symbol}, t, y) = begin
             @match ee begin
                 :($eee($tt)) && if tt == t
                 end => let ch = false
-                    for i ∈ 1:length(x)
+                    for i in 1:length(x)
                         if has(eee, x[i])
                             eee = subs(eee, x[i], y[i])
                             ch = true # todo: unnecessary (as subs can be idempotent)?
@@ -204,17 +204,18 @@ true
 ```
 """
 has(e, x, t) = begin
-    foo(x, t) = (h, args...) -> begin
-        ee = Expr(h, args...)
-        if :yes ∈ args
-            :yes
-        else
-            @match ee begin
-                :($eee($tt)) => (tt == t && has(eee, x)) ? :yes : ee
-                _ => ee
+    foo(x, t) =
+        (h, args...) -> begin
+            ee = Expr(h, args...)
+            if :yes ∈ args
+                :yes
+            else
+                @match ee begin
+                    :($eee($tt)) => (tt == t && has(eee, x)) ? :yes : ee
+                    _ => ee
+                end
             end
         end
-    end
     expr_it(e, foo(x, t), x -> x) == :yes
 end
 
