@@ -1,25 +1,25 @@
 function test_exception()
-    e = AmbiguousDescription((:e,))
+    e = CTBase.AmbiguousDescription((:e,))
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
 
-    e = IncorrectArgument("e")
+    e = CTBase.IncorrectArgument("e")
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
 
-    e = IncorrectMethod(:e)
+    e = CTBase.IncorrectMethod(:e)
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
 
-    e = IncorrectOutput("blabla")
+    e = CTBase.IncorrectOutput("blabla")
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
 
-    e = NotImplemented("blabla")
+    e = CTBase.NotImplemented("blabla")
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
 
-    e = ExtensionError(:tata)
+    e = CTBase.ExtensionError(:tata)
     @test_throws ErrorException error(e)
     @test typeof(sprint(showerror, e)) == String
 end

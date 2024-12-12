@@ -97,15 +97,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the gradient of `X` at `x`.
-"""
-ctgradient(X::VectorField, x) = ctgradient(X.f, x)
-
-__ctgradient(X::VectorField, x) = __ctgradient(X.f, x)
-
-"""
-$(TYPEDSIGNATURES)
-
 Return the Jacobian of `f` at `x`.
 """
 function ctjacobian(f::Function, x::ctNumber; backend = __get_AD_backend())
@@ -128,15 +119,6 @@ function ctjacobian(f::Function, x; backend = __get_AD_backend())
 end
 
 __ctjacobian(f::Function, x) = ForwardDiff.jacobian(f, x)
-
-"""
-$(TYPEDSIGNATURES)
-
-Return the Jacobian of `X` at `x`.
-"""
-ctjacobian(X::VectorField, x) = ctjacobian(X.f, x)
-
-__ctjacobian(X::VectorField, x) = __ctjacobian(X.f, x)
 
 """
 $(TYPEDSIGNATURES)
@@ -235,18 +217,3 @@ function to_out_of_place(f!, n; T = Float64)
     end
     return isnothing(f!) ? nothing : f
 end
-
-# Adapt getters to test in place
-function __constraint(ocp, label)
-    if is_in_place(ocp)
-        n = length(constraints(ocp)[label][3]) # Size of lb 
-        return to_out_of_place(constraint(ocp, label), n)
-    else
-        return constraint(ocp, label)
-    end
-end
-
-__dynamics(ocp) =
-    is_in_place(ocp) ? to_out_of_place(dynamics(ocp), state_dimension(ocp)) : dynamics(ocp)
-__lagrange(ocp) = is_in_place(ocp) ? to_out_of_place(lagrange(ocp), 1) : lagrange(ocp)
-__mayer(ocp) = is_in_place(ocp) ? to_out_of_place(mayer(ocp), 1) : mayer(ocp)
