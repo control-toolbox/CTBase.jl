@@ -12,14 +12,14 @@ julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]
 ```
 
 """
-function BoundaryConstraint(f::Function; variable::Bool = false)
+function BoundaryConstraint(f::Function; variable::Bool=false)
     VD = variable ? NonFixed : Fixed
-    return BoundaryConstraint{typeof(f), VD}(f)
+    return BoundaryConstraint{typeof(f),VD}(f)
 end
 
-function BoundaryConstraint!(f!::Function; variable::Bool = false)
+function BoundaryConstraint!(f!::Function; variable::Bool=false)
     VD = variable ? NonFixed : Fixed
-    return BoundaryConstraint!{typeof(f!), VD}(f!)
+    return BoundaryConstraint!{typeof(f!),VD}(f!)
 end
 
 """
@@ -35,8 +35,11 @@ julia> B = BoundaryConstraint((x0, xf, v) -> [v[3]+xf[2]-x0[1], v[1]-v[2]+2xf[1]
 ```
 
 """
-BoundaryConstraint(f::Function, VD::Type{<:VariableDependence}) = BoundaryConstraint{typeof(f), VD}(f)
-BoundaryConstraint!(f!::Function, VD::Type{<:VariableDependence}) = BoundaryConstraint!{typeof(f!), VD}(f!)
+BoundaryConstraint(f::Function, VD::Type{<:VariableDependence}) =
+    BoundaryConstraint{typeof(f),VD}(f)
+function BoundaryConstraint!(f!::Function, VD::Type{<:VariableDependence})
+    return BoundaryConstraint!{typeof(f!),VD}(f!)
+end
 
 """
 
@@ -56,27 +59,37 @@ julia> B([0, 0], [1, 1], [1, 2, 3])
 [4, 1]
 ```
 """
-function (F::BoundaryConstraint{<:Function, Fixed})(x0::State, xf::State)::ctVector
+function (F::BoundaryConstraint{<:Function,Fixed})(x0::State, xf::State)::ctVector
     return F.f(x0, xf)
 end
 
-function (F::BoundaryConstraint{<:Function, Fixed})(x0::State, xf::State, v::Variable)::ctVector
+function (F::BoundaryConstraint{<:Function,Fixed})(
+    x0::State, xf::State, v::Variable
+)::ctVector
     return F.f(x0, xf)
 end
 
-function (F::BoundaryConstraint{<:Function, NonFixed})(x0::State, xf::State, v::Variable)::ctVector
+function (F::BoundaryConstraint{<:Function,NonFixed})(
+    x0::State, xf::State, v::Variable
+)::ctVector
     return F.f(x0, xf, v)
 end
 
-function (F::BoundaryConstraint!{<:Function, Fixed})(r::ctVector, x0::State, xf::State)::Nothing
+function (F::BoundaryConstraint!{<:Function,Fixed})(
+    r::ctVector, x0::State, xf::State
+)::Nothing
     return F.f!(r, x0, xf)
 end
 
-function (F::BoundaryConstraint!{<:Function, Fixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+function (F::BoundaryConstraint!{<:Function,Fixed})(
+    r::ctVector, x0::State, xf::State, v::Variable
+)::Nothing
     return F.f!(r, x0, xf)
 end
 
-function (F::BoundaryConstraint!{<:Function, NonFixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+function (F::BoundaryConstraint!{<:Function,NonFixed})(
+    r::ctVector, x0::State, xf::State, v::Variable
+)::Nothing
     return F.f!(r, x0, xf, v)
 end
 
@@ -94,14 +107,14 @@ julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], variable=true)
 ```
 
 """
-function Mayer(f::Function; variable::Bool = false)
+function Mayer(f::Function; variable::Bool=false)
     VD = variable ? NonFixed : Fixed
-    return Mayer{typeof(f), VD}(f)
+    return Mayer{typeof(f),VD}(f)
 end
 
-function Mayer!(f!::Function; variable::Bool = false)
+function Mayer!(f!::Function; variable::Bool=false)
     VD = variable ? NonFixed : Fixed
-    return Mayer!{typeof(f!), VD}(f!)
+    return Mayer!{typeof(f!),VD}(f!)
 end
 
 """
@@ -118,7 +131,7 @@ julia> G = Mayer((x0, xf, v) -> v[3]+xf[2]-x0[1], NonFixed)
 
 """
 Mayer(f::Function, VD::Type{<:VariableDependence}) = Mayer{typeof(f),VD}(f)
-Mayer!(f!::Function, VD::Type{<:VariableDependence}) = Mayer!{typeof(f!), VD}(f!)
+Mayer!(f!::Function, VD::Type{<:VariableDependence}) = Mayer!{typeof(f!),VD}(f!)
 
 """
 
@@ -154,11 +167,15 @@ function (F::Mayer!{<:Function,Fixed})(r::ctVector, x0::State, xf::State)::Nothi
     return F.f!(r, x0, xf)
 end
 
-function (F::Mayer!{<:Function,Fixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+function (F::Mayer!{<:Function,Fixed})(
+    r::ctVector, x0::State, xf::State, v::Variable
+)::Nothing
     return F.f!(r, x0, xf)
 end
 
-function (F::Mayer!{<:Function,NonFixed})(r::ctVector, x0::State, xf::State, v::Variable)::Nothing
+function (F::Mayer!{<:Function,NonFixed})(
+    r::ctVector, x0::State, xf::State, v::Variable
+)::Nothing
     return F.f!(r, x0, xf, v)
 end
 
@@ -176,10 +193,10 @@ julia> H = Hamiltonian((x, p) -> x[1]^2+2p[2])
 julia> H = Hamiltonian((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3]], autonomous=false, variable=true)
 ```
 """
-function Hamiltonian(f::Function; autonomous::Bool = true, variable::Bool = false)
+function Hamiltonian(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return Hamiltonian{typeof(f), TD, VD}(f)
+    return Hamiltonian{typeof(f),TD,VD}(f)
 end
 
 """
@@ -195,7 +212,8 @@ julia> H = Hamiltonian((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3]], NonAutonomous, Non
 ```
 
 """
-Hamiltonian(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Hamiltonian{typeof(f), TD, VD}(f)
+Hamiltonian(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    Hamiltonian{typeof(f),TD,VD}(f)
 
 """
 
@@ -233,45 +251,42 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-function (F::Hamiltonian{<:Function, Autonomous, Fixed})(x::State, p::Costate)::ctNumber
+function (F::Hamiltonian{<:Function,Autonomous,Fixed})(x::State, p::Costate)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{<:Function, Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctNumber
+function (F::Hamiltonian{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctNumber
     return F.f(x, p)
 end
 
-function (F::Hamiltonian{<:Function, Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctNumber
-    return F.f(x, p, v)
-end
-
-function (F::Hamiltonian{<:Function, Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (F::Hamiltonian{<:Function,Autonomous,NonFixed})(
+    x::State, p::Costate, v::Variable
 )::ctNumber
     return F.f(x, p, v)
 end
 
-function (F::Hamiltonian{<:Function, NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctNumber
-    return F.f(t, x, p)
+function (F::Hamiltonian{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctNumber
+    return F.f(x, p, v)
 end
 
-function (F::Hamiltonian{<:Function, NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (F::Hamiltonian{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate
 )::ctNumber
     return F.f(t, x, p)
 end
 
-function (F::Hamiltonian{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (F::Hamiltonian{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctNumber
+    return F.f(t, x, p)
+end
+
+function (F::Hamiltonian{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
 )::ctNumber
     return F.f(t, x, p, v)
 end
@@ -292,7 +307,7 @@ julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], autonomous=false, varia
 julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], autonomous=false, variable=true)
 ```
 """
-function HamiltonianLift(f::Function; autonomous::Bool = true, variable::Bool = false)
+function HamiltonianLift(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
     return HamiltonianLift(VectorField(f, TD, VD))
@@ -312,7 +327,8 @@ julia> HL = HamiltonianLift((t, x) -> [t+x[1]^2,x[2]^2], NonAutonomous, Fixed)
 julia> HL = HamiltonianLift((t, x, v) -> [t+x[1]^2,x[2]^2+v], NonAutonomous, NonFixed)
 ```
 """
-HamiltonianLift(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = HamiltonianLift(VectorField(f, TD, VD))
+HamiltonianLift(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    HamiltonianLift(VectorField(f, TD, VD))
 
 """
 
@@ -349,50 +365,44 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 3
 ```
 """
-function (H::HamiltonianLift{<:VectorField, Autonomous, Fixed})(x::State, p::Costate)::ctNumber
-    return p' * H.X(x)
-end
-
-function (H::HamiltonianLift{<:VectorField, Autonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (H::HamiltonianLift{<:VectorField,Autonomous,Fixed})(
+    x::State, p::Costate
 )::ctNumber
     return p' * H.X(x)
 end
 
-function (H::HamiltonianLift{<:VectorField, Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctNumber
-    return p' * H.X(x, v)
+function (H::HamiltonianLift{<:VectorField,Autonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctNumber
+    return p' * H.X(x)
 end
 
-function (H::HamiltonianLift{<:VectorField, Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (H::HamiltonianLift{<:VectorField,Autonomous,NonFixed})(
+    x::State, p::Costate, v::Variable
 )::ctNumber
     return p' * H.X(x, v)
 end
 
-function (H::HamiltonianLift{<:VectorField, NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctNumber
-    return p' * H.X(t, x)
+function (H::HamiltonianLift{<:VectorField,Autonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctNumber
+    return p' * H.X(x, v)
 end
 
-function (H::HamiltonianLift{<:VectorField, NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (H::HamiltonianLift{<:VectorField,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate
 )::ctNumber
     return p' * H.X(t, x)
 end
 
-function (H::HamiltonianLift{<:VectorField, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (H::HamiltonianLift{<:VectorField,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctNumber
+    return p' * H.X(t, x)
+end
+
+function (H::HamiltonianLift{<:VectorField,NonAutonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
 )::ctNumber
     return p' * H.X(t, x, v)
 end
@@ -413,10 +423,10 @@ julia> Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p
 ```
 
 """
-function HamiltonianVectorField(f::Function; autonomous::Bool = true, variable::Bool = false)
+function HamiltonianVectorField(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return HamiltonianVectorField{typeof(f), TD, VD}(f)
+    return HamiltonianVectorField{typeof(f),TD,VD}(f)
 end
 
 """
@@ -434,7 +444,9 @@ julia> Hv = HamiltonianVectorField((t, x, p, v) -> [t+x[1]^2+2p[2]+v[3], x[2]-3p
 ```
 
 """
-HamiltonianVectorField(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = HamiltonianVectorField{typeof(f), TD, VD}(f)
+HamiltonianVectorField(
+    f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}
+) = HamiltonianVectorField{typeof(f),TD,VD}(f)
 
 """
 
@@ -471,62 +483,45 @@ julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
 [7, -3]
 ```
 """
-function (F::HamiltonianVectorField{<:Function, Autonomous, Fixed})(
-    x::State,
-    p::Costate,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,Autonomous,Fixed})(
+    x::State, p::Costate
+)::Tuple{DState,DCostate}
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{<:Function, Autonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::Tuple{DState,DCostate}
     return F.f(x, p)
 end
 
-function (F::HamiltonianVectorField{<:Function, Autonomous, NonFixed})(
-    x::State,
-    p::Costate,
-    v::Variable,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,Autonomous,NonFixed})(
+    x::State, p::Costate, v::Variable
+)::Tuple{DState,DCostate}
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{<:Function, Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::Tuple{DState,DCostate}
     return F.f(x, p, v)
 end
 
-function (F::HamiltonianVectorField{<:Function, NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate
+)::Tuple{DState,DCostate}
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{<:Function, NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::Tuple{DState,DCostate}
     return F.f(t, x, p)
 end
 
-function (F::HamiltonianVectorField{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
-)::Tuple{DState, DCostate}
+function (F::HamiltonianVectorField{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::Tuple{DState,DCostate}
     return F.f(t, x, p, v)
 end
 
@@ -546,10 +541,10 @@ julia> V = VectorField((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], autonomous=false, va
 ```
 
 """
-function VectorField(f::Function; autonomous::Bool = true, variable::Bool = false)
+function VectorField(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return VectorField{typeof(f), TD, VD}(f)
+    return VectorField{typeof(f),TD,VD}(f)
 end
 
 """
@@ -567,7 +562,8 @@ julia> V = VectorField((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], NonAutonomous, NonFi
 ```
 
 """
-VectorField(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = VectorField{typeof(f), TD, VD}(f)
+VectorField(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    VectorField{typeof(f),TD,VD}(f)
 
 """
 
@@ -604,31 +600,39 @@ julia> V(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-function (F::VectorField{<:Function, Autonomous, Fixed})(x::State)::ctVector
+function (F::VectorField{<:Function,Autonomous,Fixed})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::VectorField{<:Function, Autonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::VectorField{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(x)
 end
 
-function (F::VectorField{<:Function, Autonomous, NonFixed})(x::State, v::Variable)::ctVector
+function (F::VectorField{<:Function,Autonomous,NonFixed})(x::State, v::Variable)::ctVector
     return F.f(x, v)
 end
 
-function (F::VectorField{<:Function, Autonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::VectorField{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(x, v)
 end
 
-function (F::VectorField{<:Function, NonAutonomous, Fixed})(t::Time, x::State)::ctVector
+function (F::VectorField{<:Function,NonAutonomous,Fixed})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::VectorField{<:Function, NonAutonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::VectorField{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(t, x)
 end
 
-function (F::VectorField{<:Function, NonAutonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::VectorField{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(t, x, v)
 end
 
@@ -650,16 +654,16 @@ julia> L = Lagrange((t, x, u, v) -> t+2x[2]-u[1]^2+v[3], autonomous=false, varia
 ```
 
 """
-function Lagrange(f::Function; autonomous::Bool = true, variable::Bool = false)
+function Lagrange(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return Lagrange{typeof(f), TD, VD}(f)
+    return Lagrange{typeof(f),TD,VD}(f)
 end
 
-function Lagrange!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+function Lagrange!(f!::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return Lagrange!{typeof(f!), TD, VD}(f!)
+    return Lagrange!{typeof(f!),TD,VD}(f!)
 end
 
 """
@@ -679,8 +683,11 @@ julia> L = Lagrange((t, x, u, v) -> t+2x[2]-u[1]^2+v[3], autonomous=false, varia
 ```
 
 """
-Lagrange(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Lagrange{typeof(f), TD, VD}(f)
-Lagrange!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Lagrange!{typeof(f!), TD, VD}(f!)
+Lagrange(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    Lagrange{typeof(f),TD,VD}(f)
+function Lagrange!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence})
+    return Lagrange!{typeof(f!),TD,VD}(f!)
+end
 
 """
 
@@ -720,69 +727,84 @@ julia> L(1, [1, 0], [1], [1, 2, 3])
 3
 ```
 """
-function (F::Lagrange{<:Function, Autonomous, Fixed})(x::State, u::Control)::ctNumber
+function (F::Lagrange{<:Function,Autonomous,Fixed})(x::State, u::Control)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{<:Function, Autonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctNumber
     return F.f(x, u)
 end
 
-function (F::Lagrange{<:Function, Autonomous, NonFixed})(x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{<:Function,Autonomous,NonFixed})(
+    x::State, u::Control, v::Variable
+)::ctNumber
     return F.f(x, u, v)
 end
 
-function (F::Lagrange{<:Function, Autonomous, NonFixed})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctNumber
     return F.f(x, u, v)
 end
 
-function (F::Lagrange{<:Function, NonAutonomous, Fixed})(t::Time, x::State, u::Control)::ctNumber
+function (F::Lagrange{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, u::Control
+)::ctNumber
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{<:Function, NonAutonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctNumber
+function (F::Lagrange{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctNumber
     return F.f(t, x, u)
 end
 
-function (F::Lagrange{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::Lagrange{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, u::Control, v::Variable
 )::ctNumber
     return F.f(t, x, u, v)
 end
 
-function (F::Lagrange!{<:Function, Autonomous, Fixed})(r::ctVector, x::State, u::Control)::Nothing
+function (F::Lagrange!{<:Function,Autonomous,Fixed})(
+    r::ctVector, x::State, u::Control
+)::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::Lagrange!{<:Function, Autonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{<:Function,Autonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::Lagrange!{<:Function, Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::Lagrange!{<:Function, Autonomous, NonFixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::Lagrange!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
+function (F::Lagrange!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control
+)::Nothing
     return F.f!(r, t, x, u)
 end
 
-function (F::Lagrange!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Lagrange!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, t, x, u)
 end
 
-function (F::Lagrange!{<:Function, NonAutonomous, NonFixed})(
-    r::ctVector,
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::Lagrange!{<:Function,NonAutonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
 )::Nothing
     return F.f!(r, t, x, u, v)
 end
@@ -802,16 +824,16 @@ julia> D = Dynamics((t, x, u) -> [t+2x[2]-u^2, x[1]], autonomous=false, variable
 julia> D = Dynamics((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], autonomous=false, variable=true)
 ```
 """
-function Dynamics(f::Function; autonomous::Bool = true, variable::Bool = false)
+function Dynamics(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return Dynamics{typeof(f), TD, VD}(f)
+    return Dynamics{typeof(f),TD,VD}(f)
 end
 
-function Dynamics!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+function Dynamics!(f!::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return Dynamics!{typeof(f!), TD, VD}(f!)
+    return Dynamics!{typeof(f!),TD,VD}(f!)
 end
 
 """
@@ -828,8 +850,11 @@ julia> D = Dynamics((t, x, u) -> [t+2x[2]-u^2, x[1]], NonAutonomous, Fixed)
 julia> D = Dynamics((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], NonAutonomous, NonFixed)
 ```
 """
-Dynamics(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Dynamics{typeof(f), TD, VD}(f)
-Dynamics!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Dynamics!{typeof(f!), TD, VD}(f!)
+Dynamics(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    Dynamics{typeof(f),TD,VD}(f)
+function Dynamics!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence})
+    return Dynamics!{typeof(f!),TD,VD}(f!)
+end
 
 """
 
@@ -860,69 +885,84 @@ julia> D(1, [1, 0], 1, [1, 2, 3])
 [3, 1]
 ```
 """
-function (F::Dynamics{<:Function, Autonomous, Fixed})(x::State, u::Control)::ctVector
+function (F::Dynamics{<:Function,Autonomous,Fixed})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{<:Function, Autonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctVector
     return F.f(x, u)
 end
 
-function (F::Dynamics{<:Function, Autonomous, NonFixed})(x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{<:Function,Autonomous,NonFixed})(
+    x::State, u::Control, v::Variable
+)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::Dynamics{<:Function, Autonomous, NonFixed})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctVector
     return F.f(x, u, v)
 end
 
-function (F::Dynamics{<:Function, NonAutonomous, Fixed})(t::Time, x::State, u::Control)::ctVector
+function (F::Dynamics{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, u::Control
+)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{<:Function, NonAutonomous, Fixed})(t::Time, x::State, u::Control, v::Variable)::ctVector
+function (F::Dynamics{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctVector
     return F.f(t, x, u)
 end
 
-function (F::Dynamics{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::Dynamics{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, u::Control, v::Variable
 )::ctVector
     return F.f(t, x, u, v)
 end
 
-function (F::Dynamics!{<:Function, Autonomous, Fixed})(r::ctVector, x::State, u::Control)::Nothing
+function (F::Dynamics!{<:Function,Autonomous,Fixed})(
+    r::ctVector, x::State, u::Control
+)::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::Dynamics!{<:Function, Autonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{<:Function,Autonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::Dynamics!{<:Function, Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::Dynamics!{<:Function, Autonomous, NonFixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::Dynamics!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
+function (F::Dynamics!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control
+)::Nothing
     return F.f!(r, t, x, u)
 end
 
-function (F::Dynamics!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control, v::Variable)::Nothing
+function (F::Dynamics!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
     return F.f!(r, t, x, u)
 end
 
-function (F::Dynamics!{<:Function, NonAutonomous, NonFixed})(
-    r::ctVector,
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::Dynamics!{<:Function,NonAutonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
 )::Nothing
     return F.f!(r, t, x, u, v)
 end
@@ -942,16 +982,16 @@ julia> S = StateConstraint((t, x) -> [t+x[1]^2, 2x[2]], autonomous=false, variab
 julia> S = StateConstraint((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], autonomous=false, variable=true)
 ```
 """
-function StateConstraint(f::Function; autonomous::Bool = true, variable::Bool = false)
+function StateConstraint(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return StateConstraint{typeof(f), TD, VD}(f)
+    return StateConstraint{typeof(f),TD,VD}(f)
 end
 
-function StateConstraint!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+function StateConstraint!(f!::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return StateConstraint!{typeof(f!), TD, VD}(f!)
+    return StateConstraint!{typeof(f!),TD,VD}(f!)
 end
 
 """
@@ -968,8 +1008,13 @@ julia> S = StateConstraint((t, x) -> [t+x[1]^2, 2x[2]], NonAutonomous, Fixed)
 julia> S = StateConstraint((t, x, v) -> [t+x[1]^2, 2x[2]+v[3]], NonAutonomous, NonFixed)
 ```
 """
-StateConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = StateConstraint{typeof(f), TD, VD}(f)
-StateConstraint!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = StateConstraint!{typeof(f!), TD, VD}(f!)
+StateConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    StateConstraint{typeof(f),TD,VD}(f)
+function StateConstraint!(
+    f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}
+)
+    return StateConstraint!{typeof(f!),TD,VD}(f!)
+end
 
 """
 
@@ -1000,59 +1045,81 @@ julia>  S(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-function (F::StateConstraint{<:Function, Autonomous, Fixed})(x::State)::ctVector
+function (F::StateConstraint{<:Function,Autonomous,Fixed})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::StateConstraint{<:Function, Autonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(x)
 end
 
-function (F::StateConstraint{<:Function, Autonomous, NonFixed})(x::State, v::Variable)::ctVector
+function (F::StateConstraint{<:Function,Autonomous,NonFixed})(
+    x::State, v::Variable
+)::ctVector
     return F.f(x, v)
 end
 
-function (F::StateConstraint{<:Function, Autonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(x, v)
 end
 
-function (F::StateConstraint{<:Function, NonAutonomous, Fixed})(t::Time, x::State)::ctVector
+function (F::StateConstraint{<:Function,NonAutonomous,Fixed})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{<:Function, NonAutonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(t, x)
 end
 
-function (F::StateConstraint{<:Function, NonAutonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::StateConstraint{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(t, x, v)
 end
 
-function (F::StateConstraint!{<:Function, Autonomous, Fixed})(r::ctVector, x::State)::Nothing
+function (F::StateConstraint!{<:Function,Autonomous,Fixed})(r::ctVector, x::State)::Nothing
     return F.f!(r, x)
 end
 
-function (F::StateConstraint!{<:Function, Autonomous, Fixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{<:Function,Autonomous,Fixed})(
+    r::ctVector, t::Time, x::State, v::Variable
+)::Nothing
     return F.f!(r, x)
 end
 
-function (F::StateConstraint!{<:Function, Autonomous, NonFixed})(r::ctVector, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, x::State, v::Variable
+)::Nothing
     return F.f!(r, x, v)
 end
 
-function (F::StateConstraint!{<:Function, Autonomous, NonFixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, v::Variable
+)::Nothing
     return F.f!(r, x, v)
 end
 
-function (F::StateConstraint!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State)::Nothing
+function (F::StateConstraint!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State
+)::Nothing
     return F.f!(r, t, x)
 end
 
-function (F::StateConstraint!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, v::Variable
+)::Nothing
     return F.f!(r, t, x)
 end
 
-function (F::StateConstraint!{<:Function, NonAutonomous, NonFixed})(r::ctVector, t::Time, x::State, v::Variable)::Nothing
+function (F::StateConstraint!{<:Function,NonAutonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, v::Variable
+)::Nothing
     return F.f!(r, t, x, v)
 end
 
@@ -1072,16 +1139,16 @@ julia> C = ControlConstraint((t, u) -> [t+u[1]^2, 2u[2]], autonomous=false, vari
 julia> C = ControlConstraint((t, u, v) -> [t+u[1]^2, 2u[2]+v[3]], autonomous=false, variable=true)
 ```
 """
-function ControlConstraint(f::Function; autonomous::Bool = true, variable::Bool = false)
+function ControlConstraint(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return ControlConstraint{typeof(f), TD, VD}(f)
+    return ControlConstraint{typeof(f),TD,VD}(f)
 end
 
-function ControlConstraint!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+function ControlConstraint!(f!::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return ControlConstraint!{typeof(f!), TD, VD}(f!)
+    return ControlConstraint!{typeof(f!),TD,VD}(f!)
 end
 
 """
@@ -1098,8 +1165,13 @@ julia> C = ControlConstraint((t, u) -> [t+u[1]^2, 2u[2]], NonAutonomous, Fixed)
 julia> C = ControlConstraint((t, u, v) -> [t+u[1]^2, 2u[2]+v[3]], NonAutonomous, NonFixed)
 ```
 """
-ControlConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = ControlConstraint{typeof(f), TD, VD}(f)
-ControlConstraint!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = ControlConstraint!{typeof(f!), TD, VD}(f!)
+ControlConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    ControlConstraint{typeof(f),TD,VD}(f)
+function ControlConstraint!(
+    f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}
+)
+    return ControlConstraint!{typeof(f!),TD,VD}(f!)
+end
 
 """
 
@@ -1130,59 +1202,85 @@ julia> C(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-function (F::ControlConstraint{<:Function, Autonomous, Fixed})(u::Control)::ctVector
+function (F::ControlConstraint{<:Function,Autonomous,Fixed})(u::Control)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{<:Function, Autonomous, Fixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{<:Function,Autonomous,Fixed})(
+    t::Time, u::Control, v::Variable
+)::ctVector
     return F.f(u)
 end
 
-function (F::ControlConstraint{<:Function, Autonomous, NonFixed})(u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{<:Function,Autonomous,NonFixed})(
+    u::Control, v::Variable
+)::ctVector
     return F.f(u, v)
 end
 
-function (F::ControlConstraint{<:Function, Autonomous, NonFixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{<:Function,Autonomous,NonFixed})(
+    t::Time, u::Control, v::Variable
+)::ctVector
     return F.f(u, v)
 end
 
-function (F::ControlConstraint{<:Function, NonAutonomous, Fixed})(t::Time, u::Control)::ctVector
+function (F::ControlConstraint{<:Function,NonAutonomous,Fixed})(
+    t::Time, u::Control
+)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{<:Function, NonAutonomous, Fixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{<:Function,NonAutonomous,Fixed})(
+    t::Time, u::Control, v::Variable
+)::ctVector
     return F.f(t, u)
 end
 
-function (F::ControlConstraint{<:Function, NonAutonomous, NonFixed})(t::Time, u::Control, v::Variable)::ctVector
+function (F::ControlConstraint{<:Function,NonAutonomous,NonFixed})(
+    t::Time, u::Control, v::Variable
+)::ctVector
     return F.f(t, u, v)
 end
 
-function (F::ControlConstraint!{<:Function, Autonomous, Fixed})(r::ctVector, u::Control)::Nothing
+function (F::ControlConstraint!{<:Function,Autonomous,Fixed})(
+    r::ctVector, u::Control
+)::Nothing
     return F.f!(r, u)
 end
 
-function (F::ControlConstraint!{<:Function, Autonomous, Fixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{<:Function,Autonomous,Fixed})(
+    r::ctVector, t::Time, u::Control, v::Variable
+)::Nothing
     return F.f!(r, u)
 end
 
-function (F::ControlConstraint!{<:Function, Autonomous, NonFixed})(r::ctVector, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, u::Control, v::Variable
+)::Nothing
     return F.f!(r, u, v)
 end
 
-function (F::ControlConstraint!{<:Function, Autonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, t::Time, u::Control, v::Variable
+)::Nothing
     return F.f!(r, u, v)
 end
 
-function (F::ControlConstraint!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, u::Control)::Nothing
+function (F::ControlConstraint!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, u::Control
+)::Nothing
     return F.f!(r, t, u)
 end
 
-function (F::ControlConstraint!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, u::Control, v::Variable
+)::Nothing
     return F.f!(r, t, u)
 end
 
-function (F::ControlConstraint!{<:Function, NonAutonomous, NonFixed})(r::ctVector, t::Time, u::Control, v::Variable)::Nothing
+function (F::ControlConstraint!{<:Function,NonAutonomous,NonFixed})(
+    r::ctVector, t::Time, u::Control, v::Variable
+)::Nothing
     return F.f!(r, t, u, v)
 end
 
@@ -1201,16 +1299,16 @@ julia> M = MixedConstraint((t, x, u) -> [t+2x[2]-u^2, x[1]], autonomous=false, v
 julia> M = MixedConstraint((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], autonomous=false, variable=true)
 ```
 """
-function MixedConstraint(f::Function; autonomous::Bool = true, variable::Bool = false)
+function MixedConstraint(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return MixedConstraint{typeof(f), TD, VD}(f)
+    return MixedConstraint{typeof(f),TD,VD}(f)
 end
 
-function MixedConstraint!(f!::Function; autonomous::Bool = true, variable::Bool = false)
+function MixedConstraint!(f!::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return MixedConstraint!{typeof(f!), TD, VD}(f!)
+    return MixedConstraint!{typeof(f!),TD,VD}(f!)
 end
 
 """
@@ -1227,8 +1325,13 @@ julia> M = MixedConstraint((t, x, u) -> [t+2x[2]-u^2, x[1]], NonAutonomous, Fixe
 julia> M = MixedConstraint((t, x, u, v) -> [t+2x[2]-u^2+v[3], x[1]], NonAutonomous, NonFixed)
 ```
 """
-MixedConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = MixedConstraint{typeof(f), TD, VD}(f)
-MixedConstraint!(f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = MixedConstraint!{typeof(f!), TD, VD}(f!)
+MixedConstraint(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    MixedConstraint{typeof(f),TD,VD}(f)
+function MixedConstraint!(
+    f!::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}
+)
+    return MixedConstraint!{typeof(f!),TD,VD}(f!)
+end
 
 """
 
@@ -1261,102 +1364,84 @@ julia> M(1, [1, 0], 1, [1, 2, 3])
 [3, 1]
 ```
 """
-function (F::MixedConstraint{<:Function, Autonomous, Fixed})(x::State, u::Control)::ctVector
+function (F::MixedConstraint{<:Function,Autonomous,Fixed})(x::State, u::Control)::ctVector
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{<:Function, Autonomous, Fixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, u::Control, v::Variable
 )::ctVector
     return F.f(x, u)
 end
 
-function (F::MixedConstraint{<:Function, Autonomous, NonFixed})(x::State, u::Control, v::Variable)::ctVector
-    return F.f(x, u, v)
-end
-
-function (F::MixedConstraint{<:Function, Autonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint{<:Function,Autonomous,NonFixed})(
+    x::State, u::Control, v::Variable
 )::ctVector
     return F.f(x, u, v)
 end
 
-function (F::MixedConstraint{<:Function, NonAutonomous, Fixed})(t::Time, x::State, u::Control)::ctVector
-    return F.f(t, x, u)
+function (F::MixedConstraint{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctVector
+    return F.f(x, u, v)
 end
 
-function (F::MixedConstraint{<:Function, NonAutonomous, Fixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, u::Control
 )::ctVector
     return F.f(t, x, u)
 end
 
-function (F::MixedConstraint{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, u::Control, v::Variable
+)::ctVector
+    return F.f(t, x, u)
+end
+
+function (F::MixedConstraint{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, u::Control, v::Variable
 )::ctVector
     return F.f(t, x, u, v)
 end
 
-function (F::MixedConstraint!{<:Function, Autonomous, Fixed})(r::ctVector, x::State, u::Control)::Nothing
-    return F.f!(r, x, u)
-end
-
-function (F::MixedConstraint!{<:Function, Autonomous, Fixed})(
-    r::ctVector,
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint!{<:Function,Autonomous,Fixed})(
+    r::ctVector, x::State, u::Control
 )::Nothing
     return F.f!(r, x, u)
 end
 
-function (F::MixedConstraint!{<:Function, Autonomous, NonFixed})(r::ctVector, x::State, u::Control, v::Variable)::Nothing
-    return F.f!(r, x, u, v)
+function (F::MixedConstraint!{<:Function,Autonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
+    return F.f!(r, x, u)
 end
 
-function (F::MixedConstraint!{<:Function, Autonomous, NonFixed})(
-    r::ctVector,
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, x::State, u::Control, v::Variable
 )::Nothing
     return F.f!(r, x, u, v)
 end
 
-function (F::MixedConstraint!{<:Function, NonAutonomous, Fixed})(r::ctVector, t::Time, x::State, u::Control)::Nothing
-    return F.f!(r, t, x, u)
+function (F::MixedConstraint!{<:Function,Autonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
+    return F.f!(r, x, u, v)
 end
 
-function (F::MixedConstraint!{<:Function, NonAutonomous, Fixed})(
-    r::ctVector,
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control
 )::Nothing
     return F.f!(r, t, x, u)
 end
 
-function (F::MixedConstraint!{<:Function, NonAutonomous, NonFixed})(
-    r::ctVector,
-    t::Time,
-    x::State,
-    u::Control,
-    v::Variable,
+function (F::MixedConstraint!{<:Function,NonAutonomous,Fixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
+)::Nothing
+    return F.f!(r, t, x, u)
+end
+
+function (F::MixedConstraint!{<:Function,NonAutonomous,NonFixed})(
+    r::ctVector, t::Time, x::State, u::Control, v::Variable
 )::Nothing
     return F.f!(r, t, x, u, v)
 end
@@ -1397,10 +1482,10 @@ julia> u = FeedbackControl((t, x) -> t+x[1]^2+2x[2], autonomous=false, variable=
 julia> u = FeedbackControl((t, x, v) -> t+x[1]^2+2x[2]+v[3], autonomous=false, variable=true)
 ```
 """
-function FeedbackControl(f::Function; autonomous::Bool = true, variable::Bool = false)
+function FeedbackControl(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return FeedbackControl{typeof(f), TD, VD}(f)
+    return FeedbackControl{typeof(f),TD,VD}(f)
 end
 
 """
@@ -1417,7 +1502,8 @@ julia> u = FeedbackControl((t, x) -> t+x[1]^2+2x[2], NonAutonomous, Fixed)
 julia> u = FeedbackControl((t, x, v) -> t+x[1]^2+2x[2]+v[3], NonAutonomous, NonFixed)
 ```
 """
-FeedbackControl(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = FeedbackControl{typeof(f), TD, VD}(f)
+FeedbackControl(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    FeedbackControl{typeof(f),TD,VD}(f)
 
 """
 
@@ -1452,31 +1538,41 @@ julia> u(1, [1, 0], [1, 2, 3])
 5
 ```
 """
-function (F::FeedbackControl{<:Function, Autonomous, Fixed})(x::State)::ctVector
+function (F::FeedbackControl{<:Function,Autonomous,Fixed})(x::State)::ctVector
     return F.f(x)
 end
 
-function (F::FeedbackControl{<:Function, Autonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(x)
 end
 
-function (F::FeedbackControl{<:Function, Autonomous, NonFixed})(x::State, v::Variable)::ctVector
+function (F::FeedbackControl{<:Function,Autonomous,NonFixed})(
+    x::State, v::Variable
+)::ctVector
     return F.f(x, v)
 end
 
-function (F::FeedbackControl{<:Function, Autonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(x, v)
 end
 
-function (F::FeedbackControl{<:Function, NonAutonomous, Fixed})(t::Time, x::State)::ctVector
+function (F::FeedbackControl{<:Function,NonAutonomous,Fixed})(t::Time, x::State)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{<:Function, NonAutonomous, Fixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(t, x)
 end
 
-function (F::FeedbackControl{<:Function, NonAutonomous, NonFixed})(t::Time, x::State, v::Variable)::ctVector
+function (F::FeedbackControl{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, v::Variable
+)::ctVector
     return F.f(t, x, v)
 end
 
@@ -1495,10 +1591,10 @@ julia> u = ControlLaw((t, x, p) -> t+x[1]^2+2p[2], autonomous=false, variable=fa
 julia> u = ControlLaw((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
 ```
 """
-function ControlLaw(f::Function; autonomous::Bool = true, variable::Bool = false)
+function ControlLaw(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return ControlLaw{typeof(f), TD, VD}(f)
+    return ControlLaw{typeof(f),TD,VD}(f)
 end
 
 """
@@ -1515,7 +1611,8 @@ julia> u = ControlLaw((t, x, p) -> t+x[1]^2+2p[2], NonAutonomous, Fixed)
 julia> u = ControlLaw((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], NonAutonomous, NonFixed)
 ```
 """
-ControlLaw(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = ControlLaw{typeof(f), TD, VD}(f)
+ControlLaw(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    ControlLaw{typeof(f),TD,VD}(f)
 
 """
 
@@ -1550,35 +1647,42 @@ julia> u(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-function (F::ControlLaw{<:Function, Autonomous, Fixed})(x::State, p::Costate)::ctVector
+function (F::ControlLaw{<:Function,Autonomous,Fixed})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{<:Function, Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(x, p)
 end
 
-function (F::ControlLaw{<:Function, Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{<:Function,Autonomous,NonFixed})(
+    x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{<:Function, Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::ControlLaw{<:Function, NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctVector
+function (F::ControlLaw{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate
+)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{<:Function, NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::ControlLaw{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::ControlLaw{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (F::ControlLaw{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
 )::ctVector
     return F.f(t, x, p, v)
 end
@@ -1598,10 +1702,10 @@ julia> μ = Multiplier((t, x, p) -> t+x[1]^2+2p[2], autonomous=false, variable=f
 julia> μ = Multiplier((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], autonomous=false, variable=true)
 ```
 """
-function Multiplier(f::Function; autonomous::Bool = true, variable::Bool = false)
+function Multiplier(f::Function; autonomous::Bool=true, variable::Bool=false)
     TD = autonomous ? Autonomous : NonAutonomous
     VD = variable ? NonFixed : Fixed
-    return Multiplier{typeof(f), TD, VD}(f)
+    return Multiplier{typeof(f),TD,VD}(f)
 end
 
 """
@@ -1618,7 +1722,8 @@ julia> μ = Multiplier((t, x, p) -> t+x[1]^2+2p[2], NonAutonomous, Fixed)
 julia> μ = Multiplier((t, x, p, v) -> t+x[1]^2+2p[2]+v[3], NonAutonomous, NonFixed)
 ```
 """
-Multiplier(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) = Multiplier{typeof(f), TD, VD}(f)
+Multiplier(f::Function, TD::Type{<:TimeDependence}, VD::Type{<:VariableDependence}) =
+    Multiplier{typeof(f),TD,VD}(f)
 
 """
 
@@ -1653,35 +1758,42 @@ julia> μ(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-function (F::Multiplier{<:Function, Autonomous, Fixed})(x::State, p::Costate)::ctVector
+function (F::Multiplier{<:Function,Autonomous,Fixed})(x::State, p::Costate)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{<:Function, Autonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{<:Function,Autonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(x, p)
 end
 
-function (F::Multiplier{<:Function, Autonomous, NonFixed})(x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{<:Function,Autonomous,NonFixed})(
+    x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{<:Function, Autonomous, NonFixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{<:Function,Autonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(x, p, v)
 end
 
-function (F::Multiplier{<:Function, NonAutonomous, Fixed})(t::Time, x::State, p::Costate)::ctVector
+function (F::Multiplier{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate
+)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{<:Function, NonAutonomous, Fixed})(t::Time, x::State, p::Costate, v::Variable)::ctVector
+function (F::Multiplier{<:Function,NonAutonomous,Fixed})(
+    t::Time, x::State, p::Costate, v::Variable
+)::ctVector
     return F.f(t, x, p)
 end
 
-function (F::Multiplier{<:Function, NonAutonomous, NonFixed})(
-    t::Time,
-    x::State,
-    p::Costate,
-    v::Variable,
+function (F::Multiplier{<:Function,NonAutonomous,NonFixed})(
+    t::Time, x::State, p::Costate, v::Variable
 )::ctVector
     return F.f(t, x, p, v)
 end
