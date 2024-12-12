@@ -38,26 +38,6 @@ __fun_variable_dependence() = Fixed
 """
 $(TYPEDSIGNATURES)
 
-Used to set the default value of the time dependence of the Optimal Control Problem.
-The default value is `Autonomous`, which means that the Optimal Control Problem is considered time independent.
-The other possible time dependence is `NonAutonomous`, which means that all the functions used to define the 
-Optimal Control Problem are considered time dependent.
-"""
-__ocp_time_dependence() = Autonomous
-
-"""
-$(TYPEDSIGNATURES)
-
-Used to set the default value of the variable dependence of the Optimal Control Problem.
-The default value is `Fixed`, which means that the Optimal Control Problem is considered variable independent.
-The other possible variable dependence is `NonFixed`, which means that all the functions used to define the
-Optimal Control Problem are considered variable dependent.
-"""
-__ocp_variable_dependence() = Fixed
-
-"""
-$(TYPEDSIGNATURES)
-
 Used to set the default value of the names of the variables.
 The default value is `"v"`.
 """

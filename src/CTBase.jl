@@ -210,20 +210,8 @@ include("types.jl")
 include("functions.jl")
 include("utils.jl")
 
-# Optimal Control Model
-include("optimal_control_model-type.jl")
-include("optimal_control_model-getters.jl")
-include("optimal_control_model-setters.jl")
-
-# Optimal Control Solution
-include("optimal_control_solution-type.jl")
-include("optimal_control_solution-getters.jl")
-include("optimal_control_solution-setters.jl")
-
 #
-include("differential_geometry.jl")
 include("ctparser_utils.jl")
-include("onepass.jl")
 include("repl.jl")
 include("init.jl")
 include("print.jl")
@@ -249,41 +237,7 @@ export set_AD_backend
 
 # Functions
 export Hamiltonian, HamiltonianVectorField, VectorField
-export Mayer, Lagrange, Dynamics, ControlLaw, FeedbackControl, Multiplier
-export Mayer!, Lagrange!, Dynamics!
-export BoundaryConstraint, StateConstraint, ControlConstraint, MixedConstraint, VariableConstraint
-export BoundaryConstraint!,
-    StateConstraint!, ControlConstraint!, MixedConstraint!, VariableConstraint!
-
-# Model
-export OptimalControlModel
-export Model
-export __OCPModel # todo: to be updated, redirection to Model to avoid confusion with other Model functions from other packages. Due to @def macro
-export variable!,
-    time!,
-    constraint!,
-    dynamics!,
-    objective!,
-    state!,
-    control!,
-    remove_constraint!,
-    model_expression!
-export is_autonomous, is_fixed
-export is_time_independent, is_time_dependent
-export is_min, is_max
-export is_variable_dependent, is_variable_independent
-export is_in_place
-export nlp_constraints!, constraints, constraints_labels, constraint
-export has_free_final_time, has_free_initial_time, has_lagrange_cost, has_mayer_cost
-export dim_control_constraints, dim_state_constraints, dim_mixed_constraints, dim_path_constraints
-export dim_boundary_constraints, dim_variable_constraints, dim_control_range
-export dim_state_range, dim_variable_range
-export model_expression, initial_time, initial_time_name, final_time, final_time_name, time_name
-export control_dimension, control_components_names, control_name
-export state_dimension, state_components_names, state_name
-export variable_dimension, variable_components_names, variable_name
-export lagrange, mayer, criterion, dynamics
-export __constraint, __lagrange, __mayer, __dynamics # todo: remove after in place tests
+export ControlLaw, FeedbackControl, Multiplier
 
 # Solution
 export OptimalControlSolution
