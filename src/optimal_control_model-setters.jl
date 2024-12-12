@@ -343,8 +343,8 @@ function time!(
     ocp::OptimalControlModel{<:TimeDependence, VT};
     t0::Union{Time, Nothing} = nothing,
     tf::Union{Time, Nothing} = nothing,
-    ind0::Union{Integer, Nothing} = nothing,
-    indf::Union{Integer, Nothing} = nothing,
+    ind0::Union{Int, Nothing} = nothing,
+    indf::Union{Int, Nothing} = nothing,
     name::Union{String, Symbol} = __time_name(),
 ) where {VT}
 
@@ -417,24 +417,24 @@ function time!(
             ocp.initial_time = t0
             ocp.final_time = tf
             ocp.time_name = name
-            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
-            ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits = 2))
+            ocp.initial_time_name = t0 isa Int ? string(t0) : string(round(t0, digits = 2))
+            ocp.final_time_name = tf isa Int ? string(tf) : string(round(tf, digits = 2))
         end
-        (::Nothing, ::Integer, ::Time, ::Nothing) => begin # (ind0, tf)
+        (::Nothing, ::Int, ::Time, ::Nothing) => begin # (ind0, tf)
             ocp.initial_time = Index(ind0)
             ocp.final_time = tf
             ocp.time_name = name
             ocp.initial_time_name = variable_components_names(ocp)[ind0]
-            ocp.final_time_name = tf isa Integer ? string(tf) : string(round(tf, digits = 2))
+            ocp.final_time_name = tf isa Int ? string(tf) : string(round(tf, digits = 2))
         end
-        (::Time, ::Nothing, ::Nothing, ::Integer) => begin # (t0, indf)
+        (::Time, ::Nothing, ::Nothing, ::Int) => begin # (t0, indf)
             ocp.initial_time = t0
             ocp.final_time = Index(indf)
             ocp.time_name = name
-            ocp.initial_time_name = t0 isa Integer ? string(t0) : string(round(t0, digits = 2))
+            ocp.initial_time_name = t0 isa Int ? string(t0) : string(round(t0, digits = 2))
             ocp.final_time_name = variable_components_names(ocp)[indf]
         end
-        (::Nothing, ::Integer, ::Nothing, ::Integer) => begin # (ind0, indf)
+        (::Nothing, ::Int, ::Nothing, ::Int) => begin # (ind0, indf)
             ocp.initial_time = Index(ind0)
             ocp.final_time = Index(indf)
             ocp.time_name = name
@@ -521,7 +521,7 @@ julia> constraint!(ocp, :mixed; f = (t, x, u, v) -> x[1]*v[2]-u, lb=0, ub=1)
 function constraint!(
     ocp::OptimalControlModel{T, V},
     type::Symbol;
-    rg::Union{OrdinalRange{<:Integer}, Index, Integer, Nothing} = nothing,
+    rg::Union{OrdinalRange{<:Int}, Index, Int, Nothing} = nothing,
     f::Union{Function, Nothing} = nothing,
     lb::Union{ctVector, Nothing} = nothing,
     ub::Union{ctVector, Nothing} = nothing,
