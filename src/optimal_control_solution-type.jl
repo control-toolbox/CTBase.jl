@@ -79,3 +79,11 @@ $(TYPEDFIELDS)
     mult_control_box_lower::Union{Nothing, Function} = nothing
     mult_control_box_upper::Union{Nothing, Function} = nothing
 end
+
+# placeholders (see extension CTBaseLoadSave)
+function export_ocp_solution(args...; kwargs...)
+    throw(ExtensionError(:JLD2, :JSON3))
+end
+function import_ocp_solution(args...; kwargs...)
+    throw(ExtensionError(:JLD2, :JSON3))
+end
