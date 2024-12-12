@@ -174,10 +174,10 @@ Type alias for a dimension. This is used to define the dimension of the state sp
 the costate space, the control space, etc.
 
 ```@example
-julia> const Dimension = Integer
+julia> const Dimension = Int
 ```
 """
-const Dimension = Integer
+const Dimension = Int
 
 #
 """
