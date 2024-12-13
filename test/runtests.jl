@@ -17,7 +17,7 @@ const constraint_type = CTBase.constraint_type
 
 #
 @testset verbose = true showtiming = true "Base" begin
-    for name ∈ (
+    for name in (
         :aqua,
         :ctparser_utils,
         :default,

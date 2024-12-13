@@ -81,11 +81,11 @@ julia> B([0, 0], [1, 1], [1, 2, 3])
 [4, 1]
 ```
 """
-struct BoundaryConstraint{TF<:Function, VD<:VariableDependence}
+struct BoundaryConstraint{TF<:Function,VD<:VariableDependence}
     f::TF
 end
 
-struct BoundaryConstraint!{TF<:Function, VD<:VariableDependence}
+struct BoundaryConstraint!{TF<:Function,VD<:VariableDependence}
     f!::TF
 end
 
@@ -135,11 +135,11 @@ julia> G([0, 0], [1, 1], [1, 2, 3])
 4
 ```
 """
-struct Mayer{TF<:Function, VD<:VariableDependence}
+struct Mayer{TF<:Function,VD<:VariableDependence}
     f::TF
 end
 
-struct Mayer!{TF<:Function, VD<:VariableDependence}
+struct Mayer!{TF<:Function,VD<:VariableDependence}
     f!::TF
 end
 
@@ -148,14 +148,14 @@ $(TYPEDEF)
 
 Abstract type for hamiltonians.
 """
-abstract type AbstractHamiltonian{TD<:TimeDependence, VD<:VariableDependence} end
+abstract type AbstractHamiltonian{TD<:TimeDependence,VD<:VariableDependence} end
 
 """
 $(TYPEDEF)
 
 Abstract type for vector fields.
 """
-abstract type AbstractVectorField{TD<:TimeDependence, VD<:VariableDependence} end
+abstract type AbstractVectorField{TD<:TimeDependence,VD<:VariableDependence} end
 
 """
 $(TYPEDEF)
@@ -226,7 +226,8 @@ julia> H(1, [1, 0], [0, 1], [1, 2, 3])
 7
 ```
 """
-struct Hamiltonian{TF<:Function, TD<:TimeDependence, VD<:VariableDependence} <: AbstractHamiltonian{TD, VD}
+struct Hamiltonian{TF<:Function,TD<:TimeDependence,VD<:VariableDependence} <:
+       AbstractHamiltonian{TD,VD}
     f::TF
 end
 
@@ -300,7 +301,8 @@ julia> V(1, [1, -1], [1, 2, 3])
 [2, 1]
 ```
 """
-struct VectorField{TF<:Function, TD<:TimeDependence, VD<:VariableDependence} <: AbstractVectorField{TD, VD}
+struct VectorField{TF<:Function,TD<:TimeDependence,VD<:VariableDependence} <:
+       AbstractVectorField{TD,VD}
     f::TF
 end
 
@@ -374,7 +376,8 @@ julia> Hv(1, [1, 0], [0, 1], [1, 2, 3, 4])
 [7, -3]
 ```
 """
-struct HamiltonianVectorField{TF<:Function, TD<:TimeDependence, VD<:VariableDependence} <: AbstractVectorField{TD, VD}
+struct HamiltonianVectorField{TF<:Function,TD<:TimeDependence,VD<:VariableDependence} <:
+       AbstractVectorField{TD,VD}
     f::TF
 end
 
@@ -451,12 +454,13 @@ true
 ```
 
 """
-struct HamiltonianLift{TV<:VectorField, TD<:TimeDependence, VD<:VariableDependence} <: AbstractHamiltonian{TD, VD}
+struct HamiltonianLift{TV<:VectorField,TD<:TimeDependence,VD<:VariableDependence} <:
+       AbstractHamiltonian{TD,VD}
     X::TV
     function HamiltonianLift(
-        X::VectorField{<:Function, TD, VD},
-    ) where {TD<:TimeDependence, VD<:VariableDependence}
-        new{typeof(X), TD, VD}(X)
+        X::VectorField{<:Function,TD,VD}
+    ) where {TD<:TimeDependence,VD<:VariableDependence}
+        return new{typeof(X),TD,VD}(X)
     end
 end
 
@@ -536,11 +540,11 @@ julia> L(1, [1, 0], [1], [1, 2, 3])
 3
 ```
 """
-struct Lagrange{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct Lagrange{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
-struct Lagrange!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct Lagrange!{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f!::TF
 end
 
@@ -612,11 +616,11 @@ julia> D(1, [1, 0], 1, [1, 2, 3])
 ```
 
 """
-struct Dynamics{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct Dynamics{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
-struct Dynamics!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct Dynamics!{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f!::TF
 end
 
@@ -694,11 +698,11 @@ julia>  S(1, [1, -1], [1, 2, 3])
 ```
 
 """
-struct StateConstraint{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct StateConstraint{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
-struct StateConstraint!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct StateConstraint!{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f!::TF
 end
 
@@ -770,11 +774,11 @@ julia> C(1, [1, -1], [1, 2, 3])
 ```
 
 """
-struct ControlConstraint{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct ControlConstraint{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
-struct ControlConstraint!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct ControlConstraint!{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f!::TF
 end
 
@@ -854,11 +858,11 @@ julia> M(1, [1, 0], 1, [1, 2, 3])
 ```
 
 """
-struct MixedConstraint{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct MixedConstraint{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
-struct MixedConstraint!{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct MixedConstraint!{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f!::TF
 end
 
@@ -981,7 +985,7 @@ julia> u(1, [1, 0], [1, 2, 3])
 ```
 
 """
-struct FeedbackControl{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct FeedbackControl{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
@@ -1059,7 +1063,7 @@ julia> u(1, [1, 0], [0, 1], [1, 2, 3])
 ```
 
 """
-struct ControlLaw{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct ControlLaw{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
@@ -1137,7 +1141,7 @@ julia> μ(1, [1, 0], [0, 1], [1, 2, 3])
 ```
 
 """
-struct Multiplier{TF<:Function, TD<:TimeDependence, VD<:VariableDependence}
+struct Multiplier{TF<:Function,TD<:TimeDependence,VD<:VariableDependence}
     f::TF
 end
 
@@ -1161,7 +1165,7 @@ Base.isless(i::Index, j::Index) = i.val ≤ j.val
 Base.isless(i::Index, j::Real) = i.val ≤ j
 Base.isless(i::Real, j::Index) = i ≤ j.val
 Base.length(i::Index) = 1
-Base.iterate(i::Index, state = 0) = state == 0 ? (i, 1) : nothing
+Base.iterate(i::Index, state=0) = state == 0 ? (i, 1) : nothing
 Base.IteratorSize(::Type{Index}) = Base.HasLength()
 Base.append!(v::Vector, i::Index) = Base.append!(v, i.val)
 Base.getindex(x::AbstractArray, i::Index) = Base.getindex(x, i.val)
@@ -1174,4 +1178,4 @@ Base.getindex(x::StaticArrays.TrivialView, i::CTBase.Index) = Base.getindex(x, i
 """
 Type alias for an index or range.
 """
-const RangeConstraint = Union{Index, OrdinalRange{<:Int}}
+const RangeConstraint = Union{Index,OrdinalRange{<:Int}}
