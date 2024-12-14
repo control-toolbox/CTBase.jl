@@ -638,8 +638,8 @@ function constraint!(
                         BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= x0[rg]; nothing), V)
                     else
                         BoundaryConstraint!(
-                        (r, x0, xf, v) -> (@views r[:] .= x0[rg]; nothing), V
-                    )
+                            (r, x0, xf, v) -> (@views r[:] .= x0[rg]; nothing), V
+                        )
                     end
                 else
                     if V == Fixed
@@ -653,8 +653,8 @@ function constraint!(
                         BoundaryConstraint!((r, x0, xf) -> (@views r[:] .= xf[rg]; nothing), V)
                     else
                         BoundaryConstraint!(
-                        (r, x0, xf, v) -> (@views r[:] .= xf[rg]; nothing), V
-                    )
+                            (r, x0, xf, v) -> (@views r[:] .= xf[rg]; nothing), V
+                        )
                     end
                 else
                     if V == Fixed

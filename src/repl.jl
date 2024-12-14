@@ -150,9 +150,9 @@ function ct_repl(; debug=false, verbose=false)
                         nothing
                     else
                         begin
-                        println("\n", string($ct_repl_data.ocp_name))
-                        $(ct_repl_data.ocp_name)
-                    end
+                            println("\n", string($ct_repl_data.ocp_name))
+                            $(ct_repl_data.ocp_name)
+                        end
                     end
                 end
                 return q
