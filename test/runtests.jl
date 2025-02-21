@@ -3,7 +3,6 @@ using Aqua
 
 #
 using CTBase
-using DifferentiationInterface: AutoForwardDiff
 using Test
 
 #

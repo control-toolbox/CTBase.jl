@@ -13,16 +13,6 @@ module CTBase
 
 import Base
 using DocStringExtensions
-using DifferentiationInterface:
-    AutoForwardDiff,
-    derivative,
-    gradient,
-    jacobian,
-    prepare_derivative,
-    prepare_gradient,
-    prepare_jacobian
-import ForwardDiff
-using Interpolations: linear_interpolation, Line, Interpolations # For default interpolation
 
 # --------------------------------------------------------------------------------------------------
 # Aliases for types
