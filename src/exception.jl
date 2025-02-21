@@ -1,3 +1,4 @@
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -5,6 +6,7 @@ Abstract type for exceptions.
 """
 abstract type CTException <: Exception end
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -26,6 +28,7 @@ Print the exception.
 Base.showerror(io::IO, e::AmbiguousDescription) =
     print(io, "AmbiguousDescription: the description ", e.var, " is ambiguous / incorrect")
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -46,6 +49,7 @@ Print the exception.
 """
 Base.showerror(io::IO, e::IncorrectArgument) = print(io, "IncorrectArgument: ", e.var)
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -67,6 +71,7 @@ Print the exception.
 Base.showerror(io::IO, e::IncorrectMethod) =
     print(io, "IncorrectMethod: ", e.var, " is not an existing method")
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -87,6 +92,7 @@ Print the exception.
 """
 Base.showerror(io::IO, e::IncorrectOutput) = print(io, "IncorrectOutput: ", e.var)
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -107,6 +113,7 @@ Print the exception.
 """
 Base.showerror(io::IO, e::NotImplemented) = print(io, "NotImplemented: ", e.var)
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -126,6 +133,8 @@ $(TYPEDSIGNATURES)
 Print the exception.
 """
 Base.showerror(io::IO, e::UnauthorizedCall) = print(io, "UnauthorizedCall: ", e.var)
+
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -146,6 +155,7 @@ Print the exception.
 """
 Base.showerror(io::IO, e::ParsingError) = print(io, "ParsingError: ", e.var)
 
+# ------------------------------------------------------------------------
 """
 $(TYPEDEF)
 
@@ -155,7 +165,7 @@ Exception thrown when an extension is not loaded but the user tries to call a fu
 
 $(TYPEDFIELDS)
 """
-mutable struct ExtensionError <: CTException
+struct ExtensionError <: CTException
     weakdeps::Tuple{Vararg{Symbol}}
     function ExtensionError(weakdeps::Symbol...)
         isempty(weakdeps) && throw(
@@ -163,8 +173,7 @@ mutable struct ExtensionError <: CTException
                 "Please provide at least one weak dependence for the extension."
             ),
         )
-        e = new()
-        e.weakdeps = weakdeps
+        e = new(weakdeps)
         return e
     end
 end
