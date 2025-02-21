@@ -11,7 +11,7 @@ $(EXPORTS)
 """
 module CTBase
 
-import Base
+using Base: Base
 using DocStringExtensions
 
 # --------------------------------------------------------------------------------------------------

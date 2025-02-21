@@ -7,7 +7,7 @@ using Test
 
 #
 @testset verbose = true showtiming = true "Base" begin
-    for name ∈ (
+    for name in (
         :aqua,
         :default,
         :description,

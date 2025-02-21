@@ -20,7 +20,7 @@ function ctindices(i::Int)::String
         throw(IncorrectArgument("the indice must be positive"))
     end
     s = ""
-    for d ∈ digits(i)
+    for d in digits(i)
         s = ctindice(d) * s
     end
     return s
@@ -62,7 +62,7 @@ function ctupperscripts(i::Int)::String
         throw(IncorrectArgument("the upperscript must be positive"))
     end
     s = ""
-    for d ∈ digits(i)
+    for d in digits(i)
         s = ctupperscript(d) * s
     end
     return s
