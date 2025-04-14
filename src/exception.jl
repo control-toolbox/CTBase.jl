@@ -15,6 +15,13 @@ Exception thrown when the description is ambiguous / incorrect.
 **Fields**
 
 $(TYPEDFIELDS)
+
+**Example**
+
+```@example
+julia> complete(:f; descriptions=((:a, :b), (:a, :b, :c))
+ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
+```
 """
 struct AmbiguousDescription <: CTException
     var::Tuple{Vararg{Symbol}}

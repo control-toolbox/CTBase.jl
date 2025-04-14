@@ -2,6 +2,8 @@
 $(TYPEDSIGNATURES)
 
 Return `i` ∈ [0, 9] as a subscript.
+
+If `i` is not in the range, an exception is thrown.
 """
 function ctindice(i::Int)::Char
     if i < 0 || i > 9
@@ -14,6 +16,8 @@ end
 $(TYPEDSIGNATURES)
 
 Return `i` > 0 as a subscript.
+
+If `i` is not in the range, an exception is thrown.
 """
 function ctindices(i::Int)::String
     if i < 0
@@ -30,6 +34,8 @@ end
 $(TYPEDSIGNATURES)
 
 Return `i` ∈ [0, 9] as an upperscript.
+
+If `i` is not in the range, an exception is thrown.
 """
 function ctupperscript(i::Int)::Char
     if i < 0 || i > 9
@@ -56,6 +62,8 @@ end
 $(TYPEDSIGNATURES)
 
 Return `i` > 0 as an upperscript.
+
+If `i` is not in the range, an exception is thrown.
 """
 function ctupperscripts(i::Int)::String
     if i < 0

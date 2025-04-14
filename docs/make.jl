@@ -2,6 +2,13 @@ using Documenter
 using CTBase
 using DocumenterMermaid
 
+# to add docstrings from external packages
+Modules = [Base]
+for Module in Modules
+    isnothing(DocMeta.getdocmeta(Module, :DocTestSetup)) &&
+        DocMeta.setdocmeta!(Module, :DocTestSetup, :(using $Module); recursive=true)
+end
+
 repo_url = "github.com/control-toolbox/CTBase.jl"
 
 makedocs(;
@@ -16,7 +23,7 @@ makedocs(;
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
-    pages=["Introduction" => "index.md", "API" => "api.md", "Developers" => "dev.md"],
+    pages=["Introduction" => "index.md", "Developers" => "dev.md"],
     checkdocs=:none,
 )
 

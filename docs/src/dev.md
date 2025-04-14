@@ -1,14 +1,14 @@
 # Private functions
 
 ```@meta
-CollapsedDocStrings = true
+CollapsedDocStrings = false
 ```
 
 ## Index
 
 ```@index
 Pages   = ["dev.md"]
-Modules = [CTBase]
+Modules = [CTBase, Base]
 Order   = [:module, :constant, :type, :function, :macro]
 ```
 
@@ -16,6 +16,6 @@ Order   = [:module, :constant, :type, :function, :macro]
 
 ```@autodocs
 Modules = [CTBase]
-Order   = [:module, :constant, :type, :function, :macro]
+Order   = [:type, :module, :constant, :type, :function, :macro]
 Public  = false
 ```
