@@ -67,13 +67,15 @@ julia> descriptions[1]
 (:a,)
 ```
 """
-add(x::Tuple{}, y::Description)::Tuple{Vararg{Description}} = (y,)
+add(::Tuple{}, y::Description)::Tuple{Vararg{Description}} = (y,)
 
 """
 $(TYPEDSIGNATURES)
 
-Concatenate the description `y` to the tuple of descriptions `x` if `x` does not contain `y`
-and return the new tuple of descriptions. Throw an error if the description `y` is already contained in `x`.
+Add the description `y` to the tuple of descriptions `x` if `x` does not contain `y`
+and return the new tuple of descriptions. 
+
+Throw an exception (IncorrectArgument) if the description `y` is already contained in `x`.
 
 # Example
 
@@ -99,35 +101,44 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return a complete description from an incomplete description `desc` and 
-a list of complete descriptions `desc_list`. If several complete descriptions are possible, 
-then the first one is returned.
+Return one description from a list of Symbols `list` and a set of descriptions `D`. 
+If multiple descriptions are possible, then the first one is selected.
+
+If the list is not contained in any of the descriptions, then an exception is thrown.
 
 # Example
 
 ```@example
-julia> desc_list = ((:a, :b), (:b, :c), (:a, :c))
+julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c))
 (:a, :b)
 (:b, :c)
 (:a, :c)
-julia> getFullDescription((:a,), desc_list)
+julia> complete(:a; descriptions=D)
 (:a, :b)
+julia> complete(:a, :c; descriptions=D)
+(:a, :b, :c)
+julia> complete((:a, :c); descriptions=D)
+(:a, :b, :c)
+julia> complete(:f; descriptions=D)
+ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 ```
 """
-function getFullDescription(
-    desc::Description, desc_list::Tuple{Vararg{Description}}
-)::Description
-    n = size(desc_list, 1)
+function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
+    n = size(descriptions, 1)
     table = zeros(Int8, n, 2)
     for i in range(1, n)
-        table[i, 1] = size(desc ∩ desc_list[i], 1)
-        table[i, 2] = desc ⊆ desc_list[i] ? 1 : 0
+        table[i, 1] = size(list ∩ descriptions[i], 1)
+        table[i, 2] = list ⊆ descriptions[i] ? 1 : 0
     end
     if maximum(table[:, 2]) == 0
-        throw(AmbiguousDescription(desc))
+        throw(AmbiguousDescription(list))
     end
     # argmax : Return the index or key of the maximal element in a collection.
-    return desc_list[argmax(table[:, 1])]
+    return descriptions[argmax(table[:, 1])]
+end
+
+function complete(list::Tuple{DescVarArg}; descriptions::Tuple{Vararg{Description}})::Description
+    return complete(list..., descriptions=descriptions)
 end
 
 """

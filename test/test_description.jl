@@ -16,16 +16,16 @@ function test_description()
     algorithmes = CTBase.add(algorithmes, (:descent, :gradient, :backtracking))
     algorithmes = CTBase.add(algorithmes, (:descent, :gradient, :fixedstep))
 
-    @test CTBase.getFullDescription((:descent,), algorithmes) == (:descent, :bfgs, :bissection)
-    @test CTBase.getFullDescription((:bfgs,), algorithmes) == (:descent, :bfgs, :bissection)
-    @test CTBase.getFullDescription((:bissection,), algorithmes) == (:descent, :bfgs, :bissection)
-    @test CTBase.getFullDescription((:backtracking,), algorithmes) == (:descent, :bfgs, :backtracking)
-    @test CTBase.getFullDescription((:fixedstep,), algorithmes) == (:descent, :bfgs, :fixedstep)
-    @test CTBase.getFullDescription((:fixedstep, :gradient), algorithmes) == (:descent, :gradient, :fixedstep)
+    @test CTBase.complete((:descent,);              descriptions=algorithmes) == (:descent, :bfgs, :bissection)
+    @test CTBase.complete((:bfgs,);                 descriptions=algorithmes) == (:descent, :bfgs, :bissection)
+    @test CTBase.complete((:bissection,);           descriptions=algorithmes) == (:descent, :bfgs, :bissection)
+    @test CTBase.complete((:backtracking,);         descriptions=algorithmes) == (:descent, :bfgs, :backtracking)
+    @test CTBase.complete((:fixedstep,);            descriptions=algorithmes) == (:descent, :bfgs, :fixedstep)
+    @test CTBase.complete((:fixedstep, :gradient);  descriptions=algorithmes) == (:descent, :gradient, :fixedstep)
 
     # incorrect description
-    @test_throws CTBase.AmbiguousDescription CTBase.getFullDescription((:ttt,), algorithmes)
-    @test_throws CTBase.AmbiguousDescription CTBase.getFullDescription((:descent, :ttt), algorithmes)
+    @test_throws CTBase.AmbiguousDescription CTBase.complete((:ttt,);           descriptions=algorithmes)
+    @test_throws CTBase.AmbiguousDescription CTBase.complete((:descent, :ttt);  descriptions=algorithmes)
 
     # diff
     x = (:a, :b, :c)
@@ -37,16 +37,16 @@ function test_description()
     algorithmes = ()
     algorithmes = CTBase.add(algorithmes, (:a, :b, :c))
     algorithmes = CTBase.add(algorithmes, (:a, :b, :c, :d))
-    @test CTBase.getFullDescription((:a, :b), algorithmes) == (:a, :b, :c)
-    @test CTBase.getFullDescription((:a, :b, :c, :d), algorithmes) == (:a, :b, :c, :d)
+    @test CTBase.complete((:a, :b);         descriptions=algorithmes) == (:a, :b, :c)
+    @test CTBase.complete((:a, :b, :c, :d); descriptions=algorithmes) == (:a, :b, :c, :d)
 
     # inclusion and different sizes - switch ordering 
     # priority to the first with max shared elements
     algorithmes = ()
     algorithmes = CTBase.add(algorithmes, (:a, :b, :c, :d))
     algorithmes = CTBase.add(algorithmes, (:a, :b, :c))
-    @test CTBase.getFullDescription((:a, :b), algorithmes) == (:a, :b, :c, :d)
-    @test CTBase.getFullDescription((:a, :b, :c, :d), algorithmes) == (:a, :b, :c, :d)
+    @test CTBase.complete((:a, :b);         descriptions=algorithmes) == (:a, :b, :c, :d)
+    @test CTBase.complete((:a, :b, :c, :d); descriptions=algorithmes) == (:a, :b, :c, :d)
 
     # CTBase.add a description already in the list
     algorithmes = ()
