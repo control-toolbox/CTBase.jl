@@ -58,9 +58,9 @@ julia> throw(AmbiguousDescription((:x, :y)))
 ERROR: AmbiguousDescription: the description (:x, :y) is ambiguous / incorrect
 ```
 """
-Base.showerror(io::IO, e::AmbiguousDescription) = begin
-    printstyled(io, "AmbiguousDescription", color=:red, bold=true)
-    print(io, ": the description ", e.var, " is ambiguous / incorrect")
+function Base.showerror(io::IO, e::AmbiguousDescription)
+    printstyled(io, "AmbiguousDescription"; color=:red, bold=true)
+    return print(io, ": the description ", e.var, " is ambiguous / incorrect")
 end
 
 # ------------------------------------------------------------------------
@@ -90,9 +90,9 @@ $(TYPEDSIGNATURES)
 
 Customizes the printed message of the exception.
 """
-Base.showerror(io::IO, e::IncorrectArgument) = begin
-    printstyled(io, "IncorrectArgument", color=:red, bold=true)
-    print(io, ": ", e.var)
+function Base.showerror(io::IO, e::IncorrectArgument)
+    printstyled(io, "IncorrectArgument"; color=:red, bold=true)
+    return print(io, ": ", e.var)
 end
 
 # ------------------------------------------------------------------------
@@ -121,9 +121,9 @@ $(TYPEDSIGNATURES)
 
 Customizes the printed message of the exception.
 """
-Base.showerror(io::IO, e::IncorrectMethod) = begin
-    printstyled(io, "IncorrectMethod", color=:red, bold=true)
-    print(io, ": ", e.var, " is not an existing method")
+function Base.showerror(io::IO, e::IncorrectMethod)
+    printstyled(io, "IncorrectMethod"; color=:red, bold=true)
+    return print(io, ": ", e.var, " is not an existing method")
 end
 
 # ------------------------------------------------------------------------
@@ -153,9 +153,9 @@ $(TYPEDSIGNATURES)
 
 Customizes the printed message of the exception.
 """
-Base.showerror(io::IO, e::IncorrectOutput) = begin
-    printstyled(io, "IncorrectOutput", color=:red, bold=true)
-    print(io, ": ", e.var)
+function Base.showerror(io::IO, e::IncorrectOutput)
+    printstyled(io, "IncorrectOutput"; color=:red, bold=true)
+    return print(io, ": ", e.var)
 end
 
 # ------------------------------------------------------------------------
@@ -184,9 +184,9 @@ $(TYPEDSIGNATURES)
 
 Customizes the printed message of the exception.
 """
-Base.showerror(io::IO, e::NotImplemented) = begin
-    printstyled(io, "NotImplemented", color=:red, bold=true)
-    print(io, ": ", e.var)
+function Base.showerror(io::IO, e::NotImplemented)
+    printstyled(io, "NotImplemented"; color=:red, bold=true)
+    return print(io, ": ", e.var)
 end
 
 # ------------------------------------------------------------------------
@@ -216,9 +216,9 @@ $(TYPEDSIGNATURES)
 
 Customizes the printed message of the exception.
 """
-Base.showerror(io::IO, e::UnauthorizedCall) = begin
-    printstyled(io, "UnauthorizedCall", color=:red, bold=true)
-    print(io, ": ", e.var)
+function Base.showerror(io::IO, e::UnauthorizedCall)
+    printstyled(io, "UnauthorizedCall"; color=:red, bold=true)
+    return print(io, ": ", e.var)
 end
 
 # ------------------------------------------------------------------------
@@ -248,9 +248,9 @@ $(TYPEDSIGNATURES)
 
 Customizes the printed message of the exception.
 """
-Base.showerror(io::IO, e::ParsingError) = begin
-    printstyled(io, "ParsingError", color=:red, bold=true)
-    print(io, ": ", e.var)
+function Base.showerror(io::IO, e::ParsingError)
+    printstyled(io, "ParsingError"; color=:red, bold=true)
+    return print(io, ": ", e.var)
 end
 
 # ------------------------------------------------------------------------
@@ -283,7 +283,7 @@ struct ExtensionError <: CTException
                 "Please provide at least one weak dependence for the extension."
             ),
         )
-        new(weakdeps)
+        return new(weakdeps)
     end
 end
 
@@ -302,10 +302,10 @@ ERROR: ExtensionError. Please make: julia> using MyExtension, AnotherDep
 ```
 """
 function Base.showerror(io::IO, e::ExtensionError)
-    printstyled(io, "ExtensionError", color=:red, bold=true)
+    printstyled(io, "ExtensionError"; color=:red, bold=true)
     print(io, ". Please make: ")
-    printstyled(io, "julia>", color=:green, bold=true)
-    printstyled(io, " using ", color=:magenta)
+    printstyled(io, "julia>"; color=:green, bold=true)
+    printstyled(io, " using "; color=:magenta)
     N = length(e.weakdeps)
     for i in 1:N
         wd = e.weakdeps[i]

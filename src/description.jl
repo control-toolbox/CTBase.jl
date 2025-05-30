@@ -143,8 +143,10 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
     return descriptions[argmax(table[:, 1])]
 end
 
-function complete(list::Tuple{DescVarArg}; descriptions::Tuple{Vararg{Description}})::Description
-    return complete(list..., descriptions=descriptions)
+function complete(
+    list::Tuple{DescVarArg}; descriptions::Tuple{Vararg{Description}}
+)::Description
+    return complete(list...; descriptions=descriptions)
 end
 
 """

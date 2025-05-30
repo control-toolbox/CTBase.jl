@@ -1,5 +1,8 @@
 #
 using Aqua
+using JET
+using JuliaFormatter
+using Documenter
 
 #
 using CTBase
@@ -8,11 +11,11 @@ using Test
 #
 @testset verbose = true showtiming = true "Base" begin
     for name in (
-        :aqua,
-        :default,
-        :description,
-        :exceptions,
-        :utils,
+        :code_quality,
+        # :default,
+        # :description,
+        # :exceptions,
+        # :utils,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

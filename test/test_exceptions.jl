@@ -95,5 +95,4 @@ function test_exceptions()
     end
 
     return nothing
-    
 end

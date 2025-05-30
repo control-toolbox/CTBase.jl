@@ -1,5 +1,4 @@
 function test_utils()
-
     @test_throws CTBase.IncorrectArgument CTBase.ctindice(-1)
     @test_throws CTBase.IncorrectArgument CTBase.ctindice(10)
 
@@ -34,5 +33,4 @@ function test_utils()
     @test_throws CTBase.IncorrectArgument CTBase.ctupperscripts(-1)
     @test CTBase.ctupperscripts(019) == "¹⁹"
     @test CTBase.ctupperscripts(109) == "¹⁰⁹"
-
 end

@@ -19,12 +19,18 @@ function test_description()
         algorithmes = CTBase.add(algorithmes, (:descent, :gradient, :backtracking))
         algorithmes = CTBase.add(algorithmes, (:descent, :gradient, :fixedstep))
 
-        @test CTBase.complete((:descent,);              descriptions=algorithmes) == (:descent, :bfgs, :bissection)
-        @test CTBase.complete((:bfgs,);                 descriptions=algorithmes) == (:descent, :bfgs, :bissection)
-        @test CTBase.complete((:bissection,);           descriptions=algorithmes) == (:descent, :bfgs, :bissection)
-        @test CTBase.complete((:backtracking,);         descriptions=algorithmes) == (:descent, :bfgs, :backtracking)
-        @test CTBase.complete((:fixedstep,);            descriptions=algorithmes) == (:descent, :bfgs, :fixedstep)
-        @test CTBase.complete((:fixedstep, :gradient);  descriptions=algorithmes) == (:descent, :gradient, :fixedstep)
+        @test CTBase.complete((:descent,); descriptions=algorithmes) ==
+            (:descent, :bfgs, :bissection)
+        @test CTBase.complete((:bfgs,); descriptions=algorithmes) ==
+            (:descent, :bfgs, :bissection)
+        @test CTBase.complete((:bissection,); descriptions=algorithmes) ==
+            (:descent, :bfgs, :bissection)
+        @test CTBase.complete((:backtracking,); descriptions=algorithmes) ==
+            (:descent, :bfgs, :backtracking)
+        @test CTBase.complete((:fixedstep,); descriptions=algorithmes) ==
+            (:descent, :bfgs, :fixedstep)
+        @test CTBase.complete((:fixedstep, :gradient); descriptions=algorithmes) ==
+            (:descent, :gradient, :fixedstep)
     end
 
     # Test ambiguous or invalid description completions throw errors
@@ -37,8 +43,12 @@ function test_description()
         algorithmes = CTBase.add(algorithmes, (:descent, :gradient, :backtracking))
         algorithmes = CTBase.add(algorithmes, (:descent, :gradient, :fixedstep))
 
-        @test_throws CTBase.AmbiguousDescription CTBase.complete((:ttt,);           descriptions=algorithmes)
-        @test_throws CTBase.AmbiguousDescription CTBase.complete((:descent, :ttt);  descriptions=algorithmes)
+        @test_throws CTBase.AmbiguousDescription CTBase.complete(
+            (:ttt,); descriptions=algorithmes
+        )
+        @test_throws CTBase.AmbiguousDescription CTBase.complete(
+            (:descent, :ttt); descriptions=algorithmes
+        )
     end
 
     # Test removing elements from descriptions and check type
@@ -54,8 +64,9 @@ function test_description()
         algorithmes = ()
         algorithmes = CTBase.add(algorithmes, (:a, :b, :c))
         algorithmes = CTBase.add(algorithmes, (:a, :b, :c, :d))
-        @test CTBase.complete((:a, :b);         descriptions=algorithmes) == (:a, :b, :c)
-        @test CTBase.complete((:a, :b, :c, :d); descriptions=algorithmes) == (:a, :b, :c, :d)
+        @test CTBase.complete((:a, :b); descriptions=algorithmes) == (:a, :b, :c)
+        @test CTBase.complete((:a, :b, :c, :d); descriptions=algorithmes) ==
+            (:a, :b, :c, :d)
     end
 
     # Test priority when ordering of descriptions switched
@@ -63,8 +74,9 @@ function test_description()
         algorithmes = ()
         algorithmes = CTBase.add(algorithmes, (:a, :b, :c, :d))
         algorithmes = CTBase.add(algorithmes, (:a, :b, :c))
-        @test CTBase.complete((:a, :b);         descriptions=algorithmes) == (:a, :b, :c, :d)
-        @test CTBase.complete((:a, :b, :c, :d); descriptions=algorithmes) == (:a, :b, :c, :d)
+        @test CTBase.complete((:a, :b); descriptions=algorithmes) == (:a, :b, :c, :d)
+        @test CTBase.complete((:a, :b, :c, :d); descriptions=algorithmes) ==
+            (:a, :b, :c, :d)
     end
 
     # Test error when adding a duplicate description
@@ -77,7 +89,7 @@ function test_description()
     # Test Base.show method for Description tuples outputs correctly
     @testset "Base.show Method Output" begin
         io = IOBuffer()
-        descriptions = ( (:a, :b), (:b, :c) )
+        descriptions = ((:a, :b), (:b, :c))
         show(io, MIME"text/plain"(), descriptions)
         output = String(take!(io))
         expected = "(:a, :b)\n(:b, :c)"
