@@ -11,7 +11,7 @@ using Test
         :aqua,
         :default,
         :description,
-        :exception,
+        :exceptions,
         :utils,
     )
         @testset "$(name)" begin

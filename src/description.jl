@@ -1,7 +1,7 @@
 """
 DescVarArg is a Vararg of symbols. `DescVarArg` is a type alias for a Vararg of symbols.
 
-```@example
+```julia-repl
 julia> const DescVarArg = Vararg{Symbol}
 ```
 
@@ -12,7 +12,7 @@ const DescVarArg = Vararg{Symbol}
 """
 A description is a tuple of symbols. `Description` is a type alias for a tuple of symbols.
 
-```@example
+```julia-repl
 julia> const Description = Tuple{DescVarArg}
 ```
 
@@ -22,7 +22,7 @@ See also: [`DescVarArg`](@ref).
 
 [`Base.show`](@ref) is overloaded for descriptions, that is tuple of descriptions are printed as follows:
 
-```@example
+```julia-repl
 julia> display( ( (:a, :b), (:b, :c) ) )
 (:a, :b)
 (:b, :c)
@@ -37,18 +37,24 @@ Print a tuple of descriptions.
 
 # Example
 
-```@example
+```julia-repl
 julia> display( ( (:a, :b), (:b, :c) ) )
 (:a, :b)
 (:b, :c)
 ```
 """
 function Base.show(io::IO, ::MIME"text/plain", descriptions::Tuple{Vararg{Description}})
-    N = size(descriptions, 1)
-    for i in range(1, N)
+    N = length(descriptions)  # use length instead of size for 1D tuple
+    for i in 1:N
         description = descriptions[i]
-        i < N ? print(io, "$description\n") : print(io, "$description")
+        # print with newline except for last
+        if i < N
+            print(io, "$description\n")
+        else
+            print(io, "$description")
+        end
     end
+    return nothing
 end
 
 """
@@ -57,7 +63,7 @@ $(TYPEDSIGNATURES)
 Return a tuple containing only the description `y`.
 
 # Example
-```@example
+```julia-repl
 julia> descriptions = ()
 julia> descriptions = add(descriptions, (:a,))
 (:a,)
@@ -79,7 +85,7 @@ Throw an exception (IncorrectArgument) if the description `y` is already contain
 
 # Example
 
-```@example
+```julia-repl
 julia> descriptions = ()
 julia> descriptions = add(descriptions, (:a,))
 (:a,)
@@ -108,7 +114,7 @@ If the list is not contained in any of the descriptions, then an exception is th
 
 # Example
 
-```@example
+```julia-repl
 julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c))
 (:a, :b)
 (:b, :c)
@@ -124,16 +130,16 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 ```
 """
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
-    n = size(descriptions, 1)
+    n = length(descriptions)
     table = zeros(Int8, n, 2)
-    for i in range(1, n)
-        table[i, 1] = size(list ∩ descriptions[i], 1)
-        table[i, 2] = list ⊆ descriptions[i] ? 1 : 0
+    for i in 1:n
+        table[i, 1] = length(intersect(list, descriptions[i]))
+        table[i, 2] = issubset(Set(list), Set(descriptions[i])) ? 1 : 0
     end
     if maximum(table[:, 2]) == 0
         throw(AmbiguousDescription(list))
     end
-    # argmax : Return the index or key of the maximal element in a collection.
+    # Return the index of the description with maximal intersection count
     return descriptions[argmax(table[:, 1])]
 end
 
@@ -148,7 +154,7 @@ Return the difference between the description `x` and the description `y`.
 
 # Example
 
-```@example
+```julia-repl
 julia> remove((:a, :b), (:a,))
 (:b,)
 ```
