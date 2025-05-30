@@ -161,6 +161,6 @@ julia> remove((:a, :b), (:a,))
 (:b,)
 ```
 """
-function remove(x::Description, y::Description)::Description
-    return Tuple(setdiff(x, y))
+function remove(x::Description, y::Description)::Tuple{Vararg{Symbol}}
+    return tuple(setdiff(x, y)...)
 end
