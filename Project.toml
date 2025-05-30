@@ -5,9 +5,7 @@ version = "0.16.1"
 
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 
 [compat]
 DocStringExtensions = "0.9.3"
-JuliaFormatter = "2.1.2"
 julia = "1.10"
