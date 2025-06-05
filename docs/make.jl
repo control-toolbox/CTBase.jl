@@ -11,6 +11,8 @@ end
 
 repo_url = "github.com/control-toolbox/CTBase.jl"
 
+API_PAGES = ["ctbase.md", "default.md", "description.md", "exception.md"]
+
 makedocs(;
     warnonly=[:cross_references, :autodocs_block],
     sitename="CTBase.jl",
@@ -23,7 +25,7 @@ makedocs(;
             asset("https://control-toolbox.org/assets/js/documentation.js"),
         ],
     ),
-    pages=["Introduction" => "index.md", "Developers" => "dev.md"],
+    pages=["Introduction" => "index.md", "API" => API_PAGES],
     checkdocs=:none,
 )
 
