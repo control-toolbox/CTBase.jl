@@ -1,10 +1,3 @@
-"""
-[`CTBase`](@ref) module.
-
-Lists all the imported modules and packages:
-
-$(IMPORTS)
-"""
 module CTBase
 
 using Base: Base
