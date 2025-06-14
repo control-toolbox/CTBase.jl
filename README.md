@@ -54,6 +54,9 @@ julia> ]
 pkg> add CTBase
 ```
 
+> [!TIP]
+> If you are new to Julia, please follow this [guidelines](https://github.com/orgs/control-toolbox/discussions/64).
+
 ## Contributing
 
 [issue-url]: https://github.com/control-toolbox/CTBase.jl/issues
