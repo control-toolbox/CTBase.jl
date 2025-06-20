@@ -14,6 +14,9 @@ julia> const ctNumber = Real
 """
 const ctNumber = Real
 
+docstring(args...; kwargs...) = throw(CTBase.ExtensionError(:JSON, :HTTP))
+
+
 #
 include("exception.jl")
 include("description.jl")
