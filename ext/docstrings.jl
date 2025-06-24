@@ -1,12 +1,32 @@
-using Pkg
-Pkg.activate("tmp")
+function extract_docstring_code_pairs(ai_text::String)
+    
+    start_idx = findfirst("\"\"\"", ai_text)
+    if start_idx !== nothing
+        response = ai_text[start_idx[1]:end]
+    end
+    
+    # Regex pour capturer chaque bloc docstring + code qui suit
+    pattern = r"\"\"\"(.*?)\"\"\"\s*([\s\S]*?)(?=(\"\"\"|$))"
+    pairs = []
+    for m in eachmatch(pattern, response)
+        doc = strip(m.captures[1])
+        code = strip(m.captures[2])
+        push!(pairs, (doc, code))
+    end
 
-using HTTP
-using JSON
+    reponse = ""
+    for (doc, code) in pairs
+        reponse *= "\n\"\"\"\n$doc\n\"\"\"\n$code\n"
+    end
 
-function docstrings(code; tests=nothing, doc=nothing, apikey="")
+    return [pairs, response]
+end
+
+
+#générate an answer from an IA. 
+function docstrings(path; tests=nothing, doc=nothing, apikey="")
     # Read code file
-    code_text = read(code, String)
+    code_text = read(path, String)
     # Optionally read tests and doc files
     tests_text = tests !== nothing ? read(tests, String) : ""
     doc_text = doc !== nothing ? read(doc, String) : ""
@@ -53,6 +73,7 @@ $(doc !== nothing ? "\nVoici la documentation existante :\n$doc_text" : "")
 
 Merci de toujours suivre ce format pour chaque type, fonction ou exception générée et de ne rier rajouter de plus que ce que je te demande. Rajoute toujours juste avant la déclaration de lafonction la doc généré et null part d'autres. 
 
+
 """
 
     # Prepare the data for the API
@@ -71,12 +92,32 @@ Merci de toujours suivre ce format pour chaque type, fonction ou exception gén�
     )
 
     sol_str = String(response.body)
-
     # Parse the response
     result = JSON.parse(sol_str)
     # Extract the AI's answer (assuming Mistral API format)
     ai_text = result["choices"][1]["message"]["content"]
+    
+    # Ignore tout ce qui précède le premier bloc triple guillemets
+    response = extract_docstring_code_pairs(ai_text)[2]
+        
+    #print(ai_text)
+    #print(response)
 
-    return ai_text
+    return response
 end
+
+
+
+function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
+    ai_text = docstrings(path, tests=tests, doc=doc, apikey=apikey)
+    
+    dir, filename = splitdir(path)
+    name, ext = splitext(filename)
+    outpath = joinpath(dir, "$(name)_docstrings$(ext)")
+    open(outpath, "w") do io
+        write(io, ai_text)
+    end
+    return outpath
+end
+
 
