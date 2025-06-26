@@ -27,10 +27,8 @@ function extract_docstring_code_pairs(ai_text::String)
     return pairs, reponse
 end
 
-
-
 #générate an answer from an IA. 
-function docstrings(path; tests=nothing, doc=nothing, apikey="")
+function CTBase.docstrings(path::String; tests=nothing, doc=nothing, apikey="")
     # Read code file
     code_text = read(path, String)
     # Optionally read tests and doc files
@@ -101,7 +99,7 @@ function Base.showerror(io::IO, e::UnauthorizedCall)
     return print(io, ": ", e.var)
 end
 
-IMPORTANT :  
+IMPORTANT :
 - Ne documente **que** le code fourni ci-dessous, sans ajouter, modifier ou inventer de nouveaux types, fonctions ou exemples.
 - Place chaque docstring juste avant la déclaration correspondante, sans texte entre la docstring et le code.
 
@@ -144,14 +142,13 @@ Respecte strictement ce format pour chaque type, fonction ou exception généré
     return response
 end
 
-
 # filepath: /root/ENSEEIHT/Stage/CTBase.jl/ext/docstrings.jl
 function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
     pairs, ai_text = docstrings(path, tests=tests, doc=doc, apikey=apikey)
 
-    #verrification_code_inchangé
+    #code_unchanged_check
     original_code = read(path, String)
-    verrification_code_inchangé(pairs, original_code)
+    code_unchanged_check(pairs, original_code)
     
     # Supprime toutes les lignes qui ne contiennent que ```
     dir, filename = splitdir(path)
@@ -163,7 +160,7 @@ function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
     return outpath
 end
 
-function verrification_code_inchangé(pairs, original_code::String)
+function code_unchanged_check(pairs, original_code::String; display=true)
     # Reconstruit le code à partir des couples (docstring, code)
     reconstructed = join([code for (doc, code) in pairs], "\n\n")
     # Normalise : retire les espaces et retours à la ligne superflus
@@ -171,7 +168,7 @@ function verrification_code_inchangé(pairs, original_code::String)
     orig_norm = norm(original_code)
     recon_norm = norm(reconstructed)
     if orig_norm != recon_norm
-        println("Le code a changé (différences ignorées : espaces/retours à la ligne).")
+        display && println("Le code a changé (différences ignorées : espaces/retours à la ligne).")
         # Affiche les différences ligne à ligne pour aider à localiser
         orig_lines = split(strip(original_code), '\n')
         recon_lines = split(strip(reconstructed), '\n')
@@ -179,7 +176,7 @@ function verrification_code_inchangé(pairs, original_code::String)
         for i in 1:(maxlen-1)
             orig_line = i <= length(orig_lines) ? orig_lines[i] : ""
             recon_line = i <= length(recon_lines) ? recon_lines[i] : ""
-            if strip(orig_line) != strip(recon_line)
+            if (strip(orig_line) != strip(recon_line)) && display
                 println("Différence à la ligne $i :")
                 println("  original   : ", orig_line)
                 println("  généré     : ", recon_line)

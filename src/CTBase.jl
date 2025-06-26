@@ -14,8 +14,13 @@ julia> const ctNumber = Real
 """
 const ctNumber = Real
 
-docstring(args...; kwargs...) = throw(CTBase.ExtensionError(:JSON, :HTTP))
+#
+docstrings(path::AbstractString; kwargs...) = throw(CTBase.ExtensionError(:JSON, :HTTP))
 
+abstract type AbstractDocstringsAppTag end
+struct DocstringsAppTag <: AbstractDocstringsAppTag end
+docstrings_app(::AbstractDocstringsAppTag) = throw(CTBase.ExtensionError(:JSON, :HTTP))
+docstrings_app() = docstrings_app(DocstringsAppTag())
 
 #
 include("exception.jl")

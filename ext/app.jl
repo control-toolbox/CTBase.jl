@@ -196,7 +196,7 @@ function handle(req)
         end
         commented = ""
         try
-            commented = docstrings(codefile; tests=testsfile, doc=docfile, apikey=user_apikey)[2]
+            commented = CTBase.docstrings(codefile; tests=testsfile, doc=docfile, apikey=user_apikey)[2]
         catch err
             commented = "Erreur lors de la génération : $(err)"
         end
@@ -206,5 +206,8 @@ function handle(req)
     end
 end
 
-println("Ouvre http://localhost:8080 dans ton navigateur")
-HTTP.serve(handle, "127.0.0.1", 8080)
+function CTBase.docstrings_app(::CTBase.DocstringsAppTag)
+    println("Open http://localhost:8080 in your browser.")
+    HTTP.serve(handle, "127.0.0.1", 8080)
+    return nothing
+end

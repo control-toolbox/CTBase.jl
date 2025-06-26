@@ -1,7 +1,6 @@
-using Test
-
 function test_docstrings()
-    @testset "verrification_code_inchangé" begin
+
+    @testset "code_unchanged_check" begin
         original_code = """
         function add(x, y)
             return x + y
@@ -12,7 +11,7 @@ function test_docstrings()
         pairs = [
             ("add", "function add(x, y)\n    return x + y\nend")
         ]
-        res = verrification_code_inchangé(pairs, original_code)
+        res = CTBaseDocstring.code_unchanged_check(pairs, original_code; display=false)
         @test res == 0
 
 
@@ -20,7 +19,7 @@ function test_docstrings()
         pairs_modif = [
             ("add", "function add(x, y)\n    return x - y\nend")
         ]
-        res_modif = verrification_code_inchangé(pairs_modif, original_code)
+        res_modif = CTBaseDocstring.code_unchanged_check(pairs_modif, original_code; display=false)
         @test res_modif == 1
 
     end
@@ -49,10 +48,11 @@ function test_docstrings()
             ("subtract", "function subtract(x, y)\n    return x - y\nend")
         ]
         
-        pairs = extract_docstring_code_pairs(ai_text)
+        pairs = CTBaseDocstring.extract_docstring_code_pairs(ai_text)
         
         @test pairs == expected_pairs
         
     end
+
 end
 
