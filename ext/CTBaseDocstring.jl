@@ -1,9 +1,5 @@
 module CTBaseDocstring
 
-#
-using DocStringExtensions
-using MLStyle 
-
 using HTTP
 using JSON 
 

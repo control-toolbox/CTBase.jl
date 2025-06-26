@@ -1,6 +1,3 @@
-using HTTP
-using JSON
-
 html = """
 <!DOCTYPE html>
 <html lang='fr'>
@@ -199,7 +196,7 @@ function handle(req)
         end
         commented = ""
         try
-            commented = docstrings(codefile; tests=testsfile, doc=docfile, apikey=user_apikey)
+            commented = docstrings(codefile; tests=testsfile, doc=docfile, apikey=user_apikey)[2]
         catch err
             commented = "Erreur lors de la génération : $(err)"
         end

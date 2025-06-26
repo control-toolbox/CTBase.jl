@@ -1,12 +1,12 @@
 function extract_docstring_code_pairs(ai_text::String)
-    
+    response = ai_text  # Toujours initialiser avec tout le texte
     start_idx = findfirst("\"\"\"", ai_text)
     if start_idx !== nothing
         response = ai_text[start_idx[1]:end]
     end
-    
+
     # Regex pour capturer chaque bloc docstring + code qui suit
-    pattern = r"\"\"\"(.*?)\"\"\"\s*([\s\S]*?)(?=(\"\"\"|$))"
+    pattern = r"\"\"\"\s*(.*?)\s*\"\"\"\s*([\s\S]*?)(?=(\"\"\"|$))"s
     pairs = []
     for m in eachmatch(pattern, response)
         doc = strip(m.captures[1])
@@ -19,8 +19,14 @@ function extract_docstring_code_pairs(ai_text::String)
         reponse *= "\n\"\"\"\n$doc\n\"\"\"\n$code\n"
     end
 
-    return [pairs, response]
+    # Retire tout ce qui est après le dernier bloc ```
+    idx = findlast("```", reponse)
+    if idx !== nothing
+        reponse = reponse[1:idx[1]-1]
+    end
+    return pairs, reponse
 end
+
 
 
 #générate an answer from an IA. 
@@ -41,8 +47,8 @@ prompt = """
 Pour chaque type, fonction ou exception Julia fourni dans le code ci-dessous, génère une docstring Julia complète au format Documenter.jl, en respectant les points suivants :
 
 - La docstring doit être placée **juste au-dessus** de la déclaration correspondante (type, struct, fonction, exception).
-- Pour les **types et exceptions**, commence la docstring par `\"\"\"` suivi de `\$(TYPEDEF)` sur la première ligne.
-- Pour les **fonctions**, commence la docstring par `\"\"\"` suivi de `\$(TYPEDSIGNATURES)` sur la première ligne.
+- Pour les **types et exceptions**, commence la docstring par `\"\"` suivi de `\$(TYPEDEF)` sur la première ligne.
+- Pour les **fonctions**, commence la docstring par `\"\"` suivi de `\$(TYPEDSIGNATURES)` sur la première ligne.
 - Donne une **description claire et concise** du rôle du type, de la fonction ou de l’exception.
 - Pour les structs et exceptions, ajoute une section `# Fields` listant chaque champ avec son type et une courte description.
 - Pour les fonctions, ajoute une section `# Arguments` listant chaque argument, puis une section `# Returns` si pertinent.
@@ -130,7 +136,7 @@ Respecte strictement ce format pour chaque type, fonction ou exception généré
     ai_text = result["choices"][1]["message"]["content"]
     
     # Ignore tout ce qui précède le premier bloc triple guillemets
-    response = extract_docstring_code_pairs(ai_text)[2]
+    response = extract_docstring_code_pairs(ai_text)
         
     #print(ai_text)
     #print(response)
@@ -139,12 +145,15 @@ Respecte strictement ce format pour chaque type, fonction ou exception généré
 end
 
 
-
 # filepath: /root/ENSEEIHT/Stage/CTBase.jl/ext/docstrings.jl
 function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
-    ai_text = docstrings(path, tests=tests, doc=doc, apikey=apikey)
+    pairs, ai_text = docstrings(path, tests=tests, doc=doc, apikey=apikey)
+
+    #verrification_code_inchangé
+    original_code = read(path, String)
+    verrification_code_inchangé(pairs, original_code)
+    
     # Supprime toutes les lignes qui ne contiennent que ```
-    ai_text = join(filter(line -> strip(line) != "```", split(ai_text, '\n')), "\n")
     dir, filename = splitdir(path)
     name, ext = splitext(filename)
     outpath = joinpath(dir, "$(name)_docstrings$(ext)")
@@ -152,4 +161,32 @@ function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
         write(io, ai_text)
     end
     return outpath
+end
+
+function verrification_code_inchangé(pairs, original_code::String)
+    # Reconstruit le code à partir des couples (docstring, code)
+    reconstructed = join([code for (doc, code) in pairs], "\n\n")
+    # Normalise : retire les espaces et retours à la ligne superflus
+    norm = s -> join(split(strip(s)))
+    orig_norm = norm(original_code)
+    recon_norm = norm(reconstructed)
+    if orig_norm != recon_norm
+        println("Le code a changé (différences ignorées : espaces/retours à la ligne).")
+        # Affiche les différences ligne à ligne pour aider à localiser
+        orig_lines = split(strip(original_code), '\n')
+        recon_lines = split(strip(reconstructed), '\n')
+        maxlen = max(length(orig_lines), length(recon_lines))
+        for i in 1:(maxlen-1)
+            orig_line = i <= length(orig_lines) ? orig_lines[i] : ""
+            recon_line = i <= length(recon_lines) ? recon_lines[i] : ""
+            if strip(orig_line) != strip(recon_line)
+                println("Différence à la ligne $i :")
+                println("  original   : ", orig_line)
+                println("  généré     : ", recon_line)
+            end
+        end
+        return 1
+    else
+        return 0
+    end
 end
