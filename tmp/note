@@ -1,0 +1,14 @@
+CTBase GPT
+faire un module
+
+
+const CTFlowsODE = Base.get_extension(CTFlows, :CTFlowsODE) # to test functions from CTFlowsODE not in CTFlows
+
+
+Verrifier que le code est inchangé
+
+
+
+clé API Gémini : AIzaSyC775HA4elJRFFQyPVaxM2GgxWExngiT-g
+
+AIzaSyC775HA4elJRFFQyPVaxM2GgxWExngiT-g
