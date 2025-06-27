@@ -120,6 +120,7 @@ html = """
             <button type="submit">Générer la documentation</button>
         </form>
         <div class="output" id="output"></div>
+        <button type="button" id="quit">Quitter l'app</button>
     </div>
     <script>
         // Fonction pour ajuster dynamiquement la hauteur des textarea
@@ -156,9 +157,19 @@ html = """
             });
             const text = await resp.text();
             document.getElementById('output').textContent = text;
-            // Ajuste la hauteur de la div output si besoin (optionnel)
-            // document.getElementById('output').style.height = 'auto';
         };
+
+        document.getElementById('quit').onclick = function () {
+            document.getElementById('input').value = "";
+            document.getElementById('tests').value = "";
+            document.getElementById('doc').value = "";
+            document.getElementById('output').textContent = "Session cleared. Closing...";
+            setTimeout(function() {
+                window.close();
+            }, 700);
+        };
+
+        
     </script>
 </body>
 </html>
@@ -201,6 +212,13 @@ function handle(req)
             commented = "Erreur lors de la génération : $(err)"
         end
         return HTTP.Response(200, ["Content-Type" => "text/plain"], commented)
+    
+    elseif req.target == "/quit"
+        @async begin
+            sleep(0.5)
+            exit() 
+        end
+        return HTTP.Response(200, ["Content-Type" => "text/plain"], "Server shutting down.")
     else
         return HTTP.Response(404, ["Content-Type" => "text/plain"], "Not found")
     end

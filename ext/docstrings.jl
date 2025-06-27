@@ -1,3 +1,4 @@
+
 function extract_docstring_code_pairs(ai_text::String)
     response = ai_text  # Toujours initialiser avec tout le texte
     start_idx = findfirst("\"\"\"", ai_text)
@@ -42,19 +43,20 @@ function CTBase.docstrings(path::String; tests=nothing, doc=nothing, apikey="")
 
     # Build a precise prompt for the AI
 prompt = """
-Pour chaque type, fonction ou exception Julia fourni dans le code ci-dessous, génère une docstring Julia complète au format Documenter.jl, en respectant les points suivants :
+For each Julia type, function, or exception provided in the code below, generate a complete Julia docstring formatted according to Documenter.jl, following these rules:
 
-- La docstring doit être placée **juste au-dessus** de la déclaration correspondante (type, struct, fonction, exception).
-- Pour les **types et exceptions**, commence la docstring par `\"\"` suivi de `\$(TYPEDEF)` sur la première ligne.
-- Pour les **fonctions**, commence la docstring par `\"\"` suivi de `\$(TYPEDSIGNATURES)` sur la première ligne.
-- Donne une **description claire et concise** du rôle du type, de la fonction ou de l’exception.
-- Pour les structs et exceptions, ajoute une section `# Fields` listant chaque champ avec son type et une courte description.
-- Pour les fonctions, ajoute une section `# Arguments` listant chaque argument, puis une section `# Returns` si pertinent.
-- Ajoute une section `# Example` montrant un exemple d’utilisation dans un bloc ```julia-repl.
-- **N’ajoute rien d’autre** que les docstrings et le code fourni : ne crée pas de nouveaux types, fonctions ou exemples non présents dans le code.
+- The docstring must be placed **immediately above** the corresponding declaration (type, struct, function, or exception).
+- For **types and exceptions**, begin the docstring with `\"\"\"` followed by `\$(TYPEDEF)` on the first line.
+- For **functions**, begin the docstring with `\"\"\"` followed by `\$(TYPEDSIGNATURES)` on the first line.
+- Provide a **clear and concise** description of what the type, function, or exception does.
+- For structs and exceptions, include a `# Fields` section listing each field with its type and a short description.
+- For functions, include a `# Arguments` section listing each argument, and a `# Returns` section if applicable.
+- Add a `# Example` section showing a usage example inside a ```julia-repl block.
+- **Do not add anything else** beyond the docstrings and the provided code: do not create new types, functions, or examples that are not already in the code.
 
-**Exemple attendu pour un type ou une exception** :
+**Expected example for a type or exception**:
 
+```julia
 \"\"\"
 \$(TYPEDEF)
 
@@ -74,9 +76,11 @@ ERROR: UnauthorizedCall: user does not have permission
 struct UnauthorizedCall <: CTException
     var::String
 end
+```
 
-**Exemple attendu pour une fonction** :
+**Expected example for a function**:
 
+```julia
 \"\"\"
 \$(TYPEDSIGNATURES)
 
@@ -99,17 +103,18 @@ function Base.showerror(io::IO, e::UnauthorizedCall)
     return print(io, ": ", e.var)
 end
 
-IMPORTANT :
-- Ne documente **que** le code fourni ci-dessous, sans ajouter, modifier ou inventer de nouveaux types, fonctions ou exemples.
-- Place chaque docstring juste avant la déclaration correspondante, sans texte entre la docstring et le code.
+IMPORTANT:  
+- Only document the code provided below. Do **not** add, modify, or invent new types, functions, or examples.
+- Place each docstring immediately above its corresponding declaration, with no text in between.
 
-Voici le code à documenter :
-$code_text
+Here is the code to document:
+\$code_text
 
-$(tests !== nothing ? "\nVoici les tests associés :\n$tests_text" : "")
-$(doc !== nothing ? "\nVoici la documentation existante :\n$doc_text" : "")
+\$(tests !== nothing ? "\nHere are some related tests:\n\$tests_text" : "")
+\$(context !== nothing ? "\nHere is some additional context to help understand the code:\n\$context_text" : "")
 
-Respecte strictement ce format pour chaque type, fonction ou exception générée.
+Strictly follow this format for each type, function, or exception documented.
+
 """
 
     # Prepare the data for the API
