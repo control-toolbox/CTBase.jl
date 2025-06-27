@@ -27,10 +27,10 @@ end
 @testset verbose = true showtiming = true "Base" begin
     for name in (
         # :code_quality, 
-        # :default, 
-        # :description, 
-        # :exceptions, 
-        # :utils,
+        :default, 
+        :description, 
+        :exceptions, 
+        :utils,
         :docstrings,
         )
         @testset "$(name)" begin

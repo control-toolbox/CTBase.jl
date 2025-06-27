@@ -49,6 +49,10 @@ end
         pairs, _ = CTBaseDocstring.extract_docstring_code_pairs(ai_text)
         
         @test pairs == expected_pairs
+    
+    false_pair = []
+
+        @test pairs != false_pair
         
     end
 
