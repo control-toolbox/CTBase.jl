@@ -25,30 +25,28 @@ function test_docstrings()
     end
     @testset "extract_docstring_code_pairs" begin
         
-        # Test avec un exemple de texte
         ai_text = """
-        Here is the code for the function `add`:
+\"\"\"
+Adds two numbers.
+\"\"\"
+function add(x, y)
+    return x + y
+end
 
-        ```julia
-        function add(x, y)
-            return x + y
-        end
-        ```
-        And here is another function `subtract`:
+\"\"\"
+Subtracts two numbers.
+\"\"\"
+function subtract(x, y)
+    return x - y
+end
+"""
 
-        ```julia
-        function subtract(x, y)
-            return x - y
-        end
-        ```
-        """
+    expected_pairs = [
+        ("Adds two numbers.", "function add(x, y)\n    return x + y\nend"),
+        ("Subtracts two numbers.", "function subtract(x, y)\n    return x - y\nend")
+    ]
         
-        expected_pairs = [
-            ("add", "function add(x, y)\n    return x + y\nend"),
-            ("subtract", "function subtract(x, y)\n    return x - y\nend")
-        ]
-        
-        pairs = CTBaseDocstring.extract_docstring_code_pairs(ai_text)
+        pairs, _ = CTBaseDocstring.extract_docstring_code_pairs(ai_text)
         
         @test pairs == expected_pairs
         
