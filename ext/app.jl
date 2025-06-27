@@ -1,9 +1,9 @@
 html = """
 <!DOCTYPE html>
-<html lang='fr'>
+<html lang='en'>
 <head>
     <meta charset='UTF-8'>
-    <title>Générateur de docstrings Julia</title>
+    <title>Julia Docstring Generator</title>
     <style>
         body {
             background: #23272f;
@@ -99,41 +99,41 @@ html = """
 </head>
 <body>
     <div class="container">
-        <h2>Générateur de docstrings Julia</h2>
+        <h2>Julia Docstring Generator</h2>
         <div class="api">
-            <label for="apikey">Clé API Mistral :</label>
-            <input type="password" id="apikey" placeholder="Entrez votre clé API ici" required>
+            <label for="apikey">Mistral API Key:</label>
+            <input type="password" id="apikey" placeholder="Enter your API key here" required>
         </div>
         <form id="form">
-            <label for="input">Code Julia</label>
-            <textarea id="input" placeholder="Colle ici ton code Julia"></textarea>
+            <label for="input">Julia Code</label>
+            <textarea id="input" placeholder="Paste your Julia code here"></textarea>
             <div class="flex-row">
                 <div class="flex-col">
-                    <label for="tests">Tests Julia (optionnel)</label>
-                    <textarea id="tests" placeholder="Colle ici tes tests Julia"></textarea>
+                    <label for="tests">Julia Tests (optional)</label>
+                    <textarea id="tests" placeholder="Paste your Julia tests here"></textarea>
                 </div>
                 <div class="flex-col">
-                    <label for="doc">Documentation existante (optionnel)</label>
-                    <textarea id="doc" placeholder="Colle ici la documentation existante"></textarea>
+                    <label for="doc">Context of the code(optional)</label>
+                    <textarea id="doc" placeholder="Paste any context here"></textarea>
                 </div>
             </div>
-            <button type="submit">Générer la documentation</button>
+            <button type="submit">Generate Documentation</button>
         </form>
         <div class="output" id="output"></div>
-        <button type="button" id="quit">Quitter l'app</button>
+        <button type="button" id="quit">Quit the app</button>
     </div>
     <script>
-        // Fonction pour ajuster dynamiquement la hauteur des textarea
+        // Function to dynamically resize textareas
         function autoResizeTextarea(el) {
             el.style.height = 'auto';
             el.style.height = (el.scrollHeight) + 'px';
         }
-        // Applique l'ajustement sur tous les textarea à l'input
+        // Apply resizing to all textareas on input
         document.querySelectorAll('textarea').forEach(function(textarea) {
             textarea.addEventListener('input', function() {
                 autoResizeTextarea(this);
             });
-            // Ajuste à l'initialisation si du texte est déjà présent
+            // Adjust on load if text is already present
             autoResizeTextarea(textarea);
         });
 
@@ -144,10 +144,10 @@ html = """
             const doc = document.getElementById('doc').value;
             const apikey = document.getElementById('apikey').value;
             if (!apikey) {
-                document.getElementById('output').textContent = "Merci de renseigner votre clé API.";
+                document.getElementById('output').textContent = "Please provide your API key.";
                 return;
             }
-            document.getElementById('output').textContent = "Génération en cours...";
+            document.getElementById('output').textContent = "Generating...";
             const resp = await fetch('/run', {
                 method: 'POST',
                 headers: {
@@ -164,16 +164,42 @@ html = """
             document.getElementById('tests').value = "";
             document.getElementById('doc').value = "";
             document.getElementById('output').textContent = "Session cleared. Closing...";
-            setTimeout(function() {
-                window.close();
-            }, 700);
+            fetch('/quit').then(() => {
+                setTimeout(function() {
+                    window.close();
+                }, 700);
+            });
         };
 
-        
     </script>
 </body>
 </html>
 """
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Handle an incoming HTTP request and return a suitable response.
+
+# Arguments
+
+- `req::Request`: The request object containing the requested path, method, and body.
+
+# Returns
+
+- `HTTP.Response`: An HTTP response object containing the response status code, headers, and body.
+
+# Example
+
+```julia-repl
+julia> req = Request("", HTTP.GET, IOBuffer(""))
+
+julia> handle(req)
+HTTP.Response(404, ["Content-Type" => "text/plain"], "Not found")
+```
+"""
+
 
 function handle(req)
     if req.target == "/"
@@ -207,7 +233,7 @@ function handle(req)
         end
         commented = ""
         try
-            commented = CTBase.docstrings(codefile; tests=testsfile, doc=docfile, apikey=user_apikey)[2]
+            commented = CTBase.docstrings(codefile; tests=testsfile, context=docfile, apikey=user_apikey)[2]
         catch err
             commented = "Erreur lors de la génération : $(err)"
         end
@@ -223,6 +249,19 @@ function handle(req)
         return HTTP.Response(404, ["Content-Type" => "text/plain"], "Not found")
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Start the simple API server and run it in the background.
+
+# Example
+
+```julia-repl
+julia> CTBase.docstrings_app()
+Open http://localhost:8080 in your browser.
+```
+"""
 
 function CTBase.docstrings_app(::CTBase.DocstringsAppTag)
     println("Open http://localhost:8080 in your browser.")

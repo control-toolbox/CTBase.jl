@@ -1,4 +1,17 @@
 
+"""
+$(TYPEDEF)
+
+A type representing a tuple of a documentation string and the code that follows it.
+
+# Example
+
+```julia-repl
+julia> pairs, remaining_code = extract_docstring_code_pairs("...")
+[expected output]
+```
+"""
+
 function extract_docstring_code_pairs(ai_text::String)
     response = ai_text  # Toujours initialiser avec tout le texte
     start_idx = findfirst("\"\"\"", ai_text)
@@ -28,13 +41,29 @@ function extract_docstring_code_pairs(ai_text::String)
     return pairs, reponse
 end
 
-#générate an answer from an IA. 
-function CTBase.docstrings(path::String; tests=nothing, doc=nothing, apikey="")
+"""
+$(TYPESIGNATURES)
+
+Reads the code file and processes it to generate Julia docstrings.
+
+# Arguments
+
+- `path` :: Union{String, AbstractPath} : The path to the code file to process.
+- `tests` :: Union{String, Nothing} : Optional test code for the generated docstrings.
+- `context` :: Union{String, Nothing} : Optional context code for the generated docstrings.
+- `apikey` :: Union{String, Nothing} : Optional API key for the AI used to generate docstrings.
+
+# Returns
+
+- `String` : A string containing the generated docstrings.
+"""
+
+function CTBase.docstrings(path::String; tests=nothing, context=nothing, apikey="")
     # Read code file
     code_text = read(path, String)
     # Optionally read tests and doc files
     tests_text = tests !== nothing ? read(tests, String) : ""
-    doc_text = doc !== nothing ? read(doc, String) : ""
+    context_text = context !== nothing ? read(context, String) : ""
     url = "https://api.mistral.ai/v1/chat/completions"
     headers = [
         "Authorization" => "Bearer $apikey",
@@ -51,70 +80,68 @@ For each Julia type, function, or exception provided in the code below, generate
 - Provide a **clear and concise** description of what the type, function, or exception does.
 - For structs and exceptions, include a `# Fields` section listing each field with its type and a short description.
 - For functions, include a `# Arguments` section listing each argument, and a `# Returns` section if applicable.
-- Add a `# Example` section showing a usage example inside a ```julia-repl block.
+- Add a `# Example` section showing a usage example inside a \`\`\`julia-repl block.
 - **Do not add anything else** beyond the docstrings and the provided code: do not create new types, functions, or examples that are not already in the code.
 
-**Expected example for a type or exception**:
+To ensure consistency, **complete the following template for each documented element** (replace only the blank areas `[...]` accordingly):
 
-```julia
+For a **type or exception**:
+\`\`\`julia
 \"\"\"
 \$(TYPEDEF)
 
-Exception thrown when a function call is not authorized in the current context or with the given arguments.
+[One-sentence description of what this type or exception represents.]
 
 # Fields
 
-- `var::String`: A message explaining why the call is unauthorized.
+- `[field_name]::[Type]`: [Short description of the field.]
 
 # Example
 
-```julia-repl
-julia> throw(UnauthorizedCall("user does not have permission"))
-ERROR: UnauthorizedCall: user does not have permission
-```
+\`\`\`julia-repl
+julia> [usage example]
+[expected output]
+\`\`\`
 \"\"\"
-struct UnauthorizedCall <: CTException
-    var::String
-end
-```
+[struct or exception declaration]
+\`\`\`
 
-**Expected example for a function**:
-
-```julia
+For a **function**:
+\`\`\`julia
 \"\"\"
 \$(TYPEDSIGNATURES)
 
-Customizes the printed message of the exception.
+[One-sentence description of what this function does.]
 
 # Arguments
 
-- `io::IO`: The IO stream to print to.
-- `e::UnauthorizedCall`: The exception instance.
+- `[arg_name]::[Type]`: [Description of the argument.]
+
+# Returns
+
+- `[return_value]::[Type]`: [Description of what is returned.]
 
 # Example
 
-```julia-repl
-julia> showerror(stdout, UnauthorizedCall("user does not have permission"))
-UnauthorizedCall: user does not have permission
-```
+\`\`\`julia-repl
+julia> [usage example]
+[expected output]
+\`\`\`
 \"\"\"
-function Base.showerror(io::IO, e::UnauthorizedCall)
-    printstyled(io, "UnauthorizedCall"; color=:red, bold=true)
-    return print(io, ": ", e.var)
-end
+[function declaration]
+\`\`\`
 
 IMPORTANT:  
 - Only document the code provided below. Do **not** add, modify, or invent new types, functions, or examples.
 - Place each docstring immediately above its corresponding declaration, with no text in between.
 
 Here is the code to document:
-\$code_text
+\\$code_text
 
-\$(tests !== nothing ? "\nHere are some related tests:\n\$tests_text" : "")
-\$(context !== nothing ? "\nHere is some additional context to help understand the code:\n\$context_text" : "")
+\\$(tests !== nothing ? "\nHere are some related tests:\n\\$tests_text" : "")
+\\$(context !== nothing ? "\nHere is some additional context to help understand the code:\n\\$context_text" : "")
 
-Strictly follow this format for each type, function, or exception documented.
-
+Strictly follow this format and complete the template above for each type, function, or exception.
 """
 
     # Prepare the data for the API
@@ -147,9 +174,22 @@ Strictly follow this format for each type, function, or exception documented.
     return response
 end
 
-# filepath: /root/ENSEEIHT/Stage/CTBase.jl/ext/docstrings.jl
-function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
-    pairs, ai_text = docstrings(path, tests=tests, doc=doc, apikey=apikey)
+
+"""
+$(TYPEDEF)
+
+A function that parses and reformats the docstrings for a given source file.
+
+# Example
+
+```julia-repl
+julia> docstrings_file("path/to/your/source/file.jl")
+"path/to/your/source/file_docstrings.jl"
+```
+"""
+
+function docstrings_file(path; tests=nothing, context=nothing, apikey="")
+    pairs, ai_text = docstrings(path, tests=tests, context=context, apikey=apikey)
 
     #code_unchanged_check
     original_code = read(path, String)
@@ -164,6 +204,27 @@ function docstrings_file(path; tests=nothing, doc=nothing, apikey="")
     end
     return outpath
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Checks if the provided code is unchanged after parsing and reformatting the docstrings. Returns 1 if the code has changed, otherwise 0.
+
+# Arguments
+- `pairs`: A tuple of pairs containing (docstring, code) couples.
+- `original_code`: The original code as a string.
+- `display`: A flag that determines whether to display the differences between the original and reformatted code. Default is true.
+
+# Returns
+- `Int`: 1 if the code has changed, otherwise 0.
+
+# Example
+
+```julia-repl
+julia> code_unchanged_check(pairs, original_code)
+1
+```
+"""
 
 function code_unchanged_check(pairs, original_code::String; display=true)
     # Reconstruit le code à partir des couples (docstring, code)
