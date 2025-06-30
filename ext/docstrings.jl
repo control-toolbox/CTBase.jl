@@ -42,8 +42,6 @@ function extract_docstring_code_pairs(ai_text::String)
 end
 
 """
-$(TYPESIGNATURES)
-
 Reads the code file and processes it to generate Julia docstrings.
 
 # Arguments
@@ -206,7 +204,6 @@ function docstrings_file(path; tests=nothing, context=nothing, apikey="")
 end
 
 """
-$(TYPEDSIGNATURES)
 
 Checks if the provided code is unchanged after parsing and reformatting the docstrings. Returns 1 if the code has changed, otherwise 0.
 

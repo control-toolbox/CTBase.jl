@@ -178,7 +178,6 @@ html = """
 
 
 """
-$(TYPEDSIGNATURES)
 
 Handle an incoming HTTP request and return a suitable response.
 
@@ -251,8 +250,6 @@ function handle(req)
 end
 
 """
-$(TYPEDSIGNATURES)
-
 Start the simple API server and run it in the background.
 
 # Example
