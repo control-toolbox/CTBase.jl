@@ -11,7 +11,7 @@ function test_docstrings()
         pairs = [
             ("add", "function add(x, y)\n    return x + y\nend")
         ]
-        res = CTBaseDocstring.code_unchanged_check(pairs, original_code; display=false)
+        res = CTBaseDocstrings.code_unchanged_check(pairs, original_code; display=false)
         @test res == 0
 
 
@@ -19,7 +19,7 @@ function test_docstrings()
         pairs_modif = [
             ("add", "function add(x, y)\n    return x - y\nend")
         ]
-        res_modif = CTBaseDocstring.code_unchanged_check(pairs_modif, original_code; display=false)
+        res_modif = CTBaseDocstrings.code_unchanged_check(pairs_modif, original_code; display=false)
         @test res_modif == 1
 
     end
@@ -46,7 +46,7 @@ end
         ("Subtracts two numbers.", "function subtract(x, y)\n    return x - y\nend")
     ]
         
-        pairs, _ = CTBaseDocstring.extract_docstring_code_pairs(ai_text)
+        pairs, _ = CTBaseDocstrings.extract_docstring_code_pairs(ai_text)
         
         @test pairs == expected_pairs
     

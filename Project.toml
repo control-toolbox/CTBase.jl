@@ -11,7 +11,7 @@ HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 
 [extensions]
-CTBaseDocstring = ["HTTP","JSON"]
+CTBaseDocstrings = ["HTTP","JSON"]
 
 [compat]
 DocStringExtensions = "0.9"

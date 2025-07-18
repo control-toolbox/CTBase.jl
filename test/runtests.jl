@@ -7,7 +7,7 @@ using Documenter
 using HTTP
 using JSON
 
-const CTBaseDocstring = Base.get_extension(CTBase, :CTBaseDocstring) # to test functions from CTFlowsODE not in CTFlows
+const CTBaseDocstrings = Base.get_extension(CTBase, :CTBaseDocstrings) # to test functions from CTFlowsODE not in CTFlows
 
 # Macro to check if an expression is type-stable and inferred correctly
 macro test_inferred(expr)
