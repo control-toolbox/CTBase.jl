@@ -1,13 +1,22 @@
 """
 $(TYPEDSIGNATURES)
 
-A type representing a tuple of a documentation string and the code that follows it.
+Extracts pairs of docstrings and code blocks from the given AI-generated text.
+
+# Arguments
+
+- `ai_text::String`: The full string response from the AI, possibly containing multiple docstring-code pairs.
+
+# Returns
+
+- `(pairs, reponse)::Tuple{Vector{Tuple{String,String}}, String}`: A tuple containing a vector of `(docstring, code)` pairs and a string reconstruction with triple-quoted docstrings prepended.
 
 # Example
 
 ```julia-repl
-julia> pairs, remaining_code = extract_docstring_code_pairs("...")
-[expected output]
+julia> text = "\"\"\"Docstring\"\"\"\nfunction f(x)\n  x + 1\nend\n";
+julia> extract_docstring_code_pairs(text)
+(("Docstring", "function f(x)\n  x + 1\nend"), ...)
 ```
 """
 function extract_docstring_code_pairs(ai_text::String)
@@ -42,18 +51,25 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Reads the code file and processes it to generate Julia docstrings.
+Sends code and optional context to the Mistral API and extracts generated docstrings.
 
 # Arguments
 
-- `path` :: Union{String, AbstractPath} : The path to the code file to process.
-- `tests` :: Union{String, Nothing} : Optional test code for the generated docstrings.
-- `context` :: Union{String, Nothing} : Optional context code for the generated docstrings.
-- `apikey` :: Union{String, Nothing} : Optional API key for the AI used to generate docstrings.
+- `path::String`: Path to the Julia source file.
+- `tests`: Optional path to a test file (default `nothing`).
+- `context`: Optional path to a context file for better generation (default `nothing`).
+- `apikey::String`: Mistral API key (default empty).
 
 # Returns
 
-- `String` : A string containing the generated docstrings.
+- `(pairs, response)::Tuple{Vector{Tuple{String, String}}, String}`: A tuple containing extracted docstring-code pairs and a reconstructed version of the code with inserted docstrings.
+
+# Example
+
+```julia-repl
+julia> CTBase.docstrings("example.jl", apikey="sk-...")
+([("Docstring", "function f(x) ... end")], "...full reconstructed text...")
+```
 """
 function CTBase.docstrings(path::String; tests=nothing, context=nothing, apikey="")
 
@@ -103,13 +119,24 @@ end
 """
 $(TYPEDSIGNATURES)
 
-A function that parses and reformats the docstrings for a given source file.
+Generates a new file with inserted docstrings and saves it to disk.
+
+# Arguments
+
+- `path`: Path to the source Julia file.
+- `tests`: Optional path to test file (default `nothing`).
+- `context`: Optional path to context file (default `nothing`).
+- `apikey`: API key for Mistral (default empty string).
+
+# Returns
+
+- `outpath::String`: Path to the new file with `_docstrings` appended to the original filename.
 
 # Example
 
 ```julia-repl
-julia> docstrings_file("path/to/your/source/file.jl")
-"path/to/your/source/file_docstrings.jl"
+julia> docstrings_file("myfile.jl", apikey="sk-...")
+"myfile_docstrings.jl"
 ```
 """
 function docstrings_file(path; tests=nothing, context=nothing, apikey="")
@@ -135,21 +162,23 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Checks if the provided code is unchanged after parsing and reformatting the docstrings. Returns 1 if the code has changed, otherwise 0.
+Checks whether the generated docstring/code blocks altered the original code.
 
 # Arguments
-- `pairs`: A tuple of pairs containing (docstring, code) couples.
-- `original_code`: The original code as a string.
-- `display`: A flag that determines whether to display the differences between the original and reformatted code. Default is true.
+
+- `pairs`: A vector of `(docstring, code)` pairs.
+- `original_code::String`: The original source code as a string.
+- `display::Bool`: Whether to display line-by-line differences if any (default `true`).
 
 # Returns
-- `Int`: 1 if the code has changed, otherwise 0.
+
+- `code_changed::Int`: Returns `1` if the code was changed, `0` otherwise.
 
 # Example
 
 ```julia-repl
-julia> code_unchanged_check(pairs, original_code)
-1
+julia> code_unchanged_check([("doc", "function f() end")], "function f() end")
+0
 ```
 """
 function code_unchanged_check(pairs, original_code::String; display=true)

@@ -1,3 +1,23 @@
+"""
+$(TYPEDSIGNATURES)
+
+Returns the HTML string for the Julia Docstrings Prompt Generator web app.
+
+This HTML includes the structure, layout, and style definitions required for a client-side interface
+with dark/light mode support, tabs for input areas, and interactive elements.
+
+# Returns
+
+- `html::String`: A complete HTML string to be served as the main page of the application.
+
+# Example
+
+```julia-repl
+julia> html = html_code_doc_app();
+julia> occursin("DOCTYPE html", html)
+true
+```
+"""
 function html_code_doc_app()
 html = """
 <!DOCTYPE html>
@@ -624,6 +644,28 @@ end`;
     return html
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Handles HTTP requests to serve the web app interface, process user-submitted code, and shut down the server.
+
+# Arguments
+
+- `req`: An HTTP request object representing an incoming request to the server.
+
+# Returns
+
+- `response::HTTP.Response`: An appropriate HTTP response depending on the request path and method.
+
+# Example
+
+```julia-repl
+julia> using HTTP
+julia> req = HTTP.Request("GET", "/");
+julia> resp = handled_doc_app(req)
+HTTP.Response(200 OK)
+```
+"""
 function handled_doc_app(req)
     if req.target == "/"
         return HTTP.Response(200, ["Content-Type" => "text/html"], html_code_doc_app())
@@ -687,6 +729,28 @@ function handled_doc_app(req)
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Launches the Julia Docstrings Generator web app on localhost.
+
+Starts an HTTP server on port 8080 and prints the local URL for access.
+
+# Arguments
+
+- `::CTBase.DocstringsAppTag`: A dispatch tag used to identify this application.
+
+# Returns
+
+- `nothing`: This function runs the server and does not return a result.
+
+# Example
+
+```julia-repl
+julia> CTBase.doc_app(CTBase.DocstringsAppTag())
+Open http://localhost:8080 in your browser.
+```
+"""
 function CTBase.doc_app(::CTBase.DocstringsAppTag)
     println("Open http://localhost:8080 in your browser.")
     HTTP.serve(handled_doc_app, "127.0.0.1", 8080)
