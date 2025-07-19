@@ -52,10 +52,8 @@ DocstringsAppTag()
 """
 struct DocstringsAppTag <: AbstractDocstringsAppTag end
 
-docstrings_app(::AbstractDocstringsAppTag) = throw(CTBase.ExtensionError(:JSON, :HTTP))
-docstrings_app() = docstrings_app(DocstringsAppTag())
-prompt_app(::AbstractDocstringsAppTag) = throw(CTBase.ExtensionError(:JSON, :HTTP))
-prompt_app() = prompt_app(DocstringsAppTag())
+doc_app(::AbstractDocstringsAppTag) = throw(CTBase.ExtensionError(:JSON, :HTTP))
+doc_app() = doc_app(DocstringsAppTag())
 
 #
 include("exception.jl")
