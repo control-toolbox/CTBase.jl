@@ -1,19 +1,4 @@
-"""
-$(TYPEDSIGNATURES)
-
-Returns the HTML source code for the Julia Docstrings Generator web application.
-
-# Returns
-
-- `html::String`: A string containing the full HTML document used to render the web interface.
-
-# Example
-
-```julia-repl
-julia> html = html_code_docstrings_app();
-```
-"""
-function html_code_promt_app()
+function html_code_doc_app()
 html = """
 <!DOCTYPE html>
 <html lang='en'>
@@ -50,6 +35,11 @@ html = """
         body.light {
             background: var(--bg-light);
             color: var(--text-light);
+        }
+        body.light input[type="password"] {
+            background: var(--bg-light);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
         }
         .container {
             max-width: 900px;
@@ -116,7 +106,7 @@ html = """
             color: #10a37f;
             border-bottom: 2px solid var(--bg-output-light);
         }
-        textarea {
+        input[type="password"], textarea {
             width: 100%;
             background: var(--bg-dark);
             color: var(--text-dark);
@@ -133,6 +123,17 @@ html = """
             /* HIDE all textareas by default */
             display: none;
         }
+        input[type="password"] {
+            min-width: 200px;
+            max-width: 200px;
+            min-height: 30px;
+            max-height: 100px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            display: inline;
+        }
         textarea.active {
             /* SHOW only the active textarea */
             display: block;
@@ -142,7 +143,7 @@ html = """
             color: var(--text-light);
             border: 1px solid var(--border-light);
         }
-        textarea:focus {
+        input[type="password"]:focus, textarea:focus {
             border: 1.5px solid #10a37f;
             outline: none;
         }
@@ -152,12 +153,32 @@ html = """
             flex-wrap: wrap;
             margin-top: 0.5em;
         }
+        .flex-row.justify-between {
+            justify-content: space-between;
+            align-items: center;
+        }
+        .left-buttons,
+        .right-buttons {
+            display: flex;
+            gap: 0.8em;
+        }
+        @media (max-width: 600px) {
+            .flex-row.justify-between {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .left-buttons,
+            .right-buttons {
+                justify-content: space-between;
+            }
+        }
         button {
             background: #10a37f;
             color: #fff;
             border: none;
             border-radius: 6px;
-            padding: 0.7em 1.5em;
+            padding: 0.5em 1.0em;
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
@@ -238,15 +259,28 @@ html = """
             scrollbar-color: var(--scrollbar-thumb-light) var(--bg-output-light);
         }
 
-        /* Copy button at bottom right of output */
+        #output {
+            position: relative;   /* So the copy button can be absolutely positioned inside */
+            padding-top: 2.5em;   /* Add padding at top so text doesn't go under button */
+            /* Other styles you have */
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 400px;
+            font-family: monospace;
+        }
+
         #copy {
             position: absolute;
-            right: 1em;
-            bottom: 1em;
+            top: 0.5em;
+            right: 0.5em;
             padding: 0.4em 0.9em;
             font-size: 0.9em;
-            margin-top: 0;
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 3px;
         }
+
         #copy-check {
             margin-left: 0.5em;
             font-weight: bold;
@@ -266,7 +300,7 @@ html = """
 </head>
 <body>
     <div class="container">
-        <h2>Julia Docstrings Prompt Generator</h2>
+        <h2>Julia Docstrings Generator</h2>
 
         <div class="tabs" role="tablist" aria-label="Input Tabs">
             <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="code-tab" id="code-tab-btn">Code</div>
@@ -281,19 +315,45 @@ html = """
 
             <textarea id="context" placeholder="Add optional context to improve doc quality..." spellcheck="false" role="tabpanel" aria-labelledby="context-tab-btn" rows="7"></textarea>
 
-            <div class="flex-row">
-                <button type="submit">Generate Prompt</button>
-                <button type="button" id="example">Load Example</button>
-                <button type="button" id="quit">Quit the app</button>
-            </div>
-        </form>
+            <hr>
 
+            <div class="api">
+                <label for="apikey">Mistral API Key:</label>
+                <input type="password" id="apikey" placeholder="Enter your API key here" aria-describedby="apikey-help">
+                <small id="apikey-help" style="color: #888; font-size: 0.85em;">
+                    Required for docstring generation mode. Get your API key from Mistral AI.
+                </small>
+            </div>
+            <div class="flex-row justify-between">
+                <div class="left-buttons">
+                    <button type="submit">Generate</button>
+
+                    <div style="display: flex; align-items: center; gap: 1em; margin-top: 0.5em;">
+                        <label>
+                            <input type="radio" name="mode" value="prompt" checked> Prompt
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="docstrings"> Docstrings
+                        </label>
+                    </div>
+                </div>
+
+                <div class="right-buttons">
+                    <button type="button" id="example">Load Example</button>
+                    <button type="button" id="quit">Quit</button>
+                </div>
+            </div>
+
+        </form>
         <hr>
 
-        <pre class="output language-julia" id="output" tabindex="0" aria-live="polite"></pre>
-        <button type="button" id="copy" aria-label="Copy prompt output">
-            Copy Prompt <span id="copy-check" style="display:none;">✓</span>
-        </button>
+
+        <div class="output-container" style="position: relative;">
+            <pre class="output language-julia" id="output" tabindex="0" aria-live="polite"></pre>
+            <button type="button" id="copy" aria-label="Copy prompt output">
+                Copy Prompt <span id="copy-check" style="display:none;">✓</span>
+            </button>
+        </div>
         <button type="button" id="toggle-theme" aria-label="Toggle dark/light mode">Toggle Dark/Light Mode</button>
     </div>
 
@@ -302,6 +362,61 @@ html = """
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-julia.min.js"></script>
 
     <script>
+        function updateHeadingFromMode() {
+            const selectedMode = document.querySelector('input[name="mode"]:checked')?.value;
+            const h2 = document.querySelector("h2");
+            if (h2 && selectedMode) {
+                h2.textContent = selectedMode === "prompt"
+                    ? "Julia Prompt Generator"
+                    : "Julia Docstrings Generator";
+            }
+        }
+
+        function toggleTabsByMode() {
+            const mode = document.querySelector('input[name="mode"]:checked')?.value;
+            const contextTab = document.getElementById('context-tab-btn');
+            const contextTextarea = document.getElementById('context');
+
+            if (mode === "prompt") {
+                // Hide context tab
+                if (contextTab) contextTab.style.display = "none";
+                if (contextTextarea?.classList.contains("active")) {
+                    activateTab('code');
+                }
+            } else {
+                if (contextTab) contextTab.style.display = "";
+            }
+        }
+
+        function toggleApiKeyInput() {
+            const mode = document.querySelector('input[name="mode"]:checked')?.value;
+            const apiDiv = document.querySelector('.api');
+            const apiInput = document.getElementById('apikey');
+
+            if (mode === 'docstrings') {
+                apiDiv.style.display = '';       // show
+                apiInput.disabled = false;
+            } else {
+                apiDiv.style.display = 'none';   // hide
+                apiInput.disabled = true;
+                //apiInput.value = '';              // clear for safety
+            }
+        }
+
+        const apiInput = document.getElementById('apikey');
+        apiInput.addEventListener('input', () => {
+            localStorage.setItem('mistral-api-key', apiInput.value);
+        });
+        
+        document.querySelectorAll('input[name="mode"]').forEach(radio => {
+            radio.addEventListener("change", () => {
+                updateHeadingFromMode();
+                toggleTabsByMode();
+                toggleApiKeyInput();
+                localStorage.setItem("docgen-mode", radio.value);
+            });
+        });
+
         function autoResizeTextarea(el) {
             // Ensure no inline display style to not conflict with CSS classes
             el.style.removeProperty('display');
@@ -343,11 +458,29 @@ html = """
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Show only the first textarea on load
             activateTab('code');
-
-            // Auto resize all textareas once for initial size
             Object.values(textareas).forEach(el => autoResizeTextarea(el));
+
+            requestAnimationFrame(() => {
+                const savedTheme = localStorage.getItem("docgen-theme") || "dark";
+                applyTheme(savedTheme);
+
+                const saved = localStorage.getItem("docgen-mode");
+                if (saved === "prompt" || saved === "docstrings") {
+                    const radio = document.querySelector('input[name="mode"][value="' + saved + '"]');
+                    if (radio) radio.checked = true;
+                }
+
+                updateHeadingFromMode();
+                toggleTabsByMode();
+                toggleApiKeyInput();
+
+                const savedKey = localStorage.getItem('mistral-api-key');
+                if (savedKey) {
+                    const apiInput = document.getElementById('apikey');
+                    apiInput.value = savedKey;
+                }
+            });
         });
 
         tabs.forEach(tab => {
@@ -370,11 +503,19 @@ html = """
             });
         });
 
-        async function generatePrompt() {
+        async function generateOutput() {
             const code = textareas.code.value;
-            const test = textareas.test.value;
-            const context = textareas.context.value;
+            const tests = textareas.test.value;
+            const doc = textareas.context.value;
+            const apikey = document.getElementById('apikey').value;
+            const mode = document.querySelector('input[name="mode"]:checked').value;
             const outputEl = document.getElementById('output');
+
+            // Require API key only for docstrings mode
+            if (mode === "docstrings" && !apikey) {
+                outputEl.textContent = "Please provide your API key for docstrings generation.";
+                return;
+            }
 
             outputEl.textContent = "Generating...";
             outputEl.classList.add("generating");
@@ -383,11 +524,18 @@ html = """
             try {
                 const resp = await fetch('/run', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ code: code, test: test, context: context })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        tests: tests,
+                        doc: doc,
+                        apikey: apikey,
+                        mode: mode
+                    })
                 });
                 const text = await resp.text();
                 outputEl.textContent = text;
+                outputEl.focus();
                 Prism.highlightElement(outputEl);
             } catch (err) {
                 outputEl.textContent = "Error during request: " + err;
@@ -398,7 +546,7 @@ html = """
 
         document.getElementById('form').onsubmit = function(e) {
             e.preventDefault();
-            generatePrompt();
+            generateOutput();
         };
 
         document.getElementById('quit').onclick = function () {
@@ -440,25 +588,34 @@ html = """
         observer.observe(outputEl, { childList: true, subtree: true });
 
         document.getElementById('example').onclick = function () {
-            textareas.code.value = "function square(x)\\n    x^2\\nend";
-            textareas.test.value = "using Test\\n@test square(3) == 9";
+            textareas.code.value = `function square(x)
+    x^2
+end`;
+            textareas.test.value = `using Test
+@test square(3) == 9`;
             textareas.context.value = "";
             Object.values(textareas).forEach(el => autoResizeTextarea(el));
             activateTab('code');
         };
 
         // Dark/light mode toggle
+        function applyTheme(theme) {
+            const isLight = theme === "light";
+            document.body.classList.toggle("light", isLight);
+            const prismLink = document.getElementById("prism-theme");
+            prismLink.href = isLight
+                ? "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css"
+                : "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css";
+        }
+
         const toggleThemeBtn = document.getElementById('toggle-theme');
         toggleThemeBtn.onclick = () => {
-            document.body.classList.toggle('light');
-            // Swap Prism theme css
-            const prismLink = document.getElementById('prism-theme');
-            if(document.body.classList.contains('light')) {
-                prismLink.href = "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css";
-            } else {
-                prismLink.href = "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css";
-            }
+            const newTheme = document.body.classList.contains("light") ? "dark" : "light";
+            localStorage.setItem("docgen-theme", newTheme);
+            applyTheme(newTheme);
         };
+
+
     </script>
 </body>
 
@@ -467,44 +624,56 @@ html = """
     return html
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Handle an incoming HTTP request and return a suitable response.
-
-# Arguments
-
-- `req::Request`: The request object containing the requested path, method, and body.
-
-# Returns
-
-- `HTTP.Response`: An HTTP response object containing the response status code, headers, and body.
-
-# Example
-
-```julia-repl
-julia> req = Request("", HTTP.GET, IOBuffer(""))
-
-julia> handle_docstrings_app(req)
-HTTP.Response(404, ["Content-Type" => "text/plain"], "Not found")
-```
-"""
-function handle_prompt_app(req)
+function handled_doc_app(req)
     if req.target == "/"
-        return HTTP.Response(200, ["Content-Type" => "text/html"], html_code_promt_app())
+        return HTTP.Response(200, ["Content-Type" => "text/html"], html_code_doc_app())
 
     elseif req.target == "/run" && req.method == "POST"
         data = JSON.parse(String(req.body))
+
+        mode = get(data, "mode", "prompt")  # default to "prompt"
         user_code = data["code"]
-        user_test = get(data, "test", "")
-        user_context = get(data, "context", "")
-        prompt = ""
-        try
-            prompt = CTBase.generate_prompt(user_code, user_test, user_context)
-        catch err
-            prompt = "Error during generation: $(err)"
+        user_test = get(data, "tests", "")
+        user_context = get(data, "doc", "")  # also used for prompt context
+        user_apikey = get(data, "apikey", "")
+
+        if isempty(user_apikey) && mode == "docstrings"
+            return HTTP.Response(401, ["Content-Type" => "text/plain"], "Please provide your API key for docstrings generation.")
         end
-        return HTTP.Response(200, ["Content-Type" => "text/plain"], prompt)
+
+        result = ""
+
+        try
+            if mode == "prompt"
+                result = CTBase.generate_prompt(user_code, user_test, user_context)
+            elseif mode == "docstrings"
+                codefile = tempname() * ".jl"
+                open(codefile, "w") do io
+                    write(io, user_code)
+                end
+                testsfile = nothing
+                if !isempty(user_test)
+                    testsfile = tempname() * ".jl"
+                    open(testsfile, "w") do io
+                        write(io, user_test)
+                    end
+                end
+                contextfile = nothing
+                if !isempty(user_context)
+                    contextfile = tempname() * ".jl"
+                    open(contextfile, "w") do io
+                        write(io, user_context)
+                    end
+                end
+                result = CTBase.docstrings(codefile; tests=testsfile, context=contextfile, apikey=user_apikey)[2]
+            else
+                result = "Unknown mode: $mode"
+            end
+        catch err
+            result = "Error during generation: $(err)"
+        end
+
+        return HTTP.Response(200, ["Content-Type" => "text/plain"], result)
 
     elseif req.target == "/quit"
         @async begin
@@ -518,28 +687,8 @@ function handle_prompt_app(req)
     end
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Starts the local documentation server for the `CTBase` application.
-
-# Arguments
-
-- `::CTBase.DocstringsAppTag`: A dispatch tag used to identify the application.
-
-# Returns
-
-- `nothing`: This function does not return a meaningful value.
-
-# Example
-
-```julia-repl
-julia> CTBase.docstrings_app(CTBase.DocstringsAppTag())
-Open http://localhost:8080 in your browser.
-```
-"""
-function CTBase.prompt_app(::CTBase.DocstringsAppTag)
-    println("Open http://localhost:8081 in your browser.")
-    HTTP.serve(handle_prompt_app, "127.0.0.1", 8081)
+function CTBase.doc_app(::CTBase.DocstringsAppTag)
+    println("Open http://localhost:8080 in your browser.")
+    HTTP.serve(handled_doc_app, "127.0.0.1", 8080)
     return nothing
 end

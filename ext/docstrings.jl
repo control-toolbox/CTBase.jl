@@ -70,7 +70,7 @@ function CTBase.docstrings(path::String; tests=nothing, context=nothing, apikey=
     ]
 
     # Build a precise prompt for the AI
-    prompt = generate_prompt(code_text, tests_text, context_text)
+    prompt = CTBase.generate_prompt(code_text, tests_text, context_text)
 
     # Prepare the data for the API
     data = Dict(
