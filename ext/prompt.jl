@@ -52,17 +52,6 @@ Follow **Documenter.jl** standards precisely.
 
 ---
 
-## ⚠️ Important:
-
-- Do **not** capitalize function names in docstrings or examples if they are lowercase in the original code.
-- Use exactly the same names and casing as in the provided code.
-- For the example, call the function exactly as declared (e.g., `square(3)`, not `Square(3)`).
-- Do **not** invent any new types, structs, or functions.
-- Do not modify, rename, or annotate the code in any way. 
-- Keep function names, argument names, and type annotations **exactly** as provided.
-
----
-
 ## 📦 Templates
 
 ### Template A — Structs

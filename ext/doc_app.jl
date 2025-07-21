@@ -371,7 +371,7 @@ html = """
         <div class="output-container" style="position: relative;">
             <pre class="output language-julia" id="output" tabindex="0" aria-live="polite"></pre>
             <button type="button" id="copy" aria-label="Copy prompt output">
-                Copy Prompt <span id="copy-check" style="display:none;">✓</span>
+                Copy <span id="copy-check" style="display:none;">✓</span>
             </button>
         </div>
         <button type="button" id="toggle-theme" aria-label="Toggle dark/light mode">Toggle Dark/Light Mode</button>
