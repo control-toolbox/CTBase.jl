@@ -7,14 +7,7 @@ on:
     types: [opened]
 jobs:
   run:
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
-    steps:
-    - name: 'Auto-assign issue'
-      uses: pozil/auto-assign-issue@v2
-      with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          assignees: ocots
-          numOfAssignee: 1
+    uses: control-toolbox/CTActions/.github/workflows/breakage.yml@main
+    with:
+      assignees: ocots
+      numOfAssignee: 1
