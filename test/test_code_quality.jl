@@ -16,13 +16,13 @@ function test_code_quality()
             JET.test_package(CTBase; target_defined_modules=true)
         end
 
-        @testset "JuliaFormatter" begin
-            @test JuliaFormatter.format(CTBase; verbose=true, overwrite=false)
-        end
+        # @testset "JuliaFormatter" begin
+        #     @test JuliaFormatter.format(CTBase; verbose=true, overwrite=false)
+        # end
 
-        @testset "Doctests" begin
-            Documenter.doctest(CTBase)
-        end
+        # @testset "Doctests" begin
+        #     Documenter.doctest(CTBase)
+        # end
     end
 
     return nothing

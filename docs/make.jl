@@ -1,6 +1,9 @@
 using Documenter
 using CTBase
 using DocumenterMermaid
+using HTTP, JSON
+
+const CTBaseDocstrings = Base.get_extension(CTBase, :CTBaseDocstrings)
 
 # to add docstrings from external packages
 Modules = [Base]
@@ -11,7 +14,7 @@ end
 
 repo_url = "github.com/control-toolbox/CTBase.jl"
 
-API_PAGES = ["ctbase.md", "default.md", "description.md", "exception.md"]
+API_PAGES = ["ctbase.md", "default.md", "description.md", "docstrings.md", "exception.md"]
 
 makedocs(;
     warnonly=[:cross_references, :autodocs_block],
