@@ -7,7 +7,7 @@ on:
     types: [opened]
 jobs:
   run:
-    uses: control-toolbox/CTActions/.github/workflows/breakage.yml@main
+    uses: control-toolbox/CTActions/.github/workflows/auto-assign.yml@main
     with:
       assignees: ocots
       numOfAssignee: 1
