@@ -27,12 +27,12 @@ end
 @testset verbose = true showtiming = true "Base" begin
     for name in (
         # :code_quality, 
-        :default, 
-        :description, 
-        :exceptions, 
+        :default,
+        :description,
+        :exceptions,
         :utils,
         :docstrings,
-        )
+    )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
             println("testing: ", string(name))
