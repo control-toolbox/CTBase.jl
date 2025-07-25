@@ -7,12 +7,11 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-
 [compat]
 Aqua = "0.8"
 Documenter = "1.13"
 HTTP = "1.10"
-JET = "0.9"
+JET = "0.10"
 JSON = "0.21"
 JuliaFormatter = "2.1"
 Test = "1"
