@@ -43,7 +43,7 @@ function extract_docstring_code_pairs(ai_text::String)
     # Retire tout ce qui est après le dernier bloc ```
     idx = findlast("```", reponse)
     if idx !== nothing
-        reponse = reponse[1:idx[1]-1]
+        reponse = reponse[1:(idx[1] - 1)]
     end
     return pairs, reponse
 end
@@ -80,10 +80,7 @@ function CTBase.docstrings(path::String; tests=nothing, context=nothing, apikey=
     tests_text = tests !== nothing ? read(tests, String) : ""
     context_text = context !== nothing ? read(context, String) : ""
     url = "https://api.mistral.ai/v1/chat/completions"
-    headers = [
-        "Authorization" => "Bearer $apikey",
-        "Content-Type" => "application/json"
-    ]
+    headers = ["Authorization" => "Bearer $apikey", "Content-Type" => "application/json"]
 
     # Build a precise prompt for the AI
     prompt = CTBase.generate_prompt(code_text, tests_text, context_text)
@@ -91,25 +88,19 @@ function CTBase.docstrings(path::String; tests=nothing, context=nothing, apikey=
     # Prepare the data for the API
     data = Dict(
         "model" => "mistral-tiny",
-        "messages" => [
-            Dict("role" => "user", "content" => prompt)
-        ]
+        "messages" => [Dict("role" => "user", "content" => prompt)],
     )
 
     # Send the request
-    response = HTTP.post(
-        url,
-        headers,
-        JSON.json(data)
-    )
+    response = HTTP.post(url, headers, JSON.json(data))
     sol_str = String(response.body)
-    
+
     # Parse the response
     result = JSON.parse(sol_str)
 
     # Extract the AI's answer (assuming Mistral API format)
     ai_text = result["choices"][1]["message"]["content"]
-    
+
     # Ignore tout ce qui précède le premier bloc triple guillemets
     response = extract_docstring_code_pairs(ai_text)
 
@@ -140,13 +131,12 @@ julia> docstrings_file("myfile.jl", apikey="sk-...")
 ```
 """
 function docstrings_file(path; tests=nothing, context=nothing, apikey="")
-
-    pairs, ai_text = docstrings(path, tests=tests, context=context, apikey=apikey)
+    pairs, ai_text = docstrings(path; tests=tests, context=context, apikey=apikey)
 
     #code_unchanged_check
     original_code = read(path, String)
     code_unchanged_check(pairs, original_code)
-    
+
     # Supprime toutes les lignes qui ne contiennent que ```
     dir, filename = splitdir(path)
     name, ext = splitext(filename)
@@ -156,7 +146,6 @@ function docstrings_file(path; tests=nothing, context=nothing, apikey="")
     end
 
     return outpath
-
 end
 
 """
@@ -191,13 +180,14 @@ function code_unchanged_check(pairs, original_code::String; display=true)
     orig_norm = norm(original_code)
     recon_norm = norm(reconstructed)
     if orig_norm != recon_norm
-        display && println("Le code a changé (différences ignorées : espaces/retours à la ligne).")
+        display &&
+            println("Le code a changé (différences ignorées : espaces/retours à la ligne).")
 
         # Affiche les différences ligne à ligne pour aider à localiser
         orig_lines = split(strip(original_code), '\n')
         recon_lines = split(strip(reconstructed), '\n')
         maxlen = max(length(orig_lines), length(recon_lines))
-        for i in 1:(maxlen-1)
+        for i in 1:(maxlen - 1)
             orig_line = i <= length(orig_lines) ? orig_lines[i] : ""
             recon_line = i <= length(recon_lines) ? recon_lines[i] : ""
             if (strip(orig_line) != strip(recon_line)) && display
@@ -208,6 +198,6 @@ function code_unchanged_check(pairs, original_code::String; display=true)
         end
         return 1
     else
-        return 0 
+        return 0
     end
 end
