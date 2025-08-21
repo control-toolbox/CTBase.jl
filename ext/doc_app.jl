@@ -1,7 +1,7 @@
 """
 $(TYPEDSIGNATURES)
 
-Returns the HTML string for the Julia Docstrings Prompt Generator web app.
+Returns the HTML string for the Julia Docstrings/Prompt Generator web app.
 
 This HTML includes the structure, layout, and style definitions required for a client-side interface
 with dark/light mode support, tabs for input areas, and interactive elements.
@@ -24,7 +24,7 @@ function html_code_doc_app()
     <html lang='en'>
     <head>
         <meta charset='UTF-8'>
-        <title>Julia Docstrings Prompt Generator</title>
+        <title>Julia Doc Helper</title>
         <!-- Prism CSS: light and dark themes -->
         <link id="prism-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css" />
         <style>
@@ -323,17 +323,17 @@ function html_code_doc_app()
             <h2>Julia Docstrings Generator</h2>
 
             <div class="tabs" role="tablist" aria-label="Input Tabs">
-                <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="code-tab" id="code-tab-btn">Code</div>
-                <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="test-tab" id="test-tab-btn">Tests (optional)</div>
-                <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="context-tab" id="context-tab-btn">Context (optional)</div>
+                <div class="tab active" role="tab" tabindex=" 0" aria-selected="true"  aria-controls="code-tab"        id="code-tab-btn">Code</div>
+                <div class="tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="complement-tab"  id="complement-tab-btn">Complements (optional)</div>
+                <div class="tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="test-tab"        id="test-tab-btn">Tests (optional)</div>
+                <div class="tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="context-tab"     id="context-tab-btn">Context (optional)</div>
             </div>
 
             <form id="form" novalidate>
-                <textarea id="code" placeholder="Paste your Julia code here" spellcheck="false" role="tabpanel" aria-labelledby="code-tab-btn" rows="7"></textarea>
-
-                <textarea id="test" placeholder="Paste your Julia tests here" spellcheck="false" role="tabpanel" aria-labelledby="test-tab-btn" rows="7"></textarea>
-
-                <textarea id="context" placeholder="Add optional context to improve doc quality..." spellcheck="false" role="tabpanel" aria-labelledby="context-tab-btn" rows="7"></textarea>
+                <textarea id="code"       placeholder="Paste your Julia code here" spellcheck="false" role="tabpanel" aria-labelledby="code-tab-btn" rows="7"></textarea>
+                <textarea id="complement" placeholder="Add optional complements to the prompt. For instance: Write in UK english, not US." spellcheck="false" role="tabpanel" aria-labelledby="complement-tab-btn" rows="7"></textarea>
+                <textarea id="test"       placeholder="Paste your Julia tests here" spellcheck="false" role="tabpanel" aria-labelledby="test-tab-btn" rows="7"></textarea>
+                <textarea id="context"    placeholder="Add optional context to improve doc quality..." spellcheck="false" role="tabpanel" aria-labelledby="context-tab-btn" rows="7"></textarea>
 
                 <hr>
 
@@ -456,6 +456,7 @@ function html_code_doc_app()
             const tabs = document.querySelectorAll('.tab');
             const textareas = {
                 code: document.getElementById('code'),
+                complement: document.getElementById('complement'),
                 test: document.getElementById('test'),
                 context: document.getElementById('context')
             };
@@ -525,6 +526,7 @@ function html_code_doc_app()
 
             async function generateOutput() {
                 const code = textareas.code.value;
+                const complement = textareas.complement.value;
                 const tests = textareas.test.value;
                 const doc = textareas.context.value;
                 const apikey = document.getElementById('apikey').value;
@@ -547,6 +549,7 @@ function html_code_doc_app()
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             code: code,
+                            complement: complement,
                             tests: tests,
                             doc: doc,
                             apikey: apikey,
@@ -675,6 +678,7 @@ function handled_doc_app(req)
 
         mode = get(data, "mode", "prompt")  # default to "prompt"
         user_code = data["code"]
+        user_complement = get(data, "complement", "")
         user_test = get(data, "tests", "")
         user_context = get(data, "doc", "")  # also used for prompt context
         user_apikey = get(data, "apikey", "")
@@ -691,11 +695,18 @@ function handled_doc_app(req)
 
         try
             if mode == "prompt"
-                result = CTBase.generate_prompt(user_code, user_test, user_context)
+                result = CTBase.generate_prompt(user_code, user_complement, user_test, user_context)
             elseif mode == "docstrings"
                 codefile = tempname() * ".jl"
                 open(codefile, "w") do io
                     write(io, user_code)
+                end
+                complementfile = nothing
+                if !isempty(user_test)
+                    complementfile = tempname() * ".jl"
+                    open(complementfile, "w") do io
+                        write(io, user_test)
+                    end
                 end
                 testsfile = nothing
                 if !isempty(user_test)
@@ -712,7 +723,7 @@ function handled_doc_app(req)
                     end
                 end
                 result = CTBase.docstrings(
-                    codefile; tests=testsfile, context=contextfile, apikey=user_apikey
+                    codefile; complement=complementfile, tests=testsfile, context=contextfile, apikey=user_apikey
                 )[2]
             else
                 result = "Unknown mode: $mode"

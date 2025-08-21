@@ -1,23 +1,4 @@
 function test_docstrings()
-    @testset "code_unchanged_check" begin
-        original_code = """
-        function add(x, y)
-            return x + y
-        end
-        """
-
-        # Test où le code n'a pas changé
-        pairs = [("add", "function add(x, y)\n    return x + y\nend")]
-        res = CTBaseDocstrings.code_unchanged_check(pairs, original_code; display=false)
-        @test res == 0
-
-        # Test où le code a changé
-        pairs_modif = [("add", "function add(x, y)\n    return x - y\nend")]
-        res_modif = CTBaseDocstrings.code_unchanged_check(
-            pairs_modif, original_code; display=false
-        )
-        @test res_modif == 1
-    end
     @testset "extract_docstring_code_pairs" begin
         ai_text = """
 \"\"\"

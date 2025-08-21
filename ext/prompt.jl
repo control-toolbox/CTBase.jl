@@ -6,6 +6,7 @@ Generates a well-structured and precise prompt to produce Julia docstrings in th
 # Arguments
 
 - `code_text::String`: The Julia code (structs and functions) to document.
+- `complement_text::String`: Optional complement to the prompt.
 - `tests_text::String`: Optional related tests for improving examples.
 - `context_text::String`: Additional domain knowledge or technical explanation to improve doc quality.
 
@@ -17,15 +18,17 @@ Generates a well-structured and precise prompt to produce Julia docstrings in th
 
 ```julia-repl
 julia> code = "function square(x); x^2; end"
-julia> CTBase.generate_prompt(code, "", "")
+julia> CTBase.generate_prompt(code, "Write in UK english.", "", "")
 "Your task is to write docstrings for the following Julia code..."
 ```
 """
-function CTBase.generate_prompt(code_text::String, tests_text::String, context_text::String)
+function CTBase.generate_prompt(code_text::String, complement_text::String, tests_text::String, context_text::String)
     prompt = """
 You are a Julia expert. Your task is to generate complete and idiomatic Julia docstrings for each `struct` or `function` in the code below.
 
 Follow **Documenter.jl** standards precisely.
+
+$complement_text
 
 ---
 

@@ -16,7 +16,7 @@ const ctNumber = Real
 
 #
 docstrings(::AbstractString; kwargs...) = throw(CTBase.ExtensionError(:JSON, :HTTP))
-function generate_prompt(::AbstractString, ::AbstractString, ::AbstractString)
+function generate_prompt(::AbstractString, ::AbstractString, ::AbstractString, ::AbstractString)
     throw(CTBase.ExtensionError(:JSON, :HTTP))
 end
 
