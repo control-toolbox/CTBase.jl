@@ -72,7 +72,9 @@ julia> CTBase.docstrings("example.jl", apikey="sk-...")
 ([("Docstring", "function f(x) ... end")], "...full reconstructed text...")
 ```
 """
-function CTBase.docstrings(path::String; complement=nothing, tests=nothing, context=nothing, apikey="")
+function CTBase.docstrings(
+    path::String; complement=nothing, tests=nothing, context=nothing, apikey=""
+)
 
     # Read code file
     code_text = read(path, String)
