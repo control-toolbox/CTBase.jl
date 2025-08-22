@@ -695,7 +695,9 @@ function handled_doc_app(req)
 
         try
             if mode == "prompt"
-                result = CTBase.generate_prompt(user_code, user_complement, user_test, user_context)
+                result = CTBase.generate_prompt(
+                    user_code, user_complement, user_test, user_context
+                )
             elseif mode == "docstrings"
                 codefile = tempname() * ".jl"
                 open(codefile, "w") do io
@@ -723,7 +725,11 @@ function handled_doc_app(req)
                     end
                 end
                 result = CTBase.docstrings(
-                    codefile; complement=complementfile, tests=testsfile, context=contextfile, apikey=user_apikey
+                    codefile;
+                    complement=complementfile,
+                    tests=testsfile,
+                    context=contextfile,
+                    apikey=user_apikey,
                 )[2]
             else
                 result = "Unknown mode: $mode"

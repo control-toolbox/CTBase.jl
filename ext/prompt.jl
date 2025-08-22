@@ -22,7 +22,9 @@ julia> CTBase.generate_prompt(code, "Write in UK english.", "", "")
 "Your task is to write docstrings for the following Julia code..."
 ```
 """
-function CTBase.generate_prompt(code_text::String, complement_text::String, tests_text::String, context_text::String)
+function CTBase.generate_prompt(
+    code_text::String, complement_text::String, tests_text::String, context_text::String
+)
     prompt = """
 You are a Julia expert. Your task is to generate complete and idiomatic Julia docstrings for each `struct` or `function` in the code below.
 
