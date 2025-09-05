@@ -1,0 +1,14 @@
+name: Update README
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    uses: control-toolbox/CTActions/.github/workflows/update-readme.yml@main
+    with:
+      template_file: "README.template.md"
+      output_file: "README.md"
