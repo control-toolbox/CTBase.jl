@@ -11,5 +11,6 @@ jobs:
     with:
       template_file: README.template.md
       output_file: README.md
-      package_name: CTBase   # replace with the current repo package name
+      package_name: CTBase   # package for INSTALL.md
+      repo_name: CTBase.jl   # repository for CONTRIBUTING.md links
     secrets: inherit
