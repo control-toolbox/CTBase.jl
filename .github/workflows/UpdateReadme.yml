@@ -1,4 +1,4 @@
-name: Update README with ABOUT.md
+name: Update README with ABOUT.md and INSTALL.md
 
 on:
   schedule:
@@ -11,4 +11,5 @@ jobs:
     with:
       template_file: README.template.md
       output_file: README.md
+      package_name: CTBase   # replace with the current repo package name
     secrets: inherit
