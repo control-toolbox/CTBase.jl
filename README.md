@@ -65,7 +65,7 @@ The **control-toolbox** ecosystem brings together <a href="https://julialang.org
 
 ## Installation
 
-To install CTBase.jl please 
+To install CTBase please 
 <a href="https://docs.julialang.org/en/v1/manual/getting-started/">open Julia's interactive session (known as REPL)</a> 
 and press <kbd>]</kbd> key in the REPL to use the package mode, then add the package:
 
