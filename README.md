@@ -14,10 +14,8 @@ The CTBase.jl package is part of the [control-toolbox ecosystem](https://github.
 | **Test Coverage** | [![Coverage](https://codecov.io/gh/control-toolbox/CTBase.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/control-toolbox/CTBase.jl) |
 | **Package Evaluation** | [![PkgEval](https://img.shields.io/badge/Julia-package-purple)](https://juliahub.com/ui/Packages/General/CTBase) [![Dependencies](https://juliahub.com/docs/General/CTBase/stable/deps.svg)](https://juliahub.com/ui/Packages/General/CTBase?t=2) |
 | **Release / Version** | [![Release](https://juliahub.com/docs/General/CTBase/stable/version.svg)](https://github.com/control-toolbox/CTBase.jl/releases) |
-| **Citation** | [![DOI](https://zenodo.org/badge/541187171.svg)](https://zenodo.org/doi/10.5281/zenodo.16753152) |
 | **License** | [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/control-toolbox/CTBase.jl/blob/master/LICENSE) |
 | **Code Style / Quality** | [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/JuliaDiff/BlueStyle) [![Aqua.jl](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl) |
-| **Downloads** | [![Monthly](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fjuliapkgstats.com%2Fapi%2Fv1%2Fmonthly_downloads/CTBase&query=total_requests&suffix=%2Fmonth&label=Monthly%20Downloads)](https://juliapkgstats.com/pkg/CTBase) [![Total](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fjuliapkgstats.com%2Fapi%2Fv1%2Ftotal_downloads/CTBase&query=total_requests&label=Total%20Downloads)](https://juliapkgstats.com/pkg/CTBase) |
 
 ## About control-toolbox
 
