@@ -42,19 +42,7 @@ The CTBase.jl package is part of the [control-toolbox ecosystem](https://github.
 
 <!-- INCLUDE_ABOUT -->
 
-## Installation
-
-To install CTBase.jl please 
-<a href="https://docs.julialang.org/en/v1/manual/getting-started/">open Julia's interactive session (known as REPL)</a> 
-and press <kbd>]</kbd> key in the REPL to use the package mode, then add the package:
-
-```julia
-julia> ]
-pkg> add CTBase
-```
-
-> [!TIP]
-> If you are new to Julia, please follow this [guidelines](https://github.com/orgs/control-toolbox/discussions/64).
+<!-- INCLUDE_INSTALL -->
 
 ## Contributing
 
