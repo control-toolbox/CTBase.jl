@@ -1,11 +1,14 @@
-name: Update README
+name: Update README with ABOUT.md
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'   # every Monday at 06:00 UTC
+  workflow_dispatch:       # manual trigger
 
 jobs:
-  update-readme:
+  call-shared:
     uses: control-toolbox/CTActions/.github/workflows/update-readme.yml@main
     with:
-      template_file: "README.template.md"
-      output_file: "README.md"
+      template_file: README.template.md
+      output_file: README.md
+    secrets: inherit
