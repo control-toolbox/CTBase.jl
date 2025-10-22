@@ -9,7 +9,7 @@ Extracts pairs of docstrings and code blocks from the given AI-generated text.
 
 # Returns
 
-- `(pairs, reponse)::Tuple{Vector{Tuple{String,String}}, String}`: A tuple containing a vector of `(docstring, code)` pairs and a string reconstruction with triple-quoted docstrings prepended.
+- `(pairs, response)::Tuple{Vector{Tuple{String,String}}, String}`: A tuple containing a vector of `(docstring, code)` pairs and a string reconstruction with triple-quoted docstrings prepended.
 
 # Example
 
@@ -35,17 +35,17 @@ function extract_docstring_code_pairs(ai_text::String)
         push!(pairs, (doc, code))
     end
 
-    reponse = ""
+    response = ""
     for (doc, code) in pairs
-        reponse *= "\n\"\"\"\n$doc\n\"\"\"\n$code\n"
+        response *= "\n\"\"\"\n$doc\n\"\"\"\n$code\n"
     end
 
     # Retire tout ce qui est après le dernier bloc ```
-    idx = findlast("```", reponse)
+    idx = findlast("```", response)
     if idx !== nothing
-        reponse = reponse[1:(idx[1] - 1)]
+        response = response[1:(idx[1] - 1)]
     end
-    return pairs, reponse
+    return pairs, response
 end
 
 """
