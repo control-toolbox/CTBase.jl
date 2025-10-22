@@ -1,5 +1,5 @@
 # CompatHelper v3.5.0
-name: CompatHelper
+name: Compat Helper
 on:
   schedule:
     - cron: 0 0 * * *
