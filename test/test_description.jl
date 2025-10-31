@@ -9,11 +9,12 @@ function test_description()
         @test descriptions[2] == (:b,)
     end
 
-    # Type stability test for adding descriptions using the is_inferred macro
-    @testset "Add Descriptions Type Stability" begin
-        @test_opt CTBase.add((), (:a,))
-        @test_inferred CTBase.add((), (:a,))
-    end
+    # # Type stability test for adding descriptions using the is_inferred macro
+    # Needs JET
+    # @testset "Add Descriptions Type Stability" begin
+    #     @test_opt CTBase.add((), (:a,))
+    #     @test_inferred CTBase.add((), (:a,))
+    # end
 
     # Test building algorithm descriptions and completing partial descriptions
     @testset "Complete Descriptions with Algorithms" begin
