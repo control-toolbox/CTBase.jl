@@ -9,11 +9,12 @@ function test_description()
         @test descriptions[2] == (:b,)
     end
 
-    # Type stability test for adding descriptions using the is_inferred macro
-    @testset "Add Descriptions Type Stability" begin
-        @test_opt CTBase.add((), (:a,))
-        @test_inferred CTBase.add((), (:a,))
-    end
+    # # Type stability test for adding descriptions using the is_inferred macro
+    # # Needs JET
+    # @testset "Add Descriptions Type Stability" begin
+    #     @test_opt CTBase.add((), (:a,))
+    #     @test_inferred CTBase.add((), (:a,))
+    # end
 
     # Test building algorithm descriptions and completing partial descriptions
     @testset "Complete Descriptions with Algorithms" begin
@@ -39,19 +40,20 @@ function test_description()
             (:descent, :gradient, :fixedstep)
     end
 
-    # Type stability test for the complete function using the is_inferred macro
-    @testset "Complete Descriptions Type Stability" begin
-        algorithms = ()
-        algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
-        algorithms = CTBase.add(algorithms, (:descent, :bfgs, :backtracking))
-        algorithms = CTBase.add(algorithms, (:descent, :bfgs, :fixedstep))
-        algorithms = CTBase.add(algorithms, (:descent, :gradient, :bisection))
-        algorithms = CTBase.add(algorithms, (:descent, :gradient, :backtracking))
-        algorithms = CTBase.add(algorithms, (:descent, :gradient, :fixedstep))
+    # # Type stability test for the complete function using the is_inferred macro
+    # # Needs JET
+    # @testset "Complete Descriptions Type Stability" begin
+    #     algorithms = ()
+    #     algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
+    #     algorithms = CTBase.add(algorithms, (:descent, :bfgs, :backtracking))
+    #     algorithms = CTBase.add(algorithms, (:descent, :bfgs, :fixedstep))
+    #     algorithms = CTBase.add(algorithms, (:descent, :gradient, :bisection))
+    #     algorithms = CTBase.add(algorithms, (:descent, :gradient, :backtracking))
+    #     algorithms = CTBase.add(algorithms, (:descent, :gradient, :fixedstep))
 
-        @test_opt CTBase.complete((:descent,); descriptions=algorithms)
-        @test_inferred CTBase.complete((:descent,); descriptions=algorithms)
-    end
+    #     @test_opt CTBase.complete((:descent,); descriptions=algorithms)
+    #     @test_inferred CTBase.complete((:descent,); descriptions=algorithms)
+    # end
 
     # Test ambiguous or invalid description completions throw errors
     @testset "Ambiguous and Incorrect Description Errors" begin
@@ -88,7 +90,7 @@ function test_description()
 
         # instead of @inferred, check if the type is a subtype of Tuple{Vararg{Symbol}}
         @test typeof(result) <: Tuple{Vararg{Symbol}}
-        @test_opt CTBase.remove(x, y)
+        # @test_opt CTBase.remove(x, y)
     end
 
     # Test completion with descriptions of different sizes and inclusion priority

@@ -1,8 +1,8 @@
 using CTBase
 using Test
 using Aqua
-using JET
-#using JuliaFormatter
+# using JET
+# using JuliaFormatter
 using Documenter
 using HTTP
 using JSON

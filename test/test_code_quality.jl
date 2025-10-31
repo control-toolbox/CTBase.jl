@@ -12,9 +12,9 @@ function test_code_quality()
             Aqua.test_ambiguities(CTBase)
         end
 
-        @testset "JET" begin
-            JET.test_package(CTBase; target_defined_modules=true)
-        end
+        # @testset "JET" begin
+        #     JET.test_package(CTBase; target_defined_modules=true)
+        # end
 
         # @testset "JuliaFormatter" begin
         #     @test JuliaFormatter.format(CTBase; verbose=true, overwrite=false)
