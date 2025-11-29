@@ -1,18 +1,21 @@
 """
 $(TYPEDSIGNATURES)
 
-Returns the default value for the display flag.
+Return the default value of the display flag.
 
-This function is used internally to determine whether output should be printed during execution.
+This internal utility is used to decide whether output should be shown during
+execution.
 
 # Returns
 
-- `::Bool`: The default value `true`, indicating that output is displayed.
+- `Bool`: The default value `true`, indicating that output is displayed.
 
 # Example
 
 ```julia-repl
-julia> __display()
+julia> using CTBase
+
+julia> CTBase.__display()
 true
 ```
 """

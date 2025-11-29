@@ -1,29 +1,31 @@
 """
-DescVarArg is a Vararg of symbols. `DescVarArg` is a type alias for a Vararg of symbols.
+DescVarArg is a type alias representing a variable number of `Symbol`s.
 
 ```julia-repl
-julia> const DescVarArg = Vararg{Symbol}
+julia> using CTBase
+
+julia> CTBase.DescVarArg
+Vararg{Symbol}
 ```
 
-See also: [`Description`](@ref).
+See also: [`CTBase.Description`](@ref).
 """
 const DescVarArg = Vararg{Symbol}
 
 """
 A description is a tuple of symbols. `Description` is a type alias for a tuple of symbols.
 
-```julia-repl
-julia> const Description = Tuple{DescVarArg}
-```
-
 See also: [`DescVarArg`](@ref).
 
 # Example
 
-[`Base.show`](@ref) is overloaded for descriptions, that is tuple of descriptions are printed as follows:
+`Base.show` is overloaded for descriptions, so tuples of descriptions are
+printed one per line:
 
 ```julia-repl
-julia> display( ( (:a, :b), (:b, :c) ) )
+julia> using CTBase
+
+julia> display(((:a, :b), (:b, :c)))
 (:a, :b)
 (:b, :c)
 ```
@@ -33,12 +35,14 @@ const Description = Tuple{DescVarArg}
 """
 $(TYPEDSIGNATURES)
 
-Print a tuple of descriptions.
+Print a tuple of descriptions, one per line.
 
 # Example
 
 ```julia-repl
-julia> display( ( (:a, :b), (:b, :c) ) )
+julia> using CTBase
+
+julia> display(((:a, :b), (:b, :c)))
 (:a, :b)
 (:b, :c)
 ```
@@ -64,8 +68,10 @@ Return a tuple containing only the description `y`.
 
 # Example
 ```julia-repl
+julia> using CTBase
+
 julia> descriptions = ()
-julia> descriptions = add(descriptions, (:a,))
+julia> descriptions = CTBase.add(descriptions, (:a,))
 (:a,)
 julia> print(descriptions)
 ((:a,),)
@@ -86,13 +92,15 @@ Throw an exception (IncorrectArgument) if the description `y` is already contain
 # Example
 
 ```julia-repl
+julia> using CTBase
+
 julia> descriptions = ()
-julia> descriptions = add(descriptions, (:a,))
+julia> descriptions = CTBase.add(descriptions, (:a,))
 (:a,)
-julia> descriptions = add(descriptions, (:b,))
+julia> descriptions = CTBase.add(descriptions, (:b,))
 (:a,)
 (:b,)
-julia> descriptions = add(descriptions, (:b,))
+julia> descriptions = CTBase.add(descriptions, (:b,))
 ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
 ```
 """
@@ -115,22 +123,27 @@ If the list is not contained in any of the descriptions, then an exception is th
 # Example
 
 ```julia-repl
+julia> using CTBase
+
 julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c))
 (:a, :b)
 (:b, :c)
 (:a, :c)
-julia> complete(:a; descriptions=D)
+julia> CTBase.complete(:a; descriptions=D)
 (:a, :b)
-julia> complete(:a, :c; descriptions=D)
+julia> CTBase.complete(:a, :c; descriptions=D)
 (:a, :b, :c)
-julia> complete((:a, :c); descriptions=D)
+julia> CTBase.complete((:a, :c); descriptions=D)
 (:a, :b, :c)
-julia> complete(:f; descriptions=D)
+julia> CTBase.complete(:f; descriptions=D)
 ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 ```
 """
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
+    if n == 0
+        throw(AmbiguousDescription(list))
+    end
     table = zeros(Int8, n, 2)
     for i in 1:n
         table[i, 1] = length(intersect(list, descriptions[i]))
@@ -157,7 +170,9 @@ Return the difference between the description `x` and the description `y`.
 # Example
 
 ```julia-repl
-julia> remove((:a, :b), (:a,))
+julia> using CTBase
+
+julia> CTBase.remove((:a, :b), (:a,))
 (:b,)
 ```
 """

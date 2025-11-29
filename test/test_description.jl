@@ -9,13 +9,6 @@ function test_description()
         @test descriptions[2] == (:b,)
     end
 
-    # # Type stability test for adding descriptions using the is_inferred macro
-    # # Needs JET
-    # @testset "Add Descriptions Type Stability" begin
-    #     @test_opt CTBase.add((), (:a,))
-    #     @test_inferred CTBase.add((), (:a,))
-    # end
-
     # Test building algorithm descriptions and completing partial descriptions
     @testset "Complete Descriptions with Algorithms" begin
         algorithms = ()
@@ -39,21 +32,6 @@ function test_description()
         @test CTBase.complete((:fixedstep, :gradient); descriptions=algorithms) ==
             (:descent, :gradient, :fixedstep)
     end
-
-    # # Type stability test for the complete function using the is_inferred macro
-    # # Needs JET
-    # @testset "Complete Descriptions Type Stability" begin
-    #     algorithms = ()
-    #     algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
-    #     algorithms = CTBase.add(algorithms, (:descent, :bfgs, :backtracking))
-    #     algorithms = CTBase.add(algorithms, (:descent, :bfgs, :fixedstep))
-    #     algorithms = CTBase.add(algorithms, (:descent, :gradient, :bisection))
-    #     algorithms = CTBase.add(algorithms, (:descent, :gradient, :backtracking))
-    #     algorithms = CTBase.add(algorithms, (:descent, :gradient, :fixedstep))
-
-    #     @test_opt CTBase.complete((:descent,); descriptions=algorithms)
-    #     @test_inferred CTBase.complete((:descent,); descriptions=algorithms)
-    # end
 
     # Test ambiguous or invalid description completions throw errors
     @testset "Ambiguous and Incorrect Description Errors" begin
@@ -90,7 +68,6 @@ function test_description()
 
         # instead of @inferred, check if the type is a subtype of Tuple{Vararg{Symbol}}
         @test typeof(result) <: Tuple{Vararg{Symbol}}
-        # @test_opt CTBase.remove(x, y)
     end
 
     # Test completion with descriptions of different sizes and inclusion priority
@@ -126,6 +103,25 @@ function test_description()
         output = String(take!(io))
         expected = "(:a, :b)\n(:b, :c)"
         @test output == expected
+    end
+
+    @testset "Base.show Edge Cases" begin
+        io = IOBuffer()
+        descriptions = ()
+        show(io, MIME"text/plain"(), descriptions)
+        output = String(take!(io))
+        @test output == ""
+
+        io = IOBuffer()
+        descriptions = ((:a, :b),)
+        show(io, MIME"text/plain"(), descriptions)
+        output = String(take!(io))
+        @test output == "(:a, :b)"
+    end
+
+    @testset "Complete with Empty Descriptions" begin
+        algorithms = ()
+        @test_throws CTBase.AmbiguousDescription CTBase.complete(:a; descriptions=algorithms)
     end
 
     return nothing

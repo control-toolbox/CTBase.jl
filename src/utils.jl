@@ -6,6 +6,15 @@ Return the integer `i` ∈ [0, 9] as a Unicode **subscript character**.
 Throws an `IncorrectArgument` exception if `i` is outside this range.
 
 The Unicode subscript digits start at codepoint U+2080 for '0' and continue sequentially.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> CTBase.ctindice(3)
+'₃': Unicode U+2083 (category No: Number, other)
+```
 """
 function ctindice(i::Int)::Char
     if i < 0 || i > 9
@@ -22,10 +31,12 @@ Return the integer `i` ≥ 0 as a string of Unicode **subscript characters**.
 
 Throws an `IncorrectArgument` if `i` is negative.
 
-Example:
+# Example
 
 ```julia-repl
-julia> ctindices(123)
+julia> using CTBase
+
+julia> CTBase.ctindices(123)
 "₁₂₃"
 ```
 """
@@ -51,6 +62,15 @@ Throws an `IncorrectArgument` exception if `i` is outside this range.
 
 Note: Unicode superscripts ¹ (U+00B9), ² (U+00B2), and ³ (U+00B3) are special cases.
 The other digits ⁰ (U+2070) and ⁴ to ⁹ (U+2074 to U+2079) are mostly contiguous.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> CTBase.ctupperscript(2)
+'²': Unicode U+00B2 (category No: Number, other)
+```
 """
 function ctupperscript(i::Int)::Char
     if i < 0 || i > 9
@@ -79,10 +99,12 @@ Return the integer `i` ≥ 0 as a string of Unicode **superscript characters**.
 
 Throws an `IncorrectArgument` exception if `i` is negative.
 
-Example:
+# Example
 
 ```julia-repl
-julia> ctupperscripts(123)
+julia> using CTBase
+
+julia> CTBase.ctupperscripts(123)
 "¹²³"
 ```
 """

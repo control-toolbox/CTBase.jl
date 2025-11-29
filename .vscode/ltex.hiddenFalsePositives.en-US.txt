@@ -1,0 +1,3 @@
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QThe root package is OptimalControl.jl which aims to provide tools to model and solve optimal control problems with ordinary differential equations by direct and indirect methods, both on CPU and GPU.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qwarning\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QCTBase.jl\\E$"}

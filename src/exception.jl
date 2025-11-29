@@ -12,9 +12,11 @@ No fields.
 # Example
 
 ```julia-repl
+julia> using CTBase
+
 julia> try
-           throw(IncorrectArgument("invalid input"))
-       catch e::CTException
+           throw(CTBase.IncorrectArgument("invalid input"))
+       catch e::CTBase.CTException
            println("Caught a domain-specific exception: ", e)
        end
 Caught a domain-specific exception: IncorrectArgument: invalid input
@@ -35,7 +37,9 @@ Exception thrown when a description is ambiguous or does not match any known des
 # Example
 
 ```julia-repl
-julia> complete(:f; descriptions=((:a, :b), (:a, :b, :c)))
+julia> using CTBase
+
+julia> CTBase.complete(:f; descriptions=((:a, :b), (:a, :b, :c)))
 ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 ```
 
@@ -54,7 +58,9 @@ Customizes the printed message of the exception.
 # Example
 
 ```julia-repl
-julia> throw(AmbiguousDescription((:x, :y)))
+julia> using CTBase
+
+julia> throw(CTBase.AmbiguousDescription((:x, :y)))
 ERROR: AmbiguousDescription: the description (:x, :y) is ambiguous / incorrect
 ```
 """
@@ -77,7 +83,9 @@ invalid, or does not satisfy preconditions.
 # Example
 
 ```julia-repl
-julia> throw(IncorrectArgument("the argument must be a non-empty tuple"))
+julia> using CTBase
+
+julia> throw(CTBase.IncorrectArgument("the argument must be a non-empty tuple"))
 ERROR: IncorrectArgument: the argument must be a non-empty tuple
 ```
 """
@@ -99,69 +107,6 @@ end
 """
 $(TYPEDEF)
 
-Exception thrown when a specified method name or function symbol does not exist.
-
-# Fields
-
-- `var::Symbol`: The method or function symbol that was expected but not found.
-
-# Example
-
-```julia-repl
-julia> throw(IncorrectMethod(:nonexistent_func))
-ERROR: IncorrectMethod: nonexistent_func is not an existing method
-```
-"""
-struct IncorrectMethod <: CTException
-    var::Symbol
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Customizes the printed message of the exception.
-"""
-function Base.showerror(io::IO, e::IncorrectMethod)
-    printstyled(io, "IncorrectMethod"; color=:red, bold=true)
-    return print(io, ": ", e.var, " is not an existing method")
-end
-
-# ------------------------------------------------------------------------
-"""
-$(TYPEDEF)
-
-Exception thrown when the output produced by a function is incorrect or inconsistent
-with expected results.
-
-# Fields
-
-- `var::String`: A descriptive message explaining the incorrect output.
-
-# Example
-
-```julia-repl
-julia> throw(IncorrectOutput("the function returned NaN"))
-ERROR: IncorrectOutput: the function returned NaN
-```
-"""
-struct IncorrectOutput <: CTException
-    var::String
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Customizes the printed message of the exception.
-"""
-function Base.showerror(io::IO, e::IncorrectOutput)
-    printstyled(io, "IncorrectOutput"; color=:red, bold=true)
-    return print(io, ": ", e.var)
-end
-
-# ------------------------------------------------------------------------
-"""
-$(TYPEDEF)
-
 Exception thrown when a method or function has not been implemented yet.
 
 # Fields
@@ -171,7 +116,9 @@ Exception thrown when a method or function has not been implemented yet.
 # Example
 
 ```julia-repl
-julia> throw(NotImplemented("feature X is not implemented"))
+julia> using CTBase
+
+julia> throw(CTBase.NotImplemented("feature X is not implemented"))
 ERROR: NotImplemented: feature X is not implemented
 ```
 """
@@ -203,7 +150,9 @@ or with the given arguments.
 # Example
 
 ```julia-repl
-julia> throw(UnauthorizedCall("user does not have permission"))
+julia> using CTBase
+
+julia> throw(CTBase.UnauthorizedCall("user does not have permission"))
 ERROR: UnauthorizedCall: user does not have permission
 ```
 """
@@ -235,7 +184,9 @@ is detected.
 # Example
 
 ```julia-repl
-julia> throw(ParsingError("unexpected token"))
+julia> using CTBase
+
+julia> throw(CTBase.ParsingError("unexpected token"))
 ERROR: ParsingError: unexpected token
 ```
 """
@@ -271,7 +222,9 @@ Throws `UnauthorizedCall` if no weak dependencies are provided.
 # Example
 
 ```julia-repl
-julia> throw(ExtensionError(:MyExtension))
+julia> using CTBase
+
+julia> throw(CTBase.ExtensionError(:MyExtension))
 ERROR: ExtensionError. Please make: julia> using MyExtension
 ```
 """
@@ -296,7 +249,9 @@ to load the required extensions.
 # Example
 
 ```julia-repl
-julia> e = ExtensionError(:MyExtension, :AnotherDep)
+julia> using CTBase
+
+julia> e = CTBase.ExtensionError(:MyExtension, :AnotherDep)
 julia> showerror(stdout, e)
 ERROR: ExtensionError. Please make: julia> using MyExtension, AnotherDep
 ```
