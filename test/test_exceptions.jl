@@ -6,7 +6,7 @@ function test_exceptions()
     @testset "AmbiguousDescription" begin
         e = CTBase.AmbiguousDescription((:e,))
         # Check that throwing error(e) produces an ErrorException
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.AmbiguousDescription throw(e)
         # Check that showerror produces a string output
         output = sprint(showerror, e)
         @test typeof(output) == String
@@ -18,7 +18,7 @@ function test_exceptions()
     # Test IncorrectArgument
     @testset "IncorrectArgument" begin
         e = CTBase.IncorrectArgument("invalid argument")
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.IncorrectArgument throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("IncorrectArgument", output)
@@ -28,7 +28,7 @@ function test_exceptions()
     # Test IncorrectMethod
     @testset "IncorrectMethod" begin
         e = CTBase.IncorrectMethod(:foo)
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.IncorrectMethod throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("IncorrectMethod", output)
@@ -38,7 +38,7 @@ function test_exceptions()
     # Test IncorrectOutput
     @testset "IncorrectOutput" begin
         e = CTBase.IncorrectOutput("unexpected result")
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.IncorrectOutput throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("IncorrectOutput", output)
@@ -48,7 +48,7 @@ function test_exceptions()
     # Test NotImplemented
     @testset "NotImplemented" begin
         e = CTBase.NotImplemented("feature not ready")
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.NotImplemented throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("NotImplemented", output)
@@ -58,7 +58,7 @@ function test_exceptions()
     # Test UnauthorizedCall
     @testset "UnauthorizedCall" begin
         e = CTBase.UnauthorizedCall("access denied")
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.UnauthorizedCall throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("UnauthorizedCall", output)
@@ -68,7 +68,7 @@ function test_exceptions()
     # Test ParsingError
     @testset "ParsingError" begin
         e = CTBase.ParsingError("syntax error")
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.ParsingError throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("ParsingError", output)
@@ -81,7 +81,7 @@ function test_exceptions()
         @test_throws CTBase.UnauthorizedCall CTBase.ExtensionError()
         # Create with one weak dependency
         e = CTBase.ExtensionError(:MyExt)
-        @test_throws ErrorException error(e)
+        @test_throws CTBase.ExtensionError throw(e)
         output = sprint(showerror, e)
         @test typeof(output) == String
         @test occursin("ExtensionError", output)
@@ -92,6 +92,11 @@ function test_exceptions()
         output2 = sprint(showerror, e2)
         @test occursin("Ext1", output2)
         @test occursin("Ext2", output2)
+    end
+
+    @testset "CTException supertype catch" begin
+        e = CTBase.IncorrectArgument("msg")
+        @test_throws CTBase.IncorrectArgument throw(e)
     end
 
     return nothing

@@ -21,7 +21,14 @@ using MarkdownAST: MarkdownAST
 
 Enumeration of documentation element types recognized by the API reference generator.
 
-Types include: abstract types, constants, functions, macros, modules, and structs.
+# Values
+
+- `DOCTYPE_ABSTRACT_TYPE`: An abstract type declaration
+- `DOCTYPE_CONSTANT`: A constant binding (including non-function, non-type values)
+- `DOCTYPE_FUNCTION`: A function or callable
+- `DOCTYPE_MACRO`: A macro (name starts with `@`)
+- `DOCTYPE_MODULE`: A submodule
+- `DOCTYPE_STRUCT`: A concrete struct type
 """
 @enum(
     DocType,
@@ -39,16 +46,20 @@ Types include: abstract types, constants, functions, macros, modules, and struct
 Internal configuration for API reference generation.
 
 # Fields
-- `current_module::Module`: The module being documented
-- `subdirectory::String`: Output directory for generated API pages
-- `modules::Dict{Module,<:Vector}`: Mapping of modules to document
-- `sort_by::Function`: Custom sort function for symbols
-- `exclude::Set{Symbol}`: Symbol names to exclude from documentation
-- `public::Bool`: Flag to generate public API page
-- `private::Bool`: Flag to generate private API page
-- `title::String`: Top-level title for API reference
-- `source_files::Vector{String}`: Absolute source file paths used to filter documented symbols (empty means no filtering)
-- `filename::String`: Base filename (without extension) used for the underlying markdown file in single-page cases
+
+- `current_module::Module`: The module being documented.
+- `subdirectory::String`: Output directory for generated API pages.
+- `modules::Dict{Module,<:Vector}`: Mapping of modules to extras (reserved for future use).
+- `sort_by::Function`: Custom sort function for symbols.
+- `exclude::Set{Symbol}`: Symbol names to exclude from documentation.
+- `public::Bool`: Flag to generate public API page.
+- `private::Bool`: Flag to generate private API page.
+- `title::String`: Title displayed at the top of the generated page.
+- `title_in_menu::String`: Title displayed in the navigation menu.
+- `source_files::Vector{String}`: Absolute source file paths used to filter documented symbols (empty means no filtering).
+- `filename::String`: Base filename (without extension) for the markdown file.
+- `include_without_source::Bool`: If `true`, include symbols whose source file cannot be determined.
+- `doc_modules::Vector{Module}`: Additional modules to search for docstrings (e.g., `Base`).
 """
 struct _Config
     current_module::Module
@@ -66,6 +77,14 @@ struct _Config
     doc_modules::Vector{Module}   # Additional modules to search for docstrings (e.g., Base)
 end
 
+"""
+    CONFIG::Vector{_Config}
+
+Global configuration storage for API reference generation.
+
+Each call to [`automatic_reference_documentation`](@ref) appends a new `_Config`
+entry to this vector. Use [`reset_config!`](@ref) to clear it between builds.
+"""
 const CONFIG = _Config[]
 
 """
@@ -78,8 +97,26 @@ function reset_config!()
     return nothing
 end
 
+"""
+    APIBuilder <: Documenter.Builder.DocumentPipeline
+
+Custom Documenter pipeline stage for automatic API reference generation.
+
+This builder is inserted into the Documenter pipeline at order `0.0` (before
+most other stages) to generate API reference pages from the configurations
+stored in [`CONFIG`](@ref).
+"""
 abstract type APIBuilder <: Documenter.Builder.DocumentPipeline end
 
+"""
+    Documenter.Selectors.order(::Type{APIBuilder}) -> Float64
+
+Return the pipeline order for [`APIBuilder`](@ref).
+
+# Returns
+
+- `Float64`: Always `0.0`, placing this stage early in the Documenter pipeline.
+"""
 Documenter.Selectors.order(::Type{APIBuilder}) = 0.0
 
 """
@@ -116,7 +153,19 @@ end
 """
     _build_page_path(subdirectory::String, filename::String) -> String
 
-Build the page path, handling the case where subdirectory is "." or empty.
+Build the page path by joining subdirectory and filename.
+
+Handles special cases where `subdirectory` is `"."` or empty, returning just
+the filename in those cases.
+
+# Arguments
+
+- `subdirectory::String`: Directory path (may be `"."` or empty).
+- `filename::String`: The filename to append.
+
+# Returns
+
+- `String`: The combined path, or just `filename` if subdirectory is `"."` or empty.
 """
 function _build_page_path(subdirectory::String, filename::String)
     if subdirectory == "." || subdirectory == ""
@@ -137,6 +186,8 @@ end
         title::String = "API Reference",
         filename::String = "",
         source_files::Vector{String} = String[],
+        include_without_source::Bool = false,
+        doc_modules::Vector{Module} = Module[],
     )
 
 Automatically creates the API reference documentation for one or more modules and
@@ -469,15 +520,22 @@ end
 """
     _iterate_over_symbols(f, config, symbol_list)
 
-Iterate over symbols, apply a function to each documented symbol.
+Iterate over symbols, applying a function to each documented symbol.
 
-Filters symbols based on exclusion list, checks for documentation, and applies the
-provided function to each valid symbol. Issues warnings for undocumented symbols.
+Filters symbols based on:
+1. Exclusion list (`config.exclude`)
+2. Presence of documentation (warns and skips undocumented symbols)
+3. Source file filtering (`config.source_files`)
 
 # Arguments
-- `f::Function`: Function to apply to each (symbol, type) pair
-- `config::_Config`: Configuration containing exclusion rules and module info
-- `symbol_list::Vector`: List of (Symbol, DocType) pairs to process
+
+- `f::Function`: Callback function `f(key::Symbol, type::DocType)` applied to each valid symbol.
+- `config::_Config`: Configuration containing exclusion rules, module info, and source file filters.
+- `symbol_list::Vector{Pair{Symbol,DocType}}`: List of symbol-type pairs to process.
+
+# Returns
+
+- `nothing`
 """
 function _iterate_over_symbols(f, config, symbol_list)
     current_module = config.current_module
@@ -487,9 +545,14 @@ function _iterate_over_symbols(f, config, symbol_list)
                 continue
             end
             binding = Base.Docs.Binding(current_module, key)
-            doc = Base.Docs.doc(binding)
-            missing_doc =
-                doc === nothing || occursin("No documentation found.", string(doc))
+            missing_doc = false
+            if isdefined(Base.Docs, :hasdoc)
+                missing_doc = !Base.Docs.hasdoc(binding)
+            else
+                doc = Base.Docs.doc(binding)
+                missing_doc =
+                    doc === nothing || occursin("No documentation found.", string(doc))
+            end
             if missing_doc
                 if type == DOCTYPE_MODULE
                     mod = getfield(current_module, key)
@@ -552,16 +615,23 @@ function _to_string(x::DocType)
 end
 
 """
-    _build_api_page(document, config)
+    _build_api_page(document::Documenter.Document, config::_Config)
 
-Generate public and private API reference pages for a module.
+Generate public and/or private API reference pages for a module.
 
-Creates two markdown pages: one listing exported symbols and one for internal symbols.
-Each page includes an overview and docstring references for all documented symbols.
+Creates markdown pages listing symbols with their docstrings. When both
+`config.public` and `config.private` are `true`, two separate pages are
+generated (`public.md` and `private.md`). Otherwise, a single page is created
+using `config.filename`.
 
 # Arguments
-- `document::Documenter.Document`: Documenter document object
-- `config::_Config`: Configuration for the module being documented
+
+- `document::Documenter.Document`: The Documenter document object to add pages to.
+- `config::_Config`: Configuration specifying the module, output paths, and filtering options.
+
+# Returns
+
+- `nothing`
 """
 function _build_api_page(document::Documenter.Document, config::_Config)
     subdir = config.subdirectory

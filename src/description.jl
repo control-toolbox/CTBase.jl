@@ -141,6 +141,9 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 """
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
+    if n == 0
+        throw(AmbiguousDescription(list))
+    end
     table = zeros(Int8, n, 2)
     for i in 1:n
         table[i, 1] = length(intersect(list, descriptions[i]))

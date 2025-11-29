@@ -57,5 +57,17 @@ function test_utils()
         @test CTBase.ctupperscripts(109) == "¹⁰⁹"
     end
 
+    @testset "ctindices / ctindice consistency" begin
+        for d in 0:9
+            @test CTBase.ctindices(d) == string(CTBase.ctindice(d))
+        end
+    end
+
+    @testset "ctupperscripts / ctupperscript consistency" begin
+        for d in 0:9
+            @test CTBase.ctupperscripts(d) == string(CTBase.ctupperscript(d))
+        end
+    end
+
     return nothing
 end
