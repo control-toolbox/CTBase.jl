@@ -1,3 +1,9 @@
+"""
+Core building blocks for the Control Toolbox (CT) ecosystem.
+
+This package defines shared types and utilities that are reused by other
+packages such as OptimalControl.jl.
+"""
 module CTBase
 
 using Base: Base
@@ -15,49 +21,51 @@ julia> const ctNumber = Real
 const ctNumber = Real
 
 #
-docstrings(::AbstractString; kwargs...) = throw(CTBase.ExtensionError(:JSON, :HTTP))
-function generate_prompt(
-    ::AbstractString, ::AbstractString, ::AbstractString, ::AbstractString
-)
-    throw(CTBase.ExtensionError(:JSON, :HTTP))
-end
-
 """
 $(TYPEDEF)
 
-Abstract supertype for identifying different kinds of docstring application tags.
+Abstract supertype for tags used to select a particular implementation of
+`automatic_reference_documentation`.
 
-Used as a dispatch mechanism to select the appropriate implementation for a docstrings-related application.
+Concrete subtypes identify a specific backend that provides the actual
+documentation generation logic.
 
 # Example
 
 ```julia-repl
-julia> CTBase.AbstractDocstringsAppTag <: AbstractDocstringsAppTag
+julia> using CTBase
+
+julia> CTBase.DocumenterReferenceTag() isa CTBase.AbstractDocumenterReferenceTag
 true
 ```
 """
-abstract type AbstractDocstringsAppTag end
+abstract type AbstractDocumenterReferenceTag end
 
 """
 $(TYPEDEF)
 
-Concrete tag type used to identify the Julia Docstrings Generator application.
+Concrete tag type used to dispatch to the `DocumenterReference` extension.
 
-# Fields
-
-This struct has no fields.
+Instances of this type are passed to `automatic_reference_documentation` to
+enable the integration with Documenter.jl when the `DocumenterReference`
+extension is available.
 
 # Example
 
 ```julia-repl
-julia> tag = DocstringsAppTag()
-DocstringsAppTag()
+julia> using CTBase
+
+julia> tag = CTBase.DocumenterReferenceTag()
+CTBase.DocumenterReferenceTag()
 ```
 """
-struct DocstringsAppTag <: AbstractDocstringsAppTag end
-
-doc_app(::AbstractDocstringsAppTag) = throw(CTBase.ExtensionError(:JSON, :HTTP))
-doc_app() = doc_app(DocstringsAppTag())
+struct DocumenterReferenceTag <: AbstractDocumenterReferenceTag end
+function automatic_reference_documentation(::AbstractDocumenterReferenceTag; kwargs...)
+    throw(CTBase.ExtensionError(:Documenter, :Markdown, :MarkdownAST))
+end
+function automatic_reference_documentation(; kwargs...)
+    automatic_reference_documentation(DocumenterReferenceTag(); kwargs...)
+end
 
 #
 include("exception.jl")
