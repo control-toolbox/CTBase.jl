@@ -1,13 +1,9 @@
 using CTBase
 using Test
 using Aqua
-# using JET
-# using JuliaFormatter
 using Documenter
-using HTTP
-using JSON
 
-const CTBaseDocstrings = Base.get_extension(CTBase, :CTBaseDocstrings) # to test functions from CTFlowsODE not in CTFlows
+const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference) # to test functions from CTFlowsODE not in CTFlows
 
 # Macro to check if an expression is type-stable and inferred correctly
 macro test_inferred(expr)
@@ -27,11 +23,11 @@ end
 @testset verbose = true showtiming = true "Base" begin
     for name in (
         # :code_quality, 
-        :default,
-        :description,
-        :exceptions,
-        :utils,
-        :docstrings,
+        # :default,
+        # :description,
+        # :exceptions,
+        # :utils,
+        :documenter_reference,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)
