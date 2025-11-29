@@ -647,7 +647,7 @@ function _build_api_page(document::Documenter.Document, config::_Config)
     public_overview = """
     # $(public_title)
 
-    This page lists the **exported** symbols of `$(current_module)`.
+    This page lists **exported** symbols of `$(current_module)`.
 
     Load all public symbols into the current scope with:
     ```julia
@@ -694,7 +694,7 @@ function _build_api_page(document::Documenter.Document, config::_Config)
 
     # $(private_title)
 
-    This page lists the **non-exported** (internal) symbols of `$(current_module)`.
+    This page lists **non-exported** (internal) symbols of `$(current_module)`.
 
     Access these symbols with:
     ```julia

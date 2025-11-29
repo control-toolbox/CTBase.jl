@@ -1,7 +1,3 @@
-using Test
-using CTBase
-using Documenter
-
 module DocumenterReferenceTestMod
 
     """

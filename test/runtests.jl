@@ -2,6 +2,8 @@ using CTBase
 using Test
 using Aqua
 using Documenter
+using Markdown
+using MarkdownAST
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference) # to test functions from CTFlowsODE not in CTFlows
 
@@ -28,6 +30,7 @@ end
         :exceptions,
         :utils,
         :documenter_reference,
+        :integration,
     )
         @testset "$(name)" begin
             test_name = Symbol(:test_, name)

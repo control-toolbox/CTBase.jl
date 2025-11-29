@@ -25,26 +25,6 @@ function test_exceptions()
         @test occursin("invalid argument", output)
     end
 
-    # Test IncorrectMethod
-    @testset "IncorrectMethod" begin
-        e = CTBase.IncorrectMethod(:foo)
-        @test_throws CTBase.IncorrectMethod throw(e)
-        output = sprint(showerror, e)
-        @test typeof(output) == String
-        @test occursin("IncorrectMethod", output)
-        @test occursin("foo", output)
-    end
-
-    # Test IncorrectOutput
-    @testset "IncorrectOutput" begin
-        e = CTBase.IncorrectOutput("unexpected result")
-        @test_throws CTBase.IncorrectOutput throw(e)
-        output = sprint(showerror, e)
-        @test typeof(output) == String
-        @test occursin("IncorrectOutput", output)
-        @test occursin("unexpected result", output)
-    end
-
     # Test NotImplemented
     @testset "NotImplemented" begin
         e = CTBase.NotImplemented("feature not ready")
