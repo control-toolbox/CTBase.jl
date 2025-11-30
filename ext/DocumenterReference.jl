@@ -222,7 +222,8 @@ returns a `Vector` which can be used in the `pages` argument of
 Each time you call this function, a new object is added to the global variable
 `DocumenterReference.CONFIG`. Use `reset_config!()` to clear it between builds.
 """
-function CTBase.automatic_reference_documentation(::CTBase.DocumenterReferenceTag;
+function CTBase.automatic_reference_documentation(
+    ::CTBase.DocumenterReferenceTag;
     subdirectory::String,
     modules::Vector,
     sort_by::Function=identity,
@@ -244,7 +245,9 @@ function CTBase.automatic_reference_documentation(::CTBase.DocumenterReferenceTa
         isempty(source_files) ? String[] : [abspath(path) for path in source_files]
 
     if !public && !private
-        error("automatic_reference_documentation: both `public` and `private` cannot be false.")
+        error(
+            "automatic_reference_documentation: both `public` and `private` cannot be false.",
+        )
     end
 
     # Effective title_in_menu defaults to title if not provided
@@ -257,7 +260,21 @@ function CTBase.automatic_reference_documentation(::CTBase.DocumenterReferenceTa
         effective_filename = _default_basename(filename, public, private)
         push!(
             CONFIG,
-            _Config(current_module, subdirectory, _modules, sort_by, exclude_set, public, private, title, effective_title_in_menu, normalized_source_files, effective_filename, include_without_source, doc_modules),
+            _Config(
+                current_module,
+                subdirectory,
+                _modules,
+                sort_by,
+                exclude_set,
+                public,
+                private,
+                title,
+                effective_title_in_menu,
+                normalized_source_files,
+                effective_filename,
+                include_without_source,
+                doc_modules,
+            ),
         )
         if public && private
             # Both pages: use subdirectory with public.md and private.md
@@ -266,9 +283,11 @@ function CTBase.automatic_reference_documentation(::CTBase.DocumenterReferenceTa
                 "Private" => _build_page_path(subdirectory, "private.md"),
             ]
         elseif public
-            return effective_title_in_menu => _build_page_path(subdirectory, "$effective_filename.md")
+            return effective_title_in_menu =>
+                _build_page_path(subdirectory, "$effective_filename.md")
         else
-            return effective_title_in_menu => _build_page_path(subdirectory, "$effective_filename.md")
+            return effective_title_in_menu =>
+                _build_page_path(subdirectory, "$effective_filename.md")
         end
     end
 
@@ -328,10 +347,28 @@ function _automatic_reference_documentation(
 )
     effective_filename = _default_basename("", public, private)
     # For multi-module case, use default titles
-    default_title = public && !private ? "Public API" : (!public && private ? "Private API" : "API Reference")
+    default_title = if public && !private
+        "Public API"
+    else
+        (!public && private ? "Private API" : "API Reference")
+    end
     push!(
         CONFIG,
-        _Config(current_module, subdirectory, modules, sort_by, exclude, public, private, default_title, default_title, source_files, effective_filename, include_without_source, doc_modules),
+        _Config(
+            current_module,
+            subdirectory,
+            modules,
+            sort_by,
+            exclude,
+            public,
+            private,
+            default_title,
+            default_title,
+            source_files,
+            effective_filename,
+            include_without_source,
+            doc_modules,
+        ),
     )
     if public && private
         return [
@@ -670,7 +707,9 @@ function _build_api_page(document::Documenter.Document, config::_Config)
             if type == DOCTYPE_MODULE
                 return nothing
             end
-            push!(public_docstrings, "## `$key`\n\n```@docs\n$(current_module).$key\n```\n\n")
+            push!(
+                public_docstrings, "## `$key`\n\n```@docs\n$(current_module).$key\n```\n\n"
+            )
             return nothing
         end
         public_md = Markdown.parse(public_overview * join(public_docstrings, "\n"))
@@ -712,7 +751,9 @@ function _build_api_page(document::Documenter.Document, config::_Config)
             if type == DOCTYPE_MODULE
                 return nothing
             end
-            push!(private_docstrings, "## `$key`\n\n```@docs\n$(current_module).$key\n```\n\n")
+            push!(
+                private_docstrings, "## `$key`\n\n```@docs\n$(current_module).$key\n```\n\n"
+            )
             return nothing
         end
         # Add docstrings from additional modules (e.g., Base.showerror)
@@ -731,7 +772,10 @@ function _build_api_page(document::Documenter.Document, config::_Config)
                                 abs_file = abspath(file)
                                 if abs_file in config.source_files
                                     push!(found_symbols, key)
-                                    push!(private_docstrings, "## `$(extra_mod).$key`\n\n```@docs\n$(extra_mod).$key\n```\n\n")
+                                    push!(
+                                        private_docstrings,
+                                        "## `$(extra_mod).$key`\n\n```@docs\n$(extra_mod).$key\n```\n\n",
+                                    )
                                     break
                                 end
                             end

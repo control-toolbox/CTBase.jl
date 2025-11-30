@@ -121,7 +121,9 @@ function test_description()
 
     @testset "Complete with Empty Descriptions" begin
         algorithms = ()
-        @test_throws CTBase.AmbiguousDescription CTBase.complete(:a; descriptions=algorithms)
+        @test_throws CTBase.AmbiguousDescription CTBase.complete(
+            :a; descriptions=algorithms
+        )
     end
 
     return nothing
