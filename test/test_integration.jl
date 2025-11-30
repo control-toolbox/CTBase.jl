@@ -20,8 +20,12 @@ function test_integration()
         @test diff == (:bisection,)
 
         # Ambiguous / invalid descriptions should raise AmbiguousDescription
-        @test_throws CTBase.AmbiguousDescription CTBase.complete((:unknown,); descriptions=algorithms)
-        @test_throws CTBase.AmbiguousDescription CTBase.complete((:descent, :unknown); descriptions=algorithms)
+        @test_throws CTBase.AmbiguousDescription CTBase.complete(
+            (:unknown,); descriptions=algorithms
+        )
+        @test_throws CTBase.AmbiguousDescription CTBase.complete(
+            (:descent, :unknown); descriptions=algorithms
+        )
     end
 
     # Integration test: formatting labels using utils (subscripts/superscripts) with descriptions
