@@ -1,37 +1,36 @@
 module DocumenterReferenceTestMod
 
-    """
-    Simple documented function used to test source file detection and inclusion.
-    """
-    myfun(x) = x
+"""
+Simple documented function used to test source file detection and inclusion.
+"""
+myfun(x) = x
 
-    """
-    Function that should be kept by _iterate_over_symbols.
-    """
-    keep(x) = x
+"""
+Function that should be kept by _iterate_over_symbols.
+"""
+keep(x) = x
 
-    """
-    Function that will be excluded via the `exclude` configuration.
-    """
-    skip(x) = x
+"""
+Function that will be excluded via the `exclude` configuration.
+"""
+skip(x) = x
 
-    # No docstring: this function should be skipped by _iterate_over_symbols.
-    no_doc(x) = x
+# No docstring: this function should be skipped by _iterate_over_symbols.
+no_doc(x) = x
 
-    """
-    Test submodule with a docstring but no associated source file information.
-    Used to exercise include_without_source behaviour for modules.
-    """
-    module SubModule
-    end
+"""
+Test submodule with a docstring but no associated source file information.
+Used to exercise include_without_source behaviour for modules.
+"""
+module SubModule end
 
-    abstract type AbstractFoo end
+abstract type AbstractFoo end
 
-    struct Foo <: AbstractFoo
-        x::Int
-    end
+struct Foo <: AbstractFoo
+    x::Int
+end
 
-    const MYCONST = 42
+const MYCONST = 42
 
 end
 
@@ -57,13 +56,17 @@ function test_documenter_reference()
     end
 
     @testset "_classify_symbol and _to_string" begin
-
         @test DR._classify_symbol(nothing, "@mymacro") == DR.DOCTYPE_MACRO
-        @test DR._classify_symbol(DocumenterReferenceTestMod.SubModule, "SubModule") == DR.DOCTYPE_MODULE
-        @test DR._classify_symbol(DocumenterReferenceTestMod.AbstractFoo, "AbstractFoo") == DR.DOCTYPE_ABSTRACT_TYPE
-        @test DR._classify_symbol(DocumenterReferenceTestMod.Foo, "Foo") == DR.DOCTYPE_STRUCT
-        @test DR._classify_symbol(DocumenterReferenceTestMod.myfun, "myfun") == DR.DOCTYPE_FUNCTION
-        @test DR._classify_symbol(DocumenterReferenceTestMod.MYCONST, "MYCONST") == DR.DOCTYPE_CONSTANT
+        @test DR._classify_symbol(DocumenterReferenceTestMod.SubModule, "SubModule") ==
+            DR.DOCTYPE_MODULE
+        @test DR._classify_symbol(DocumenterReferenceTestMod.AbstractFoo, "AbstractFoo") ==
+            DR.DOCTYPE_ABSTRACT_TYPE
+        @test DR._classify_symbol(DocumenterReferenceTestMod.Foo, "Foo") ==
+            DR.DOCTYPE_STRUCT
+        @test DR._classify_symbol(DocumenterReferenceTestMod.myfun, "myfun") ==
+            DR.DOCTYPE_FUNCTION
+        @test DR._classify_symbol(DocumenterReferenceTestMod.MYCONST, "MYCONST") ==
+            DR.DOCTYPE_CONSTANT
 
         @test DR._to_string(DR.DOCTYPE_ABSTRACT_TYPE) == "abstract type"
         @test DR._to_string(DR.DOCTYPE_CONSTANT) == "constant"
@@ -77,7 +80,9 @@ function test_documenter_reference()
         path = DR._get_source_file(DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION)
         @test path === abspath(@__FILE__)
 
-        const_path = DR._get_source_file(DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT)
+        const_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT
+        )
         @test const_path === nothing
     end
 
@@ -143,9 +148,7 @@ function test_documenter_reference()
             Module[],
         )
 
-        symbols1 = [
-            :myfun => DR.DOCTYPE_FUNCTION,
-        ]
+        symbols1 = [:myfun => DR.DOCTYPE_FUNCTION]
 
         seen1 = Symbol[]
         DR._iterate_over_symbols(config1, symbols1) do key, type
@@ -186,9 +189,7 @@ function test_documenter_reference()
             Module[],
         )
 
-        symbols_module = [
-            :SubModule => DR.DOCTYPE_MODULE,
-        ]
+        symbols_module = [:SubModule => DR.DOCTYPE_MODULE]
 
         seen2 = Symbol[]
         DR._iterate_over_symbols(config2, symbols_module) do key, type
@@ -242,10 +243,8 @@ function test_documenter_reference()
         @test cfg2.public == true
         @test cfg2.private == true
         @test cfg2.title == "All API"
-        @test pages2 == ("All API" => [
-            "Public" => "ref/public.md",
-            "Private" => "ref/private.md",
-        ])
+        @test pages2 ==
+            ("All API" => ["Public" => "ref/public.md", "Private" => "ref/private.md"])
 
         # public=false, private=false should error
         @test_throws ErrorException CTBase.automatic_reference_documentation(
@@ -328,25 +327,36 @@ function test_documenter_reference()
 
     @testset "_get_source_file expanded cases" begin
         # Function case (already tested, but verify)
-        func_path = DR._get_source_file(DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION)
+        func_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION
+        )
         @test func_path !== nothing
         @test endswith(func_path, "test_documenter_reference.jl")
 
         # Struct case - should find source via constructor methods
-        struct_path = DR._get_source_file(DocumenterReferenceTestMod, :Foo, DR.DOCTYPE_STRUCT)
+        struct_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :Foo, DR.DOCTYPE_STRUCT
+        )
         # Structs defined in test file should be found
-        @test struct_path === nothing || endswith(struct_path, "test_documenter_reference.jl")
+        @test struct_path === nothing ||
+            endswith(struct_path, "test_documenter_reference.jl")
 
         # Abstract type case - typically returns nothing (no constructor)
-        abstract_path = DR._get_source_file(DocumenterReferenceTestMod, :AbstractFoo, DR.DOCTYPE_ABSTRACT_TYPE)
+        abstract_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :AbstractFoo, DR.DOCTYPE_ABSTRACT_TYPE
+        )
         @test abstract_path === nothing
 
         # Module case - modules cannot reliably determine source
-        mod_path = DR._get_source_file(DocumenterReferenceTestMod, :SubModule, DR.DOCTYPE_MODULE)
+        mod_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :SubModule, DR.DOCTYPE_MODULE
+        )
         @test mod_path === nothing
 
         # Constant case (already tested)
-        const_path = DR._get_source_file(DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT)
+        const_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT
+        )
         @test const_path === nothing
     end
 

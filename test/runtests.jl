@@ -24,7 +24,7 @@ end
 # Main test set running multiple test suites with verbose output and timing information
 @testset verbose = true showtiming = true "Base" begin
     for name in (
-        :code_quality, 
+        :code_quality,
         :default,
         :description,
         :exceptions,
