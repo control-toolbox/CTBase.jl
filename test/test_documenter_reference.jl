@@ -34,6 +34,24 @@ const MYCONST = 42
 
 end
 
+module DRTypeFormatTestMod
+    struct Simple end
+    struct Parametric{T} end
+    struct WithValue{T,N} end
+end
+
+module DRMethodTestMod
+    f() = 1
+    f(x::Int) = x
+    g(x::Int, y::String) = x
+    h(xs::Int...) = length(xs)
+end
+
+module DRExternalTestMod
+    extfun(x::Int) = x
+    extfun(x::String) = length(x)
+end
+
 using .DocumenterReferenceTestMod
 
 function test_documenter_reference()
@@ -211,7 +229,7 @@ function test_documenter_reference()
         pages1 = CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="ref",
-            modules=[DocumenterReferenceTestMod],
+            primary_modules=[DocumenterReferenceTestMod],
             public=true,
             private=false,
             title="My API",
@@ -231,7 +249,7 @@ function test_documenter_reference()
         pages2 = CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="ref",
-            modules=[DocumenterReferenceTestMod],
+            primary_modules=[DocumenterReferenceTestMod],
             public=true,
             private=true,
             title="All API",
@@ -250,7 +268,7 @@ function test_documenter_reference()
         @test_throws ErrorException CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="ref",
-            modules=[DocumenterReferenceTestMod],
+            primary_modules=[DocumenterReferenceTestMod],
             public=false,
             private=false,
         )
@@ -306,7 +324,7 @@ function test_documenter_reference()
         pages = CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="api",
-            modules=[mod1, mod1],  # Two entries to trigger multi-module path
+            primary_modules=[mod1, mod1],  # Two entries to trigger multi-module path
             public=true,
             private=true,
             title="Multi API",
@@ -317,8 +335,8 @@ function test_documenter_reference()
         @test first(pages) == "Multi API"
         @test last(pages) isa Vector
 
-        # CONFIG should have 2 entries (one per module)
-        @test length(DR.CONFIG) == 2
+        # CONFIG should have 1 entry (one per unique module)
+        @test length(DR.CONFIG) == 1
     end
 
     # ============================================================================
@@ -412,5 +430,139 @@ function test_documenter_reference()
         DR.reset_config!()
         DR.reset_config!()
         @test isempty(DR.CONFIG)
+    end
+
+    @testset "_format_type_for_docs and helpers" begin
+        simple_str = DR._format_type_for_docs(DRTypeFormatTestMod.Simple)
+        @test startswith(simple_str, "::")
+        @test occursin("DRTypeFormatTestMod.Simple", simple_str)
+
+        param_type = DRTypeFormatTestMod.Parametric{DRTypeFormatTestMod.Simple}
+        param_str = DR._format_type_for_docs(param_type)
+        @test occursin("Parametric", param_str)
+        @test occursin("Simple", param_str)
+
+        union_str = DR._format_type_for_docs(Union{DRTypeFormatTestMod.Simple, Nothing})
+        @test occursin("Union", union_str)
+        @test occursin("Simple", union_str)
+        @test occursin("Nothing", union_str)
+
+        value_type = DRTypeFormatTestMod.WithValue{Int, 3}
+        value_str = DR._format_type_for_docs(value_type)
+        @test occursin("WithValue", value_str)
+        @test occursin("3", value_str)
+
+        param_fmt = DR._format_type_param(DRTypeFormatTestMod.Simple)
+        @test occursin("DRTypeFormatTestMod.Simple", param_fmt)
+
+        value_param_fmt = DR._format_type_param(3)
+        @test value_param_fmt == "3"
+    end
+
+    @testset "_method_signature_string and method collection" begin
+        methods_f = methods(DRMethodTestMod.f)
+        m0 = first(filter(m -> length(m.sig.parameters) == 1, methods_f))
+        sig0 = DR._method_signature_string(m0, DRMethodTestMod, :f)
+        @test endswith(sig0, "DRMethodTestMod.f()")
+
+        m1 = first(filter(m -> length(m.sig.parameters) == 2, methods_f))
+        sig1 = DR._method_signature_string(m1, DRMethodTestMod, :f)
+        @test occursin("DRMethodTestMod.f", sig1)
+        @test occursin("Int", sig1)
+
+        methods_h = methods(DRMethodTestMod.h)
+        mvar = first(methods_h)
+        sigv = DR._method_signature_string(mvar, DRMethodTestMod, :h)
+        @test occursin("Vararg", sigv)
+
+        source_files = [abspath(@__FILE__)]
+        methods_by_func = DR._collect_methods_from_source_files(DRMethodTestMod, source_files)
+        @test :f in keys(methods_by_func)
+        @test :h in keys(methods_by_func)
+        for ms in values(methods_by_func)
+            for m in ms
+                file = String(m.file)
+                @test abspath(file) in source_files
+            end
+        end
+    end
+
+    @testset "Page content builders" begin
+        modules_str = "ModA, ModB"
+        module_contents_private = [
+            (DocumenterReferenceTestMod, String[], ["priv_a"]),
+            (DRMethodTestMod, String[], ["priv_b1", "priv_b2"]),
+        ]
+        overview_priv, docs_priv = DR._build_private_page_content(modules_str, module_contents_private)
+        @test occursin("Private API", overview_priv)
+        @test occursin("ModA, ModB", overview_priv)
+        @test !isempty(docs_priv)
+        @test any(occursin("priv_a", s) for s in docs_priv)
+        @test any(occursin("priv_b1", s) for s in docs_priv)
+
+        module_contents_public = [
+            (DocumenterReferenceTestMod, ["pub_a"], String[]),
+            (DRMethodTestMod, String[], String[]),
+        ]
+        overview_pub, docs_pub = DR._build_public_page_content(modules_str, module_contents_public)
+        @test occursin("Public API", overview_pub)
+        @test occursin("ModA, ModB", overview_pub)
+        @test !isempty(docs_pub)
+        @test any(occursin("pub_a", s) for s in docs_pub)
+    end
+
+    @testset "external_modules_to_document" begin
+        current_module = DocumenterReferenceTestMod
+        modules = Dict(current_module => String[])
+        sort_by(x) = x
+        source_files = [abspath(@__FILE__)]
+
+        config = DR._Config(
+            current_module,
+            "api_ext",
+            modules,
+            sort_by,
+            Set{Symbol}(),
+            true,
+            true,
+            "Ext API",
+            "Ext API",
+            source_files,
+            "api_ext",
+            false,
+            [DRExternalTestMod],
+        )
+
+        private_docs = DR._collect_private_docstrings(config, Pair{Symbol,DR.DocType}[])
+        @test !isempty(private_docs)
+        @test any(occursin("DRExternalTestMod.extfun", s) for s in private_docs)
+    end
+
+    @testset "APIBuilder runner integration" begin
+        DR.reset_config!()
+
+        pages = CTBase.automatic_reference_documentation(
+            CTBase.DocumenterReferenceTag();
+            subdirectory="api_integration",
+            primary_modules=[DocumenterReferenceTestMod],
+            public=true,
+            private=true,
+            title="Integration API",
+        )
+
+        @test !isempty(DR.CONFIG)
+
+        doc = Documenter.Document(
+            ;
+            root=pwd(),
+            source="src",
+            build="build",
+            remotes=nothing,
+        )
+
+        Documenter.Selectors.runner(DR.APIBuilder, doc)
+
+        @test !isempty(doc.blueprint.pages)
+        @test any(endswith(k, "private.md") for k in keys(doc.blueprint.pages))
     end
 end

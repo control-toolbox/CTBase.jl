@@ -1,6 +1,6 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
-version = "0.17.0"
+version = "0.17.1"
 authors = ["Olivier Cots <olivier.cots@irit.fr>", "Jean-Baptiste Caillau <caillau@univ-cotedazur.fr>"]
 
 [deps]
