@@ -211,7 +211,7 @@ function test_documenter_reference()
         pages1 = CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="ref",
-            modules=[DocumenterReferenceTestMod],
+            primary_modules=[DocumenterReferenceTestMod],
             public=true,
             private=false,
             title="My API",
@@ -231,7 +231,7 @@ function test_documenter_reference()
         pages2 = CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="ref",
-            modules=[DocumenterReferenceTestMod],
+            primary_modules=[DocumenterReferenceTestMod],
             public=true,
             private=true,
             title="All API",
@@ -250,7 +250,7 @@ function test_documenter_reference()
         @test_throws ErrorException CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="ref",
-            modules=[DocumenterReferenceTestMod],
+            primary_modules=[DocumenterReferenceTestMod],
             public=false,
             private=false,
         )
@@ -306,7 +306,7 @@ function test_documenter_reference()
         pages = CTBase.automatic_reference_documentation(
             CTBase.DocumenterReferenceTag();
             subdirectory="api",
-            modules=[mod1, mod1],  # Two entries to trigger multi-module path
+            primary_modules=[mod1, mod1],  # Two entries to trigger multi-module path
             public=true,
             private=true,
             title="Multi API",
@@ -317,8 +317,8 @@ function test_documenter_reference()
         @test first(pages) == "Multi API"
         @test last(pages) isa Vector
 
-        # CONFIG should have 2 entries (one per module)
-        @test length(DR.CONFIG) == 2
+        # CONFIG should have 1 entry (one per unique module)
+        @test length(DR.CONFIG) == 1
     end
 
     # ============================================================================
