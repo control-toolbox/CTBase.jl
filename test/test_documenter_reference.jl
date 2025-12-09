@@ -35,21 +35,21 @@ const MYCONST = 42
 end
 
 module DRTypeFormatTestMod
-    struct Simple end
-    struct Parametric{T} end
-    struct WithValue{T,N} end
+struct Simple end
+struct Parametric{T} end
+struct WithValue{T,N} end
 end
 
 module DRMethodTestMod
-    f() = 1
-    f(x::Int) = x
-    g(x::Int, y::String) = x
-    h(xs::Int...) = length(xs)
+f() = 1
+f(x::Int) = x
+g(x::Int, y::String) = x
+h(xs::Int...) = length(xs)
 end
 
 module DRExternalTestMod
-    extfun(x::Int) = x
-    extfun(x::String) = length(x)
+extfun(x::Int) = x
+extfun(x::String) = length(x)
 end
 
 using .DocumenterReferenceTestMod
@@ -442,12 +442,12 @@ function test_documenter_reference()
         @test occursin("Parametric", param_str)
         @test occursin("Simple", param_str)
 
-        union_str = DR._format_type_for_docs(Union{DRTypeFormatTestMod.Simple, Nothing})
+        union_str = DR._format_type_for_docs(Union{DRTypeFormatTestMod.Simple,Nothing})
         @test occursin("Union", union_str)
         @test occursin("Simple", union_str)
         @test occursin("Nothing", union_str)
 
-        value_type = DRTypeFormatTestMod.WithValue{Int, 3}
+        value_type = DRTypeFormatTestMod.WithValue{Int,3}
         value_str = DR._format_type_for_docs(value_type)
         @test occursin("WithValue", value_str)
         @test occursin("3", value_str)
@@ -476,7 +476,9 @@ function test_documenter_reference()
         @test occursin("Vararg", sigv)
 
         source_files = [abspath(@__FILE__)]
-        methods_by_func = DR._collect_methods_from_source_files(DRMethodTestMod, source_files)
+        methods_by_func = DR._collect_methods_from_source_files(
+            DRMethodTestMod, source_files
+        )
         @test :f in keys(methods_by_func)
         @test :h in keys(methods_by_func)
         for ms in values(methods_by_func)
@@ -493,7 +495,9 @@ function test_documenter_reference()
             (DocumenterReferenceTestMod, String[], ["priv_a"]),
             (DRMethodTestMod, String[], ["priv_b1", "priv_b2"]),
         ]
-        overview_priv, docs_priv = DR._build_private_page_content(modules_str, module_contents_private)
+        overview_priv, docs_priv = DR._build_private_page_content(
+            modules_str, module_contents_private
+        )
         @test occursin("Private API", overview_priv)
         @test occursin("ModA, ModB", overview_priv)
         @test !isempty(docs_priv)
@@ -504,7 +508,9 @@ function test_documenter_reference()
             (DocumenterReferenceTestMod, ["pub_a"], String[]),
             (DRMethodTestMod, String[], String[]),
         ]
-        overview_pub, docs_pub = DR._build_public_page_content(modules_str, module_contents_public)
+        overview_pub, docs_pub = DR._build_public_page_content(
+            modules_str, module_contents_public
+        )
         @test occursin("Public API", overview_pub)
         @test occursin("ModA, ModB", overview_pub)
         @test !isempty(docs_pub)
@@ -552,12 +558,8 @@ function test_documenter_reference()
 
         @test !isempty(DR.CONFIG)
 
-        doc = Documenter.Document(
-            ;
-            root=pwd(),
-            source="src",
-            build="build",
-            remotes=nothing,
+        doc = Documenter.Document(;
+            root=pwd(), source="src", build="build", remotes=nothing
         )
 
         Documenter.Selectors.runner(DR.APIBuilder, doc)
