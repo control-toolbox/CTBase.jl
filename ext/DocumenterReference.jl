@@ -54,7 +54,7 @@ Enumeration of documentation element types recognized by the API reference gener
 
 Mapping from DocType enum values to their human-readable string representations.
 """
-const DOCTYPE_NAMES = Dict{DocType, String}(
+const DOCTYPE_NAMES = Dict{DocType,String}(
     DOCTYPE_ABSTRACT_TYPE => "abstract type",
     DOCTYPE_CONSTANT => "constant",
     DOCTYPE_FUNCTION => "function",
@@ -69,7 +69,7 @@ const DOCTYPE_NAMES = Dict{DocType, String}(
 Ordering for DocType values used when sorting symbols for display.
 Lower values appear first.
 """
-const DOCTYPE_ORDER = Dict{DocType, Int}(
+const DOCTYPE_ORDER = Dict{DocType,Int}(
     DOCTYPE_MODULE => 0,
     DOCTYPE_MACRO => 1,
     DOCTYPE_FUNCTION => 2,
@@ -132,7 +132,9 @@ const CONFIG = _Config[]
 Global accumulator for multi-module combined pages.
 Maps output filename to a list of (module, public_docstrings, private_docstrings) tuples.
 """
-const PAGE_CONTENT_ACCUMULATOR = Dict{String, Vector{Tuple{Module, Vector{String}, Vector{String}}}}()
+const PAGE_CONTENT_ACCUMULATOR = Dict{
+    String,Vector{Tuple{Module,Vector{String},Vector{String}}}
+}()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Public API
@@ -211,7 +213,9 @@ function CTBase.automatic_reference_documentation(
 )
     # Validate arguments
     if !public && !private
-        error("automatic_reference_documentation: both `public` and `private` cannot be false.")
+        error(
+            "automatic_reference_documentation: both `public` and `private` cannot be false.",
+        )
     end
 
     # Parse primary_modules into a Dict{Module, Vector{String}}
@@ -225,23 +229,47 @@ function CTBase.automatic_reference_documentation(
     if length(primary_modules) == 1
         current_module = first(keys(modules_dict))
         _register_config(
-            current_module, subdirectory, modules_dict, sort_by, exclude_set,
-            public, private, title, effective_title_in_menu, normalized_source_files,
-            effective_filename, include_without_source, external_modules_to_document
+            current_module,
+            subdirectory,
+            modules_dict,
+            sort_by,
+            exclude_set,
+            public,
+            private,
+            title,
+            effective_title_in_menu,
+            normalized_source_files,
+            effective_filename,
+            include_without_source,
+            external_modules_to_document,
         )
-        return _build_page_return_structure(effective_title_in_menu, subdirectory, effective_filename, public, private)
+        return _build_page_return_structure(
+            effective_title_in_menu, subdirectory, effective_filename, public, private
+        )
     end
 
     # Multi-module case with combined page (filename provided)
     if !isempty(filename)
         for mod in keys(modules_dict)
             _register_config(
-                mod, subdirectory, modules_dict, sort_by, exclude_set,
-                public, private, title, effective_title_in_menu, normalized_source_files,
-                effective_filename, include_without_source, external_modules_to_document
+                mod,
+                subdirectory,
+                modules_dict,
+                sort_by,
+                exclude_set,
+                public,
+                private,
+                title,
+                effective_title_in_menu,
+                normalized_source_files,
+                effective_filename,
+                include_without_source,
+                external_modules_to_document,
             )
         end
-        return _build_page_return_structure(effective_title_in_menu, subdirectory, effective_filename, public, private)
+        return _build_page_return_structure(
+            effective_title_in_menu, subdirectory, effective_filename, public, private
+        )
     end
 
     # Multi-module case with per-module subdirectories
@@ -250,14 +278,26 @@ function CTBase.automatic_reference_documentation(
         module_subdir = joinpath(subdirectory, string(mod))
         module_filename = _default_basename("", public, private)
         default_title = _default_title(public, private)
-        
+
         _register_config(
-            mod, module_subdir, modules_dict, sort_by, exclude_set,
-            public, private, default_title, default_title, normalized_source_files,
-            module_filename, include_without_source, external_modules_to_document
+            mod,
+            module_subdir,
+            modules_dict,
+            sort_by,
+            exclude_set,
+            public,
+            private,
+            default_title,
+            default_title,
+            normalized_source_files,
+            module_filename,
+            include_without_source,
+            external_modules_to_document,
         )
-        
-        pages = _build_page_return_structure(default_title, module_subdir, module_filename, public, private)
+
+        pages = _build_page_return_structure(
+            default_title, module_subdir, module_filename, public, private
+        )
         push!(list_of_pages, string(mod) => last(pages))
     end
     return effective_title_in_menu => list_of_pages
@@ -312,7 +352,7 @@ Parse the `primary_modules` argument into a dictionary mapping modules to their 
 Handles both plain modules and `Module => files` pairs.
 """
 function _parse_primary_modules(primary_modules::Vector)
-    result = Dict{Module, Vector{String}}()
+    result = Dict{Module,Vector{String}}()
     for m in primary_modules
         if m isa Module
             result[m] = String[]
@@ -321,7 +361,9 @@ function _parse_primary_modules(primary_modules::Vector)
             files = last(m)
             result[mod] = _normalize_paths(files isa Vector ? files : [files])
         else
-            error("Invalid element in primary_modules: expected Module or Module => files pair")
+            error(
+                "Invalid element in primary_modules: expected Module or Module => files pair",
+            )
         end
     end
     return result
@@ -346,7 +388,7 @@ Create and register a `_Config` in the global `CONFIG` vector.
 function _register_config(
     current_module::Module,
     subdirectory::String,
-    modules::Dict{Module, Vector{String}},
+    modules::Dict{Module,Vector{String}},
     sort_by::Function,
     exclude::Set{Symbol},
     public::Bool,
@@ -358,11 +400,24 @@ function _register_config(
     include_without_source::Bool,
     external_modules_to_document::Vector{Module},
 )
-    push!(CONFIG, _Config(
-        current_module, subdirectory, modules, sort_by, exclude,
-        public, private, title, title_in_menu, source_files, filename,
-        include_without_source, external_modules_to_document
-    ))
+    push!(
+        CONFIG,
+        _Config(
+            current_module,
+            subdirectory,
+            modules,
+            sort_by,
+            exclude,
+            public,
+            private,
+            title,
+            title_in_menu,
+            source_files,
+            filename,
+            include_without_source,
+            external_modules_to_document,
+        ),
+    )
     return nothing
 end
 
@@ -405,7 +460,13 @@ end
 
 Build the return structure for `automatic_reference_documentation`.
 """
-function _build_page_return_structure(title_in_menu::String, subdirectory::String, filename::String, public::Bool, private::Bool)
+function _build_page_return_structure(
+    title_in_menu::String,
+    subdirectory::String,
+    filename::String,
+    public::Bool,
+    private::Bool,
+)
     if public && private
         return title_in_menu => [
             "Public" => _build_page_path(subdirectory, "public.md"),
@@ -533,7 +594,7 @@ function _get_source_from_docstring(mod::Module, key::Symbol)
     binding = Base.Docs.Binding(mod, key)
     meta = Base.Docs.meta(mod)
     haskey(meta, binding) || return nothing
-    
+
     docs = meta[binding]
     if isa(docs, Base.Docs.MultiDoc) && !isempty(docs.docs)
         for (_, docstr) in docs.docs
@@ -579,20 +640,22 @@ function _iterate_over_symbols(f, config::_Config, symbol_list)
 
     for (key, type) in sort!(copy(symbol_list); by=config.sort_by)
         key isa Symbol || continue
-        
+
         # Check exclusion
         key in config.exclude && continue
-        
+
         # Check documentation
         if !_has_documentation(current_module, key, type, config.modules)
             continue
         end
-        
+
         # Check source file filtering
-        if !_passes_source_filter(current_module, key, type, effective_source_files, config.include_without_source)
+        if !_passes_source_filter(
+            current_module, key, type, effective_source_files, config.include_without_source
+        )
             continue
         end
-        
+
         f(key, type)
     end
     return nothing
@@ -605,14 +668,14 @@ Check if a symbol has documentation. Logs a warning if not.
 """
 function _has_documentation(mod::Module, key::Symbol, type::DocType, modules::Dict)
     binding = Base.Docs.Binding(mod, key)
-    
+
     has_doc = if isdefined(Base.Docs, :hasdoc)
         Base.Docs.hasdoc(binding)
     else
         doc = Base.Docs.doc(binding)
         doc !== nothing && !occursin("No documentation found.", string(doc))
     end
-    
+
     if !has_doc
         if type == DOCTYPE_MODULE
             submod = getfield(mod, key)
@@ -631,9 +694,15 @@ end
 
 Check if a symbol passes the source file filter.
 """
-function _passes_source_filter(mod::Module, key::Symbol, type::DocType, source_files::Vector{String}, include_without_source::Bool)
+function _passes_source_filter(
+    mod::Module,
+    key::Symbol,
+    type::DocType,
+    source_files::Vector{String},
+    include_without_source::Bool,
+)
     isempty(source_files) && return true
-    
+
     source_path = _get_source_file(mod, key, type)
     if source_path === nothing
         if !include_without_source
@@ -642,7 +711,7 @@ function _passes_source_filter(mod::Module, key::Symbol, type::DocType, source_f
         end
         return true
     end
-    
+
     return source_path in source_files
 end
 
@@ -672,7 +741,7 @@ function _method_signature_string(m::Method, mod::Module, key::Symbol)
     if isempty(arg_types)
         return "$(mod).$(key)()"
     end
-    
+
     type_strs = [_format_type_for_docs(T) for T in arg_types]
     return "$(mod).$(key)($(join(type_strs, ", ")))"
 end
@@ -690,18 +759,18 @@ function _format_type_for_docs(T)
         inner_clean = startswith(inner, "::") ? inner[3:end] : inner
         return "::Vararg{$(inner_clean)}"
     end
-    
+
     # TypeVar
     T isa TypeVar && return "::$(T.name)"
-    
+
     # UnionAll - unwrap and format
     T isa UnionAll && return _format_type_for_docs(Base.unwrap_unionall(T))
-    
+
     # DataType
     if T isa DataType
         return _format_datatype_for_docs(T)
     end
-    
+
     # Union
     if T isa Union
         union_types = Base.uniontypes(T)
@@ -709,7 +778,7 @@ function _format_type_for_docs(T)
         cleaned = [startswith(s, "::") ? s[3:end] : s for s in formatted]
         return "::Union{$(join(cleaned, ", "))}"
     end
-    
+
     return "::$(T)"
 end
 
@@ -726,7 +795,7 @@ function _format_datatype_for_docs(T::DataType)
     # Handle parametric types
     if !isempty(T.parameters)
         has_typevar_params = any(p -> p isa TypeVar, T.parameters)
-        
+
         if has_typevar_params
             # Strip type parameters to avoid UndefVarError
             return is_core_or_base ? "::$(type_name)" : "::$(type_mod).$(type_name)"
@@ -734,7 +803,11 @@ function _format_datatype_for_docs(T::DataType)
             # Keep concrete type parameters
             params = [_format_type_param(p) for p in T.parameters]
             params_str = join(params, ", ")
-            return is_core_or_base ? "::$(type_name){$(params_str)}" : "::$(type_mod).$(type_name){$(params_str)}"
+            return if is_core_or_base
+                "::$(type_name){$(params_str)}"
+            else
+                "::$(type_mod).$(type_name){$(params_str)}"
+            end
         end
     end
 
@@ -778,14 +851,21 @@ function _build_api_page(document::Documenter.Document, config::_Config)
     private_filename = _build_page_path(config.subdirectory, "$private_basename.md")
 
     # Collect docstrings
-    public_docstrings = config.public ? _collect_module_docstrings(config, symbols.exported) : String[]
-    private_docstrings = config.private ? _collect_private_docstrings(config, symbols.private) : String[]
+    public_docstrings =
+        config.public ? _collect_module_docstrings(config, symbols.exported) : String[]
+    private_docstrings =
+        config.private ? _collect_private_docstrings(config, symbols.private) : String[]
 
     # Accumulate content
     if !haskey(PAGE_CONTENT_ACCUMULATOR, private_filename)
-        PAGE_CONTENT_ACCUMULATOR[private_filename] = Tuple{Module, Vector{String}, Vector{String}}[]
+        PAGE_CONTENT_ACCUMULATOR[private_filename] = Tuple{
+            Module,Vector{String},Vector{String}
+        }[]
     end
-    push!(PAGE_CONTENT_ACCUMULATOR[private_filename], (current_module, public_docstrings, private_docstrings))
+    push!(
+        PAGE_CONTENT_ACCUMULATOR[private_filename],
+        (current_module, public_docstrings, private_docstrings),
+    )
 
     return nothing
 end
@@ -798,13 +878,13 @@ Collect docstring blocks for symbols from the current module.
 function _collect_module_docstrings(config::_Config, symbol_list)
     docstrings = String[]
     current_module = config.current_module
-    
+
     _iterate_over_symbols(config, symbol_list) do key, type
         type == DOCTYPE_MODULE && return nothing
         push!(docstrings, "## `$key`\n\n```@docs\n$(current_module).$key\n```\n\n")
         return nothing
     end
-    
+
     return docstrings
 end
 
@@ -815,13 +895,13 @@ Collect docstring blocks for private symbols, including external module methods.
 """
 function _collect_private_docstrings(config::_Config, symbol_list)
     docstrings = _collect_module_docstrings(config, symbol_list)
-    
+
     # Add docstrings from external modules
     if !isempty(config.external_modules_to_document)
         external_docs = _collect_external_module_docstrings(config)
         append!(docstrings, external_docs)
     end
-    
+
     return docstrings
 end
 
@@ -836,19 +916,21 @@ function _collect_external_module_docstrings(config::_Config)
     filtered_source_files = _get_effective_source_files(config)
 
     for extra_mod in config.external_modules_to_document
-        methods_by_func = _collect_methods_from_source_files(extra_mod, filtered_source_files)
-        
+        methods_by_func = _collect_methods_from_source_files(
+            extra_mod, filtered_source_files
+        )
+
         for (key, method_list) in sort(collect(methods_by_func); by=first)
             for m in method_list
                 sig_str = _method_signature_string(m, extra_mod, key)
                 sig_str in added_signatures && continue
-                
+
                 push!(added_signatures, sig_str)
                 push!(docstrings, "## `$(extra_mod).$key`\n\n```@docs\n$(sig_str)\n```\n\n")
             end
         end
     end
-    
+
     return docstrings
 end
 
@@ -858,24 +940,24 @@ end
 Collect all methods from a module that are defined in the given source files.
 """
 function _collect_methods_from_source_files(mod::Module, source_files::Vector{String})
-    methods_by_func = Dict{Symbol, Vector{Method}}()
-    
+    methods_by_func = Dict{Symbol,Vector{Method}}()
+
     for key in names(mod; all=true)
         obj = try
             getfield(mod, key)
         catch
             continue
         end
-        
+
         obj isa Function || continue
-        
+
         for m in methods(obj)
             file = String(m.file)
             (file == "<built-in>" || file == "none") && continue
-            
+
             abs_file = abspath(file)
             should_include = isempty(source_files) || (abs_file in source_files)
-            
+
             if should_include
                 if !haskey(methods_by_func, key)
                     methods_by_func[key] = Method[]
@@ -884,7 +966,7 @@ function _collect_methods_from_source_files(mod::Module, source_files::Vector{St
             end
         end
     end
-    
+
     return methods_by_func
 end
 
@@ -896,18 +978,18 @@ Finalize all accumulated API pages by combining content from multiple modules.
 function _finalize_api_pages(document::Documenter.Document)
     for (filename, module_contents) in PAGE_CONTENT_ACCUMULATOR
         is_private = occursin("private", filename) || !occursin("public", filename)
-        
+
         all_modules = [mc[1] for mc in module_contents]
         modules_str = join([string(m) for m in all_modules], "`, `")
-        
+
         overview, all_docstrings = if is_private
             _build_private_page_content(modules_str, module_contents)
         else
             _build_public_page_content(modules_str, module_contents)
         end
-        
+
         combined_md = Markdown.parse(overview * join(all_docstrings, "\n"))
-        
+
         document.blueprint.pages[filename] = Documenter.Page(
             joinpath(document.user.source, filename),
             joinpath(document.user.build, filename),
@@ -917,7 +999,7 @@ function _finalize_api_pages(document::Documenter.Document)
             convert(MarkdownAST.Node, combined_md),
         )
     end
-    
+
     empty!(PAGE_CONTENT_ACCUMULATOR)
     return nothing
 end
@@ -938,7 +1020,7 @@ function _build_private_page_content(modules_str::String, module_contents)
     This page lists **non-exported** (internal) symbols of `$(modules_str)`.
 
     """
-    
+
     all_docstrings = String[]
     for (mod, _, private_docs) in module_contents
         if !isempty(private_docs)
@@ -946,7 +1028,7 @@ function _build_private_page_content(modules_str::String, module_contents)
             append!(all_docstrings, private_docs)
         end
     end
-    
+
     return overview, all_docstrings
 end
 
@@ -962,7 +1044,7 @@ function _build_public_page_content(modules_str::String, module_contents)
     This page lists **exported** symbols of `$(modules_str)`.
 
     """
-    
+
     all_docstrings = String[]
     for (mod, public_docs, _) in module_contents
         if !isempty(public_docs)
@@ -970,7 +1052,7 @@ function _build_public_page_content(modules_str::String, module_contents)
             append!(all_docstrings, public_docs)
         end
     end
-    
+
     return overview, all_docstrings
 end
 
