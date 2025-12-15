@@ -86,6 +86,7 @@ function generate_api_reference(src_dir::String)
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[DocumenterReference => ext("DocumenterReference.jl")],
+                external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_DOCREF,
                 public=false,
                 private=true,
@@ -103,6 +104,7 @@ function generate_api_reference(src_dir::String)
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[CoveragePostprocessing => ext("CoveragePostprocessing.jl")],
+                external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
                 private=true,
@@ -120,6 +122,7 @@ function generate_api_reference(src_dir::String)
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[TestRunner => ext("TestRunner.jl")],
+                external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
                 private=true,
