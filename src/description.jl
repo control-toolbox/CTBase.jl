@@ -177,7 +177,7 @@ This method is equivalent to `complete(list...; descriptions=descriptions)`.
 
 # Throws
 
-- [`AmbiguousDescription`](@ref): If `descriptions` is empty, or if `list` is not contained
+- [`AmbiguousDescription`](@ref CTBase.AmbiguousDescription): If `descriptions` is empty, or if `list` is not contained
   in any candidate description.
 """
 function complete(

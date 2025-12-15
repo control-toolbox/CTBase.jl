@@ -8,6 +8,8 @@ Returns the list of pages.
 function generate_api_reference(src_dir::String)
     # Helper to build absolute paths
     src(files...) = [abspath(joinpath(src_dir, f)) for f in files]
+    ext_dir = abspath(joinpath(src_dir, "..", "ext"))
+    ext(files...) = [abspath(joinpath(ext_dir, f)) for f in files]
 
     # Symbols to exclude (must match make.jl if shared, or be defined here)
     EXCLUDE_SYMBOLS = Symbol[:include, :eval]
@@ -65,6 +67,68 @@ function generate_api_reference(src_dir::String)
             filename="utils",
         ),
     ]
+
+    DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
+    if !isnothing(DocumenterReference)
+        EXCLUDE_DOCREF = vcat(
+            EXCLUDE_SYMBOLS,
+            Symbol[
+                :DOCTYPE_ABSTRACT_TYPE,
+                :DOCTYPE_CONSTANT,
+                :DOCTYPE_FUNCTION,
+                :DOCTYPE_MACRO,
+                :DOCTYPE_MODULE,
+                :DOCTYPE_STRUCT,
+            ],
+        )
+        push!(
+            pages,
+            CTBase.automatic_reference_documentation(;
+                subdirectory=".",
+                primary_modules=[DocumenterReference => ext("DocumenterReference.jl")],
+                exclude=EXCLUDE_DOCREF,
+                public=false,
+                private=true,
+                title="DocumenterReference",
+                title_in_menu="DocumenterReference",
+                filename="documenter_reference",
+            ),
+        )
+    end
+
+    CoveragePostprocessing = Base.get_extension(CTBase, :CoveragePostprocessing)
+    if !isnothing(CoveragePostprocessing)
+        push!(
+            pages,
+            CTBase.automatic_reference_documentation(;
+                subdirectory=".",
+                primary_modules=[CoveragePostprocessing => ext("CoveragePostprocessing.jl")],
+                exclude=EXCLUDE_SYMBOLS,
+                public=false,
+                private=true,
+                title="CoveragePostprocessing",
+                title_in_menu="CoveragePostprocessing",
+                filename="coverage_postprocessing",
+            ),
+        )
+    end
+
+    TestRunner = Base.get_extension(CTBase, :TestRunner)
+    if !isnothing(TestRunner)
+        push!(
+            pages,
+            CTBase.automatic_reference_documentation(;
+                subdirectory=".",
+                primary_modules=[TestRunner => ext("TestRunner.jl")],
+                exclude=EXCLUDE_SYMBOLS,
+                public=false,
+                private=true,
+                title="TestRunner",
+                title_in_menu="TestRunner",
+                filename="test_runner",
+            ),
+        )
+    end
     return pages
 end
 

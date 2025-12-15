@@ -1,7 +1,14 @@
+using Pkg
+Pkg.activate(@__DIR__)
+Pkg.develop(PackageSpec(; path=joinpath(@__DIR__, "..")))
+Pkg.instantiate()
+
 using Documenter
 using CTBase
 using Markdown
 using MarkdownAST: MarkdownAST
+using Test
+using Coverage
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Configuration
@@ -12,6 +19,12 @@ draft = false # Draft mode: if true, @example blocks in markdown are not execute
 # Docstrings from external packages
 # ═══════════════════════════════════════════════════════════════════════════════
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
+const CoveragePostprocessing = Base.get_extension(CTBase, :CoveragePostprocessing)
+const TestRunner = Base.get_extension(CTBase, :TestRunner)
+
+if !isnothing(DocumenterReference)
+    DocumenterReference.reset_config!()
+end
 
 Modules = [Base]
 for Module in Modules
@@ -24,7 +37,7 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 repo_url = "github.com/control-toolbox/CTBase.jl"
 src_dir = abspath(joinpath(@__DIR__, "..", "src"))
-ext_dir = abspath(joinpath(@__DIR__, "..", "ext"))
+#ext_dir = abspath(joinpath(@__DIR__, "..", "ext"))
 
 # Helper to build absolute paths
 # Helper to build absolute paths (reused in api_reference.jl, but passed as arg)
