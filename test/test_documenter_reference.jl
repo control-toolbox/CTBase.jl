@@ -57,12 +57,12 @@ using .DocumenterReferenceTestMod
 function test_documenter_reference()
     DR = DocumenterReference
 
-    @testset "reset_config! clears CONFIG" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "reset_config! clears CONFIG" begin
         DR.reset_config!()
         @test isempty(DR.CONFIG)
     end
 
-    @testset "_default_basename and _build_page_path" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_default_basename and _build_page_path" begin
         @test DR._default_basename("manual", true, true) == "manual"
         @test DR._default_basename("", true, true) == "api"
         @test DR._default_basename("", true, false) == "public"
@@ -73,7 +73,7 @@ function test_documenter_reference()
         @test DR._build_page_path("", "public") == "public"
     end
 
-    @testset "_classify_symbol and _to_string" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_classify_symbol and _to_string" begin
         @test DR._classify_symbol(nothing, "@mymacro") == DR.DOCTYPE_MACRO
         @test DR._classify_symbol(DocumenterReferenceTestMod.SubModule, "SubModule") ==
             DR.DOCTYPE_MODULE
@@ -94,7 +94,7 @@ function test_documenter_reference()
         @test DR._to_string(DR.DOCTYPE_STRUCT) == "struct"
     end
 
-    @testset "_get_source_file" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file" begin
         path = DR._get_source_file(DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION)
         @test path === abspath(@__FILE__)
 
@@ -104,7 +104,7 @@ function test_documenter_reference()
         @test const_path === nothing
     end
 
-    @testset "_iterate_over_symbols filtering" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols filtering" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => Any[])
         exclude = Set{Symbol}([:skip])
@@ -143,7 +143,7 @@ function test_documenter_reference()
         @test :no_doc ∉ seen
     end
 
-    @testset "_iterate_over_symbols with source_files and include_without_source" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols with source_files and include_without_source" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => Any[])
         sort_by(x) = x
@@ -222,7 +222,7 @@ function test_documenter_reference()
         @test :SubModule in seen3
     end
 
-    @testset "automatic_reference_documentation configuration" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation configuration" begin
         DR.reset_config!()
 
         # Single-module, public-only
@@ -234,6 +234,27 @@ function test_documenter_reference()
             private=false,
             title="My API",
         )
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation default tag" begin
+            DR.reset_config!()
+
+            pages_default = CTBase.automatic_reference_documentation(;
+                subdirectory="ref",
+                primary_modules=[DocumenterReferenceTestMod],
+                public=true,
+                private=false,
+                title="My API",
+            )
+
+            @test length(DR.CONFIG) == 1
+            cfg_default = DR.CONFIG[1]
+            @test cfg_default.current_module === DocumenterReferenceTestMod
+            @test cfg_default.subdirectory == "ref"
+            @test cfg_default.public == true
+            @test cfg_default.private == false
+            @test cfg_default.filename == "public"
+            @test pages_default == pages1
+        end
 
         @test length(DR.CONFIG) == 1
         cfg1 = DR.CONFIG[1]
@@ -274,7 +295,7 @@ function test_documenter_reference()
         )
     end
 
-    @testset "Documenter.Selectors.order for APIBuilder" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
         @test Documenter.Selectors.order(DR.APIBuilder) == 0.0
     end
 
@@ -282,7 +303,7 @@ function test_documenter_reference()
     # NEW TESTS: _exported_symbols
     # ============================================================================
 
-    @testset "_exported_symbols classification" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_exported_symbols classification" begin
         # Test that _exported_symbols correctly classifies symbols
         result = DR._exported_symbols(DocumenterReferenceTestMod)
 
@@ -314,7 +335,7 @@ function test_documenter_reference()
     # NEW TESTS: automatic_reference_documentation multi-module
     # ============================================================================
 
-    @testset "automatic_reference_documentation multi-module" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module" begin
         DR.reset_config!()
 
         # Create a second test module for multi-module testing
@@ -343,7 +364,7 @@ function test_documenter_reference()
     # NEW TESTS: _get_source_file expanded
     # ============================================================================
 
-    @testset "_get_source_file expanded cases" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file expanded cases" begin
         # Function case (already tested, but verify)
         func_path = DR._get_source_file(
             DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION
@@ -382,7 +403,7 @@ function test_documenter_reference()
     # NEW TESTS: Edge cases
     # ============================================================================
 
-    @testset "Edge cases" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Edge cases" begin
         # _build_page_path with various inputs
         @test DR._build_page_path("", "") == ""
         @test DR._build_page_path(".", "") == ""
@@ -432,7 +453,7 @@ function test_documenter_reference()
         @test isempty(DR.CONFIG)
     end
 
-    @testset "_format_type_for_docs and helpers" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs and helpers" begin
         simple_str = DR._format_type_for_docs(DRTypeFormatTestMod.Simple)
         @test startswith(simple_str, "::")
         @test occursin("DRTypeFormatTestMod.Simple", simple_str)
@@ -459,7 +480,7 @@ function test_documenter_reference()
         @test value_param_fmt == "3"
     end
 
-    @testset "_method_signature_string and method collection" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string and method collection" begin
         methods_f = methods(DRMethodTestMod.f)
         m0 = first(filter(m -> length(m.sig.parameters) == 1, methods_f))
         sig0 = DR._method_signature_string(m0, DRMethodTestMod, :f)
@@ -489,7 +510,7 @@ function test_documenter_reference()
         end
     end
 
-    @testset "Page content builders" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders" begin
         modules_str = "ModA, ModB"
         module_contents_private = [
             (DocumenterReferenceTestMod, String[], ["priv_a"]),
@@ -517,7 +538,7 @@ function test_documenter_reference()
         @test any(occursin("pub_a", s) for s in docs_pub)
     end
 
-    @testset "external_modules_to_document" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "external_modules_to_document" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => String[])
         sort_by(x) = x
@@ -544,7 +565,7 @@ function test_documenter_reference()
         @test any(occursin("DRExternalTestMod.extfun", s) for s in private_docs)
     end
 
-    @testset "APIBuilder runner integration" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "APIBuilder runner integration" begin
         DR.reset_config!()
 
         pages = CTBase.automatic_reference_documentation(

@@ -1,6 +1,6 @@
 function test_code_quality()
-    @testset verbose = true "Code quality" begin
-        @testset "Aqua" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Code quality" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "Aqua" begin
             Aqua.test_all(
                 CTBase;
                 ambiguities=false,

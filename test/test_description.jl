@@ -1,6 +1,6 @@
 function test_description()
     # Test adding and indexing descriptions
-    @testset "Add and Index Descriptions" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Add and Index Descriptions" begin
         descriptions = ()
         descriptions = CTBase.add(descriptions, (:a,))
         @test descriptions[1] == (:a,)  # Intermediate test after first add
@@ -10,7 +10,7 @@ function test_description()
     end
 
     # Test building algorithm descriptions and completing partial descriptions
-    @testset "Complete Descriptions with Algorithms" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Complete Descriptions with Algorithms" begin
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :backtracking))
@@ -34,7 +34,7 @@ function test_description()
     end
 
     # Test ambiguous or invalid description completions throw errors
-    @testset "Ambiguous and Incorrect Description Errors" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Ambiguous and Incorrect Description Errors" begin
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :backtracking))
@@ -52,7 +52,7 @@ function test_description()
     end
 
     # Test removing elements from descriptions and check type
-    @testset "Remove Elements and Type Checking" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Remove Elements and Type Checking" begin
         x = (:a, :b, :c)
         y = (:b,)
         @test CTBase.remove(x, y) == (:a, :c)
@@ -60,7 +60,7 @@ function test_description()
     end
 
     # Type stability test for remove function using the is_inferred macro
-    @testset "Remove Elements Type Stability" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Remove Elements Type Stability" begin
         # example input
         x = (:a, :b, :c)
         y = (:b,)
@@ -71,7 +71,7 @@ function test_description()
     end
 
     # Test completion with descriptions of different sizes and inclusion priority
-    @testset "Completion with Variable Sized Descriptions" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Completion with Variable Sized Descriptions" begin
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:a, :b, :c))
         algorithms = CTBase.add(algorithms, (:a, :b, :c, :d))
@@ -80,7 +80,7 @@ function test_description()
     end
 
     # Test priority when ordering of descriptions switched
-    @testset "Priority in Completion with Different Ordering" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Priority in Completion with Different Ordering" begin
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:a, :b, :c, :d))
         algorithms = CTBase.add(algorithms, (:a, :b, :c))
@@ -89,14 +89,14 @@ function test_description()
     end
 
     # Test error when adding a duplicate description
-    @testset "Duplicate Description Addition" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Duplicate Description Addition" begin
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:a, :b, :c))
         @test_throws CTBase.IncorrectArgument CTBase.add(algorithms, (:a, :b, :c))
     end
 
     # Test Base.show method for Description tuples outputs correctly
-    @testset "Base.show Method Output" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Base.show Method Output" begin
         io = IOBuffer()
         descriptions = ((:a, :b), (:b, :c))
         show(io, MIME"text/plain"(), descriptions)
@@ -105,7 +105,7 @@ function test_description()
         @test output == expected
     end
 
-    @testset "Base.show Edge Cases" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Base.show Edge Cases" begin
         io = IOBuffer()
         descriptions = ()
         show(io, MIME"text/plain"(), descriptions)
@@ -119,7 +119,7 @@ function test_description()
         @test output == "(:a, :b)"
     end
 
-    @testset "Complete with Empty Descriptions" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Complete with Empty Descriptions" begin
         algorithms = ()
         @test_throws CTBase.AmbiguousDescription CTBase.complete(
             :a; descriptions=algorithms

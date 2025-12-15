@@ -32,11 +32,24 @@ julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["utils","integratio
 julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["all"])'
 ```
 
-Each group `name` corresponds to a `test_<name>.jl` file defining a
-`test_<name>()` function.
+- Special arg `coverage=true`: ignored by this runner (so it does not affect test selection).
+  Use it only to ask `Pkg.test(...; coverage=true)` to generate `.cov` files, then run the
+  post-processing artifact from the package root.
+
+```bash
+julia --project=@. -e '
+using Pkg
+Pkg.test("CTBase"; coverage=true, test_args=["utils"])
+include("coverage_artifact.jl")
+CoverageArtifact.run()
+'
+```
+
+Each group `name` corresponds to a `test_<n>.jl` file defining a
+`test_<n>()` function.
 """
 function default_tests()
-    # Keys correspond to `test_<name>.jl` files + `test_<name>()` entrypoints.
+    # Keys correspond to `test_<n>.jl` files + `test_<n>()` entrypoints.
     # Values indicate which test groups are enabled when no CLI selection is provided.
     return OrderedDict(
         :code_quality => true,
@@ -58,11 +71,10 @@ using Markdown
 using MarkdownAST
 
 # Optional extension module access (loaded only when the package defines it).
-const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference) # to test functions from CTFlowsODE not in CTFlows
+const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 
 # Macro to check if an expression is type-stable and inferred correctly
 macro test_inferred(expr)
-    # Purpose: Verify that the expression is type-stable and inferred correctly.
     q = quote
         try
             @inferred $expr
@@ -79,44 +91,48 @@ end
 const VERBOSE = true
 const SHOWTIMING = true
 
-# Optional CLI selection: pass symbols like `default` or `code_quality`.
-# Special value `all` enables everything.
-const TEST_SELECTIONS = isempty(ARGS) ? Symbol[] : Symbol.(ARGS)
+# ============================================================================
+# Command-line argument parsing
+# ============================================================================
+
+function _parse_test_args(args::Vector{String})
+    selections = String[]
+
+    for arg in args
+        arg in ("coverage=true", "coverage", "--coverage", "coverage=false") && continue
+        push!(selections, arg)
+    end
+
+    return selections
+end
+
+const _SELECTION_ARGS = _parse_test_args(String.(ARGS))
+const TEST_SELECTIONS = isempty(_SELECTION_ARGS) ? Symbol[] : Symbol.(_SELECTION_ARGS)
+
+# ============================================================================
+# Test selection logic
+# ============================================================================
 
 function selected_tests()
-    # Determine which test groups to run based on CLI selection.
     tests = default_tests()
     sels = TEST_SELECTIONS
 
-    # No selection: use defaults
-    if isempty(sels)
-        return tests
-    end
+    isempty(sels) && return tests
 
-    # Single :all selection: enable everything
-    if length(sels) == 1 && sels[1] == :all
+    # Enable all tests if :all is requested
+    if :all in sels
         for k in keys(tests)
             tests[k] = true
         end
         return tests
     end
 
-    # Otherwise, start with everything disabled
+    # Otherwise, enable only selected tests
     for k in keys(tests)
         tests[k] = false
     end
-
-    # Enable explicit selections
     for sel in sels
-        if sel == :all
-            for k in keys(tests)
-                tests[k] = true
-            end
-            break
-        end
-        if haskey(tests, sel)
-            tests[sel] = true
-        end
+        haskey(tests, sel) && (tests[sel] = true)
     end
 
     return tests
@@ -128,9 +144,6 @@ const SELECTED_TESTS = selected_tests()
     for (name, enabled) in SELECTED_TESTS
         enabled || continue
         @testset "$(name)" begin
-            # Convention:
-            # - file:     `test_<name>.jl`
-            # - function: `test_<name>()`
             test_name = Symbol(:test_, name)
             include("$(test_name).jl")
             @eval $test_name()
