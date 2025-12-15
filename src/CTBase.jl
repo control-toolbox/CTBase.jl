@@ -69,14 +69,17 @@ end
 
 abstract type AbstractCoveragePostprocessingTag end
 struct CoveragePostprocessingTag <: AbstractCoveragePostprocessingTag end
-function postprocess_coverage(::AbstractCoveragePostprocessingTag; kwargs...)
+function postprocess_coverage(
+    ::AbstractCoveragePostprocessingTag;
+    generate_report::Bool = true,
+    root_dir::String = pwd(),
+)
     throw(CTBase.ExtensionError(:Coverage))
 end
 function postprocess_coverage(; kwargs...)
     postprocess_coverage(CoveragePostprocessingTag(); kwargs...)
 end
 
-# TestRunner extension stubs
 abstract type AbstractTestRunnerTag end
 struct TestRunnerTag <: AbstractTestRunnerTag end
 function run_tests(::AbstractTestRunnerTag; kwargs...)

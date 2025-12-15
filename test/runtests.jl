@@ -25,11 +25,7 @@
 #
 # Run tests with code coverage instrumentation:
 #
-#   julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true, test_args=["all"])'
-#
-# After tests complete, generate the coverage report by running:
-#
-#   julia --project=@. -e 'include("test/coverage.jl")'
+#   julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
 #
 # This produces:
 #   - coverage/lcov.info      — LCOV format for CI integration
@@ -96,6 +92,7 @@ CTBase.run_tests(;
     funcname_builder = name -> Symbol(:test_, name),
     verbose = VERBOSE,
     showtiming = SHOWTIMING,
+    test_dir = @__DIR__,
 )
 
 # If running with coverage enabled, remind the user to run the post-processing script
@@ -109,11 +106,7 @@ if Base.JLOptions().code_coverage != 0
     To process them, move them to the coverage/ directory, and generate a report, 
     please run:
     
-        include("test/coverage.jl")
-        
-    or from the command line:
-    
-        julia --project=@. test/coverage.jl
+        julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
     ================================================================================
     """)
 end

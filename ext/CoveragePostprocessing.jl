@@ -3,18 +3,29 @@ module CoveragePostprocessing
 using CTBase: CTBase
 using Coverage: Coverage
 
-const SRC_DIR = "src"
-const TEST_DIR = "test"
-const EXT_DIR = "ext"
-const COVERAGE_DIR = "coverage"
-const COV_DIR = joinpath(COVERAGE_DIR, "cov")
-
-function CTBase.postprocess_coverage(::CTBase.CoveragePostprocessingTag; generate_report::Bool=true)
+# Main entry point for coverage post-processing
+function CTBase.postprocess_coverage(
+    ::CTBase.CoveragePostprocessingTag; 
+    generate_report::Bool = true,
+    root_dir::String = pwd(),
+)
     println("✓ Coverage post-processing start")
 
-    _reset_coverage_dir()
+    # Define paths relative to root_dir
+    source_dirs = String[]
+    for d in ["src", "test", "ext"]
+        path = joinpath(root_dir, d)
+        if isdir(path)
+            push!(source_dirs, path)
+        end
+    end
+    
+    coverage_dir = joinpath(root_dir, "coverage")
+    cov_storage_dir = joinpath(coverage_dir, "cov")
 
-    n_cov = _count_cov_files()
+    _reset_coverage_dir(coverage_dir, cov_storage_dir)
+
+    n_cov = _count_cov_files(source_dirs)
     if n_cov == 0
         error("""
         Coverage requested but no .cov files were produced.
@@ -29,34 +40,33 @@ function CTBase.postprocess_coverage(::CTBase.CoveragePostprocessingTag; generat
         """)
     end
 
-    _clean_stale_cov_files!()
+    _clean_stale_cov_files!(source_dirs)
 
-    n_cov = _count_cov_files()
+    n_cov = _count_cov_files(source_dirs)
     if n_cov == 0
         error("Coverage requested but no usable .cov files were found after cleanup.")
     end
 
-    generate_report && _generate_coverage_reports!()
+    generate_report && _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
 
-    moved = _collect_and_move_cov_files!()
+    moved = _collect_and_move_cov_files!(source_dirs, cov_storage_dir)
     isempty(moved) && error("Coverage requested but no .cov files were found to move.")
-    println("✓ Moved $(length(moved)) .cov files to $COV_DIR")
+    println("✓ Moved $(length(moved)) .cov files to $cov_storage_dir")
 
     println("✓ Coverage post-processing completed successfully")
     return nothing
 end
 
-function _reset_coverage_dir()
-    isdir(COVERAGE_DIR) && rm(COVERAGE_DIR; recursive=true, force=true)
-    mkpath(COV_DIR)
+function _reset_coverage_dir(coverage_dir, cov_storage_dir)
+    isdir(coverage_dir) && rm(coverage_dir; recursive=true, force=true)
+    mkpath(cov_storage_dir)
     println("✓ Reset coverage/ directory")
     return nothing
 end
 
-function _count_cov_files()
+function _count_cov_files(source_dirs)
     n = 0
-    for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
-        isdir(dir) || continue
+    for dir in source_dirs
         for f in readdir(dir; join=true)
             endswith(f, ".cov") || continue
             n += 1
@@ -65,10 +75,9 @@ function _count_cov_files()
     return n
 end
 
-function _clean_stale_cov_files!()
+function _clean_stale_cov_files!(source_dirs)
     covs = String[]
-    for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
-        isdir(dir) || continue
+    for dir in source_dirs
         append!(covs, filter(f -> endswith(f, ".cov"), readdir(dir; join=true)))
     end
     isempty(covs) && return nothing
@@ -92,18 +101,17 @@ function _clean_stale_cov_files!()
         rm(f; force=true)
         removed += 1
     end
-    removed > 0 && println("Cleaned $removed existing .cov files from $(SRC_DIR)/, $(TEST_DIR)/, and $(EXT_DIR)/")
+    removed > 0 && println("Cleaned $removed existing .cov files from source directories")
 
     return nothing
 end
 
-function _collect_and_move_cov_files!()
+function _collect_and_move_cov_files!(source_dirs, dest_dir)
     moved = String[]
-    for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
-        isdir(dir) || continue
+    for dir in source_dirs
         for f in readdir(dir; join=true)
             endswith(f, ".cov") || continue
-            dest = joinpath(COV_DIR, basename(f))
+            dest = joinpath(dest_dir, basename(f))
             mv(f, dest; force=true)
             push!(moved, dest)
         end
@@ -111,16 +119,20 @@ function _collect_and_move_cov_files!()
     return moved
 end
 
-function _generate_coverage_reports!()
+function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
     println("✓ Generating coverage report")
 
-    # Process both src/ and ext/ directories for coverage
-    cov_src = Coverage.process_folder(SRC_DIR)
-    cov_ext = isdir(EXT_DIR) ? Coverage.process_folder(EXT_DIR) : Coverage.FileCoverage[]
-    cov = vcat(cov_src, cov_ext)
-    isempty(cov) && error("No coverage data found in $SRC_DIR or $EXT_DIR")
+    # Process source directories for coverage
+    cov = Coverage.FileCoverage[]
+    for dir in source_dirs
+        # Coverage.process_folder looks for .jl files in dir and checks for .cov files
+        # It handles the matching.
+        append!(cov, Coverage.process_folder(dir))
+    end
+    
+    isempty(cov) && error("No coverage data found in source directories")
 
-    lcov_file = joinpath(COVERAGE_DIR, "lcov.info")
+    lcov_file = joinpath(coverage_dir, "lcov.info")
     Coverage.LCOV.writefile(lcov_file, cov)
 
     function line_stats(fc)
@@ -139,8 +151,18 @@ function _generate_coverage_reports!()
     rows = [(fc.filename, line_stats(fc)...) for fc in cov]
     sort!(rows, by = r -> r[4])
 
-    open(joinpath(COVERAGE_DIR, "llm_report.md"), "w") do io
-        println(io, "# Coverage (LLM digest)\n")
+    # Helper to make paths relative to root_dir
+    function relative_path(path, root)
+        if startswith(path, root)
+            relpath = path[length(root)+1:end]
+            # Remove leading slash if present
+            return startswith(relpath, "/") ? relpath[2:end] : relpath
+        end
+        return path
+    end
+
+    open(joinpath(coverage_dir, "coverage_report.md"), "w") do io
+        println(io, "# Coverage report\n")
 
         println(io, "## Overall\n```")
         show(io, Coverage.get_summary(cov)); println(io)
@@ -150,15 +172,17 @@ function _generate_coverage_reports!()
         println(io, "| file | covered | total | % |")
         println(io, "|---|---:|---:|---:|")
         for (f, h, t, p) in rows[1:min(end, 20)]
-            println(io, "| `", f, "` | ", h, " | ", t, " | ", round(p; digits=2), " |")
+            rel_f = relative_path(f, root_dir)
+            println(io, "| `", rel_f, "` | ", h, " | ", t, " | ", round(p; digits=2), " |")
         end
         println(io)
 
         println(io, "## Uncovered lines (first 200)\n```")
         n = 0
         for fc in cov
+            rel_filename = relative_path(fc.filename, root_dir)
             for i in findall(v -> (v isa Integer) && v == 0, fc.coverage)
-                println(io, fc.filename, ":", i)
+                println(io, rel_filename, ":", i)
                 n += 1
                 n >= 200 && break
             end

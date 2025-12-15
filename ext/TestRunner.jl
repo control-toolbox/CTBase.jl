@@ -26,12 +26,19 @@ function CTBase.run_tests(
     eval_mode::Bool = true,
     verbose::Bool = true,
     showtiming::Bool = true,
+    test_dir::String = joinpath(pwd(), "test"),
 )
     # Parse command-line arguments
-    selections = _parse_test_args(String.(Main.ARGS))
+    (selections, run_all, dry_run) = _parse_test_args(String.(Main.ARGS))
 
     # Get selected tests
-    selected = _select_tests(selections, available_tests)
+    selected = _select_tests(selections, available_tests, run_all, filename_builder; test_dir=test_dir)
+
+    if dry_run
+        println("Dry run: the following tests would be executed:")
+        println(join(selected, "\n"))
+        return nothing
+    end
 
     @testset verbose = verbose showtiming = showtiming "$testset_name" begin
         for name in selected
@@ -50,47 +57,165 @@ end
 
 """
 Parse test arguments from ARGS, filtering out coverage-related flags.
+Returns a tuple: (selections, run_all, dry_run)
 """
 function _parse_test_args(args::Vector{String})
     selections = Symbol[]
+    run_all = false
+    dry_run = false
+
     for arg in args
-        arg in ("coverage=true", "coverage", "--coverage", "coverage=false") && continue
-        push!(selections, Symbol(arg))
+        if arg in ("coverage=true", "coverage", "--coverage", "coverage=false")
+            continue
+        elseif arg == "-a" || arg == "--all"
+            run_all = true
+        elseif arg == "-n" || arg == "--dryrun"
+            dry_run = true
+        else
+            push!(selections, Symbol(arg))
+        end
     end
-    return selections
+    return (selections, run_all, dry_run)
+end
+
+# Helper to convert glob pattern to regex
+function _glob_to_regex(pattern::AbstractString)
+    # Escape special regex characters except * and ?
+    regex_str = replace(pattern,
+        "." => "\\.",
+        "+" => "\\+",
+        "(" => "\\(",
+        ")" => "\\)",
+        "[" => "\\[",
+        "]" => "\\]",
+        "{" => "\\{",
+        "}" => "\\}",
+        "^" => "\\^",
+        "\$" => "\\\$"
+    )
+    # Convert glob wildcards to regex wildcards
+    regex_str = replace(regex_str, "*" => ".*", "?" => ".")
+    # Anchor to full string
+    return Regex("^" * regex_str * "\$")
 end
 
 """
-Determine which tests to run based on selections and available_tests filter.
+Determine which tests to run based on selections, available_tests filter, and file globbing.
+1. Identify potential test files in `test_dir` (default: `test/`).
+2. Filter by `available_tests` if provided.
+3. Filter by `selections` (interpreted as globs) if present.
 """
-function _select_tests(selections::Vector{Symbol}, available_tests::Vector{Symbol})
-    # If :all is requested, return all available tests (or selections if no filter)
-    if :all in selections
-        return isempty(available_tests) ? selections : available_tests
-    end
+function _select_tests(
+    selections::Vector{Symbol},
+    available_tests::Vector{Symbol},
+    run_all::Bool,
+    filename_builder::Function;
+    test_dir::String = joinpath(pwd(), "test") # Default assumption
+)
+    # 1. Identify all potential test files
+    # We look for .jl files in test_dir, excluding runtests.jl
+    all_files = filter(f -> endswith(f, ".jl") && f != "runtests.jl", readdir(test_dir))
+    
+    # Map filenames back to "test names" is tricky without reverse builder.
+    # Strategy:
+    # We assume `available_tests` defines the canonical list of "names".
+    # If `available_tests` is empty, we derive names from files? 
+    #   -> User said: "list all .jl files... but only keep available if provided"
+    
+    candidates = Symbol[]
 
-    # If no selections, return all available tests
-    if isempty(selections)
-        return available_tests
-    end
-
-    # Filter selections against available_tests if specified
-    if !isempty(available_tests)
-        for sel in selections
-            if sel ∉ available_tests
-                # Check if file might exist (for helpful message)
-                error("""
-                Test "$(sel)" is not in the available tests list.
-                Available tests: $(join(available_tests, ", "))
-
-                If you want to add this test, include it in the `available_tests` argument:
-                    available_tests = [..., :$(sel)]
-                """)
+    if isempty(available_tests)
+        # If no available_tests provided, every .jl file is a candidate!
+        # This effectively AUTO-DISCOVERS tests.
+        # We need to guess the "name" from the filename.
+        # This is hard because filename_builder is name -> filename.
+        #   utils -> test_utils.jl
+        #   test_utils.jl -> utils ??
+        # For now, let's keep the user's current behavior:
+        # If available_tests is empty, the logic relies on what the user passes.
+        # BUT the new logic says "if args empty -> run all".
+        # So we MUST perform auto-discovery if we want "run all" to work without explicit available_tests.
+        
+        # Heuristic: if file starts with "test_", strip it?
+        # Or just use the basename as the symbol?
+        # Let's assume the "name" is the filename without extension for auto-discovery?
+        # Or better: don't guess names yet. Just work with filenames?
+        # But `run_tests` iterates over `names`.
+        
+        # Let's look at existing files: test_utils.jl -> name=:utils (via filename_builder)
+        # We cannot invert `filename_builder` (F -> S).
+        # So we are stuck if we want to infer names from files.
+        
+        # COMPROMISE: If available_tests is empty, we cannot guarantee auto-discovery compatibility with arbitrary filename_builders.
+        # We will assume a default mapping for auto-discovery: name = file_basename_without_extension.
+        for f in all_files
+            name_str = replace(f, ".jl" => "")
+            # If name starts with "test_", removing it is common convention, but maybe risky?
+            # Let's keep the full basename as the name if we are auto-discovering.
+            push!(candidates, Symbol(name_str))
+        end
+    else
+        # If available_tests IS provided, we only consider these.
+        # We verify if their files exist.
+        for test_name in available_tests
+            fname = filename_builder(test_name)
+            if "$(fname).jl" ∈ all_files
+                push!(candidates, test_name)
             end
         end
     end
 
-    return selections
+    # If run_all is requested or no selections, return all candidates
+    if run_all || isempty(selections)
+        return candidates
+    end
+
+    # 3. Filter candidates by selections (Patterns)
+    # selections are now patterns! e.g. [:utils, :test_u*]
+    filtered = Symbol[]
+    
+    for candidate in candidates
+        candidate_str = string(candidate)
+        # Also check the associated filename?
+        # If I have candidate :utils -> test_utils.jl
+        # And user passes "test_u*", it should match "test_utils.jl" OR "utils"?
+        # User said "Scan test/ directory... ARGS are globs".
+        # So matching against the FILENAME seems primary.
+        
+        # Resolve filename for candidate
+        if isempty(available_tests)
+             # Auto-discovered: filename is roughly "$(candidate).jl"
+             candidate_filename = "$(candidate).jl"
+        else
+             candidate_filename = "$(filename_builder(candidate)).jl"
+        end
+        
+        # Also match strictly against filename without extension?
+        candidate_filename_no_ext = replace(candidate_filename, ".jl" => "")
+
+        matched = false
+        for sel in selections
+            pattern = string(sel)
+            regex = _glob_to_regex(pattern)
+            
+            # Match against:
+            # 1. Candidate name (e.g. :utils)
+            # 2. Filename (e.g. test_utils.jl)
+            # 3. Filename without extension (e.g. test_utils)
+            if !isnothing(match(regex, candidate_str)) || 
+               !isnothing(match(regex, candidate_filename)) || 
+               !isnothing(match(regex, candidate_filename_no_ext))
+               matched = true
+               break
+            end
+        end
+        
+        if matched
+            push!(filtered, candidate)
+        end
+    end
+
+    return filtered
 end
 
 """

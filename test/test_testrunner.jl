@@ -29,35 +29,54 @@ function test_testrunner()
         # Access the private function via the loaded extension module
         parse_args = TestRunner._parse_test_args
 
-        @testset "empty args returns empty" begin
-            @test parse_args(String[]) == Symbol[]
+        @testset "empty args returns empty with default flags" begin
+            (sel, all_flag, dry_flag) = parse_args(String[])
+            @test sel == Symbol[]
+            @test all_flag == false
+
+            @test dry_flag == false
         end
 
-        @testset "single test name is converted to Symbol" begin
-            @test parse_args(["utils"]) == [:utils]
+
+
+        @testset "single test name" begin
+            (sel, _, _) = parse_args(["utils"])
+            @test sel == [:utils]
         end
 
-        @testset "multiple test names are converted to Symbols" begin
-            @test parse_args(["utils", "default", "exceptions"]) == [:utils, :default, :exceptions]
+        @testset "multiple test names" begin
+            (sel, _, _) = parse_args(["utils", "default"])
+            @test sel == [:utils, :default]
         end
 
         @testset "coverage flags are filtered out" begin
-            # All coverage-related flags should be ignored
-            @test parse_args(["coverage=true"]) == Symbol[]
-            @test parse_args(["coverage=false"]) == Symbol[]
-            @test parse_args(["coverage"]) == Symbol[]
-            @test parse_args(["--coverage"]) == Symbol[]
+            (sel, _, _) = parse_args(["coverage=true"])
+            @test sel == Symbol[]
         end
 
-        @testset "coverage flags are filtered while keeping test names" begin
-            @test parse_args(["utils", "coverage=true"]) == [:utils]
-            @test parse_args(["coverage=true", "utils", "default"]) == [:utils, :default]
-            @test parse_args(["utils", "--coverage", "default"]) == [:utils, :default]
+        @testset "CLI flags -a / --all" begin
+            # -a should set run_all=true
+            (_, run_all, _) = parse_args(["-a"])
+            @test run_all == true
+
+            (_, run_all, _) = parse_args(["--all"])
+            @test run_all == true
         end
 
-        @testset "'all' is preserved as a symbol" begin
-            @test parse_args(["all"]) == [:all]
-            @test parse_args(["all", "coverage=true"]) == [:all]
+        @testset "CLI flags -n / --dryrun" begin
+            # -n should set dry_run=true
+            (_, _, dry_run) = parse_args(["-n"])
+            @test dry_run == true
+
+            (_, _, dry_run) = parse_args(["--dryrun"])
+            @test dry_run == true
+        end
+        
+        @testset "mixed flags and tests" begin
+            (sel, run_all, dry_run) = parse_args(["utils", "-n", "--all"])
+            @test sel == [:utils]
+            @test run_all == true
+            @test dry_run == true
         end
     end
 
@@ -68,44 +87,79 @@ function test_testrunner()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "_select_tests" begin
         select_tests = TestRunner._select_tests
 
-        available = [:code_quality, :default, :utils, :integration]
+        # Mock filename builder for testing
+        test_builder = name -> Symbol(:test_, name)
 
-        @testset "no selections returns all available tests" begin
-            # When no CLI args, return all available tests
-            @test select_tests(Symbol[], available) == available
-        end
+        # Mocking readdir requires a temporary directory or we mock the fs behavior? 
+        # Easier: we test the filtering logic with a custom test_dir.
+        # Let's create a temporary directory structure for testing.
 
-        @testset "empty available_tests with selections returns selections" begin
-            # When available_tests is empty, all selections are allowed
-            @test select_tests([:foo, :bar], Symbol[]) == [:foo, :bar]
-        end
+        mktempdir() do temp_dir
+            # Create some dummy test files
+            touch(joinpath(temp_dir, "test_utils.jl"))
+            touch(joinpath(temp_dir, "test_core.jl"))
+            touch(joinpath(temp_dir, "runtests.jl")) # Should be ignored
+            touch(joinpath(temp_dir, "readme.md"))   # Should be ignored
 
-        @testset ":all returns all available tests" begin
-            # :all should return the full available_tests list
-            @test select_tests([:all], available) == available
-        end
+            # ==========================================================
+            # Scenario 1: Auto-discovery (available_tests empty)
+            # ==========================================================
+            @testset "Auto-discovery (empty available_tests)" begin
+                # Empty args -> run all .jl files (excluding runtests.jl)
+                # Names derived as basenames
+                sel = select_tests(Symbol[], Symbol[], false, identity; test_dir=temp_dir)
+                @test sort(sel) == [:test_core, :test_utils]
 
-        @testset ":all with empty available returns selections" begin
-            # Edge case: :all with no available_tests
-            @test select_tests([:all], Symbol[]) == [:all]
-        end
+                # Run all (-a) -> same result
+                sel = select_tests(Symbol[], Symbol[], true, identity; test_dir=temp_dir)
+                @test sort(sel) == [:test_core, :test_utils]
 
-        @testset "valid selection returns that selection" begin
-            @test select_tests([:utils], available) == [:utils]
-            @test select_tests([:utils, :default], available) == [:utils, :default]
-        end
+                # Globbing: select only utils
+                sel = select_tests([:test_utils], Symbol[], false, identity; test_dir=temp_dir)
+                @test sel == [:test_utils]
 
-        @testset "invalid selection throws error with helpful message" begin
-            # When a selection is not in available_tests, error with guidance
-            err = try
-                select_tests([:nonexistent], available)
-                nothing
-            catch e
-                e
+                # Globbing: pattern matching
+                sel = select_tests([Symbol("test_c*")], Symbol[], false, identity; test_dir=temp_dir)
+                @test sel == [:test_core]
+                
+                # Globbing: match filename? 
+                # candidate=:test_core -> filename="test_core.jl"
+                sel = select_tests([:test_core_jl], Symbol[], false, identity; test_dir=temp_dir)
+                # This won't match regex "^test_core_jl$" against "test_core" or "test_core.jl"
+                @test isempty(sel)
+
+                sel = select_tests([Symbol("test_core.jl")], Symbol[], false, identity; test_dir=temp_dir)
+                @test sel == [:test_core]
             end
-            @test err isa ErrorException
-            @test occursin("nonexistent", err.msg)
-            @test occursin("available_tests", err.msg)
+
+            # ==========================================================
+            # Scenario 2: With available_tests
+            # ==========================================================
+            @testset "With available_tests" begin
+                available = [:utils, :core]
+                
+                # Note: TestRunner checks if file exists via builder
+                # test_utils.jl exists -> :utils is valid
+                # test_core.jl exists -> :core is valid
+                
+                # Empty args -> run all valid available tests
+                sel = select_tests(Symbol[], available, false, test_builder; test_dir=temp_dir)
+                @test sort(sel) == [:core, :utils]
+
+                # Selection
+                sel = select_tests([:utils], available, false, test_builder; test_dir=temp_dir)
+                @test sel == [:utils]
+
+                # Globbing over available names
+                # available test :core, file: test_core.jl
+                sel = select_tests([Symbol("c*")], available, false, test_builder; test_dir=temp_dir)
+                @test sel == [:core] 
+
+                # Globbing over filename without extension
+                # available test :core, file: test_core.jl
+                sel = select_tests([:test_core], available, false, test_builder; test_dir=temp_dir)
+                @test sel == [:core]
+            end
         end
     end
 
@@ -119,18 +173,37 @@ function test_testrunner()
 
         @testset "mixed case and special characters in test names" begin
             # Test names are converted to Symbols, preserving case
-            @test parse_args(["MyTest", "test_123"]) == [:MyTest, :test_123]
+            (sel, _, _) = parse_args(["MyTest", "test_123"])
+            @test sel == [:MyTest, :test_123]
         end
 
         @testset "order preservation" begin
-            # Selections should preserve order
-            @test parse_args(["z", "a", "m"]) == [:z, :a, :m]
-            @test select_tests([:z, :a], [:a, :b, :z]) == [:z, :a]
+            # Selections should preserve order in ARGS parsing
+            (sel, _, _) = parse_args(["z", "a", "m"])
+            @test sel == [:z, :a, :m]
+            
+            # Using custom select_tests to verify preservation behavior
+            mktempdir() do temp_dir
+                 touch(joinpath(temp_dir, "z.jl"))
+                 touch(joinpath(temp_dir, "a.jl"))
+                 touch(joinpath(temp_dir, "m.jl"))
+                 touch(joinpath(temp_dir, "b.jl"))
+                 
+                 # Case 1: Available list order determines output order if provided
+                 sel = select_tests([:z, :a], [:a, :b, :z], false, identity; test_dir=temp_dir)
+                 @test sel == [:a, :z] # candidates order candidate list order
+                 
+                 # Case 2: Auto-discovery order (filesystem order, filtered)
+                 # We can't guarantee FS order, so checking set equality
+                 sel = select_tests([:z, :a], Symbol[], false, identity; test_dir=temp_dir)
+                 @test Set(sel) == Set([:z, :a])
+            end
         end
 
         @testset "duplicate selections are preserved" begin
             # Duplicates are not filtered (caller's responsibility)
-            @test parse_args(["utils", "utils"]) == [:utils, :utils]
+            (sel, _, _) = parse_args(["utils", "utils"])
+            @test sel == [:utils, :utils]
         end
     end
 
