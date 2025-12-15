@@ -1,9 +1,52 @@
+"""
+Coverage post-processing backend for CTBase.
+
+This extension implements [`CTBase.postprocess_coverage`](@ref) and provides utilities
+to collect `.cov` files, generate reports, and move artifacts into a dedicated
+`coverage/` directory.
+
+Most functions in this module have filesystem side effects.
+"""
 module CoveragePostprocessing
 
 using CTBase: CTBase
 using Coverage
 
 # Main entry point for coverage post-processing
+"""
+    CTBase.postprocess_coverage(::CTBase.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
+
+Post-process coverage artifacts produced by `Pkg.test(; coverage=true)`.
+
+This implementation:
+
+- Collects coverage source directories under `root_dir` (`src/`, `test/`, `ext/` when present)
+- Resets the `coverage/` directory
+- Removes stale `.cov` files (keeping the most complete PID suffix when multiple runs exist)
+- Optionally generates reports (LCOV + markdown report)
+- Moves `.cov` files into `coverage/cov/`
+
+# Keyword Arguments
+
+- `generate_report::Bool=true`: If `true`, write `coverage/lcov.info` and `coverage/cov_report.md`.
+- `root_dir::String=pwd()`: Root directory of the project.
+
+# Returns
+
+- `Nothing`
+
+# Notes
+
+This function **creates/removes/moves files and directories** under `root_dir`.
+
+# Usage sketch (non-executed)
+
+```julia
+using CTBase
+
+# CTBase.postprocess_coverage(; generate_report=true, root_dir=pwd())
+```
+"""
 function CTBase.postprocess_coverage(
     ::CTBase.CoveragePostprocessingTag; 
     generate_report::Bool = true,
@@ -57,6 +100,14 @@ function CTBase.postprocess_coverage(
     return nothing
 end
 
+"""
+    _reset_coverage_dir(coverage_dir, cov_storage_dir)
+
+Internal helper that recreates the `coverage/` directory structure.
+
+This function removes `coverage_dir` (recursively) if it already exists, then
+creates `cov_storage_dir`.
+"""
 function _reset_coverage_dir(coverage_dir, cov_storage_dir)
     isdir(coverage_dir) && rm(coverage_dir; recursive=true, force=true)
     mkpath(cov_storage_dir)
@@ -64,6 +115,11 @@ function _reset_coverage_dir(coverage_dir, cov_storage_dir)
     return nothing
 end
 
+"""
+    _count_cov_files(source_dirs) -> Int
+
+Internal helper that counts the number of `.cov` files in the provided directories.
+"""
 function _count_cov_files(source_dirs)
     n = 0
     for dir in source_dirs
@@ -75,6 +131,14 @@ function _count_cov_files(source_dirs)
     return n
 end
 
+"""
+    _clean_stale_cov_files!(source_dirs)
+
+Internal helper that removes stale `.cov` files from `source_dirs`.
+
+If multiple runs are detected (PID suffix in filenames), this function keeps the
+PID with the largest number of `.cov` files and removes the others.
+"""
 function _clean_stale_cov_files!(source_dirs)
     covs = String[]
     for dir in source_dirs
@@ -106,6 +170,13 @@ function _clean_stale_cov_files!(source_dirs)
     return nothing
 end
 
+"""
+    _collect_and_move_cov_files!(source_dirs, dest_dir) -> Vector{String}
+
+Internal helper that moves all `.cov` files from `source_dirs` into `dest_dir`.
+
+Returns a vector of destination paths for the moved files.
+"""
 function _collect_and_move_cov_files!(source_dirs, dest_dir)
     moved = String[]
     for dir in source_dirs
@@ -119,6 +190,16 @@ function _collect_and_move_cov_files!(source_dirs, dest_dir)
     return moved
 end
 
+"""
+    _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
+
+Internal helper that generates coverage reports from `.cov` files.
+
+Writes:
+
+- `coverage/lcov.info`
+- `coverage/cov_report.md`
+"""
 function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
     println("✓ Generating coverage report")
 
