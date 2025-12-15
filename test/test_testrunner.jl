@@ -134,5 +134,35 @@ function test_testrunner()
         end
     end
 
+    # ============================================================================
+    # UNIT TESTS - _run_single_test error branches
+    # ============================================================================
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_run_single_test" begin
+        run_single = TestRunner._run_single_test
+
+        @testset "error when file not found" begin
+            # L112: error branch when test file doesn't exist
+            err = try
+                run_single(
+                    :nonexistent_file_xyz123;
+                    available_tests = Symbol[],
+                    filename_builder = identity,
+                    funcname_builder = identity,
+                    eval_mode = true,
+                )
+                nothing
+            catch e
+                e
+            end
+            @test err isa ErrorException
+            @test occursin("not found", err.msg)
+        end
+
+        # Note: Other error branches (L126, L134, L139) are not directly tested
+        # because they require Base.include(Main, ...) which causes side effects.
+        # They are tested indirectly through normal test execution.
+    end
+
     return nothing
 end
