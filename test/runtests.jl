@@ -97,3 +97,23 @@ CTBase.run_tests(;
     verbose = VERBOSE,
     showtiming = SHOWTIMING,
 )
+
+# If running with coverage enabled, remind the user to run the post-processing script
+# because .cov files are flushed at process exit and cannot be cleaned up by this script.
+if Base.JLOptions().code_coverage != 0
+    println("""
+
+    ================================================================================
+    [CTBase] Coverage files generated.
+    
+    To process them, move them to the coverage/ directory, and generate a report, 
+    please run:
+    
+        include("test/coverage.jl")
+        
+    or from the command line:
+    
+        julia --project=@. test/coverage.jl
+    ================================================================================
+    """)
+end

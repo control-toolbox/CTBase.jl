@@ -116,7 +116,7 @@ function _generate_coverage_reports!()
 
     # Process both src/ and ext/ directories for coverage
     cov_src = Coverage.process_folder(SRC_DIR)
-    cov_ext = isdir(EXT_DIR) ? Coverage.process_folder(EXT_DIR) : []
+    cov_ext = isdir(EXT_DIR) ? Coverage.process_folder(EXT_DIR) : Coverage.FileCoverage[]
     cov = vcat(cov_src, cov_ext)
     isempty(cov) && error("No coverage data found in $SRC_DIR or $EXT_DIR")
 

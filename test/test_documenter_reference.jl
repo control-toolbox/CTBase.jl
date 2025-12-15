@@ -57,6 +57,15 @@ using .DocumenterReferenceTestMod
 function test_documenter_reference()
     DR = DocumenterReference
 
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
+        @test_throws ErrorException CTBase.automatic_reference_documentation(
+            CTBase.DocumenterReferenceTag();
+            subdirectory="ref",
+            primary_modules=["invalid_string"], # String is not Module or Pair
+            title="My API",
+        )
+    end
+
     @testset verbose = VERBOSE showtiming = SHOWTIMING "reset_config! clears CONFIG" begin
         DR.reset_config!()
         @test isempty(DR.CONFIG)
@@ -358,6 +367,37 @@ function test_documenter_reference()
 
         # CONFIG should have 1 entry (one per unique module)
         @test length(DR.CONFIG) == 1
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module with filename" begin
+        DR.reset_config!()
+
+        mod1 = DocumenterReferenceTestMod
+        mod2 = DRMethodTestMod
+
+        # Test multi-module case with explicit filename (combined page - public only)
+        # Note: DocumenterReference currently splits public/private if both are true,
+        # ignoring the filename for the split structure.
+        # So we test public-only to verify filename is respected.
+        pages = CTBase.automatic_reference_documentation(
+            CTBase.DocumenterReferenceTag();
+            subdirectory="api",
+            primary_modules=[mod1, mod2],
+            public=true,
+            private=false,
+            title="Combined Public API",
+            filename="combined_public"
+        )
+
+        # Should return a Pair with title and path to the combined file
+        @test pages isa Pair
+        @test first(pages) == "Combined Public API"
+        @test last(pages) == "api/combined_public.md"
+
+        # CONFIG should have 2 entries (one per unique module)
+        @test length(DR.CONFIG) == 2
+        @test count(c -> c.current_module == mod1, DR.CONFIG) == 1
+        @test count(c -> c.current_module == mod2, DR.CONFIG) == 1
     end
 
     # ============================================================================
