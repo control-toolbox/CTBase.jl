@@ -1,11 +1,7 @@
-module CoverageArtifact
+module CoveragePostprocessing
 
-import Pkg
-
-Pkg.activate(joinpath(@__DIR__, "test"))
-
-using Coverage
-using Printf
+using CTBase: CTBase
+using Coverage: Coverage
 
 const SRC_DIR = "src"
 const TEST_DIR = "test"
@@ -13,23 +9,12 @@ const EXT_DIR = "ext"
 const COVERAGE_DIR = "coverage"
 const COV_DIR = joinpath(COVERAGE_DIR, "cov")
 
-"""
-    run(; generate_report=true)
+function CTBase.postprocess_coverage(::CTBase.CoveragePostprocessingTag; generate_report::Bool=true)
+    println("✓ Coverage post-processing start")
 
-Workflow coverage complet et correct :
+    _reset_coverage_dir()
 
-1. Nettoie coverage/
-2. Nettoie les anciens .cov dans src/ et test/
-3. (Les tests doivent être lancés AVANT avec coverage=true)
-4. Déplace tous les .cov vers coverage/cov
-5. Génère le rapport coverage dans coverage/
-"""
-function run(; generate_report::Bool = true)
-    println("✓ Coverage artifact start")
-
-    reset_coverage_dir()
-
-    n_cov = count_cov_files()
+    n_cov = _count_cov_files()
     if n_cov == 0
         error("""
         Coverage requested but no .cov files were produced.
@@ -44,66 +29,31 @@ function run(; generate_report::Bool = true)
         """)
     end
 
-    clean_existing_cov_files()
+    _clean_stale_cov_files!()
 
-    n_cov = count_cov_files()
+    n_cov = _count_cov_files()
     if n_cov == 0
         error("Coverage requested but no usable .cov files were found after cleanup.")
     end
 
-    generate_report && generate_coverage_report()
+    generate_report && _generate_coverage_reports!()
 
-    moved = collect_and_move_cov_files()
+    moved = _collect_and_move_cov_files!()
     isempty(moved) && error("Coverage requested but no .cov files were found to move.")
     println("✓ Moved $(length(moved)) .cov files to $COV_DIR")
 
-    println("✓ Coverage artifact completed successfully")
+    println("✓ Coverage post-processing completed successfully")
+    return nothing
 end
 
-# -------------------------------------------------------------------
-# Internals
-# -------------------------------------------------------------------
-
-function reset_coverage_dir()
+function _reset_coverage_dir()
     isdir(COVERAGE_DIR) && rm(COVERAGE_DIR; recursive=true, force=true)
     mkpath(COV_DIR)
     println("✓ Reset coverage/ directory")
+    return nothing
 end
 
-function clean_existing_cov_files()
-    covs = String[]
-    for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
-        isdir(dir) || continue
-        append!(covs, filter(f -> endswith(f, ".cov"), readdir(dir; join=true)))
-    end
-
-    isempty(covs) && return
-
-    pid_counts = Dict{String,Int}()
-    pid_re = r"\.(\d+)\.cov$"
-    for f in covs
-        m = match(pid_re, f)
-        m === nothing && continue
-        pid = m.captures[1]
-        pid_counts[pid] = get(pid_counts, pid, 0) + 1
-    end
-
-    isempty(pid_counts) && return
-
-    keep_pid = first(sort(collect(pid_counts); by = kv -> kv[2], rev=true))[1]
-    keep_suffix = "." * keep_pid * ".cov"
-
-    removed = 0
-    for f in covs
-        endswith(f, keep_suffix) && continue
-        rm(f; force=true)
-        removed += 1
-    end
-
-    removed > 0 && println("Cleaned $removed existing .cov files from $(SRC_DIR)/, $(TEST_DIR)/, and $(EXT_DIR)/")
-end
-
-function count_cov_files()
+function _count_cov_files()
     n = 0
     for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
         isdir(dir) || continue
@@ -115,7 +65,39 @@ function count_cov_files()
     return n
 end
 
-function collect_and_move_cov_files()
+function _clean_stale_cov_files!()
+    covs = String[]
+    for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
+        isdir(dir) || continue
+        append!(covs, filter(f -> endswith(f, ".cov"), readdir(dir; join=true)))
+    end
+    isempty(covs) && return nothing
+
+    pid_counts = Dict{String,Int}()
+    pid_re = r"\.(\d+)\.cov$"
+    for f in covs
+        m = match(pid_re, f)
+        m === nothing && continue
+        pid = m.captures[1]
+        pid_counts[pid] = get(pid_counts, pid, 0) + 1
+    end
+    isempty(pid_counts) && return nothing
+
+    keep_pid = first(sort(collect(pid_counts); by = kv -> kv[2], rev=true))[1]
+    keep_suffix = "." * keep_pid * ".cov"
+
+    removed = 0
+    for f in covs
+        endswith(f, keep_suffix) && continue
+        rm(f; force=true)
+        removed += 1
+    end
+    removed > 0 && println("Cleaned $removed existing .cov files from $(SRC_DIR)/, $(TEST_DIR)/, and $(EXT_DIR)/")
+
+    return nothing
+end
+
+function _collect_and_move_cov_files!()
     moved = String[]
     for dir in (SRC_DIR, TEST_DIR, EXT_DIR)
         isdir(dir) || continue
@@ -129,15 +111,17 @@ function collect_and_move_cov_files()
     return moved
 end
 
-function generate_coverage_report()
+function _generate_coverage_reports!()
     println("✓ Generating coverage report")
 
-    cov = process_folder(SRC_DIR)
-
-    isempty(cov) && error("No coverage data found in $SRC_DIR")
+    # Process both src/ and ext/ directories for coverage
+    cov_src = Coverage.process_folder(SRC_DIR)
+    cov_ext = isdir(EXT_DIR) ? Coverage.process_folder(EXT_DIR) : []
+    cov = vcat(cov_src, cov_ext)
+    isempty(cov) && error("No coverage data found in $SRC_DIR or $EXT_DIR")
 
     lcov_file = joinpath(COVERAGE_DIR, "lcov.info")
-    LCOV.writefile(lcov_file, cov)
+    Coverage.LCOV.writefile(lcov_file, cov)
 
     function line_stats(fc)
         hits = 0
@@ -184,6 +168,7 @@ function generate_coverage_report()
     end
 
     println("✓ Wrote LCOV report to $lcov_file")
+    return nothing
 end
 
-end # module
+end

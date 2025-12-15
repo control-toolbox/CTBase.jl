@@ -67,6 +67,25 @@ function automatic_reference_documentation(; kwargs...)
     automatic_reference_documentation(DocumenterReferenceTag(); kwargs...)
 end
 
+abstract type AbstractCoveragePostprocessingTag end
+struct CoveragePostprocessingTag <: AbstractCoveragePostprocessingTag end
+function postprocess_coverage(::AbstractCoveragePostprocessingTag; kwargs...)
+    throw(CTBase.ExtensionError(:Coverage))
+end
+function postprocess_coverage(; kwargs...)
+    postprocess_coverage(CoveragePostprocessingTag(); kwargs...)
+end
+
+# TestRunner extension stubs
+abstract type AbstractTestRunnerTag end
+struct TestRunnerTag <: AbstractTestRunnerTag end
+function run_tests(::AbstractTestRunnerTag; kwargs...)
+    throw(CTBase.ExtensionError(:Test))
+end
+function run_tests(; kwargs...)
+    run_tests(TestRunnerTag(); kwargs...)
+end
+
 #
 include("exception.jl")
 include("description.jl")
