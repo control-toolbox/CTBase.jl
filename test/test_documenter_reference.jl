@@ -628,4 +628,54 @@ function test_documenter_reference()
         @test !isempty(doc.blueprint.pages)
         @test any(endswith(k, "private.md") for k in keys(doc.blueprint.pages))
     end
+
+    # ============================================================================
+    # Edge Case Tests: Type Formatting Functions
+    # ============================================================================
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs edge cases" begin
+        # Test Union types formatting (covers L775-782)
+        union_result = DR._format_type_for_docs(Union{Int,String})
+        @test occursin("Union", union_result)
+        @test occursin("Int", union_result)
+        @test occursin("String", union_result)
+
+        # Test simple non-DataType fallback (covers L782)
+        @test DR._format_type_for_docs(Any) == "::Any"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_datatype_for_docs with TypeVar" begin
+        # Test parametric type with concrete parameters
+        concrete_result = DR._format_datatype_for_docs(Vector{Int})
+        @test occursin("Vector", concrete_result) || occursin("Array", concrete_result)
+        @test occursin("Int", concrete_result)
+
+        # Test parametric type - the function strips parameters when TypeVar present
+        # Array{T,1} where T has a TypeVar, so it gets stripped
+        @test DR._format_datatype_for_docs(Int) == "::Int"
+        @test DR._format_datatype_for_docs(String) == "::String"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_param edge cases" begin
+        # Test Type parameter (covers L824-826)
+        type_result = DR._format_type_param(Int)
+        @test type_result == "Int"  # Should strip leading ::
+
+        # Test value parameter (covers L830) - e.g., for sized arrays
+        @test DR._format_type_param(3) == "3"
+        @test DR._format_type_param(42) == "42"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string edge cases" begin
+        # Test method signature generation for DRMethodTestMod
+        m = first(methods(DRMethodTestMod.f))
+        sig = DR._method_signature_string(m, DRMethodTestMod, :f)
+        @test occursin("DRMethodTestMod", sig)
+        @test occursin("f", sig)
+
+        # Test with multiple arguments
+        m2 = first(methods(DRMethodTestMod.g))
+        sig2 = DR._method_signature_string(m2, DRMethodTestMod, :g)
+        @test occursin("g", sig2)
+    end
 end

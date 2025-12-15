@@ -1,7 +1,7 @@
 module CoveragePostprocessing
 
 using CTBase: CTBase
-using Coverage: Coverage
+using Coverage
 
 # Main entry point for coverage post-processing
 function CTBase.postprocess_coverage(
@@ -123,17 +123,30 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
     println("✓ Generating coverage report")
 
     # Process source directories for coverage
-    cov = Coverage.FileCoverage[]
+    cov_all = Coverage.FileCoverage[]
     for dir in source_dirs
         # Coverage.process_folder looks for .jl files in dir and checks for .cov files
         # It handles the matching.
-        append!(cov, Coverage.process_folder(dir))
+        append!(cov_all, Coverage.process_folder(dir))
     end
     
-    isempty(cov) && error("No coverage data found in source directories")
+    isempty(cov_all) && error("No coverage data found in source directories")
 
     lcov_file = joinpath(coverage_dir, "lcov.info")
-    Coverage.LCOV.writefile(lcov_file, cov)
+    Coverage.LCOV.writefile(lcov_file, cov_all)
+
+    sep = Base.Filesystem.path_separator
+    report_prefixes_abs = (joinpath(root_dir, "src"), joinpath(root_dir, "ext"))
+    cov = filter(cov_all) do fc
+        f = fc.filename
+        if any(p -> startswith(f, p), report_prefixes_abs)
+            return true
+        end
+        startswith(f, "src" * string(sep)) && return true
+        startswith(f, "ext" * string(sep)) && return true
+        return false
+    end
+    isempty(cov) && (cov = cov_all)
 
     function line_stats(fc)
         hits = 0
@@ -161,14 +174,14 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
         return path
     end
 
-    open(joinpath(coverage_dir, "coverage_report.md"), "w") do io
+    function write_report(io)
         println(io, "# Coverage report\n")
 
-        println(io, "## Overall\n```")
+        println(io, "## Overall\n\n```shell")
         show(io, Coverage.get_summary(cov)); println(io)
         println(io, "```\n")
 
-        println(io, "## Lowest-covered files (top 20)")
+        println(io, "## Lowest-covered files (top 20)\n")
         println(io, "| file | covered | total | % |")
         println(io, "|---|---:|---:|---:|")
         for (f, h, t, p) in rows[1:min(end, 20)]
@@ -177,7 +190,7 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
         end
         println(io)
 
-        println(io, "## Uncovered lines (first 200)\n```")
+        println(io, "## Uncovered lines (first 200)\n\n```shell")
         n = 0
         for fc in cov
             rel_filename = relative_path(fc.filename, root_dir)
@@ -189,9 +202,14 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
             n >= 200 && break
         end
         println(io, "```")
+        return nothing
     end
 
-    println("✓ Wrote LCOV report to $lcov_file")
+    open(joinpath(coverage_dir, "cov_report.md"), "w") do io
+        write_report(io)
+    end
+
+    println("✓ Wrote coverage report to $lcov_file")
     return nothing
 end
 

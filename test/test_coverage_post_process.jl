@@ -103,9 +103,9 @@ function test_coverage_post_process()
                 CTBase.postprocess_coverage(; generate_report=true)
                 
                 @test isfile(joinpath("coverage", "lcov.info"))
-                @test isfile(joinpath("coverage", "llm_report.md"))
+                @test isfile(joinpath("coverage", "cov_report.md"))
                 
-                report = read(joinpath("coverage", "llm_report.md"), String)
+                report = read(joinpath("coverage", "cov_report.md"), String)
                 @test occursin("foo.jl", report)
                 @test occursin("100.0", report) # 1 line covered out of 1
             end

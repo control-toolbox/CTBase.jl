@@ -29,7 +29,7 @@
 #
 # This produces:
 #   - coverage/lcov.info      — LCOV format for CI integration
-#   - coverage/llm_report.md  — Human-readable summary with uncovered lines
+#   - coverage/cov_report.md  — Human-readable summary with uncovered lines
 #   - coverage/cov/           — Archived .cov files
 #
 # ## Test Groups
