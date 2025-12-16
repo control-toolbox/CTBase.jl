@@ -31,7 +31,7 @@ function test_testrunner()
 
         @testset "empty args returns empty with default flags" begin
             (sel, all_flag, dry_flag) = parse_args(String[])
-            @test sel == Symbol[]
+            @test sel == String[]
             @test all_flag == false
 
             @test dry_flag == false
@@ -41,17 +41,17 @@ function test_testrunner()
 
         @testset "single test name" begin
             (sel, _, _) = parse_args(["utils"])
-            @test sel == [:utils]
+            @test sel == ["utils"]
         end
 
         @testset "multiple test names" begin
             (sel, _, _) = parse_args(["utils", "default"])
-            @test sel == [:utils, :default]
+            @test sel == ["utils", "default"]
         end
 
         @testset "coverage flags are filtered out" begin
             (sel, _, _) = parse_args(["coverage=true"])
-            @test sel == Symbol[]
+            @test sel == String[]
         end
 
         @testset "CLI flags -a / --all" begin
@@ -74,7 +74,7 @@ function test_testrunner()
         
         @testset "mixed flags and tests" begin
             (sel, run_all, dry_run) = parse_args(["utils", "-n", "--all"])
-            @test sel == [:utils]
+            @test sel == ["utils"]
             @test run_all == true
             @test dry_run == true
         end
@@ -88,7 +88,8 @@ function test_testrunner()
         select_tests = TestRunner._select_tests
 
         # Mock filename builder for testing
-        test_builder = name -> Symbol(:test_, name)
+        test_builder_sym = name -> Symbol(:test_, name)
+        test_builder_str = name -> "test_" * String(name)
 
         # Mocking readdir requires a temporary directory or we mock the fs behavior? 
         # Easier: we test the filtering logic with a custom test_dir.
@@ -107,28 +108,28 @@ function test_testrunner()
             @testset "Auto-discovery (empty available_tests)" begin
                 # Empty args -> run all .jl files (excluding runtests.jl)
                 # Names derived as basenames
-                sel = select_tests(Symbol[], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(String[], Symbol[], false, identity; test_dir=temp_dir)
                 @test sort(sel) == [:test_core, :test_utils]
 
                 # Run all (-a) -> same result
-                sel = select_tests(Symbol[], Symbol[], true, identity; test_dir=temp_dir)
+                sel = select_tests(String[], Symbol[], true, identity; test_dir=temp_dir)
                 @test sort(sel) == [:test_core, :test_utils]
 
                 # Globbing: select only utils
-                sel = select_tests([:test_utils], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(["test_utils"], Symbol[], false, identity; test_dir=temp_dir)
                 @test sel == [:test_utils]
 
                 # Globbing: pattern matching
-                sel = select_tests([Symbol("test_c*")], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(["test_c*"], Symbol[], false, identity; test_dir=temp_dir)
                 @test sel == [:test_core]
                 
                 # Globbing: match filename? 
                 # candidate=:test_core -> filename="test_core.jl"
-                sel = select_tests([:test_core_jl], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(["test_core_jl"], Symbol[], false, identity; test_dir=temp_dir)
                 # This won't match regex "^test_core_jl$" against "test_core" or "test_core.jl"
                 @test isempty(sel)
 
-                sel = select_tests([Symbol("test_core.jl")], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(["test_core.jl"], Symbol[], false, identity; test_dir=temp_dir)
                 @test sel == [:test_core]
             end
 
@@ -143,22 +144,49 @@ function test_testrunner()
                 # test_core.jl exists -> :core is valid
                 
                 # Empty args -> run all valid available tests
-                sel = select_tests(Symbol[], available, false, test_builder; test_dir=temp_dir)
+                sel = select_tests(String[], available, false, test_builder_sym; test_dir=temp_dir)
                 @test sort(sel) == [:core, :utils]
 
                 # Selection
-                sel = select_tests([:utils], available, false, test_builder; test_dir=temp_dir)
+                sel = select_tests(["utils"], available, false, test_builder_sym; test_dir=temp_dir)
                 @test sel == [:utils]
 
                 # Globbing over available names
                 # available test :core, file: test_core.jl
-                sel = select_tests([Symbol("c*")], available, false, test_builder; test_dir=temp_dir)
+                sel = select_tests(["c*"], available, false, test_builder_sym; test_dir=temp_dir)
                 @test sel == [:core] 
 
                 # Globbing over filename without extension
                 # available test :core, file: test_core.jl
-                sel = select_tests([:test_core], available, false, test_builder; test_dir=temp_dir)
+                sel = select_tests(["test_core"], available, false, test_builder_sym; test_dir=temp_dir)
                 @test sel == [:core]
+
+                # Builder may return String
+                sel = select_tests(["core"], available, false, test_builder_str; test_dir=temp_dir)
+                @test sel == [:core]
+            end
+
+            @testset "With available_tests (symbol located in subdirectory)" begin
+                mkpath(joinpath(temp_dir, "suite_src"))
+                touch(joinpath(temp_dir, "suite_src", "test_utils.jl"))
+
+                available = [:utils]
+
+                sel = select_tests(String[], available, false, test_builder_sym; test_dir=temp_dir)
+                @test sel == [:utils]
+            end
+
+            @testset "available_tests may include directories" begin
+                mkpath(joinpath(temp_dir, "suite"))
+                touch(joinpath(temp_dir, "suite", "test_a.jl"))
+                touch(joinpath(temp_dir, "suite", "test_b.jl"))
+
+                available = TestRunner.TestSpec["suite"]
+                sel = select_tests(String[], available, false, identity; test_dir=temp_dir)
+                @test sel == ["suite/test_a.jl", "suite/test_b.jl"]
+
+                sel = select_tests(["suite/test_a"], available, false, identity; test_dir=temp_dir)
+                @test sel == ["suite/test_a.jl"]
             end
         end
     end
@@ -170,17 +198,28 @@ function test_testrunner()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Edge cases" begin
         parse_args = TestRunner._parse_test_args
         select_tests = TestRunner._select_tests
+        normalize_available = TestRunner._normalize_available_tests
 
         @testset "mixed case and special characters in test names" begin
             # Test names are converted to Symbols, preserving case
             (sel, _, _) = parse_args(["MyTest", "test_123"])
-            @test sel == [:MyTest, :test_123]
+            @test sel == ["MyTest", "test_123"]
+        end
+
+        @testset "available_tests may be a Tuple" begin
+            out = normalize_available((:a, "suite_ext/*"))
+            @test out == TestRunner.TestSpec[:a, "suite_ext/*"]
+        end
+
+        @testset "available_tests may be Vector{Any}" begin
+            out = normalize_available(Any[:a, "suite_ext/*"])
+            @test out == TestRunner.TestSpec[:a, "suite_ext/*"]
         end
 
         @testset "order preservation" begin
             # Selections should preserve order in ARGS parsing
             (sel, _, _) = parse_args(["z", "a", "m"])
-            @test sel == [:z, :a, :m]
+            @test sel == ["z", "a", "m"]
             
             # Using custom select_tests to verify preservation behavior
             mktempdir() do temp_dir
@@ -190,12 +229,12 @@ function test_testrunner()
                  touch(joinpath(temp_dir, "b.jl"))
                  
                  # Case 1: Available list order determines output order if provided
-                 sel = select_tests([:z, :a], [:a, :b, :z], false, identity; test_dir=temp_dir)
+                 sel = select_tests(["z", "a"], [:a, :b, :z], false, identity; test_dir=temp_dir)
                  @test sel == [:a, :z] # candidates order candidate list order
                  
                  # Case 2: Auto-discovery order (filesystem order, filtered)
                  # We can't guarantee FS order, so checking set equality
-                 sel = select_tests([:z, :a], Symbol[], false, identity; test_dir=temp_dir)
+                 sel = select_tests(["z", "a"], Symbol[], false, identity; test_dir=temp_dir)
                  @test Set(sel) == Set([:z, :a])
             end
         end
@@ -203,7 +242,7 @@ function test_testrunner()
         @testset "duplicate selections are preserved" begin
             # Duplicates are not filtered (caller's responsibility)
             (sel, _, _) = parse_args(["utils", "utils"])
-            @test sel == [:utils, :utils]
+            @test sel == ["utils", "utils"]
         end
     end
 
@@ -223,6 +262,7 @@ function test_testrunner()
                     filename_builder = identity,
                     funcname_builder = identity,
                     eval_mode = true,
+                    test_dir = mktempdir(),
                 )
                 nothing
             catch e

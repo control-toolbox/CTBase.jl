@@ -76,18 +76,13 @@ end
 
 # Run tests using the TestRunner extension
 CTBase.run_tests(;
+    args = String.(ARGS),
     testset_name = "CTBase tests",
-    available_tests = [
-        :code_quality, 
-        :default, 
-        :description, 
-        :exceptions, 
-        :utils, 
-        :documenter_reference, 
-        :integration,
-        :coverage_post_process,
-        :testrunner,
-    ],
+    available_tests = (
+        :code_quality,
+        "suite_src/*",
+        "suite_ext/*",
+    ),
     filename_builder = name -> Symbol(:test_, name),
     funcname_builder = name -> Symbol(:test_, name),
     verbose = VERBOSE,

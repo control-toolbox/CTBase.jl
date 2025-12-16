@@ -12,6 +12,8 @@ module TestRunner
 using CTBase: CTBase
 using Test: Test, @testset
 
+const TestSpec = Union{Symbol,String}
+
 """
     run_tests(::CTBase.TestRunnerTag; kwargs...)
 
@@ -42,8 +44,9 @@ using CTBase
 """
 function CTBase.run_tests(
     ::CTBase.TestRunnerTag;
+    args::AbstractVector{<:AbstractString} = String[],
     testset_name::String = "Tests",
-    available_tests::Vector{Symbol} = Symbol[],
+    available_tests = Symbol[],
     filename_builder::Function = identity,
     funcname_builder::Function = identity,
     eval_mode::Bool = true,
@@ -52,10 +55,12 @@ function CTBase.run_tests(
     test_dir::String = joinpath(pwd(), "test"),
 )
     # Parse command-line arguments
-    (selections, run_all, dry_run) = _parse_test_args(String.(Main.ARGS))
+    (selections, run_all, dry_run) = _parse_test_args(String.(args))
+
+    available_tests_vec = _normalize_available_tests(available_tests)
 
     # Get selected tests
-    selected = _select_tests(selections, available_tests, run_all, filename_builder; test_dir=test_dir)
+    selected = _select_tests(selections, available_tests_vec, run_all, filename_builder; test_dir=test_dir)
 
     if dry_run
         println("Dry run: the following tests would be executed:")
@@ -64,14 +69,15 @@ function CTBase.run_tests(
     end
 
     @testset verbose = verbose showtiming = showtiming "$testset_name" begin
-        for name in selected
-            @testset "$(name)" begin
+        for spec in selected
+            @testset "$(spec)" begin
                 _run_single_test(
-                    name;
-                    available_tests,
+                    spec;
+                    available_tests = available_tests_vec,
                     filename_builder,
                     funcname_builder,
                     eval_mode,
+                    test_dir,
                 )
             end
         end
@@ -90,7 +96,7 @@ Returns `(selections, run_all, dry_run)` where:
 - `dry_run`: whether `-n` / `--dryrun` was present
 """
 function _parse_test_args(args::Vector{String})
-    selections = Symbol[]
+    selections = String[]
     run_all = false
     dry_run = false
 
@@ -102,7 +108,7 @@ function _parse_test_args(args::Vector{String})
         elseif arg == "-n" || arg == "--dryrun"
             dry_run = true
         else
-            push!(selections, Symbol(arg))
+            push!(selections, arg)
         end
     end
     return (selections, run_all, dry_run)
@@ -127,12 +133,73 @@ function _glob_to_regex(pattern::AbstractString)
         "{" => "\\{",
         "}" => "\\}",
         "^" => "\\^",
-        "\$" => "\\\$"
+        "\u0024" => "\\\u0024",
+        "\\" => "\\\\"
     )
     # Convert glob wildcards to regex wildcards
     regex_str = replace(regex_str, "*" => ".*", "?" => ".")
     # Anchor to full string
-    return Regex("^" * regex_str * "\$")
+    return Regex("^" * regex_str * "\u0024")
+end
+
+function _ensure_jl(filename::AbstractString)
+    endswith(filename, ".jl") ? filename : filename * ".jl"
+end
+
+function _builder_to_string(x)
+    x isa Symbol ? String(x) : String(x)
+end
+
+function _normalize_available_tests(available_tests)
+    available_tests === nothing && return TestSpec[]
+
+    if !(available_tests isa AbstractVector || available_tests isa Tuple)
+        throw(ArgumentError("available_tests must be a Vector or Tuple of Symbol/String"))
+    end
+
+    out = TestSpec[]
+    for entry in available_tests
+        if entry isa Symbol || entry isa String
+            push!(out, entry)
+        else
+            throw(ArgumentError("available_tests entries must be Symbol or String"))
+        end
+    end
+    return out
+end
+
+function _collect_test_files_recursive(test_dir::AbstractString)
+    files = String[]
+    for (root, _, fs) in walkdir(test_dir)
+        for f in fs
+            if endswith(f, ".jl") && f != "runtests.jl"
+                full = joinpath(root, f)
+                push!(files, relpath(full, test_dir))
+            end
+        end
+    end
+    sort!(files)
+    return files
+end
+
+function _find_symbol_test_file_rel(
+    name::Symbol,
+    filename_builder::Function;
+    test_dir::AbstractString,
+)
+    wanted = _ensure_jl(_builder_to_string(filename_builder(name)))
+    all = _collect_test_files_recursive(test_dir)
+    matches = filter(f -> basename(f) == wanted, all)
+
+    if isempty(matches)
+        return nothing
+    end
+    if wanted in matches
+        return wanted
+    end
+
+    sort!(matches, by = f -> (count(==('/'), f), ncodeunits(f), f))
+    return first(matches)
 end
 
 """
@@ -147,8 +214,8 @@ If `available_tests` is empty, this function falls back to an auto-discovery
 heuristic using the filename stem as the candidate test name.
 """
 function _select_tests(
-    selections::Vector{Symbol},
-    available_tests::Vector{Symbol},
+    selections::Vector{String},
+    available_tests::AbstractVector{<:TestSpec},
     run_all::Bool,
     filename_builder::Function;
     test_dir::String = joinpath(pwd(), "test") # Default assumption
@@ -163,7 +230,7 @@ function _select_tests(
     # If `available_tests` is empty, we derive names from files? 
     #   -> User said: "list all .jl files... but only keep available if provided"
     
-    candidates = Symbol[]
+    candidates = TestSpec[]
 
     if isempty(available_tests)
         # If no available_tests provided, every .jl file is a candidate!
@@ -198,10 +265,31 @@ function _select_tests(
     else
         # If available_tests IS provided, we only consider these.
         # We verify if their files exist.
-        for test_name in available_tests
-            fname = filename_builder(test_name)
-            if "$(fname).jl" ∈ all_files
-                push!(candidates, test_name)
+        recursive_files = _collect_test_files_recursive(test_dir)
+        for entry in available_tests
+            if entry isa Symbol
+                rel = _find_symbol_test_file_rel(entry, filename_builder; test_dir=test_dir)
+                if rel !== nothing
+                    push!(candidates, entry)
+                end
+            else
+                full = joinpath(test_dir, entry)
+                if isdir(full)
+                    prefix = entry * "/"
+                    for f in recursive_files
+                        if startswith(f, prefix)
+                            push!(candidates, f)
+                        end
+                    end
+                else
+                    regex = _glob_to_regex(entry)
+                    for f in recursive_files
+                        f_no_ext = replace(f, ".jl" => "")
+                        if !isnothing(match(regex, f)) || !isnothing(match(regex, f_no_ext))
+                            push!(candidates, f)
+                        end
+                    end
+                end
             end
         end
     end
@@ -213,10 +301,10 @@ function _select_tests(
 
     # 3. Filter candidates by selections (Patterns)
     # selections are now patterns! e.g. [:utils, :test_u*]
-    filtered = Symbol[]
+    filtered = TestSpec[]
     
     for candidate in candidates
-        candidate_str = string(candidate)
+        candidate_str = candidate isa Symbol ? String(candidate) : String(candidate)
         # Also check the associated filename?
         # If I have candidate :utils -> test_utils.jl
         # And user passes "test_u*", it should match "test_utils.jl" OR "utils"?
@@ -224,11 +312,12 @@ function _select_tests(
         # So matching against the FILENAME seems primary.
         
         # Resolve filename for candidate
-        if isempty(available_tests)
-             # Auto-discovered: filename is roughly "$(candidate).jl"
-             candidate_filename = "$(candidate).jl"
+        if candidate isa String
+            candidate_filename = _ensure_jl(candidate)
+        elseif isempty(available_tests)
+            candidate_filename = "$(candidate).jl"
         else
-             candidate_filename = "$(filename_builder(candidate)).jl"
+            candidate_filename = _ensure_jl(_builder_to_string(filename_builder(candidate)))
         end
         
         # Also match strictly against filename without extension?
@@ -236,8 +325,7 @@ function _select_tests(
 
         matched = false
         for sel in selections
-            pattern = string(sel)
-            regex = _glob_to_regex(pattern)
+            regex = _glob_to_regex(sel)
             
             # Match against:
             # 1. Candidate name (e.g. :utils)
@@ -273,15 +361,50 @@ This helper:
 This function is not part of the public API.
 """
 function _run_single_test(
-    name::Symbol;
-    available_tests::Vector{Symbol},
+    spec::TestSpec;
+    available_tests::AbstractVector{<:TestSpec},
     filename_builder::Function,
     funcname_builder::Function,
     eval_mode::Bool,
+    test_dir::String,
 )
+    if spec isa String
+        rel = _ensure_jl(spec)
+        filename = joinpath(test_dir, rel)
+        if !isfile(filename)
+            error("""
+            Test file "$(filename)" not found.
+            Current directory: $(pwd())
+            """)
+        end
+        Base.include(Main, filename)
+
+        if !eval_mode
+            return nothing
+        end
+
+        func_symbol = Symbol(replace(basename(rel), ".jl" => ""))
+        if !isdefined(Main, func_symbol)
+            error("""
+            Function "$(func_symbol)" not found after including "$(filename)".
+            Make sure the file defines a function with this name.
+            """)
+        end
+
+        Main.eval(Expr(:call, func_symbol))
+        return nothing
+    end
+
+    name = spec
+
     # Build filename
-    file_symbol = filename_builder(name)
-    filename = "$(file_symbol).jl"
+    rel = _find_symbol_test_file_rel(name, filename_builder; test_dir=test_dir)
+    rel === nothing && error("""
+    Test file not found for test "$(name)".
+    Current directory: $(pwd())
+    """)
+
+    filename = joinpath(test_dir, rel)
 
     # Check file exists
     if !isfile(filename)
@@ -309,6 +432,8 @@ function _run_single_test(
     if !eval_mode || func_symbol === nothing
         return nothing
     end
+
+    func_symbol = func_symbol isa Symbol ? func_symbol : Symbol(String(func_symbol))
 
     # Check function exists before eval
     if !isdefined(Main, func_symbol)
