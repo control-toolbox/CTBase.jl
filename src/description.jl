@@ -156,6 +156,30 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
     return descriptions[argmax(table[:, 1])]
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Convenience overload of [`complete`](@ref) for tuple inputs.
+
+This method is equivalent to `complete(list...; descriptions=descriptions)`.
+
+# Arguments
+
+- `list::Tuple{Vararg{Symbol}}`: A tuple of symbols representing a partial description.
+
+# Keyword Arguments
+
+- `descriptions::Tuple{Vararg{Description}}`: Candidate descriptions used for completion.
+
+# Returns
+
+- `Description`: A description from `descriptions` that contains all symbols in `list`.
+
+# Throws
+
+- [`AmbiguousDescription`](@ref CTBase.AmbiguousDescription): If `descriptions` is empty, or if `list` is not contained
+  in any candidate description.
+"""
 function complete(
     list::Tuple{DescVarArg}; descriptions::Tuple{Vararg{Description}}
 )::Description

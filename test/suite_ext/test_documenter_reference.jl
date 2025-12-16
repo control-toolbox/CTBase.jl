@@ -52,17 +52,34 @@ extfun(x::Int) = x
 extfun(x::String) = length(x)
 end
 
+module DRNoDocModule
+module Inner end
+end
+
+module DRUnionAllTestMod
+f(x::T) where {T} = x
+end
+
 using .DocumenterReferenceTestMod
 
 function test_documenter_reference()
     DR = DocumenterReference
 
-    @testset "reset_config! clears CONFIG" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
+        @test_throws ErrorException CTBase.automatic_reference_documentation(
+            CTBase.DocumenterReferenceTag();
+            subdirectory="ref",
+            primary_modules=["invalid_string"], # String is not Module or Pair
+            title="My API",
+        )
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "reset_config! clears CONFIG" begin
         DR.reset_config!()
         @test isempty(DR.CONFIG)
     end
 
-    @testset "_default_basename and _build_page_path" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_default_basename and _build_page_path" begin
         @test DR._default_basename("manual", true, true) == "manual"
         @test DR._default_basename("", true, true) == "api"
         @test DR._default_basename("", true, false) == "public"
@@ -73,7 +90,7 @@ function test_documenter_reference()
         @test DR._build_page_path("", "public") == "public"
     end
 
-    @testset "_classify_symbol and _to_string" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_classify_symbol and _to_string" begin
         @test DR._classify_symbol(nothing, "@mymacro") == DR.DOCTYPE_MACRO
         @test DR._classify_symbol(DocumenterReferenceTestMod.SubModule, "SubModule") ==
             DR.DOCTYPE_MODULE
@@ -94,9 +111,19 @@ function test_documenter_reference()
         @test DR._to_string(DR.DOCTYPE_STRUCT) == "struct"
     end
 
-    @testset "_get_source_file" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file" begin
         path = DR._get_source_file(DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION)
         @test path === abspath(@__FILE__)
+
+        # No docstring => should use method-based resolution
+        path2 = DR._get_source_file(DocumenterReferenceTestMod, :no_doc, DR.DOCTYPE_FUNCTION)
+        @test path2 === abspath(@__FILE__)
+
+        # Missing symbol should be caught and return nothing
+        missing_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :__does_not_exist__, DR.DOCTYPE_FUNCTION
+        )
+        @test missing_path === nothing
 
         const_path = DR._get_source_file(
             DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT
@@ -104,7 +131,55 @@ function test_documenter_reference()
         @test const_path === nothing
     end
 
-    @testset "_iterate_over_symbols filtering" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_from_methods" begin
+        # For built-in operators like +, source detection behavior may vary by Julia version.
+        # In Julia 1.12+, it may return a source file path even for +.
+        # We just verify the function runs without error and returns String or nothing.
+        result = DR._get_source_from_methods(+)
+        @test result === nothing || result isa String
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_parse_primary_modules with Pair" begin
+        d = DR._parse_primary_modules([DocumenterReferenceTestMod => @__FILE__])
+        @test d[DocumenterReferenceTestMod] == [abspath(@__FILE__)]
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_has_documentation: module documented elsewhere" begin
+        modules = Dict(DRNoDocModule.Inner => Any[])
+        @test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) == true
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Type formatting helpers" begin
+        @test DR._format_datatype_for_docs(UInt) == "::UInt"
+
+        # Parametric types without concrete params are UnionAll, use _format_type_for_docs
+        param_result = DR._format_type_for_docs(DRTypeFormatTestMod.Parametric)
+        @test occursin("Parametric", param_result)
+
+        # Concrete params => kept (WithValue{Int,2} is a DataType)
+        concrete_result = DR._format_datatype_for_docs(DRTypeFormatTestMod.WithValue{Int,2})
+        @test occursin("WithValue", concrete_result)
+        @test occursin("Int", concrete_result)
+        @test occursin("2", concrete_result)
+
+        # Fallback branch for non-type inputs
+        @test DR._format_type_for_docs(1) == "::1"
+
+        # TypeVar formatting in _format_type_param - need to unwrap UnionAll first
+        unwrapped = Base.unwrap_unionall(DRTypeFormatTestMod.Parametric)
+        tv = unwrapped.parameters[1]
+        @test tv isa TypeVar
+        @test DR._format_type_param(tv) == "T"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string handles UnionAll" begin
+        m = first(methods(DRUnionAllTestMod.f))
+        s = DR._method_signature_string(m, DRUnionAllTestMod, :f)
+        @test occursin("DRUnionAllTestMod.f", s)
+        @test occursin("T", s)
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols filtering" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => Any[])
         exclude = Set{Symbol}([:skip])
@@ -143,7 +218,7 @@ function test_documenter_reference()
         @test :no_doc ∉ seen
     end
 
-    @testset "_iterate_over_symbols with source_files and include_without_source" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols with source_files and include_without_source" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => Any[])
         sort_by(x) = x
@@ -222,7 +297,7 @@ function test_documenter_reference()
         @test :SubModule in seen3
     end
 
-    @testset "automatic_reference_documentation configuration" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation configuration" begin
         DR.reset_config!()
 
         # Single-module, public-only
@@ -234,6 +309,27 @@ function test_documenter_reference()
             private=false,
             title="My API",
         )
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation default tag" begin
+            DR.reset_config!()
+
+            pages_default = CTBase.automatic_reference_documentation(;
+                subdirectory="ref",
+                primary_modules=[DocumenterReferenceTestMod],
+                public=true,
+                private=false,
+                title="My API",
+            )
+
+            @test length(DR.CONFIG) == 1
+            cfg_default = DR.CONFIG[1]
+            @test cfg_default.current_module === DocumenterReferenceTestMod
+            @test cfg_default.subdirectory == "ref"
+            @test cfg_default.public == true
+            @test cfg_default.private == false
+            @test cfg_default.filename == "public"
+            @test pages_default == pages1
+        end
 
         @test length(DR.CONFIG) == 1
         cfg1 = DR.CONFIG[1]
@@ -274,7 +370,7 @@ function test_documenter_reference()
         )
     end
 
-    @testset "Documenter.Selectors.order for APIBuilder" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
         @test Documenter.Selectors.order(DR.APIBuilder) == 0.0
     end
 
@@ -282,7 +378,7 @@ function test_documenter_reference()
     # NEW TESTS: _exported_symbols
     # ============================================================================
 
-    @testset "_exported_symbols classification" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_exported_symbols classification" begin
         # Test that _exported_symbols correctly classifies symbols
         result = DR._exported_symbols(DocumenterReferenceTestMod)
 
@@ -314,7 +410,7 @@ function test_documenter_reference()
     # NEW TESTS: automatic_reference_documentation multi-module
     # ============================================================================
 
-    @testset "automatic_reference_documentation multi-module" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module" begin
         DR.reset_config!()
 
         # Create a second test module for multi-module testing
@@ -339,11 +435,42 @@ function test_documenter_reference()
         @test length(DR.CONFIG) == 1
     end
 
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module with filename" begin
+        DR.reset_config!()
+
+        mod1 = DocumenterReferenceTestMod
+        mod2 = DRMethodTestMod
+
+        # Test multi-module case with explicit filename (combined page - public only)
+        # Note: DocumenterReference currently splits public/private if both are true,
+        # ignoring the filename for the split structure.
+        # So we test public-only to verify filename is respected.
+        pages = CTBase.automatic_reference_documentation(
+            CTBase.DocumenterReferenceTag();
+            subdirectory="api",
+            primary_modules=[mod1, mod2],
+            public=true,
+            private=false,
+            title="Combined Public API",
+            filename="combined_public"
+        )
+
+        # Should return a Pair with title and path to the combined file
+        @test pages isa Pair
+        @test first(pages) == "Combined Public API"
+        @test last(pages) == "api/combined_public.md"
+
+        # CONFIG should have 2 entries (one per unique module)
+        @test length(DR.CONFIG) == 2
+        @test count(c -> c.current_module == mod1, DR.CONFIG) == 1
+        @test count(c -> c.current_module == mod2, DR.CONFIG) == 1
+    end
+
     # ============================================================================
     # NEW TESTS: _get_source_file expanded
     # ============================================================================
 
-    @testset "_get_source_file expanded cases" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file expanded cases" begin
         # Function case (already tested, but verify)
         func_path = DR._get_source_file(
             DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION
@@ -382,7 +509,7 @@ function test_documenter_reference()
     # NEW TESTS: Edge cases
     # ============================================================================
 
-    @testset "Edge cases" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Edge cases" begin
         # _build_page_path with various inputs
         @test DR._build_page_path("", "") == ""
         @test DR._build_page_path(".", "") == ""
@@ -432,7 +559,7 @@ function test_documenter_reference()
         @test isempty(DR.CONFIG)
     end
 
-    @testset "_format_type_for_docs and helpers" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs and helpers" begin
         simple_str = DR._format_type_for_docs(DRTypeFormatTestMod.Simple)
         @test startswith(simple_str, "::")
         @test occursin("DRTypeFormatTestMod.Simple", simple_str)
@@ -459,7 +586,7 @@ function test_documenter_reference()
         @test value_param_fmt == "3"
     end
 
-    @testset "_method_signature_string and method collection" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string and method collection" begin
         methods_f = methods(DRMethodTestMod.f)
         m0 = first(filter(m -> length(m.sig.parameters) == 1, methods_f))
         sig0 = DR._method_signature_string(m0, DRMethodTestMod, :f)
@@ -489,7 +616,7 @@ function test_documenter_reference()
         end
     end
 
-    @testset "Page content builders" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders" begin
         modules_str = "ModA, ModB"
         module_contents_private = [
             (DocumenterReferenceTestMod, String[], ["priv_a"]),
@@ -517,7 +644,7 @@ function test_documenter_reference()
         @test any(occursin("pub_a", s) for s in docs_pub)
     end
 
-    @testset "external_modules_to_document" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "external_modules_to_document" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => String[])
         sort_by(x) = x
@@ -544,7 +671,7 @@ function test_documenter_reference()
         @test any(occursin("DRExternalTestMod.extfun", s) for s in private_docs)
     end
 
-    @testset "APIBuilder runner integration" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "APIBuilder runner integration" begin
         DR.reset_config!()
 
         pages = CTBase.automatic_reference_documentation(
@@ -566,5 +693,55 @@ function test_documenter_reference()
 
         @test !isempty(doc.blueprint.pages)
         @test any(endswith(k, "private.md") for k in keys(doc.blueprint.pages))
+    end
+
+    # ============================================================================
+    # Edge Case Tests: Type Formatting Functions
+    # ============================================================================
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs edge cases" begin
+        # Test Union types formatting (covers L775-782)
+        union_result = DR._format_type_for_docs(Union{Int,String})
+        @test occursin("Union", union_result)
+        @test occursin("Int", union_result)
+        @test occursin("String", union_result)
+
+        # Test simple non-DataType fallback (covers L782)
+        @test DR._format_type_for_docs(Any) == "::Any"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_datatype_for_docs with TypeVar" begin
+        # Test parametric type with concrete parameters
+        concrete_result = DR._format_datatype_for_docs(Vector{Int})
+        @test occursin("Vector", concrete_result) || occursin("Array", concrete_result)
+        @test occursin("Int", concrete_result)
+
+        # Test parametric type - the function strips parameters when TypeVar present
+        # Array{T,1} where T has a TypeVar, so it gets stripped
+        @test DR._format_datatype_for_docs(Int) == "::Int"
+        @test DR._format_datatype_for_docs(String) == "::String"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_param edge cases" begin
+        # Test Type parameter (covers L824-826)
+        type_result = DR._format_type_param(Int)
+        @test type_result == "Int"  # Should strip leading ::
+
+        # Test value parameter (covers L830) - e.g., for sized arrays
+        @test DR._format_type_param(3) == "3"
+        @test DR._format_type_param(42) == "42"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string edge cases" begin
+        # Test method signature generation for DRMethodTestMod
+        m = first(methods(DRMethodTestMod.f))
+        sig = DR._method_signature_string(m, DRMethodTestMod, :f)
+        @test occursin("DRMethodTestMod", sig)
+        @test occursin("f", sig)
+
+        # Test with multiple arguments
+        m2 = first(methods(DRMethodTestMod.g))
+        sig2 = DR._method_signature_string(m2, DRMethodTestMod, :g)
+        @test occursin("g", sig2)
     end
 end

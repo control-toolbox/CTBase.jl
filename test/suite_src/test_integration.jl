@@ -2,7 +2,7 @@ struct DummyDocRefTag <: CTBase.AbstractDocumenterReferenceTag end
 
 function test_integration()
     # Integration test: description workflow combining add, complete, remove, and exceptions
-    @testset "Integration: description workflow" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Integration: description workflow" begin
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
         algorithms = CTBase.add(algorithms, (:descent, :gradient, :fixedstep))
@@ -29,7 +29,7 @@ function test_integration()
     end
 
     # Integration test: formatting labels using utils (subscripts/superscripts) with descriptions
-    @testset "Integration: label formatting with utils" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Integration: label formatting with utils" begin
         base = :x
 
         # Single index / power labels
@@ -48,7 +48,7 @@ function test_integration()
     end
 
     # Integration test: descriptions and exceptions consistency
-    @testset "Integration: descriptions and exceptions" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Integration: descriptions and exceptions" begin
         descs = ()
         descs = CTBase.add(descs, (:a, :b))
 
@@ -68,7 +68,7 @@ function test_integration()
     end
 
     # Integration test: automatic_reference_documentation fallback when extension is not used
-    @testset "Integration: automatic_reference_documentation fallback" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Integration: automatic_reference_documentation fallback" begin
         err = try
             CTBase.automatic_reference_documentation(DummyDocRefTag();)
             nothing

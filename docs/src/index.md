@@ -46,6 +46,94 @@ The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://githu
     julia> private_fun(x)
     ```
 
+## Optional extensions
+
+CTBase uses Julia's *package extensions* mechanism (via `[weakdeps]` + `[extensions]` in
+`Project.toml`) to provide optional functionality without forcing extra dependencies
+on downstream packages.
+
+The pattern is:
+
+- The core package defines **tag types** and **extension points** (methods that throw
+  `CTBase.ExtensionError(...)` by default).
+- When you load an optional dependency, Julia automatically loads the corresponding
+  extension module from `ext/`, which adds the real implementation.
+
+You can check whether an extension is loaded with `Base.get_extension`:
+
+```julia
+Base.get_extension(CTBase, :TestRunner)
+Base.get_extension(CTBase, :CoveragePostprocessing)
+Base.get_extension(CTBase, :DocumenterReference)
+```
+
+### `DocumenterReference` (API reference generation)
+
+- **Role**: provides the backend for `CTBase.automatic_reference_documentation(...)` used
+  to generate API reference pages for Documenter.
+- **Triggered by**: loading the dependencies needed by the extension, typically:
+
+```julia
+using CTBase
+using Documenter
+using Markdown
+using MarkdownAST
+```
+
+- **Why there is no “simple” usage**: the function is meant to run *inside a docs build*
+  and interacts with Documenter’s build pipeline and filesystem layout.
+
+Usage sketch (non-executed):
+
+```julia
+using CTBase
+using Documenter
+using Markdown
+using MarkdownAST
+
+# pages = CTBase.automatic_reference_documentation(; subdirectory=".", primary_modules=[CTBase])
+```
+
+### `TestRunner` (selectable test groups)
+
+- **Role**: provides the backend for `CTBase.run_tests(...)` used by this repository’s
+  `test/runtests.jl` to run named test groups and support selection via `test_args`.
+- **Triggered by**: `using Test` (or loading `Test` indirectly via a test run).
+
+Why it is not exposed as a “simple” user API:
+
+- It is mainly a **developer tool** for this package (and related repos).
+- It executes tests, includes files, and may depend on `Main.ARGS` conventions.
+
+Usage sketch (non-executed):
+
+```julia
+using CTBase
+using Test
+
+# CTBase.run_tests(; testset_name="CTBase tests", test_dir="test")
+```
+
+### `CoveragePostprocessing` (coverage artifacts)
+
+- **Role**: provides the backend for `CTBase.postprocess_coverage(...)`, used after running
+  tests with coverage to collect `.cov` files and generate reports.
+- **Triggered by**: `using Coverage`.
+
+Why it is not a “simple” usage:
+
+- It performs **filesystem side-effects** (create/remove/move files under `coverage/`).
+- It assumes a project layout (`src/`, `test/`, `ext/`).
+
+Usage sketch (non-executed):
+
+```julia
+using CTBase
+using Coverage
+
+# CTBase.postprocess_coverage(; root_dir=pwd(), generate_report=true)
+```
+
 ## Descriptions: encoding algorithms
 
 One of the central ideas in CTBase is the notion of a **description**.

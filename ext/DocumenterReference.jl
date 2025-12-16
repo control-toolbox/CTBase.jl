@@ -792,6 +792,12 @@ function _format_datatype_for_docs(T::DataType)
     type_name = T.name.name
     is_core_or_base = type_mod === Core || type_mod === Base
 
+    if T === Int
+        type_name = :Int
+    elseif T === UInt
+        type_name = :UInt
+    end
+
     # Handle parametric types
     if !isempty(T.parameters)
         has_typevar_params = any(p -> p isa TypeVar, T.parameters)

@@ -33,3 +33,7 @@ Manifest*.toml
 .\#*
 \#*
 .*.swp
+
+#
+.agent/
+reports/

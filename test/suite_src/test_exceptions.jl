@@ -3,7 +3,7 @@ function test_exceptions()
     # Test suite for CTException subtypes and their error printing
 
     # Test AmbiguousDescription
-    @testset "AmbiguousDescription" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "AmbiguousDescription" begin
         e = CTBase.AmbiguousDescription((:e,))
         # Check that throwing error(e) produces an ErrorException
         @test_throws CTBase.AmbiguousDescription throw(e)
@@ -16,7 +16,7 @@ function test_exceptions()
     end
 
     # Test IncorrectArgument
-    @testset "IncorrectArgument" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "IncorrectArgument" begin
         e = CTBase.IncorrectArgument("invalid argument")
         @test_throws CTBase.IncorrectArgument throw(e)
         output = sprint(showerror, e)
@@ -26,7 +26,7 @@ function test_exceptions()
     end
 
     # Test NotImplemented
-    @testset "NotImplemented" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "NotImplemented" begin
         e = CTBase.NotImplemented("feature not ready")
         @test_throws CTBase.NotImplemented throw(e)
         output = sprint(showerror, e)
@@ -36,7 +36,7 @@ function test_exceptions()
     end
 
     # Test UnauthorizedCall
-    @testset "UnauthorizedCall" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "UnauthorizedCall" begin
         e = CTBase.UnauthorizedCall("access denied")
         @test_throws CTBase.UnauthorizedCall throw(e)
         output = sprint(showerror, e)
@@ -46,7 +46,7 @@ function test_exceptions()
     end
 
     # Test ParsingError
-    @testset "ParsingError" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "ParsingError" begin
         e = CTBase.ParsingError("syntax error")
         @test_throws CTBase.ParsingError throw(e)
         output = sprint(showerror, e)
@@ -56,7 +56,7 @@ function test_exceptions()
     end
 
     # Test ExtensionError
-    @testset "ExtensionError" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "ExtensionError" begin
         # Test constructor throws if no dependencies provided
         @test_throws CTBase.UnauthorizedCall CTBase.ExtensionError()
         # Create with one weak dependency
@@ -74,7 +74,7 @@ function test_exceptions()
         @test occursin("Ext2", output2)
     end
 
-    @testset "CTException supertype catch" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "CTException supertype catch" begin
         e = CTBase.IncorrectArgument("msg")
         @test_throws CTBase.IncorrectArgument throw(e)
     end

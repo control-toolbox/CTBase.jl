@@ -83,12 +83,9 @@ function ctupperscript(i::Int)::Char
         return '\u00B2'   # superscript two
     elseif i == 3
         return '\u00B3'   # superscript three
-    elseif 4 <= i <= 9
+    else #if 4 <= i <= 9
         # Unicode superscript digits 4-9 contiguous starting at U+2074
         return Char(Int('\u2074') + (i - 4))
-    else
-        # Defensive fallback (should never occur due to prior checks)
-        throw(IncorrectArgument("Invalid input for ctupperscript"))
     end
 end
 
