@@ -2,8 +2,30 @@ struct DummyCoverageTag <: CTBase.AbstractCoveragePostprocessingTag end
 
 function test_coverage_post_process()
 
+    CP = Base.get_extension(CTBase, :CoveragePostprocessing)
+
     @testset "CoveragePostprocessing extension" begin
         @test Base.get_extension(CTBase, :CoveragePostprocessing) !== nothing
+    end
+
+    @testset "Errors when no .cov files were produced" begin
+        mktempdir() do tmp
+            cd(tmp) do
+                mkpath("src")
+                mkpath("test")
+                mkpath("ext")
+
+                err = try
+                    CTBase.postprocess_coverage(; generate_report=false)
+                    nothing
+                catch e
+                    e
+                end
+
+                @test err isa ErrorException
+                @test occursin("no .cov files", lowercase(err.msg))
+            end
+        end
     end
 
     @testset "Stub dispatch remains available" begin
@@ -108,6 +130,47 @@ function test_coverage_post_process()
                 report = read(joinpath("coverage", "cov_report.md"), String)
                 @test occursin("foo.jl", report)
                 @test occursin("100.0", report) # 1 line covered out of 1
+            end
+        end
+    end
+
+    @testset "Internal report generation handles relative source_dirs" begin
+        mktempdir() do tmp
+            cd(tmp) do
+                mkpath("src")
+                mkpath("coverage")
+
+                write(joinpath("src", "foo.jl"), "foo(x) = x\n")
+                write(joinpath("src", "foo.jl.1234.cov"), """
+                        -:    1:foo(x) = x
+                        0:    2:foo(1)
+                """)
+
+                CP._generate_coverage_reports!(["src"], joinpath(tmp, "coverage"), tmp)
+
+                @test isfile(joinpath("coverage", "lcov.info"))
+                @test isfile(joinpath("coverage", "cov_report.md"))
+            end
+        end
+    end
+
+    @testset "Internal report generation includes non-root files when filter is empty" begin
+        mktempdir() do root
+            mktempdir() do other
+                cd(other) do
+                    mkpath("src")
+                    write(joinpath("src", "bar.jl"), "bar(x) = x\n")
+                    write(joinpath("src", "bar.jl.1234.cov"), """
+                            -:    1:bar(x) = x
+                            0:    2:bar(1)
+                    """)
+                end
+
+                mkpath(joinpath(root, "coverage"))
+                CP._generate_coverage_reports!([joinpath(other, "src")], joinpath(root, "coverage"), root)
+
+                report = read(joinpath(root, "coverage", "cov_report.md"), String)
+                @test occursin(joinpath(other, "src", "bar.jl"), report)
             end
         end
     end

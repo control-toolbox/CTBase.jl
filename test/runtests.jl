@@ -19,7 +19,7 @@
 #
 # ### Run all tests (including those not enabled by default)
 #
-#   julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["all"])'
+#   julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["-a"])'
 #
 # ## Coverage Mode
 #

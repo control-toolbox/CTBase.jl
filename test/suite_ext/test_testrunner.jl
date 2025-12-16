@@ -5,11 +5,11 @@ function test_testrunner()
     # UNIT TESTS - TestRunner extension
     # ============================================================================
 
-    @testset "TestRunner extension" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "TestRunner extension" begin
         @test Base.get_extension(CTBase, :TestRunner) !== nothing
     end
 
-    @testset "TestRunner stub dispatch" begin
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "TestRunner stub dispatch" begin
         err = try
             CTBase.run_tests(DummyTestRunnerTag())
             nothing
@@ -29,7 +29,7 @@ function test_testrunner()
         # Access the private function via the loaded extension module
         parse_args = TestRunner._parse_test_args
 
-        @testset "empty args returns empty with default flags" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "empty args returns empty with default flags" begin
             (sel, all_flag, dry_flag) = parse_args(String[])
             @test sel == String[]
             @test all_flag == false
@@ -37,24 +37,22 @@ function test_testrunner()
             @test dry_flag == false
         end
 
-
-
-        @testset "single test name" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "single test name" begin
             (sel, _, _) = parse_args(["utils"])
             @test sel == ["utils"]
         end
 
-        @testset "multiple test names" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "multiple test names" begin
             (sel, _, _) = parse_args(["utils", "default"])
             @test sel == ["utils", "default"]
         end
 
-        @testset "coverage flags are filtered out" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "coverage flags are filtered out" begin
             (sel, _, _) = parse_args(["coverage=true"])
             @test sel == String[]
         end
 
-        @testset "CLI flags -a / --all" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "CLI flags -a / --all" begin
             # -a should set run_all=true
             (_, run_all, _) = parse_args(["-a"])
             @test run_all == true
@@ -63,7 +61,7 @@ function test_testrunner()
             @test run_all == true
         end
 
-        @testset "CLI flags -n / --dryrun" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "CLI flags -n / --dryrun" begin
             # -n should set dry_run=true
             (_, _, dry_run) = parse_args(["-n"])
             @test dry_run == true
@@ -72,11 +70,41 @@ function test_testrunner()
             @test dry_run == true
         end
         
-        @testset "mixed flags and tests" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "mixed flags and tests" begin
             (sel, run_all, dry_run) = parse_args(["utils", "-n", "--all"])
             @test sel == ["utils"]
             @test run_all == true
             @test dry_run == true
+        end
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "run_tests (dry run)" begin
+        mktempdir() do temp_dir
+            touch(joinpath(temp_dir, "test_dummy.jl"))
+
+            # Use Pipe for redirect_stdout (IOBuffer not supported in Julia 1.12+)
+            old_stdout = stdout
+            rd, wr = redirect_stdout()
+            try
+                CTBase.run_tests(;
+                    args = ["--dryrun", "test_dummy.jl"],
+                    testset_name = "DryRun",
+                    available_tests = ("*.jl",),
+                    filename_builder = identity,
+                    funcname_builder = identity,
+                    eval_mode = false,
+                    verbose = false,
+                    showtiming = false,
+                    test_dir = temp_dir,
+                )
+            finally
+                redirect_stdout(old_stdout)
+                close(wr)
+            end
+            s = read(rd, String)
+
+            @test occursin("Dry run", s)
+            @test occursin("test_dummy.jl", s)
         end
     end
 
@@ -105,7 +133,7 @@ function test_testrunner()
             # ==========================================================
             # Scenario 1: Auto-discovery (available_tests empty)
             # ==========================================================
-            @testset "Auto-discovery (empty available_tests)" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "Auto-discovery (empty available_tests)" begin
                 # Empty args -> run all .jl files (excluding runtests.jl)
                 # Names derived as basenames
                 sel = select_tests(String[], Symbol[], false, identity; test_dir=temp_dir)
@@ -136,7 +164,7 @@ function test_testrunner()
             # ==========================================================
             # Scenario 2: With available_tests
             # ==========================================================
-            @testset "With available_tests" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "With available_tests" begin
                 available = [:utils, :core]
                 
                 # Note: TestRunner checks if file exists via builder
@@ -166,7 +194,7 @@ function test_testrunner()
                 @test sel == [:core]
             end
 
-            @testset "With available_tests (symbol located in subdirectory)" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "With available_tests (symbol located in subdirectory)" begin
                 mkpath(joinpath(temp_dir, "suite_src"))
                 touch(joinpath(temp_dir, "suite_src", "test_utils.jl"))
 
@@ -176,7 +204,7 @@ function test_testrunner()
                 @test sel == [:utils]
             end
 
-            @testset "available_tests may include directories" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests may include directories" begin
                 mkpath(joinpath(temp_dir, "suite"))
                 touch(joinpath(temp_dir, "suite", "test_a.jl"))
                 touch(joinpath(temp_dir, "suite", "test_b.jl"))
@@ -199,24 +227,42 @@ function test_testrunner()
         parse_args = TestRunner._parse_test_args
         select_tests = TestRunner._select_tests
         normalize_available = TestRunner._normalize_available_tests
+        find_symbol_file = TestRunner._find_symbol_test_file_rel
 
-        @testset "mixed case and special characters in test names" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "mixed case and special characters in test names" begin
             # Test names are converted to Symbols, preserving case
             (sel, _, _) = parse_args(["MyTest", "test_123"])
             @test sel == ["MyTest", "test_123"]
         end
 
-        @testset "available_tests may be a Tuple" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests may be a Tuple" begin
             out = normalize_available((:a, "suite_ext/*"))
             @test out == TestRunner.TestSpec[:a, "suite_ext/*"]
         end
 
-        @testset "available_tests may be Vector{Any}" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests may be Vector{Any}" begin
             out = normalize_available(Any[:a, "suite_ext/*"])
             @test out == TestRunner.TestSpec[:a, "suite_ext/*"]
         end
 
-        @testset "order preservation" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests input validation" begin
+            @test_throws ArgumentError normalize_available(123)
+            @test_throws ArgumentError normalize_available(Any[1])
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol resolution prefers shallowest match when root missing" begin
+            mktempdir() do temp_dir
+                mkpath(joinpath(temp_dir, "a"))
+                mkpath(joinpath(temp_dir, "a", "b"))
+                touch(joinpath(temp_dir, "a", "test_x.jl"))
+                touch(joinpath(temp_dir, "a", "b", "test_x.jl"))
+
+                rel = find_symbol_file(:x, n -> "test_" * String(n); test_dir = temp_dir)
+                @test rel == joinpath("a", "test_x.jl")
+            end
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "order preservation" begin
             # Selections should preserve order in ARGS parsing
             (sel, _, _) = parse_args(["z", "a", "m"])
             @test sel == ["z", "a", "m"]
@@ -239,7 +285,7 @@ function test_testrunner()
             end
         end
 
-        @testset "duplicate selections are preserved" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "duplicate selections are preserved" begin
             # Duplicates are not filtered (caller's responsibility)
             (sel, _, _) = parse_args(["utils", "utils"])
             @test sel == ["utils", "utils"]
@@ -253,7 +299,7 @@ function test_testrunner()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "_run_single_test" begin
         run_single = TestRunner._run_single_test
 
-        @testset "error when file not found" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "error when file not found" begin
             # L112: error branch when test file doesn't exist
             err = try
                 run_single(
@@ -270,6 +316,124 @@ function test_testrunner()
             end
             @test err isa ErrorException
             @test occursin("not found", err.msg)
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: error when file not found" begin
+            err = try
+                run_single(
+                    "does_not_exist_abc123.jl";
+                    available_tests = Symbol[],
+                    filename_builder = identity,
+                    funcname_builder = identity,
+                    eval_mode = true,
+                    test_dir = mktempdir(),
+                )
+                nothing
+            catch e
+                e
+            end
+            @test err isa ErrorException
+            @test occursin("not found", err.msg)
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: eval_mode=false does not call function" begin
+            mktempdir() do temp_dir
+                stem = "testrunner_evalmode_false"
+                file = joinpath(temp_dir, stem * ".jl")
+                write(
+                    file,
+                    "const __ctbase_tr_flag__ = Ref(false)\n" *
+                    "function $(stem)()\n" *
+                    "    __ctbase_tr_flag__[] = true\n" *
+                    "    return nothing\n" *
+                    "end\n",
+                )
+
+                run_single(
+                    stem;
+                    available_tests = Symbol[],
+                    filename_builder = identity,
+                    funcname_builder = identity,
+                    eval_mode = false,
+                    test_dir = temp_dir,
+                )
+                # Use invokelatest to avoid world age warning in Julia 1.12+
+                flag_value = Base.invokelatest(getfield, Main, :__ctbase_tr_flag__)
+                @test flag_value[] == false
+            end
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: error when expected function missing" begin
+            mktempdir() do temp_dir
+                stem = "testrunner_missing_func"
+                file = joinpath(temp_dir, stem * ".jl")
+                write(file, "x = 1\n")
+
+                err = try
+                    run_single(
+                        stem;
+                        available_tests = Symbol[],
+                        filename_builder = identity,
+                        funcname_builder = identity,
+                        eval_mode = true,
+                        test_dir = temp_dir,
+                    )
+                    nothing
+                catch e
+                    e
+                end
+
+                @test err isa ErrorException
+                @test occursin("Function", err.msg)
+                @test occursin("not found", err.msg)
+            end
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: funcname_builder returns nothing in eval_mode" begin
+            mktempdir() do temp_dir
+                touch(joinpath(temp_dir, "test_foo.jl"))
+
+                err = try
+                    run_single(
+                        :foo;
+                        available_tests = Symbol[],
+                        filename_builder = n -> "test_" * String(n),
+                        funcname_builder = _ -> nothing,
+                        eval_mode = true,
+                        test_dir = temp_dir,
+                    )
+                    nothing
+                catch e
+                    e
+                end
+
+                @test err isa ErrorException
+                @test occursin("Inconsistency", err.msg)
+            end
+        end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: error when built function missing" begin
+            mktempdir() do temp_dir
+                write(joinpath(temp_dir, "test_bar.jl"), "x = 1\n")
+
+                err = try
+                    run_single(
+                        :bar;
+                        available_tests = Symbol[],
+                        filename_builder = n -> "test_" * String(n),
+                        funcname_builder = n -> "test_" * String(n),
+                        eval_mode = true,
+                        test_dir = temp_dir,
+                    )
+                    nothing
+                catch e
+                    e
+                end
+
+                @test err isa ErrorException
+                @test occursin("Function", err.msg)
+                @test occursin("not found", err.msg)
+            end
         end
 
         # Note: Other error branches (L126, L134, L139) are not directly tested

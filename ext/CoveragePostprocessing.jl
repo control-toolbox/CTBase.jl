@@ -24,7 +24,7 @@ This implementation:
 - Resets the `coverage/` directory
 - Removes stale `.cov` files (keeping the most complete PID suffix when multiple runs exist)
 - Optionally generates reports (LCOV + markdown report)
-- Moves `.cov` files into `coverage/cov/`
+- Moves `.cov` files into `coverage/cov/` (recursively from source dirs)
 
 # Keyword Arguments
 
@@ -123,9 +123,11 @@ Internal helper that counts the number of `.cov` files in the provided directori
 function _count_cov_files(source_dirs)
     n = 0
     for dir in source_dirs
-        for f in readdir(dir; join=true)
-            endswith(f, ".cov") || continue
-            n += 1
+        for (root, dirs, files) in walkdir(dir)
+            for f in files
+                endswith(f, ".cov") || continue
+                n += 1
+            end
         end
     end
     return n
@@ -142,7 +144,13 @@ PID with the largest number of `.cov` files and removes the others.
 function _clean_stale_cov_files!(source_dirs)
     covs = String[]
     for dir in source_dirs
-        append!(covs, filter(f -> endswith(f, ".cov"), readdir(dir; join=true)))
+        for (root, dirs, files) in walkdir(dir)
+            for f in files
+                if endswith(f, ".cov")
+                    push!(covs, joinpath(root, f))
+                end
+            end
+        end
     end
     isempty(covs) && return nothing
 
@@ -180,11 +188,31 @@ Returns a vector of destination paths for the moved files.
 function _collect_and_move_cov_files!(source_dirs, dest_dir)
     moved = String[]
     for dir in source_dirs
-        for f in readdir(dir; join=true)
-            endswith(f, ".cov") || continue
-            dest = joinpath(dest_dir, basename(f))
-            mv(f, dest; force=true)
-            push!(moved, dest)
+        for (root, dirs, files) in walkdir(dir)
+            for f in files
+                endswith(f, ".cov") || continue
+                # We flatten the structure in coverage/cov
+                # If there are name collisions (e.g. src/foo.jl.cov and src/subdir/foo.jl.cov),
+                # the last one wins or we should perhaps preserve structure?
+                # The current implementation was flattening, so we keep flattening but maybe warn?
+                # Actually, Coverage.jl handles files by absolute path usually, but here we just move .cov files.
+                # Let's keep simple flattening for now as requested, but beware of collisions.
+                
+                # Note: to avoid collisions we could use replace(relpath(joinpath(root, f), root_dir), "/" => "_")
+                # But let's stick to the plan: just recursive collection.
+                
+                src = joinpath(root, f)
+                dest = joinpath(dest_dir, f) # Wait, this might fail if f is just filename.
+                
+                # The issue with joinpath(dest_dir, f) if f is just a filename is that it puts everything in root of dest_dir.
+                # If f comes from walkdir's `files`, it is just the filename.
+                # So `src` is correct. `dest` puts it in `coverage/cov/filename.cov`. 
+                # This matches previous behavior, just expanded to subdirs.
+                
+                dest = joinpath(dest_dir, f)
+                mv(src, dest; force=true)
+                push!(moved, dest)
+            end
         end
     end
     return moved

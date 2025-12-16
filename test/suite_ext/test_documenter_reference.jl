@@ -52,6 +52,14 @@ extfun(x::Int) = x
 extfun(x::String) = length(x)
 end
 
+module DRNoDocModule
+module Inner end
+end
+
+module DRUnionAllTestMod
+f(x::T) where {T} = x
+end
+
 using .DocumenterReferenceTestMod
 
 function test_documenter_reference()
@@ -107,10 +115,68 @@ function test_documenter_reference()
         path = DR._get_source_file(DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION)
         @test path === abspath(@__FILE__)
 
+        # No docstring => should use method-based resolution
+        path2 = DR._get_source_file(DocumenterReferenceTestMod, :no_doc, DR.DOCTYPE_FUNCTION)
+        @test path2 === abspath(@__FILE__)
+
+        # Missing symbol should be caught and return nothing
+        missing_path = DR._get_source_file(
+            DocumenterReferenceTestMod, :__does_not_exist__, DR.DOCTYPE_FUNCTION
+        )
+        @test missing_path === nothing
+
         const_path = DR._get_source_file(
             DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT
         )
         @test const_path === nothing
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_from_methods" begin
+        # For built-in operators like +, source detection behavior may vary by Julia version.
+        # In Julia 1.12+, it may return a source file path even for +.
+        # We just verify the function runs without error and returns String or nothing.
+        result = DR._get_source_from_methods(+)
+        @test result === nothing || result isa String
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_parse_primary_modules with Pair" begin
+        d = DR._parse_primary_modules([DocumenterReferenceTestMod => @__FILE__])
+        @test d[DocumenterReferenceTestMod] == [abspath(@__FILE__)]
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_has_documentation: module documented elsewhere" begin
+        modules = Dict(DRNoDocModule.Inner => Any[])
+        @test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) == true
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Type formatting helpers" begin
+        @test DR._format_datatype_for_docs(UInt) == "::UInt"
+
+        # Parametric types without concrete params are UnionAll, use _format_type_for_docs
+        param_result = DR._format_type_for_docs(DRTypeFormatTestMod.Parametric)
+        @test occursin("Parametric", param_result)
+
+        # Concrete params => kept (WithValue{Int,2} is a DataType)
+        concrete_result = DR._format_datatype_for_docs(DRTypeFormatTestMod.WithValue{Int,2})
+        @test occursin("WithValue", concrete_result)
+        @test occursin("Int", concrete_result)
+        @test occursin("2", concrete_result)
+
+        # Fallback branch for non-type inputs
+        @test DR._format_type_for_docs(1) == "::1"
+
+        # TypeVar formatting in _format_type_param - need to unwrap UnionAll first
+        unwrapped = Base.unwrap_unionall(DRTypeFormatTestMod.Parametric)
+        tv = unwrapped.parameters[1]
+        @test tv isa TypeVar
+        @test DR._format_type_param(tv) == "T"
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string handles UnionAll" begin
+        m = first(methods(DRUnionAllTestMod.f))
+        s = DR._method_signature_string(m, DRUnionAllTestMod, :f)
+        @test occursin("DRUnionAllTestMod.f", s)
+        @test occursin("T", s)
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols filtering" begin
