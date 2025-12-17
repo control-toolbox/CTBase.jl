@@ -69,7 +69,7 @@ function test_testrunner()
             (_, _, dry_run) = parse_args(["--dryrun"])
             @test dry_run == true
         end
-        
+
         @testset verbose = VERBOSE showtiming = SHOWTIMING "mixed flags and tests" begin
             (sel, run_all, dry_run) = parse_args(["utils", "-n", "--all"])
             @test sel == ["utils"]
@@ -87,15 +87,15 @@ function test_testrunner()
             rd, wr = redirect_stdout()
             try
                 CTBase.run_tests(;
-                    args = ["--dryrun", "test_dummy.jl"],
-                    testset_name = "DryRun",
-                    available_tests = ("*.jl",),
-                    filename_builder = identity,
-                    funcname_builder = identity,
-                    eval_mode = false,
-                    verbose = false,
-                    showtiming = false,
-                    test_dir = temp_dir,
+                    args=["--dryrun", "test_dummy.jl"],
+                    testset_name="DryRun",
+                    available_tests=("*.jl",),
+                    filename_builder=identity,
+                    funcname_builder=identity,
+                    eval_mode=false,
+                    verbose=false,
+                    showtiming=false,
+                    test_dir=temp_dir,
                 )
             finally
                 redirect_stdout(old_stdout)
@@ -144,20 +144,28 @@ function test_testrunner()
                 @test sort(sel) == [:test_core, :test_utils]
 
                 # Globbing: select only utils
-                sel = select_tests(["test_utils"], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(
+                    ["test_utils"], Symbol[], false, identity; test_dir=temp_dir
+                )
                 @test sel == [:test_utils]
 
                 # Globbing: pattern matching
-                sel = select_tests(["test_c*"], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(
+                    ["test_c*"], Symbol[], false, identity; test_dir=temp_dir
+                )
                 @test sel == [:test_core]
-                
+
                 # Globbing: match filename? 
                 # candidate=:test_core -> filename="test_core.jl"
-                sel = select_tests(["test_core_jl"], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(
+                    ["test_core_jl"], Symbol[], false, identity; test_dir=temp_dir
+                )
                 # This won't match regex "^test_core_jl$" against "test_core" or "test_core.jl"
                 @test isempty(sel)
 
-                sel = select_tests(["test_core.jl"], Symbol[], false, identity; test_dir=temp_dir)
+                sel = select_tests(
+                    ["test_core.jl"], Symbol[], false, identity; test_dir=temp_dir
+                )
                 @test sel == [:test_core]
             end
 
@@ -166,31 +174,41 @@ function test_testrunner()
             # ==========================================================
             @testset verbose = VERBOSE showtiming = SHOWTIMING "With available_tests" begin
                 available = [:utils, :core]
-                
+
                 # Note: TestRunner checks if file exists via builder
                 # test_utils.jl exists -> :utils is valid
                 # test_core.jl exists -> :core is valid
-                
+
                 # Empty args -> run all valid available tests
-                sel = select_tests(String[], available, false, test_builder_sym; test_dir=temp_dir)
+                sel = select_tests(
+                    String[], available, false, test_builder_sym; test_dir=temp_dir
+                )
                 @test sort(sel) == [:core, :utils]
 
                 # Selection
-                sel = select_tests(["utils"], available, false, test_builder_sym; test_dir=temp_dir)
+                sel = select_tests(
+                    ["utils"], available, false, test_builder_sym; test_dir=temp_dir
+                )
                 @test sel == [:utils]
 
                 # Globbing over available names
                 # available test :core, file: test_core.jl
-                sel = select_tests(["c*"], available, false, test_builder_sym; test_dir=temp_dir)
-                @test sel == [:core] 
+                sel = select_tests(
+                    ["c*"], available, false, test_builder_sym; test_dir=temp_dir
+                )
+                @test sel == [:core]
 
                 # Globbing over filename without extension
                 # available test :core, file: test_core.jl
-                sel = select_tests(["test_core"], available, false, test_builder_sym; test_dir=temp_dir)
+                sel = select_tests(
+                    ["test_core"], available, false, test_builder_sym; test_dir=temp_dir
+                )
                 @test sel == [:core]
 
                 # Builder may return String
-                sel = select_tests(["core"], available, false, test_builder_str; test_dir=temp_dir)
+                sel = select_tests(
+                    ["core"], available, false, test_builder_str; test_dir=temp_dir
+                )
                 @test sel == [:core]
             end
 
@@ -200,7 +218,9 @@ function test_testrunner()
 
                 available = [:utils]
 
-                sel = select_tests(String[], available, false, test_builder_sym; test_dir=temp_dir)
+                sel = select_tests(
+                    String[], available, false, test_builder_sym; test_dir=temp_dir
+                )
                 @test sel == [:utils]
             end
 
@@ -213,7 +233,9 @@ function test_testrunner()
                 sel = select_tests(String[], available, false, identity; test_dir=temp_dir)
                 @test sel == ["suite/test_a.jl", "suite/test_b.jl"]
 
-                sel = select_tests(["suite/test_a"], available, false, identity; test_dir=temp_dir)
+                sel = select_tests(
+                    ["suite/test_a"], available, false, identity; test_dir=temp_dir
+                )
                 @test sel == ["suite/test_a.jl"]
             end
         end
@@ -257,7 +279,7 @@ function test_testrunner()
                 touch(joinpath(temp_dir, "a", "test_x.jl"))
                 touch(joinpath(temp_dir, "a", "b", "test_x.jl"))
 
-                rel = find_symbol_file(:x, n -> "test_" * String(n); test_dir = temp_dir)
+                rel = find_symbol_file(:x, n -> "test_" * String(n); test_dir=temp_dir)
                 @test rel == joinpath("a", "test_x.jl")
             end
         end
@@ -266,22 +288,24 @@ function test_testrunner()
             # Selections should preserve order in ARGS parsing
             (sel, _, _) = parse_args(["z", "a", "m"])
             @test sel == ["z", "a", "m"]
-            
+
             # Using custom select_tests to verify preservation behavior
             mktempdir() do temp_dir
-                 touch(joinpath(temp_dir, "z.jl"))
-                 touch(joinpath(temp_dir, "a.jl"))
-                 touch(joinpath(temp_dir, "m.jl"))
-                 touch(joinpath(temp_dir, "b.jl"))
-                 
-                 # Case 1: Available list order determines output order if provided
-                 sel = select_tests(["z", "a"], [:a, :b, :z], false, identity; test_dir=temp_dir)
-                 @test sel == [:a, :z] # candidates order candidate list order
-                 
-                 # Case 2: Auto-discovery order (filesystem order, filtered)
-                 # We can't guarantee FS order, so checking set equality
-                 sel = select_tests(["z", "a"], Symbol[], false, identity; test_dir=temp_dir)
-                 @test Set(sel) == Set([:z, :a])
+                touch(joinpath(temp_dir, "z.jl"))
+                touch(joinpath(temp_dir, "a.jl"))
+                touch(joinpath(temp_dir, "m.jl"))
+                touch(joinpath(temp_dir, "b.jl"))
+
+                # Case 1: Available list order determines output order if provided
+                sel = select_tests(
+                    ["z", "a"], [:a, :b, :z], false, identity; test_dir=temp_dir
+                )
+                @test sel == [:a, :z] # candidates order candidate list order
+
+                # Case 2: Auto-discovery order (filesystem order, filtered)
+                # We can't guarantee FS order, so checking set equality
+                sel = select_tests(["z", "a"], Symbol[], false, identity; test_dir=temp_dir)
+                @test Set(sel) == Set([:z, :a])
             end
         end
 
@@ -304,11 +328,11 @@ function test_testrunner()
             err = try
                 run_single(
                     :nonexistent_file_xyz123;
-                    available_tests = Symbol[],
-                    filename_builder = identity,
-                    funcname_builder = identity,
-                    eval_mode = true,
-                    test_dir = mktempdir(),
+                    available_tests=Symbol[],
+                    filename_builder=identity,
+                    funcname_builder=identity,
+                    eval_mode=true,
+                    test_dir=mktempdir(),
                 )
                 nothing
             catch e
@@ -322,11 +346,11 @@ function test_testrunner()
             err = try
                 run_single(
                     "does_not_exist_abc123.jl";
-                    available_tests = Symbol[],
-                    filename_builder = identity,
-                    funcname_builder = identity,
-                    eval_mode = true,
-                    test_dir = mktempdir(),
+                    available_tests=Symbol[],
+                    filename_builder=identity,
+                    funcname_builder=identity,
+                    eval_mode=true,
+                    test_dir=mktempdir(),
                 )
                 nothing
             catch e
@@ -351,11 +375,11 @@ function test_testrunner()
 
                 run_single(
                     stem;
-                    available_tests = Symbol[],
-                    filename_builder = identity,
-                    funcname_builder = identity,
-                    eval_mode = false,
-                    test_dir = temp_dir,
+                    available_tests=Symbol[],
+                    filename_builder=identity,
+                    funcname_builder=identity,
+                    eval_mode=false,
+                    test_dir=temp_dir,
                 )
                 # Use invokelatest to avoid world age warning in Julia 1.12+
                 flag_value = Base.invokelatest(getfield, Main, :__ctbase_tr_flag__)
@@ -372,11 +396,11 @@ function test_testrunner()
                 err = try
                     run_single(
                         stem;
-                        available_tests = Symbol[],
-                        filename_builder = identity,
-                        funcname_builder = identity,
-                        eval_mode = true,
-                        test_dir = temp_dir,
+                        available_tests=Symbol[],
+                        filename_builder=identity,
+                        funcname_builder=identity,
+                        eval_mode=true,
+                        test_dir=temp_dir,
                     )
                     nothing
                 catch e
@@ -396,11 +420,11 @@ function test_testrunner()
                 err = try
                     run_single(
                         :foo;
-                        available_tests = Symbol[],
-                        filename_builder = n -> "test_" * String(n),
-                        funcname_builder = _ -> nothing,
-                        eval_mode = true,
-                        test_dir = temp_dir,
+                        available_tests=Symbol[],
+                        filename_builder=n -> "test_" * String(n),
+                        funcname_builder=_ -> nothing,
+                        eval_mode=true,
+                        test_dir=temp_dir,
                     )
                     nothing
                 catch e
@@ -419,11 +443,11 @@ function test_testrunner()
                 err = try
                     run_single(
                         :bar;
-                        available_tests = Symbol[],
-                        filename_builder = n -> "test_" * String(n),
-                        funcname_builder = n -> "test_" * String(n),
-                        eval_mode = true,
-                        test_dir = temp_dir,
+                        available_tests=Symbol[],
+                        filename_builder=n -> "test_" * String(n),
+                        funcname_builder=n -> "test_" * String(n),
+                        eval_mode=true,
+                        test_dir=temp_dir,
                     )
                     nothing
                 catch e

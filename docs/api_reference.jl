@@ -103,7 +103,9 @@ function generate_api_reference(src_dir::String)
             pages,
             CTBase.automatic_reference_documentation(;
                 subdirectory=".",
-                primary_modules=[CoveragePostprocessing => ext("CoveragePostprocessing.jl")],
+                primary_modules=[
+                    CoveragePostprocessing => ext("CoveragePostprocessing.jl")
+                ],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false,
@@ -148,33 +150,33 @@ function with_api_reference(f::Function, src_dir::String)
         # Clean up generated files
         # The pages are Pairs: "Title" => "filename.md" (relative to build? no, relative to src)
         # automatic_reference_documentation returns "filename" which is relative to docs/src if subdirectory="."
-        
+
         # We need to reconstruct the full path to delete them.
         # Assuming they are in docs/src (which is where makedocs runs from?)
         # Wait, makedocs options say subdirectory=".". 
         # Typically automatic_reference_documentation writes to joinpath(@__DIR__, "src", subdirectory, filename.md) ??
         # I need to check where automatic_reference_documentation writes.
         # Assuming we are running from docs/ (where make.jl is).
-        
+
         # Let's assume the files are in `docs/src`.
         docs_src = abspath(joinpath(@__DIR__, "src"))
-        
+
         for p in pages
             # p is "Title" => "filename.md" (or path)
             # automatic_reference_documentation returns a path relative to docs/src?
             # actually it returns what should be put in `pages`.
-            
+
             # If I look at make.jl, it passed subdirectory="."
             # So the file is likely at `docs/src/filename.md`.
-            
+
             filename = last(p) # "ctbase.md" or "ctbase" (if extension added automatically?)
             # automatic_reference_documentation usually adds .md if filename argument didn't have it?
             # In make.jl: filename="ctbase"
-            
+
             # Let's handle both cases just in case
             fname = endswith(filename, ".md") ? filename : filename * ".md"
             full_path = joinpath(docs_src, fname)
-            
+
             if isfile(full_path)
                 rm(full_path)
                 println("Removed temporary API doc: $full_path")

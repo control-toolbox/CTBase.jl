@@ -76,32 +76,30 @@ end
 
 # Run tests using the TestRunner extension
 CTBase.run_tests(;
-    args = String.(ARGS),
-    testset_name = "CTBase tests",
-    available_tests = (
-        :code_quality,
-        "suite_src/*",
-        "suite_ext/*",
-    ),
-    filename_builder = name -> Symbol(:test_, name),
-    funcname_builder = name -> Symbol(:test_, name),
-    verbose = VERBOSE,
-    showtiming = SHOWTIMING,
-    test_dir = @__DIR__,
+    args=String.(ARGS),
+    testset_name="CTBase tests",
+    available_tests=(:code_quality, "suite_src/*", "suite_ext/*"),
+    filename_builder=name -> Symbol(:test_, name),
+    funcname_builder=name -> Symbol(:test_, name),
+    verbose=VERBOSE,
+    showtiming=SHOWTIMING,
+    test_dir=@__DIR__,
 )
 
 # If running with coverage enabled, remind the user to run the post-processing script
 # because .cov files are flushed at process exit and cannot be cleaned up by this script.
 if Base.JLOptions().code_coverage != 0
-    println("""
+    println(
+        """
 
-    ================================================================================
-    [CTBase] Coverage files generated.
-    
-    To process them, move them to the coverage/ directory, and generate a report, 
-    please run:
-    
-        julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
-    ================================================================================
-    """)
+================================================================================
+[CTBase] Coverage files generated.
+
+To process them, move them to the coverage/ directory, and generate a report, 
+please run:
+
+    julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
+================================================================================
+""",
+    )
 end
