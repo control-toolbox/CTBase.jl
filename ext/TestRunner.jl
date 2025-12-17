@@ -324,6 +324,12 @@ function _select_tests(
         # Also match strictly against filename without extension?
         candidate_filename_no_ext = replace(candidate_filename, ".jl" => "")
 
+        candidate_basename = basename(candidate_filename)
+        candidate_basename_no_ext = replace(candidate_basename, ".jl" => "")
+        candidate_basename_no_test_prefix =
+            startswith(candidate_basename_no_ext, "test_") ? candidate_basename_no_ext[6:end] :
+            candidate_basename_no_ext
+
         matched = false
         for sel in selections
             regex = _glob_to_regex(sel)
@@ -334,7 +340,10 @@ function _select_tests(
             # 3. Filename without extension (e.g. test_utils)
             if !isnothing(match(regex, candidate_str)) ||
                 !isnothing(match(regex, candidate_filename)) ||
-                !isnothing(match(regex, candidate_filename_no_ext))
+                !isnothing(match(regex, candidate_filename_no_ext)) ||
+                !isnothing(match(regex, candidate_basename)) ||
+                !isnothing(match(regex, candidate_basename_no_ext)) ||
+                !isnothing(match(regex, candidate_basename_no_test_prefix))
                 matched = true
                 break
             end
