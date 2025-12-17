@@ -44,15 +44,15 @@ using CTBase
 """
 function CTBase.run_tests(
     ::CTBase.TestRunnerTag;
-    args::AbstractVector{<:AbstractString} = String[],
-    testset_name::String = "Tests",
-    available_tests = Symbol[],
-    filename_builder::Function = identity,
-    funcname_builder::Function = identity,
-    eval_mode::Bool = true,
-    verbose::Bool = true,
-    showtiming::Bool = true,
-    test_dir::String = joinpath(pwd(), "test"),
+    args::AbstractVector{<:AbstractString}=String[],
+    testset_name::String="Tests",
+    available_tests=Symbol[],
+    filename_builder::Function=identity,
+    funcname_builder::Function=identity,
+    eval_mode::Bool=true,
+    verbose::Bool=true,
+    showtiming::Bool=true,
+    test_dir::String=joinpath(pwd(), "test"),
 )
     # Parse command-line arguments
     (selections, run_all, dry_run) = _parse_test_args(String.(args))
@@ -60,7 +60,9 @@ function CTBase.run_tests(
     available_tests_vec = _normalize_available_tests(available_tests)
 
     # Get selected tests
-    selected = _select_tests(selections, available_tests_vec, run_all, filename_builder; test_dir=test_dir)
+    selected = _select_tests(
+        selections, available_tests_vec, run_all, filename_builder; test_dir=test_dir
+    )
 
     if dry_run
         println("Dry run: the following tests would be executed:")
@@ -73,7 +75,7 @@ function CTBase.run_tests(
             @testset "$(spec)" begin
                 _run_single_test(
                     spec;
-                    available_tests = available_tests_vec,
+                    available_tests=available_tests_vec,
                     filename_builder,
                     funcname_builder,
                     eval_mode,
@@ -123,7 +125,8 @@ The returned regex is anchored (matches the full string).
 """
 function _glob_to_regex(pattern::AbstractString)
     # Escape special regex characters except * and ?
-    regex_str = replace(pattern,
+    regex_str = replace(
+        pattern,
         "." => "\\.",
         "+" => "\\+",
         "(" => "\\(",
@@ -134,7 +137,7 @@ function _glob_to_regex(pattern::AbstractString)
         "}" => "\\}",
         "^" => "\\^",
         "\u0024" => "\\\u0024",
-        "\\" => "\\\\"
+        "\\" => "\\\\",
     )
     # Convert glob wildcards to regex wildcards
     regex_str = replace(regex_str, "*" => ".*", "?" => ".")
@@ -183,9 +186,7 @@ function _collect_test_files_recursive(test_dir::AbstractString)
 end
 
 function _find_symbol_test_file_rel(
-    name::Symbol,
-    filename_builder::Function;
-    test_dir::AbstractString,
+    name::Symbol, filename_builder::Function; test_dir::AbstractString
 )
     wanted = _ensure_jl(_builder_to_string(filename_builder(name)))
     all = _collect_test_files_recursive(test_dir)
@@ -198,7 +199,7 @@ function _find_symbol_test_file_rel(
         return wanted
     end
 
-    sort!(matches, by = f -> (count(==('/'), f), ncodeunits(f), f))
+    sort!(matches; by=f -> (count(==('/'), f), ncodeunits(f), f))
     return first(matches)
 end
 
@@ -218,18 +219,18 @@ function _select_tests(
     available_tests::AbstractVector{<:TestSpec},
     run_all::Bool,
     filename_builder::Function;
-    test_dir::String = joinpath(pwd(), "test") # Default assumption
+    test_dir::String=joinpath(pwd(), "test"), # Default assumption
 )
     # 1. Identify all potential test files
     # We look for .jl files in test_dir, excluding runtests.jl
     all_files = filter(f -> endswith(f, ".jl") && f != "runtests.jl", readdir(test_dir))
-    
+
     # Map filenames back to "test names" is tricky without reverse builder.
     # Strategy:
     # We assume `available_tests` defines the canonical list of "names".
     # If `available_tests` is empty, we derive names from files? 
     #   -> User said: "list all .jl files... but only keep available if provided"
-    
+
     candidates = TestSpec[]
 
     if isempty(available_tests)
@@ -243,17 +244,17 @@ function _select_tests(
         # If available_tests is empty, the logic relies on what the user passes.
         # BUT the new logic says "if args empty -> run all".
         # So we MUST perform auto-discovery if we want "run all" to work without explicit available_tests.
-        
+
         # Heuristic: if file starts with "test_", strip it?
         # Or just use the basename as the symbol?
         # Let's assume the "name" is the filename without extension for auto-discovery?
         # Or better: don't guess names yet. Just work with filenames?
         # But `run_tests` iterates over `names`.
-        
+
         # Let's look at existing files: test_utils.jl -> name=:utils (via filename_builder)
         # We cannot invert `filename_builder` (F -> S).
         # So we are stuck if we want to infer names from files.
-        
+
         # COMPROMISE: If available_tests is empty, we cannot guarantee auto-discovery compatibility with arbitrary filename_builders.
         # We will assume a default mapping for auto-discovery: name = file_basename_without_extension.
         for f in all_files
@@ -302,7 +303,7 @@ function _select_tests(
     # 3. Filter candidates by selections (Patterns)
     # selections are now patterns! e.g. [:utils, :test_u*]
     filtered = TestSpec[]
-    
+
     for candidate in candidates
         candidate_str = candidate isa Symbol ? String(candidate) : String(candidate)
         # Also check the associated filename?
@@ -310,7 +311,7 @@ function _select_tests(
         # And user passes "test_u*", it should match "test_utils.jl" OR "utils"?
         # User said "Scan test/ directory... ARGS are globs".
         # So matching against the FILENAME seems primary.
-        
+
         # Resolve filename for candidate
         if candidate isa String
             candidate_filename = _ensure_jl(candidate)
@@ -319,26 +320,26 @@ function _select_tests(
         else
             candidate_filename = _ensure_jl(_builder_to_string(filename_builder(candidate)))
         end
-        
+
         # Also match strictly against filename without extension?
         candidate_filename_no_ext = replace(candidate_filename, ".jl" => "")
 
         matched = false
         for sel in selections
             regex = _glob_to_regex(sel)
-            
+
             # Match against:
             # 1. Candidate name (e.g. :utils)
             # 2. Filename (e.g. test_utils.jl)
             # 3. Filename without extension (e.g. test_utils)
-            if !isnothing(match(regex, candidate_str)) || 
-               !isnothing(match(regex, candidate_filename)) || 
-               !isnothing(match(regex, candidate_filename_no_ext))
-               matched = true
-               break
+            if !isnothing(match(regex, candidate_str)) ||
+                !isnothing(match(regex, candidate_filename)) ||
+                !isnothing(match(regex, candidate_filename_no_ext))
+                matched = true
+                break
             end
         end
-        
+
         if matched
             push!(filtered, candidate)
         end
@@ -422,10 +423,12 @@ function _run_single_test(
 
     # Check consistency: eval_mode=true but funcname_builder returns nothing
     if eval_mode && func_symbol === nothing
-        error("""
-        Inconsistency: eval_mode=true but funcname_builder returned nothing for test "$(name)".
-        Either set eval_mode=false, or make funcname_builder return a Symbol.
-        """)
+        error(
+            """
+      Inconsistency: eval_mode=true but funcname_builder returned nothing for test "$(name)".
+      Either set eval_mode=false, or make funcname_builder return a Symbol.
+      """,
+        )
     end
 
     # Skip eval if not in eval mode or funcname_builder returned nothing

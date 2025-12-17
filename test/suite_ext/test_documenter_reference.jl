@@ -116,7 +116,9 @@ function test_documenter_reference()
         @test path === abspath(@__FILE__)
 
         # No docstring => should use method-based resolution
-        path2 = DR._get_source_file(DocumenterReferenceTestMod, :no_doc, DR.DOCTYPE_FUNCTION)
+        path2 = DR._get_source_file(
+            DocumenterReferenceTestMod, :no_doc, DR.DOCTYPE_FUNCTION
+        )
         @test path2 === abspath(@__FILE__)
 
         # Missing symbol should be caught and return nothing
@@ -146,7 +148,8 @@ function test_documenter_reference()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "_has_documentation: module documented elsewhere" begin
         modules = Dict(DRNoDocModule.Inner => Any[])
-        @test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) == true
+        @test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) ==
+            true
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Type formatting helpers" begin
@@ -452,7 +455,7 @@ function test_documenter_reference()
             public=true,
             private=false,
             title="Combined Public API",
-            filename="combined_public"
+            filename="combined_public",
         )
 
         # Should return a Pair with title and path to the combined file

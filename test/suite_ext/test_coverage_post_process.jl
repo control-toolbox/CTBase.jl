@@ -1,7 +1,6 @@
 struct DummyCoverageTag <: CTBase.AbstractCoveragePostprocessingTag end
 
 function test_coverage_post_process()
-
     CP = Base.get_extension(CTBase, :CoveragePostprocessing)
 
     @testset "CoveragePostprocessing extension" begin
@@ -73,7 +72,7 @@ function test_coverage_post_process()
                 mkpath("src")
                 mkpath("test")
                 mkpath("coverage")
-                
+
                 # Create a source file
                 code = """
                 function foo(x)
@@ -102,31 +101,34 @@ function test_coverage_post_process()
                 # Let's just mock the result of process_folder by mocking Coverage.process_folder?
                 # No, can't easily mock module function.
                 # Let's rely on creating real file structure.
-                
+
                 # But wait, Coverage.process_folder reads source files AND .cov files.
                 # And LCOV generation needs them.
-                
+
                 # Julia's coverage output format:
                 #        -:    1:function foo(x)
                 #        1:    2:    return x * 2
                 #        -:    3:end
                 # We need to replicate this somewhat for CoverageTools to parse it.
                 # CoverageTools.process_cov splits by ":" and expects the first part to be the count.
-                
-                write(joinpath("src", "foo.jl.1234.cov"), """
-                        -:    1:function foo(x)
-                        1:    2:    return x * 2
-                        -:    3:end
-                """)
-                
+
+                write(
+                    joinpath("src", "foo.jl.1234.cov"),
+                    """
+        -:    1:function foo(x)
+        1:    2:    return x * 2
+        -:    3:end
+""",
+                )
+
                 # We also need to mock EXT_DIR if we want to test that branch?
                 # The current code checks isdir(EXT_DIR).
-                
+
                 CTBase.postprocess_coverage(; generate_report=true)
-                
+
                 @test isfile(joinpath("coverage", "lcov.info"))
                 @test isfile(joinpath("coverage", "cov_report.md"))
-                
+
                 report = read(joinpath("coverage", "cov_report.md"), String)
                 @test occursin("foo.jl", report)
                 @test occursin("100.0", report) # 1 line covered out of 1
@@ -141,10 +143,13 @@ function test_coverage_post_process()
                 mkpath("coverage")
 
                 write(joinpath("src", "foo.jl"), "foo(x) = x\n")
-                write(joinpath("src", "foo.jl.1234.cov"), """
-                        -:    1:foo(x) = x
-                        0:    2:foo(1)
-                """)
+                write(
+                    joinpath("src", "foo.jl.1234.cov"),
+                    """
+        -:    1:foo(x) = x
+        0:    2:foo(1)
+""",
+                )
 
                 CP._generate_coverage_reports!(["src"], joinpath(tmp, "coverage"), tmp)
 
@@ -160,14 +165,19 @@ function test_coverage_post_process()
                 cd(other) do
                     mkpath("src")
                     write(joinpath("src", "bar.jl"), "bar(x) = x\n")
-                    write(joinpath("src", "bar.jl.1234.cov"), """
-                            -:    1:bar(x) = x
-                            0:    2:bar(1)
-                    """)
+                    write(
+                        joinpath("src", "bar.jl.1234.cov"),
+                        """
+        -:    1:bar(x) = x
+        0:    2:bar(1)
+""",
+                    )
                 end
 
                 mkpath(joinpath(root, "coverage"))
-                CP._generate_coverage_reports!([joinpath(other, "src")], joinpath(root, "coverage"), root)
+                CP._generate_coverage_reports!(
+                    [joinpath(other, "src")], joinpath(root, "coverage"), root
+                )
 
                 report = read(joinpath(root, "coverage", "cov_report.md"), String)
                 @test occursin(joinpath(other, "src", "bar.jl"), report)

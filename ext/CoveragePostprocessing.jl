@@ -48,9 +48,7 @@ using CTBase
 ```
 """
 function CTBase.postprocess_coverage(
-    ::CTBase.CoveragePostprocessingTag; 
-    generate_report::Bool = true,
-    root_dir::String = pwd(),
+    ::CTBase.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd()
 )
     println("✓ Coverage post-processing start")
 
@@ -62,7 +60,7 @@ function CTBase.postprocess_coverage(
             push!(source_dirs, path)
         end
     end
-    
+
     coverage_dir = joinpath(root_dir, "coverage")
     cov_storage_dir = joinpath(coverage_dir, "cov")
 
@@ -164,7 +162,7 @@ function _clean_stale_cov_files!(source_dirs)
     end
     isempty(pid_counts) && return nothing
 
-    keep_pid = first(sort(collect(pid_counts); by = kv -> kv[2], rev=true))[1]
+    keep_pid = first(sort(collect(pid_counts); by=kv -> kv[2], rev=true))[1]
     keep_suffix = "." * keep_pid * ".cov"
 
     removed = 0
@@ -197,18 +195,18 @@ function _collect_and_move_cov_files!(source_dirs, dest_dir)
                 # The current implementation was flattening, so we keep flattening but maybe warn?
                 # Actually, Coverage.jl handles files by absolute path usually, but here we just move .cov files.
                 # Let's keep simple flattening for now as requested, but beware of collisions.
-                
+
                 # Note: to avoid collisions we could use replace(relpath(joinpath(root, f), root_dir), "/" => "_")
                 # But let's stick to the plan: just recursive collection.
-                
+
                 src = joinpath(root, f)
                 dest = joinpath(dest_dir, f) # Wait, this might fail if f is just filename.
-                
+
                 # The issue with joinpath(dest_dir, f) if f is just a filename is that it puts everything in root of dest_dir.
                 # If f comes from walkdir's `files`, it is just the filename.
                 # So `src` is correct. `dest` puts it in `coverage/cov/filename.cov`. 
                 # This matches previous behavior, just expanded to subdirs.
-                
+
                 dest = joinpath(dest_dir, f)
                 mv(src, dest; force=true)
                 push!(moved, dest)
@@ -238,7 +236,7 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
         # It handles the matching.
         append!(cov_all, Coverage.process_folder(dir))
     end
-    
+
     isempty(cov_all) && error("No coverage data found in source directories")
 
     lcov_file = joinpath(coverage_dir, "lcov.info")
@@ -271,12 +269,12 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
     end
 
     rows = [(fc.filename, line_stats(fc)...) for fc in cov]
-    sort!(rows, by = r -> r[4])
+    sort!(rows; by=r -> r[4])
 
     # Helper to make paths relative to root_dir
     function relative_path(path, root)
         if startswith(path, root)
-            relpath = path[length(root)+1:end]
+            relpath = path[(length(root) + 1):end]
             # Remove leading slash if present
             return startswith(relpath, "/") ? relpath[2:end] : relpath
         end
@@ -287,7 +285,8 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
         println(io, "# Coverage report\n")
 
         println(io, "## Overall\n\n```shell")
-        show(io, Coverage.get_summary(cov)); println(io)
+        show(io, Coverage.get_summary(cov));
+        println(io)
         println(io, "```\n")
 
         println(io, "## Lowest-covered files (top 20)\n")

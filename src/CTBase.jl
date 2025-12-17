@@ -108,7 +108,6 @@ function automatic_reference_documentation(; kwargs...)
     automatic_reference_documentation(DocumenterReferenceTag(); kwargs...)
 end
 
-
 """
 $(TYPEDEF)
 
@@ -158,9 +157,7 @@ is loaded.
 - [`ExtensionError`](@ref): If the coverage post-processing extension is not loaded.
 """
 function postprocess_coverage(
-    ::AbstractCoveragePostprocessingTag;
-    generate_report::Bool = true,
-    root_dir::String = pwd(),
+    ::AbstractCoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd()
 )
     throw(CTBase.ExtensionError(:Coverage))
 end
@@ -181,7 +178,6 @@ Forwarded to `postprocess_coverage(CoveragePostprocessingTag(); kwargs...)`.
 function postprocess_coverage(; kwargs...)
     postprocess_coverage(CoveragePostprocessingTag(); kwargs...)
 end
-
 
 """
 $(TYPEDEF)

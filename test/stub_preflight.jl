@@ -11,7 +11,7 @@ const STUB_PREFLIGHT = let
     end
 
     (
-        test_runner_extension_before = test_runner_extension_before,
-        run_tests_error = run_tests_error,
+        test_runner_extension_before=test_runner_extension_before,
+        run_tests_error=run_tests_error,
     )
 end
