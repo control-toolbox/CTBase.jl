@@ -238,6 +238,16 @@ function test_testrunner()
                 )
                 @test sel == ["suite/test_a.jl"]
             end
+
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests glob string: selection may match basename without test_ prefix" begin
+                mkpath(joinpath(temp_dir, "suite_src"))
+                touch(joinpath(temp_dir, "suite_src", "test_utils.jl"))
+
+                available = TestRunner.TestSpec["suite_src/*"]
+
+                sel = select_tests(["utils"], available, false, identity; test_dir=temp_dir)
+                @test sel == ["suite_src/test_utils.jl"]
+            end
         end
     end
 
