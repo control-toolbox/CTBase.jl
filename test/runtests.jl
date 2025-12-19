@@ -8,7 +8,7 @@
 #
 # ## Running Tests
 #
-# ### Default (all enabled tests)
+# ### Default (all available tests)
 #
 #   julia --project -e 'using Pkg; Pkg.test("CTBase")'
 #
@@ -17,15 +17,19 @@
 #   julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["utils"])'
 #   julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["testrunner", "exceptions"])'
 #
-# ### Run all tests (including those not enabled by default)
-#
-#   julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["-a"])'
+# Note: 
+# - Passing `-a` or `--all` is equivalent to running without arguments.
+# - Passing `--dry-run` will print the list of tests that would be run, but not execute them.
 #
 # ## Coverage Mode
 #
 # Run tests with code coverage instrumentation:
 #
-#   julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
+#   julia --project -e '
+#       using Pkg; 
+#       Pkg.test("CTBase"; coverage=true); 
+#       include("test/coverage.jl")
+#   '
 #
 # This produces:
 #   - coverage/lcov.info      — LCOV format for CI integration
@@ -79,8 +83,8 @@ CTBase.run_tests(;
     args=String.(ARGS),
     testset_name="CTBase tests",
     available_tests=(:code_quality, "suite_src/*", "suite_ext/*"),
-    filename_builder=name -> Symbol(:test_, name),
-    funcname_builder=name -> Symbol(:test_, name),
+    filename_builder=name -> "test_$(name).jl",
+    funcname_builder=name -> "test_$(name)",
     verbose=VERBOSE,
     showtiming=SHOWTIMING,
     test_dir=@__DIR__,
@@ -91,15 +95,15 @@ CTBase.run_tests(;
 if Base.JLOptions().code_coverage != 0
     println(
         """
+        ================================================================================
+        Coverage files generated. To process them, please run:
 
-================================================================================
-[CTBase] Coverage files generated.
-
-To process them, move them to the coverage/ directory, and generate a report, 
-please run:
-
-    julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
-================================================================================
-""",
+            julia --project -e '
+                using Pkg; 
+                Pkg.test("CTBase"; coverage=true); 
+                include("test/coverage.jl")'
+            '
+        ================================================================================
+        """
     )
 end

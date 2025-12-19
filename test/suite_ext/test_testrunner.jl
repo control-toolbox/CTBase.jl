@@ -470,6 +470,40 @@ function test_testrunner()
             end
         end
 
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "funcname_builder may return String or Symbol" begin
+            mktempdir() do temp_dir
+                # Create a test file with a function
+                write(
+                    joinpath(temp_dir, "test_baz.jl"),
+                    "function test_baz()\n    @test true\nend\n",
+                )
+
+                # Test with funcname_builder returning String
+                run_single(
+                    :baz;
+                    available_tests=Symbol[],
+                    filename_builder=n -> "test_" * String(n),
+                    funcname_builder=n -> "test_" * String(n),  # Returns String
+                    eval_mode=true,
+                    test_dir=temp_dir,
+                )
+                # If no error, the test passed
+
+                # Test with funcname_builder returning Symbol
+                run_single(
+                    :baz;
+                    available_tests=Symbol[],
+                    filename_builder=n -> "test_" * String(n),
+                    funcname_builder=n -> Symbol(:test_, n),  # Returns Symbol
+                    eval_mode=true,
+                    test_dir=temp_dir,
+                )
+                # If no error, the test passed
+
+                @test true  # Explicit pass if both succeeded
+            end
+        end
+
         # Note: Other error branches (L126, L134, L139) are not directly tested
         # because they require Base.include(Main, ...) which causes side effects.
         # They are tested indirectly through normal test execution.

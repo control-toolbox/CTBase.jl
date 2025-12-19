@@ -65,7 +65,11 @@ with_api_reference(src_dir) do api_pages
                 asset("https://control-toolbox.org/assets/js/documentation.js"),
             ],
         ),
-        pages=["Introduction" => "index.md", "API Reference" => api_pages],
+        pages=[
+            "Introduction" => "index.md", 
+            "Developers Guide" => "developers-guide.md", 
+            "API Reference" => api_pages
+        ],
         checkdocs=:none,
     )
 end
