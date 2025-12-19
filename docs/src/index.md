@@ -10,7 +10,7 @@ The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://githu
 
     The root package is [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl) which aims to provide tools to model and solve optimal control problems with ordinary differential equations by direct and indirect methods, both on CPU and GPU.
 
-!!! warning
+!!! details "Note on Private Methods"
 
     In some examples in the documentation, private methods are shown without the module
     prefix. This is done for the sake of clarity and readability.
@@ -45,94 +45,6 @@ The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://githu
     julia> x = 1
     julia> private_fun(x)
     ```
-
-## Optional extensions
-
-CTBase uses Julia's *package extensions* mechanism (via `[weakdeps]` + `[extensions]` in
-`Project.toml`) to provide optional functionality without forcing extra dependencies
-on downstream packages.
-
-The pattern is:
-
-- The core package defines **tag types** and **extension points** (methods that throw
-  `CTBase.ExtensionError(...)` by default).
-- When you load an optional dependency, Julia automatically loads the corresponding
-  extension module from `ext/`, which adds the real implementation.
-
-You can check whether an extension is loaded with `Base.get_extension`:
-
-```julia
-Base.get_extension(CTBase, :TestRunner)
-Base.get_extension(CTBase, :CoveragePostprocessing)
-Base.get_extension(CTBase, :DocumenterReference)
-```
-
-### `DocumenterReference` (API reference generation)
-
-- **Role**: provides the backend for `CTBase.automatic_reference_documentation(...)` used
-  to generate API reference pages for Documenter.
-- **Triggered by**: loading the dependencies needed by the extension, typically:
-
-```julia
-using CTBase
-using Documenter
-using Markdown
-using MarkdownAST
-```
-
-- **Why there is no “simple” usage**: the function is meant to run *inside a docs build*
-  and interacts with Documenter’s build pipeline and filesystem layout.
-
-Usage sketch (non-executed):
-
-```julia
-using CTBase
-using Documenter
-using Markdown
-using MarkdownAST
-
-# pages = CTBase.automatic_reference_documentation(; subdirectory=".", primary_modules=[CTBase])
-```
-
-### `TestRunner` (selectable test groups)
-
-- **Role**: provides the backend for `CTBase.run_tests(...)` used by this repository’s
-  `test/runtests.jl` to run named test groups and support selection via `test_args`.
-- **Triggered by**: `using Test` (or loading `Test` indirectly via a test run).
-
-Why it is not exposed as a “simple” user API:
-
-- It is mainly a **developer tool** for this package (and related repos).
-- It executes tests, includes files, and may depend on `Main.ARGS` conventions.
-
-Usage sketch (non-executed):
-
-```julia
-using CTBase
-using Test
-
-# CTBase.run_tests(; testset_name="CTBase tests", test_dir="test")
-```
-
-### `CoveragePostprocessing` (coverage artifacts)
-
-- **Role**: provides the backend for `CTBase.postprocess_coverage(...)`, used after running
-  tests with coverage to collect `.cov` files and generate reports.
-- **Triggered by**: `using Coverage`.
-
-Why it is not a “simple” usage:
-
-- It performs **filesystem side-effects** (create/remove/move files under `coverage/`).
-- It assumes a project layout (`src/`, `test/`, `ext/`).
-
-Usage sketch (non-executed):
-
-```julia
-using CTBase
-using Coverage
-
-# CTBase.postprocess_coverage(; root_dir=pwd(), generate_report=true)
-```
 
 ## Descriptions: encoding algorithms
 
@@ -258,7 +170,7 @@ end
 This pattern avoids accidentally swallowing unrelated internal errors while still
 giving you a single place to handle all CTBase-specific problems.
 
-### `AmbiguousDescription`
+### [`AmbiguousDescription`](@id ambiguous-description-index)
 
 ```julia
 CTBase.AmbiguousDescription <: CTBase.CTException
@@ -279,7 +191,7 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 Use this exception when *the high-level choice of description itself* is wrong
 or ambiguous and there is no sensible default.
 
-### `IncorrectArgument`
+### [`IncorrectArgument`](@id incorrect-argument-index)
 
 ```julia
 CTBase.IncorrectArgument <: CTBase.CTException
@@ -307,7 +219,7 @@ Examples from CTBase:
 Use this exception whenever *one input value* is outside the allowed domain
 (wrong range, duplicate, empty when it must not be, etc.).
 
-### `NotImplemented`
+### [`NotImplemented`](@id not-implemented-index)
 
 ```julia
 CTBase.NotImplemented <: CTBase.CTException
@@ -332,7 +244,7 @@ testing.
 Use `NotImplemented` when defining *interfaces* and you want an explicit,
 typed error rather than a generic `error("TODO")`.
 
-### `UnauthorizedCall`
+### [`UnauthorizedCall`](@id unauthorized-call-index)
 
 ```julia
 CTBase.UnauthorizedCall <: CTBase.CTException
@@ -368,7 +280,7 @@ julia> CTBase.ExtensionError()
 ERROR: UnauthorizedCall: Please provide at least one weak dependence for the extension.
 ```
 
-### `ParsingError`
+### [`ParsingError`](@id parsing-error-index)
 
 ```julia
 CTBase.ParsingError <: CTBase.CTException
@@ -383,3 +295,26 @@ julia> using CTBase
 julia> throw(CTBase.ParsingError("unexpected token 'end'"))
 ERROR: ParsingError: unexpected token 'end'
 ```
+
+## Optional extensions
+
+CTBase uses Julia's *package extensions* mechanism (via `[weakdeps]` + `[extensions]` in
+`Project.toml`) to provide optional functionality without forcing extra dependencies
+on downstream packages.
+
+The pattern is:
+
+- The core package defines **tag types** and **extension points** (methods that throw
+  `CTBase.ExtensionError(...)` by default).
+- When you load an optional dependency, Julia automatically loads the corresponding
+  extension module from `ext/`, which adds the real implementation.
+
+You can check whether an extension is loaded with `Base.get_extension`:
+
+```julia
+Base.get_extension(CTBase, :TestRunner)
+Base.get_extension(CTBase, :CoveragePostprocessing)
+Base.get_extension(CTBase, :DocumenterReference)
+```
+
+For practical guidance on using the `TestRunner` and `CoveragePostprocessing` extensions, see the [Testing and Coverage Guide](test-coverage-guide.md), which provides detailed examples and best practices for setting up testing and coverage workflows in your Julia packages. For information on automated API documentation generation using the `DocumenterReference` extension, see the [Documentation Guide](documentation-guide.md).

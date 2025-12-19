@@ -72,6 +72,13 @@ function test_exceptions()
         output2 = sprint(showerror, e2)
         @test occursin("Ext1", output2)
         @test occursin("Ext2", output2)
+        
+        # Test with optional message
+        e_msg = CTBase.ExtensionError(:MyExt; message="to enable feature X")
+        output_msg = sprint(showerror, e_msg)
+        @test occursin("ExtensionError", output_msg)
+        @test occursin("MyExt", output_msg)
+        @test occursin("to enable feature X", output_msg)
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "CTException supertype catch" begin
