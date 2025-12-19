@@ -66,9 +66,12 @@ with_api_reference(src_dir) do api_pages
             ],
         ),
         pages=[
-            "Introduction" => "index.md", 
-            "Developers Guide" => "developers-guide.md", 
-            "API Reference" => api_pages
+            "Introduction" => "index.md",
+            "Developers Guide" => [
+                "Testing and Coverage" => "test-coverage-guide.md",
+                "Documentation" => "documentation-guide.md",
+            ],
+            "API Reference" => api_pages,
         ],
         checkdocs=:none,
     )
