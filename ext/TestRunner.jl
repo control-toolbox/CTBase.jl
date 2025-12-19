@@ -327,8 +327,11 @@ function _select_tests(
         candidate_basename = basename(candidate_filename)
         candidate_basename_no_ext = replace(candidate_basename, ".jl" => "")
         candidate_basename_no_test_prefix =
-            startswith(candidate_basename_no_ext, "test_") ? candidate_basename_no_ext[6:end] :
-            candidate_basename_no_ext
+            if startswith(candidate_basename_no_ext, "test_")
+                candidate_basename_no_ext[6:end]
+            else
+                candidate_basename_no_ext
+            end
 
         matched = false
         for sel in selections
