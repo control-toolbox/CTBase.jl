@@ -170,7 +170,7 @@ end
 This pattern avoids accidentally swallowing unrelated internal errors while still
 giving you a single place to handle all CTBase-specific problems.
 
-### `AmbiguousDescription`
+### [`AmbiguousDescription`](@id ambiguous-description-index)
 
 ```julia
 CTBase.AmbiguousDescription <: CTBase.CTException
@@ -191,7 +191,7 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 Use this exception when *the high-level choice of description itself* is wrong
 or ambiguous and there is no sensible default.
 
-### `IncorrectArgument`
+### [`IncorrectArgument`](@id incorrect-argument-index)
 
 ```julia
 CTBase.IncorrectArgument <: CTBase.CTException
@@ -219,7 +219,7 @@ Examples from CTBase:
 Use this exception whenever *one input value* is outside the allowed domain
 (wrong range, duplicate, empty when it must not be, etc.).
 
-### `NotImplemented`
+### [`NotImplemented`](@id not-implemented-index)
 
 ```julia
 CTBase.NotImplemented <: CTBase.CTException
@@ -244,7 +244,7 @@ testing.
 Use `NotImplemented` when defining *interfaces* and you want an explicit,
 typed error rather than a generic `error("TODO")`.
 
-### `UnauthorizedCall`
+### [`UnauthorizedCall`](@id unauthorized-call-index)
 
 ```julia
 CTBase.UnauthorizedCall <: CTBase.CTException
@@ -280,7 +280,7 @@ julia> CTBase.ExtensionError()
 ERROR: UnauthorizedCall: Please provide at least one weak dependence for the extension.
 ```
 
-### `ParsingError`
+### [`ParsingError`](@id parsing-error-index)
 
 ```julia
 CTBase.ParsingError <: CTBase.CTException
@@ -317,4 +317,4 @@ Base.get_extension(CTBase, :CoveragePostprocessing)
 Base.get_extension(CTBase, :DocumenterReference)
 ```
 
-For practical guidance on using the `TestRunner` and `CoveragePostprocessing` extensions, see the [Developers Guide](developers-guide.md), which provides detailed examples and best practices for setting up testing and coverage workflows in your Julia packages.
+For practical guidance on using the `TestRunner` and `CoveragePostprocessing` extensions, see the [Testing and Coverage Guide](test-coverage-guide.md), which provides detailed examples and best practices for setting up testing and coverage workflows in your Julia packages. For information on automated API documentation generation using the `DocumenterReference` extension, see the [Documentation Guide](documentation-guide.md).
