@@ -13,6 +13,6 @@ using Coverage
 # 2. Generates an LCOV file (coverage/lcov.info).
 # 3. Generates a markdown summary (coverage/cov_report.md).
 # 4. Archives used .cov files to keep the directory clean.
-CTBase.postprocess_coverage(; 
-    root_dir=dirname(@__DIR__) # Point to the package root
+CTBase.postprocess_coverage(;
+    root_dir=dirname(@__DIR__), # Point to the package root
 )
