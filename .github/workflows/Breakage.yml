@@ -5,6 +5,7 @@ name: Breakage
 # no access to secrets
 on:
   pull_request:
+    types: [labeled, synchronize, opened, reopened]
 
 jobs:
   call:
