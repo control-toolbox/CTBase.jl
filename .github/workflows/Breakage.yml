@@ -22,6 +22,6 @@ jobs:
       pkgname: ${{ matrix.pkgname }}
       pkgpath: ${{ matrix.pkgpath }}
       pkgversion: ${{ matrix.pkgversion }}
-      use_registry: true
+      use_ct_registry: true
     secrets:
       SSH_KEY: ${{ secrets.SSH_KEY }}
