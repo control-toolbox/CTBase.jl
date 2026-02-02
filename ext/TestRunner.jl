@@ -420,12 +420,10 @@ function _run_single_test(
     filename = joinpath(test_dir, rel)
 
     # Check file exists
-    if !isfile(filename)
-        error("""
+    !isfile(filename) && error("""
         Test file "$(filename)" not found for test "$(name)".
         Current directory: $(pwd())
         """)
-    end
 
     # Include the file
     Base.include(Main, filename)

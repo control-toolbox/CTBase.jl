@@ -272,7 +272,30 @@ function test_exception_display()
             @test !contains(output, "Context:")
             @test !contains(output, "Suggestion:")
         end
-        
+
+        @testset "NotImplemented - All optional fields" begin
+            io = IOBuffer()
+            e = NotImplemented(
+                "Not implemented feature";
+                type_info="MyType",
+                context="testing context",
+                suggestion="use this instead",
+            )
+
+            CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            @test contains(output, "NotImplemented")
+            @test contains(output, "Not implemented feature")
+            @test contains(output, "Type:")
+            @test contains(output, "MyType")
+            @test contains(output, "Context:")
+            @test contains(output, "testing context")
+            @test contains(output, "Suggestion:")
+            @test contains(output, "use this instead")
+        end
+
         @testset "ParsingError - Missing optional fields" begin
             io = IOBuffer()
             # Test with only required field (msg)
@@ -288,7 +311,23 @@ function test_exception_display()
             @test !contains(output, "Location:")
             @test !contains(output, "Suggestion:")
         end
-        
+
+        @testset "ParsingError - All optional fields" begin
+            io = IOBuffer()
+            e = ParsingError("Parse error"; location="line 10", suggestion="check syntax")
+
+            CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            @test contains(output, "ParsingError")
+            @test contains(output, "Parse error")
+            @test contains(output, "Location:")
+            @test contains(output, "line 10")
+            @test contains(output, "Suggestion:")
+            @test contains(output, "check syntax")
+        end
+
         @testset "ExtensionError - Minimal fields" begin
             io = IOBuffer()
             # Test with only required fields
@@ -312,12 +351,20 @@ function test_exception_display()
             e = IncorrectArgument("Test error for location")
             
             CTBase.set_show_full_stacktrace!(false)
-            @test_nowarn showerror(io, e)
+
+            # We must throw and catch the error to have a valid backtrace
+            try
+                throw(e)
+            catch e_caught
+                @test_nowarn showerror(io, e_caught)
+            end
+
             output = String(take!(io))
             
             # The output should contain the user code location section
             # (this tests the lines 173-187 that were uncovered)
             @test contains(output, "Control Toolbox Error")
+            @test contains(output, "In your code:")
             # In a real test environment, this should show user frames
             # The exact content depends on the test environment
         end

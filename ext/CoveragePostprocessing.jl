@@ -88,9 +88,8 @@ function CTBase.postprocess_coverage(
     _clean_stale_cov_files!(source_dirs)
 
     n_cov = _count_cov_files(source_dirs)
-    if n_cov == 0
+    n_cov == 0 &&
         error("Coverage requested but no usable .cov files were found after cleanup.")
-    end
 
     generate_report && _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
 

@@ -397,6 +397,32 @@ function test_testrunner()
             end
         end
 
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: eval_mode=false does not call function" begin
+            mktempdir() do temp_dir
+                touch(joinpath(temp_dir, "test_sym_noeval.jl"))
+                write(
+                    joinpath(temp_dir, "test_sym_noeval.jl"),
+                    "const __ctbase_sym_tr_flag__ = Ref(false)\n" *
+                    "function test_sym_noeval()\n" *
+                    "    __ctbase_sym_tr_flag__[] = true\n" *
+                    "    return nothing\n" *
+                    "end\n",
+                )
+
+                run_single(
+                    :sym_noeval;
+                    available_tests=Symbol[],
+                    filename_builder=n -> "test_" * String(n),
+                    funcname_builder=n -> "test_" * String(n),
+                    eval_mode=false,
+                    test_dir=temp_dir,
+                )
+
+                flag_value = Base.invokelatest(getfield, Main, :__ctbase_sym_tr_flag__)
+                @test flag_value[] == false
+            end
+        end
+
         @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: error when expected function missing" begin
             mktempdir() do temp_dir
                 stem = "testrunner_missing_func"
