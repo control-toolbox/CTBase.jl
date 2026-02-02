@@ -65,11 +65,8 @@ if Base.JLOptions().code_coverage != 0
         ================================================================================
         Coverage files generated. To process them, please run:
 
-            julia --project -e '
-                using Pkg; 
-                Pkg.test("CTBase"; coverage=true); 
-                include("test/coverage.jl")'
-            '
+            julia --project -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
+
         ================================================================================
         """
     )

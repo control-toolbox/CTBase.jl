@@ -138,13 +138,14 @@ is loaded.
 
 - `generate_report::Bool=true`: Whether to generate summary reports.
 - `root_dir::String=pwd()`: Project root directory used to locate coverage artifacts.
+- `dest_dir::String="coverage"`: Destination directory for coverage artifacts.
 
 # Throws
 
 - [`ExtensionError`](@ref): If the coverage post-processing extension is not loaded.
 """
 function postprocess_coverage(
-    ::AbstractCoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd()
+    ::AbstractCoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd(), dest_dir::String="coverage"
 )
     throw(ExtensionError(:Coverage))
 end

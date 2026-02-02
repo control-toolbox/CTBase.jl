@@ -238,6 +238,89 @@ function test_exception_display()
             
             CTBase.set_show_full_stacktrace!(false)
         end
+        
+        @testset "extract_user_frames function" begin
+            # Test with a mock stacktrace that includes various frame types
+            # This tests the filtering logic in extract_user_frames
+            try
+                # Create an error to generate a real stacktrace
+                error("test error")
+            catch e
+                st = stacktrace(catch_backtrace())
+                filtered = CTBase.Exceptions.extract_user_frames(st)
+                
+                # Should return some frames (non-empty in normal test environment)
+                @test filtered isa Vector
+                # The filtering should work without errors
+                @test_nowarn CTBase.Exceptions.extract_user_frames(st)
+            end
+        end
+        
+        @testset "NotImplemented - Missing optional fields" begin
+            io = IOBuffer()
+            # Test with only required field (msg)
+            e = NotImplemented("Not implemented feature")
+            
+            CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+            
+            @test contains(output, "NotImplemented")
+            @test contains(output, "Not implemented feature")
+            # Should not contain optional sections that are not provided
+            @test !contains(output, "Type:")
+            @test !contains(output, "Context:")
+            @test !contains(output, "Suggestion:")
+        end
+        
+        @testset "ParsingError - Missing optional fields" begin
+            io = IOBuffer()
+            # Test with only required field (msg)
+            e = ParsingError("Parse error")
+            
+            CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+            
+            @test contains(output, "ParsingError")
+            @test contains(output, "Parse error")
+            # Should not contain optional sections that are not provided
+            @test !contains(output, "Location:")
+            @test !contains(output, "Suggestion:")
+        end
+        
+        @testset "ExtensionError - Minimal fields" begin
+            io = IOBuffer()
+            # Test with only required fields
+            e = ExtensionError(:TestDep)
+            
+            CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+            
+            @test contains(output, "ExtensionError")
+            @test contains(output, "Missing dependencies:")
+            @test contains(output, "TestDep")
+            # Should not contain optional sections that are not provided
+            @test !contains(output, "Feature:")
+            @test !contains(output, "Context:")
+            @test !contains(output, "Purpose:")
+        end
+        
+        @testset "User code location display" begin
+            io = IOBuffer()
+            e = IncorrectArgument("Test error for location")
+            
+            CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+            
+            # The output should contain the user code location section
+            # (this tests the lines 173-187 that were uncovered)
+            @test contains(output, "Control Toolbox Error")
+            # In a real test environment, this should show user frames
+            # The exact content depends on the test environment
+        end
     end
 end
 

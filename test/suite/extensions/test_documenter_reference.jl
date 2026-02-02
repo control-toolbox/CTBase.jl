@@ -747,4 +747,5 @@ function test_documenter_reference()
         sig2 = DR._method_signature_string(m2, DRMethodTestMod, :g)
         @test occursin("g", sig2)
     end
+    
 end

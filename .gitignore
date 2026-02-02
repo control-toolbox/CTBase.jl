@@ -37,3 +37,4 @@ Manifest*.toml
 #
 .agent/
 .reports/
+.coverage/

@@ -50,7 +50,18 @@ julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["-a"])'
 
 To generate a coverage report, you must run the tests with `coverage=true` and then execute the coverage post-processing script.
 
-**Command:**
+### ⚠️ Prerequisites
+
+**Important**: The `Coverage` package must be installed in your base Julia environment for coverage to work properly:
+
+```bash
+# In your base Julia environment (not the project environment)
+julia --project=@v1.12 -e 'using Pkg; Pkg.add("Coverage")'
+```
+
+This is required because coverage processing happens at the Julia level and needs the `Coverage` package to be available globally.
+
+### Command
 
 ```bash
 julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
@@ -58,9 +69,9 @@ julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("te
 
 **Outputs:**
 
-- `coverage/lcov.info`: LCOV format file (useful for CI integration like Codecov).
-- `coverage/cov_report.md`: Human-readable summary of coverage gaps.
-- `coverage/cov/`: detailed `.cov` files.
+- `.coverage/lcov.info`: LCOV format file (useful for CI integration like Codecov).
+- `.coverage/cov_report.md`: Human-readable summary of coverage gaps.
+- `.coverage/cov/`: detailed `.cov` files.
 
 ## 3. Adding New Tests
 
