@@ -1,10 +1,14 @@
-# Add the test directory to the load path so Julia can find dependencies from 
-# test/Project.toml. This is necessary because this script is included from the 
-# main project context, not from the test project context. Without this, Julia 
-# won't find Coverage and other test-only dependencies.
+# ==============================================================================
+# CTBase Coverage Post-Processing
+# ==============================================================================
+#
+# See test/README.md for details.
+#
+# Usage:
+#   julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("test/coverage.jl")'
+#
+# ==============================================================================
 pushfirst!(LOAD_PATH, @__DIR__)
-
-using Pkg
 using CTBase # Provides postprocess_coverage
 using Coverage
 

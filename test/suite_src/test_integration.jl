@@ -1,4 +1,4 @@
-struct DummyDocRefTag <: CTBase.AbstractDocumenterReferenceTag end
+struct DummyDocRefTag <: CTBase.Extensions.AbstractDocumenterReferenceTag end
 
 function test_integration()
     # Integration test: description workflow combining add, complete, remove, and exceptions

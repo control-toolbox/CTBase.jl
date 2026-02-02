@@ -1,4 +1,17 @@
 """
+    Descriptions
+
+Description management utilities for CTBase.
+
+This module provides types and functions for working with symbolic descriptions,
+including type aliases, manipulation functions, and completion utilities.
+"""
+module Descriptions
+
+using DocStringExtensions
+using ..Exceptions
+
+"""
 DescVarArg is a type alias representing a variable number of `Symbol`s.
 
 ```julia-repl
@@ -146,7 +159,8 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
     end
     table = zeros(Int8, n, 2)
     for i in 1:n
-        table[i, 1] = length(intersect(list, descriptions[i]))
+        description = descriptions[i]
+        table[i, 1] = length(intersect(Set(list), Set(description)))
         table[i, 2] = issubset(Set(list), Set(descriptions[i])) ? 1 : 0
     end
     if maximum(table[:, 2]) == 0
@@ -189,17 +203,22 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the difference between the description `x` and the description `y`.
+Remove symbols from a description tuple.
 
 # Example
 
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.remove((:a, :b), (:a,))
-(:b,)
+julia> CTBase.remove((:a, :b, :c), (:a,))
+(:b, :c)
 ```
 """
 function remove(x::Description, y::Description)::Tuple{Vararg{Symbol}}
     return tuple(setdiff(x, y)...)
 end
+
+# Export public API
+export DescVarArg, Description, add, complete, remove
+
+end # module

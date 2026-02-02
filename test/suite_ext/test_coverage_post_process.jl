@@ -1,4 +1,4 @@
-struct DummyCoverageTag <: CTBase.AbstractCoveragePostprocessingTag end
+struct DummyCoverageTag <: CTBase.Extensions.AbstractCoveragePostprocessingTag end
 
 function test_coverage_post_process()
     CP = Base.get_extension(CTBase, :CoveragePostprocessing)

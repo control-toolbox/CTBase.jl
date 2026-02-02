@@ -1,4 +1,4 @@
-struct DummyTestRunnerTag <: CTBase.AbstractTestRunnerTag end
+struct DummyTestRunnerTag <: CTBase.Extensions.AbstractTestRunnerTag end
 
 function test_testrunner()
     # ============================================================================
@@ -11,7 +11,7 @@ function test_testrunner()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "TestRunner stub dispatch" begin
         err = try
-            CTBase.run_tests(DummyTestRunnerTag())
+            CTBase.run_tests(CTBase.Extensions.DummyTestRunnerTag())
             nothing
         catch e
             e

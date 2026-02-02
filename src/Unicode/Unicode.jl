@@ -1,4 +1,17 @@
 """
+    Unicode
+
+Unicode character utilities for CTBase.
+
+This module provides functions for converting integers to Unicode subscript
+and superscript characters, useful for mathematical notation and display.
+"""
+module Unicode
+
+using DocStringExtensions
+using ..Exceptions
+
+"""
 $(TYPEDSIGNATURES)
 
 Return the integer `i` ∈ [0, 9] as a Unicode **subscript character**.
@@ -69,7 +82,7 @@ The other digits ⁰ (U+2070) and ⁴ to ⁹ (U+2074 to U+2079) are mostly conti
 julia> using CTBase
 
 julia> CTBase.ctupperscript(2)
-'²': Unicode U+00B2 (category No: Number, other)
+'²': Unicode U+00B9 (category No: Number, other)
 ```
 """
 function ctupperscript(i::Int)::Char
@@ -94,7 +107,7 @@ $(TYPEDSIGNATURES)
 
 Return the integer `i` ≥ 0 as a string of Unicode **superscript characters**.
 
-Throws an `IncorrectArgument` exception if `i` is negative.
+Throws an `IncorrectArgument` if `i` is negative.
 
 # Example
 
@@ -115,3 +128,8 @@ function ctupperscripts(i::Int)::String
     end
     return s
 end
+
+# Export public API
+export ctindice, ctindices, ctupperscript, ctupperscripts
+
+end # module

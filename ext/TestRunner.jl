@@ -15,7 +15,7 @@ using Test: Test, @testset
 const TestSpec = Union{Symbol,String}
 
 """
-    run_tests(::CTBase.TestRunnerTag; kwargs...)
+    run_tests(::CTBase.Extensions.TestRunnerTag; kwargs...)
 
 Run tests with configurable file/function name builders and optional available tests filter.
 
@@ -43,7 +43,7 @@ using CTBase
 ```
 """
 function CTBase.run_tests(
-    ::CTBase.TestRunnerTag;
+    ::CTBase.Extensions.TestRunnerTag;
     args::AbstractVector{<:AbstractString}=String[],
     testset_name::String="Tests",
     available_tests=Symbol[],

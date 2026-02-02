@@ -14,7 +14,7 @@ using Coverage
 
 # Main entry point for coverage post-processing
 """
-    CTBase.postprocess_coverage(::CTBase.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
+    CTBase.postprocess_coverage(::CTBase.Extensions.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
 
 Post-process coverage artifacts produced by `Pkg.test(; coverage=true)`.
 
@@ -48,7 +48,7 @@ using CTBase
 ```
 """
 function CTBase.postprocess_coverage(
-    ::CTBase.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd()
+    ::CTBase.Extensions.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd()
 )
     println("✓ Coverage post-processing start")
 

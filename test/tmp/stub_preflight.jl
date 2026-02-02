@@ -1,11 +1,11 @@
-struct DummyTestRunnerTag <: CTBase.AbstractTestRunnerTag end
+struct DummyTestRunnerTag <: CTBase.Extensions.AbstractTestRunnerTag end
 
 const STUB_PREFLIGHT = let
     test_runner_extension_before = Base.get_extension(CTBase, :TestRunner)
 
     run_tests_error = nothing
     try
-        CTBase.run_tests(DummyTestRunnerTag())
+        CTBase.run_tests(CTBase.Extensions.DummyTestRunnerTag())
     catch e
         run_tests_error = e
     end

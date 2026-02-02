@@ -67,7 +67,7 @@ function test_documenter_reference()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
         @test_throws ErrorException CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="ref",
             primary_modules=["invalid_string"], # String is not Module or Pair
             title="My API",
@@ -305,7 +305,7 @@ function test_documenter_reference()
 
         # Single-module, public-only
         pages1 = CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="ref",
             primary_modules=[DocumenterReferenceTestMod],
             public=true,
@@ -346,7 +346,7 @@ function test_documenter_reference()
         # Both public and private pages
         DR.reset_config!()
         pages2 = CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="ref",
             primary_modules=[DocumenterReferenceTestMod],
             public=true,
@@ -365,7 +365,7 @@ function test_documenter_reference()
 
         # public=false, private=false should error
         @test_throws ErrorException CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="ref",
             primary_modules=[DocumenterReferenceTestMod],
             public=false,
@@ -421,7 +421,7 @@ function test_documenter_reference()
 
         # Test multi-module case (using same module twice as a proxy)
         pages = CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="api",
             primary_modules=[mod1, mod1],  # Two entries to trigger multi-module path
             public=true,
@@ -449,7 +449,7 @@ function test_documenter_reference()
         # ignoring the filename for the split structure.
         # So we test public-only to verify filename is respected.
         pages = CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="api",
             primary_modules=[mod1, mod2],
             public=true,
@@ -678,7 +678,7 @@ function test_documenter_reference()
         DR.reset_config!()
 
         pages = CTBase.automatic_reference_documentation(
-            CTBase.DocumenterReferenceTag();
+            CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="api_integration",
             primary_modules=[DocumenterReferenceTestMod],
             public=true,
