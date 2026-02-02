@@ -237,8 +237,15 @@ function run_tests(; kwargs...)
     run_tests(TestRunnerTag(); kwargs...)
 end
 
+# ============================================================================ #
+# FOUNDATIONAL TYPES AND UTILITIES
+# ============================================================================ #
+
+# Exceptions module - enhanced error handling system (must load first)
+include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
+using .Exceptions
+
 #
-include("exception.jl")
 include("description.jl")
 include("default.jl")
 include("utils.jl")
