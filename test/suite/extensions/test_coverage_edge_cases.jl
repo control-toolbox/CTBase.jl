@@ -138,7 +138,7 @@ function test_coverage_edge_cases()
 
             # Line 327: Documenter.Selectors.order(::Type{APIBuilder})
             # Explicit call to ensure coverage
-            @test Documenter.Selectors.order(DR.APIBuilder) == 0.0
+            @test Documenter.Selectors.order(DR.APIBuilder) == 0.5
 
             # Line 539: _exported_symbols getfield failure
             # Used BrokenExportMod defined at top level

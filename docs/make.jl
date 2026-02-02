@@ -54,7 +54,6 @@ with_api_reference(src_dir) do api_pages
     makedocs(;
         draft=draft,
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
-        warnonly=true,
         sitename="CTBase.jl",
         format=Documenter.HTML(;
             repolink="https://" * repo_url,
@@ -73,7 +72,6 @@ with_api_reference(src_dir) do api_pages
             ],
             "API Reference" => api_pages,
         ],
-        checkdocs=:none,
     )
 end
 

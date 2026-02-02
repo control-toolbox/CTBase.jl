@@ -16,7 +16,7 @@ $(TYPEDSIGNATURES)
 
 Return the integer `i` ∈ [0, 9] as a Unicode **subscript character**.
 
-Throws an `IncorrectArgument` exception if `i` is outside this range.
+Throws an `CTBase.Exceptions.IncorrectArgument` exception if `i` is outside this range.
 
 The Unicode subscript digits start at codepoint U+2080 for '0' and continue sequentially.
 
@@ -31,7 +31,7 @@ julia> CTBase.ctindice(3)
 """
 function ctindice(i::Int)::Char
     if i < 0 || i > 9
-        throw(IncorrectArgument("the subscript must be between 0 and 9"))
+        throw(Exceptions.IncorrectArgument("the subscript must be between 0 and 9"))
     end
     # Unicode subscript digits 0-9 are contiguous from U+2080 to U+2089
     return Char(Int('\u2080') + i)
@@ -42,7 +42,7 @@ $(TYPEDSIGNATURES)
 
 Return the integer `i` ≥ 0 as a string of Unicode **subscript characters**.
 
-Throws an `IncorrectArgument` if `i` is negative.
+Throws an `CTBase.Exceptions.IncorrectArgument` if `i` is negative.
 
 # Example
 
@@ -55,7 +55,7 @@ julia> CTBase.ctindices(123)
 """
 function ctindices(i::Int)::String
     if i < 0
-        throw(IncorrectArgument("the subscript must be positive"))
+        throw(Exceptions.IncorrectArgument("the subscript must be positive"))
     end
     s = ""
     # digits returns digits from least significant to most significant,
@@ -71,7 +71,7 @@ $(TYPEDSIGNATURES)
 
 Return the integer `i` ∈ [0, 9] as a Unicode **superscript (upper) character**.
 
-Throws an `IncorrectArgument` exception if `i` is outside this range.
+Throws an `CTBase.Exceptions.IncorrectArgument` exception if `i` is outside this range.
 
 Note: Unicode superscripts ¹ (U+00B9), ² (U+00B2), and ³ (U+00B3) are special cases.
 The other digits ⁰ (U+2070) and ⁴ to ⁹ (U+2074 to U+2079) are mostly contiguous.
@@ -82,12 +82,12 @@ The other digits ⁰ (U+2070) and ⁴ to ⁹ (U+2074 to U+2079) are mostly conti
 julia> using CTBase
 
 julia> CTBase.ctupperscript(2)
-'²': Unicode U+00B9 (category No: Number, other)
+'²': Unicode U+00B2 (category No: Number, other)
 ```
 """
 function ctupperscript(i::Int)::Char
     if i < 0 || i > 9
-        throw(IncorrectArgument("the superscript must be between 0 and 9"))
+        throw(Exceptions.IncorrectArgument("the superscript must be between 0 and 9"))
     elseif i == 0
         return '\u2070'   # superscript zero
     elseif i == 1
@@ -107,7 +107,7 @@ $(TYPEDSIGNATURES)
 
 Return the integer `i` ≥ 0 as a string of Unicode **superscript characters**.
 
-Throws an `IncorrectArgument` if `i` is negative.
+Throws an `CTBase.Exceptions.IncorrectArgument` if `i` is negative.
 
 # Example
 
@@ -120,7 +120,7 @@ julia> CTBase.ctupperscripts(123)
 """
 function ctupperscripts(i::Int)::String
     if i < 0
-        throw(IncorrectArgument("the superscript must be positive"))
+        throw(Exceptions.IncorrectArgument("the superscript must be positive"))
     end
     s = ""
     for d in digits(i)

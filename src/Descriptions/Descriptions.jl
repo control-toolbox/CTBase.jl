@@ -21,7 +21,7 @@ julia> CTBase.DescVarArg
 Vararg{Symbol}
 ```
 
-See also: [`CTBase.Description`](@ref).
+See also: [`Description`](@ref).
 """
 const DescVarArg = Vararg{Symbol}
 
@@ -119,7 +119,7 @@ ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
     if y ∈ x
-        throw(IncorrectArgument("the description $y is already in $x"))
+        throw(Exceptions.IncorrectArgument("the description $y is already in $x"))
     else
         return (x..., y)
     end
@@ -155,7 +155,7 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
     if n == 0
-        throw(AmbiguousDescription(list))
+        throw(Exceptions.AmbiguousDescription(list))
     end
     table = zeros(Int8, n, 2)
     for i in 1:n
@@ -164,7 +164,7 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
         table[i, 2] = issubset(Set(list), Set(descriptions[i])) ? 1 : 0
     end
     if maximum(table[:, 2]) == 0
-        throw(AmbiguousDescription(list))
+        throw(Exceptions.AmbiguousDescription(list))
     end
     # Return the index of the description with maximal intersection count
     return descriptions[argmax(table[:, 1])]
@@ -191,7 +191,7 @@ This method is equivalent to `complete(list...; descriptions=descriptions)`.
 
 # Throws
 
-- [`AmbiguousDescription`](@ref CTBase.AmbiguousDescription): If `descriptions` is empty, or if `list` is not contained
+- ``AmbiguousDescription``: If `descriptions` is empty, or if `list` is not contained
   in any candidate description.
 """
 function complete(

@@ -45,6 +45,12 @@ Get current stacktrace display configuration.
 
 # Returns
 - `Bool`: Current setting for full stacktrace display
+
+# Example
+```julia-repl
+julia> CTBase.get_show_full_stacktrace()
+false
+```
 """
 function get_show_full_stacktrace()
     return SHOW_FULL_STACKTRACE[]

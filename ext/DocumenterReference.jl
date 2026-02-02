@@ -121,7 +121,7 @@ end
 
 Global configuration storage for API reference generation.
 
-Each call to [`automatic_reference_documentation`](@ref) appends a new `_Config`
+Each call to `CTBase.automatic_reference_documentation` appends a new `_Config`
 entry to this vector. Use [`reset_config!`](@ref) to clear it between builds.
 """
 const CONFIG = _Config[]
@@ -322,16 +322,10 @@ abstract type APIBuilder <: Documenter.Builder.DocumentPipeline end
     Documenter.Selectors.order(::Type{APIBuilder}) -> Float64
 
 Return the pipeline order for [`APIBuilder`](@ref).
-Returns `0.0`, placing this stage early in the Documenter pipeline.
+# Run before SetupBuildDirectory (1.0) so that generated files exist when Documenter checks pages.
 """
-Documenter.Selectors.order(::Type{APIBuilder}) = 0.0
+Documenter.Selectors.order(::Type{APIBuilder}) = 0.5
 
-"""
-    Documenter.Selectors.runner(::Type{APIBuilder}, document)
-
-Documenter pipeline runner for API reference generation.
-Processes all registered module configurations and generates their API reference pages.
-"""
 function Documenter.Selectors.runner(::Type{APIBuilder}, document::Documenter.Document)
     @info "APIBuilder: creating API reference"
     for config in CONFIG
@@ -468,9 +462,11 @@ function _build_page_return_structure(
     private::Bool,
 )
     if public && private
+        pub = !isempty(filename) ? "$(filename)_public.md" : "public.md"
+        priv = !isempty(filename) ? "$(filename)_private.md" : "private.md"
         return title_in_menu => [
-            "Public" => _build_page_path(subdirectory, "public.md"),
-            "Private" => _build_page_path(subdirectory, "private.md"),
+            "Public" => _build_page_path(subdirectory, pub),
+            "Private" => _build_page_path(subdirectory, priv),
         ]
     else
         return title_in_menu => _build_page_path(subdirectory, "$filename.md")
@@ -852,9 +848,16 @@ function _build_api_page(document::Documenter.Document, config::_Config)
     symbols = _exported_symbols(current_module)
 
     # Determine output filenames
-    public_basename = config.public && config.private ? "public" : config.filename
-    private_basename = config.public && config.private ? "private" : config.filename
-    private_filename = _build_page_path(config.subdirectory, "$private_basename.md")
+    public_basename = if config.public && config.private
+        (!isempty(config.filename) ? "$(config.filename)_public" : "public")
+    else
+        config.filename
+    end
+    private_basename = if config.public && config.private
+        (!isempty(config.filename) ? "$(config.filename)_private" : "private")
+    else
+        config.filename
+    end
 
     # Collect docstrings
     public_docstrings =
@@ -863,15 +866,38 @@ function _build_api_page(document::Documenter.Document, config::_Config)
         config.private ? _collect_private_docstrings(config, symbols.private) : String[]
 
     # Accumulate content
-    if !haskey(PAGE_CONTENT_ACCUMULATOR, private_filename)
-        PAGE_CONTENT_ACCUMULATOR[private_filename] = Tuple{
-            Module,Vector{String},Vector{String}
-        }[]
+    if config.public && config.private
+        # Split mode: use two separate keys
+        pub_filename = _build_page_path(config.subdirectory, "$(public_basename).md")
+        priv_filename = _build_page_path(config.subdirectory, "$(private_basename).md")
+
+        for (fname, docs) in
+            [(pub_filename, public_docstrings), (priv_filename, private_docstrings)]
+            if !haskey(PAGE_CONTENT_ACCUMULATOR, fname)
+                PAGE_CONTENT_ACCUMULATOR[fname] = Tuple{
+                    Module,Vector{String},Vector{String}
+                }[]
+            end
+            # In split mode, the other docstrings list is intentionally empty for that file
+            if fname == pub_filename
+                push!(PAGE_CONTENT_ACCUMULATOR[fname], (current_module, docs, String[]))
+            else
+                push!(PAGE_CONTENT_ACCUMULATOR[fname], (current_module, String[], docs))
+            end
+        end
+    else
+        # Combined mode: use one key (either public or private)
+        filename = _build_page_path(config.subdirectory, "$(config.filename).md")
+        if !haskey(PAGE_CONTENT_ACCUMULATOR, filename)
+            PAGE_CONTENT_ACCUMULATOR[filename] = Tuple{
+                Module,Vector{String},Vector{String}
+            }[]
+        end
+        push!(
+            PAGE_CONTENT_ACCUMULATOR[filename],
+            (current_module, public_docstrings, private_docstrings),
+        )
     end
-    push!(
-        PAGE_CONTENT_ACCUMULATOR[private_filename],
-        (current_module, public_docstrings, private_docstrings),
-    )
 
     return nothing
 end
@@ -983,21 +1009,35 @@ Finalize all accumulated API pages by combining content from multiple modules.
 """
 function _finalize_api_pages(document::Documenter.Document)
     for (filename, module_contents) in PAGE_CONTENT_ACCUMULATOR
-        is_private = occursin("private", filename) || !occursin("public", filename)
+        is_private_split = occursin("private", filename)
+        is_public_split = occursin("public", filename)
 
         all_modules = [mc[1] for mc in module_contents]
         modules_str = join([string(m) for m in all_modules], "`, `")
 
-        overview, all_docstrings = if is_private
+        overview, all_docstrings = if is_public_split
+            # Case 1: Pure Public Split Page
+            _build_public_page_content(modules_str, module_contents)
+        elseif is_private_split
+            # Case 2: Pure Private Split Page
             _build_private_page_content(modules_str, module_contents)
         else
-            _build_public_page_content(modules_str, module_contents)
+            # Case 3: Combined Page (Public then Private)
+            _build_combined_page_content(modules_str, module_contents)
         end
 
         combined_md = Markdown.parse(overview * join(all_docstrings, "\n"))
 
+        # Write to source directory so SetupBuildDirectory can find and copy it
+        source_path = joinpath(document.user.source, filename)
+        mkpath(dirname(source_path))
+        open(source_path, "w") do io
+            write(io, overview)
+            write(io, join(all_docstrings, "\n"))
+        end
+
         document.blueprint.pages[filename] = Documenter.Page(
-            joinpath(document.user.source, filename),
+            source_path,
             joinpath(document.user.build, filename),
             document.user.build,
             combined_md.content,
@@ -1008,6 +1048,37 @@ function _finalize_api_pages(document::Documenter.Document)
 
     empty!(PAGE_CONTENT_ACCUMULATOR)
     return nothing
+end
+
+"""
+    _build_combined_page_content(modules_str, module_contents) -> Tuple{String, Vector{String}}
+
+Build the overview and docstrings for a combined (Public + Private) API page.
+"""
+function _build_combined_page_content(modules_str::String, module_contents)
+    overview = """
+    # API reference
+
+    This page lists documented symbols of `$(modules_str)`.
+
+    """
+
+    all_docstrings = String[]
+    for (mod, public_docs, private_docs) in module_contents
+        if !isempty(public_docs) || !isempty(private_docs)
+            push!(all_docstrings, "\n---\n\n## From `$(mod)`\n\n")
+            if !isempty(public_docs)
+                push!(all_docstrings, "### Public API\n\n")
+                append!(all_docstrings, public_docs)
+            end
+            if !isempty(private_docs)
+                push!(all_docstrings, "\n### Private API\n\n")
+                append!(all_docstrings, private_docs)
+            end
+        end
+    end
+
+    return overview, all_docstrings
 end
 
 """

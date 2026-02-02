@@ -17,54 +17,64 @@ function generate_api_reference(src_dir::String)
     pages = [
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[CTBase => src("CTBase.jl")],
+            primary_modules=[CTBase.Core => src(joinpath("Core", "Core.jl"))],
             exclude=EXCLUDE_SYMBOLS,
-            public=false,
+            public=true,
             private=true,
-            title="CTBase",
-            title_in_menu="CTBase",
-            filename="ctbase",
+            title="Core",
+            title_in_menu="Core",
+            filename="api_core",
         ),
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[CTBase => src("default.jl")],
+            primary_modules=[
+                CTBase.Descriptions => src(joinpath("Descriptions", "Descriptions.jl"))
+            ],
             exclude=EXCLUDE_SYMBOLS,
-            public=false,
+            public=true,
             private=true,
-            title="Default",
-            title_in_menu="Default",
-            filename="default",
+            title="Descriptions",
+            title_in_menu="Descriptions",
+            filename="api_descriptions",
         ),
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[CTBase => src("description.jl")],
+            primary_modules=[
+                CTBase.Exceptions => src(
+                    joinpath("Exceptions", "Exceptions.jl"),
+                    joinpath("Exceptions", "types.jl"),
+                    joinpath("Exceptions", "config.jl"),
+                    joinpath("Exceptions", "display.jl"),
+                ),
+            ],
             exclude=EXCLUDE_SYMBOLS,
-            public=false,
+            public=true,
             private=true,
-            title="Description",
-            title_in_menu="Description",
-            filename="description",
+            title="Exceptions",
+            title_in_menu="Exceptions",
+            filename="api_exceptions",
         ),
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[CTBase => src("exception.jl")],
-            external_modules_to_document=[Base],
+            primary_modules=[CTBase.Unicode => src(joinpath("Unicode", "Unicode.jl"))],
             exclude=EXCLUDE_SYMBOLS,
-            public=false,
+            public=true,
             private=true,
-            title="Exception",
-            title_in_menu="Exception",
-            filename="exception",
+            title="Unicode",
+            title_in_menu="Unicode",
+            filename="api_unicode",
         ),
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
-            primary_modules=[CTBase => src("utils.jl")],
+            primary_modules=[
+                CTBase.Extensions => src(joinpath("Extensions", "Extensions.jl"))
+            ],
             exclude=EXCLUDE_SYMBOLS,
-            public=false,
+            public=true,
             private=true,
-            title="Utils",
-            title_in_menu="Utils",
-            filename="utils",
+            title="Extensions",
+            title_in_menu="Extensions",
+            filename="api_extensions",
         ),
     ]
 
@@ -88,7 +98,7 @@ function generate_api_reference(src_dir::String)
                 primary_modules=[DocumenterReference => ext("DocumenterReference.jl")],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_DOCREF,
-                public=false,
+                public=true,
                 private=true,
                 title="DocumenterReference",
                 title_in_menu="DocumenterReference",
@@ -108,7 +118,7 @@ function generate_api_reference(src_dir::String)
                 ],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
-                public=false,
+                public=true,
                 private=true,
                 title="CoveragePostprocessing",
                 title_in_menu="CoveragePostprocessing",
@@ -126,7 +136,7 @@ function generate_api_reference(src_dir::String)
                 primary_modules=[TestRunner => ext("TestRunner.jl")],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
-                public=false,
+                public=true,
                 private=true,
                 title="TestRunner",
                 title_in_menu="TestRunner",
@@ -161,26 +171,25 @@ function with_api_reference(f::Function, src_dir::String)
         # Let's assume the files are in `docs/src`.
         docs_src = abspath(joinpath(@__DIR__, "src"))
 
-        for p in pages
-            # p is "Title" => "filename.md" (or path)
-            # automatic_reference_documentation returns a path relative to docs/src?
-            # actually it returns what should be put in `pages`.
-
-            # If I look at make.jl, it passed subdirectory="."
-            # So the file is likely at `docs/src/filename.md`.
-
-            filename = last(p) # "ctbase.md" or "ctbase" (if extension added automatically?)
-            # automatic_reference_documentation usually adds .md if filename argument didn't have it?
-            # In make.jl: filename="ctbase"
-
-            # Let's handle both cases just in case
-            fname = endswith(filename, ".md") ? filename : filename * ".md"
-            full_path = joinpath(docs_src, fname)
-
-            if isfile(full_path)
-                rm(full_path)
-                println("Removed temporary API doc: $full_path")
+        function cleanup_pages(pages)
+            for p in pages
+                content = last(p)
+                if content isa AbstractString
+                    # file path
+                    filename = content
+                    fname = endswith(filename, ".md") ? filename : filename * ".md"
+                    full_path = joinpath(docs_src, fname)
+                    if isfile(full_path)
+                        rm(full_path)
+                        println("Removed temporary API doc: $full_path")
+                    end
+                elseif content isa Vector
+                    # nested pages
+                    cleanup_pages(content)
+                end
             end
         end
+
+        cleanup_pages(pages)
     end
 end

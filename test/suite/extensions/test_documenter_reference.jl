@@ -361,7 +361,10 @@ function test_documenter_reference()
         @test cfg2.private == true
         @test cfg2.title == "All API"
         @test pages2 ==
-            ("All API" => ["Public" => "ref/public.md", "Private" => "ref/private.md"])
+            (
+            "All API" =>
+                ["Public" => "ref/api_public.md", "Private" => "ref/api_private.md"]
+        )
 
         # public=false, private=false should error
         @test_throws ErrorException CTBase.automatic_reference_documentation(
@@ -374,7 +377,7 @@ function test_documenter_reference()
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
-        @test Documenter.Selectors.order(DR.APIBuilder) == 0.0
+        @test Documenter.Selectors.order(DR.APIBuilder) == 0.5
     end
 
     # ============================================================================
@@ -645,6 +648,16 @@ function test_documenter_reference()
         @test occursin("ModA, ModB", overview_pub)
         @test !isempty(docs_pub)
         @test any(occursin("pub_a", s) for s in docs_pub)
+
+        module_contents_combined = [(DocumenterReferenceTestMod, ["pub_a"], ["priv_a"])]
+        overview_comb, docs_comb = DR._build_combined_page_content(
+            modules_str, module_contents_combined
+        )
+        @test occursin("API reference", overview_comb)
+        @test any(occursin("Public API", s) for s in docs_comb)
+        @test any(occursin("Private API", s) for s in docs_comb)
+        @test any(occursin("pub_a", s) for s in docs_comb)
+        @test any(occursin("priv_a", s) for s in docs_comb)
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "external_modules_to_document" begin
@@ -695,7 +708,7 @@ function test_documenter_reference()
         Documenter.Selectors.runner(DR.APIBuilder, doc)
 
         @test !isempty(doc.blueprint.pages)
-        @test any(endswith(k, "private.md") for k in keys(doc.blueprint.pages))
+        @test any(endswith(k, "api_private.md") for k in keys(doc.blueprint.pages))
     end
 
     # ============================================================================

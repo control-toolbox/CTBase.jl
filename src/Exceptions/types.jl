@@ -377,8 +377,8 @@ throw(CTBase.Exceptions.AmbiguousDescription(
 - Validation of symbolic descriptions in mathematical modeling
 
 # See Also
-- [`complete`](@ref): Matches a partial description to a complete one
-- [`add`](@ref): Adds descriptions to a catalogue (throws [`IncorrectArgument`](@ref) for duplicates)
+- `complete`: Matches a partial description to a complete one
+- `add`: Adds descriptions to a catalogue (throws [`IncorrectArgument`](@ref) for duplicates)
 - [`IncorrectArgument`](@ref): For input validation errors
 """
 struct AmbiguousDescription <: CTException
