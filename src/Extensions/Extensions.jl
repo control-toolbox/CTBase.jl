@@ -84,7 +84,12 @@ automatic_reference_documentation(
 ```
 """
 function automatic_reference_documentation(::AbstractDocumenterReferenceTag; kwargs...)
-    throw(Exceptions.ExtensionError(:Documenter, :Markdown, :MarkdownAST))
+    throw(Exceptions.ExtensionError(
+        :Documenter, :Markdown, :MarkdownAST;
+        message="to generate automatic reference documentation",
+        feature="automatic documentation generation",
+        context="reference generation"
+    ))
 end
 
 """
@@ -173,7 +178,12 @@ using CTBase
 function postprocess_coverage(
     ::AbstractCoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd(), dest_dir::String="coverage"
 )
-    throw(Exceptions.ExtensionError(:Coverage))
+    throw(Exceptions.ExtensionError(
+        :Coverage;
+        message="to postprocess test coverage results",
+        feature="coverage analysis and reporting",
+        context="coverage postprocessing"
+    ))
 end
 
 """
@@ -247,7 +257,12 @@ using CTBase
 ```
 """
 function run_tests(::AbstractTestRunnerTag; kwargs...)
-    throw(Exceptions.ExtensionError(:Test))
+    throw(Exceptions.ExtensionError(
+        :Test;
+        message="to run automated tests",
+        feature="test execution and reporting",
+        context="test running"
+    ))
 end
 
 """

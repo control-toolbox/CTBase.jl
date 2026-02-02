@@ -14,7 +14,7 @@ CTBase.set_show_full_stacktrace!(true)  # Show full stacktraces
 CTBase.set_show_full_stacktrace!(false) # User-friendly display only
 ```
 """
-const SHOW_FULL_STACKTRACE = Ref{Bool}(true)
+const SHOW_FULL_STACKTRACE = Ref{Bool}(false)
 
 """
     set_show_full_stacktrace!(value::Bool)

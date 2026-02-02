@@ -31,7 +31,13 @@ julia> CTBase.ctindice(3)
 """
 function ctindice(i::Int)::Char
     if i < 0 || i > 9
-        throw(Exceptions.IncorrectArgument("the subscript must be between 0 and 9"))
+        throw(Exceptions.IncorrectArgument(
+            "the subscript must be between 0 and 9",
+            got=string(i),
+            expected="0-9",
+            suggestion="Use ctindices() for numbers larger than 9, or check your input value",
+            context="Unicode subscript generation"
+        ))
     end
     # Unicode subscript digits 0-9 are contiguous from U+2080 to U+2089
     return Char(Int('\u2080') + i)
@@ -55,7 +61,13 @@ julia> CTBase.ctindices(123)
 """
 function ctindices(i::Int)::String
     if i < 0
-        throw(Exceptions.IncorrectArgument("the subscript must be positive"))
+        throw(Exceptions.IncorrectArgument(
+            "the subscript must be positive",
+            got=string(i),
+            expected="≥ 0",
+            suggestion="Use abs() to get the absolute value, or check your input calculation",
+            context="Unicode subscript string generation"
+        ))
     end
     s = ""
     # digits returns digits from least significant to most significant,
@@ -87,7 +99,13 @@ julia> CTBase.ctupperscript(2)
 """
 function ctupperscript(i::Int)::Char
     if i < 0 || i > 9
-        throw(Exceptions.IncorrectArgument("the superscript must be between 0 and 9"))
+        throw(Exceptions.IncorrectArgument(
+            "the superscript must be between 0 and 9",
+            got=string(i),
+            expected="0-9",
+            suggestion="Use ctupperscripts() for numbers larger than 9, or check your input value",
+            context="Unicode superscript generation"
+        ))
     elseif i == 0
         return '\u2070'   # superscript zero
     elseif i == 1
@@ -120,7 +138,13 @@ julia> CTBase.ctupperscripts(123)
 """
 function ctupperscripts(i::Int)::String
     if i < 0
-        throw(Exceptions.IncorrectArgument("the superscript must be positive"))
+        throw(Exceptions.IncorrectArgument(
+            "the superscript must be positive",
+            got=string(i),
+            expected="≥ 0",
+            suggestion="Use abs() to get the absolute value, or check your input calculation",
+            context="Unicode superscript string generation"
+        ))
     end
     s = ""
     for d in digits(i)

@@ -13,6 +13,22 @@ function test_exceptions()
         # Check that the output contains the type name styled (red, bold)
         @test occursin("AmbiguousDescription", output)
         @test occursin("(:e,)", output)
+        
+        # Test enriched version with candidates and suggestions
+        e_enriched = CTBase.AmbiguousDescription(
+            (:x,),
+            candidates=["(:a, :b)", "(:c, :d)"],
+            suggestion="Try one of the available descriptions",
+            context="test context"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Valid candidates", output_enriched)
+        @test occursin("(:a, :b)", output_enriched)
+        @test occursin("(:c, :d)", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Try one of the available descriptions", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("test context", output_enriched)
     end
 
     # Test IncorrectArgument
@@ -23,6 +39,24 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("IncorrectArgument", output)
         @test occursin("invalid argument", output)
+        
+        # Test enriched version with all fields
+        e_enriched = CTBase.IncorrectArgument(
+            "dimension mismatch",
+            got="vector of length 3",
+            expected="vector of length 2",
+            suggestion="Resize your vector to match the expected dimension",
+            context="initialization"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Got", output_enriched)
+        @test occursin("vector of length 3", output_enriched)
+        @test occursin("Expected", output_enriched)
+        @test occursin("vector of length 2", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Resize your vector", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("initialization", output_enriched)
     end
 
     # Test NotImplemented
@@ -33,6 +67,21 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("NotImplemented", output)
         @test occursin("feature not ready", output)
+        
+        # Test enriched version
+        e_enriched = CTBase.NotImplemented(
+            "method not implemented",
+            type_info="MyAbstractType",
+            suggestion="Implement this method for your concrete type",
+            context="algorithm execution"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Type", output_enriched)
+        @test occursin("MyAbstractType", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Implement this method", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("algorithm execution", output_enriched)
     end
 
     # Test UnauthorizedCall
@@ -43,6 +92,21 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("UnauthorizedCall", output)
         @test occursin("access denied", output)
+        
+        # Test enriched version
+        e_enriched = CTBase.UnauthorizedCall(
+            "operation not allowed",
+            reason="object already finalized",
+            suggestion="Create a new instance",
+            context="finalization"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Reason", output_enriched)
+        @test occursin("object already finalized", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Create a new instance", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("finalization", output_enriched)
     end
 
     # Test ParsingError
@@ -53,6 +117,18 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("ParsingError", output)
         @test occursin("syntax error", output)
+        
+        # Test enriched version
+        e_enriched = CTBase.ParsingError(
+            "unexpected token",
+            location="line 42, column 15",
+            suggestion="Check syntax balance"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Location", output_enriched)
+        @test occursin("line 42, column 15", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Check syntax balance", output_enriched)
     end
 
     # Test ExtensionError
@@ -79,6 +155,24 @@ function test_exceptions()
         @test occursin("ExtensionError", output_msg)
         @test occursin("MyExt", output_msg)
         @test occursin("to enable feature X", output_msg)
+        
+        # Test enriched version with feature and context
+        e_enriched = CTBase.ExtensionError(
+            :Documenter, :Markdown;
+            message="to generate documentation",
+            feature="automatic documentation",
+            context="reference generation"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Missing dependencies", output_enriched)
+        @test occursin("Documenter", output_enriched)
+        @test occursin("Markdown", output_enriched)
+        @test occursin("Feature", output_enriched)
+        @test occursin("automatic documentation", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("reference generation", output_enriched)
+        @test occursin("Purpose", output_enriched)
+        @test occursin("to generate documentation", output_enriched)
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "CTException supertype catch" begin
