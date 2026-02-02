@@ -26,16 +26,16 @@ julia --project -e 'using Pkg; Pkg.test("CTBase")'
 
 You can run specific test files or groups using the `test_args` argument. The argument supports glob-style patterns.
 
-**Run all tests in the `ocp` directory:**
+**Run all tests in the `core` directory:**
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/ocp/*"])'
+julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/core/*"])'
 ```
 
 **Run specific test files:**
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/ocp/test_constraints", "suite/ocp/test_dynamics"])'
+julia --project -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/core/test_default", "suite/unicode/test_utils"])'
 ```
 
 ### Running All Tests (Including Optional/Long Tests)
@@ -66,23 +66,20 @@ julia --project=@. -e 'using Pkg; Pkg.test("CTBase"; coverage=true); include("te
 
 ### File and Function Naming
 
-- **File Name:** Must follow the pattern `test_<name>.jl` (e.g., `test_dynamics.jl`).
+- **File Name:** Must follow the pattern `test_<name>.jl` (e.g., `test_default.jl`).
 - **Entry Function:** The file **MUST** contain a function named `test_<name>()` (matching the filename) that serves as the entry point.
 
-**Example (`test/suite/ocp/test_dynamics.jl`):**
+**Example (`test/suite/core/test_default.jl`):**
 
 ```julia
-module TestDynamics # namespace isolation
+module TestCore
 
 using Test
 using CTBase
-using Main.TestProblems # Access shared test helpers
+using Main.TestOptions # Access shared test options
 
-# Define structs at top-level (crucial!)
-struct MyDummyModel end
-
-function test_dynamics()
-    @testset "Dynamics Tests" begin
+function test_default()
+    @testset "Core Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
         # Your tests here
     end
 end
@@ -90,7 +87,7 @@ end
 end # module
 
 # CRITICAL: Redefine the function in the outer scope so TestRunner can find it
-test_dynamics() = TestDynamics.test_dynamics()
+test_default() = TestCore.test_default()
 ```
 
 ### Registering the Test
@@ -108,24 +105,72 @@ All helper methods, mocks, and structs must be defined at the **top-level** of t
 
 - **Unit vs. Integration:** Clearly separate unit tests (testing single functions/components in isolation) from integration tests (testing the interaction between components).
 - **Mocks and Fakes:** Use mock objects or fake implementations to isolate the code under test.
-- **Qualification of methods**: always **qualify the method call** even if a method is exported (e.g., `CTBase.solve(...)`). This makes it explicit what is being tested and avoids any ambiguity.
+- **Qualification of methods**: always **qualify the method call** even if a method is exported (e.g., `CTBase.ctindice(...)`). This makes it explicit what is being tested and avoids any ambiguity.
 - **Verification of exports**: dedicated tests should be added to verify that methods are correctly exported when necessary (e.g., using `isdefined(CTBase, :...)`).
 
 ### Directory Structure
 
-All test files are organized under `test/suite/`. Place your test file in the appropriate subdirectory based on functionality:
+All test files are organized under `test/suite/` to maintain orthogonal relationship with the source code structure. Place your test file in the appropriate subdirectory based on functionality:
 
-- `suite/docp/`: DOCP (Discretized Optimal Control Problem) module tests
-- `suite/init/`: Initial guess and initialization tests
-- `suite/integration/`: End-to-end integration tests
-- `suite/io/`: Import/Export functionality tests
-- `suite/meta/`: Meta tests (Aqua.jl quality checks, etc.)
-- `suite/modelers/`: Modelers (ADNLPModeler, ExaModeler) tests
-- `suite/ocp/`: Optimal Control Problem definitions and components
-- `suite/optimization/`: Optimization module (builders, contracts, etc.)
-- `suite/options/`: Options system tests
-- `suite/orchestration/`: Orchestration layer tests
-- `suite/plot/`: Plotting functionality tests
-- `suite/strategies/`: Strategies framework tests
-- `suite/types/`: Core type definitions tests
-- `suite/utils/`: Utility functions tests
+- `suite/core/`: Core module tests (ctNumber, __display, internal utilities)
+- `suite/unicode/`: Unicode module tests (ctindice, ctindices, ctupperscript, ctupperscripts)
+- `suite/descriptions/`: Descriptions module tests (add, complete, remove, integration)
+- `suite/exceptions/`: Exceptions module tests (exception types, display, configuration)
+- `suite/extensions/`: Extensions module tests (TestRunner, DocumenterReference, CoveragePostprocessing)
+- `suite/meta/`: Meta tests (Aqua.jl quality checks, code quality)
+
+### Module Testing Pattern
+
+Each test file should follow the modular pattern:
+
+```julia
+module Test<ModuleName>
+
+using Test
+using CTBase
+using Main.TestOptions
+
+# Define all structs and helpers at top-level
+struct DummyTag <: CTBase.Extensions.Abstract<Extension>Tag end
+
+function test_<module_name>()
+    @testset "<Module Name> Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
+        # Test public API
+        @test CTBase.<function_name>(args) == expected
+        
+        # Test internal functions with qualification
+        @test CTBase.<SubModule>.<internal_function>(args) == expected
+        
+        # Test error cases
+        @test_throws CTBase.<ExceptionType> CTBase.<function_name>(invalid_args)
+    end
+end
+
+end # module
+
+# Export to outer scope
+test_<module_name>() = Test<ModuleName>.test_<module_name>()
+```
+
+## 5. Test Organization Principles
+
+### Orthogonal Structure
+
+The test structure mirrors the source code structure:
+
+```
+src/
+├── Core/Core.jl              → test/suite/core/test_default.jl
+├── Unicode/Unicode.jl        → test/suite/unicode/test_utils.jl
+├── Descriptions/Descriptions.jl → test/suite/descriptions/test_description.jl
+├── Extensions/Extensions.jl  → test/suite/extensions/test_*.jl
+└── Exceptions/               → test/suite/exceptions/test_*.jl
+```
+
+### Internal vs Public API Testing
+
+- **Public API**: Test functions accessible via `CTBase.f`
+- **Internal Functions**: Test via qualification `CTBase.SubModule.f`
+- **Extension Tags**: Test via qualification `CTBase.Extensions.TagType`
+
+This ensures tests validate both the user-facing API and internal implementation details.

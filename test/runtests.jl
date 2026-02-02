@@ -49,9 +49,6 @@ CTBase.run_tests(;
     testset_name="CTBase tests",
     available_tests=(
         "suite/*/test_*",
-        :code_quality, 
-        "suite_src/*", 
-        "suite_ext/*",
         ),
     filename_builder=name -> "test_$(name).jl",
     funcname_builder=name -> "test_$(name)",

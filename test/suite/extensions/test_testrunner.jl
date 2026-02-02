@@ -11,7 +11,7 @@ function test_testrunner()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "TestRunner stub dispatch" begin
         err = try
-            CTBase.run_tests(CTBase.Extensions.DummyTestRunnerTag())
+            CTBase.run_tests(DummyTestRunnerTag())
             nothing
         catch e
             e
