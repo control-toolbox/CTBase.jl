@@ -39,4 +39,6 @@ Manifest*.toml
 .reports/
 reports/
 .coverage/
-.vscode
+.vscode/
+#.windsurf/
+#.cursor/
