@@ -183,4 +183,3 @@ jobs:
 
 - [Test Runner Guide](test-runner.md): Setting up modular tests
 - [Exception Handling](exceptions.md): Testing exception paths
-- [API Reference](api.md): Complete API documentation

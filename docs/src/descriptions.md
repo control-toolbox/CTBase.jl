@@ -135,4 +135,3 @@ This throws `AmbiguousDescription` when no description in the library contains a
 ## See Also
 
 - [Exception Handling](exceptions.md): Understanding CTBase exceptions
-- [API Reference](api.md): Complete API documentation

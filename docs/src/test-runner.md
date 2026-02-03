@@ -222,4 +222,3 @@ jobs:
 
 - [Exception Handling](exceptions.md): Understanding test failures and exceptions
 - [Coverage Guide](coverage.md): Measuring test coverage
-- [API Reference](api.md): Complete API documentation

@@ -337,4 +337,3 @@ This makes debugging faster by providing all the information needed to understan
 
 - [Descriptions Tutorial](descriptions.md): Understanding the description system
 - [Test Runner Guide](test-runner.md): Testing exception handling
-- [API Reference](api.md): Complete API documentation
