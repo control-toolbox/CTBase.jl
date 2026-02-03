@@ -125,7 +125,7 @@ By default, the system automatically generates appropriate titles based on the p
 
 - **Single public page** (`public=true, private=false`): Title is "Public API"
 - **Single private page** (`public=false, private=true`): Title is "Private API"
-- **Split pages** (`public=true, private=true`): Titles are "Public" and "Private"
+- **Split pages** (`public=true, private=true`): Titles are "Public API" and "Private API"
 - **Combined page** (both public and private on same page): Title is "API reference"
 
 ### Custom Titles
@@ -187,8 +187,8 @@ If you pass empty strings (the default), the system uses the standard titles and
 ```julia
 CTBase.automatic_reference_documentation(;
     # ...
-    public_title="",        # Uses default: "Public API" or "Public"
-    private_title="",       # Uses default: "Private API" or "Private"
+    public_title="",        # Uses default: "Public API"
+    private_title="",       # Uses default: "Private API"
     public_description="",  # Uses default description
     private_description="", # Uses default description
     # ...

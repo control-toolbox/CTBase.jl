@@ -1179,7 +1179,7 @@ function _build_private_page_content(modules_str::String, module_contents, is_sp
     title = if !isempty(custom_title)
         custom_title
     else
-        is_split ? "Private" : "Private API"
+        "Private API"
     end
     
     # Choose description based on customization
@@ -1228,7 +1228,7 @@ function _build_public_page_content(modules_str::String, module_contents, is_spl
     title = if !isempty(custom_title)
         custom_title
     else
-        is_split ? "Public" : "Public API"
+        "Public API"
     end
     
     # Choose description based on customization

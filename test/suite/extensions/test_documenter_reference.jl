@@ -808,8 +808,7 @@ function test_documenter_reference()
         overview_priv_split, docs_priv_split = DR._build_private_page_content(
             modules_str, module_contents_private, true
         )
-        @test occursin("# Private", overview_priv_split)
-        @test !occursin("# Private API", overview_priv_split)
+        @test occursin("# Private API", overview_priv_split)
         @test occursin("non-exported", overview_priv_split)
         
         # Test public page with is_split=false (single page)
@@ -819,15 +818,13 @@ function test_documenter_reference()
             modules_str, module_contents_public, false
         )
         @test occursin("# Public API", overview_pub_single)
-        @test !occursin("# Public\n", overview_pub_single)
         @test occursin("exported", overview_pub_single)
         
         # Test public page with is_split=true (split page)
         overview_pub_split, docs_pub_split = DR._build_public_page_content(
             modules_str, module_contents_public, true
         )
-        @test occursin("# Public", overview_pub_split)
-        @test !occursin("# Public API", overview_pub_split)
+        @test occursin("# Public API", overview_pub_split)
         @test occursin("exported", overview_pub_split)
     end
 
@@ -843,15 +840,13 @@ function test_documenter_reference()
         overview_pub, _ = DR._build_public_page_content(modules_str, module_contents, false)
         @test occursin("# Public API", overview_pub)
         
-        # Split private page should have "Private" title
+        # Split private page should have "Private API" title
         overview_priv_split, _ = DR._build_private_page_content(modules_str, module_contents, true)
-        @test occursin("# Private", overview_priv_split)
-        @test !occursin("API", overview_priv_split) || occursin("Private\n", overview_priv_split)
+        @test occursin("# Private API", overview_priv_split)
         
-        # Split public page should have "Public" title
+        # Split public page should have "Public API" title
         overview_pub_split, _ = DR._build_public_page_content(modules_str, module_contents, true)
-        @test occursin("# Public", overview_pub_split)
-        @test !occursin("API", overview_pub_split) || occursin("Public\n", overview_pub_split)
+        @test occursin("# Public API", overview_pub_split)
         
         # Combined page should have "API reference" title
         overview_comb, _ = DR._build_combined_page_content(modules_str, module_contents)
@@ -888,7 +883,7 @@ function test_documenter_reference()
             custom_title="Internal"
         )
         @test occursin("# Internal", overview_priv_split_custom)
-        @test !occursin("# Private", overview_priv_split_custom)
+        @test !occursin("# Private API", overview_priv_split_custom)
         
         # Test custom title for public page (split)
         overview_pub_split_custom, _ = DR._build_public_page_content(
@@ -896,7 +891,7 @@ function test_documenter_reference()
             custom_title="Exported"
         )
         @test occursin("# Exported", overview_pub_split_custom)
-        @test !occursin("# Public", overview_pub_split_custom)
+        @test !occursin("# Public API", overview_pub_split_custom)
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Custom descriptions for API pages" begin
