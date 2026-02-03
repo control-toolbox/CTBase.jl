@@ -628,8 +628,9 @@ function test_documenter_reference()
             (DocumenterReferenceTestMod, String[], ["priv_a"]),
             (DRMethodTestMod, String[], ["priv_b1", "priv_b2"]),
         ]
+        # Test with is_split=false (single page)
         overview_priv, docs_priv = DR._build_private_page_content(
-            modules_str, module_contents_private
+            modules_str, module_contents_private, false
         )
         @test occursin("Private API", overview_priv)
         @test occursin("ModA, ModB", overview_priv)
@@ -641,8 +642,9 @@ function test_documenter_reference()
             (DocumenterReferenceTestMod, ["pub_a"], String[]),
             (DRMethodTestMod, String[], String[]),
         ]
+        # Test with is_split=false (single page)
         overview_pub, docs_pub = DR._build_public_page_content(
-            modules_str, module_contents_public
+            modules_str, module_contents_public, false
         )
         @test occursin("Public API", overview_pub)
         @test occursin("ModA, ModB", overview_pub)
@@ -759,6 +761,77 @@ function test_documenter_reference()
         m2 = first(methods(DRMethodTestMod.g))
         sig2 = DR._method_signature_string(m2, DRMethodTestMod, :g)
         @test occursin("g", sig2)
+    end
+
+    # ============================================================================
+    # NEW TESTS: Title System with is_split Parameter
+    # ============================================================================
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders with is_split parameter" begin
+        modules_str = "TestModule"
+        
+        # Test private page with is_split=false (single page)
+        module_contents_private = [(DocumenterReferenceTestMod, String[], ["priv_doc"])]
+        
+        overview_priv_single, docs_priv_single = DR._build_private_page_content(
+            modules_str, module_contents_private, false
+        )
+        @test occursin("# Private API", overview_priv_single)
+        @test !occursin("# Private\n", overview_priv_single)
+        @test occursin("non-exported", overview_priv_single)
+        
+        # Test private page with is_split=true (split page)
+        overview_priv_split, docs_priv_split = DR._build_private_page_content(
+            modules_str, module_contents_private, true
+        )
+        @test occursin("# Private", overview_priv_split)
+        @test !occursin("# Private API", overview_priv_split)
+        @test occursin("non-exported", overview_priv_split)
+        
+        # Test public page with is_split=false (single page)
+        module_contents_public = [(DocumenterReferenceTestMod, ["pub_doc"], String[])]
+        
+        overview_pub_single, docs_pub_single = DR._build_public_page_content(
+            modules_str, module_contents_public, false
+        )
+        @test occursin("# Public API", overview_pub_single)
+        @test !occursin("# Public\n", overview_pub_single)
+        @test occursin("exported", overview_pub_single)
+        
+        # Test public page with is_split=true (split page)
+        overview_pub_split, docs_pub_split = DR._build_public_page_content(
+            modules_str, module_contents_public, true
+        )
+        @test occursin("# Public", overview_pub_split)
+        @test !occursin("# Public API", overview_pub_split)
+        @test occursin("exported", overview_pub_split)
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Title consistency across different page types" begin
+        modules_str = "MyModule"
+        module_contents = [(DocumenterReferenceTestMod, ["pub"], ["priv"])]
+        
+        # Single private page should have "Private API" title
+        overview_priv, _ = DR._build_private_page_content(modules_str, module_contents, false)
+        @test occursin("# Private API", overview_priv)
+        
+        # Single public page should have "Public API" title
+        overview_pub, _ = DR._build_public_page_content(modules_str, module_contents, false)
+        @test occursin("# Public API", overview_pub)
+        
+        # Split private page should have "Private" title
+        overview_priv_split, _ = DR._build_private_page_content(modules_str, module_contents, true)
+        @test occursin("# Private", overview_priv_split)
+        @test !occursin("API", overview_priv_split) || occursin("Private\n", overview_priv_split)
+        
+        # Split public page should have "Public" title
+        overview_pub_split, _ = DR._build_public_page_content(modules_str, module_contents, true)
+        @test occursin("# Public", overview_pub_split)
+        @test !occursin("API", overview_pub_split) || occursin("Public\n", overview_pub_split)
+        
+        # Combined page should have "API reference" title
+        overview_comb, _ = DR._build_combined_page_content(modules_str, module_contents)
+        @test occursin("# API reference", overview_comb)
     end
     
 end
