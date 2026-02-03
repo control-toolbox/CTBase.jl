@@ -431,11 +431,11 @@ end
     _default_title(public::Bool, private::Bool) -> String
 
 Compute the default title based on public/private flags.
+Returns empty string for single pages to use configured title.
 """
 function _default_title(public::Bool, private::Bool)
-    public && !private && return "Public API"
-    !public && private && return "Private API"
-    return "API Reference"
+    public && private && return "API Reference"  # Combined page
+    return ""  # Single page - use configured title
 end
 
 """
@@ -1092,7 +1092,7 @@ function _build_private_page_content(modules_str::String, module_contents)
     EditURL = nothing
     ```
 
-    # Private API
+    # API Reference
 
     This page lists **non-exported** (internal) symbols of `$(modules_str)`.
 
@@ -1116,7 +1116,7 @@ Build the overview and docstrings for a public API page.
 """
 function _build_public_page_content(modules_str::String, module_contents)
     overview = """
-    # Public API
+    # API Reference
 
     This page lists **exported** symbols of `$(modules_str)`.
 
