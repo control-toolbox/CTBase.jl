@@ -203,6 +203,10 @@ function test_documenter_reference()
             "api",
             false,
             Module[],
+            "",
+            "",
+            "",
+            "",
         )
 
         symbols = [
@@ -242,6 +246,10 @@ function test_documenter_reference()
             "api",
             false,
             Module[],
+            "",
+            "",
+            "",
+            "",
         )
 
         symbols1 = [:myfun => DR.DOCTYPE_FUNCTION]
@@ -267,6 +275,10 @@ function test_documenter_reference()
             "api",
             false,
             Module[],
+            "",
+            "",
+            "",
+            "",
         )
 
         config3 = DR._Config(
@@ -283,6 +295,10 @@ function test_documenter_reference()
             "api",
             true,
             Module[],
+            "",
+            "",
+            "",
+            "",
         )
 
         symbols_module = [:SubModule => DR.DOCTYPE_MODULE]
@@ -552,6 +568,10 @@ function test_documenter_reference()
             "api",
             false,
             Module[],
+            "",
+            "",
+            "",
+            "",
         )
         seen = Symbol[]
         DR._iterate_over_symbols(config, Pair{Symbol,DR.DocType}[]) do key, type
@@ -682,6 +702,10 @@ function test_documenter_reference()
             "api_ext",
             false,
             [DRExternalTestMod],
+            "",
+            "",
+            "",
+            "",
         )
 
         private_docs = DR._collect_private_docstrings(config, Pair{Symbol,DR.DocType}[])

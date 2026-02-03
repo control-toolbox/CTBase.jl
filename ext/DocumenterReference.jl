@@ -99,6 +99,10 @@ Internal configuration for API reference generation.
 - `filename::String`: Base filename (without extension) for the markdown file.
 - `include_without_source::Bool`: If `true`, include symbols whose source file cannot be determined.
 - `external_modules_to_document::Vector{Module}`: Additional modules to search for docstrings.
+- `public_title::String`: Custom title for public API page (empty string uses default).
+- `private_title::String`: Custom title for private API page (empty string uses default).
+- `public_description::String`: Custom description for public API page (empty string uses default).
+- `private_description::String`: Custom description for private API page (empty string uses default).
 """
 struct _Config
     current_module::Module
@@ -114,6 +118,10 @@ struct _Config
     filename::String
     include_without_source::Bool
     external_modules_to_document::Vector{Module}
+    public_title::String
+    private_title::String
+    public_description::String
+    private_description::String
 end
 
 """
@@ -166,6 +174,10 @@ end
         source_files::Vector{String} = String[],
         include_without_source::Bool = false,
         external_modules_to_document::Vector{Module} = Module[],
+        public_title::String = "",
+        private_title::String = "",
+        public_description::String = "",
+        private_description::String = "",
     )
 
 Automatically creates the API reference documentation for one or more modules and
@@ -190,6 +202,10 @@ returns a structure which can be used in the `pages` argument of `Documenter.mak
    be determined. Default: `false`.
  * `external_modules_to_document`: additional modules to search for docstrings
    (e.g., `[Plots]` to include `Plots.plot` methods defined in your source files).
+ * `public_title`: custom title for public API page. Empty string uses default ("Public API" or "Public").
+ * `private_title`: custom title for private API page. Empty string uses default ("Private API" or "Private").
+ * `public_description`: custom description text for public API page. Empty string uses default.
+ * `private_description`: custom description text for private API page. Empty string uses default.
 
 ## Multiple instances
 
@@ -210,6 +226,10 @@ function CTBase.automatic_reference_documentation(
     source_files::Vector{String}=String[],
     include_without_source::Bool=false,
     external_modules_to_document::Vector{Module}=Module[],
+    public_title::String="",
+    private_title::String="",
+    public_description::String="",
+    private_description::String="",
 )
     # Validate arguments
     if !public && !private
@@ -242,6 +262,10 @@ function CTBase.automatic_reference_documentation(
             effective_filename,
             include_without_source,
             external_modules_to_document,
+            public_title,
+            private_title,
+            public_description,
+            private_description,
         )
         return _build_page_return_structure(
             effective_title_in_menu, subdirectory, effective_filename, public, private
@@ -265,6 +289,10 @@ function CTBase.automatic_reference_documentation(
                 effective_filename,
                 include_without_source,
                 external_modules_to_document,
+                public_title,
+                private_title,
+                public_description,
+                private_description,
             )
         end
         return _build_page_return_structure(
@@ -293,6 +321,10 @@ function CTBase.automatic_reference_documentation(
             module_filename,
             include_without_source,
             external_modules_to_document,
+            public_title,
+            private_title,
+            public_description,
+            private_description,
         )
 
         pages = _build_page_return_structure(
@@ -375,7 +407,8 @@ end
 """
     _register_config(current_module, subdirectory, modules, sort_by, exclude, public, private, 
                      title, title_in_menu, source_files, filename, include_without_source, 
-                     external_modules_to_document)
+                     external_modules_to_document, public_title, private_title, 
+                     public_description, private_description)
 
 Create and register a `_Config` in the global `CONFIG` vector.
 """
@@ -393,6 +426,10 @@ function _register_config(
     filename::String,
     include_without_source::Bool,
     external_modules_to_document::Vector{Module},
+    public_title::String,
+    private_title::String,
+    public_description::String,
+    private_description::String,
 )
     push!(
         CONFIG,
@@ -410,6 +447,10 @@ function _register_config(
             filename,
             include_without_source,
             external_modules_to_document,
+            public_title,
+            private_title,
+            public_description,
+            private_description,
         ),
     )
     return nothing
@@ -1027,13 +1068,26 @@ function _finalize_api_pages(document::Documenter.Document)
 
         all_modules = [mc[1] for mc in module_contents]
         modules_str = join([string(m) for m in all_modules], "`, `")
+        
+        # Get custom titles and descriptions from the first module's config
+        # (assuming all modules in the same page share the same customization)
+        first_module = first(all_modules)
+        config = findfirst(c -> c.current_module === first_module, CONFIG)
+        custom_public_title = config !== nothing ? CONFIG[config].public_title : ""
+        custom_private_title = config !== nothing ? CONFIG[config].private_title : ""
+        custom_public_desc = config !== nothing ? CONFIG[config].public_description : ""
+        custom_private_desc = config !== nothing ? CONFIG[config].private_description : ""
 
         overview, all_docstrings = if is_public_split
             # Case 1: Pure Public Split Page
-            _build_public_page_content(modules_str, module_contents, is_split)
+            _build_public_page_content(modules_str, module_contents, is_split; 
+                                      custom_title=custom_public_title, 
+                                      custom_description=custom_public_desc)
         elseif is_private_split
             # Case 2: Pure Private Split Page
-            _build_private_page_content(modules_str, module_contents, is_split)
+            _build_private_page_content(modules_str, module_contents, is_split;
+                                       custom_title=custom_private_title,
+                                       custom_description=custom_private_desc)
         else
             # Case 3: Combined Page (Public then Private)
             _build_combined_page_content(modules_str, module_contents)
@@ -1095,7 +1149,7 @@ function _build_combined_page_content(modules_str::String, module_contents)
 end
 
 """
-    _build_private_page_content(modules_str, module_contents, is_split) -> Tuple{String, Vector{String}}
+    _build_private_page_content(modules_str, module_contents, is_split; custom_title="", custom_description="") -> Tuple{String, Vector{String}}
 
 Build the overview and docstrings for a private API page.
 
@@ -1103,10 +1157,23 @@ Build the overview and docstrings for a private API page.
 - `modules_str`: Comma-separated list of module names
 - `module_contents`: Vector of (module, public_docs, private_docs) tuples
 - `is_split`: Whether this is part of a split public/private documentation
+- `custom_title`: Optional custom title (empty string uses default)
+- `custom_description`: Optional custom description (empty string uses default)
 """
-function _build_private_page_content(modules_str::String, module_contents, is_split::Bool)
-    # Choose title based on context
-    title = is_split ? "Private" : "Private API"
+function _build_private_page_content(modules_str::String, module_contents, is_split::Bool; custom_title::String="", custom_description::String="")
+    # Choose title based on context and customization
+    title = if !isempty(custom_title)
+        custom_title
+    else
+        is_split ? "Private" : "Private API"
+    end
+    
+    # Choose description based on customization
+    description = if !isempty(custom_description)
+        custom_description
+    else
+        "This page lists **non-exported** (internal) symbols of `$(modules_str)`."
+    end
     
     overview = """
     ```@meta
@@ -1115,7 +1182,7 @@ function _build_private_page_content(modules_str::String, module_contents, is_sp
 
     # $(title)
 
-    This page lists **non-exported** (internal) symbols of `$(modules_str)`.
+    $(description)
 
     """
 
@@ -1131,7 +1198,7 @@ function _build_private_page_content(modules_str::String, module_contents, is_sp
 end
 
 """
-    _build_public_page_content(modules_str, module_contents, is_split) -> Tuple{String, Vector{String}}
+    _build_public_page_content(modules_str, module_contents, is_split; custom_title="", custom_description="") -> Tuple{String, Vector{String}}
 
 Build the overview and docstrings for a public API page.
 
@@ -1139,15 +1206,28 @@ Build the overview and docstrings for a public API page.
 - `modules_str`: Comma-separated list of module names
 - `module_contents`: Vector of (module, public_docs, private_docs) tuples
 - `is_split`: Whether this is part of a split public/private documentation
+- `custom_title`: Optional custom title (empty string uses default)
+- `custom_description`: Optional custom description (empty string uses default)
 """
-function _build_public_page_content(modules_str::String, module_contents, is_split::Bool)
-    # Choose title based on context
-    title = is_split ? "Public" : "Public API"
+function _build_public_page_content(modules_str::String, module_contents, is_split::Bool; custom_title::String="", custom_description::String="")
+    # Choose title based on context and customization
+    title = if !isempty(custom_title)
+        custom_title
+    else
+        is_split ? "Public" : "Public API"
+    end
+    
+    # Choose description based on customization
+    description = if !isempty(custom_description)
+        custom_description
+    else
+        "This page lists **exported** symbols of `$(modules_str)`."
+    end
     
     overview = """
     # $(title)
 
-    This page lists **exported** symbols of `$(modules_str)`.
+    $(description)
 
     """
 
