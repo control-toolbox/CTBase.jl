@@ -1009,18 +1009,31 @@ Finalize all accumulated API pages by combining content from multiple modules.
 """
 function _finalize_api_pages(document::Documenter.Document)
     for (filename, module_contents) in PAGE_CONTENT_ACCUMULATOR
-        is_private_split = occursin("private", filename)
-        is_public_split = occursin("public", filename)
+        is_private_split = occursin("_private", filename)
+        is_public_split = occursin("_public", filename)
+        
+        # Detect if this is a split page by checking if both public and private files exist
+        # Extract base filename by removing _public.md or _private.md suffixes
+        base_filename = replace(replace(filename, "_public.md" => ""), "_private.md" => "")
+        
+        # Check if the counterpart file exists (if we have _public, check for _private and vice versa)
+        is_split = if is_public_split
+            haskey(PAGE_CONTENT_ACCUMULATOR, "$(base_filename)_private.md")
+        elseif is_private_split
+            haskey(PAGE_CONTENT_ACCUMULATOR, "$(base_filename)_public.md")
+        else
+            false  # Not a split page at all
+        end
 
         all_modules = [mc[1] for mc in module_contents]
         modules_str = join([string(m) for m in all_modules], "`, `")
 
         overview, all_docstrings = if is_public_split
             # Case 1: Pure Public Split Page
-            _build_public_page_content(modules_str, module_contents)
+            _build_public_page_content(modules_str, module_contents, is_split)
         elseif is_private_split
             # Case 2: Pure Private Split Page
-            _build_private_page_content(modules_str, module_contents)
+            _build_private_page_content(modules_str, module_contents, is_split)
         else
             # Case 3: Combined Page (Public then Private)
             _build_combined_page_content(modules_str, module_contents)
@@ -1082,17 +1095,25 @@ function _build_combined_page_content(modules_str::String, module_contents)
 end
 
 """
-    _build_private_page_content(modules_str, module_contents) -> Tuple{String, Vector{String}}
+    _build_private_page_content(modules_str, module_contents, is_split) -> Tuple{String, Vector{String}}
 
 Build the overview and docstrings for a private API page.
+
+# Arguments
+- `modules_str`: Comma-separated list of module names
+- `module_contents`: Vector of (module, public_docs, private_docs) tuples
+- `is_split`: Whether this is part of a split public/private documentation
 """
-function _build_private_page_content(modules_str::String, module_contents)
+function _build_private_page_content(modules_str::String, module_contents, is_split::Bool)
+    # Choose title based on context
+    title = is_split ? "Private" : "Private API"
+    
     overview = """
     ```@meta
     EditURL = nothing
     ```
 
-    # API Reference
+    # $(title)
 
     This page lists **non-exported** (internal) symbols of `$(modules_str)`.
 
@@ -1110,13 +1131,21 @@ function _build_private_page_content(modules_str::String, module_contents)
 end
 
 """
-    _build_public_page_content(modules_str, module_contents) -> Tuple{String, Vector{String}}
+    _build_public_page_content(modules_str, module_contents, is_split) -> Tuple{String, Vector{String}}
 
 Build the overview and docstrings for a public API page.
+
+# Arguments
+- `modules_str`: Comma-separated list of module names
+- `module_contents`: Vector of (module, public_docs, private_docs) tuples
+- `is_split`: Whether this is part of a split public/private documentation
 """
-function _build_public_page_content(modules_str::String, module_contents)
+function _build_public_page_content(modules_str::String, module_contents, is_split::Bool)
+    # Choose title based on context
+    title = is_split ? "Public" : "Public API"
+    
     overview = """
-    # API Reference
+    # $(title)
 
     This page lists **exported** symbols of `$(modules_str)`.
 
