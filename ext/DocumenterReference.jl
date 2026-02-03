@@ -1078,6 +1078,10 @@ function _finalize_api_pages(document::Documenter.Document)
         custom_public_desc = config !== nothing ? CONFIG[config].public_description : ""
         custom_private_desc = config !== nothing ? CONFIG[config].private_description : ""
 
+        # Determine if this is a single-type page or truly combined
+        has_public = any(mc -> !isempty(mc[2]), module_contents)  # mc[2] = public_docs
+        has_private = any(mc -> !isempty(mc[3]), module_contents)  # mc[3] = private_docs
+        
         overview, all_docstrings = if is_public_split
             # Case 1: Pure Public Split Page
             _build_public_page_content(modules_str, module_contents, is_split; 
@@ -1088,8 +1092,18 @@ function _finalize_api_pages(document::Documenter.Document)
             _build_private_page_content(modules_str, module_contents, is_split;
                                        custom_title=custom_private_title,
                                        custom_description=custom_private_desc)
+        elseif has_public && !has_private
+            # Case 3: Single public-only page
+            _build_public_page_content(modules_str, module_contents, false;
+                                      custom_title=custom_public_title,
+                                      custom_description=custom_public_desc)
+        elseif has_private && !has_public
+            # Case 4: Single private-only page
+            _build_private_page_content(modules_str, module_contents, false;
+                                       custom_title=custom_private_title,
+                                       custom_description=custom_private_desc)
         else
-            # Case 3: Combined Page (Public then Private)
+            # Case 5: Combined Page (Public then Private)
             _build_combined_page_content(modules_str, module_contents)
         end
 
