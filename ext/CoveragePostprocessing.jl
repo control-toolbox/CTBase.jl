@@ -14,7 +14,7 @@ using Coverage
 
 # Main entry point for coverage post-processing
 """
-    CTBase.postprocess_coverage(::CTBase.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
+    CTBase.postprocess_coverage(::CTBase.Extensions.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
 
 Post-process coverage artifacts produced by `Pkg.test(; coverage=true)`.
 
@@ -30,6 +30,7 @@ This implementation:
 
 - `generate_report::Bool=true`: If `true`, write `coverage/lcov.info` and `coverage/cov_report.md`.
 - `root_dir::String=pwd()`: Root directory of the project.
+- `dest_dir::String="coverage"`: Destination directory for coverage artifacts.
 
 # Returns
 
@@ -48,7 +49,10 @@ using CTBase
 ```
 """
 function CTBase.postprocess_coverage(
-    ::CTBase.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd()
+    ::CTBase.Extensions.CoveragePostprocessingTag; 
+    generate_report::Bool=true, 
+    root_dir::String=pwd(),
+    dest_dir::String="coverage"
 )
     println("✓ Coverage post-processing start")
 
@@ -61,7 +65,7 @@ function CTBase.postprocess_coverage(
         end
     end
 
-    coverage_dir = joinpath(root_dir, "coverage")
+    coverage_dir = joinpath(root_dir, dest_dir)
     cov_storage_dir = joinpath(coverage_dir, "cov")
 
     _reset_coverage_dir(coverage_dir, cov_storage_dir)
@@ -84,9 +88,8 @@ function CTBase.postprocess_coverage(
     _clean_stale_cov_files!(source_dirs)
 
     n_cov = _count_cov_files(source_dirs)
-    if n_cov == 0
+    n_cov == 0 &&
         error("Coverage requested but no usable .cov files were found after cleanup.")
-    end
 
     generate_report && _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
 
@@ -285,8 +288,19 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
         println(io, "# Coverage report\n")
 
         println(io, "## Overall\n\n```shell")
-        show(io, Coverage.get_summary(cov));
+        summary = Coverage.get_summary(cov)
+        show(io, summary)
         println(io)
+        # Calculate and display global percentage from the summary string
+        # The summary is already displayed as "(826, 854)" format
+        summary_str = string(summary)
+        m = match(r"\((\d+),\s*(\d+)\)", summary_str)
+        if m !== nothing
+            covered_lines = parse(Int, m.captures[1])
+            total_lines = parse(Int, m.captures[2])
+            percentage = round((covered_lines / total_lines) * 100; digits=2)
+            println(io, "\nGlobal coverage: $(percentage)% ($(covered_lines), $(total_lines))")
+        end
         println(io, "```\n")
 
         println(io, "## Lowest-covered files (top 20)\n")

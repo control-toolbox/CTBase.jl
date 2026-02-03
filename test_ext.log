@@ -1,0 +1,191 @@
+     Testing CTBase
+      Status `/private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_SEUFgh/Project.toml`
+  [4c88cf16] Aqua v0.8.14
+  [54762871] CTBase v0.17.4 `~/Research/logiciels/dev/control-toolbox/CTBase`
+  [a2441757] Coverage v1.8.1
+  [ffbed154] DocStringExtensions v0.9.5
+  [e30172f5] Documenter v1.16.1
+  [d0879d2d] MarkdownAST v0.1.2
+  [bac558e1] OrderedCollections v1.8.1
+  [d6f4376e] Markdown v1.11.0
+  [8dfed614] Test v1.11.0
+      Status `/private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_SEUFgh/Manifest.toml`
+  [a4c015fc] ANSIColoredPrinters v0.0.1
+  [1520ce14] AbstractTrees v0.4.5
+  [4c88cf16] Aqua v0.8.14
+  [c7e460c6] ArgParse v1.2.0
+  [d1d4a3ce] BitFlags v0.1.9
+  [54762871] CTBase v0.17.4 `~/Research/logiciels/dev/control-toolbox/CTBase`
+  [944b1d66] CodecZlib v0.7.8
+  [34da2185] Compat v4.18.1
+  [f0e56b4a] ConcurrentUtilities v2.5.0
+  [a2441757] Coverage v1.8.1
+  [c36e975a] CoverageTools v1.4.1
+  [ffbed154] DocStringExtensions v0.9.5
+  [e30172f5] Documenter v1.16.1
+  [460bff9d] ExceptionUnwrapping v0.1.11
+  [d7ba0133] Git v1.5.0
+  [cd3eb016] HTTP v1.10.19
+  [b5f81e59] IOCapture v1.0.0
+  [692b3bcd] JLLWrappers v1.7.1
+  [682c06a0] JSON v1.4.0
+  [70703baa] JuliaSyntax v1.0.2
+  [0e77f7df] LazilyInitializedFields v1.3.0
+  [e6f89c97] LoggingExtras v1.2.0
+  [d0879d2d] MarkdownAST v0.1.2
+  [739be429] MbedTLS v1.1.9
+  [4d8831e6] OpenSSL v1.6.1
+  [bac558e1] OrderedCollections v1.8.1
+  [69de0a69] Parsers v2.8.3
+  [aea7be01] PrecompileTools v1.3.3
+  [21216c6a] Preferences v1.5.1
+  [2792f1a3] RegistryInstances v0.1.0
+  [6c6a2e73] Scratch v1.3.0
+  [777ac1f9] SimpleBufferStream v1.2.0
+  [ec057cc2] StructUtils v2.6.2
+  [b718987f] TextWrap v1.0.2
+  [3bb67fe8] TranscodingStreams v0.11.3
+  [5c2747f8] URIs v1.6.1
+  [2e619515] Expat_jll v2.7.3+0
+  [020c3dae] Git_LFS_jll v3.7.0+0
+  [f8c6e375] Git_jll v2.52.0+0
+  [94ce4f54] Libiconv_jll v1.18.0+0
+  [c8ffd9c3] MbedTLS_jll v2.28.1010+0
+  [9bd350c2] OpenSSH_jll v10.2.1+0
+  [0dad84c5] ArgTools v1.1.2
+  [56f22d72] Artifacts v1.11.0
+  [2a0f44e3] Base64 v1.11.0
+  [ade2ca70] Dates v1.11.0
+  [f43a241f] Downloads v1.6.0
+  [7b1f6079] FileWatching v1.11.0
+  [b77e0a4c] InteractiveUtils v1.11.0
+  [ac6e5ff7] JuliaSyntaxHighlighting v1.12.0
+  [b27032c2] LibCURL v0.6.4
+  [76f85450] LibGit2 v1.11.0
+  [8f399da3] Libdl v1.11.0
+  [56ddb016] Logging v1.11.0
+  [d6f4376e] Markdown v1.11.0
+  [ca575930] NetworkOptions v1.3.0
+  [44cfe95a] Pkg v1.12.0
+  [de0858da] Printf v1.11.0
+  [3fa0cd96] REPL v1.11.0
+  [9a3f8284] Random v1.11.0
+  [ea8e919c] SHA v0.7.0
+  [9e88b42a] Serialization v1.11.0
+  [6462fe0b] Sockets v1.11.0
+  [f489334b] StyledStrings v1.11.0
+  [fa267f1f] TOML v1.0.3
+  [a4e569a6] Tar v1.10.0
+  [8dfed614] Test v1.11.0
+  [cf7118a7] UUIDs v1.11.0
+  [4ec0a83e] Unicode v1.11.0
+  [deac9b47] LibCURL_jll v8.11.1+1
+  [e37daf67] LibGit2_jll v1.9.0+0
+  [29816b5a] LibSSH2_jll v1.11.3+1
+  [14a3606d] MozillaCACerts_jll v2025.5.20
+  [458c3c95] OpenSSL_jll v3.5.1+0
+  [efcefdf7] PCRE2_jll v10.44.0+1
+  [83775a58] Zlib_jll v1.3.1+2
+  [8e850ede] nghttp2_jll v1.64.0+1
+  [3f19e933] p7zip_jll v17.5.0+2
+     Testing Running tests...
+WARNING: Method definition _find_symbol_test_file_rel(Any, Any) in module TestRunner at /Users/ocots/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:98 overwritten at /Users/ocots/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:125.
+WARNING: Method definition kwcall(NamedTuple{names, T} where T<:Tuple where names, typeof(TestRunner._find_symbol_test_file_rel), Any, Any) in module TestRunner at /Users/ocots/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:98 overwritten at /Users/ocots/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:125.
+WARNING: Method definition test_baz() in module Main at /var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_jotrtG/test_baz.jl:1 overwritten on the same line (check for duplicate calls to `include`).
+[ Info: CoverageTools.process_folder: Searching /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_imKs6z/src for .jl files...
+[ Info: CoverageTools.process_file: Detecting coverage for /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_imKs6z/src/foo.jl
+[ Info: CoverageTools.process_cov: processing /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_imKs6z/src/foo.jl.1234.cov
+[ Info: CoverageTools.process_folder: Searching /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_imKs6z/test for .jl files...
+[ Info: CoverageTools.process_folder: Searching src for .jl files...
+[ Info: CoverageTools.process_file: Detecting coverage for src/foo.jl
+[ Info: CoverageTools.process_cov: processing src/foo.jl.1234.cov
+[ Info: CoverageTools.process_folder: Searching /var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_KtpdnW/src for .jl files...
+[ Info: CoverageTools.process_file: Detecting coverage for /var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_KtpdnW/src/bar.jl
+[ Info: CoverageTools.process_cov: processing /var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_KtpdnW/src/bar.jl.1234.cov
+┌ Warning: No documentation found for no_doc in Main.DocumenterReferenceTestMod. Skipping from API reference.
+└ @ DocumenterReference ~/Research/logiciels/dev/control-toolbox/CTBase/ext/DocumenterReference.jl:682
+┌ Warning: Unable to determine HTML(edit_link = ...) from remote HEAD branch, defaulting to "master".
+│ Calling `git remote` failed with an exception. Set JULIA_DEBUG=Documenter to see the error.
+│ Unless this is due to a configuration error, the relevant variable should be set explicitly.
+└ @ Documenter ~/.julia/packages/Documenter/xvqbW/src/utilities/utilities.jl:680
+[ Info: APIBuilder: creating API reference
+┌ Warning: No documentation found for AbstractFoo in Main.DocumenterReferenceTestMod. Skipping from API reference.
+└ @ DocumenterReference ~/Research/logiciels/dev/control-toolbox/CTBase/ext/DocumenterReference.jl:682
+┌ Warning: No documentation found for Foo in Main.DocumenterReferenceTestMod. Skipping from API reference.
+└ @ DocumenterReference ~/Research/logiciels/dev/control-toolbox/CTBase/ext/DocumenterReference.jl:682
+┌ Warning: No documentation found for MYCONST in Main.DocumenterReferenceTestMod. Skipping from API reference.
+└ @ DocumenterReference ~/Research/logiciels/dev/control-toolbox/CTBase/ext/DocumenterReference.jl:682
+┌ Warning: No documentation found for no_doc in Main.DocumenterReferenceTestMod. Skipping from API reference.
+└ @ DocumenterReference ~/Research/logiciels/dev/control-toolbox/CTBase/ext/DocumenterReference.jl:682
+ERROR: LoadError: Some tests did not pass: 261 passed, 1 failed, 0 errored, 0 broken.
+in expression starting at /Users/ocots/Research/logiciels/dev/control-toolbox/CTBase/test/runtests.jl:47
+DocumenterReference: Edge cases: Test Failed at /Users/ocots/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:141
+  Expression: Documenter.Selectors.order(DR.APIBuilder) == 0.0
+   Evaluated: 0.5 == 0.0
+
+Stacktrace:
+ [1] macro expansion
+   @ ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Test/src/Test.jl:680 [inlined]
+ [2] macro expansion
+   @ ~/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:141 [inlined]
+ [3] macro expansion
+   @ ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Test/src/Test.jl:1776 [inlined]
+ [4] macro expansion
+   @ ~/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:141 [inlined]
+ [5] macro expansion
+   @ ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Test/src/Test.jl:1776 [inlined]
+ [6] test_coverage_edge_cases()
+   @ Main.TestCoverageEdgeCases ~/Research/logiciels/dev/control-toolbox/CTBase/test/suite/extensions/test_coverage_edge_cases.jl:89
+✓ Coverage post-processing start
+✓ Reset coverage/ directory
+✓ Coverage post-processing start
+✓ Reset coverage/ directory
+Cleaned 1 existing .cov files from source directories
+✓ Moved 3 .cov files to /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_LSvG6w/coverage/cov
+✓ Coverage post-processing completed successfully
+✓ Coverage post-processing start
+✓ Reset coverage/ directory
+✓ Generating coverage report
+✓ Wrote coverage report to /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_imKs6z/coverage/lcov.info
+✓ Moved 1 .cov files to /private/var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_imKs6z/coverage/cov
+✓ Coverage post-processing completed successfully
+✓ Generating coverage report
+✓ Wrote coverage report to /var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_NpnMWE/coverage/lcov.info
+✓ Generating coverage report
+✓ Wrote coverage report to /var/folders/xh/6cj27y_n2_v3l0h35s5p5pkh0000gp/T/jl_FrIzXf/coverage/lcov.info
+Test Summary:                                    | Pass  Fail  Total   Time
+CTBase tests                                     |  261     1    262  11.6s
+  suite/extensions/test_coverage_edge_cases.jl   |    7     1      8   1.8s
+    Coverage and Test Edge Cases                 |    7     1      8   1.1s
+      TestRunner: file exists then disappears    |    4            4   0.0s
+      DocumenterReference: Edge cases            |    3     1      4   1.1s
+  suite/extensions/test_coverage_post_process.jl |   19           19   1.8s
+  suite/extensions/test_documenter_reference.jl  |  175          175   5.4s
+  suite/extensions/test_testrunner.jl            |   60           60   2.6s
+RNG of the outermost testset: Random.Xoshiro(0xc4c7a939a50c7a1d, 0x3b2986f825734f14, 0xde337c1fd7181b33, 0x47fc227b13ff1a46, 0xc52a9c1ed4d8a742)
+ERROR: Package CTBase errored during testing
+Stacktrace:
+  [1] pkgerror(msg::String)
+    @ Pkg.Types ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/Types.jl:68
+  [2] test(ctx::Pkg.Types.Context, pkgs::Vector{PackageSpec}; coverage::Bool, julia_args::Cmd, test_args::Cmd, test_fn::Nothing, force_latest_compatible_version::Bool, allow_earlier_backwards_compatible_versions::Bool, allow_reresolve::Bool)
+    @ Pkg.Operations ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/Operations.jl:2427
+  [3] test
+    @ ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/Operations.jl:2280 [inlined]
+  [4] test(ctx::Pkg.Types.Context, pkgs::Vector{PackageSpec}; coverage::Bool, test_fn::Nothing, julia_args::Cmd, test_args::Vector{String}, force_latest_compatible_version::Bool, allow_earlier_backwards_compatible_versions::Bool, allow_reresolve::Bool, kwargs::@Kwargs{io::IOContext{IO}})
+    @ Pkg.API ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/API.jl:484
+  [5] test(pkgs::Vector{PackageSpec}; io::IOContext{IO}, kwargs::@Kwargs{test_args::Vector{String}})
+    @ Pkg.API ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/API.jl:164
+  [6] test(pkgs::Vector{String}; kwargs::@Kwargs{test_args::Vector{String}})
+    @ Pkg.API ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/API.jl:152
+  [7] test
+    @ ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/API.jl:152 [inlined]
+  [8] #test#81
+    @ ~/.julia/juliaup/julia-1.12.1+0.aarch64.apple.darwin14/share/julia/stdlib/v1.12/Pkg/src/API.jl:151 [inlined]
+  [9] top-level scope
+    @ none:1
+ [10] eval(m::Module, e::Any)
+    @ Core ./boot.jl:489
+ [11] exec_options(opts::Base.JLOptions)
+    @ Base ./client.jl:283
+ [12] _start()
+    @ Base ./client.jl:550
