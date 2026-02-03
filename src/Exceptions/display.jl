@@ -77,22 +77,6 @@ function format_user_friendly_error(io::IO, e::CTException)
             println(io, "💡 Suggestion: ", e.suggestion)
         end
 
-    elseif e isa UnauthorizedCall
-        if !isnothing(e.user)
-            println(io, "👤 User: ", e.user)
-        end
-
-        if !isnothing(e.reason)
-            println(io, "❓ Reason: ", e.reason)
-        end
-
-        if !isnothing(e.context)
-            println(io, "📂 Context: ", e.context)
-        end
-
-        if !isnothing(e.suggestion)
-            println(io, "💡 Suggestion: ", e.suggestion)
-        end
 
     elseif e isa NotImplemented
         if !isnothing(e.required_method)
@@ -239,14 +223,7 @@ function Base.showerror(io::IO, e::PreconditionError)
     format_user_friendly_error(io, e)
 end
 
-"""
-    Base.showerror(io::IO, e::UnauthorizedCall)
 
-Custom error display for UnauthorizedCall.
-"""
-function Base.showerror(io::IO, e::UnauthorizedCall)
-    format_user_friendly_error(io, e)
-end
 
 """
     Base.showerror(io::IO, e::NotImplemented)

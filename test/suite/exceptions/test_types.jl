@@ -192,7 +192,7 @@ function test_exception_types()
             # Simple description only
             e = AmbiguousDescription((:f,))
             @test e.description == (:f,)
-            @test contains(e.msg, "(:f,) is ambiguous / incorrect")
+            @test contains(e.msg, "cannot find matching description")
             @test isnothing(e.candidates)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)

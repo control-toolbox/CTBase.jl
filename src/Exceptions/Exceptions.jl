@@ -8,7 +8,7 @@ fields for better error reporting, suggestions, and context.
 
 # Main Features
 
-1. **Enriched Exceptions**: `IncorrectArgument`, `UnauthorizedCall`, etc. with optional fields
+1. **Enriched Exceptions**: `IncorrectArgument`, `PreconditionError`, etc. with optional fields
 2. **User-Friendly Display**: Clear, formatted error messages with emojis and sections
 3. **Rich Context**: Detailed information for debugging and problem resolution
 
@@ -48,7 +48,7 @@ include("display.jl")
 
 # Export public API
 export CTException
-export IncorrectArgument, PreconditionError, UnauthorizedCall, NotImplemented, ParsingError
+export IncorrectArgument, PreconditionError, NotImplemented, ParsingError
 export AmbiguousDescription, ExtensionError
 
 end # module

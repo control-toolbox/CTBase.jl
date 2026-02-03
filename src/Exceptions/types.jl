@@ -51,8 +51,7 @@ This exception is raised when **one input value** is outside the allowed domain,
 - Type mismatches or invalid combinations
 
 Use this exception to signal that the problem is with the **input data itself**, not with
-the state of the system or the calling context. This is distinct from `UnauthorizedCall`,
-which indicates a state-related issue.
+the state of the system or the calling context.
 
 # Fields
 - `msg::String`: Main error message describing the problem
@@ -98,7 +97,6 @@ throw(CTBase.Exceptions.IncorrectArgument(
 ```
 
 # See Also
-- [`UnauthorizedCall`](@ref): For state-related or context-related errors
 - [`AmbiguousDescription`](@ref): For high-level description matching errors
 """
 struct IncorrectArgument <: CTException
@@ -179,7 +177,6 @@ throw(CTBase.Exceptions.PreconditionError(
 
 # See Also
 - [`IncorrectArgument`](@ref): For input validation errors
-- [`UnauthorizedCall`](@ref): For permission/security errors
 - [`NotImplemented`](@ref): For unimplemented interface methods
 """
 struct PreconditionError <: CTException
@@ -196,72 +193,7 @@ struct PreconditionError <: CTException
     ) = new(msg, reason, suggestion, context)
 end
 
-"""
-    UnauthorizedCall <: CTException
 
-Exception thrown when a function call is denied due to **insufficient permissions** or
-**security restrictions**.
-
-This exception is specifically for access control and authorization errors, such as:
-- User account is inactive or disabled
-- User lacks required permission level
-- Access to restricted resources
-- Security policy violations
-
-For errors related to preconditions or state validation, use `PreconditionError` instead.
-
-# Fields
-- `msg::String`: Main error message
-- `user::Union{String, Nothing}`: User or entity attempting the call (optional)
-- `reason::Union{String, Nothing}`: Why access is denied (optional)
-- `suggestion::Union{String, Nothing}`: How to resolve the issue (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
-
-# Examples
-
-```julia-repl
-julia> using CTBase
-
-julia> throw(CTBase.Exceptions.UnauthorizedCall("user does not have permission"))
-ERROR: UnauthorizedCall: user does not have permission
-```
-
-Typical pattern for permission checks:
-
-```julia
-function delete_data(user::User, data_id::String)
-    if !user.is_active
-        throw(CTBase.Exceptions.UnauthorizedCall(
-            "user account is not active",
-            user=user.name,
-            reason="Account disabled or suspended",
-            suggestion="Contact administrator to reactivate account",
-            context="delete_data - user validation"
-        ))
-    end
-    # ... delete data ...
-end
-```
-
-# See Also
-- [`PreconditionError`](@ref): For precondition and state validation errors
-- [`IncorrectArgument`](@ref): For input validation errors
-"""
-struct UnauthorizedCall <: CTException
-    msg::String
-    user::Union{String,Nothing}
-    reason::Union{String,Nothing}
-    suggestion::Union{String,Nothing}
-    context::Union{String,Nothing}
-
-    UnauthorizedCall(
-        msg::String;
-        user::Union{String,Nothing}=nothing,
-        reason::Union{String,Nothing}=nothing,
-        suggestion::Union{String,Nothing}=nothing,
-        context::Union{String,Nothing}=nothing,
-    ) = new(msg, user, reason, suggestion, context)
-end
 
 """
     NotImplemented <: CTException
@@ -319,7 +251,6 @@ throw(CTBase.Exceptions.NotImplemented(
 ```
 
 # See Also
-- [`UnauthorizedCall`](@ref): For state-related errors
 - [`IncorrectArgument`](@ref): For input validation errors
 """
 struct NotImplemented <: CTException

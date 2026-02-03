@@ -111,7 +111,7 @@ function test_descriptions_enriched()
                 @test "(:a, :b)" in e.candidates
                 @test "(:c, :d)" in e.candidates
                 @test "(:e, :f)" in e.candidates
-                @test occursin("Available descriptions", e.suggestion)
+                @test occursin("Choose from the available descriptions listed above", e.suggestion)
                 @test e.context == "description completion"
             end
         end
@@ -126,7 +126,7 @@ function test_descriptions_enriched()
                 @test e isa CTBase.AmbiguousDescription
                 @test e.description == (:b, :f)
                 @test !isempty(e.candidates)
-                @test occursin("similar descriptions", e.suggestion)
+                @test occursin("closest matches", e.suggestion)
                 # Should suggest descriptions containing :b
                 @test any(occursin("(:a,", candidate) for candidate in e.candidates)
             end

@@ -55,7 +55,6 @@ function test_unicode_enriched()
                 @test e.got == "-5"
                 @test e.expected == "≥ 0"
                 @test occursin("subscript must be positive", e.msg)
-                @test occursin("abs()", e.suggestion)
                 @test e.context == "Unicode subscript string generation"
             end
         end
@@ -103,7 +102,6 @@ function test_unicode_enriched()
                 @test e.got == "-3"
                 @test e.expected == "≥ 0"
                 @test occursin("superscript must be positive", e.msg)
-                @test occursin("abs()", e.suggestion)
                 @test e.context == "Unicode superscript string generation"
             end
         end

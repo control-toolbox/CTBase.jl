@@ -102,41 +102,6 @@ testing.
 Use `NotImplemented` when defining *interfaces* and you want an explicit,
 typed error rather than a generic `error("TODO")`.
 
-## [UnauthorizedCall](@id unauthorized-call-tutorial)
-
-```julia
-CTBase.UnauthorizedCall <: CTBase.CTException
-```
-
-Signals that a function call is not allowed in the **current state** of the
-object or system. This is different from `IncorrectArgument`: here the
-arguments may be valid, but the call is forbidden because of *when* or *how*
-it is made.
-
-A common pattern is a method that is meant to be called only once:
-
-```julia
-function finalize!(s::SomeState)
-    if s.is_finalized
-        throw(CTBase.UnauthorizedCall("finalize! was already called for this state"))
-    end
-    # ... perform finalisation and mark state as finalised ...
-end
-```
-
-Use `UnauthorizedCall` when the calling context is invalid (wrong phase of a
-computation, method already called, state already closed, missing
-permissions, illegal order of calls, etc.).
-
-It is also used internally by `ExtensionError` when it is called without any
-weak dependencies:
-
-```julia-repl
-julia> using CTBase
-
-julia> CTBase.ExtensionError()
-ERROR: UnauthorizedCall: Please provide at least one weak dependence for the extension.
-```
 
 ## [ParsingError](@id parsing-error-tutorial)
 
