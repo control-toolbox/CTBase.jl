@@ -65,7 +65,6 @@ function ctindices(i::Int)::String
             "the subscript must be positive",
             got=string(i),
             expected="≥ 0",
-            suggestion="Use abs() to get the absolute value, or check your input calculation",
             context="Unicode subscript string generation"
         ))
     end
@@ -142,7 +141,6 @@ function ctupperscripts(i::Int)::String
             "the superscript must be positive",
             got=string(i),
             expected="≥ 0",
-            suggestion="Use abs() to get the absolute value, or check your input calculation",
             context="Unicode superscript string generation"
         ))
     end

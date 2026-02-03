@@ -37,126 +37,155 @@ Display an error in a user-friendly format with clear sections and user code loc
 - `e::CTException`: The exception to display
 """
 function format_user_friendly_error(io::IO, e::CTException)
-    println(io, "\n" * "━"^70)
-    printstyled(io, "❌ Control Toolbox Error\n"; color=:red, bold=true)
-    println(io, "━"^70)
+    #println(io, "\n" * "━"^70)
+    printstyled(io, "Control Toolbox Error\n"; color=:red, bold=true)
+    #println(io, "─"^28)
 
     # Main problem
-    println(io, "\n📋 Problem:")
-    println(io, "   ", typeof(e).name, ": ", e.msg)
+    print(io, "\n❌ Error: ")
+    printstyled(io, typeof(e); color=:red, bold=true)
+    println(io, ", ", e.msg)
 
     # Type-specific details
     if e isa IncorrectArgument
         if !isnothing(e.got)
-            println(io, "\n🔍 Details:")
-            println(io, "   Got:      ", e.got)
+            print(io, "🔍 Got: ", e.got)
             if !isnothing(e.expected)
-                println(io, "   Expected: ", e.expected)
+                print(io, ", Expected: ", e.expected)
             end
+            println(io)
         end
 
         if !isnothing(e.context)
-            println(io, "\n📂 Context:")
-            println(io, "   ", e.context)
+            println(io, "📂 Context: ", e.context)
         end
 
         if !isnothing(e.suggestion)
-            println(io, "\n💡 Suggestion:")
-            println(io, "   ", e.suggestion)
+            println(io, "💡 Suggestion: ", e.suggestion)
+        end
+
+    elseif e isa PreconditionError
+        if !isnothing(e.reason)
+            println(io, "❓ Reason: ", e.reason)
+        end
+
+        if !isnothing(e.context)
+            println(io, "📂 Context: ", e.context)
+        end
+
+        if !isnothing(e.suggestion)
+            println(io, "💡 Suggestion: ", e.suggestion)
         end
 
     elseif e isa UnauthorizedCall
+        if !isnothing(e.user)
+            println(io, "👤 User: ", e.user)
+        end
+
         if !isnothing(e.reason)
-            println(io, "\n❓ Reason:")
-            println(io, "   ", e.reason)
+            println(io, "❓ Reason: ", e.reason)
         end
 
         if !isnothing(e.context)
-            println(io, "\n📂 Context:")
-            println(io, "   ", e.context)
+            println(io, "📂 Context: ", e.context)
         end
 
         if !isnothing(e.suggestion)
-            println(io, "\n💡 Suggestion:")
-            println(io, "   ", e.suggestion)
+            println(io, "💡 Suggestion: ", e.suggestion)
         end
 
     elseif e isa NotImplemented
-        if !isnothing(e.type_info)
-            println(io, "\n🔧 Type:")
-            println(io, "   ", e.type_info)
+        if !isnothing(e.required_method)
+            println(io, "🔧 Required method: ", e.required_method)
         end
 
         if !isnothing(e.context)
-            println(io, "\n📂 Context:")
-            println(io, "   ", e.context)
+            println(io, "📂 Context: ", e.context)
         end
 
         if !isnothing(e.suggestion)
-            println(io, "\n💡 Suggestion:")
-            println(io, "   ", e.suggestion)
+            println(io, "💡 Suggestion: ", e.suggestion)
         end
 
     elseif e isa ParsingError
         if !isnothing(e.location)
-            println(io, "\n📍 Location:")
-            println(io, "   ", e.location)
+            println(io, "📍 Location: ", e.location)
         end
 
         if !isnothing(e.suggestion)
-            println(io, "\n💡 Suggestion:")
-            println(io, "   ", e.suggestion)
+            println(io, "💡 Suggestion: ", e.suggestion)
         end
 
     elseif e isa AmbiguousDescription
-        println(io, "\n🔍 Description:")
-        println(io, "   ", e.description)
+        # Show diagnostic first for clarity - on one line
+        if !isnothing(e.diagnostic)
+            print(io, "⚠️  Diagnostic: ")
+            if e.diagnostic == "empty catalog"
+                printstyled(io, "Empty catalog"; color=:yellow, bold=true)
+                print(io, " - no descriptions available")
+            elseif e.diagnostic == "unknown symbols"
+                printstyled(io, "Unknown symbols"; color=:yellow, bold=true)
+                print(io, " - none of the requested symbols appear in any available description")
+            elseif e.diagnostic == "no complete match"
+                printstyled(io, "No complete match"; color=:yellow, bold=true)
+                print(io, " - no available description contains all the requested symbols")
+            else
+                print(io, e.diagnostic)
+            end
+            println(io)
+        end
+        
+        # Requested description on one line
+        println(io, "🎯 Requested description: ", e.description)
 
-        if !isnothing(e.candidates)
-            println(io, "\n💡 Valid candidates:")
+        if !isnothing(e.candidates) && !isempty(e.candidates)
+            println(io, "📋 Available descriptions:")
             for candidate in e.candidates
                 println(io, "   - ", candidate)
             end
         end
 
         if !isnothing(e.context)
-            println(io, "\n📂 Context:")
-            println(io, "   ", e.context)
+            println(io, "📂 Context: ", e.context)
         end
 
+        # Suggestion on one line
         if !isnothing(e.suggestion)
-            println(io, "\n💡 Suggestion:")
-            println(io, "   ", e.suggestion)
+            print(io, "💡 Suggestion: ", e.suggestion)
+            
+            # Show closest matches directly in the suggestion if it ends with ":"
+            if endswith(strip(e.suggestion), ":") && contains(e.suggestion, "closest matches")
+                if !isnothing(e.candidates) && !isempty(e.candidates)
+                    # Show up to 3 candidates as closest matches
+                    max_show = min(3, length(e.candidates))
+                    for i in 1:max_show
+                        if i == 1
+                            print(io, " ", e.candidates[i])
+                        else
+                            print(io, ", ", e.candidates[i])
+                        end
+                    end
+                end
+            end
+            println(io)
         end
 
     elseif e isa ExtensionError
-        println(io, "\n📦 Missing dependencies:")
+        # Missing dependencies on one line
+        print(io, "📦 Missing dependencies: ")
         for (i, dep) in enumerate(e.weakdeps)
             if i == 1
-                print(io, "   ", dep)
+                print(io, dep)
             else
                 print(io, ", ", dep)
             end
         end
         println(io)
 
-        if !isnothing(e.feature)
-            println(io, "\n🔧 Feature:")
-            println(io, "   ", e.feature)
-        end
-
-        if !isnothing(e.context)
-            println(io, "\n📂 Context:")
-            println(io, "   ", e.context)
-        end
-
-        if !isempty(e.msg) && e.msg != "missing dependencies"
-            println(io, "\n🎯 Purpose:")
-            println(io, "   ", e.msg)
-        end
-
-        println(io, "\n💡 Suggestion:")
-        printstyled(io, "   julia> using "; color=:green)
+        # Suggestion on one line
+        print(io, "💡 Suggestion: ")
+        printstyled(io, "julia>"; color=:green, bold=true)
+        printstyled(io, " using "; color=:magenta)
         for (i, dep) in enumerate(e.weakdeps)
             if i == 1
                 print(io, dep)
@@ -170,7 +199,7 @@ function format_user_friendly_error(io::IO, e::CTException)
     # Add user code location
     user_frames = extract_user_frames(stacktrace(catch_backtrace()))
     if !isempty(user_frames)
-        println(io, "\n📍 In your code:")
+        println(io, "📍 In your code:")
         # Show up to 3 most relevant user frames
         for (i, frame) in enumerate(user_frames[1:min(3, length(user_frames))])
             file_name = basename(string(frame.file))
@@ -179,45 +208,35 @@ function format_user_friendly_error(io::IO, e::CTException)
 
             if i == 1
                 # The most recent frame (where error occurred)
-                println(io, "   $func_name at $file_name:$line_info")
+                println(io, "     $func_name at $file_name:$line_info")
             else
-                # Previous frames (call stack)
-                println(io, "   called from $func_name at $file_name:$line_info")
+                # Previous frames (call stack) - show call hierarchy with visual arrows
+                arrow_prefix = "     " * "    "^(i-2) * "└── "
+                println(io, "$(arrow_prefix)$func_name at $file_name:$line_info")
             end
         end
     end
 
-    # Stacktrace info
-    if !SHOW_FULL_STACKTRACE[]
-        println(io, "\n💬 Note:")
-        println(io, "   For full Julia stacktrace, run:")
-        printstyled(io, "   CTBase.set_show_full_stacktrace!(true)\n"; color=:cyan)
-    end
-
-    println(io, "━"^70 * "\n")
+    #println(io, "━"^70 * "\n")
 end
 
 """
     Base.showerror(io::IO, e::IncorrectArgument)
 
 Custom error display for IncorrectArgument.
-Shows user-friendly format if SHOW_FULL_STACKTRACE is false.
+Shows user-friendly format with enriched information.
 """
 function Base.showerror(io::IO, e::IncorrectArgument)
-    if SHOW_FULL_STACKTRACE[]
-        # Standard Julia error display
-        printstyled(io, "IncorrectArgument"; color=:red, bold=true)
-        print(io, ": ", e.msg)
-        if !isnothing(e.got)
-            print(io, " (got: ", e.got, ")")
-        end
-        if !isnothing(e.expected)
-            print(io, " (expected: ", e.expected, ")")
-        end
-    else
-        # User-friendly display
-        format_user_friendly_error(io, e)
-    end
+    format_user_friendly_error(io, e)
+end
+
+"""
+    Base.showerror(io::IO, e::PreconditionError)
+
+Custom error display for PreconditionError.
+"""
+function Base.showerror(io::IO, e::PreconditionError)
+    format_user_friendly_error(io, e)
 end
 
 """
@@ -226,15 +245,7 @@ end
 Custom error display for UnauthorizedCall.
 """
 function Base.showerror(io::IO, e::UnauthorizedCall)
-    if SHOW_FULL_STACKTRACE[]
-        printstyled(io, "UnauthorizedCall"; color=:red, bold=true)
-        print(io, ": ", e.msg)
-        if !isnothing(e.reason)
-            print(io, " (reason: ", e.reason, ")")
-        end
-    else
-        format_user_friendly_error(io, e)
-    end
+    format_user_friendly_error(io, e)
 end
 
 """
@@ -243,12 +254,7 @@ end
 Custom error display for NotImplemented.
 """
 function Base.showerror(io::IO, e::NotImplemented)
-    if SHOW_FULL_STACKTRACE[]
-        printstyled(io, "NotImplemented"; color=:red, bold=true)
-        print(io, ": ", e.msg)
-    else
-        format_user_friendly_error(io, e)
-    end
+    format_user_friendly_error(io, e)
 end
 
 """
@@ -257,15 +263,7 @@ end
 Custom error display for ParsingError.
 """
 function Base.showerror(io::IO, e::ParsingError)
-    if SHOW_FULL_STACKTRACE[]
-        printstyled(io, "ParsingError"; color=:red, bold=true)
-        print(io, ": ", e.msg)
-        if !isnothing(e.location)
-            print(io, " (at: ", e.location, ")")
-        end
-    else
-        format_user_friendly_error(io, e)
-    end
+    format_user_friendly_error(io, e)
 end
 
 """
@@ -274,15 +272,7 @@ end
 Custom error display for AmbiguousDescription.
 """
 function Base.showerror(io::IO, e::AmbiguousDescription)
-    if SHOW_FULL_STACKTRACE[]
-        printstyled(io, "AmbiguousDescription"; color=:red, bold=true)
-        print(io, ": the description ", e.description, " is ambiguous / incorrect")
-        if !isnothing(e.context)
-            print(io, " (context: ", e.context, ")")
-        end
-    else
-        format_user_friendly_error(io, e)
-    end
+    format_user_friendly_error(io, e)
 end
 
 """
@@ -291,24 +281,5 @@ end
 Custom error display for ExtensionError.
 """
 function Base.showerror(io::IO, e::ExtensionError)
-    if SHOW_FULL_STACKTRACE[]
-        printstyled(io, "ExtensionError"; color=:red, bold=true)
-        print(io, ". Please make: ")
-        printstyled(io, "julia>"; color=:green, bold=true)
-        printstyled(io, " using "; color=:magenta)
-        N = length(e.weakdeps)
-        for i in 1:N
-            wd = e.weakdeps[i]
-            if i < N
-                print(io, string(wd), ", ")
-            else
-                print(io, string(wd))
-            end
-        end
-        if !isempty(e.msg) && e.msg != "missing dependencies"
-            print(io, " ", e.msg)
-        end
-    else
-        format_user_friendly_error(io, e)
-    end
+    format_user_friendly_error(io, e)
 end

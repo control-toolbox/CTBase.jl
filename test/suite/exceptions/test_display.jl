@@ -23,15 +23,13 @@ function test_exception_display()
             )
             
             # User-friendly display (default)
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
             # Check for key sections in user-friendly display
             @test contains(output, "Control Toolbox Error")
-            @test contains(output, "Problem:")
             @test contains(output, "Test error")
-            @test contains(output, "Details:")
             @test contains(output, "Got:")
             @test contains(output, "value1")
             @test contains(output, "Expected:")
@@ -51,87 +49,89 @@ function test_exception_display()
             )
             
             # Full stacktrace display
-            CTBase.set_show_full_stacktrace!(true)
+            # CTBase.set_show_full_stacktrace!(true)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
-            # Check for standard Julia error format
+            # Check for compact format
             @test contains(output, "IncorrectArgument")
             @test contains(output, "Test error")
-            @test contains(output, "got: value1")
-            @test contains(output, "expected: value2")
+            @test contains(output, "Got:")
+            @test contains(output, "value1")
+            @test contains(output, "Expected:")
+            @test contains(output, "value2")
             
             # Reset to default
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
         end
         
         @testset "IncorrectArgument - Minimal Display" begin
             io = IOBuffer()
             e = IncorrectArgument("Simple error")
             
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
             @test contains(output, "Simple error")
-            @test contains(output, "Problem:")
+        end
+        
+        @testset "PreconditionError - User-Friendly Display" begin
+            io = IOBuffer()
+            e = PreconditionError(
+                "State must be set before dynamics",
+                reason="state has not been defined yet",
+                suggestion="Call state!(ocp, dimension) before dynamics!",
+                context="dynamics! function"
+            )
+            
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+            
+            @test contains(output, "Control Toolbox Error")
+            @test contains(output, "State must be set before dynamics")
+            @test contains(output, "Reason:")
+            @test contains(output, "state has not been defined yet")
+            @test contains(output, "Suggestion:")
+            @test contains(output, "Call state!(ocp, dimension)")
         end
         
         @testset "UnauthorizedCall - User-Friendly Display" begin
             io = IOBuffer()
             e = UnauthorizedCall(
-                "Cannot call function",
-                reason="already called",
-                suggestion="Create new instance",
-                context="state! function"
+                "insufficient permissions",
+                user="alice",
+                reason="User level: GUEST, Required: ADMIN",
+                suggestion="Request elevated permissions",
+                context="permission validation"
             )
             
-            CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
             @test contains(output, "Control Toolbox Error")
-            @test contains(output, "Cannot call function")
+            @test contains(output, "insufficient permissions")
+            @test contains(output, "User:")
+            @test contains(output, "alice")
             @test contains(output, "Reason:")
-            @test contains(output, "already called")
+            @test contains(output, "User level: GUEST")
             @test contains(output, "Suggestion:")
-            @test contains(output, "Create new instance")
-        end
-        
-        @testset "UnauthorizedCall - Full Stacktrace Display" begin
-            io = IOBuffer()
-            e = UnauthorizedCall("Test", reason="test reason")
-            
-            CTBase.set_show_full_stacktrace!(true)
-            @test_nowarn showerror(io, e)
-            output = String(take!(io))
-            
-            @test contains(output, "UnauthorizedCall")
-            @test contains(output, "Test")
-            @test contains(output, "reason: test reason")
-            
-            CTBase.set_show_full_stacktrace!(false)
+            @test contains(output, "Request elevated permissions")
         end
         
         @testset "NotImplemented - Display" begin
             io = IOBuffer()
-            e = NotImplemented("Feature not implemented", type_info="MyType")
+            e = NotImplemented("Feature not implemented", required_method="MyType")
             
             # User-friendly
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             @test contains(output, "Feature not implemented")
-            @test contains(output, "Type:")
+            @test contains(output, "Required method:")
             @test contains(output, "MyType")
             
-            # Full stacktrace
-            CTBase.set_show_full_stacktrace!(true)
-            @test_nowarn showerror(io, e)
-            output = String(take!(io))
-            @test contains(output, "NotImplemented")
-            
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
         end
         
         @testset "ParsingError - Display" begin
@@ -139,21 +139,14 @@ function test_exception_display()
             e = ParsingError("Syntax error", location="line 42")
             
             # User-friendly
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             @test contains(output, "Syntax error")
             @test contains(output, "Location:")
             @test contains(output, "line 42")
             
-            # Full stacktrace
-            CTBase.set_show_full_stacktrace!(true)
-            @test_nowarn showerror(io, e)
-            output = String(take!(io))
-            @test contains(output, "ParsingError")
-            @test contains(output, "at: line 42")
-            
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
         end
         
         @testset "Display - No Crash on Edge Cases" begin
@@ -189,23 +182,16 @@ function test_exception_display()
             )
             
             # User-friendly
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             @test contains(output, "AmbiguousDescription")
             @test contains(output, "(:f,)")
-            @test contains(output, "Valid candidates:")
+            @test contains(output, "Available descriptions:")
             @test contains(output, "(:a, :b)")
             @test contains(output, "algorithm selection")
             
-            # Full stacktrace
-            CTBase.set_show_full_stacktrace!(true)
-            @test_nowarn showerror(io, e)
-            output = String(take!(io))
-            @test contains(output, "AmbiguousDescription")
-            @test contains(output, "(:f,) is ambiguous / incorrect")
-            
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
         end
         
         @testset "ExtensionError - Display" begin
@@ -218,25 +204,16 @@ function test_exception_display()
             )
             
             # User-friendly
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             @test contains(output, "ExtensionError")
             @test contains(output, "Missing dependencies:")
             @test contains(output, "Plots")
             @test contains(output, "PlotlyJS")
-            @test contains(output, "plotting functionality")
             @test contains(output, "julia> using")
             
-            # Full stacktrace
-            CTBase.set_show_full_stacktrace!(true)
-            @test_nowarn showerror(io, e)
-            output = String(take!(io))
-            @test contains(output, "ExtensionError")
-            @test contains(output, "Please make:")
-            @test contains(output, "using Plots, PlotlyJS")
-            
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
         end
         
         @testset "extract_user_frames function" begin
@@ -261,7 +238,7 @@ function test_exception_display()
             # Test with only required field (msg)
             e = NotImplemented("Not implemented feature")
             
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
@@ -277,18 +254,18 @@ function test_exception_display()
             io = IOBuffer()
             e = NotImplemented(
                 "Not implemented feature";
-                type_info="MyType",
+                required_method="MyType",
                 context="testing context",
                 suggestion="use this instead",
             )
 
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
 
             @test contains(output, "NotImplemented")
             @test contains(output, "Not implemented feature")
-            @test contains(output, "Type:")
+            @test contains(output, "Required method:")
             @test contains(output, "MyType")
             @test contains(output, "Context:")
             @test contains(output, "testing context")
@@ -301,7 +278,7 @@ function test_exception_display()
             # Test with only required field (msg)
             e = ParsingError("Parse error")
             
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
@@ -316,7 +293,7 @@ function test_exception_display()
             io = IOBuffer()
             e = ParsingError("Parse error"; location="line 10", suggestion="check syntax")
 
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
 
@@ -333,7 +310,7 @@ function test_exception_display()
             # Test with only required fields
             e = ExtensionError(:TestDep)
             
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
@@ -350,7 +327,7 @@ function test_exception_display()
             io = IOBuffer()
             e = IncorrectArgument("Test error for location")
             
-            CTBase.set_show_full_stacktrace!(false)
+            # CTBase.set_show_full_stacktrace!(false)
 
             # We must throw and catch the error to have a valid backtrace
             try

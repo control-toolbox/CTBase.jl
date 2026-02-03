@@ -71,7 +71,7 @@ function test_exceptions()
         # Test enriched version
         e_enriched = CTBase.NotImplemented(
             "method not implemented",
-            type_info="MyAbstractType",
+            required_method="MyAbstractType",
             suggestion="Implement this method for your concrete type",
             context="algorithm execution"
         )
@@ -84,6 +84,31 @@ function test_exceptions()
         @test occursin("algorithm execution", output_enriched)
     end
 
+    # Test PreconditionError
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "PreconditionError" begin
+        e = CTBase.PreconditionError("state must be set before dynamics")
+        @test_throws CTBase.PreconditionError throw(e)
+        output = sprint(showerror, e)
+        @test typeof(output) == String
+        @test occursin("PreconditionError", output)
+        @test occursin("state must be set before dynamics", output)
+        
+        # Test enriched version
+        e_enriched = CTBase.PreconditionError(
+            "Cannot call state! twice",
+            reason="state has already been defined for this OCP",
+            suggestion="Create a new OCP instance",
+            context="state definition"
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Reason", output_enriched)
+        @test occursin("state has already been defined", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Create a new OCP instance", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("state definition", output_enriched)
+    end
+
     # Test UnauthorizedCall
     @testset verbose = VERBOSE showtiming = SHOWTIMING "UnauthorizedCall" begin
         e = CTBase.UnauthorizedCall("access denied")
@@ -93,20 +118,23 @@ function test_exceptions()
         @test occursin("UnauthorizedCall", output)
         @test occursin("access denied", output)
         
-        # Test enriched version
+        # Test enriched version with user field
         e_enriched = CTBase.UnauthorizedCall(
-            "operation not allowed",
-            reason="object already finalized",
-            suggestion="Create a new instance",
-            context="finalization"
+            "insufficient permissions",
+            user="alice",
+            reason="User level: GUEST, Required: ADMIN",
+            suggestion="Request elevated permissions from administrator",
+            context="permission validation"
         )
         output_enriched = sprint(showerror, e_enriched)
+        @test occursin("User", output_enriched)
+        @test occursin("alice", output_enriched)
         @test occursin("Reason", output_enriched)
-        @test occursin("object already finalized", output_enriched)
+        @test occursin("User level: GUEST", output_enriched)
         @test occursin("Suggestion", output_enriched)
-        @test occursin("Create a new instance", output_enriched)
+        @test occursin("Request elevated permissions", output_enriched)
         @test occursin("Context", output_enriched)
-        @test occursin("finalization", output_enriched)
+        @test occursin("permission validation", output_enriched)
     end
 
     # Test ParsingError
@@ -134,7 +162,7 @@ function test_exceptions()
     # Test ExtensionError
     @testset verbose = VERBOSE showtiming = SHOWTIMING "ExtensionError" begin
         # Test constructor throws if no dependencies provided
-        @test_throws CTBase.UnauthorizedCall CTBase.ExtensionError()
+        @test_throws CTBase.PreconditionError CTBase.ExtensionError()
         # Create with one weak dependency
         e = CTBase.ExtensionError(:MyExt)
         @test_throws CTBase.ExtensionError throw(e)

@@ -14,7 +14,7 @@ function test_extensions_enriched()
         
         @testset "ExtensionError Contract Implementation" begin
             # Test constructor throws if no dependencies provided
-            @test_throws CTBase.UnauthorizedCall CTBase.ExtensionError()
+            @test_throws CTBase.PreconditionError CTBase.ExtensionError()
             
             # Test enriched ExtensionError creation
             e = CTBase.ExtensionError(
@@ -81,13 +81,13 @@ function test_extensions_enriched()
         
         @testset "ExtensionError Constructor Validation" begin
             @testset "No dependencies provided" begin
-                @test_throws CTBase.UnauthorizedCall CTBase.ExtensionError()
+                @test_throws CTBase.PreconditionError CTBase.ExtensionError()
                 
                 try
                     CTBase.ExtensionError()
                     @test false  # Should not reach here
                 catch e
-                    @test e isa CTBase.UnauthorizedCall
+                    @test e isa CTBase.PreconditionError
                     @test occursin("weak dependence", e.msg)
                     @test occursin("ExtensionError called without dependencies", e.reason)
                 end

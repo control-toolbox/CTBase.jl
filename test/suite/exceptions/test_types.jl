@@ -14,6 +14,7 @@ function test_exception_types()
         @testset "CTException Hierarchy" begin
             # Test that all exceptions inherit from CTException
             @test IncorrectArgument("test") isa CTException
+            @test PreconditionError("test") isa CTException
             @test UnauthorizedCall("test") isa CTException
             @test NotImplemented("test") isa CTException
             @test ParsingError("test") isa CTException
@@ -22,6 +23,7 @@ function test_exception_types()
             
             # Test that they are also standard Exceptions
             @test IncorrectArgument("test") isa Exception
+            @test PreconditionError("test") isa Exception
             @test UnauthorizedCall("test") isa Exception
             @test NotImplemented("test") isa Exception
             @test ParsingError("test") isa Exception
@@ -64,22 +66,22 @@ function test_exception_types()
             @test_throws IncorrectArgument throw(IncorrectArgument("Test error"))
         end
         
-        @testset "UnauthorizedCall - Construction" begin
+        @testset "PreconditionError - Construction" begin
             # Simple message only
-            e = UnauthorizedCall("State already set")
-            @test e.msg == "State already set"
+            e = PreconditionError("State must be set before dynamics")
+            @test e.msg == "State must be set before dynamics"
             @test isnothing(e.reason)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
             
             # With reason
-            e = UnauthorizedCall("Cannot call", reason="already called")
+            e = PreconditionError("Cannot call", reason="precondition not met")
             @test e.msg == "Cannot call"
-            @test e.reason == "already called"
+            @test e.reason == "precondition not met"
             @test isnothing(e.suggestion)
             
             # With all fields
-            e = UnauthorizedCall(
+            e = PreconditionError(
                 "Cannot call state! twice",
                 reason="state has already been defined for this OCP",
                 suggestion="Create a new OCP instance",
@@ -91,6 +93,40 @@ function test_exception_types()
             @test e.context == "state! function"
             
             # Test that it can be thrown
+            @test_throws PreconditionError throw(PreconditionError("Test error"))
+        end
+        
+        @testset "UnauthorizedCall - Construction" begin
+            # Simple message only
+            e = UnauthorizedCall("access denied")
+            @test e.msg == "access denied"
+            @test isnothing(e.user)
+            @test isnothing(e.reason)
+            @test isnothing(e.suggestion)
+            @test isnothing(e.context)
+            
+            # With user and reason
+            e = UnauthorizedCall("insufficient permissions", user="alice", reason="account inactive")
+            @test e.msg == "insufficient permissions"
+            @test e.user == "alice"
+            @test e.reason == "account inactive"
+            @test isnothing(e.suggestion)
+            
+            # With all fields
+            e = UnauthorizedCall(
+                "user account is not active",
+                user="bob",
+                reason="Account disabled or suspended",
+                suggestion="Contact administrator to reactivate account",
+                context="security check"
+            )
+            @test e.msg == "user account is not active"
+            @test e.user == "bob"
+            @test e.reason == "Account disabled or suspended"
+            @test e.suggestion == "Contact administrator to reactivate account"
+            @test e.context == "security check"
+            
+            # Test that it can be thrown
             @test_throws UnauthorizedCall throw(UnauthorizedCall("Test error"))
         end
         
@@ -98,26 +134,26 @@ function test_exception_types()
             # Simple message only
             e = NotImplemented("run! not implemented")
             @test e.msg == "run! not implemented"
-            @test isnothing(e.type_info)
+            @test isnothing(e.required_method)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
             
-            # With type info
-            e = NotImplemented("run! not implemented", type_info="MyAlgorithm")
+            # With required method
+            e = NotImplemented("run! not implemented", required_method="run!(::MyAlgorithm, state)")
             @test e.msg == "run! not implemented"
-            @test e.type_info == "MyAlgorithm"
+            @test e.required_method == "run!(::MyAlgorithm, state)"
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
             
             # With all fields (NEW)
             e = NotImplemented(
                 "Method solve! not implemented",
-                type_info="MyStrategy",
+                required_method="solve!(::MyStrategy, ...)",
                 context="solve call",
                 suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
             )
             @test e.msg == "Method solve! not implemented"
-            @test e.type_info == "MyStrategy"
+            @test e.required_method == "solve!(::MyStrategy, ...)"
             @test e.context == "solve call"
             @test e.suggestion == "Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
             
@@ -216,7 +252,7 @@ function test_exception_types()
             @test_throws ExtensionError throw(ExtensionError(:TestExt))
             
             # Test error when no dependencies provided
-            @test_throws UnauthorizedCall ExtensionError()
+            @test_throws PreconditionError ExtensionError()
         end
     end
 end

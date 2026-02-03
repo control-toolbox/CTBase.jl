@@ -16,21 +16,21 @@ function test_descriptions_enriched()
             # Test identical descriptions
             desc1 = (:a, :b)
             desc2 = (:a, :b)
-            @test CTBase.compute_similarity(desc1, desc2) == 1.0
+            @test CTBase.Descriptions.compute_similarity(desc1, desc2) == 1.0
             
             # Test partial similarity
             desc3 = (:a, :c)
             desc4 = (:a, :b, :c)
-            @test CTBase.compute_similarity(desc3, desc4) == 2/3
+            @test CTBase.Descriptions.compute_similarity(desc3, desc4) == 2/3
             
             # Test no similarity
             desc5 = (:x, :y)
             desc6 = (:a, :b)
-            @test CTBase.compute_similarity(desc5, desc6) == 0.0
+            @test CTBase.Descriptions.compute_similarity(desc5, desc6) == 0.0
             
             # Test edge cases
-            @test CTBase.compute_similarity((), ()) == 0.0
-            @test CTBase.compute_similarity((), (:a,)) == 0.0
+            @test CTBase.Descriptions.compute_similarity((), ()) == 0.0
+            @test CTBase.Descriptions.compute_similarity((), (:a,)) == 0.0
         end
 
         @testset "find_similar_descriptions" begin
@@ -38,7 +38,7 @@ function test_descriptions_enriched()
             target = (:a,)
             
             # Test finding similar descriptions
-            similar = CTBase.find_similar_descriptions(target, descriptions)
+            similar = CTBase.Descriptions.find_similar_descriptions(target, descriptions)
             @test length(similar) == 2  # Should find descriptions containing :a
             @test "(:a, :b)" in similar
             @test "(:a, :c)" in similar
@@ -46,11 +46,11 @@ function test_descriptions_enriched()
             
             # Test no similar descriptions
             target2 = (:z,)
-            similar2 = CTBase.find_similar_descriptions(target2, descriptions)
+            similar2 = CTBase.Descriptions.find_similar_descriptions(target2, descriptions)
             @test isempty(similar2)
             
             # Test empty descriptions
-            similar3 = CTBase.find_similar_descriptions(target, ())
+            similar3 = CTBase.Descriptions.find_similar_descriptions(target, ())
             @test isempty(similar3)
         end
 
@@ -58,19 +58,19 @@ function test_descriptions_enriched()
             descriptions = ((:a, :b), (:a, :c), (:x, :y), (:p, :q), (:r, :s), (:t, :u))
             
             # Test default max_show=5
-            formatted = CTBase.format_description_candidates(descriptions)
+            formatted = CTBase.Descriptions.format_description_candidates(descriptions)
             @test length(formatted) == 5
             @test formatted[1] == "(:a, :b)"
             @test formatted[5] == "(:r, :s)"
             
             # Test custom max_show
-            formatted2 = CTBase.format_description_candidates(descriptions; max_show=3)
+            formatted2 = CTBase.Descriptions.format_description_candidates(descriptions; max_show=3)
             @test length(formatted2) == 3
             @test formatted2[1] == "(:a, :b)"
             @test formatted2[3] == "(:x, :y)"
             
             # Test empty descriptions
-            formatted3 = CTBase.format_description_candidates(())
+            formatted3 = CTBase.Descriptions.format_description_candidates(())
             @test isempty(formatted3)
         end
     end
@@ -120,14 +120,14 @@ function test_descriptions_enriched()
             descriptions = ((:a, :b, :c), (:a, :d, :e), (:x, :y, :z))
             
             try
-                CTBase.complete(:a, :b; descriptions=descriptions)
+                CTBase.complete(:b, :f; descriptions=descriptions)  # :b, :f n'est contenu dans aucune description
                 @test false  # Should not reach here
             catch e
                 @test e isa CTBase.AmbiguousDescription
-                @test e.description == (:a, :b)
+                @test e.description == (:b, :f)
                 @test !isempty(e.candidates)
                 @test occursin("similar descriptions", e.suggestion)
-                # Should suggest descriptions containing :a
+                # Should suggest descriptions containing :b
                 @test any(occursin("(:a,", candidate) for candidate in e.candidates)
             end
         end

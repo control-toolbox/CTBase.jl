@@ -100,7 +100,6 @@ throw(CTBase.Exceptions.IncorrectArgument(
 # See Also
 - [`UnauthorizedCall`](@ref): For state-related or context-related errors
 - [`AmbiguousDescription`](@ref): For high-level description matching errors
-- [`set_show_full_stacktrace!`](@ref): Control stacktrace display
 """
 struct IncorrectArgument <: CTException
     msg::String
@@ -120,10 +119,10 @@ struct IncorrectArgument <: CTException
 end
 
 """
-    UnauthorizedCall <: CTException
+    PreconditionError <: CTException
 
-Exception thrown when a function call is not allowed in the **current state** of the
-object or system.
+Exception thrown when a function call violates a **precondition** or is not allowed in the
+**current state** of the object or system.
 
 This exception signals that the arguments may be valid, but the call is forbidden because
 of **when** or **how** it is made. This is distinct from `IncorrectArgument`, which
@@ -132,14 +131,90 @@ indicates a problem with the input values themselves.
 Common use cases:
 - A method that is meant to be called only once
 - State already closed or finalized
-- Missing permissions or access rights
+- Required setup not completed (e.g., state must be set before dynamics)
 - Illegal order of operations
 - Wrong phase of a computation
 
 # Fields
 - `msg::String`: Main error message
-- `reason::Union{String, Nothing}`: Why the call is unauthorized (optional)
+- `reason::Union{String, Nothing}`: Why the precondition failed (optional)
 - `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
+- `context::Union{String, Nothing}`: Where the error occurred (optional)
+
+# Examples
+
+```julia-repl
+julia> using CTBase
+
+julia> throw(CTBase.Exceptions.PreconditionError("state must be set before dynamics"))
+ERROR: PreconditionError: state must be set before dynamics
+```
+
+Typical pattern for checking preconditions (as used in CTModels.jl):
+
+```julia
+function dynamics!(ocp::PreModel, f::Function)
+    if !__is_state_set(ocp)
+        throw(CTBase.Exceptions.PreconditionError(
+            "State must be set before defining dynamics",
+            reason="state has not been defined yet",
+            suggestion="Call state!(ocp, dimension) before dynamics!",
+            context="dynamics! function - state validation"
+        ))
+    end
+    # ... set dynamics ...
+end
+```
+
+Enhanced version with detailed context:
+
+```julia
+throw(CTBase.Exceptions.PreconditionError(
+    "Cannot call state! twice",
+    reason="state has already been defined for this OCP",
+    suggestion="Create a new OCP instance or use a different component name",
+    context="state definition"
+))
+```
+
+# See Also
+- [`IncorrectArgument`](@ref): For input validation errors
+- [`UnauthorizedCall`](@ref): For permission/security errors
+- [`NotImplemented`](@ref): For unimplemented interface methods
+"""
+struct PreconditionError <: CTException
+    msg::String
+    reason::Union{String,Nothing}
+    suggestion::Union{String,Nothing}
+    context::Union{String,Nothing}
+
+    PreconditionError(
+        msg::String;
+        reason::Union{String,Nothing}=nothing,
+        suggestion::Union{String,Nothing}=nothing,
+        context::Union{String,Nothing}=nothing,
+    ) = new(msg, reason, suggestion, context)
+end
+
+"""
+    UnauthorizedCall <: CTException
+
+Exception thrown when a function call is denied due to **insufficient permissions** or
+**security restrictions**.
+
+This exception is specifically for access control and authorization errors, such as:
+- User account is inactive or disabled
+- User lacks required permission level
+- Access to restricted resources
+- Security policy violations
+
+For errors related to preconditions or state validation, use `PreconditionError` instead.
+
+# Fields
+- `msg::String`: Main error message
+- `user::Union{String, Nothing}`: User or entity attempting the call (optional)
+- `reason::Union{String, Nothing}`: Why access is denied (optional)
+- `suggestion::Union{String, Nothing}`: How to resolve the issue (optional)
 - `context::Union{String, Nothing}`: Where the error occurred (optional)
 
 # Examples
@@ -151,48 +226,41 @@ julia> throw(CTBase.Exceptions.UnauthorizedCall("user does not have permission")
 ERROR: UnauthorizedCall: user does not have permission
 ```
 
-A typical pattern for state-dependent operations:
+Typical pattern for permission checks:
 
 ```julia
-function finalize!(s::SomeState)
-    if s.is_finalized
+function delete_data(user::User, data_id::String)
+    if !user.is_active
         throw(CTBase.Exceptions.UnauthorizedCall(
-            "finalize! was already called for this state",
-            reason="state already finalized",
-            suggestion="Create a new instance or check finalization status"
+            "user account is not active",
+            user=user.name,
+            reason="Account disabled or suspended",
+            suggestion="Contact administrator to reactivate account",
+            context="delete_data - user validation"
         ))
     end
-    # ... perform finalisation and mark state as finalised ...
+    # ... delete data ...
 end
 ```
 
-Enhanced version with detailed context:
-
-```julia
-throw(CTBase.Exceptions.UnauthorizedCall(
-    "Cannot call state! twice",
-    reason="state has already been defined for this OCP",
-    suggestion="Create a new OCP instance or use a different component name",
-    context="state definition"
-))
-```
-
 # See Also
+- [`PreconditionError`](@ref): For precondition and state validation errors
 - [`IncorrectArgument`](@ref): For input validation errors
-- [`NotImplemented`](@ref): For unimplemented interface methods
 """
 struct UnauthorizedCall <: CTException
     msg::String
+    user::Union{String,Nothing}
     reason::Union{String,Nothing}
     suggestion::Union{String,Nothing}
     context::Union{String,Nothing}
 
     UnauthorizedCall(
         msg::String;
+        user::Union{String,Nothing}=nothing,
         reason::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
-    ) = new(msg, reason, suggestion, context)
+    ) = new(msg, user, reason, suggestion, context)
 end
 
 """
@@ -209,7 +277,7 @@ rather than a generic `error("TODO")`.
 
 # Fields
 - `msg::String`: Description of what is not implemented
-- `type_info::Union{String, Nothing}`: Type information (optional)
+- `required_method::Union{String, Nothing}`: Method signature or requirement (optional)
 - `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
 - `context::Union{String, Nothing}`: Where the error occurred (optional)
 
@@ -230,7 +298,7 @@ abstract type MyAbstractAlgorithm end
 function run!(algo::MyAbstractAlgorithm, state)
     throw(CTBase.Exceptions.NotImplemented(
         "run! is not implemented for \$(typeof(algo))",
-        type_info="MyAbstractAlgorithm",
+        required_method="run!(::MyAbstractAlgorithm, state)",
         context="algorithm execution",
         suggestion="Implement run! for your concrete algorithm type"
     ))
@@ -244,7 +312,7 @@ Enhanced version with full context:
 ```julia
 throw(CTBase.Exceptions.NotImplemented(
     "Method solve! not implemented",
-    type_info="MyStrategy",
+    required_method="solve!(::MyStrategy, ...)",
     context="solve call",
     suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
 ))
@@ -256,16 +324,16 @@ throw(CTBase.Exceptions.NotImplemented(
 """
 struct NotImplemented <: CTException
     msg::String
-    type_info::Union{String,Nothing}
+    required_method::Union{String,Nothing}
     suggestion::Union{String,Nothing}
     context::Union{String,Nothing}
 
     NotImplemented(
         msg::String;
-        type_info::Union{String,Nothing}=nothing,
+        required_method::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
-    ) = new(msg, type_info, suggestion, context)
+    ) = new(msg, required_method, suggestion, context)
 end
 
 """
@@ -294,7 +362,7 @@ julia> throw(CTBase.Exceptions.ParsingError("unexpected token 'end'"))
 ERROR: ParsingError: unexpected token 'end'
 ```
 
-Enhanced version with location and suggestion:
+With optional fields:
 
 ```julia
 throw(CTBase.Exceptions.ParsingError(
@@ -302,6 +370,13 @@ throw(CTBase.Exceptions.ParsingError(
     location="line 42, column 15",
     suggestion="Check syntax balance or remove extra 'end'"
 ))
+```
+
+As used in CTParser.jl (message only):
+
+```julia
+info = string("Line ", 42, ": x = 1\n", "Unexpected token 'end'")
+throw(CTBase.Exceptions.ParsingError(info))
 ```
 
 Common use cases:
@@ -387,14 +462,16 @@ struct AmbiguousDescription <: CTException
     candidates::Union{Vector{String},Nothing}
     suggestion::Union{String,Nothing}
     context::Union{String,Nothing}
+    diagnostic::Union{String,Nothing}
 
     AmbiguousDescription(
         description::Tuple{Vararg{Symbol}};
-        msg::String="the description $(description) is ambiguous / incorrect",
+        msg::String="cannot find matching description",
         candidates::Union{Vector{String},Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
-    ) = new(msg, description, candidates, suggestion, context)
+        diagnostic::Union{String,Nothing}=nothing,
+    ) = new(msg, description, candidates, suggestion, context, diagnostic)
 end
 
 """
@@ -409,7 +486,7 @@ required extensions, this exception provides a helpful message indicating exactl
 packages need to be loaded.
 
 It is also used internally by `ExtensionError()` when called without any weak dependencies,
-in which case it throws `UnauthorizedCall` instead.
+in which case it throws `PreconditionError` instead.
 
 Enhanced version with additional context for better error reporting.
 
@@ -425,10 +502,10 @@ Enhanced version with additional context for better error reporting.
 ExtensionError(weakdeps::Symbol...; message::String="", feature::Union{String, Nothing}=nothing, context::Union{String, Nothing}=nothing)
 ```
 
-Throws `UnauthorizedCall` if no weak dependencies are provided:
+Throws `PreconditionError` if no weak dependencies are provided:
 
 ```julia
-ExtensionError()  # Throws UnauthorizedCall
+ExtensionError()  # Throws PreconditionError
 ```
 
 # Examples
@@ -465,8 +542,7 @@ throw(CTBase.Exceptions.ExtensionError(
 - Advanced algorithms that depend on external libraries
 
 # See Also
-- [`UnauthorizedCall`](@ref): Thrown when `ExtensionError()` is called without arguments
-- [`set_show_full_stacktrace!`](@ref): Control stacktrace display
+- [`PreconditionError`](@ref): Thrown when `ExtensionError()` is called without arguments
 """
 struct ExtensionError <: CTException
     msg::String
@@ -475,7 +551,7 @@ struct ExtensionError <: CTException
     context::Union{String,Nothing}
     function ExtensionError(weakdeps::Symbol...; message::String="", feature::Union{String,Nothing}=nothing, context::Union{String,Nothing}=nothing)
         isempty(weakdeps) && throw(
-            UnauthorizedCall(
+            PreconditionError(
                 "Please provide at least one weak dependence for the extension.",
                 reason="ExtensionError called without dependencies"
             ),
