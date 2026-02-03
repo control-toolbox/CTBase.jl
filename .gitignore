@@ -39,3 +39,4 @@ Manifest*.toml
 .reports/
 reports/
 .coverage/
+.vscode
