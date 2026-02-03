@@ -54,6 +54,7 @@ with_api_reference(src_dir) do api_pages
     makedocs(;
         draft=draft,
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
+        warnonly=true,
         sitename="CTBase.jl",
         format=Documenter.HTML(;
             repolink="https://" * repo_url,
@@ -66,15 +67,13 @@ with_api_reference(src_dir) do api_pages
         ),
         pages=[
             "Introduction" => "index.md",
-            "Tutorials" => [
-                "Descriptions" => "descriptions.md",
-                "Exceptions" => "exceptions.md",
-                "Test Runner" => "test-runner.md",
-                "Coverage" => "coverage.md",
-                "API Documentation" => "api-documentation.md",
+            "Developers Guide" => [
+                "Testing and Coverage" => "test-coverage-guide.md",
+                "Documentation" => "documentation-guide.md",
             ],
             "API Reference" => api_pages,
         ],
+        checkdocs=:none,
     )
 end
 

@@ -15,7 +15,7 @@ using Test: Test, @testset
 const TestSpec = Union{Symbol,String}
 
 """
-    run_tests(::CTBase.Extensions.TestRunnerTag; kwargs...)
+    run_tests(::CTBase.TestRunnerTag; kwargs...)
 
 Run tests with configurable file/function name builders and optional available tests filter.
 
@@ -43,7 +43,7 @@ using CTBase
 ```
 """
 function CTBase.run_tests(
-    ::CTBase.Extensions.TestRunnerTag;
+    ::CTBase.TestRunnerTag;
     args::AbstractVector{<:AbstractString}=String[],
     testset_name::String="Tests",
     available_tests=Symbol[],
@@ -420,10 +420,12 @@ function _run_single_test(
     filename = joinpath(test_dir, rel)
 
     # Check file exists
-    !isfile(filename) && error("""
+    if !isfile(filename)
+        error("""
         Test file "$(filename)" not found for test "$(name)".
         Current directory: $(pwd())
         """)
+    end
 
     # Include the file
     Base.include(Main, filename)
