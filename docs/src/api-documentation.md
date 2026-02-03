@@ -174,13 +174,192 @@ The `DocumenterReference` extension recognizes several documentation element typ
 
 These types are automatically detected and organized in the generated documentation.
 
+## Common Patterns
+
+### Pattern 1: Main Module with Extensions
+
+```julia
+# In api_reference.jl
+function generate_api_reference(src_dir)
+    pages = []
+    
+    # Main module
+    push!(pages, CTBase.automatic_reference_documentation(;
+        subdirectory=".",
+        primary_modules=[MyPackage => [joinpath(src_dir, "MyPackage.jl")]],
+        title="MyPackage API",
+        filename="api",
+    ))
+    
+    # Check and document extensions
+    for (ext_name, ext_files) in [
+        (:PlotExt, ["ext/PlotExt.jl"]),
+        (:OptimExt, ["ext/OptimExt.jl"])
+    ]
+        ext = Base.get_extension(MyPackage, ext_name)
+        if !isnothing(ext)
+            push!(pages, CTBase.automatic_reference_documentation(;
+                subdirectory=".",
+                primary_modules=[ext => ext_files],
+                external_modules_to_document=[MyPackage],
+                title="$ext_name Extension",
+                filename=lowercase(string(ext_name)),
+            ))
+        end
+    end
+    
+    return pages
+end
+```
+
+### Pattern 2: Separate Public and Private Documentation
+
+```julia
+# Public API for users
+push!(pages, CTBase.automatic_reference_documentation(;
+    subdirectory=".",
+    primary_modules=[MyPackage],
+    public=true,
+    private=false,
+    title="Public API",
+    filename="api_public",
+))
+
+# Private API for developers
+push!(pages, CTBase.automatic_reference_documentation(;
+    subdirectory=".",
+    primary_modules=[MyPackage],
+    public=false,
+    private=true,
+    title="Internal API",
+    filename="api_private",
+))
+```
+
+### Pattern 3: Filtering Unwanted Symbols
+
+```julia
+CTBase.automatic_reference_documentation(;
+    subdirectory=".",
+    primary_modules=[MyPackage],
+    exclude=[
+        "eval",           # Compiler-generated
+        "include",        # Compiler-generated
+        "__init__",       # Internal initialization
+        "PRIVATE_CONST",  # Internal constant
+    ],
+    title="MyPackage API",
+    filename="api",
+)
+```
+
+## Troubleshooting
+
+### Issue: Extension not documented
+
+**Problem**: Extension exists but doesn't appear in documentation
+
+**Solution**: Ensure the extension is loaded before generating docs:
+
+```julia
+# In docs/make.jl
+using MyPackage
+using OptionalDependency  # Load the extension
+
+# Now the extension will be available
+const MyExt = Base.get_extension(MyPackage, :MyExt)
+```
+
+### Issue: Docstrings not found
+
+**Problem**: Functions are listed but have no documentation
+
+**Solution**: Check that:
+1. Docstrings are properly formatted with `"""`
+2. Source files are correctly specified in `primary_modules`
+3. The module is properly loaded
+
+### Issue: Too many symbols documented
+
+**Problem**: Documentation includes internal/generated symbols
+
+**Solution**: Use the `exclude` parameter:
+
+```julia
+exclude=["eval", "include", "#.*"]  # Exclude compiler-generated symbols
+```
+
+### Issue: Methods from Base not showing
+
+**Problem**: Extended Base methods don't appear
+
+**Solution**: Add Base to `external_modules_to_document`:
+
+```julia
+external_modules_to_document=[Base, Core]
+```
+
+### Issue: ExtensionError when generating docs
+
+**Error**: `ExtensionError: missing dependencies`
+
+**Solution**: The DocumenterReference extension requires Documenter, Markdown, and MarkdownAST. Ensure they're in your docs environment:
+
+```julia
+# In docs/Project.toml
+[deps]
+Documenter = "..."
+Markdown = "..."
+MarkdownAST = "..."
+```
+
 ## Best Practices
 
-1. **Exclude internal symbols**: Use the `exclude` parameter to hide implementation details or compiler-generated symbols.
-2. **Separate public and private**: Create separate pages for public and private APIs to keep the end-user documentation focused.
-3. **Document external modules**: Use `external_modules_to_document` to include methods from other packages that your package extends (e.g., `Base` or `Plots`).
-4. **Check extensions before documenting**: Always use `Base.get_extension()` to safely check for optional dependencies before calling `automatic_reference_documentation` on them.
+1. **Exclude internal symbols**: Use the `exclude` parameter to hide implementation details or compiler-generated symbols
+2. **Separate public and private**: Create separate pages for public and private APIs to keep the end-user documentation focused
+3. **Document external modules**: Use `external_modules_to_document` to include methods from other packages that your package extends (e.g., `Base` or `Plots`)
+4. **Check extensions before documenting**: Always use `Base.get_extension()` to safely check for optional dependencies before calling `automatic_reference_documentation` on them
+5. **Use meaningful titles**: Choose clear, descriptive titles for each documentation page
+6. **Organize by module**: Group related functionality together
+7. **Keep it up-to-date**: Regenerate documentation with each release
+8. **Test documentation builds**: Include documentation building in your CI pipeline
+
+## CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+name: Documentation
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+      - name: Install dependencies
+        run: julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+      - name: Build documentation
+        run: julia --project=docs docs/make.jl
+      - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+```
 
 ## Summary
 
 The `DocumenterReference` extension provides a powerful, flexible system for automatically generating API documentation. By following the patterns shown in this guide, you can maintain comprehensive, up-to-date documentation with minimal manual effort.
+
+## See Also
+
+- [Exception Handling](exceptions.md): Documenting exception types
+- [Test Runner Guide](test-runner.md): Testing documentation examples
+- [Coverage Guide](coverage.md): Ensuring documentation coverage
