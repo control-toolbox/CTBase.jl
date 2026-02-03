@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Documentation · CTBase.jl</title><meta name="title" content="Documentation · CTBase.jl"/><meta property="og:title" content="Documentation · CTBase.jl"/><meta property="twitter:title" content="Documentation · CTBase.jl"/><meta name="description" content="Documentation for CTBase.jl."/><meta property="og:description" content="Documentation for CTBase.jl."/><meta property="twitter:description" content="Documentation for CTBase.jl."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script><link href="https://control-toolbox.org/assets/css/documentation.css" rel="stylesheet" type="text/css"/><script src="https://control-toolbox.org/assets/js/documentation.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">CTBase.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Introduction</a></li><li><span class="tocitem">Developers Guide</span><ul><li><a class="tocitem" href="test-coverage-guide.html">Testing and Coverage</a></li><li class="is-active"><a class="tocitem" href="documentation-guide.html">Documentation</a><ul class="internal"><li><a class="tocitem" href="#Overview"><span>Overview</span></a></li><li><a class="tocitem" href="#Architecture"><span>Architecture</span></a></li><li><a class="tocitem" href="#Setting-Up-API-Documentation"><span>Setting Up API Documentation</span></a></li><li><a class="tocitem" href="#Handling-Extensions"><span>Handling Extensions</span></a></li><li><a class="tocitem" href="#Integration-with-Documenter.jl"><span>Integration with Documenter.jl</span></a></li><li><a class="tocitem" href="#DocType-System"><span>DocType System</span></a></li><li><a class="tocitem" href="#Best-Practices"><span>Best Practices</span></a></li><li><a class="tocitem" href="#Troubleshooting"><span>Troubleshooting</span></a></li><li><a class="tocitem" href="#Summary"><span>Summary</span></a></li></ul></li></ul></li><li><span class="tocitem">API Reference</span><ul><li><a class="tocitem" href="ctbase.html">CTBase</a></li><li><a class="tocitem" href="default.html">Default</a></li><li><a class="tocitem" href="description.html">Description</a></li><li><a class="tocitem" href="exception.html">Exception</a></li><li><a class="tocitem" href="utils.html">Utils</a></li><li><a class="tocitem" href="documenter_reference.html">DocumenterReference</a></li><li><a class="tocitem" href="coverage_postprocessing.html">CoveragePostprocessing</a></li><li><a class="tocitem" href="test_runner.html">TestRunner</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Developers Guide</a></li><li class="is-active"><a href="documentation-guide.html">Documentation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="documentation-guide.html">Documentation</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/control-toolbox/CTBase.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Documentation-Guide"><a class="docs-heading-anchor" href="#Documentation-Guide">Documentation Guide</a><a id="Documentation-Guide-1"></a><a class="docs-heading-anchor-permalink" href="#Documentation-Guide" title="Permalink"></a></h1><p>This guide explains how to set up automated API reference documentation generation using the <code>DocumenterReference</code> extension. This is particularly useful for maintaining comprehensive and up-to-date API documentation as your codebase evolves.</p><h2 id="Overview"><a class="docs-heading-anchor" href="#Overview">Overview</a><a id="Overview-1"></a><a class="docs-heading-anchor-permalink" href="#Overview" title="Permalink"></a></h2><p>The <code>DocumenterReference</code> extension provides the <code>CTBase.automatic_reference_documentation()</code> function, which automatically generates API reference pages from your Julia source code. It:</p><ul><li>Extracts docstrings from your modules</li><li>Separates public and private APIs</li><li>Generates markdown files suitable for Documenter.jl</li><li>Handles extensions and optional dependencies gracefully</li><li>Supports filtering and customization</li></ul><h2 id="Architecture"><a class="docs-heading-anchor" href="#Architecture">Architecture</a><a id="Architecture-1"></a><a class="docs-heading-anchor-permalink" href="#Architecture" title="Permalink"></a></h2><h3 id="Directory-Structure"><a class="docs-heading-anchor" href="#Directory-Structure">Directory Structure</a><a id="Directory-Structure-1"></a><a class="docs-heading-anchor-permalink" href="#Directory-Structure" title="Permalink"></a></h3><pre><code class="language-text hljs">docs/
+├── make.jl                 # Main documentation build script
+├── api_reference.jl        # API reference generation logic
+└── src/
+    ├── index.md           # Documentation homepage
+    ├── developers-guide.md # Testing and coverage guide
+    └── documentation-guide.md  # This file</code></pre><h3 id="How-It-Works"><a class="docs-heading-anchor" href="#How-It-Works">How It Works</a><a id="How-It-Works-1"></a><a class="docs-heading-anchor-permalink" href="#How-It-Works" title="Permalink"></a></h3><p>The documentation generation happens in two stages:</p><ol><li><strong><code>api_reference.jl</code></strong>: Defines <code>generate_api_reference()</code> which calls <code>CTBase.automatic_reference_documentation()</code> for each module</li><li><strong><code>make.jl</code></strong>: Calls <code>with_api_reference()</code> which executes the generation and passes the pages to <code>Documenter.makedocs()</code></li></ol><h2 id="Setting-Up-API-Documentation"><a class="docs-heading-anchor" href="#Setting-Up-API-Documentation">Setting Up API Documentation</a><a id="Setting-Up-API-Documentation-1"></a><a class="docs-heading-anchor-permalink" href="#Setting-Up-API-Documentation" title="Permalink"></a></h2><h3 id="Basic-Configuration"><a class="docs-heading-anchor" href="#Basic-Configuration">Basic Configuration</a><a id="Basic-Configuration-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-Configuration" title="Permalink"></a></h3><p>The core function is <code>CTBase.automatic_reference_documentation()</code>. Here&#39;s a minimal example:</p><pre><code class="language-julia hljs">using CTBase
+using Documenter
+
+CTBase.automatic_reference_documentation(;
+    subdirectory=&quot;.&quot;,
+    primary_modules=[MyModule =&gt; [&quot;src/MyModule.jl&quot;]],
+    title=&quot;MyModule API&quot;,
+    title_in_menu=&quot;API&quot;,
+    filename=&quot;api&quot;,
+)</code></pre><h3 id="Key-Parameters"><a class="docs-heading-anchor" href="#Key-Parameters">Key Parameters</a><a id="Key-Parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Key-Parameters" title="Permalink"></a></h3><ul><li><strong><code>subdirectory</code></strong>: Where to write generated markdown files (relative to <code>docs/src</code>)</li><li><strong><code>primary_modules</code></strong>: Vector of modules to document, optionally with source files<ul><li>Format: <code>Module</code> or <code>Module =&gt; [&quot;path/to/file.jl&quot;]</code></li><li>When source files are provided, only symbols from those files are documented</li></ul></li><li><strong><code>title</code></strong>: Title displayed at the top of the generated page</li><li><strong><code>title_in_menu</code></strong>: Title in the navigation menu (defaults to <code>title</code>)</li><li><strong><code>filename</code></strong>: Base filename for the markdown file (without <code>.md</code> extension)</li><li><strong><code>exclude</code></strong>: Vector of symbol names to skip from documentation</li><li><strong><code>public</code></strong>: Generate public API page (default: <code>true</code>)</li><li><strong><code>private</code></strong>: Generate private API page (default: <code>true</code>)</li><li><strong><code>external_modules_to_document</code></strong>: Additional modules to search for docstrings (e.g., <code>[Base]</code>)</li></ul><h3 id="Public-vs.-Private-API"><a class="docs-heading-anchor" href="#Public-vs.-Private-API">Public vs. Private API</a><a id="Public-vs.-Private-API-1"></a><a class="docs-heading-anchor-permalink" href="#Public-vs.-Private-API" title="Permalink"></a></h3><p>The <code>public</code> and <code>private</code> flags control which symbols are documented:</p><h4 id="Option-1:-Public-API-Only-(publictrue,-privatefalse)"><a class="docs-heading-anchor" href="#Option-1:-Public-API-Only-(publictrue,-privatefalse)">Option 1: Public API Only (<code>public=true, private=false</code>)</a><a id="Option-1:-Public-API-Only-(publictrue,-privatefalse)-1"></a><a class="docs-heading-anchor-permalink" href="#Option-1:-Public-API-Only-(publictrue,-privatefalse)" title="Permalink"></a></h4><pre><code class="language-julia hljs">CTBase.automatic_reference_documentation(;
+    subdirectory=&quot;.&quot;,
+    primary_modules=[MyModule =&gt; src(&quot;MyModule.jl&quot;)],
+    public=true,
+    private=false,
+    title=&quot;MyModule API&quot;,
+    filename=&quot;api&quot;,
+)</code></pre><p><strong>Result</strong>: Only exported symbols are documented. This is ideal for end-user documentation.</p><h4 id="Option-2:-Private-API-Only-(publicfalse,-privatetrue)"><a class="docs-heading-anchor" href="#Option-2:-Private-API-Only-(publicfalse,-privatetrue)">Option 2: Private API Only (<code>public=false, private=true</code>)</a><a id="Option-2:-Private-API-Only-(publicfalse,-privatetrue)-1"></a><a class="docs-heading-anchor-permalink" href="#Option-2:-Private-API-Only-(publicfalse,-privatetrue)" title="Permalink"></a></h4><pre><code class="language-julia hljs">CTBase.automatic_reference_documentation(;
+    subdirectory=&quot;.&quot;,
+    primary_modules=[MyModule =&gt; src(&quot;MyModule.jl&quot;)],
+    public=false,
+    private=true,
+    title=&quot;MyModule Internals&quot;,
+    filename=&quot;internals&quot;,
+)</code></pre><p><strong>Result</strong>: Only non-exported (private) symbols are documented. Useful for developer documentation.</p><h4 id="Option-3:-Both-Public-and-Private-(publictrue,-privatetrue)"><a class="docs-heading-anchor" href="#Option-3:-Both-Public-and-Private-(publictrue,-privatetrue)">Option 3: Both Public and Private (<code>public=true, private=true</code>)</a><a id="Option-3:-Both-Public-and-Private-(publictrue,-privatetrue)-1"></a><a class="docs-heading-anchor-permalink" href="#Option-3:-Both-Public-and-Private-(publictrue,-privatetrue)" title="Permalink"></a></h4><pre><code class="language-julia hljs">CTBase.automatic_reference_documentation(;
+    subdirectory=&quot;.&quot;,
+    primary_modules=[MyModule =&gt; src(&quot;MyModule.jl&quot;)],
+    public=true,
+    private=true,
+    title=&quot;MyModule Complete Reference&quot;,
+    filename=&quot;complete_api&quot;,
+)</code></pre><p><strong>Result</strong>: All symbols are documented in a single page. This provides a comprehensive reference.</p><h3 id="Example:-CTBase-Configuration"><a class="docs-heading-anchor" href="#Example:-CTBase-Configuration">Example: CTBase Configuration</a><a id="Example:-CTBase-Configuration-1"></a><a class="docs-heading-anchor-permalink" href="#Example:-CTBase-Configuration" title="Permalink"></a></h3><p>Here&#39;s how CTBase configures its API documentation in <code>docs/api_reference.jl</code>:</p><pre><code class="language-julia hljs">function generate_api_reference(src_dir::String)
+    # Helper functions to build absolute paths
+    src(files...) = [abspath(joinpath(src_dir, f)) for f in files]
+    ext_dir = abspath(joinpath(src_dir, &quot;..&quot;, &quot;ext&quot;))
+    ext(files...) = [abspath(joinpath(ext_dir, f)) for f in files]
+
+    # Symbols to exclude from all API pages
+    EXCLUDE_SYMBOLS = Symbol[:include, :eval]
+
+    pages = [
+        # Main CTBase module - private API only
+        CTBase.automatic_reference_documentation(;
+            subdirectory=&quot;.&quot;,
+            primary_modules=[CTBase =&gt; src(&quot;CTBase.jl&quot;)],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title=&quot;CTBase&quot;,
+            title_in_menu=&quot;CTBase&quot;,
+            filename=&quot;ctbase&quot;,
+        ),
+        # Other modules...
+    ]
+
+    # Extensions are checked with Base.get_extension
+    DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
+    if !isnothing(DocumenterReference)
+        push!(
+            pages,
+            CTBase.automatic_reference_documentation(;
+                subdirectory=&quot;.&quot;,
+                primary_modules=[DocumenterReference =&gt; ext(&quot;DocumenterReference.jl&quot;)],
+                external_modules_to_document=[CTBase],
+                exclude=EXCLUDE_SYMBOLS,
+                public=false,
+                private=true,
+                title=&quot;DocumenterReference&quot;,
+                title_in_menu=&quot;DocumenterReference&quot;,
+                filename=&quot;documenter_reference&quot;,
+            ),
+        )
+    end
+
+    return pages
+end</code></pre><h2 id="Handling-Extensions"><a class="docs-heading-anchor" href="#Handling-Extensions">Handling Extensions</a><a id="Handling-Extensions-1"></a><a class="docs-heading-anchor-permalink" href="#Handling-Extensions" title="Permalink"></a></h2><p>When your package uses extensions (weak dependencies), you need to check if they&#39;re loaded before documenting them:</p><pre><code class="language-julia hljs"># Check if the extension is loaded
+MyExtension = Base.get_extension(MyPackage, :MyExtension)
+if !isnothing(MyExtension)
+    push!(
+        pages,
+        CTBase.automatic_reference_documentation(;
+            subdirectory=&quot;.&quot;,
+            primary_modules=[MyExtension =&gt; ext(&quot;MyExtension.jl&quot;)],
+            external_modules_to_document=[MyPackage],
+            exclude=EXCLUDE_SYMBOLS,
+            public=false,
+            private=true,
+            title=&quot;MyExtension&quot;,
+            title_in_menu=&quot;MyExtension&quot;,
+            filename=&quot;my_extension&quot;,
+        ),
+    )
+end</code></pre><p>This ensures that:</p><ul><li>Documentation is only generated if the extension is actually loaded</li><li>The extension can reference types and functions from the main package via <code>external_modules_to_document</code></li></ul><h2 id="Integration-with-Documenter.jl"><a class="docs-heading-anchor" href="#Integration-with-Documenter.jl">Integration with Documenter.jl</a><a id="Integration-with-Documenter.jl-1"></a><a class="docs-heading-anchor-permalink" href="#Integration-with-Documenter.jl" title="Permalink"></a></h2><p>In <code>docs/make.jl</code>, use <code>with_api_reference()</code> to integrate the generated pages:</p><pre><code class="language-julia hljs">using Documenter
+using CTBase
+
+include(&quot;api_reference.jl&quot;)
+
+with_api_reference(dirname(@__DIR__)) do api_pages
+    makedocs(;
+        modules=[CTBase],
+        authors=&quot;Your Name&quot;,
+        repo=&quot;https://github.com/yourname/yourpackage.jl&quot;,
+        sitename=&quot;YourPackage.jl&quot;,
+        format=Documenter.HTML(;
+            assets=String[],
+        ),
+        pages=[
+            &quot;Introduction&quot; =&gt; &quot;index.md&quot;,
+            &quot;Developers Guide&quot; =&gt; &quot;developers-guide.md&quot;,
+            &quot;Documentation Guide&quot; =&gt; &quot;documentation-guide.md&quot;,
+            &quot;API Reference&quot; =&gt; api_pages,
+        ],
+        checkdocs=:none,
+    )
+end</code></pre><p>The <code>with_api_reference()</code> function:</p><ol><li>Generates the API reference pages</li><li>Passes them to your <code>makedocs()</code> call</li><li>Cleans up temporary generated files after the build</li></ol><h2 id="DocType-System"><a class="docs-heading-anchor" href="#DocType-System">DocType System</a><a id="DocType-System-1"></a><a class="docs-heading-anchor-permalink" href="#DocType-System" title="Permalink"></a></h2><p>The <code>DocumenterReference</code> extension recognizes several documentation element types:</p><ul><li><strong><code>DOCTYPE_ABSTRACT_TYPE</code></strong>: Abstract type declarations</li><li><strong><code>DOCTYPE_STRUCT</code></strong>: Concrete struct types</li><li><strong><code>DOCTYPE_FUNCTION</code></strong>: Functions and callables</li><li><strong><code>DOCTYPE_MACRO</code></strong>: Macros (names starting with <code>@</code>)</li><li><strong><code>DOCTYPE_MODULE</code></strong>: Submodules</li><li><strong><code>DOCTYPE_CONSTANT</code></strong>: Constants and non-function values</li></ul><p>These types are automatically detected and organized in the generated documentation.</p><h2 id="Best-Practices"><a class="docs-heading-anchor" href="#Best-Practices">Best Practices</a><a id="Best-Practices-1"></a><a class="docs-heading-anchor-permalink" href="#Best-Practices" title="Permalink"></a></h2><ol><li><p><strong>Exclude internal symbols</strong>: Use the <code>exclude</code> parameter to hide implementation details</p><pre><code class="language-julia hljs">exclude=Symbol[:_internal_helper, :_private_constant]</code></pre></li><li><p><strong>Separate public and private</strong>: Create separate pages for public and private APIs</p><pre><code class="language-julia hljs"># Public API
+CTBase.automatic_reference_documentation(;
+    ...,
+    public=true,
+    private=false,
+    filename=&quot;api_public&quot;,
+)
+# Private API
+CTBase.automatic_reference_documentation(;
+    ...,
+    public=false,
+    private=true,
+    filename=&quot;api_private&quot;,
+)</code></pre></li><li><p><strong>Document external modules</strong>: Use <code>external_modules_to_document</code> to include methods from other packages</p><pre><code class="language-julia hljs">CTBase.automatic_reference_documentation(;
+    ...,
+    external_modules_to_document=[Base, Documenter],
+)</code></pre></li><li><p><strong>Check extensions before documenting</strong>: Always use <code>Base.get_extension()</code> to safely check for optional dependencies</p><pre><code class="language-julia hljs">MyExt = Base.get_extension(MyPackage, :MyExtension)
+if !isnothing(MyExt)
+    # Document the extension
+end</code></pre></li></ol><h2 id="Troubleshooting"><a class="docs-heading-anchor" href="#Troubleshooting">Troubleshooting</a><a id="Troubleshooting-1"></a><a class="docs-heading-anchor-permalink" href="#Troubleshooting" title="Permalink"></a></h2><h3 id="Missing-Docstrings"><a class="docs-heading-anchor" href="#Missing-Docstrings">Missing Docstrings</a><a id="Missing-Docstrings-1"></a><a class="docs-heading-anchor-permalink" href="#Missing-Docstrings" title="Permalink"></a></h3><p>If symbols appear without docstrings in the generated documentation, ensure:</p><ul><li>The docstring is defined immediately before the symbol</li><li>The docstring uses the correct Julia docstring syntax (triple quotes)</li><li>The symbol is actually exported or included in your module</li></ul><h3 id="Symbols-Not-Appearing"><a class="docs-heading-anchor" href="#Symbols-Not-Appearing">Symbols Not Appearing</a><a id="Symbols-Not-Appearing-1"></a><a class="docs-heading-anchor-permalink" href="#Symbols-Not-Appearing" title="Permalink"></a></h3><p>If expected symbols don&#39;t appear in the documentation:</p><ul><li>Check if they&#39;re in the <code>exclude</code> list</li><li>Verify the source file path is correct</li><li>Ensure the symbol is defined in the specified source file (not imported)</li></ul><h3 id="Extension-Not-Documented"><a class="docs-heading-anchor" href="#Extension-Not-Documented">Extension Not Documented</a><a id="Extension-Not-Documented-1"></a><a class="docs-heading-anchor-permalink" href="#Extension-Not-Documented" title="Permalink"></a></h3><p>If an extension&#39;s documentation isn&#39;t generated:</p><ul><li>Verify the extension is loaded with <code>Base.get_extension()</code></li><li>Check that the extension file path is correct</li><li>Ensure the extension module is properly defined</li></ul><h2 id="Summary"><a class="docs-heading-anchor" href="#Summary">Summary</a><a id="Summary-1"></a><a class="docs-heading-anchor-permalink" href="#Summary" title="Permalink"></a></h2><p>The <code>DocumenterReference</code> extension provides a powerful, flexible system for automatically generating API documentation. By following the patterns shown in this guide, you can maintain comprehensive, up-to-date documentation with minimal manual effort.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="test-coverage-guide.html">« Testing and Coverage</a><a class="docs-footer-nextpage" href="ctbase.html">CTBase »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Tuesday 3 February 2026 20:27">Tuesday 3 February 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
