@@ -378,7 +378,7 @@ module DemoFileProcessor
                     "Cannot parse headers without opening file";
                     reason="open_file! not called yet",
                     suggestion="Call open_file!(state, filename) before parse_headers!",
-                    context="header parsing",
+                    #context="header parsing",
                 ),
             )
         end
@@ -389,7 +389,7 @@ module DemoFileProcessor
                     "Headers already parsed";
                     reason="parse_headers! can only be called once per file",
                     suggestion="Create new FileProcessingState or reset with reset!(state)",
-                    context="header parsing",
+                    #context="header parsing",
                 ),
             )
         end
@@ -400,7 +400,7 @@ module DemoFileProcessor
                     "Cannot parse empty content";
                     reason="content string is empty",
                     suggestion="Provide non-empty content to parse",
-                    context="header parsing",
+                    #context="header parsing",
                 ),
             )
         end

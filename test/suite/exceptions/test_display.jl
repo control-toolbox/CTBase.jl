@@ -73,7 +73,12 @@ function test_exception_display()
             @test_nowarn showerror(io, e)
             output = String(take!(io))
             
+
             @test contains(output, "Simple error")
+            @test !contains(output, "Got:")
+            @test !contains(output, "Expected:")
+            @test !contains(output, "Context:")
+            @test !contains(output, "Suggestion:")
         end
         
         @testset "PreconditionError - User-Friendly Display" begin
@@ -95,29 +100,8 @@ function test_exception_display()
             @test contains(output, "Suggestion:")
             @test contains(output, "Call state!(ocp, dimension)")
         end
-        
-        @testset "UnauthorizedCall - User-Friendly Display" begin
-            io = IOBuffer()
-            e = UnauthorizedCall(
-                "insufficient permissions",
-                user="alice",
-                reason="User level: GUEST, Required: ADMIN",
-                suggestion="Request elevated permissions",
-                context="permission validation"
-            )
-            
-            @test_nowarn showerror(io, e)
-            output = String(take!(io))
-            
-            @test contains(output, "Control Toolbox Error")
-            @test contains(output, "insufficient permissions")
-            @test contains(output, "User:")
-            @test contains(output, "alice")
-            @test contains(output, "Reason:")
-            @test contains(output, "User level: GUEST")
-            @test contains(output, "Suggestion:")
-            @test contains(output, "Request elevated permissions")
-        end
+
+
         
         @testset "NotImplemented - Display" begin
             io = IOBuffer()
@@ -155,10 +139,7 @@ function test_exception_display()
             # Empty optional fields
             e1 = IncorrectArgument("Error")
             @test_nowarn showerror(io, e1)
-            
-            e2 = UnauthorizedCall("Error")
-            @test_nowarn showerror(io, e2)
-            
+
             e3 = NotImplemented("Error")
             @test_nowarn showerror(io, e3)
             
@@ -321,6 +302,31 @@ function test_exception_display()
             @test !contains(output, "Feature:")
             @test !contains(output, "Context:")
             @test !contains(output, "Purpose:")
+        end
+
+        @testset "PreconditionError - Missing optional fields" begin
+            io = IOBuffer()
+            e = PreconditionError("Simple error")
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            @test contains(output, "Simple error")
+            @test !contains(output, "Reason:")
+            @test !contains(output, "Context:")
+            @test !contains(output, "Suggestion:")
+        end
+
+        @testset "AmbiguousDescription - Missing optional fields" begin
+            io = IOBuffer()
+            e = AmbiguousDescription((:f,))
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            @test contains(output, "AmbiguousDescription")
+            @test contains(output, "(:f,)")
+            @test !contains(output, "Available descriptions:")
+            @test !contains(output, "Context:")
+            @test !contains(output, "Suggestion:")
         end
         
         @testset "User code location display" begin

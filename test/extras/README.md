@@ -16,11 +16,6 @@ This directory contains comprehensive examples demonstrating the enriched except
   - Description completion with smart suggestions
   - Catalog lookup failures
 
-- **`test_unauthorized_call_examples.jl`** - `UnauthorizedCall` exceptions
-  - User permission systems
-  - Security checks and access control
-  - Role-based authorization
-
 - **`test_not_implemented_examples.jl`** - `NotImplemented` exceptions
   - Feature development status
   - API placeholder methods
@@ -114,7 +109,6 @@ current_mode = CTBase.get_show_full_stacktrace()
 |---------------|----------|------------|
 | `IncorrectArgument` | Invalid input parameters | `got`, `expected`, `suggestion`, `context` |
 | `AmbiguousDescription` | Description completion failures | `candidates`, `suggestion`, `context` |
-| `UnauthorizedCall` | Permission/access denied | `user`, `reason`, `context` |
 | `NotImplemented` | Unimplemented features | `type_info`, `location`, `context` |
 | `ParsingError` | Data parsing failures | `input`, `position`, `context` |
 | `ExtensionError` | Missing dependencies | `weakdeps`, `feature`, `context` |

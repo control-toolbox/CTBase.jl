@@ -223,8 +223,6 @@ function Base.showerror(io::IO, e::PreconditionError)
     format_user_friendly_error(io, e)
 end
 
-
-
 """
     Base.showerror(io::IO, e::NotImplemented)
 

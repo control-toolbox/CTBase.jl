@@ -15,7 +15,7 @@ function test_exception_types()
             # Test that all exceptions inherit from CTException
             @test IncorrectArgument("test") isa CTException
             @test PreconditionError("test") isa CTException
-            @test UnauthorizedCall("test") isa CTException
+
             @test NotImplemented("test") isa CTException
             @test ParsingError("test") isa CTException
             @test AmbiguousDescription((:f,)) isa CTException
@@ -24,7 +24,7 @@ function test_exception_types()
             # Test that they are also standard Exceptions
             @test IncorrectArgument("test") isa Exception
             @test PreconditionError("test") isa Exception
-            @test UnauthorizedCall("test") isa Exception
+
             @test NotImplemented("test") isa Exception
             @test ParsingError("test") isa Exception
             @test AmbiguousDescription((:f,)) isa Exception
@@ -95,41 +95,7 @@ function test_exception_types()
             # Test that it can be thrown
             @test_throws PreconditionError throw(PreconditionError("Test error"))
         end
-        
-        @testset "UnauthorizedCall - Construction" begin
-            # Simple message only
-            e = UnauthorizedCall("access denied")
-            @test e.msg == "access denied"
-            @test isnothing(e.user)
-            @test isnothing(e.reason)
-            @test isnothing(e.suggestion)
-            @test isnothing(e.context)
-            
-            # With user and reason
-            e = UnauthorizedCall("insufficient permissions", user="alice", reason="account inactive")
-            @test e.msg == "insufficient permissions"
-            @test e.user == "alice"
-            @test e.reason == "account inactive"
-            @test isnothing(e.suggestion)
-            
-            # With all fields
-            e = UnauthorizedCall(
-                "user account is not active",
-                user="bob",
-                reason="Account disabled or suspended",
-                suggestion="Contact administrator to reactivate account",
-                context="security check"
-            )
-            @test e.msg == "user account is not active"
-            @test e.user == "bob"
-            @test e.reason == "Account disabled or suspended"
-            @test e.suggestion == "Contact administrator to reactivate account"
-            @test e.context == "security check"
-            
-            # Test that it can be thrown
-            @test_throws UnauthorizedCall throw(UnauthorizedCall("Test error"))
-        end
-        
+
         @testset "NotImplemented - Construction" begin
             # Simple message only
             e = NotImplemented("run! not implemented")

@@ -109,34 +109,6 @@ function test_exceptions()
         @test occursin("state definition", output_enriched)
     end
 
-    # Test UnauthorizedCall
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "UnauthorizedCall" begin
-        e = CTBase.UnauthorizedCall("access denied")
-        @test_throws CTBase.UnauthorizedCall throw(e)
-        output = sprint(showerror, e)
-        @test typeof(output) == String
-        @test occursin("UnauthorizedCall", output)
-        @test occursin("access denied", output)
-        
-        # Test enriched version with user field
-        e_enriched = CTBase.UnauthorizedCall(
-            "insufficient permissions",
-            user="alice",
-            reason="User level: GUEST, Required: ADMIN",
-            suggestion="Request elevated permissions from administrator",
-            context="permission validation"
-        )
-        output_enriched = sprint(showerror, e_enriched)
-        @test occursin("User", output_enriched)
-        @test occursin("alice", output_enriched)
-        @test occursin("Reason", output_enriched)
-        @test occursin("User level: GUEST", output_enriched)
-        @test occursin("Suggestion", output_enriched)
-        @test occursin("Request elevated permissions", output_enriched)
-        @test occursin("Context", output_enriched)
-        @test occursin("permission validation", output_enriched)
-    end
-
     # Test ParsingError
     @testset verbose = VERBOSE showtiming = SHOWTIMING "ParsingError" begin
         e = CTBase.ParsingError("syntax error")
