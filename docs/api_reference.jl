@@ -28,7 +28,15 @@ function generate_api_reference(src_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[
-                CTBase.Descriptions => src(joinpath("Descriptions", "Descriptions.jl"))
+                CTBase.Descriptions => src(
+                    joinpath("Descriptions", "Descriptions.jl"),
+                    joinpath("Descriptions", "types.jl"),
+                    joinpath("Descriptions", "similarity.jl"),
+                    joinpath("Descriptions", "display.jl"),
+                    joinpath("Descriptions", "catalog.jl"),
+                    joinpath("Descriptions", "complete.jl"),
+                    joinpath("Descriptions", "remove.jl"),
+                ),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
@@ -43,7 +51,6 @@ function generate_api_reference(src_dir::String)
                 CTBase.Exceptions => src(
                     joinpath("Exceptions", "Exceptions.jl"),
                     joinpath("Exceptions", "types.jl"),
-                    joinpath("Exceptions", "config.jl"),
                     joinpath("Exceptions", "display.jl"),
                 ),
             ],
@@ -59,7 +66,7 @@ function generate_api_reference(src_dir::String)
             primary_modules=[CTBase.Unicode => src(joinpath("Unicode", "Unicode.jl"))],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
-            private=true,
+            private=false, # there is no private API
             title="Unicode",
             title_in_menu="Unicode",
             filename="api_unicode",
@@ -98,7 +105,7 @@ function generate_api_reference(src_dir::String)
                 primary_modules=[DocumenterReference => ext("DocumenterReference.jl")],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_DOCREF,
-                public=true,
+                public=false, # there is no public API
                 private=true,
                 title="DocumenterReference",
                 title_in_menu="DocumenterReference",
@@ -118,7 +125,7 @@ function generate_api_reference(src_dir::String)
                 ],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
-                public=true,
+                public=false, # there is no public API
                 private=true,
                 title="CoveragePostprocessing",
                 title_in_menu="CoveragePostprocessing",
@@ -136,7 +143,7 @@ function generate_api_reference(src_dir::String)
                 primary_modules=[TestRunner => ext("TestRunner.jl")],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
-                public=true,
+                public=false, # there is no public API
                 private=true,
                 title="TestRunner",
                 title_in_menu="TestRunner",
