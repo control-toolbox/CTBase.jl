@@ -64,6 +64,10 @@ CTBase.automatic_reference_documentation(;
 - **`public`**: Generate public API page (default: `true`).
 - **`private`**: Generate private API page (default: `true`).
 - **`external_modules_to_document`**: Additional modules to search for docstrings (e.g., `[Base]`).
+- **`public_title`**: Custom title for public API page (empty string uses default).
+- **`private_title`**: Custom title for private API page (empty string uses default).
+- **`public_description`**: Custom description for public API page (empty string uses default).
+- **`private_description`**: Custom description for private API page (empty string uses default).
 
 ### Public vs. Private API
 
@@ -110,6 +114,88 @@ CTBase.automatic_reference_documentation(;
 ```
 
 **Result**: If `public` and `private` are both true, the function returns a structure with two sub-pages (Public and Private).
+
+## Customizing Page Titles and Descriptions
+
+You can customize the titles and descriptions of generated API pages using the `public_title`, `private_title`, `public_description`, and `private_description` parameters.
+
+### Default Behavior
+
+By default, the system automatically generates appropriate titles based on the page type:
+
+- **Single public page** (`public=true, private=false`): Title is "Public API"
+- **Single private page** (`public=false, private=true`): Title is "Private API"
+- **Split pages** (`public=true, private=true`): Titles are "Public" and "Private"
+- **Combined page** (both public and private on same page): Title is "API reference"
+
+### Custom Titles
+
+Override the default titles with custom text:
+
+```julia
+CTBase.automatic_reference_documentation(;
+    # ...
+    public=false,
+    private=true,
+    private_title="Internal Implementation",
+    filename="internals",
+)
+```
+
+**Result**: The private page will display "Internal Implementation" instead of "Private API".
+
+### Custom Descriptions
+
+Customize the introductory text that appears below the title:
+
+```julia
+CTBase.automatic_reference_documentation(;
+    # ...
+    public=true,
+    private=false,
+    public_title="User API",
+    public_description="This page documents the public interface for end users. All functions listed here are stable and safe to use in your applications.",
+    filename="api",
+)
+```
+
+**Result**: The page will show your custom title and description instead of the defaults.
+
+### Split Pages with Custom Titles
+
+When generating split pages, you can customize both public and private titles:
+
+```julia
+CTBase.automatic_reference_documentation(;
+    # ...
+    public=true,
+    private=true,
+    public_title="Exported Functions",
+    public_description="Stable API for end users.",
+    private_title="Internal Functions",
+    private_description="Implementation details for contributors.",
+    filename="api",
+)
+```
+
+**Result**: Two pages are created with your custom titles and descriptions.
+
+### Empty String Behavior
+
+If you pass empty strings (the default), the system uses the standard titles and descriptions:
+
+```julia
+CTBase.automatic_reference_documentation(;
+    # ...
+    public_title="",        # Uses default: "Public API" or "Public"
+    private_title="",       # Uses default: "Private API" or "Private"
+    public_description="",  # Uses default description
+    private_description="", # Uses default description
+    # ...
+)
+```
+
+This allows you to selectively customize only the titles or descriptions you want to change.
 
 ## Handling Extensions
 
