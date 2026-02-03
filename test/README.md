@@ -169,7 +169,7 @@ test_<module_name>() = Test<ModuleName>.test_<module_name>()
 
 The test structure mirrors the source code structure:
 
-```
+```text
 src/
 ├── Core/Core.jl              → test/suite/core/test_default.jl
 ├── Unicode/Unicode.jl        → test/suite/unicode/test_utils.jl

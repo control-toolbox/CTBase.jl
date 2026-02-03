@@ -1,5 +1,6 @@
 ---
 trigger: always_on
+globs: **/*.jl
 ---
 
 # Julia Testing Standards

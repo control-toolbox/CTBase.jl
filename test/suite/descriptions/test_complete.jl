@@ -6,6 +6,11 @@ using Main.TestOptions: VERBOSE, SHOWTIMING
 
 function test_complete()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Complete Descriptions" begin
+        
+        # ====================================================================
+        # UNIT TESTS - Complete Function Core Logic
+        # ====================================================================
+        
         algorithms = ()
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :bisection))
         algorithms = CTBase.add(algorithms, (:descent, :bfgs, :backtracking))
@@ -57,7 +62,91 @@ function test_complete()
             result2 = CTBase.complete(:a; descriptions=descriptions)
             @test result2 in [(:a, :b), (:a, :b, :c)]
         end
+        
+        @testset "Tie-breaking behavior" begin
+            # When multiple descriptions have same intersection size, first wins
+            descriptions = ((:a, :b, :c), (:a, :b, :d), (:a, :b, :e))
+            result = CTBase.complete(:a, :b; descriptions=descriptions)
+            @test result == (:a, :b, :c)  # First one wins
+            
+            # Different order
+            descriptions2 = ((:x, :y, :z), (:x, :y, :w), (:x, :y, :v))
+            result2 = CTBase.complete(:x, :y; descriptions=descriptions2)
+            @test result2 == (:x, :y, :z)  # First one wins
+            
+            # Single symbol query with equal matches
+            descriptions3 = ((:a, :b), (:a, :c), (:a, :d))
+            result3 = CTBase.complete(:a; descriptions=descriptions3)
+            @test result3 == (:a, :b)  # First one wins
+        end
+        
+        @testset "Exact match with multiple candidates" begin
+            # Exact match exists among multiple partial matches
+            descriptions = ((:a, :b, :c), (:a, :b), (:a, :c))
+            result = CTBase.complete(:a, :b; descriptions=descriptions)
+            # Should prefer exact match or first with max intersection
+            @test result in [(:a, :b, :c), (:a, :b)]
+            
+            # Multiple exact matches - first wins
+            descriptions2 = ((:x, :y), (:x, :y), (:x, :y, :z))
+            result2 = CTBase.complete(:x, :y; descriptions=descriptions2)
+            @test result2 == (:x, :y)  # First exact match
+        end
+        
+        @testset "Single vs multi-symbol input" begin
+            descriptions = ((:a, :b, :c), (:a, :d), (:b, :c))
+            
+            # Single symbol
+            result1 = CTBase.complete(:a; descriptions=descriptions)
+            @test result1 in [(:a, :b, :c), (:a, :d)]
+            
+            # Two symbols
+            result2 = CTBase.complete(:a, :b; descriptions=descriptions)
+            @test result2 == (:a, :b, :c)
+            
+            # Three symbols
+            result3 = CTBase.complete(:a, :b, :c; descriptions=descriptions)
+            @test result3 == (:a, :b, :c)
+        end
+        
+        @testset "Tuple overload delegation" begin
+            descriptions = ((:a, :b), (:c, :d))
+            
+            # Test that tuple overload works correctly
+            result1 = CTBase.complete((:a,); descriptions=descriptions)
+            result2 = CTBase.complete(:a; descriptions=descriptions)
+            @test result1 == result2
+            
+            # Multi-element tuple
+            result3 = CTBase.complete((:a, :b); descriptions=descriptions)
+            result4 = CTBase.complete(:a, :b; descriptions=descriptions)
+            @test result3 == result4
+        end
 
+        # ====================================================================
+        # TYPE STABILITY TESTS
+        # ====================================================================
+        
+        @testset "Type stability - complete function" begin
+            descriptions = ((:a, :b), (:a, :c), (:b, :c))
+            
+            # Varargs overload
+            @test (@inferred CTBase.complete(:a; descriptions=descriptions)) isa CTBase.Description
+            @test (@inferred CTBase.complete(:a, :b; descriptions=descriptions)) isa CTBase.Description
+            
+            # Tuple overload
+            @test (@inferred CTBase.complete((:a,); descriptions=descriptions)) isa CTBase.Description
+            @test (@inferred CTBase.complete((:a, :b); descriptions=descriptions)) isa CTBase.Description
+            
+            # Verify return type consistency
+            result = CTBase.complete(:a; descriptions=descriptions)
+            @test result isa Tuple{Vararg{Symbol}}
+        end
+        
+        # ====================================================================
+        # ERROR TESTS - AmbiguousDescription Quality
+        # ====================================================================
+        
         @testset "Ambiguous/Invalid completions" begin
             # Basic error check
             @test_throws CTBase.AmbiguousDescription CTBase.complete(
@@ -104,6 +193,34 @@ function test_complete()
                 @test occursin("closest matches", e.suggestion)
                 # Should suggest descriptions containing :b (which is (:a, :b, :c))
                 @test any(occursin("(:a,", candidate) for candidate in e.candidates)
+            end
+        end
+        
+        @testset "Diagnostic field verification" begin
+            # Empty catalog - should have diagnostic
+            try
+                CTBase.complete(:a; descriptions=())
+            catch e
+                @test e isa CTBase.AmbiguousDescription
+                @test e.diagnostic == "empty catalog"
+            end
+            
+            # Unknown symbols - should have diagnostic
+            descriptions = ((:a, :b), (:c, :d))
+            try
+                CTBase.complete(:x, :y; descriptions=descriptions)
+            catch e
+                @test e isa CTBase.AmbiguousDescription
+                @test e.diagnostic in ["unknown symbols", "no complete match"]
+            end
+            
+            # Partial match but not complete - should have diagnostic
+            descriptions2 = ((:a, :b, :c), (:d, :e, :f))
+            try
+                CTBase.complete(:a, :x; descriptions=descriptions2)
+            catch e
+                @test e isa CTBase.AmbiguousDescription
+                @test e.diagnostic == "no complete match"
             end
         end
     end
