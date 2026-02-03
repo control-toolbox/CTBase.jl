@@ -91,3 +91,48 @@ julia> CTBase.remove(full, (:descent, :bfgs))
 This “description language” lets higher-level packages refer to algorithms in a
 structured, composable way, while CTBase takes care of the low-level
 operations (adding, completing, and comparing descriptions).
+
+## Function Reference
+
+| Function | Purpose | Returns | Throws |
+|----------|---------|---------|--------|
+| `add(x, y)` | Add description `y` to collection `x` | Updated tuple | `IncorrectArgument` if duplicate |
+| `complete(list; descriptions=D)` | Find complete description matching partial list | Complete description | `AmbiguousDescription` if no match |
+| `remove(x, y)` | Remove symbols in `y` from description `x` | Remaining symbols | - |
+
+## Error Handling
+
+The description system uses CTBase exceptions to signal problems:
+
+### Duplicate Descriptions
+
+```@repl
+using CTBase
+algorithms = CTBase.add((), (:a, :b))
+CTBase.add(algorithms, (:a, :b))  # Error: duplicate
+```
+
+This throws `IncorrectArgument` because adding a duplicate would create ambiguity.
+
+### Ambiguous or Invalid Descriptions
+
+```@repl
+using CTBase
+D = ((:a, :b), (:c, :d))
+CTBase.complete((:x,); descriptions=D)  # Error: no match
+```
+
+This throws `AmbiguousDescription` when no description in the library contains all the requested symbols.
+
+## Best Practices
+
+1. **Order matters**: Place more specific descriptions first in your library
+2. **Use meaningful symbols**: Choose symbols that clearly describe the algorithm
+3. **Keep it simple**: Descriptions should be short and focused
+4. **Handle errors**: Always catch `AmbiguousDescription` when using `complete`
+5. **Document your descriptions**: Maintain a list of valid descriptions for your package
+
+## See Also
+
+- [Exception Handling](exceptions.md): Understanding CTBase exceptions
+- [API Reference](api.md): Complete API documentation
