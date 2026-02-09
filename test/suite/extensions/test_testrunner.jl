@@ -1,3 +1,13 @@
+module TestTestRunner
+
+using Test
+using CTBase
+
+const TestRunner = Base.get_extension(CTBase, :TestRunner)
+
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+
 struct DummyTestRunnerTag <: CTBase.Extensions.AbstractTestRunnerTag end
 
 function test_testrunner()
@@ -248,6 +258,93 @@ function test_testrunner()
                 sel = select_tests(["utils"], available, false, identity; test_dir=temp_dir)
                 @test sel == ["suite_src/test_utils.jl"]
             end
+
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "bare directory selection (no wildcard) selects all files in directory" begin
+                mkpath(joinpath(temp_dir, "suite_norm"))
+                touch(joinpath(temp_dir, "suite_norm", "test_x.jl"))
+                touch(joinpath(temp_dir, "suite_norm", "test_y.jl"))
+
+                available = TestRunner.TestSpec["suite_norm/*"]
+
+                # "suite_norm" (no wildcard) should behave like "suite_norm/*"
+                sel = select_tests(
+                    ["suite_norm"], available, false, identity; test_dir=temp_dir
+                )
+                @test sort(sel) == ["suite_norm/test_x.jl", "suite_norm/test_y.jl"]
+
+                # Trailing slash should also work
+                sel = select_tests(
+                    ["suite_norm/"], available, false, identity; test_dir=temp_dir
+                )
+                @test sort(sel) == ["suite_norm/test_x.jl", "suite_norm/test_y.jl"]
+
+                # Explicit wildcard still works
+                sel = select_tests(
+                    ["suite_norm/*"], available, false, identity; test_dir=temp_dir
+                )
+                @test sort(sel) == ["suite_norm/test_x.jl", "suite_norm/test_y.jl"]
+            end
+
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "bare nested directory selection" begin
+                mkpath(joinpath(temp_dir, "suite_deep", "sub"))
+                touch(joinpath(temp_dir, "suite_deep", "sub", "test_z.jl"))
+
+                available = TestRunner.TestSpec["suite_deep/sub/*"]
+
+                # "suite_deep/sub" should match "suite_deep/sub/*"
+                sel = select_tests(
+                    ["suite_deep/sub"], available, false, identity; test_dir=temp_dir
+                )
+                @test sel == ["suite_deep/sub/test_z.jl"]
+            end
+        end
+    end
+
+    # ============================================================================
+    # UNIT TESTS - _normalize_selections
+    # ============================================================================
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_normalize_selections" begin
+        normalize = TestRunner._normalize_selections
+
+        candidates = TestRunner.TestSpec[
+            "suite/exceptions/test_display.jl",
+            "suite/exceptions/test_types.jl",
+            "suite/core/test_core.jl",
+        ]
+
+        @testset "bare directory expands to dir/*" begin
+            result = normalize(["suite/exceptions"], candidates)
+            @test "suite/exceptions" in result
+            @test "suite/exceptions/*" in result
+        end
+
+        @testset "trailing slash is stripped and expanded" begin
+            result = normalize(["suite/exceptions/"], candidates)
+            @test "suite/exceptions" in result
+            @test "suite/exceptions/*" in result
+        end
+
+        @testset "pattern with wildcard is kept as-is" begin
+            result = normalize(["suite/exceptions/*"], candidates)
+            @test result == ["suite/exceptions/*"]
+        end
+
+        @testset "non-matching directory is not expanded" begin
+            result = normalize(["nonexistent"], candidates)
+            @test result == ["nonexistent"]
+        end
+
+        @testset "parent directory expands" begin
+            result = normalize(["suite"], candidates)
+            @test "suite" in result
+            @test "suite/*" in result
+        end
+
+        @testset "no duplicates" begin
+            result = normalize(["suite/exceptions", "suite/exceptions/"], candidates)
+            @test count(==("suite/exceptions"), result) == 1
+            @test count(==("suite/exceptions/*"), result) == 1
         end
     end
 
@@ -879,3 +976,8 @@ function test_testrunner()
 
     return nothing
 end
+
+end # module
+
+# Re-export for TestRunner discovery
+test_testrunner() = TestTestRunner.test_testrunner()

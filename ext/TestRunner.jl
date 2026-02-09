@@ -160,6 +160,38 @@ function _parse_test_args(args::Vector{String})
 end
 
 """
+    _normalize_selections(selections, candidates) -> Vector{String}
+
+Normalize user-provided selection patterns before glob matching.
+
+Applied transformations:
+- Strip trailing `/` (e.g. `"suite/exceptions/"` → `"suite/exceptions"`)
+- If a selection contains no glob wildcard (`*` or `?`) and matches a directory
+  prefix of at least one candidate, expand it to `"selection/*"` so that all
+  files under that directory are selected.
+
+The original selection is always kept so that exact-name matches still work.
+"""
+function _normalize_selections(selections::Vector{String}, candidates::Vector{<:TestSpec})
+    candidate_strs = [c isa Symbol ? String(c) : String(c) for c in candidates]
+    normalized = String[]
+    for sel in selections
+        # Strip trailing slash(es)
+        s = rstrip(sel, '/')
+        push!(normalized, s)
+        # If no glob wildcard, check if it looks like a directory prefix
+        if !occursin('*', s) && !occursin('?', s)
+            prefix = s * "/"
+            is_dir_prefix = any(c -> startswith(c, prefix), candidate_strs)
+            if is_dir_prefix
+                push!(normalized, s * "/*")
+            end
+        end
+    end
+    return unique(normalized)
+end
+
+"""
     _glob_to_regex(pattern::AbstractString) -> Regex
 
 Convert a glob pattern (using `*` and `?`) into a regular expression.
@@ -343,8 +375,10 @@ function _select_tests(
         return candidates
     end
 
-    # 3. Filter candidates by selections (Patterns)
-    # selections are now patterns! e.g. [:utils, :test_u*]
+    # 3. Normalize selections: expand bare directory paths to dir/*
+    selections = _normalize_selections(selections, candidates)
+
+    # 4. Filter candidates by selections (Patterns)
     filtered = TestSpec[]
 
     for candidate in candidates
