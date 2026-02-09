@@ -39,7 +39,7 @@ function test_testrunner()
         # Access the private function via the loaded extension module
         parse_args = TestRunner._parse_test_args
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "empty args returns empty with default flags" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "empty args with defaults" begin
             (sel, all_flag, dry_flag) = parse_args(String[])
             @test sel == String[]
             @test all_flag == false
@@ -222,7 +222,7 @@ function test_testrunner()
                 @test sel == [:core]
             end
 
-            @testset verbose = VERBOSE showtiming = SHOWTIMING "With available_tests (symbol located in subdirectory)" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol in subdirectory" begin
                 mkpath(joinpath(temp_dir, "suite_src"))
                 touch(joinpath(temp_dir, "suite_src", "test_utils.jl"))
 
@@ -234,7 +234,7 @@ function test_testrunner()
                 @test sel == [:utils]
             end
 
-            @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests may include directories" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests may be directories" begin
                 mkpath(joinpath(temp_dir, "suite"))
                 touch(joinpath(temp_dir, "suite", "test_a.jl"))
                 touch(joinpath(temp_dir, "suite", "test_b.jl"))
@@ -249,7 +249,7 @@ function test_testrunner()
                 @test sel == ["suite/test_a.jl"]
             end
 
-            @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests glob string: selection may match basename without test_ prefix" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "glob: match basename without test_ prefix" begin
                 mkpath(joinpath(temp_dir, "suite_src"))
                 touch(joinpath(temp_dir, "suite_src", "test_utils.jl"))
 
@@ -259,7 +259,7 @@ function test_testrunner()
                 @test sel == ["suite_src/test_utils.jl"]
             end
 
-            @testset verbose = VERBOSE showtiming = SHOWTIMING "bare directory selection (no wildcard) selects all files in directory" begin
+            @testset verbose = VERBOSE showtiming = SHOWTIMING "bare directory selection" begin
                 mkpath(joinpath(temp_dir, "suite_norm"))
                 touch(joinpath(temp_dir, "suite_norm", "test_x.jl"))
                 touch(joinpath(temp_dir, "suite_norm", "test_y.jl"))
@@ -349,6 +349,133 @@ function test_testrunner()
     end
 
     # ============================================================================
+    # UNIT TESTS - Progress display
+    # ============================================================================
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "Progress display" begin
+        progress_bar = TestRunner._progress_bar
+        bar_width = TestRunner._bar_width
+        default_on_test_done = TestRunner._default_on_test_done
+
+        @testset "_bar_width adaptive" begin
+            @test bar_width(1) == 1
+            @test bar_width(10) == 10
+            @test bar_width(20) == 20
+            @test bar_width(21) == 20
+            @test bar_width(30) == 20
+            @test bar_width(50) == 20
+            @test bar_width(100) == 20
+            @test bar_width(500) == 20
+            @test bar_width(1000) == 20
+            @test bar_width(0) == 0
+        end
+
+        @testset "_progress_bar rendering" begin
+            # Full bar (explicit width)
+            bar = progress_bar(10, 10; width=10)
+            @test bar == "[██████████]"
+
+            # Empty bar
+            bar = progress_bar(0, 10; width=10)
+            @test bar == "[░░░░░░░░░░]"
+
+            # Half bar
+            bar = progress_bar(5, 10; width=10)
+            @test bar == "[█████░░░░░]"
+
+            # Auto width: 2 tests → width=2
+            bar = progress_bar(1, 2)
+            @test length(bar) == 4  # 2 chars + 2 brackets
+
+            # Auto width: 50 tests → width=20
+            bar = progress_bar(25, 50)
+            @test length(bar) == 22  # 20 chars + 2 brackets
+
+            # Auto width: 500 tests → width=20
+            bar = progress_bar(250, 500)
+            @test length(bar) == 22  # 20 chars + 2 brackets
+
+            # Edge case: total=0
+            bar = progress_bar(0, 0; width=10)
+            @test bar == "[░░░░░░░░░░]"
+        end
+
+        @testset "_format_progress_line output" begin
+            fmt = TestRunner._format_progress_line
+
+            info = TestRunner.TestRunInfo(
+                :my_test, "/tmp/test_my_test.jl", :test_my_test,
+                3, 10, :post_eval, nothing, 1.234,
+            )
+            buf = IOBuffer()
+            fmt(buf, info)
+            output = String(take!(buf))
+            @test contains(output, "✓")
+            @test contains(output, "[03/10]")
+            @test contains(output, "my_test")
+            @test contains(output, "1.2s")
+            @test contains(output, "█")
+
+            # Error status
+            info_err = TestRunner.TestRunInfo(
+                "suite/test_fail.jl", "/tmp/test_fail.jl", :test_fail,
+                5, 10, :error, ErrorException("boom"), 0.5,
+            )
+            buf_err = IOBuffer()
+            fmt(buf_err, info_err)
+            output_err = String(take!(buf_err))
+            @test contains(output_err, "✗")
+            @test contains(output_err, "FAILED")
+            @test contains(output_err, "[05/10]")
+
+            # test_failed status (from @test failures)
+            info_tf = TestRunner.TestRunInfo(
+                :my_test, "/tmp/test_my_test.jl", :test_my_test,
+                7, 10, :test_failed, nothing, 2.0,
+            )
+            buf_tf = IOBuffer()
+            fmt(buf_tf, info_tf)
+            output_tf = String(take!(buf_tf))
+            @test contains(output_tf, "✗")
+            @test contains(output_tf, "FAILED")
+
+            # Skipped status
+            info_skip = TestRunner.TestRunInfo(
+                :skipped_test, "/tmp/test_skip.jl", :test_skip,
+                1, 5, :skipped, nothing, nothing,
+            )
+            buf_skip = IOBuffer()
+            fmt(buf_skip, info_skip)
+            output_skip = String(take!(buf_skip))
+            @test contains(output_skip, "○")
+            @test !contains(output_skip, "FAILED")
+
+            # Fixed bar of 20 chars even for >400 tests (empty at start)
+            info_large = TestRunner.TestRunInfo(
+                :big_test, "/tmp/test_big.jl", :test_big,
+                1, 500, :post_eval, nothing, 0.1,
+            )
+            buf_large = IOBuffer()
+            fmt(buf_large, info_large)
+            output_large = String(take!(buf_large))
+            @test contains(output_large, "✓")
+            @test contains(output_large, "░")
+            
+            # Test with some progress (25%)
+            info_large_progress = TestRunner.TestRunInfo(
+                :big_test, "/tmp/test_big.jl", :test_big,
+                125, 500, :post_eval, nothing, 0.1,
+            )
+            buf_large_progress = IOBuffer()
+            fmt(buf_large_progress, info_large_progress)
+            output_large_progress = String(take!(buf_large_progress))
+            @test contains(output_large_progress, "✓")
+            @test contains(output_large_progress, "█")
+            @test contains(output_large_progress, "░")
+        end
+    end
+
+    # ============================================================================
     # EDGE CASES
     # ============================================================================
 
@@ -358,7 +485,7 @@ function test_testrunner()
         normalize_available = TestRunner._normalize_available_tests
         find_symbol_file = TestRunner._find_symbol_test_file_rel
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "mixed case and special characters in test names" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "mixed case & special chars" begin
             # Test names are converted to Symbols, preserving case
             (sel, _, _) = parse_args(["MyTest", "test_123"])
             @test sel == ["MyTest", "test_123"]
@@ -379,7 +506,7 @@ function test_testrunner()
             @test_throws ArgumentError normalize_available(Any[1])
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol resolution prefers shallowest match when root missing" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol resolution: shallowest match" begin
             mktempdir() do temp_dir
                 mkpath(joinpath(temp_dir, "a"))
                 mkpath(joinpath(temp_dir, "a", "b"))
@@ -416,7 +543,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "duplicate selections are preserved" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "duplicate selections preserved" begin
             # Duplicates are not filtered (caller's responsibility)
             (sel, _, _) = parse_args(["utils", "utils"])
             @test sel == ["utils", "utils"]
@@ -449,7 +576,7 @@ function test_testrunner()
             @test occursin("not found", err.msg)
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: error when file not found" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: file not found" begin
             err = try
                 run_single(
                     "does_not_exist_abc123.jl";
@@ -467,7 +594,7 @@ function test_testrunner()
             @test occursin("not found", err.msg)
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: eval_mode=false does not call function" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: eval_mode=false" begin
             mktempdir() do temp_dir
                 stem = "testrunner_evalmode_false"
                 file = joinpath(temp_dir, stem * ".jl")
@@ -494,7 +621,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: eval_mode=false does not call function" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: eval_mode=false" begin
             mktempdir() do temp_dir
                 touch(joinpath(temp_dir, "test_sym_noeval.jl"))
                 write(
@@ -520,7 +647,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: error when expected function missing" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "string spec: missing function" begin
             mktempdir() do temp_dir
                 stem = "testrunner_missing_func"
                 file = joinpath(temp_dir, stem * ".jl")
@@ -546,7 +673,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: funcname_builder returns nothing in eval_mode" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: funcname_builder returns nothing" begin
             mktempdir() do temp_dir
                 touch(joinpath(temp_dir, "test_foo.jl"))
 
@@ -569,7 +696,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: error when built function missing" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol spec: built function missing" begin
             mktempdir() do temp_dir
                 write(joinpath(temp_dir, "test_bar.jl"), "x = 1\n")
 
@@ -593,7 +720,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "funcname_builder may return String or Symbol" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "funcname_builder: String or Symbol" begin
             mktempdir() do temp_dir
                 # Create a test file with a function
                 write(
@@ -671,7 +798,7 @@ function test_testrunner()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Callbacks" begin
         run_single = TestRunner._run_single_test
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_start receives :pre_eval info" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_start receives :pre_eval" begin
             mktempdir() do temp_dir
                 write(
                     joinpath(temp_dir, "test_cb_start.jl"),
@@ -704,7 +831,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_done receives :post_eval info after successful eval" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_done receives :post_eval" begin
             mktempdir() do temp_dir
                 write(
                     joinpath(temp_dir, "test_cb_done.jl"),
@@ -735,7 +862,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_start returning false skips eval" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_start false skips eval" begin
             mktempdir() do temp_dir
                 write(
                     joinpath(temp_dir, "test_cb_skip.jl"),
@@ -772,7 +899,7 @@ function test_testrunner()
             end
         end
 
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_done receives :skipped when eval_mode=false" begin
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_done receives :skipped" begin
             mktempdir() do temp_dir
                 write(
                     joinpath(temp_dir, "test_cb_noeval.jl"),

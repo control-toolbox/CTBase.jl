@@ -56,6 +56,7 @@ Run tests with configurable file/function name builders and optional available t
 - `showtiming::Bool = true` — show timing in testset output
 - `on_test_start::Union{Function,Nothing} = nothing` — callback invoked after include, before eval. Receives a [`TestRunInfo`](@ref) with `status == :pre_eval`. Must return `Bool`: `true` to proceed with eval, `false` to skip.
 - `on_test_done::Union{Function,Nothing} = nothing` — callback invoked after eval (or skip/error). Receives a [`TestRunInfo`](@ref) with `status ∈ {:post_eval, :skipped, :error}`.
+- `progress::Bool = true` — display a progress line after each test. Ignored when a custom `on_test_done` is provided.
 
 # Notes
 
@@ -90,6 +91,7 @@ function CTBase.run_tests(
     test_dir::String=joinpath(pwd(), "test"),
     on_test_start::Union{Function,Nothing}=nothing,
     on_test_done::Union{Function,Nothing}=nothing,
+    progress::Bool=true,
 )
     # Parse command-line arguments
     (selections, run_all, dry_run) = _parse_test_args(String.(args))
@@ -109,6 +111,15 @@ function CTBase.run_tests(
 
     total = length(selected)
 
+    # Wire up default progress callback when no custom on_test_done is provided
+    effective_on_test_done = if on_test_done !== nothing
+        on_test_done
+    elseif progress
+        _default_on_test_done
+    else
+        nothing
+    end
+
     @testset verbose = verbose showtiming = showtiming "$testset_name" begin
         for (idx, spec) in enumerate(selected)
             @testset "$(spec)" begin
@@ -122,7 +133,7 @@ function CTBase.run_tests(
                     index=idx,
                     total,
                     on_test_start,
-                    on_test_done,
+                    on_test_done=effective_on_test_done,
                 )
             end
         end
@@ -502,13 +513,23 @@ function _run_single_test(
         return nothing
     end
 
+    # --- Snapshot testset results before eval ---
+    ts = Test.get_testset()
+    n_before = (ts isa Test.DefaultTestSet) ? length(ts.results) : nothing
+
     # --- Eval the function ---
     t0 = time()
     try
         Main.eval(Expr(:call, func_symbol))
         elapsed = time() - t0
         if on_test_done !== nothing
-            done_info = TestRunInfo(spec, filename, func_symbol, index, total, :post_eval, nothing, elapsed)
+            # Detect @test failures by scanning only the new results added during eval
+            status = if n_before !== nothing
+                _has_failures_in_results(ts, n_before + 1) ? :test_failed : :post_eval
+            else
+                :post_eval
+            end
+            done_info = TestRunInfo(spec, filename, func_symbol, index, total, status, nothing, elapsed)
             on_test_done(done_info)
         end
     catch ex
@@ -597,6 +618,132 @@ function _resolve_test(
     func_symbol = func_symbol isa Symbol ? func_symbol : Symbol(String(func_symbol))
 
     return (filename, func_symbol)
+end
+
+# ============================================================================
+# Progress display
+# ============================================================================
+
+"""
+    _has_failures_in_results(ts::Test.DefaultTestSet, from::Int=1) -> Bool
+
+Recursively scan a `DefaultTestSet` results for `Test.Fail` or `Test.Error` entries,
+starting at index `from`.
+
+This is used to detect `@test` failures that occurred during a specific eval by
+comparing the results count before and after the eval. The `anynonpass` field is
+unreliable because it is only updated when a testset *finishes* (in `Test.finish`).
+"""
+function _has_failures_in_results(ts::Test.DefaultTestSet, from::Int=1)
+    for i in from:length(ts.results)
+        r = ts.results[i]
+        if r isa Test.DefaultTestSet
+            _has_failures_in_results(r) && return true
+        elseif r isa Test.Fail || r isa Test.Error
+            return true
+        end
+    end
+    return false
+end
+
+"""
+    _bar_width(total::Int) -> Int
+
+Compute the progress bar character width based on the number of tests.
+
+- `total ≤ 20`: width equals `total` (one block per test).
+- `total > 20`: fixed width of 20 (some tests skip a block advance).
+"""
+function _bar_width(total::Int)
+    total <= 0 && return 0
+    return min(total, 20)
+end
+
+"""
+    _progress_bar(index, total; width=nothing) -> String
+
+Render a progress bar string like `[████████░░░░░░░░░░░░]`.
+
+When `width` is `nothing` (default), the width is computed automatically
+via `_bar_width(total)`. Returns an empty string when the bar is hidden.
+
+# Arguments
+- `index::Int`: current progress (1-based)
+- `total::Int`: total number of items
+- `width::Union{Int,Nothing}`: character width of the bar (default: auto)
+"""
+function _progress_bar(index::Int, total::Int; width::Union{Int,Nothing}=nothing)
+    w = width === nothing ? _bar_width(total) : width
+    w <= 0 && return ""
+    total <= 0 && return "[" * repeat("░", w) * "]"
+    filled = round(Int, index / total * w)
+    filled = clamp(filled, 0, w)
+    return "[" * repeat("█", filled) * repeat("░", w - filled) * "]"
+end
+
+"""
+    _format_progress_line(io::IO, info::TestRunInfo) -> Nothing
+
+Write a styled progress line for a completed test to `io`.
+
+Uses ANSI colors: green for success, red for errors, yellow for skipped.
+
+Format:
+
+```
+[████████░░░░░░░░░░░░] ✓ [8/19] suite/exceptions/test_display.jl (2.5s)
+```
+"""
+function _format_progress_line(io::IO, info::TestRunInfo)
+    # ANSI codes
+    reset   = "\e[0m"
+    bold    = "\e[1m"
+    dim     = "\e[2m"
+    green   = "\e[32m"
+    red     = "\e[31m"
+    yellow  = "\e[33m"
+    cyan    = "\e[36m"
+
+    bar = _progress_bar(info.index, info.total)
+
+    if info.status == :error || info.status == :test_failed
+        color = red
+        symbol = "✗"
+    elseif info.status == :skipped
+        color = yellow
+        symbol = "○"
+    else
+        color = green
+        symbol = "✓"
+    end
+
+    w = ndigits(info.total)
+    idx_str = "[$(lpad(info.index, w, '0'))/$(info.total)]"
+    time_str = if info.elapsed !== nothing
+        " $(dim)($(round(info.elapsed; digits=1))s)$(reset)"
+    else
+        ""
+    end
+    status_str = (info.status == :error || info.status == :test_failed) ? " $(bold)$(red)FAILED$(reset)$(dim)," : ""
+
+    if !isempty(bar)
+        print(io, "$(color)$(bar)$(reset) ")
+    end
+    print(io, "$(bold)$(color)$(symbol)$(reset) ")
+    print(io, "$(cyan)$(idx_str)$(reset) ")
+    print(io, "$(bold)$(info.spec)$(reset)")
+    println(io, "$(status_str)$(time_str)")
+    return nothing
+end
+
+"""
+    _default_on_test_done(info::TestRunInfo) -> Nothing
+
+Default progress callback for `on_test_done`. Prints to `stdout`.
+"""
+function _default_on_test_done(info::TestRunInfo)
+    _format_progress_line(stdout, info)
+    return nothing
 end
 
 end
