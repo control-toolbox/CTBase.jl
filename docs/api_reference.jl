@@ -164,39 +164,23 @@ function with_api_reference(f::Function, src_dir::String)
     try
         f(pages)
     finally
-        # Clean up generated files
-        # The pages are Pairs: "Title" => "filename.md" (relative to build? no, relative to src)
-        # automatic_reference_documentation returns "filename" which is relative to docs/src if subdirectory="."
+        docs_src = abspath(joinpath(@__DIR__, "src"))
+        _cleanup_pages(docs_src, pages)
+    end
+end
 
-        # We need to reconstruct the full path to delete them.
-        # Assuming they are in docs/src (which is where makedocs runs from?)
-        # Wait, makedocs options say subdirectory=".". 
-        # Typically automatic_reference_documentation writes to joinpath(@__DIR__, "src", subdirectory, filename.md) ??
-        # I need to check where automatic_reference_documentation writes.
-        # Assuming we are running from docs/ (where make.jl is).
-
-        # Let's assume the files are in `docs/src/api`.
-        docs_src = abspath(joinpath(@__DIR__, "src", "api"))
-
-        function cleanup_pages(pages)
-            for p in pages
-                content = last(p)
-                if content isa AbstractString
-                    # file path
-                    filename = content
-                    fname = endswith(filename, ".md") ? filename : filename * ".md"
-                    full_path = joinpath(docs_src, fname)
-                    if isfile(full_path)
-                        rm(full_path)
-                        println("Removed temporary API doc: $full_path")
-                    end
-                elseif content isa Vector
-                    # nested pages
-                    cleanup_pages(content)
-                end
+function _cleanup_pages(docs_src::String, pages)
+    for p in pages
+        val = last(p)
+        if val isa AbstractString
+            fname = endswith(val, ".md") ? val : val * ".md"
+            full_path = joinpath(docs_src, fname)
+            if isfile(full_path)
+                rm(full_path)
+                println("Removed temporary API doc: $full_path")
             end
+        elseif val isa AbstractVector
+            _cleanup_pages(docs_src, val)
         end
-
-        cleanup_pages(pages)
     end
 end
