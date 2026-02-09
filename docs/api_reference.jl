@@ -16,17 +16,17 @@ function generate_api_reference(src_dir::String)
 
     pages = [
         CTBase.automatic_reference_documentation(;
-            subdirectory=".",
+            subdirectory="api",
             primary_modules=[CTBase.Core => src(joinpath("Core", "Core.jl"))],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
             title="Core",
             title_in_menu="Core",
-            filename="api_core",
+            filename="core",
         ),
         CTBase.automatic_reference_documentation(;
-            subdirectory=".",
+            subdirectory="api",
             primary_modules=[
                 CTBase.Descriptions => src(
                     joinpath("Descriptions", "Descriptions.jl"),
@@ -43,10 +43,10 @@ function generate_api_reference(src_dir::String)
             private=true,
             title="Descriptions",
             title_in_menu="Descriptions",
-            filename="api_descriptions",
+            filename="descriptions",
         ),
         CTBase.automatic_reference_documentation(;
-            subdirectory=".",
+            subdirectory="api",
             primary_modules=[
                 CTBase.Exceptions => src(
                     joinpath("Exceptions", "Exceptions.jl"),
@@ -59,20 +59,20 @@ function generate_api_reference(src_dir::String)
             private=true,
             title="Exceptions",
             title_in_menu="Exceptions",
-            filename="api_exceptions",
+            filename="exceptions",
         ),
         CTBase.automatic_reference_documentation(;
-            subdirectory=".",
+            subdirectory="api",
             primary_modules=[CTBase.Unicode => src(joinpath("Unicode", "Unicode.jl"))],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=false, # there is no private API
             title="Unicode",
             title_in_menu="Unicode",
-            filename="api_unicode",
+            filename="unicode",
         ),
         CTBase.automatic_reference_documentation(;
-            subdirectory=".",
+            subdirectory="api",
             primary_modules=[
                 CTBase.Extensions => src(joinpath("Extensions", "Extensions.jl"))
             ],
@@ -81,7 +81,7 @@ function generate_api_reference(src_dir::String)
             private=true,
             title="Extensions",
             title_in_menu="Extensions",
-            filename="api_extensions",
+            filename="extensions",
         ),
     ]
 
@@ -101,7 +101,7 @@ function generate_api_reference(src_dir::String)
         push!(
             pages,
             CTBase.automatic_reference_documentation(;
-                subdirectory=".",
+                subdirectory="api",
                 primary_modules=[DocumenterReference => ext("DocumenterReference.jl")],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_DOCREF,
@@ -119,7 +119,7 @@ function generate_api_reference(src_dir::String)
         push!(
             pages,
             CTBase.automatic_reference_documentation(;
-                subdirectory=".",
+                subdirectory="api",
                 primary_modules=[
                     CoveragePostprocessing => ext("CoveragePostprocessing.jl")
                 ],
@@ -139,7 +139,7 @@ function generate_api_reference(src_dir::String)
         push!(
             pages,
             CTBase.automatic_reference_documentation(;
-                subdirectory=".",
+                subdirectory="api",
                 primary_modules=[TestRunner => ext("TestRunner.jl")],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
@@ -175,8 +175,8 @@ function with_api_reference(f::Function, src_dir::String)
         # I need to check where automatic_reference_documentation writes.
         # Assuming we are running from docs/ (where make.jl is).
 
-        # Let's assume the files are in `docs/src`.
-        docs_src = abspath(joinpath(@__DIR__, "src"))
+        # Let's assume the files are in `docs/src/api`.
+        docs_src = abspath(joinpath(@__DIR__, "src", "api"))
 
         function cleanup_pages(pages)
             for p in pages
