@@ -86,6 +86,37 @@ function test_testrunner()
             @test run_all == true
             @test dry_run == true
         end
+
+        @testset verbose = VERBOSE showtiming = SHOWTIMING "test/ prefix is stripped" begin
+            (sel, _, _) = parse_args(["test/suite/foo"])
+            @test sel == ["suite/foo"]
+
+            (sel, _, _) = parse_args(["test/suite"])
+            @test sel == ["suite"]
+
+            # No prefix → unchanged
+            (sel, _, _) = parse_args(["suite/foo"])
+            @test sel == ["suite/foo"]
+
+            # Exact "test" (no slash) → unchanged
+            (sel, _, _) = parse_args(["test"])
+            @test sel == ["test"]
+
+            # Multiple args with mixed prefixes
+            (sel, _, _) = parse_args(["test/suite/a", "suite/b"])
+            @test sel == ["suite/a", "suite/b"]
+        end
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_strip_test_prefix" begin
+        strip_prefix = TestRunner._strip_test_prefix
+
+        @test strip_prefix("test/suite/foo") == "suite/foo"
+        @test strip_prefix("test/a") == "a"
+        @test strip_prefix("suite/foo") == "suite/foo"
+        @test strip_prefix("test") == "test"
+        @test strip_prefix("testing/foo") == "testing/foo"
+        @test strip_prefix("test/") == ""
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "run_tests (dry run)" begin

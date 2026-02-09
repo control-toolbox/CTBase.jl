@@ -93,6 +93,17 @@ function CTBase.run_tests(
     on_test_done::Union{Function,Nothing}=nothing,
     progress::Bool=true,
 )
+    # Guard: a subdirectory named "test" inside test_dir would conflict with
+    # the automatic `test/` prefix stripping in _parse_test_args.
+    if isdir(joinpath(test_dir, "test"))
+        error(
+            "A subdirectory \"test\" exists inside the test directory " *
+            "\"$(test_dir)\". This is not supported because selection " *
+            "arguments starting with \"test/\" are automatically stripped " *
+            "(e.g. \"test/suite\" → \"suite\"). Please rename the subdirectory."
+        )
+    end
+
     # Parse command-line arguments
     (selections, run_all, dry_run) = _parse_test_args(String.(args))
 
@@ -150,6 +161,9 @@ Returns `(selections, run_all, dry_run)` where:
 - `selections`: selection patterns provided by the user (as symbols)
 - `run_all`: whether `-a` / `--all` was present
 - `dry_run`: whether `-n` / `--dryrun` was present
+
+Selection patterns starting with `test/` or `test\\` are automatically stripped
+so that users can write `test/suite/foo` or `suite/foo` interchangeably.
 """
 function _parse_test_args(args::Vector{String})
     selections = String[]
@@ -164,10 +178,27 @@ function _parse_test_args(args::Vector{String})
         elseif arg == "-n" || arg == "--dryrun"
             dry_run = true
         else
-            push!(selections, arg)
+            push!(selections, _strip_test_prefix(arg))
         end
     end
     return (selections, run_all, dry_run)
+end
+
+"""
+    _strip_test_prefix(s::AbstractString) -> String
+
+Strip a leading `test/` or `test\\` prefix from a selection pattern.
+
+This allows users to type `test/suite/foo` instead of `suite/foo` since
+the test directory is already the root for pattern matching.
+"""
+function _strip_test_prefix(s::AbstractString)
+    for prefix in ("test/", "test\\")
+        if startswith(s, prefix)
+            return String(s[length(prefix)+1:end])
+        end
+    end
+    return String(s)
 end
 
 """
