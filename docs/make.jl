@@ -66,12 +66,12 @@ with_api_reference(src_dir) do api_pages
         ),
         pages=[
             "Introduction" => "index.md",
-            "Tutorials" => [
-                "Descriptions" => "descriptions.md",
-                "Exceptions" => "exceptions.md",
-                "Test Runner" => "test-runner.md",
-                "Coverage" => "coverage.md",
-                "API Documentation" => "api-documentation.md",
+            "User Guides" => [
+                "Descriptions" => joinpath("guide", "descriptions.md"),
+                "Exceptions" => joinpath("guide", "exceptions.md"),
+                "Test Runner" => joinpath("guide", "test-runner.md"),
+                "Coverage" => joinpath("guide", "coverage.md"),
+                "API Documentation" => joinpath("guide", "api-documentation.md"),
             ],
             "API Reference" => api_pages,
         ],

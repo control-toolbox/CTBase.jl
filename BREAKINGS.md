@@ -7,6 +7,7 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 - [Exception System Overhaul](#exception-system-overhaul)
 - [Module Reorganization](#module-reorganization)  
 - [Extension System Introduction](#extension-system-introduction)
+- [TestRunner Enhancements](#testrunner-enhancements)
 - [API Changes](#api-changes)
 - [Dependency Updates](#dependency-updates)
 - [Migration Guide](#migration-guide)
@@ -230,6 +231,109 @@ CTBase.ctindice(1)
 
 # v0.18.0-beta - Direct module access
 CTBase.Unicode.ctindice(1)
+```
+
+---
+
+## TestRunner Enhancements
+
+### 🚨 New Extension Features
+
+The TestRunner extension has been significantly enhanced with advanced capabilities for test execution and progress tracking.
+
+#### Progress Bar System Changes
+
+The progress bar implementation has been completely rewritten with adaptive width:
+
+```julia
+# v0.18.0-beta (basic progress)
+[████████████░░░░░░░░░░] ✓ [08/19] suite/exceptions/test_display.jl (2.5s)
+
+# v0.18.0-beta.1 (adaptive width)
+[████████░░░░░░░░░░] ✓ [08/19] suite/exceptions/test_display.jl (2.5s)
+[████████████████████] ✓ [19/19] suite/exceptions/test_exceptions.jl (0.6s)
+```
+
+#### Enhanced Failure Detection
+
+The failure detection mechanism is now more robust and accurate:
+
+```julia
+# v0.18.0-beta (unreliable)
+# @test failures sometimes showed as success
+
+# v0.18.0-beta.1 (robust detection)
+# Correctly detects both exceptions and @test assertion failures
+```
+
+#### Path Prefix Stripping
+
+Users can now use `test/suite` and `suite` interchangeably:
+
+```julia
+# v0.18.0-beta (explicit paths required)
+julia --project -e 'using Pkg; Pkg.test(; test_args=["suite/exceptions"])'
+
+# v0.18.0-beta.1 (automatic stripping)
+julia --project -e 'using Pkg; Pkg.test(; test_args=["test/suite"])'  # Same result
+```
+
+#### Callback System Overhaul
+
+The callback system has been enhanced with rich context information:
+
+```julia
+# v0.18.0-beta (basic callbacks)
+on_test_done = info -> println("Done: $(info.status)")
+
+# v0.18.0-beta.1 (rich context)
+on_test_done = info -> begin
+    if info.status == :error || info.status == :test_failed
+        println("❌ FAILED: $(info.spec)")
+    else
+        println("✓ Success: $(info.spec)")
+    end
+end
+```
+
+#### Directory Protection
+
+The system now prevents ambiguous directory structures:
+
+```julia
+# v0.18.0-beta (allowed)
+test/
+├── test/  # This would cause ambiguity with prefix stripping
+
+# v0.18.0-beta.1 (protected)
+ERROR: A subdirectory "test" exists inside the test directory
+```
+
+### 📚 Documentation Improvements
+
+#### Docstring Standards Compliance
+
+All TestRunner functions now follow the project's documentation standards:
+
+```julia
+"""
+$(TYPEDSIGNATURES)
+Run tests with configurable file/function name builders...
+
+# Arguments
+- `args::AbstractVector{<:AbstractString}`: Command-line arguments...
+```
+
+#### Cross-Reference Resolution
+
+All internal references now use fully qualified names to prevent header conflicts:
+
+```julia
+# v0.18.0-beta (conflicts)
+See also: [`TestRunInfo`](@ref)  # Header conflicts
+
+# v0.18.0-beta.1 (resolved)
+See also: [`TestRunner.TestRunInfo`](@ref)
 ```
 
 ---
