@@ -54,8 +54,8 @@ Run tests with configurable file/function name builders and optional available t
 - `eval_mode::Bool = true` — whether to eval the function after include
 - `verbose::Bool = true` — verbose testset output
 - `showtiming::Bool = true` — show timing in testset output
-- `on_test_start::Union{Function,Nothing} = nothing` — callback invoked after include, before eval. Receives a [`TestRunInfo`](@ref) with `status == :pre_eval`. Must return `Bool`: `true` to proceed with eval, `false` to skip.
-- `on_test_done::Union{Function,Nothing} = nothing` — callback invoked after eval (or skip/error). Receives a [`TestRunInfo`](@ref) with `status ∈ {:post_eval, :skipped, :error}`.
+- `on_test_start::Union{Function,Nothing} = nothing` — callback invoked after include, before eval. Receives a [`TestRunInfo`](@ref TestRunner.TestRunInfo) with `status == :pre_eval`. Must return `Bool`: `true` to proceed with eval, `false` to skip.
+- `on_test_done::Union{Function,Nothing} = nothing` — callback invoked after eval (or skip/error). Receives a [`TestRunInfo`](@ref TestRunner.TestRunInfo) with `status ∈ {:post_eval, :skipped, :error}`.
 - `progress::Bool = true` — display a progress line after each test. Ignored when a custom `on_test_done` is provided.
 
 # Notes
