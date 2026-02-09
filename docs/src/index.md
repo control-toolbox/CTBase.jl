@@ -12,15 +12,15 @@ It provides the core types, utilities, and infrastructure used by other packages
 
     The root package is [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl) which aims to provide tools to model and solve optimal control problems with ordinary differential equations by direct and indirect methods, both on CPU and GPU.
 
-## Features and Tutorials
+## Features and User Guides
 
 CTBase provides several key features to build robust control-toolbox packages:
 
-- **[Descriptions: encoding algorithms](descriptions.md)**: A declarative way to encode algorithms or configurations using tuples of symbols.
-- **[Error handling and Exceptions](exceptions.md)**: A domain-specific exception hierarchy for consistent error reporting.
-- **[Test Runner](test-runner.md)**: A modular test runner for granular test execution.
-- **[Coverage Post-processing](coverage.md)**: Tools to generate readable coverage reports.
-- **[API Documentation Generation](api-documentation.md)**: Automated API reference generation from docstrings.
+- **[Descriptions: encoding algorithms](guide/descriptions.md)**: A declarative way to encode algorithms or configurations using tuples of symbols.
+- **[Error handling and Exceptions](guide/exceptions.md)**: A domain-specific exception hierarchy for consistent error reporting.
+- **[Test Runner](guide/test-runner.md)**: A modular test runner for granular test execution.
+- **[Coverage Post-processing](guide/coverage.md)**: Tools to generate readable coverage reports.
+- **[API Documentation Generation](guide/api-documentation.md)**: Automated API reference generation from docstrings.
 
 ## Note on Private Methods
 
