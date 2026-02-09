@@ -15,6 +15,33 @@ using Test: Test, @testset
 const TestSpec = Union{Symbol,String}
 
 """
+Context information passed to test callbacks (`on_test_start`, `on_test_done`).
+
+Provides details about the current test being executed, including progress
+information (`index`, `total`) and execution results (`status`, `error`, `elapsed`).
+
+# Fields
+- `spec::TestSpec`: test identifier (Symbol or relative path String)
+- `filename::String`: absolute path of the included test file
+- `func_symbol::Union{Symbol,Nothing}`: function to call (`nothing` if `eval_mode=false`)
+- `index::Int`: 1-based index of the current test in the selected list
+- `total::Int`: total number of selected tests
+- `status::Symbol`: one of `:pre_eval`, `:post_eval`, `:skipped`, `:error`
+- `error::Union{Exception,Nothing}`: captured exception when `status == :error`
+- `elapsed::Union{Float64,Nothing}`: wall-clock seconds for the eval phase (only in `on_test_done`)
+"""
+struct TestRunInfo
+    spec::TestSpec
+    filename::String
+    func_symbol::Union{Symbol,Nothing}
+    index::Int
+    total::Int
+    status::Symbol
+    error::Union{Exception,Nothing}
+    elapsed::Union{Float64,Nothing}
+end
+
+"""
     run_tests(::CTBase.Extensions.TestRunnerTag; kwargs...)
 
 Run tests with configurable file/function name builders and optional available tests filter.
@@ -27,6 +54,8 @@ Run tests with configurable file/function name builders and optional available t
 - `eval_mode::Bool = true` — whether to eval the function after include
 - `verbose::Bool = true` — verbose testset output
 - `showtiming::Bool = true` — show timing in testset output
+- `on_test_start::Union{Function,Nothing} = nothing` — callback invoked after include, before eval. Receives a [`TestRunInfo`](@ref) with `status == :pre_eval`. Must return `Bool`: `true` to proceed with eval, `false` to skip.
+- `on_test_done::Union{Function,Nothing} = nothing` — callback invoked after eval (or skip/error). Receives a [`TestRunInfo`](@ref) with `status ∈ {:post_eval, :skipped, :error}`.
 
 # Notes
 
@@ -40,6 +69,12 @@ Run tests with configurable file/function name builders and optional available t
 using CTBase
 
 # CTBase.run_tests(; testset_name="Tests")
+
+# With progress callbacks
+# CTBase.run_tests(;
+#     on_test_start = info -> (print("  [", info.index, "/", info.total, "] ", info.spec, "..."); true),
+#     on_test_done  = info -> println(info.status == :post_eval ? " ✓" : " ✗"),
+# )
 ```
 """
 function CTBase.run_tests(
@@ -53,6 +88,8 @@ function CTBase.run_tests(
     verbose::Bool=true,
     showtiming::Bool=true,
     test_dir::String=joinpath(pwd(), "test"),
+    on_test_start::Union{Function,Nothing}=nothing,
+    on_test_done::Union{Function,Nothing}=nothing,
 )
     # Parse command-line arguments
     (selections, run_all, dry_run) = _parse_test_args(String.(args))
@@ -70,8 +107,10 @@ function CTBase.run_tests(
         return nothing
     end
 
+    total = length(selected)
+
     @testset verbose = verbose showtiming = showtiming "$testset_name" begin
-        for spec in selected
+        for (idx, spec) in enumerate(selected)
             @testset "$(spec)" begin
                 _run_single_test(
                     spec;
@@ -80,6 +119,10 @@ function CTBase.run_tests(
                     funcname_builder,
                     eval_mode,
                     test_dir,
+                    index=idx,
+                    total,
+                    on_test_start,
+                    on_test_done,
                 )
             end
         end
@@ -361,7 +404,7 @@ function _select_tests(
 end
 
 """
-    _run_single_test(name::Symbol; kwargs...)
+    _run_single_test(spec::TestSpec; kwargs...)
 
 Run a single selected test.
 
@@ -369,11 +412,94 @@ This helper:
 
 - Resolves a test filename via `filename_builder`
 - Includes the file into `Main`
+- Calls `on_test_start` (if provided) after include, before eval
 - Optionally evaluates a function (via `funcname_builder`) when `eval_mode=true`
+- Calls `on_test_done` (if provided) after eval, skip, or error
 
 This function is not part of the public API.
 """
 function _run_single_test(
+    spec::TestSpec;
+    available_tests::AbstractVector{<:TestSpec},
+    filename_builder::Function,
+    funcname_builder::Function,
+    eval_mode::Bool,
+    test_dir::String,
+    index::Int=1,
+    total::Int=1,
+    on_test_start::Union{Function,Nothing}=nothing,
+    on_test_done::Union{Function,Nothing}=nothing,
+)
+    # --- Resolve filename and func_symbol ---
+    filename, func_symbol = _resolve_test(
+        spec; available_tests, filename_builder, funcname_builder, eval_mode, test_dir
+    )
+
+    # --- Include the file ---
+    Base.include(Main, filename)
+
+    # --- Check function exists after include ---
+    if eval_mode && func_symbol !== nothing && !isdefined(Main, func_symbol)
+        error("""
+        Function "$(func_symbol)" not found after including "$(filename)".
+        Make sure the file defines a function with this name.
+        """)
+    end
+
+    # --- on_test_start callback ---
+    if on_test_start !== nothing
+        info = TestRunInfo(spec, filename, func_symbol, index, total, :pre_eval, nothing, nothing)
+        should_continue = on_test_start(info)
+        if should_continue === false
+            if on_test_done !== nothing
+                done_info = TestRunInfo(spec, filename, func_symbol, index, total, :skipped, nothing, nothing)
+                on_test_done(done_info)
+            end
+            return nothing
+        end
+    end
+
+    # --- Skip eval if not in eval mode ---
+    if !eval_mode || func_symbol === nothing
+        if on_test_done !== nothing
+            done_info = TestRunInfo(spec, filename, func_symbol, index, total, :skipped, nothing, nothing)
+            on_test_done(done_info)
+        end
+        return nothing
+    end
+
+    # --- Eval the function ---
+    t0 = time()
+    try
+        Main.eval(Expr(:call, func_symbol))
+        elapsed = time() - t0
+        if on_test_done !== nothing
+            done_info = TestRunInfo(spec, filename, func_symbol, index, total, :post_eval, nothing, elapsed)
+            on_test_done(done_info)
+        end
+    catch ex
+        elapsed = time() - t0
+        if on_test_done !== nothing
+            done_info = TestRunInfo(spec, filename, func_symbol, index, total, :error, ex, elapsed)
+            on_test_done(done_info)
+        end
+        rethrow()
+    end
+
+    return nothing
+end
+
+"""
+    _resolve_test(spec::TestSpec; kwargs...) -> (filename::String, func_symbol::Union{Symbol,Nothing})
+
+Resolve a test spec into an absolute filename and function symbol.
+
+Handles both `String` specs (relative paths) and `Symbol` specs (logical names).
+Raises errors if the file is not found or if `eval_mode=true` but no function can be determined.
+
+This function is not part of the public API.
+"""
+function _resolve_test(
     spec::TestSpec;
     available_tests::AbstractVector{<:TestSpec},
     filename_builder::Function,
@@ -390,22 +516,14 @@ function _run_single_test(
             Current directory: $(pwd())
             """)
         end
-        Base.include(Main, filename)
 
-        if !eval_mode
-            return nothing
+        func_symbol = if eval_mode
+            Symbol(replace(basename(rel), ".jl" => ""))
+        else
+            nothing
         end
 
-        func_symbol = Symbol(replace(basename(rel), ".jl" => ""))
-        if !isdefined(Main, func_symbol)
-            error("""
-            Function "$(func_symbol)" not found after including "$(filename)".
-            Make sure the file defines a function with this name.
-            """)
-        end
-
-        Main.eval(Expr(:call, func_symbol))
-        return nothing
+        return (filename, func_symbol)
     end
 
     name = spec
@@ -425,9 +543,6 @@ function _run_single_test(
         Current directory: $(pwd())
         """)
 
-    # Include the file
-    Base.include(Main, filename)
-
     # Determine function name
     func_symbol = funcname_builder(name)
 
@@ -441,25 +556,13 @@ function _run_single_test(
         )
     end
 
-    # Skip eval if not in eval mode or funcname_builder returned nothing
     if !eval_mode || func_symbol === nothing
-        return nothing
+        return (filename, nothing)
     end
 
     func_symbol = func_symbol isa Symbol ? func_symbol : Symbol(String(func_symbol))
 
-    # Check function exists before eval
-    if !isdefined(Main, func_symbol)
-        error("""
-        Function "$(func_symbol)" not found after including "$(filename)".
-        Make sure the file defines a function with this name.
-        """)
-    end
-
-    # Eval the function
-    Main.eval(Expr(:call, func_symbol))
-
-    return nothing
+    return (filename, func_symbol)
 end
 
 end
