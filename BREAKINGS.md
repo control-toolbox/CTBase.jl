@@ -7,6 +7,7 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 - [Exception System Overhaul](#exception-system-overhaul)
 - [Module Reorganization](#module-reorganization)  
 - [Extension System Introduction](#extension-system-introduction)
+- [Documentation Generation Changes](#documentation-generation-changes)
 - [TestRunner Enhancements](#testrunner-enhancements)
 - [API Changes](#api-changes)
 - [Dependency Updates](#dependency-updates)
@@ -190,6 +191,51 @@ ERROR: ExtensionError. Please make: julia> using Documenter, Markdown, MarkdownA
 
 ---
 
+## Documentation Generation Changes
+
+### 🚨 Enhanced API Documentation System
+
+The DocumenterReference extension has been significantly enhanced with new customization capabilities.
+
+#### Title System Simplification
+
+The API documentation title system has been standardized:
+
+```julia
+# v0.18.0-beta (variable titles)
+# Different pages had inconsistent title patterns
+
+# v0.18.0-beta.1 (standardized)
+# All API pages consistently use:
+# - "Public API" for exported functions
+# - "Private API" for internal functions
+```
+
+#### New Customization Parameters
+
+API documentation generation now supports customizable titles and descriptions:
+
+```julia
+# v0.18.0-beta (fixed titles)
+automatic_reference_documentation()  # Used default titles
+
+# v0.18.0-beta.1 (customizable)
+automatic_reference_documentation(;
+    public_title="Custom Public API",
+    private_title="Internal Functions",
+    public_description="Custom description for public API",
+    private_description="Custom description for private API"
+)
+```
+
+#### Impact Assessment - Documentation Changes
+
+- **Low Impact**: Existing code continues to work with defaults
+- **Medium Impact**: Code relying on specific title patterns may need updates
+- **Enhancement**: New customization provides better documentation control
+
+---
+
 ## API Changes
 
 ### 🚨 Public API Modifications
@@ -308,6 +354,20 @@ test/
 # v0.18.0-beta.1 (protected)
 ERROR: A subdirectory "test" exists inside the test directory
 ```
+
+#### Test Path Handling Changes
+
+Path prefix stripping behavior has been standardized:
+
+```julia
+# v0.18.0-beta (explicit paths required)
+julia --project -e 'using Pkg; Pkg.test(; test_args=["suite/exceptions"])'
+
+# v0.18.0-beta.1 (automatic stripping)
+julia --project -e 'using Pkg; Pkg.test(; test_args=["test/suite"])'  # Same result
+```
+
+**Note**: The `test/` prefix is now automatically stripped, making both forms equivalent.
 
 ### 📚 Documentation Improvements
 
