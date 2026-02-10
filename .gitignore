@@ -40,5 +40,5 @@ Manifest*.toml
 reports/
 .coverage/
 .vscode/
-#.windsurf/
-#.cursor/
+.windsurf/
+.cursor/
