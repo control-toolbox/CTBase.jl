@@ -5,6 +5,15 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🧹 Maintenance
+
+#### **Git Configuration**
+- Cleaned up gitignore to exclude IDE directories (`.windsurf/`, `.cursor/`)
+- Removed IDE configuration files from git tracking while preserving them locally
+- Improved repository hygiene and reduced noise in version control
+
 ## [0.18.0-beta] - 2025-02-04
 
 ### 🚀 Major Features
