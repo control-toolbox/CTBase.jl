@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed IDE configuration files from git tracking while preserving them locally
 - Improved repository hygiene and reduced noise in version control
 
+#### **Documentation Generation Improvements**
+- **Simplified title system**: Consistent 'Public API' and 'Private API' titles across documentation
+- **Customization parameters**: Added configurable page titles and descriptions for API documentation
+- **Enhanced testing**: Comprehensive tests for customization parameters and title consistency
+
 ## [0.18.0-beta] - 2025-02-04
 
 ### 🚀 Major Features
