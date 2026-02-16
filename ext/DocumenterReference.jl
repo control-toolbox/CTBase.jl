@@ -948,9 +948,26 @@ end
 
 Collect docstring blocks for symbols from the current module.
 """
-function _collect_module_docstrings(config::_Config, symbol_list)
+function _collect_module_docstrings(config::_Config, symbol_list; include_module::Bool=true)
     docstrings = String[]
     current_module = config.current_module
+    effective_source_files = _get_effective_source_files(config)
+
+    # Include the module docstring itself (if present and not filtered out)
+    if include_module && _has_documentation(
+        current_module,
+        nameof(current_module),
+        DOCTYPE_MODULE,
+        config.modules,
+    ) && _passes_source_filter(
+        current_module,
+        nameof(current_module),
+        DOCTYPE_MODULE,
+        effective_source_files,
+        config.include_without_source,
+    )
+        push!(docstrings, "## `$(current_module)`\n\n```@docs\n$(current_module)\n```\n\n")
+    end
 
     _iterate_over_symbols(config, symbol_list) do key, type
         type == DOCTYPE_MODULE && return nothing
@@ -967,7 +984,7 @@ end
 Collect docstring blocks for private symbols, including external module methods.
 """
 function _collect_private_docstrings(config::_Config, symbol_list)
-    docstrings = _collect_module_docstrings(config, symbol_list)
+    docstrings = _collect_module_docstrings(config, symbol_list; include_module=false)
 
     # Add docstrings from external modules
     if !isempty(config.external_modules_to_document)

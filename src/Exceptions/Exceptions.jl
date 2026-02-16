@@ -33,8 +33,6 @@ The Exceptions module is organized into thematic files:
 
 - **types.jl**: Exception type definitions
 - **display.jl**: Custom display functions for user-friendly error messages
-
-See also: [`CTBase`](@ref)
 """
 module Exceptions
 

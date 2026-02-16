@@ -26,8 +26,6 @@ The Descriptions module is organized into thematic submodules:
 - `add`: Add descriptions to a catalog
 - `complete`: Find matching descriptions with intelligent suggestions
 - `remove`: Remove symbols from descriptions
-
-See also: [`CTBase`](@ref)
 """
 module Descriptions
 

@@ -1,3 +1,7 @@
+"""
+Docstring for the main test module used to validate module-level documentation
+in the generated API pages.
+"""
 module DocumenterReferenceTestMod
 
 """
@@ -394,6 +398,35 @@ function test_documenter_reference()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
         @test Documenter.Selectors.order(DR.APIBuilder) == 0.5
+    end
+
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "_collect_module_docstrings includes module docstring" begin
+        DR.reset_config!()
+
+        config = DR._Config(
+            DocumenterReferenceTestMod,
+            "api",
+            Dict(DocumenterReferenceTestMod => Any[]),
+            identity,
+            Set{Symbol}(),
+            true,
+            true,
+            "API",
+            "API",
+            String[],
+            "api",
+            false,
+            Module[],
+            "",
+            "",
+            "",
+            "",
+        )
+
+        symbols = DR._exported_symbols(DocumenterReferenceTestMod).exported
+        docs = DR._collect_module_docstrings(config, symbols)
+
+        @test any(doc -> occursin("```@docs\n$(DocumenterReferenceTestMod)\n```", doc), docs)
     end
 
     # ============================================================================
