@@ -15,6 +15,12 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 
 ---
 
+## Non-breaking note (0.18.3-beta)
+
+- TestRunner progress bar now keeps full resolution up to 50 tests (previously 20) with cumulative coloring; compressed mode beyond 50 retains uniform bar. No breaking API change; purely visual behavior. No migration required.
+
+---
+
 ## Exception System Overhaul
 
 ### 🚨 Major Breaking Change

@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Customization parameters**: Added configurable page titles and descriptions for API documentation
 - **Enhanced testing**: Comprehensive tests for customization parameters and title consistency
 
+## [0.18.3-beta] - 2026-02-19
+
+### 🛠 Enhancements
+
+- **TestRunner**: Full-resolution progress bar up to 50 tests with cumulative coloring (green/yellow/red), brackets reflect max severity; compressed mode retains uniform bar.
+- **Progress demo**: Added `test/extras/progress/real_bar.jl` for realistic bar simulation with history (skips/failures).
+- **Documentation**: Module docstrings now appear on public API pages only.
+
+### 🧪 Testing
+
+- Updated progress display tests for new 50-width threshold and cumulative bar rendering.
+
 ## [0.18.0-beta] - 2025-02-04
 
 ### 🚀 Major Features
