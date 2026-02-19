@@ -31,6 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated progress display tests for new 50-width threshold and cumulative bar rendering.
 
+## [0.18.2-beta] - 2026-02-16
+
+### 🧹 Maintenance
+
+- Version bump only; no functional changes recorded.
+
+## [0.18.1-beta] - 2026-02-16
+
+### 🧠 Documentation
+
+- Public API pages now include module docstrings (private pages unaffected).
+
+### 🧹 Maintenance
+
+- Removed `.vscode/` artefacts from version control (gitignore hygiene).
+
 ## [0.18.0-beta] - 2025-02-04
 
 ### 🚀 Major Features
