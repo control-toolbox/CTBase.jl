@@ -179,7 +179,7 @@ function CTBase.run_tests(
     effective_on_test_done = if on_test_done !== nothing
         on_test_done
     elseif progress
-        _default_on_test_done
+        _make_default_on_test_done(stdout, total)
     else
         nothing
     end
@@ -953,6 +953,8 @@ end
 # Progress display
 # ============================================================================
 
+const _FULL_BAR_THRESHOLD = 50
+
 """
 $(TYPEDSIGNATURES)
 
@@ -1002,8 +1004,8 @@ $(TYPEDSIGNATURES)
 
 Compute the progress bar character width based on the number of tests.
 
-- `total ≤ 20`: width equals `total` (one block per test).
-- `total > 20`: fixed width of 20 (some tests skip a block advance).
+- `total ≤ 50`: width equals `total` (one block per test).
+- `total > 50`: fixed width of 50 (some tests skip a block advance).
 
 # Arguments
 - `total::Int`: Total number of tests
@@ -1019,7 +1021,7 @@ julia> TestRunner._bar_width(10)
 10
 
 julia> TestRunner._bar_width(25)
-20
+25
 
 julia> TestRunner._bar_width(0)
 0
@@ -1027,7 +1029,7 @@ julia> TestRunner._bar_width(0)
 """
 function _bar_width(total::Int)
     total <= 0 && return 0
-    return min(total, 20)
+    return min(total, _FULL_BAR_THRESHOLD)
 end
 
 """
@@ -1069,6 +1071,14 @@ function _progress_bar(index::Int, total::Int; width::Union{Int,Nothing}=nothing
     return "[" * repeat("█", filled) * repeat("░", w - filled) * "]"
 end
 
+@inline _severity(status::Symbol) = (status == :error || status == :test_failed) ? 3 : (status == :skipped ? 2 : 1)
+
+@inline function _color_for_severity(sev::Int)
+    sev >= 3 && return "\e[31m" # red
+    sev == 2 && return "\e[33m" # yellow
+    return "\e[32m"             # green
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -1105,7 +1115,12 @@ julia> String(take!(buf))
 "[█████░░░░░░░░░░░] ✓ [05/10] test_example (1.2s)"
 ```
 """
-function _format_progress_line(io::IO, info::TestRunInfo)
+function _format_progress_line(
+    io::IO,
+    info::TestRunInfo;
+    history::Union{Vector{Int},Nothing}=nothing,
+    cumulative_severity::Union{Int,Nothing}=nothing,
+)
     # ANSI codes
     reset   = "\e[0m"
     bold    = "\e[1m"
@@ -1115,12 +1130,14 @@ function _format_progress_line(io::IO, info::TestRunInfo)
     yellow  = "\e[33m"
     cyan    = "\e[36m"
 
+    bar_width = _bar_width(info.total)
     bar = _progress_bar(info.index, info.total)
 
-    if info.status == :error || info.status == :test_failed
+    severity = _severity(info.status)
+    if severity == 3
         color = red
         symbol = "✗"
-    elseif info.status == :skipped
+    elseif severity == 2
         color = yellow
         symbol = "○"
     else
@@ -1137,8 +1154,37 @@ function _format_progress_line(io::IO, info::TestRunInfo)
     end
     status_str = (info.status == :error || info.status == :test_failed) ? " $(bold)$(red)FAILED$(reset)$(dim)," : ""
 
-    if !isempty(bar)
-        print(io, "$(color)$(bar)$(reset) ")
+    function bracket_color_from(sev::Union{Int,Nothing})
+        sev === nothing && return green
+        sev <= 1 && return green
+        sev == 2 && return yellow
+        return red
+    end
+
+    has_history = history !== nothing && length(history) == info.total && bar_width == info.total
+    if has_history
+        # Build colored bar per block using history; brackets colored by max severity seen
+        max_sev = maximum(history)
+        bracket_color = bracket_color_from(max_sev)
+        blocks = String[]
+        for i in 1:info.total
+            sev = history[i]
+            if sev <= 0
+                push!(blocks, "$(dim)░$(reset)")
+            else
+                push!(blocks, "$( _color_for_severity(sev) )█$(reset)")
+            end
+        end
+        # Reapply bracket_color for closing bracket so block-local resets do not strip it
+        bar = "$(bracket_color)[" * join(blocks) * "$(bracket_color)]$(reset)"
+        print(io, "$(bar) ")
+    elseif !isempty(bar)
+        bracket_sev = cumulative_severity === nothing ? severity : cumulative_severity
+        bracket_color = bracket_color_from(bracket_sev)
+        inner_start = nextind(bar, firstindex(bar))
+        inner_end = prevind(bar, lastindex(bar))
+        inner = inner_start <= inner_end ? bar[inner_start:inner_end] : ""
+        print(io, "$(bracket_color)[$(reset)$(color)$(inner)$(reset)$(bracket_color)]$(reset) ")
     end
     print(io, "$(bold)$(color)$(symbol)$(reset) ")
     print(io, "$(cyan)$(idx_str)$(reset) ")
@@ -1177,9 +1223,32 @@ julia> TestRunner._default_on_test_done(info)
 [█████░░░░░░░░░░░] ✓ [05/10] test_example (1.2s)
 ```
 """
+function _make_default_on_test_done(io::IO, total::Int)
+    history = total <= _FULL_BAR_THRESHOLD ? fill(0, total) : Int[]
+    max_severity = Ref{Int}(0)
+
+    function update(info::TestRunInfo)
+        sev = _severity(info.status)
+        max_severity[] = max(max_severity[], sev)
+        if !isempty(history) && info.index <= length(history)
+            history[info.index] = sev
+        end
+        _format_progress_line(
+            io,
+            info;
+            history=!isempty(history) ? history : nothing,
+            cumulative_severity=max_severity[],
+        )
+        return nothing
+    end
+
+    return update
+end
+
+# Backward compatibility shim: keep old name for callers/tests
 function _default_on_test_done(info::TestRunInfo)
-    _format_progress_line(stdout, info)
-    return nothing
+    cb = _make_default_on_test_done(stdout, info.total)
+    return cb(info)
 end
 
 end

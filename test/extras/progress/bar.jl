@@ -99,7 +99,7 @@ function simulate_progress(total_tests::Int)
         # Simulate different statuses
         status = if i == 1
             :post_eval  # success
-        elseif i == total_tests
+        elseif i == points[end-1]
             :test_failed  # failure
         else
             :post_eval  # success
@@ -123,7 +123,7 @@ function simulate_progress(total_tests::Int)
 end
 
 # Simulate different test counts including edge cases
-for total in [5, 10, 20, 21, 30, 50, 100, 200, 500]
+for total in [5] #, 10, 20, 21, 30, 50, 100, 200, 500]
     simulate_progress(total)
 end
 

@@ -392,12 +392,13 @@ function test_testrunner()
             @test bar_width(1) == 1
             @test bar_width(10) == 10
             @test bar_width(20) == 20
-            @test bar_width(21) == 20
-            @test bar_width(30) == 20
-            @test bar_width(50) == 20
-            @test bar_width(100) == 20
-            @test bar_width(500) == 20
-            @test bar_width(1000) == 20
+            @test bar_width(21) == 21
+            @test bar_width(30) == 30
+            @test bar_width(50) == 50
+            @test bar_width(51) == 50
+            @test bar_width(100) == 50
+            @test bar_width(500) == 50
+            @test bar_width(1000) == 50
             @test bar_width(0) == 0
         end
 
@@ -418,13 +419,13 @@ function test_testrunner()
             bar = progress_bar(1, 2)
             @test length(bar) == 4  # 2 chars + 2 brackets
 
-            # Auto width: 50 tests → width=20
+            # Auto width: 50 tests → width=50
             bar = progress_bar(25, 50)
-            @test length(bar) == 22  # 20 chars + 2 brackets
+            @test length(bar) == 52  # 50 chars + 2 brackets
 
-            # Auto width: 500 tests → width=20
+            # Auto width: 500 tests → width=50
             bar = progress_bar(250, 500)
-            @test length(bar) == 22  # 20 chars + 2 brackets
+            @test length(bar) == 52  # 50 chars + 2 brackets
 
             # Edge case: total=0
             bar = progress_bar(0, 0; width=10)
@@ -503,6 +504,33 @@ function test_testrunner()
             @test contains(output_large_progress, "✓")
             @test contains(output_large_progress, "█")
             @test contains(output_large_progress, "░")
+        end
+
+        @testset "_format_progress_line cumulative coloring (full width)" begin
+            fmt = TestRunner._format_progress_line
+            history = [1, 1, 2, 3, 1]  # green, green, yellow, red, green
+            info = TestRunner.TestRunInfo(
+                :final, "/tmp/final.jl", :final,
+                5, 5, :post_eval, nothing, 0.5,
+            )
+            buf = IOBuffer()
+            fmt(buf, info; history=history, cumulative_severity=maximum(history))
+            output = String(take!(buf))
+            @test contains(output, "[")
+            @test occursin("\e[31m[", output)  # brackets red because of failure
+            @test occursin("\e[33m█", output)  # yellow block present
+        end
+
+        @testset "_format_progress_line compressed coloring" begin
+            fmt = TestRunner._format_progress_line
+            info = TestRunner.TestRunInfo(
+                :compressed, "/tmp/compressed.jl", :compressed,
+                10, 50, :post_eval, nothing, 0.2,
+            )
+            buf = IOBuffer()
+            fmt(buf, info; cumulative_severity=2)
+            output = String(take!(buf))
+            @test occursin("\e[33m[", output) || occursin("\e[33m[", replace(output, "\e[0m"=>""))
         end
     end
 
