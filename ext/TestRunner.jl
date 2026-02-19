@@ -1079,6 +1079,12 @@ end
     return "\e[32m"             # green
 end
 
+@inline function _block_char_for_severity(sev::Int)
+    sev >= 3 && return "▚"  # failure (diagonal)
+    sev == 2 && return "┆"   # skipped (thin vertical)
+    return "█"               # success
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -1172,7 +1178,8 @@ function _format_progress_line(
             if sev <= 0
                 push!(blocks, "$(dim)░$(reset)")
             else
-                push!(blocks, "$( _color_for_severity(sev) )█$(reset)")
+                glyph = _block_char_for_severity(sev)
+                push!(blocks, "$( _color_for_severity(sev) )$(glyph)$(reset)")
             end
         end
         # Reapply bracket_color for closing bracket so block-local resets do not strip it
@@ -1181,9 +1188,11 @@ function _format_progress_line(
     elseif !isempty(bar)
         bracket_sev = cumulative_severity === nothing ? severity : cumulative_severity
         bracket_color = bracket_color_from(bracket_sev)
-        inner_start = nextind(bar, firstindex(bar))
-        inner_end = prevind(bar, lastindex(bar))
-        inner = inner_start <= inner_end ? bar[inner_start:inner_end] : ""
+        # Rebuild inner bar with severity-specific glyphs for clarity (color + shape)
+        filled_char = _block_char_for_severity(severity)
+        w = bar_width
+        filled = clamp(round(Int, info.index / info.total * w), 0, w)
+        inner = repeat(filled_char, filled) * repeat("░", w - filled)
         print(io, "$(bracket_color)[$(reset)$(color)$(inner)$(reset)$(bracket_color)]$(reset) ")
     end
     print(io, "$(bold)$(color)$(symbol)$(reset) ")

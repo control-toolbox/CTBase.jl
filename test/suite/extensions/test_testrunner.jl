@@ -518,7 +518,7 @@ function test_testrunner()
             output = String(take!(buf))
             @test contains(output, "[")
             @test occursin("\e[31m[", output)  # brackets red because of failure
-            @test occursin("\e[33m█", output)  # yellow block present
+            @test occursin("\e[33m┆", output)  # yellow block present (skip glyph)
         end
 
         @testset "_format_progress_line compressed coloring" begin
