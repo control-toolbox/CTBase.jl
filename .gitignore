@@ -43,3 +43,7 @@ reports/
 .windsurf/
 .cursor/
 .vscode/
+.extras/
+
+# Temporary test artifacts (created during test runs)
+test/_test_*/

@@ -953,6 +953,17 @@ end
 # Progress display
 # ============================================================================
 
+"""
+    _FULL_BAR_THRESHOLD
+
+Internal constant defining the maximum number of tests for full-resolution progress bars.
+
+When the total number of tests is ≤ `_FULL_BAR_THRESHOLD` (50), the progress bar displays
+one character per test with cumulative coloring (each test gets its own colored block).
+Beyond this threshold, the bar switches to compressed mode with uniform coloring.
+
+This threshold balances visual clarity with terminal width constraints.
+"""
 const _FULL_BAR_THRESHOLD = 50
 
 """
@@ -1071,14 +1082,52 @@ function _progress_bar(index::Int, total::Int; width::Union{Int,Nothing}=nothing
     return "[" * repeat("█", filled) * repeat("░", w - filled) * "]"
 end
 
+"""
+    _severity(status::Symbol) -> Int
+
+Internal helper to map test status to severity level for display formatting.
+
+# Arguments
+- `status::Symbol`: Test status (`:error`, `:test_failed`, `:skipped`, or success)
+
+# Returns
+- `Int`: Severity level (3=failure, 2=skipped, 1=success)
+"""
 @inline _severity(status::Symbol) = (status == :error || status == :test_failed) ? 3 : (status == :skipped ? 2 : 1)
 
+"""
+    _color_for_severity(sev::Int) -> String
+
+Internal helper to map severity level to ANSI color code.
+
+# Arguments
+- `sev::Int`: Severity level (3=failure, 2=skipped, 1=success)
+
+# Returns
+- `String`: ANSI color escape code (red for failure, yellow for skipped, green for success)
+"""
 @inline function _color_for_severity(sev::Int)
     sev >= 3 && return "\e[31m" # red
     sev == 2 && return "\e[33m" # yellow
     return "\e[32m"             # green
 end
 
+"""
+    _block_char_for_severity(sev::Int) -> String
+
+Internal helper to map severity level to block character for colorblind-friendly display.
+
+Uses distinct glyphs to ensure progress bars are readable without color:
+- Success: █ (solid block)
+- Skipped: ┆ (thin vertical line)
+- Failure: ▚ (diagonal pattern)
+
+# Arguments
+- `sev::Int`: Severity level (3=failure, 2=skipped, 1=success)
+
+# Returns
+- `String`: Unicode block character representing the severity
+"""
 @inline function _block_char_for_severity(sev::Int)
     sev >= 3 && return "▚"  # failure (diagonal)
     sev == 2 && return "┆"   # skipped (thin vertical)
@@ -1254,7 +1303,23 @@ function _make_default_on_test_done(io::IO, total::Int)
     return update
 end
 
-# Backward compatibility shim: keep old name for callers/tests
+"""
+    _default_on_test_done(info::TestRunInfo)
+
+Backward compatibility shim for the default test completion callback.
+
+Creates a fresh stateful callback via [`_make_default_on_test_done`](@ref) and invokes it
+with the given `info`. This function exists for compatibility with existing code/tests that
+expect a stateless callback signature.
+
+For new code, prefer using [`_make_default_on_test_done`](@ref) directly to create a
+persistent callback that maintains test history across multiple invocations.
+
+# Arguments
+- `info::TestRunInfo`: Test execution information
+
+See also: [`_make_default_on_test_done`](@ref)
+"""
 function _default_on_test_done(info::TestRunInfo)
     cb = _make_default_on_test_done(stdout, info.total)
     return cb(info)
