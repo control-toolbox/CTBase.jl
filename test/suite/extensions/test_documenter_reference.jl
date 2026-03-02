@@ -761,7 +761,7 @@ function test_documenter_reference()
         @test !isempty(DR.CONFIG)
 
         doc = Documenter.Document(;
-            root=pwd(), source="src", build="build", remotes=nothing
+            root=pwd(), source="_test_docs_src", build="_test_docs_build", remotes=nothing
         )
 
         Documenter.Selectors.runner(DR.APIBuilder, doc)
