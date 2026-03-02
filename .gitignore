@@ -45,5 +45,6 @@ reports/
 .vscode/
 .extras/
 
-# Temporary test artifacts (created by coverage tests)
+# Temporary test artifacts (created during test runs)
+test/_test_*/
 test/src/
