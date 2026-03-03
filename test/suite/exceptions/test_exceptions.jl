@@ -13,13 +13,13 @@ function test_exceptions()
         # Check that the output contains the type name styled (red, bold)
         @test occursin("AmbiguousDescription", output)
         @test occursin("(:e,)", output)
-        
+
         # Test enriched version with candidates and suggestions
         e_enriched = CTBase.AmbiguousDescription(
             (:x,),
             candidates=["(:a, :b)", "(:c, :d)"],
             suggestion="Try one of the available descriptions",
-            context="test context"
+            context="test context",
         )
         output_enriched = sprint(showerror, e_enriched)
         @test occursin("Available descriptions", output_enriched)
@@ -39,14 +39,14 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("IncorrectArgument", output)
         @test occursin("invalid argument", output)
-        
+
         # Test enriched version with all fields
         e_enriched = CTBase.IncorrectArgument(
             "dimension mismatch",
             got="vector of length 3",
             expected="vector of length 2",
             suggestion="Resize your vector to match the expected dimension",
-            context="initialization"
+            context="initialization",
         )
         output_enriched = sprint(showerror, e_enriched)
         @test occursin("Got", output_enriched)
@@ -67,13 +67,13 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("NotImplemented", output)
         @test occursin("feature not ready", output)
-        
+
         # Test enriched version
         e_enriched = CTBase.NotImplemented(
             "method not implemented",
             required_method="MyAbstractType",
             suggestion="Implement this method for your concrete type",
-            context="algorithm execution"
+            context="algorithm execution",
         )
         output_enriched = sprint(showerror, e_enriched)
         @test occursin("Type", output_enriched)
@@ -92,13 +92,13 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("PreconditionError", output)
         @test occursin("state must be set before dynamics", output)
-        
+
         # Test enriched version
         e_enriched = CTBase.PreconditionError(
             "Cannot call state! twice",
             reason="state has already been defined for this OCP",
             suggestion="Create a new OCP instance",
-            context="state definition"
+            context="state definition",
         )
         output_enriched = sprint(showerror, e_enriched)
         @test occursin("Reason", output_enriched)
@@ -117,12 +117,12 @@ function test_exceptions()
         @test typeof(output) == String
         @test occursin("ParsingError", output)
         @test occursin("syntax error", output)
-        
+
         # Test enriched version
         e_enriched = CTBase.ParsingError(
             "unexpected token",
             location="line 42, column 15",
-            suggestion="Check syntax balance"
+            suggestion="Check syntax balance",
         )
         output_enriched = sprint(showerror, e_enriched)
         @test occursin("Location", output_enriched)
@@ -155,13 +155,14 @@ function test_exceptions()
         @test occursin("ExtensionError", output_msg)
         @test occursin("MyExt", output_msg)
         @test occursin("to enable feature X", output_msg)
-        
+
         # Test enriched version with feature and context
         e_enriched = CTBase.ExtensionError(
-            :Documenter, :Markdown;
+            :Documenter,
+            :Markdown;
             message="to generate documentation",
             feature="automatic documentation",
-            context="reference generation"
+            context="reference generation",
         )
         output_enriched = sprint(showerror, e_enriched)
         @test occursin("Missing dependencies", output_enriched)

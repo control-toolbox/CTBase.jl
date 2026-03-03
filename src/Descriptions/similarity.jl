@@ -27,11 +27,11 @@ function compute_similarity(desc1::Description, desc2::Description)::Float64
     if isempty(desc1) || isempty(desc2)
         return 0.0
     end
-    
+
     set1, set2 = Set(desc1), Set(desc2)
     intersection = length(set1 ∩ set2)
     union = length(set1 ∪ set2)
-    
+
     return union == 0 ? 0.0 : intersection / union
 end
 
@@ -62,25 +62,31 @@ julia> CTBase.Descriptions.find_similar_descriptions((:a,), descriptions)
  "(:a, :c)"
 ```
 """
-function find_similar_descriptions(target::Tuple{Vararg{Symbol}}, descriptions::Tuple{Vararg{Description}}; max_results::Int=5)::Vector{String}
+function find_similar_descriptions(
+    target::Tuple{Vararg{Symbol}},
+    descriptions::Tuple{Vararg{Description}};
+    max_results::Int=5,
+)::Vector{String}
     if isempty(descriptions)
         return String[]
     end
-    
+
     # Compute similarities
-    similarities = [(compute_similarity(target, desc), string(desc)) for desc in descriptions]
-    
+    similarities = [
+        (compute_similarity(target, desc), string(desc)) for desc in descriptions
+    ]
+
     # Sort by similarity (descending) and take top results
-    sort!(similarities, rev=true)
-    
+    sort!(similarities; rev=true)
+
     # Filter out zero similarity
     filtered = filter(x -> x[1] > 0.0, similarities)
-    
+
     # Limit results and extract descriptions
     if isempty(filtered)
         return String[]
     end
-    
+
     limited = filtered[1:min(max_results, length(filtered))]
     return Vector{String}([desc for (_, desc) in limited])
 end
@@ -112,13 +118,15 @@ julia> CTBase.Descriptions.format_description_candidates(descriptions; max_show=
  "(:x, :y)"
 ```
 """
-function format_description_candidates(descriptions::Tuple{Vararg{Description}}; max_show::Int=5)::Vector{String}
+function format_description_candidates(
+    descriptions::Tuple{Vararg{Description}}; max_show::Int=5
+)::Vector{String}
     if isempty(descriptions)
         return String[]
     end
-    
+
     # Take up to max_show descriptions
     to_show = descriptions[1:min(max_show, length(descriptions))]
-    
+
     return Vector{String}([string(desc) for desc in to_show])
 end

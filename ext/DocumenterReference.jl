@@ -954,18 +954,17 @@ function _collect_module_docstrings(config::_Config, symbol_list; include_module
     effective_source_files = _get_effective_source_files(config)
 
     # Include the module docstring itself (if present and not filtered out)
-    if include_module && _has_documentation(
-        current_module,
-        nameof(current_module),
-        DOCTYPE_MODULE,
-        config.modules,
-    ) && _passes_source_filter(
-        current_module,
-        nameof(current_module),
-        DOCTYPE_MODULE,
-        effective_source_files,
-        config.include_without_source,
-    )
+    if include_module &&
+        _has_documentation(
+            current_module, nameof(current_module), DOCTYPE_MODULE, config.modules
+        ) &&
+        _passes_source_filter(
+            current_module,
+            nameof(current_module),
+            DOCTYPE_MODULE,
+            effective_source_files,
+            config.include_without_source,
+        )
         push!(docstrings, "## `$(current_module)`\n\n```@docs\n$(current_module)\n```\n\n")
     end
 
@@ -1069,11 +1068,11 @@ function _finalize_api_pages(document::Documenter.Document)
     for (filename, module_contents) in PAGE_CONTENT_ACCUMULATOR
         is_private_split = occursin("_private", filename)
         is_public_split = occursin("_public", filename)
-        
+
         # Detect if this is a split page by checking if both public and private files exist
         # Extract base filename by removing _public.md or _private.md suffixes
         base_filename = replace(replace(filename, "_public.md" => ""), "_private.md" => "")
-        
+
         # Check if the counterpart file exists (if we have _public, check for _private and vice versa)
         is_split = if is_public_split
             haskey(PAGE_CONTENT_ACCUMULATOR, "$(base_filename)_private.md")
@@ -1085,7 +1084,7 @@ function _finalize_api_pages(document::Documenter.Document)
 
         all_modules = [mc[1] for mc in module_contents]
         modules_str = join([string(m) for m in all_modules], "`, `")
-        
+
         # Get custom titles and descriptions from the first module's config
         # (assuming all modules in the same page share the same customization)
         first_module = first(all_modules)
@@ -1098,27 +1097,43 @@ function _finalize_api_pages(document::Documenter.Document)
         # Determine if this is a single-type page or truly combined
         has_public = any(mc -> !isempty(mc[2]), module_contents)  # mc[2] = public_docs
         has_private = any(mc -> !isempty(mc[3]), module_contents)  # mc[3] = private_docs
-        
+
         overview, all_docstrings = if is_public_split
             # Case 1: Pure Public Split Page
-            _build_public_page_content(modules_str, module_contents, is_split; 
-                                      custom_title=custom_public_title, 
-                                      custom_description=custom_public_desc)
+            _build_public_page_content(
+                modules_str,
+                module_contents,
+                is_split;
+                custom_title=custom_public_title,
+                custom_description=custom_public_desc,
+            )
         elseif is_private_split
             # Case 2: Pure Private Split Page
-            _build_private_page_content(modules_str, module_contents, is_split;
-                                       custom_title=custom_private_title,
-                                       custom_description=custom_private_desc)
+            _build_private_page_content(
+                modules_str,
+                module_contents,
+                is_split;
+                custom_title=custom_private_title,
+                custom_description=custom_private_desc,
+            )
         elseif has_public && !has_private
             # Case 3: Single public-only page
-            _build_public_page_content(modules_str, module_contents, false;
-                                      custom_title=custom_public_title,
-                                      custom_description=custom_public_desc)
+            _build_public_page_content(
+                modules_str,
+                module_contents,
+                false;
+                custom_title=custom_public_title,
+                custom_description=custom_public_desc,
+            )
         elseif has_private && !has_public
             # Case 4: Single private-only page
-            _build_private_page_content(modules_str, module_contents, false;
-                                       custom_title=custom_private_title,
-                                       custom_description=custom_private_desc)
+            _build_private_page_content(
+                modules_str,
+                module_contents,
+                false;
+                custom_title=custom_private_title,
+                custom_description=custom_private_desc,
+            )
         else
             # Case 5: Combined Page (Public then Private)
             _build_combined_page_content(modules_str, module_contents)
@@ -1191,21 +1206,27 @@ Build the overview and docstrings for a private API page.
 - `custom_title`: Optional custom title (empty string uses default)
 - `custom_description`: Optional custom description (empty string uses default)
 """
-function _build_private_page_content(modules_str::String, module_contents, is_split::Bool; custom_title::String="", custom_description::String="")
+function _build_private_page_content(
+    modules_str::String,
+    module_contents,
+    is_split::Bool;
+    custom_title::String="",
+    custom_description::String="",
+)
     # Choose title based on context and customization
     title = if !isempty(custom_title)
         custom_title
     else
         "Private API"
     end
-    
+
     # Choose description based on customization
     description = if !isempty(custom_description)
         custom_description
     else
         "This page lists **non-exported** (internal) symbols of `$(modules_str)`."
     end
-    
+
     overview = """
     ```@meta
     EditURL = nothing
@@ -1240,21 +1261,27 @@ Build the overview and docstrings for a public API page.
 - `custom_title`: Optional custom title (empty string uses default)
 - `custom_description`: Optional custom description (empty string uses default)
 """
-function _build_public_page_content(modules_str::String, module_contents, is_split::Bool; custom_title::String="", custom_description::String="")
+function _build_public_page_content(
+    modules_str::String,
+    module_contents,
+    is_split::Bool;
+    custom_title::String="",
+    custom_description::String="",
+)
     # Choose title based on context and customization
     title = if !isempty(custom_title)
         custom_title
     else
         "Public API"
     end
-    
+
     # Choose description based on customization
     description = if !isempty(custom_description)
         custom_description
     else
         "This page lists **exported** symbols of `$(modules_str)`."
     end
-    
+
     overview = """
     # $(title)
 

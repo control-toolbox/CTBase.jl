@@ -211,7 +211,7 @@ function test_coverage_post_process()
         # It seems L36 is unreachable logic unless file system race condition or delete moves current files?
         # I'll skip striving for this branch if it's too defensive.
     end
-    
+
     @testset "Error when no usable files after cleanup" begin
         # Test the error case at line 92 in CoveragePostprocessing.jl
         mktempdir() do tmp
@@ -219,16 +219,16 @@ function test_coverage_post_process()
                 mkpath("src")
                 mkpath("test")
                 mkpath("ext")
-                
+
                 # Create a .cov file that will be cleaned up
                 # We need to simulate the case where cleanup removes all files
                 # This is tricky because the cleanup logic keeps files with the most complete PID
                 # Let's create a scenario where files exist but get cleaned up
-                
+
                 # Create a .cov file with a PID that will be considered "stale"
                 # This is hard to test reliably, so we'll test the error message format
                 CP = Base.get_extension(CTBase, :CoveragePostprocessing)
-                
+
                 # Test the error message directly by calling the internal function
                 # This tests line 92 without needing complex file manipulation
                 try

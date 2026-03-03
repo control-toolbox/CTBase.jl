@@ -153,7 +153,7 @@ function CTBase.run_tests(
             "A subdirectory \"test\" exists inside the test directory " *
             "\"$(test_dir)\". This is not supported because selection " *
             "arguments starting with \"test/\" are automatically stripped " *
-            "(e.g. \"test/suite\" → \"suite\"). Please rename the subdirectory."
+            "(e.g. \"test/suite\" → \"suite\"). Please rename the subdirectory.",
         )
     end
 
@@ -284,7 +284,7 @@ julia> TestRunner._strip_test_prefix("test\\windows\\path")
 function _strip_test_prefix(s::AbstractString)
     for prefix in ("test/", "test\\")
         if startswith(s, prefix)
-            return String(s[length(prefix)+1:end])
+            return String(s[(length(prefix) + 1):end])
         end
     end
     return String(s)
@@ -803,11 +803,15 @@ function _run_single_test(
 
     # --- on_test_start callback ---
     if on_test_start !== nothing
-        info = TestRunInfo(spec, filename, func_symbol, index, total, :pre_eval, nothing, nothing)
+        info = TestRunInfo(
+            spec, filename, func_symbol, index, total, :pre_eval, nothing, nothing
+        )
         should_continue = on_test_start(info)
         if should_continue === false
             if on_test_done !== nothing
-                done_info = TestRunInfo(spec, filename, func_symbol, index, total, :skipped, nothing, nothing)
+                done_info = TestRunInfo(
+                    spec, filename, func_symbol, index, total, :skipped, nothing, nothing
+                )
                 on_test_done(done_info)
             end
             return nothing
@@ -817,7 +821,9 @@ function _run_single_test(
     # --- Skip eval if not in eval mode ---
     if !eval_mode || func_symbol === nothing
         if on_test_done !== nothing
-            done_info = TestRunInfo(spec, filename, func_symbol, index, total, :skipped, nothing, nothing)
+            done_info = TestRunInfo(
+                spec, filename, func_symbol, index, total, :skipped, nothing, nothing
+            )
             on_test_done(done_info)
         end
         return nothing
@@ -839,13 +845,17 @@ function _run_single_test(
             else
                 :post_eval
             end
-            done_info = TestRunInfo(spec, filename, func_symbol, index, total, status, nothing, elapsed)
+            done_info = TestRunInfo(
+                spec, filename, func_symbol, index, total, status, nothing, elapsed
+            )
             on_test_done(done_info)
         end
     catch ex
         elapsed = time() - t0
         if on_test_done !== nothing
-            done_info = TestRunInfo(spec, filename, func_symbol, index, total, :error, ex, elapsed)
+            done_info = TestRunInfo(
+                spec, filename, func_symbol, index, total, :error, ex, elapsed
+            )
             on_test_done(done_info)
         end
         rethrow()
@@ -1093,7 +1103,8 @@ Internal helper to map test status to severity level for display formatting.
 # Returns
 - `Int`: Severity level (3=failure, 2=skipped, 1=success)
 """
-@inline _severity(status::Symbol) = (status == :error || status == :test_failed) ? 3 : (status == :skipped ? 2 : 1)
+@inline _severity(status::Symbol) =
+    (status == :error || status == :test_failed) ? 3 : (status == :skipped ? 2 : 1)
 
 """
     _color_for_severity(sev::Int) -> String
@@ -1177,13 +1188,13 @@ function _format_progress_line(
     cumulative_severity::Union{Int,Nothing}=nothing,
 )
     # ANSI codes
-    reset   = "\e[0m"
-    bold    = "\e[1m"
-    dim     = "\e[2m"
-    green   = "\e[32m"
-    red     = "\e[31m"
-    yellow  = "\e[33m"
-    cyan    = "\e[36m"
+    reset = "\e[0m"
+    bold = "\e[1m"
+    dim = "\e[2m"
+    green = "\e[32m"
+    red = "\e[31m"
+    yellow = "\e[33m"
+    cyan = "\e[36m"
 
     bar_width = _bar_width(info.total)
     bar = _progress_bar(info.index, info.total)
@@ -1207,7 +1218,11 @@ function _format_progress_line(
     else
         ""
     end
-    status_str = (info.status == :error || info.status == :test_failed) ? " $(bold)$(red)FAILED$(reset)$(dim)," : ""
+    status_str = if (info.status == :error || info.status == :test_failed)
+        " $(bold)$(red)FAILED$(reset)$(dim),"
+    else
+        ""
+    end
 
     function bracket_color_from(sev::Union{Int,Nothing})
         sev === nothing && return green
@@ -1216,7 +1231,8 @@ function _format_progress_line(
         return red
     end
 
-    has_history = history !== nothing && length(history) == info.total && bar_width == info.total
+    has_history =
+        history !== nothing && length(history) == info.total && bar_width == info.total
     if has_history
         # Build colored bar per block using history; brackets colored by max severity seen
         max_sev = maximum(history)
@@ -1242,7 +1258,10 @@ function _format_progress_line(
         w = bar_width
         filled = clamp(round(Int, info.index / info.total * w), 0, w)
         inner = repeat(filled_char, filled) * repeat("░", w - filled)
-        print(io, "$(bracket_color)[$(reset)$(color)$(inner)$(reset)$(bracket_color)]$(reset) ")
+        print(
+            io,
+            "$(bracket_color)[$(reset)$(color)$(inner)$(reset)$(bracket_color)]$(reset) ",
+        )
     end
     print(io, "$(bold)$(color)$(symbol)$(reset) ")
     print(io, "$(cyan)$(idx_str)$(reset) ")
