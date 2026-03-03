@@ -63,13 +63,15 @@ See also: [`complete`](@ref), [`remove`](@ref)
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
     if y ∈ x
-        throw(Exceptions.IncorrectArgument(
-            "the description $y is already in $x",
-            got=string(y),
-            expected="a unique description not in the catalog",
-            suggestion="Check existing descriptions before adding, or use a different description",
-            context="description catalog management"
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "the description $y is already in $x";
+                got=string(y),
+                expected="a unique description not in the catalog",
+                suggestion="Check existing descriptions before adding, or use a different description",
+                context="description catalog management",
+            ),
+        )
     else
         return (x..., y)
     end

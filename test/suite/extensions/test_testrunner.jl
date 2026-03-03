@@ -436,8 +436,14 @@ function test_testrunner()
             fmt = TestRunner._format_progress_line
 
             info = TestRunner.TestRunInfo(
-                :my_test, "/tmp/test_my_test.jl", :test_my_test,
-                3, 10, :post_eval, nothing, 1.234,
+                :my_test,
+                "/tmp/test_my_test.jl",
+                :test_my_test,
+                3,
+                10,
+                :post_eval,
+                nothing,
+                1.234,
             )
             buf = IOBuffer()
             fmt(buf, info)
@@ -450,8 +456,14 @@ function test_testrunner()
 
             # Error status
             info_err = TestRunner.TestRunInfo(
-                "suite/test_fail.jl", "/tmp/test_fail.jl", :test_fail,
-                5, 10, :error, ErrorException("boom"), 0.5,
+                "suite/test_fail.jl",
+                "/tmp/test_fail.jl",
+                :test_fail,
+                5,
+                10,
+                :error,
+                ErrorException("boom"),
+                0.5,
             )
             buf_err = IOBuffer()
             fmt(buf_err, info_err)
@@ -462,8 +474,14 @@ function test_testrunner()
 
             # test_failed status (from @test failures)
             info_tf = TestRunner.TestRunInfo(
-                :my_test, "/tmp/test_my_test.jl", :test_my_test,
-                7, 10, :test_failed, nothing, 2.0,
+                :my_test,
+                "/tmp/test_my_test.jl",
+                :test_my_test,
+                7,
+                10,
+                :test_failed,
+                nothing,
+                2.0,
             )
             buf_tf = IOBuffer()
             fmt(buf_tf, info_tf)
@@ -473,8 +491,14 @@ function test_testrunner()
 
             # Skipped status
             info_skip = TestRunner.TestRunInfo(
-                :skipped_test, "/tmp/test_skip.jl", :test_skip,
-                1, 5, :skipped, nothing, nothing,
+                :skipped_test,
+                "/tmp/test_skip.jl",
+                :test_skip,
+                1,
+                5,
+                :skipped,
+                nothing,
+                nothing,
             )
             buf_skip = IOBuffer()
             fmt(buf_skip, info_skip)
@@ -484,19 +508,17 @@ function test_testrunner()
 
             # Fixed bar of 20 chars even for >400 tests (empty at start)
             info_large = TestRunner.TestRunInfo(
-                :big_test, "/tmp/test_big.jl", :test_big,
-                1, 500, :post_eval, nothing, 0.1,
+                :big_test, "/tmp/test_big.jl", :test_big, 1, 500, :post_eval, nothing, 0.1
             )
             buf_large = IOBuffer()
             fmt(buf_large, info_large)
             output_large = String(take!(buf_large))
             @test contains(output_large, "✓")
             @test contains(output_large, "░")
-            
+
             # Test with some progress (25%)
             info_large_progress = TestRunner.TestRunInfo(
-                :big_test, "/tmp/test_big.jl", :test_big,
-                125, 500, :post_eval, nothing, 0.1,
+                :big_test, "/tmp/test_big.jl", :test_big, 125, 500, :post_eval, nothing, 0.1
             )
             buf_large_progress = IOBuffer()
             fmt(buf_large_progress, info_large_progress)
@@ -510,8 +532,7 @@ function test_testrunner()
             fmt = TestRunner._format_progress_line
             history = [1, 1, 2, 3, 1]  # green, green, yellow, red, green
             info = TestRunner.TestRunInfo(
-                :final, "/tmp/final.jl", :final,
-                5, 5, :post_eval, nothing, 0.5,
+                :final, "/tmp/final.jl", :final, 5, 5, :post_eval, nothing, 0.5
             )
             buf = IOBuffer()
             fmt(buf, info; history=history, cumulative_severity=maximum(history))
@@ -524,13 +545,20 @@ function test_testrunner()
         @testset "_format_progress_line compressed coloring" begin
             fmt = TestRunner._format_progress_line
             info = TestRunner.TestRunInfo(
-                :compressed, "/tmp/compressed.jl", :compressed,
-                10, 50, :post_eval, nothing, 0.2,
+                :compressed,
+                "/tmp/compressed.jl",
+                :compressed,
+                10,
+                50,
+                :post_eval,
+                nothing,
+                0.2,
             )
             buf = IOBuffer()
             fmt(buf, info; cumulative_severity=2)
             output = String(take!(buf))
-            @test occursin("\e[33m[", output) || occursin("\e[33m[", replace(output, "\e[0m"=>""))
+            @test occursin("\e[33m[", output) ||
+                occursin("\e[33m[", replace(output, "\e[0m"=>""))
         end
     end
 
@@ -824,7 +852,16 @@ function test_testrunner()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "TestRunInfo" begin
         @testset verbose = VERBOSE showtiming = SHOWTIMING "construction with all fields" begin
-            info = TestRunner.TestRunInfo(:my_test, "/tmp/test_my_test.jl", :test_my_test, 1, 5, :pre_eval, nothing, nothing)
+            info = TestRunner.TestRunInfo(
+                :my_test,
+                "/tmp/test_my_test.jl",
+                :test_my_test,
+                1,
+                5,
+                :pre_eval,
+                nothing,
+                nothing,
+            )
             @test info.spec === :my_test
             @test info.filename == "/tmp/test_my_test.jl"
             @test info.func_symbol === :test_my_test
@@ -836,14 +873,25 @@ function test_testrunner()
         end
 
         @testset verbose = VERBOSE showtiming = SHOWTIMING "construction with String spec" begin
-            info = TestRunner.TestRunInfo("suite/test_a.jl", "/tmp/suite/test_a.jl", :test_a, 3, 10, :post_eval, nothing, 1.5)
+            info = TestRunner.TestRunInfo(
+                "suite/test_a.jl",
+                "/tmp/suite/test_a.jl",
+                :test_a,
+                3,
+                10,
+                :post_eval,
+                nothing,
+                1.5,
+            )
             @test info.spec == "suite/test_a.jl"
             @test info.elapsed == 1.5
         end
 
         @testset verbose = VERBOSE showtiming = SHOWTIMING "construction with error" begin
             ex = ErrorException("boom")
-            info = TestRunner.TestRunInfo(:failing, "/tmp/test_failing.jl", :test_failing, 2, 3, :error, ex, 0.1)
+            info = TestRunner.TestRunInfo(
+                :failing, "/tmp/test_failing.jl", :test_failing, 2, 3, :error, ex, 0.1
+            )
             @test info.status === :error
             @test info.error === ex
             @test info.elapsed == 0.1
@@ -874,7 +922,7 @@ function test_testrunner()
                     test_dir=temp_dir,
                     index=2,
                     total=7,
-                    on_test_start=info -> (captured[] = info; true),
+                    on_test_start=info -> (captured[]=info; true),
                     on_test_done=nothing,
                 )
 
@@ -960,10 +1008,7 @@ function test_testrunner()
 
         @testset verbose = VERBOSE showtiming = SHOWTIMING "on_test_done receives :skipped" begin
             mktempdir() do temp_dir
-                write(
-                    joinpath(temp_dir, "test_cb_noeval.jl"),
-                    "x = 1\n",
-                )
+                write(joinpath(temp_dir, "test_cb_noeval.jl"), "x = 1\n")
 
                 done_captured = Ref{Any}(nothing)
                 run_single(
@@ -1043,7 +1088,7 @@ function test_testrunner()
                     test_dir=temp_dir,
                     index=3,
                     total=5,
-                    on_test_start=info -> (start_captured[] = info; true),
+                    on_test_start=info -> (start_captured[]=info; true),
                     on_test_done=info -> (done_captured[] = info),
                 )
 
@@ -1074,7 +1119,7 @@ function test_testrunner()
                     test_dir=temp_dir,
                     index=1,
                     total=2,
-                    on_test_start=info -> (start_captured[] = info; true),
+                    on_test_start=info -> (start_captured[]=info; true),
                     on_test_done=info -> (done_captured[] = info),
                 )
 

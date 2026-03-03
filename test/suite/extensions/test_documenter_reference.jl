@@ -380,8 +380,7 @@ function test_documenter_reference()
         @test cfg2.public == true
         @test cfg2.private == true
         @test cfg2.title == "All API"
-        @test pages2 ==
-            (
+        @test pages2 == (
             "All API" =>
                 ["Public" => "ref/api_public.md", "Private" => "ref/api_private.md"]
         )
@@ -426,7 +425,9 @@ function test_documenter_reference()
         symbols = DR._exported_symbols(DocumenterReferenceTestMod).exported
         docs = DR._collect_module_docstrings(config, symbols)
 
-        @test any(doc -> occursin("```@docs\n$(DocumenterReferenceTestMod)\n```", doc), docs)
+        @test any(
+            doc -> occursin("```@docs\n$(DocumenterReferenceTestMod)\n```", doc), docs
+        )
     end
 
     # ============================================================================
@@ -826,33 +827,33 @@ function test_documenter_reference()
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders with is_split parameter" begin
         modules_str = "TestModule"
-        
+
         # Test private page with is_split=false (single page)
         module_contents_private = [(DocumenterReferenceTestMod, String[], ["priv_doc"])]
-        
+
         overview_priv_single, docs_priv_single = DR._build_private_page_content(
             modules_str, module_contents_private, false
         )
         @test occursin("# Private API", overview_priv_single)
         @test !occursin("# Private\n", overview_priv_single)
         @test occursin("non-exported", overview_priv_single)
-        
+
         # Test private page with is_split=true (split page)
         overview_priv_split, docs_priv_split = DR._build_private_page_content(
             modules_str, module_contents_private, true
         )
         @test occursin("# Private API", overview_priv_split)
         @test occursin("non-exported", overview_priv_split)
-        
+
         # Test public page with is_split=false (single page)
         module_contents_public = [(DocumenterReferenceTestMod, ["pub_doc"], String[])]
-        
+
         overview_pub_single, docs_pub_single = DR._build_public_page_content(
             modules_str, module_contents_public, false
         )
         @test occursin("# Public API", overview_pub_single)
         @test occursin("exported", overview_pub_single)
-        
+
         # Test public page with is_split=true (split page)
         overview_pub_split, docs_pub_split = DR._build_public_page_content(
             modules_str, module_contents_public, true
@@ -864,23 +865,29 @@ function test_documenter_reference()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Title consistency across different page types" begin
         modules_str = "MyModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub"], ["priv"])]
-        
+
         # Single private page should have "Private API" title
-        overview_priv, _ = DR._build_private_page_content(modules_str, module_contents, false)
+        overview_priv, _ = DR._build_private_page_content(
+            modules_str, module_contents, false
+        )
         @test occursin("# Private API", overview_priv)
-        
+
         # Single public page should have "Public API" title
         overview_pub, _ = DR._build_public_page_content(modules_str, module_contents, false)
         @test occursin("# Public API", overview_pub)
-        
+
         # Split private page should have "Private API" title
-        overview_priv_split, _ = DR._build_private_page_content(modules_str, module_contents, true)
+        overview_priv_split, _ = DR._build_private_page_content(
+            modules_str, module_contents, true
+        )
         @test occursin("# Private API", overview_priv_split)
-        
+
         # Split public page should have "Public API" title
-        overview_pub_split, _ = DR._build_public_page_content(modules_str, module_contents, true)
+        overview_pub_split, _ = DR._build_public_page_content(
+            modules_str, module_contents, true
+        )
         @test occursin("# Public API", overview_pub_split)
-        
+
         # Combined page should have "API reference" title
         overview_comb, _ = DR._build_combined_page_content(modules_str, module_contents)
         @test occursin("# API reference", overview_comb)
@@ -893,35 +900,31 @@ function test_documenter_reference()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Custom titles for API pages" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
-        
+
         # Test custom title for private page (single)
         overview_priv_custom, _ = DR._build_private_page_content(
-            modules_str, module_contents, false;
-            custom_title="Internal API"
+            modules_str, module_contents, false; custom_title="Internal API"
         )
         @test occursin("# Internal API", overview_priv_custom)
         @test !occursin("# Private API", overview_priv_custom)
-        
+
         # Test custom title for public page (single)
         overview_pub_custom, _ = DR._build_public_page_content(
-            modules_str, module_contents, false;
-            custom_title="Exported API"
+            modules_str, module_contents, false; custom_title="Exported API"
         )
         @test occursin("# Exported API", overview_pub_custom)
         @test !occursin("# Public API", overview_pub_custom)
-        
+
         # Test custom title for private page (split)
         overview_priv_split_custom, _ = DR._build_private_page_content(
-            modules_str, module_contents, true;
-            custom_title="Internal"
+            modules_str, module_contents, true; custom_title="Internal"
         )
         @test occursin("# Internal", overview_priv_split_custom)
         @test !occursin("# Private API", overview_priv_split_custom)
-        
+
         # Test custom title for public page (split)
         overview_pub_split_custom, _ = DR._build_public_page_content(
-            modules_str, module_contents, true;
-            custom_title="Exported"
+            modules_str, module_contents, true; custom_title="Exported"
         )
         @test occursin("# Exported", overview_pub_split_custom)
         @test !occursin("# Public API", overview_pub_split_custom)
@@ -930,40 +933,41 @@ function test_documenter_reference()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Custom descriptions for API pages" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
-        
+
         # Test custom description for private page
         custom_desc_priv = "This page documents internal implementation details."
         overview_priv_desc, _ = DR._build_private_page_content(
-            modules_str, module_contents, false;
-            custom_description=custom_desc_priv
+            modules_str, module_contents, false; custom_description=custom_desc_priv
         )
         @test occursin(custom_desc_priv, overview_priv_desc)
         @test !occursin("non-exported", overview_priv_desc)
-        
+
         # Test custom description for public page
         custom_desc_pub = "This page documents the public interface for end users."
         overview_pub_desc, _ = DR._build_public_page_content(
-            modules_str, module_contents, false;
-            custom_description=custom_desc_pub
+            modules_str, module_contents, false; custom_description=custom_desc_pub
         )
         @test occursin(custom_desc_pub, overview_pub_desc)
-        @test !occursin("exported", overview_pub_desc) || occursin(custom_desc_pub, overview_pub_desc)
+        @test !occursin("exported", overview_pub_desc) ||
+            occursin(custom_desc_pub, overview_pub_desc)
     end
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Combined custom title and description" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
-        
+
         # Test both custom title and description together
         custom_title = "Developer Reference"
         custom_desc = "Advanced documentation for contributors and maintainers."
-        
+
         overview, _ = DR._build_private_page_content(
-            modules_str, module_contents, false;
+            modules_str,
+            module_contents,
+            false;
             custom_title=custom_title,
-            custom_description=custom_desc
+            custom_description=custom_desc,
         )
-        
+
         @test occursin("# Developer Reference", overview)
         @test occursin(custom_desc, overview)
         @test !occursin("# Private API", overview)
@@ -973,23 +977,18 @@ function test_documenter_reference()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Empty customization uses defaults" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
-        
+
         # Empty strings should use default behavior
         overview_priv_empty, _ = DR._build_private_page_content(
-            modules_str, module_contents, false;
-            custom_title="",
-            custom_description=""
+            modules_str, module_contents, false; custom_title="", custom_description=""
         )
         @test occursin("# Private API", overview_priv_empty)
         @test occursin("non-exported", overview_priv_empty)
-        
+
         overview_pub_empty, _ = DR._build_public_page_content(
-            modules_str, module_contents, false;
-            custom_title="",
-            custom_description=""
+            modules_str, module_contents, false; custom_title="", custom_description=""
         )
         @test occursin("# Public API", overview_pub_empty)
         @test occursin("exported", overview_pub_empty)
     end
-    
 end

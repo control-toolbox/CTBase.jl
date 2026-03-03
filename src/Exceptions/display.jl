@@ -77,7 +77,6 @@ function format_user_friendly_error(io::IO, e::CTException)
             println(io, "💡 Suggestion: ", e.suggestion)
         end
 
-
     elseif e isa NotImplemented
         if !isnothing(e.required_method)
             println(io, "🔧 Required method: ", e.required_method)
@@ -109,7 +108,10 @@ function format_user_friendly_error(io::IO, e::CTException)
                 print(io, " - no descriptions available")
             elseif e.diagnostic == "unknown symbols"
                 printstyled(io, "Unknown symbols"; color=:yellow, bold=true)
-                print(io, " - none of the requested symbols appear in any available description")
+                print(
+                    io,
+                    " - none of the requested symbols appear in any available description",
+                )
             elseif e.diagnostic == "no complete match"
                 printstyled(io, "No complete match"; color=:yellow, bold=true)
                 print(io, " - no available description contains all the requested symbols")
@@ -118,7 +120,7 @@ function format_user_friendly_error(io::IO, e::CTException)
             end
             println(io)
         end
-        
+
         # Requested description on one line
         println(io, "🎯 Requested description: ", e.description)
 
@@ -136,9 +138,10 @@ function format_user_friendly_error(io::IO, e::CTException)
         # Suggestion on one line
         if !isnothing(e.suggestion)
             print(io, "💡 Suggestion: ", e.suggestion)
-            
+
             # Show closest matches directly in the suggestion if it ends with ":"
-            if endswith(strip(e.suggestion), ":") && contains(e.suggestion, "closest matches")
+            if endswith(strip(e.suggestion), ":") &&
+                contains(e.suggestion, "closest matches")
                 if !isnothing(e.candidates) && !isempty(e.candidates)
                     # Show up to 3 candidates as closest matches
                     max_show = min(3, length(e.candidates))

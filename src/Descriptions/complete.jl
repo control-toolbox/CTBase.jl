@@ -54,27 +54,29 @@ See also: [`compute_similarity`](@ref), [`find_similar_descriptions`](@ref), [`f
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
     if n == 0
-        throw(Exceptions.AmbiguousDescription(
-            list,
-            candidates=String[],
-            suggestion="No descriptions available - check your descriptions catalog or provide descriptions keyword argument",
-            context="description completion",
-            diagnostic="empty catalog"
-        ))
+        throw(
+            Exceptions.AmbiguousDescription(
+                list;
+                candidates=String[],
+                suggestion="No descriptions available - check your descriptions catalog or provide descriptions keyword argument",
+                context="description completion",
+                diagnostic="empty catalog",
+            ),
+        )
     end
-    
+
     table = zeros(Int8, n, 2)
     for i in 1:n
         description = descriptions[i]
         table[i, 1] = length(intersect(Set(list), Set(description)))
         table[i, 2] = issubset(Set(list), Set(descriptions[i])) ? 1 : 0
     end
-    
+
     if maximum(table[:, 2]) == 0
         # Find similar descriptions for helpful suggestions
         similar_descs = find_similar_descriptions(list, descriptions; max_results=5)
         all_candidates = format_description_candidates(descriptions; max_show=10)
-        
+
         # Build contextual suggestion
         suggestion = if !isempty(similar_descs)
             "Try one of the closest matches:"
@@ -83,7 +85,7 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
         else
             "Check your input symbols and available descriptions"
         end
-        
+
         # Determine diagnostic: unknown symbols or no complete match
         has_any_match = any(table[:, 1] .> 0)
         diagnostic = if !has_any_match
@@ -91,16 +93,18 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
         else
             "no complete match"
         end
-        
-        throw(Exceptions.AmbiguousDescription(
-            list,
-            candidates=all_candidates,
-            suggestion=suggestion,
-            context="description completion",
-            diagnostic=diagnostic
-        ))
+
+        throw(
+            Exceptions.AmbiguousDescription(
+                list;
+                candidates=all_candidates,
+                suggestion=suggestion,
+                context="description completion",
+                diagnostic=diagnostic,
+            ),
+        )
     end
-    
+
     # Return the index of the description with maximal intersection count
     return descriptions[argmax(table[:, 1])]
 end

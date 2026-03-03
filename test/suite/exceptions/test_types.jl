@@ -10,7 +10,6 @@ Tests for exception type definitions (types.jl)
 """
 function test_exception_types()
     @testset "Exception Types" verbose = VERBOSE showtiming = SHOWTIMING begin
-        
         @testset "CTException Hierarchy" begin
             # Test that all exceptions inherit from CTException
             @test IncorrectArgument("test") isa CTException
@@ -20,7 +19,7 @@ function test_exception_types()
             @test ParsingError("test") isa CTException
             @test AmbiguousDescription((:f,)) isa CTException
             @test ExtensionError(:MyExt) isa CTException
-            
+
             # Test that they are also standard Exceptions
             @test IncorrectArgument("test") isa Exception
             @test PreconditionError("test") isa Exception
@@ -30,7 +29,7 @@ function test_exception_types()
             @test AmbiguousDescription((:f,)) isa Exception
             @test ExtensionError(:MyExt) isa Exception
         end
-        
+
         @testset "IncorrectArgument - Construction" begin
             # Simple message only
             e = IncorrectArgument("Invalid input")
@@ -39,7 +38,7 @@ function test_exception_types()
             @test isnothing(e.expected)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With got and expected
             e = IncorrectArgument("Invalid value", got="x", expected="y")
             @test e.msg == "Invalid value"
@@ -47,25 +46,25 @@ function test_exception_types()
             @test e.expected == "y"
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With all fields
             e = IncorrectArgument(
                 "Invalid criterion",
                 got=":invalid",
                 expected=":min or :max",
                 suggestion="Use objective!(ocp, :min, ...)",
-                context="objective! function"
+                context="objective! function",
             )
             @test e.msg == "Invalid criterion"
             @test e.got == ":invalid"
             @test e.expected == ":min or :max"
             @test e.suggestion == "Use objective!(ocp, :min, ...)"
             @test e.context == "objective! function"
-            
+
             # Test that it can be thrown
             @test_throws IncorrectArgument throw(IncorrectArgument("Test error"))
         end
-        
+
         @testset "PreconditionError - Construction" begin
             # Simple message only
             e = PreconditionError("State must be set before dynamics")
@@ -73,25 +72,25 @@ function test_exception_types()
             @test isnothing(e.reason)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With reason
             e = PreconditionError("Cannot call", reason="precondition not met")
             @test e.msg == "Cannot call"
             @test e.reason == "precondition not met"
             @test isnothing(e.suggestion)
-            
+
             # With all fields
             e = PreconditionError(
                 "Cannot call state! twice",
                 reason="state has already been defined for this OCP",
                 suggestion="Create a new OCP instance",
-                context="state! function"
+                context="state! function",
             )
             @test e.msg == "Cannot call state! twice"
             @test e.reason == "state has already been defined for this OCP"
             @test e.suggestion == "Create a new OCP instance"
             @test e.context == "state! function"
-            
+
             # Test that it can be thrown
             @test_throws PreconditionError throw(PreconditionError("Test error"))
         end
@@ -103,57 +102,60 @@ function test_exception_types()
             @test isnothing(e.required_method)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With required method
-            e = NotImplemented("run! not implemented", required_method="run!(::MyAlgorithm, state)")
+            e = NotImplemented(
+                "run! not implemented", required_method="run!(::MyAlgorithm, state)"
+            )
             @test e.msg == "run! not implemented"
             @test e.required_method == "run!(::MyAlgorithm, state)"
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With all fields (NEW)
             e = NotImplemented(
                 "Method solve! not implemented",
                 required_method="solve!(::MyStrategy, ...)",
                 context="solve call",
-                suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
+                suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)",
             )
             @test e.msg == "Method solve! not implemented"
             @test e.required_method == "solve!(::MyStrategy, ...)"
             @test e.context == "solve call"
-            @test e.suggestion == "Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
-            
+            @test e.suggestion ==
+                "Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
+
             # Test that it can be thrown
             @test_throws NotImplemented throw(NotImplemented("Test"))
         end
-        
+
         @testset "ParsingError - Construction" begin
             # Simple message only
             e = ParsingError("Unexpected token")
             @test e.msg == "Unexpected token"
             @test isnothing(e.location)
             @test isnothing(e.suggestion)
-            
+
             # With location
             e = ParsingError("Unexpected token", location="line 42")
             @test e.msg == "Unexpected token"
             @test e.location == "line 42"
             @test isnothing(e.suggestion)
-            
+
             # With all fields (NEW)
             e = ParsingError(
                 "Unexpected token 'end'",
                 location="line 42, column 15",
-                suggestion="Check syntax balance or remove extra 'end'"
+                suggestion="Check syntax balance or remove extra 'end'",
             )
             @test e.msg == "Unexpected token 'end'"
             @test e.location == "line 42, column 15"
             @test e.suggestion == "Check syntax balance or remove extra 'end'"
-            
+
             # Test that it can be thrown
             @test_throws ParsingError throw(ParsingError("Test"))
         end
-        
+
         @testset "AmbiguousDescription - Construction" begin
             # Simple description only
             e = AmbiguousDescription((:f,))
@@ -162,7 +164,7 @@ function test_exception_types()
             @test isnothing(e.candidates)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With custom message
             e = AmbiguousDescription((:x, :y); msg="Custom message")
             @test e.description == (:x, :y)
@@ -170,23 +172,23 @@ function test_exception_types()
             @test isnothing(e.candidates)
             @test isnothing(e.suggestion)
             @test isnothing(e.context)
-            
+
             # With all fields
             e = AmbiguousDescription(
                 (:f,),
                 candidates=["(:a, :b)", "(:c, :d)"],
                 suggestion="Use a complete description",
-                context="algorithm selection"
+                context="algorithm selection",
             )
             @test e.description == (:f,)
             @test e.candidates == ["(:a, :b)", "(:c, :d)"]
             @test e.suggestion == "Use a complete description"
             @test e.context == "algorithm selection"
-            
+
             # Test that it can be thrown
             @test_throws AmbiguousDescription throw(AmbiguousDescription((:test,)))
         end
-        
+
         @testset "ExtensionError - Construction" begin
             # Simple dependency only
             e = ExtensionError(:MyExt)
@@ -194,29 +196,30 @@ function test_exception_types()
             @test e.msg == "missing dependencies"
             @test isnothing(e.feature)
             @test isnothing(e.context)
-            
+
             # With message
             e = ExtensionError(:Plots; message="to plot results")
             @test e.weakdeps == (:Plots,)
             @test e.msg == "missing dependencies to plot results"
             @test isnothing(e.feature)
             @test isnothing(e.context)
-            
+
             # With all fields
             e = ExtensionError(
-                :Plots, :PlotlyJS,
+                :Plots,
+                :PlotlyJS,
                 message="to plot optimization results",
                 feature="plotting functionality",
-                context="solve! call"
+                context="solve! call",
             )
             @test e.weakdeps == (:Plots, :PlotlyJS)
             @test e.msg == "missing dependencies to plot optimization results"
             @test e.feature == "plotting functionality"
             @test e.context == "solve! call"
-            
+
             # Test that it can be thrown
             @test_throws ExtensionError throw(ExtensionError(:TestExt))
-            
+
             # Test error when no dependencies provided
             @test_throws PreconditionError ExtensionError()
         end

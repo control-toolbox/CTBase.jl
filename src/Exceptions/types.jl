@@ -107,13 +107,15 @@ struct IncorrectArgument <: CTException
     context::Union{String,Nothing}
 
     # Constructor for enriched exceptions
-    IncorrectArgument(
+    function IncorrectArgument(
         msg::String;
         got::Union{String,Nothing}=nothing,
         expected::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
-    ) = new(msg, got, expected, suggestion, context)
+    )
+        new(msg, got, expected, suggestion, context)
+    end
 end
 
 """
@@ -185,15 +187,15 @@ struct PreconditionError <: CTException
     suggestion::Union{String,Nothing}
     context::Union{String,Nothing}
 
-    PreconditionError(
+    function PreconditionError(
         msg::String;
         reason::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
-    ) = new(msg, reason, suggestion, context)
+    )
+        new(msg, reason, suggestion, context)
+    end
 end
-
-
 
 """
     NotImplemented <: CTException
@@ -259,12 +261,14 @@ struct NotImplemented <: CTException
     suggestion::Union{String,Nothing}
     context::Union{String,Nothing}
 
-    NotImplemented(
+    function NotImplemented(
         msg::String;
         required_method::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
-    ) = new(msg, required_method, suggestion, context)
+    )
+        new(msg, required_method, suggestion, context)
+    end
 end
 
 """
@@ -325,11 +329,13 @@ struct ParsingError <: CTException
     location::Union{String,Nothing}
     suggestion::Union{String,Nothing}
 
-    ParsingError(
+    function ParsingError(
         msg::String;
         location::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
-    ) = new(msg, location, suggestion)
+    )
+        new(msg, location, suggestion)
+    end
 end
 
 """
@@ -395,14 +401,16 @@ struct AmbiguousDescription <: CTException
     context::Union{String,Nothing}
     diagnostic::Union{String,Nothing}
 
-    AmbiguousDescription(
+    function AmbiguousDescription(
         description::Tuple{Vararg{Symbol}};
         msg::String="cannot find matching description",
         candidates::Union{Vector{String},Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
         diagnostic::Union{String,Nothing}=nothing,
-    ) = new(msg, description, candidates, suggestion, context, diagnostic)
+    )
+        new(msg, description, candidates, suggestion, context, diagnostic)
+    end
 end
 
 """
@@ -480,11 +488,16 @@ struct ExtensionError <: CTException
     weakdeps::Tuple{Vararg{Symbol}}
     feature::Union{String,Nothing}
     context::Union{String,Nothing}
-    function ExtensionError(weakdeps::Symbol...; message::String="", feature::Union{String,Nothing}=nothing, context::Union{String,Nothing}=nothing)
+    function ExtensionError(
+        weakdeps::Symbol...;
+        message::String="",
+        feature::Union{String,Nothing}=nothing,
+        context::Union{String,Nothing}=nothing,
+    )
         isempty(weakdeps) && throw(
             PreconditionError(
-                "Please provide at least one weak dependence for the extension.",
-                reason="ExtensionError called without dependencies"
+                "Please provide at least one weak dependence for the extension.";
+                reason="ExtensionError called without dependencies",
             ),
         )
         msg = isempty(message) ? "missing dependencies" : "missing dependencies $(message)"

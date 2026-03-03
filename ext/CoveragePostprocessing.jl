@@ -49,10 +49,10 @@ using CTBase
 ```
 """
 function CTBase.postprocess_coverage(
-    ::CTBase.Extensions.CoveragePostprocessingTag; 
-    generate_report::Bool=true, 
+    ::CTBase.Extensions.CoveragePostprocessingTag;
+    generate_report::Bool=true,
     root_dir::String=pwd(),
-    dest_dir::String="coverage"
+    dest_dir::String="coverage",
 )
     println("✓ Coverage post-processing start")
 
@@ -299,7 +299,9 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
             covered_lines = parse(Int, m.captures[1])
             total_lines = parse(Int, m.captures[2])
             percentage = round((covered_lines / total_lines) * 100; digits=2)
-            println(io, "\nGlobal coverage: $(percentage)% ($(covered_lines), $(total_lines))")
+            println(
+                io, "\nGlobal coverage: $(percentage)% ($(covered_lines), $(total_lines))"
+            )
         end
         println(io, "```\n")
 
