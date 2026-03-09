@@ -5,9 +5,25 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.18.4] - 2026-03-02
+## [0.18.5] - 2026-03-09
 
 ### 🧹 Maintenance
+
+#### **Documentation Reference Fixes**
+
+- Fixed cross-reference syntax in docstrings by removing unnecessary `@ref` macros
+- Updated references in `src/Exceptions/types.jl` for cleaner documentation links
+- Updated references in `src/Descriptions/` module files for consistency
+- Updated references in extension files (`ext/TestRunner.jl`, `ext/DocumenterReference.jl`, `ext/CoveragePostprocessing.jl`)
+- Improved documentation rendering and link consistency across the codebase
+
+#### **Version Update**
+
+- Bumped version to 0.18.5 for maintenance release
+
+## [0.18.4] - 2026-03-02
+
+### 🧹 Maintenance & Documentation
 
 #### **Test Artifacts Cleanup**
 

@@ -15,6 +15,11 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 
 ---
 
+## Non-breaking note (0.18.5)
+
+- Documentation reference fixes: removed unnecessary `@ref` macros from cross-references in docstrings across multiple modules and extensions. No API changes; purely documentation improvement. No migration required.
+- Version bump to 0.18.5 for maintenance release. No functional changes. No migration required.
+
 ## Non-breaking note (0.18.4)
 
 - Test artifacts cleanup: removed `test/extras/` and `test/src/` directories containing demo scripts and temporary build artifacts. No API changes; purely repository hygiene. No migration required.
