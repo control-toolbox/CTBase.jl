@@ -97,7 +97,7 @@ throw(CTBase.Exceptions.IncorrectArgument(
 ```
 
 # See Also
-- [`AmbiguousDescription`](@ref): For high-level description matching errors
+- `AmbiguousDescription`: For high-level description matching errors
 """
 struct IncorrectArgument <: CTException
     msg::String
@@ -178,8 +178,8 @@ throw(CTBase.Exceptions.PreconditionError(
 ```
 
 # See Also
-- [`IncorrectArgument`](@ref): For input validation errors
-- [`NotImplemented`](@ref): For unimplemented interface methods
+- `IncorrectArgument`: For input validation errors
+- `NotImplemented`: For unimplemented interface methods
 """
 struct PreconditionError <: CTException
     msg::String
@@ -253,7 +253,7 @@ throw(CTBase.Exceptions.NotImplemented(
 ```
 
 # See Also
-- [`IncorrectArgument`](@ref): For input validation errors
+- `IncorrectArgument`: For input validation errors
 """
 struct NotImplemented <: CTException
     msg::String
@@ -321,8 +321,8 @@ Common use cases:
 - Validating syntax of domain-specific languages
 
 # See Also
-- [`IncorrectArgument`](@ref): For general input validation errors
-- [`AmbiguousDescription`](@ref): For description matching errors
+- `IncorrectArgument`: For general input validation errors
+- `AmbiguousDescription`: For description matching errors
 """
 struct ParsingError <: CTException
     msg::String
@@ -390,8 +390,8 @@ throw(CTBase.Exceptions.AmbiguousDescription(
 
 # See Also
 - `complete`: Matches a partial description to a complete one
-- `add`: Adds descriptions to a catalogue (throws [`IncorrectArgument`](@ref) for duplicates)
-- [`IncorrectArgument`](@ref): For input validation errors
+- `add`: Adds descriptions to a catalogue (throws `IncorrectArgument` for duplicates)
+- `IncorrectArgument`: For input validation errors
 """
 struct AmbiguousDescription <: CTException
     msg::String
@@ -481,7 +481,7 @@ throw(CTBase.Exceptions.ExtensionError(
 - Advanced algorithms that depend on external libraries
 
 # See Also
-- [`PreconditionError`](@ref): Thrown when `ExtensionError()` is called without arguments
+- `PreconditionError`: Thrown when `ExtensionError()` is called without arguments
 """
 struct ExtensionError <: CTException
     msg::String

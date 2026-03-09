@@ -15,7 +15,7 @@ julia> CTBase.DescVarArg
 Vararg{Symbol}
 ```
 
-See also: [`Description`](@ref)
+See also: `Description`
 """
 const DescVarArg = Vararg{Symbol}
 
@@ -36,6 +36,6 @@ julia> display(((:a, :b), (:b, :c)))
 (:b, :c)
 ```
 
-See also: [`DescVarArg`](@ref)
+See also: `DescVarArg`
 """
 const Description = Tuple{DescVarArg}

@@ -1,7 +1,7 @@
 """
 Test runner backend for CTBase.
 
-This extension implements [`CTBase.run_tests`](@ref), allowing test selection
+This extension implements `CTBase.run_tests`, allowing test selection
 via command-line arguments (globs) and configurable filename/function-name builders.
 
 Most functions in this module have side effects (including file inclusion and
@@ -30,7 +30,7 @@ and internal test identifiers.
 - String specs are treated as relative paths from `test_dir`
 - Glob patterns are supported for String specs
 
-See also: [`CTBase.run_tests`](@ref), [`TestRunner._select_tests`](@ref)
+See also: `CTBase.run_tests`, `TestRunner._select_tests`
 """
 const TestSpec = Union{Symbol,String}
 
@@ -129,7 +129,7 @@ julia> CTBase.run_tests(;
        )
 ```
 
-See also: [`TestRunner.TestRunInfo`](@ref), [`TestRunner._parse_test_args`](@ref), [`TestRunner._select_tests`](@ref)
+See also: `TestRunner.TestRunInfo`, `TestRunner._parse_test_args`, `TestRunner._select_tests`
 """
 function CTBase.run_tests(
     ::CTBase.Extensions.TestRunnerTag;
@@ -553,7 +553,7 @@ different subdirectories), prefers the shallowest path.
 - Prefers shallower paths when multiple matches exist
 - Returns the exact relative path if found
 
-See also: [`TestRunner._collect_test_files_recursive`](@ref), [`TestRunner._ensure_jl`](@ref)
+See also: `TestRunner._collect_test_files_recursive`, `TestRunner._ensure_jl`
 """
 function _find_symbol_test_file_rel(
     name::Symbol, filename_builder::Function; test_dir::AbstractString
@@ -1327,17 +1327,17 @@ end
 
 Backward compatibility shim for the default test completion callback.
 
-Creates a fresh stateful callback via [`_make_default_on_test_done`](@ref) and invokes it
+Creates a fresh stateful callback via `_make_default_on_test_done` and invokes it
 with the given `info`. This function exists for compatibility with existing code/tests that
 expect a stateless callback signature.
 
-For new code, prefer using [`_make_default_on_test_done`](@ref) directly to create a
+For new code, prefer using `_make_default_on_test_done` directly to create a
 persistent callback that maintains test history across multiple invocations.
 
 # Arguments
 - `info::TestRunInfo`: Test execution information
 
-See also: [`_make_default_on_test_done`](@ref)
+See also: `_make_default_on_test_done`
 """
 function _default_on_test_done(info::TestRunInfo)
     cb = _make_default_on_test_done(stdout, info.total)

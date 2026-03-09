@@ -1,7 +1,7 @@
 """
 Coverage post-processing backend for CTBase.
 
-This extension implements [`CTBase.postprocess_coverage`](@ref) and provides utilities
+This extension implements `CTBase.postprocess_coverage` and provides utilities
 to collect `.cov` files, generate reports, and move artifacts into a dedicated
 `coverage/` directory.
 

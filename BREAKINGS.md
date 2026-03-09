@@ -401,10 +401,10 @@ All internal references now use fully qualified names to prevent header conflict
 
 ```julia
 # v0.18.0-beta (conflicts)
-See also: [`TestRunInfo`](@ref)  # Header conflicts
+See also: `TestRunInfo`  # Header conflicts
 
 # v0.18.0-beta.1 (resolved)
-See also: [`TestRunner.TestRunInfo`](@ref)
+See also: `TestRunner.TestRunInfo`
 ```
 
 ---

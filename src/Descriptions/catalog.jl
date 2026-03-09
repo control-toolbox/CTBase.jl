@@ -22,7 +22,7 @@ julia> descriptions[1]
 (:a,)
 ```
 
-See also: [`Description`](@ref)
+See also: `Description`
 """
 add(::Tuple{}, y::Description)::Tuple{Vararg{Description}} = (y,)
 
@@ -39,7 +39,7 @@ Add the description `y` to the catalog `x` if it is not already present.
 - `Tuple{Vararg{Description}}`: The updated catalog with `y` appended
 
 # Throws
-- [`IncorrectArgument`](@ref): If the description `y` is already contained in `x`
+- `IncorrectArgument`: If the description `y` is already contained in `x`
 
 # Example
 ```julia-repl
@@ -59,7 +59,7 @@ ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
        Context: description catalog management
 ```
 
-See also: [`complete`](@ref), [`remove`](@ref)
+See also: `complete`, `remove`
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
     if y ∈ x

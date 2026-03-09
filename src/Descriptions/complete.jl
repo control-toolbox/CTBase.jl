@@ -14,10 +14,10 @@ the first one in the catalog wins (priority is top-to-bottom).
 - `descriptions::Tuple{Vararg{Description}}`: A catalog of candidate descriptions
 
 # Returns
-- [`Description`](@ref): The best-matching description from the catalog
+- `Description`: The best-matching description from the catalog
 
 # Throws
-- [`AmbiguousDescription`](@ref): If the catalog is empty or if no description contains all symbols in `list`.
+- `AmbiguousDescription`: If the catalog is empty or if no description contains all symbols in `list`.
 
 # Example
 ```julia-repl
@@ -49,7 +49,7 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 When no matching description is found, the function provides suggestions based on 
 similarity and lists existing candidates.
 
-See also: [`compute_similarity`](@ref), [`find_similar_descriptions`](@ref), [`format_description_candidates`](@ref)
+See also: `compute_similarity`, `find_similar_descriptions`, `format_description_candidates`
 """
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
@@ -112,7 +112,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Convenience overload of [`complete`](@ref) for tuple inputs.
+Convenience overload of `complete` for tuple inputs.
 
 This method is equivalent to `complete(list...; descriptions=descriptions)`.
 

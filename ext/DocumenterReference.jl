@@ -130,7 +130,7 @@ end
 Global configuration storage for API reference generation.
 
 Each call to `CTBase.automatic_reference_documentation` appends a new `_Config`
-entry to this vector. Use [`reset_config!`](@ref) to clear it between builds.
+entry to this vector. Use `reset_config!` to clear it between builds.
 """
 const CONFIG = _Config[]
 
@@ -346,14 +346,14 @@ Custom Documenter pipeline stage for automatic API reference generation.
 
 This builder is inserted into the Documenter pipeline at order `0.0` (before
 most other stages) to generate API reference pages from the configurations
-stored in [`CONFIG`](@ref).
+stored in `CONFIG`.
 """
 abstract type APIBuilder <: Documenter.Builder.DocumentPipeline end
 
 """
     Documenter.Selectors.order(::Type{APIBuilder}) -> Float64
 
-Return the pipeline order for [`APIBuilder`](@ref).
+Return the pipeline order for `APIBuilder`.
 # Run before SetupBuildDirectory (1.0) so that generated files exist when Documenter checks pages.
 """
 Documenter.Selectors.order(::Type{APIBuilder}) = 0.5
