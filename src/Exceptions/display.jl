@@ -1,6 +1,30 @@
 # Custom display functions for user-friendly error messages
 
 """
+Generate ANSI escape sequence for the specified color and formatting.
+"""
+function _ansi_color(color::Symbol, bold::Bool=false)
+    color_codes = Dict(
+        :black => 30, :red => 31, :green => 32, :yellow => 33,
+        :blue => 34, :magenta => 35, :cyan => 36, :white => 37,
+        :default => 39
+    )
+    
+    code = get(color_codes, color, 39)
+    return bold ? "\033[1;$(code)m" : "\033[$(code)m"
+end
+
+"""Generate ANSI reset sequence to clear formatting."""
+_ansi_reset() = "\033[0m"
+
+"""
+Print text with ANSI color formatting for Documenter compatibility.
+"""
+function _print_ansi_styled(io, text::Union{String,Symbol,Type}, color::Symbol, bold::Bool=false)
+    print(io, _ansi_color(color, bold), string(text), _ansi_reset())
+end
+
+"""
     extract_user_frames(st::Vector)
 
 Extract stacktrace frames that are relevant to user code.
@@ -38,12 +62,12 @@ Display an error in a user-friendly format with clear sections and user code loc
 """
 function format_user_friendly_error(io::IO, e::CTException)
     #println(io, "\n" * "━"^70)
-    printstyled(io, "Control Toolbox Error\n"; color=:red, bold=true)
+    _print_ansi_styled(io, "Control Toolbox Error\n", :red, true)
     #println(io, "─"^28)
 
     # Main problem
     print(io, "\n❌ Error: ")
-    printstyled(io, typeof(e); color=:red, bold=true)
+    _print_ansi_styled(io, typeof(e), :red, true)
     println(io, ", ", e.msg)
 
     # Type-specific details
@@ -104,16 +128,16 @@ function format_user_friendly_error(io::IO, e::CTException)
         if !isnothing(e.diagnostic)
             print(io, "⚠️  Diagnostic: ")
             if e.diagnostic == "empty catalog"
-                printstyled(io, "Empty catalog"; color=:yellow, bold=true)
+                _print_ansi_styled(io, "Empty catalog", :yellow, true)
                 print(io, " - no descriptions available")
             elseif e.diagnostic == "unknown symbols"
-                printstyled(io, "Unknown symbols"; color=:yellow, bold=true)
+                _print_ansi_styled(io, "Unknown symbols", :yellow, true)
                 print(
                     io,
                     " - none of the requested symbols appear in any available description",
                 )
             elseif e.diagnostic == "no complete match"
-                printstyled(io, "No complete match"; color=:yellow, bold=true)
+                _print_ansi_styled(io, "No complete match", :yellow, true)
                 print(io, " - no available description contains all the requested symbols")
             else
                 print(io, e.diagnostic)
@@ -171,8 +195,8 @@ function format_user_friendly_error(io::IO, e::CTException)
 
         # Suggestion on one line
         print(io, "💡 Suggestion: ")
-        printstyled(io, "julia>"; color=:green, bold=true)
-        printstyled(io, " using "; color=:magenta)
+        _print_ansi_styled(io, "julia>", :green, true)
+        _print_ansi_styled(io, " using ", :magenta)
         for (i, dep) in enumerate(e.weakdeps)
             if i == 1
                 print(io, dep)

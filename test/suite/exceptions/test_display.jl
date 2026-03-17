@@ -185,7 +185,8 @@ function test_exception_display()
             @test contains(output, "Missing dependencies:")
             @test contains(output, "Plots")
             @test contains(output, "PlotlyJS")
-            @test contains(output, "julia> using")
+            # Check for ANSI-formatted julia> using (colors now work in documentation)
+            @test contains(output, "\e[1;32mjulia>\e[0m\e[35m using \e[0m")
 
             # CTBase.set_show_full_stacktrace!(false)
         end
