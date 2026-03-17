@@ -5,6 +5,27 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.6-beta] - 2026-03-17
+
+### 🛠 Enhancements
+
+#### **Documenter Color Compatibility**
+
+- **ANSI escape sequence support**: Added ANSI color formatting for exception display in generated documentation
+- **Replaced printstyled calls**: Migrated from `printstyled()` to raw ANSI escape sequences in `src/Exceptions/display.jl`
+- **Automatic CSS conversion**: Documenter now automatically converts ANSI sequences to CSS classes for web display
+- **Helper functions**: Added `_ansi_color()`, `_ansi_reset()`, and `_print_ansi_styled()` for consistent color formatting
+- **Type support**: Extended color formatting to support `String`, `Symbol`, and `Type` inputs
+
+#### **Testing Updates**
+
+- Updated exception display tests to verify ANSI output format
+- All tests pass with new ANSI color implementation (106/106)
+
+### 🧹 Maintenance
+
+- Version bump to 0.18.6-beta for feature enhancement
+
 ## [0.18.5] - 2026-03-09
 
 ### 🧹 Maintenance
