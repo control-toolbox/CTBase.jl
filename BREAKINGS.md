@@ -15,6 +15,13 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 
 ---
 
+## Non-breaking note (0.18.7)
+
+- **Version stabilization**: Bumped from 0.18.6-beta to 0.18.7 for stable release. No functional changes; version promotion only.
+- **Code formatting**: Applied JuliaFormatter to ensure consistent code style across the codebase. No functional changes; formatting only.
+- **CI improvements**: Enhanced CompatHelper workflow with subdirs input for better dependency management. No functional changes; CI infrastructure only.
+- No breaking changes. No migration required.
+
 ## Non-breaking note (0.18.6-beta)
 
 - **Documenter Color Support**: Added ANSI escape sequence support for exception display colors in generated documentation. Replaced `printstyled` calls with ANSI equivalents to enable automatic conversion to CSS classes by Documenter. No API changes; purely internal implementation improvement. No migration required.

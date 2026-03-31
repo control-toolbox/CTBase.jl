@@ -5,6 +5,25 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.7] - 2026-03-31
+
+### 🧹 Maintenance
+
+#### **Version Stabilization**
+
+- **Stable release**: Bumped from 0.18.6-beta to 0.18.7 for stable release
+- **No functional changes**: Version promotion only, all features from 0.18.6-beta preserved
+
+#### **Code Quality**
+
+- **Code formatting**: Applied JuliaFormatter across the codebase for consistent style
+- **Standardized formatting**: Improved readability and maintainability
+
+#### **Infrastructure**
+
+- **CI improvements**: Enhanced CompatHelper workflow with subdirs input
+- **Better dependency management**: More robust compatibility checking
+
 ## [0.18.6-beta] - 2026-03-17
 
 ### 🛠 Enhancements
