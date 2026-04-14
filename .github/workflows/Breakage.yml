@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pkgname: [CTDirect, CTFlows, CTModels, CTParser, OptimalControl]
+        pkgname: [CTDirect, CTFlows, CTModels, CTParser, CTSolvers, OptimalControl]
         pkgversion: [latest, stable]
         include:
           - pkgpath: control-toolbox
