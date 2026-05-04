@@ -15,6 +15,10 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 
 ---
 
+## Non-breaking note (0.18.8)
+
+- **New exception type**: Added `SolverFailure` exception for reporting solver/integrator failures (ODE integration, optimization NLP, linear systems). Includes fields for `retcode`, `suggestion`, and `context`. No breaking changes; purely additive feature. No migration required.
+
 ## Non-breaking note (0.18.7)
 
 - **Version stabilization**: Bumped from 0.18.6-beta to 0.18.7 for stable release. No functional changes; version promotion only.
