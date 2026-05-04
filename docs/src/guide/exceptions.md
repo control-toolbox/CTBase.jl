@@ -18,7 +18,8 @@ CTException (abstract)
 ├── NotImplemented         # Unimplemented interface methods
 ├── ParsingError           # Parsing errors
 ├── AmbiguousDescription   # Ambiguous or incorrect descriptions
-└── ExtensionError         # Missing optional dependencies
+├── ExtensionError         # Missing optional dependencies
+└── SolverFailure          # Solver/integrator failures
 ```
 
 ## General Error Handling Pattern
@@ -288,6 +289,69 @@ The enriched display automatically suggests:
 - Extensions are not loaded
 - Weak dependencies are missing
 
+## Solver and Integrator Exceptions
+
+### [SolverFailure](@id solver-failure-tutorial)
+
+```julia
+CTBase.SolverFailure <: CTBase.CTException
+```
+
+**When to use**: Thrown when a solver (ODE integrator, optimization solver, linear solver, etc.)
+fails to complete successfully or returns an error code.
+
+**Fields**:
+
+- `msg::String`: Error message describing the failure
+- `retcode::Union{String,Nothing}`: Solver-specific return code (optional)
+- `suggestion::Union{String,Nothing}`: How to fix the problem (optional)
+- `context::Union{String,Nothing}`: Where the error occurred (optional)
+
+**Example**:
+
+```julia
+function integrate_ode(system, integrator)
+    result = solve(system, integrator)
+    if result.retcode != :Success
+        throw(CTBase.SolverFailure(
+            "ODE integration failed",
+            retcode=string(result.retcode),
+            suggestion="Reduce time step or check initial conditions",
+            context="SciML integrator"
+        ))
+    end
+    return result
+end
+```
+
+The enriched display shows the solver-specific return code:
+
+```text
+❌ Error: SolverFailure, ODE integration failed
+🔧 Return code: :Unstable
+📂 Context: SciML integrator
+💡 Suggestion: Reduce time step or check initial conditions
+```
+
+**Common return codes**:
+
+- **SciML integrators**: `:Unstable`, `:DtLessThanMin`, `:MaxIters`, `:Success`
+- **NLP solvers**: `:Infeasible`, `:MaxIterations`, `:Stalled`, `:FirstOrder`
+- **Linear solvers**: Condition number indicators, singular matrix flags
+
+**Use this exception** when:
+
+- ODE integration fails in CTFlows
+- Optimization solver does not converge in CTDirect
+- Linear system is ill-conditioned
+- Any numerical solver returns a failure status
+
+**Distinction from other exceptions**:
+
+- `IncorrectArgument`: The *input* is invalid
+- `PreconditionError`: The *state* or *timing* is wrong
+- `SolverFailure`: The *numerical computation* itself failed
+
 ## Quick Reference: Which Exception to Use?
 
 | Situation | Exception | Example |
@@ -298,6 +362,7 @@ The enriched display automatically suggests:
 | Parsing error | `ParsingError` | `throw(ParsingError("unexpected token", location="line 10"))` |
 | Ambiguous description | `AmbiguousDescription` | `throw(AmbiguousDescription((:x,), candidates=["(:a,:b)", "(:c,:d)"]))` |
 | Missing optional dependency | `ExtensionError` | `throw(ExtensionError(:Plots, feature="plotting"))` |
+| Solver/integrator failure | `SolverFailure` | `throw(SolverFailure("ODE failed", retcode=":Unstable"))` |
 
 ## Enriched Error Display
 

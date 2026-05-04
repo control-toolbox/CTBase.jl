@@ -47,6 +47,6 @@ include("display.jl")
 # Export public API
 export CTException
 export IncorrectArgument, PreconditionError, NotImplemented, ParsingError
-export AmbiguousDescription, ExtensionError
+export AmbiguousDescription, ExtensionError, SolverFailure
 
 end # module

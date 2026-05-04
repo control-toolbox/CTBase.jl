@@ -19,6 +19,7 @@ function test_exception_types()
             @test ParsingError("test") isa CTException
             @test AmbiguousDescription((:f,)) isa CTException
             @test ExtensionError(:MyExt) isa CTException
+            @test SolverFailure("test") isa CTException
 
             # Test that they are also standard Exceptions
             @test IncorrectArgument("test") isa Exception
@@ -28,6 +29,7 @@ function test_exception_types()
             @test ParsingError("test") isa Exception
             @test AmbiguousDescription((:f,)) isa Exception
             @test ExtensionError(:MyExt) isa Exception
+            @test SolverFailure("test") isa Exception
         end
 
         @testset "IncorrectArgument - Construction" begin
@@ -222,6 +224,37 @@ function test_exception_types()
 
             # Test error when no dependencies provided
             @test_throws PreconditionError ExtensionError()
+        end
+
+        @testset "SolverFailure - Construction" begin
+            # Simple message only
+            e = SolverFailure("Solver failed")
+            @test e.msg == "Solver failed"
+            @test isnothing(e.retcode)
+            @test isnothing(e.suggestion)
+            @test isnothing(e.context)
+
+            # With retcode
+            e = SolverFailure("Integration failed", retcode=":Unstable")
+            @test e.msg == "Integration failed"
+            @test e.retcode == ":Unstable"
+            @test isnothing(e.suggestion)
+            @test isnothing(e.context)
+
+            # With all fields
+            e = SolverFailure(
+                "Optimization did not converge",
+                retcode=":MaxIterations",
+                suggestion="Increase max iterations or adjust tolerance",
+                context="IPOPT solver",
+            )
+            @test e.msg == "Optimization did not converge"
+            @test e.retcode == ":MaxIterations"
+            @test e.suggestion == "Increase max iterations or adjust tolerance"
+            @test e.context == "IPOPT solver"
+
+            # Test that it can be thrown
+            @test_throws SolverFailure throw(SolverFailure("Test error"))
         end
     end
 end

@@ -213,6 +213,22 @@ function format_user_friendly_error(io::IO, e::CTException)
             end
         end
         println(io)
+
+    elseif e isa SolverFailure
+        # Return code
+        if !isnothing(e.retcode)
+            print(io, "🔧 Return code: ")
+            _print_ansi_styled(io, e.retcode, :yellow, true)
+            println(io)
+        end
+
+        if !isnothing(e.context)
+            println(io, "📂 Context: ", e.context)
+        end
+
+        if !isnothing(e.suggestion)
+            println(io, "💡 Suggestion: ", e.suggestion)
+        end
     end
 
     # Add user code location
@@ -291,5 +307,14 @@ end
 Custom error display for ExtensionError.
 """
 function Base.showerror(io::IO, e::ExtensionError)
+    format_user_friendly_error(io, e)
+end
+
+"""
+    Base.showerror(io::IO, e::SolverFailure)
+
+Custom error display for SolverFailure.
+"""
+function Base.showerror(io::IO, e::SolverFailure)
     format_user_friendly_error(io, e)
 end

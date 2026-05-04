@@ -504,3 +504,71 @@ struct ExtensionError <: CTException
         return new(msg, weakdeps, feature, context)
     end
 end
+
+"""
+    SolverFailure <: CTException
+
+Exception thrown when a solver (ODE integrator, optimization solver, linear solver, etc.)
+fails to complete successfully or returns an error code.
+
+This exception is used across the Control Toolbox to report solver failures in a uniform way.
+The `retcode` field is generic and can accommodate different solver types:
+- SciML integrators: `:Unstable`, `:DtLessThanMin`, `:MaxIters`, `:Success`
+- NLP solvers: `:Infeasible`, `:MaxIterations`, `:Stalled`, `:FirstOrder`
+- Linear solvers: condition number indicators, singular matrix flags, etc.
+
+This exception signals that the numerical computation itself failed, not that the input
+was invalid (use `IncorrectArgument` for that) or that a precondition was violated (use
+`PreconditionError` for that).
+
+# Fields
+- `msg::String`: Main error message describing the failure
+- `retcode::Union{String, Nothing}`: Solver-specific return code (optional)
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
+- `context::Union{String, Nothing}`: Where the error occurred (optional)
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> throw(CTBase.Exceptions.SolverFailure("ODE integration failed", retcode=":Unstable"))
+ERROR: SolverFailure: ODE integration failed
+```
+
+Enhanced version with full context:
+
+```julia
+throw(CTBase.Exceptions.SolverFailure(
+    "Optimization solver did not converge",
+    retcode=":MaxIterations",
+    suggestion="Increase max iterations or adjust tolerance settings",
+    context="IPOPT solver in CTDirect"
+))
+```
+
+# Common Use Cases
+- ODE integration failures in CTFlows (SciML integrators)
+- Non-convergence of optimization solvers in CTDirect
+- Ill-conditioned linear systems in numerical algorithms
+- Any numerical solver that returns a status code indicating failure
+
+# See Also
+- `IncorrectArgument`: For input validation errors
+- `PreconditionError`: For precondition violations
+"""
+struct SolverFailure <: CTException
+    msg::String
+    retcode::Union{String,Nothing}
+    suggestion::Union{String,Nothing}
+    context::Union{String,Nothing}
+
+    function SolverFailure(
+        msg::String;
+        retcode::Union{String,Nothing}=nothing,
+        suggestion::Union{String,Nothing}=nothing,
+        context::Union{String,Nothing}=nothing,
+    )
+        new(msg, retcode, suggestion, context)
+    end
+end

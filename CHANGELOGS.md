@@ -5,6 +5,41 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.8] - 2026-05-04
+
+### ✨ New Features
+
+#### **SolverFailure Exception**
+
+- **New exception type**: Added `SolverFailure` exception for reporting solver/integrator failures across the toolbox
+- **Generic retcode support**: Accommodates different solver types (SciML integrators, NLP solvers, linear solvers)
+  - SciML: `:Unstable`, `:DtLessThanMin`, `:MaxIters`
+  - NLP: `:Infeasible`, `:MaxIterations`, `:Stalled`
+  - Linear: condition number indicators, singular matrix flags
+- **Enriched context**: Fields for `retcode`, `suggestion`, and `context` to provide actionable error information
+- **User-friendly display**: Emoji-based display with 🔧 for return codes
+- **Cross-package utility**: Suitable for use across CTFlows, CTDirect, and other control-toolbox packages
+
+#### **Documentation Updates**
+
+- **Exception guide**: Added comprehensive `SolverFailure` section to `docs/src/guide/exceptions.md`
+- **Hierarchy update**: Updated exception hierarchy diagram to include `SolverFailure`
+- **Quick reference**: Added `SolverFailure` to decision table for exception selection
+- **Usage examples**: Provided examples for ODE integration, optimization, and linear solver failures
+
+### 🧪 Testing
+
+- **Comprehensive test coverage**: Added tests for `SolverFailure` in all test suites
+  - `test_types.jl`: Hierarchy and construction tests
+  - `test_display.jl`: Display tests (minimal, full fields, edge cases)
+  - `test_exceptions.jl`: Exception throwing and output tests
+- **All tests passing**: 315 tests pass including 15 new tests for `SolverFailure`
+
+### 📦 API Changes
+
+- **Exception module**: Exported `SolverFailure` from `CTBase.Exceptions`
+- **Display module**: Added display logic in `format_user_friendly_error` and `Base.showerror`
+
 ## [0.18.7] - 2026-03-31
 
 ### 🧹 Maintenance

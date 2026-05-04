@@ -171,6 +171,31 @@ function test_exceptions()
         @test occursin("to generate documentation", output_enriched)
     end
 
+    # Test SolverFailure
+    @testset verbose = VERBOSE showtiming = SHOWTIMING "SolverFailure" begin
+        e = CTBase.SolverFailure("solver failed")
+        @test_throws CTBase.SolverFailure throw(e)
+        output = sprint(showerror, e)
+        @test typeof(output) == String
+        @test occursin("SolverFailure", output)
+        @test occursin("solver failed", output)
+
+        # Test enriched version with retcode
+        e_enriched = CTBase.SolverFailure(
+            "ODE integration failed",
+            retcode=":Unstable",
+            suggestion="Reduce time step",
+            context="SciML integrator",
+        )
+        output_enriched = sprint(showerror, e_enriched)
+        @test occursin("Return code", output_enriched)
+        @test occursin(":Unstable", output_enriched)
+        @test occursin("Suggestion", output_enriched)
+        @test occursin("Reduce time step", output_enriched)
+        @test occursin("Context", output_enriched)
+        @test occursin("SciML integrator", output_enriched)
+    end
+
     @testset verbose = VERBOSE showtiming = SHOWTIMING "CTException supertype catch" begin
         e = CTBase.IncorrectArgument("msg")
         @test_throws CTBase.IncorrectArgument throw(e)
