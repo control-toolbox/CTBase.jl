@@ -143,6 +143,9 @@ function test_exception_display()
 
             e6 = ExtensionError(:TestExt)
             @test_nowarn showerror(io, e6)
+
+            e7 = SolverFailure("Error")
+            @test_nowarn showerror(io, e7)
         end
 
         @testset "AmbiguousDescription - Display" begin
@@ -344,6 +347,71 @@ function test_exception_display()
             @test contains(output, "In your code:")
             # In a real test environment, this should show user frames
             # The exact content depends on the test environment
+        end
+
+        @testset "SolverFailure - Display" begin
+            io = IOBuffer()
+            e = SolverFailure(
+                "ODE integration failed",
+                retcode=":Unstable",
+                suggestion="Reduce time step or check initial conditions",
+                context="SciML integrator",
+            )
+
+            # User-friendly
+            # CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+            @test contains(output, "SolverFailure")
+            @test contains(output, "ODE integration failed")
+            @test contains(output, "Return code:")
+            @test contains(output, ":Unstable")
+            @test contains(output, "Suggestion:")
+            @test contains(output, "Reduce time step")
+            @test contains(output, "Context:")
+            @test contains(output, "SciML integrator")
+
+            # CTBase.set_show_full_stacktrace!(false)
+        end
+
+        @testset "SolverFailure - Missing optional fields" begin
+            io = IOBuffer()
+            # Test with only required field (msg)
+            e = SolverFailure("Solver failed")
+
+            # CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            @test contains(output, "SolverFailure")
+            @test contains(output, "Solver failed")
+            # Should not contain optional sections that are not provided
+            @test !contains(output, "Return code:")
+            @test !contains(output, "Context:")
+            @test !contains(output, "Suggestion:")
+        end
+
+        @testset "SolverFailure - All optional fields" begin
+            io = IOBuffer()
+            e = SolverFailure(
+                "Optimization did not converge";
+                retcode=":MaxIterations",
+                context="IPOPT solver",
+                suggestion="Increase max iterations",
+            )
+
+            # CTBase.set_show_full_stacktrace!(false)
+            @test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            @test contains(output, "SolverFailure")
+            @test contains(output, "Optimization did not converge")
+            @test contains(output, "Return code:")
+            @test contains(output, ":MaxIterations")
+            @test contains(output, "Context:")
+            @test contains(output, "IPOPT solver")
+            @test contains(output, "Suggestion:")
+            @test contains(output, "Increase max iterations")
         end
     end
 end
