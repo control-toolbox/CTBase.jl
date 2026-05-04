@@ -1,4 +1,3 @@
-# Ref: https://securitylab.github.com/research/github-actions-preventing-pwn-requests
 name: Breakage
 
 # read-only repo token
