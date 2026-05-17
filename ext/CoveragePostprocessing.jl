@@ -228,6 +228,22 @@ function _collect_and_move_cov_files!(source_dirs, dest_dir)
 end
 
 """
+    _get_pid_suffix(cov_file_path) -> String
+
+Internal helper that extracts the PID suffix from a .cov file path.
+
+# Arguments
+- `cov_file_path::String`: Path to a .cov file (e.g., `src/foo.jl.12345.cov`)
+
+# Returns
+- `String`: The PID suffix (e.g., `"12345"`), or empty string if no suffix found.
+"""
+function _get_pid_suffix(cov_file_path::String)
+    m = match(r"\.(\d+)\.cov$", cov_file_path)
+    return m === nothing ? "" : m.captures[1]
+end
+
+"""
     _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
 
 Internal helper that generates coverage reports from `.cov` files.
@@ -246,6 +262,18 @@ Writes:
 """
 function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
     println("✓ Generating coverage report")
+
+    # Collect set of existing .cov file paths
+    cov_files = Set{String}()
+    for dir in source_dirs
+        for (root, dirs, files) in walkdir(dir)
+            for f in files
+                if endswith(f, ".cov")
+                    push!(cov_files, joinpath(root, f))
+                end
+            end
+        end
+    end
 
     # Process source directories for coverage
     cov_all = Coverage.FileCoverage[]
@@ -272,6 +300,10 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_
         return false
     end
     isempty(cov) && (cov = cov_all)
+
+    # Keep only files that have corresponding .cov files
+    # This filters out files that were never actually tested
+    cov = filter(fc -> any(cov_file -> endswith(cov_file, basename(fc.filename) * "." * _get_pid_suffix(cov_file) * ".cov"), cov_files), cov)
 
     # Keep only files that actually had .cov data generated
     # (files without .cov have all-nothing coverage arrays)
