@@ -1,3 +1,4 @@
+# TOP-LEVEL: Fake type for stub testing
 struct DummyCoverageTag <: CTBase.Extensions.AbstractCoveragePostprocessingTag end
 
 function test_coverage_post_process()
@@ -151,7 +152,7 @@ function test_coverage_post_process()
 """,
                 )
 
-                CP._generate_coverage_reports!(["src"], joinpath(tmp, "coverage"), tmp)
+                CP._generate_coverage_reports!(["src"], joinpath(tmp, "coverage"), tmp, 20, 200)
 
                 @test isfile(joinpath("coverage", "lcov.info"))
                 @test isfile(joinpath("coverage", "cov_report.md"))
@@ -176,7 +177,7 @@ function test_coverage_post_process()
 
                 mkpath(joinpath(root, "coverage"))
                 CP._generate_coverage_reports!(
-                    [joinpath(other, "src")], joinpath(root, "coverage"), root
+                    [joinpath(other, "src")], joinpath(root, "coverage"), root, 20, 200
                 )
 
                 report = read(joinpath(root, "coverage", "cov_report.md"), String)
@@ -237,6 +238,143 @@ function test_coverage_post_process()
                 catch e
                     # This should not error in normal circumstances
                 end
+            end
+        end
+    end
+
+    @testset "Report limits - default behavior" begin
+        mktempdir() do tmp
+            cd(tmp) do
+                mkpath("src")
+                mkpath("coverage")
+
+                write(joinpath("src", "a.jl"), "a(x) = x\n")
+                write(joinpath("src", "b.jl"), "b(x) = x\n")
+                write(joinpath("src", "c.jl"), "c(x) = x\n")
+
+                write(joinpath("src", "a.jl.1234.cov"), """
+        -:    1:a(x) = x
+        0:    2:a(1)
+""")
+                write(joinpath("src", "b.jl.1234.cov"), """
+        -:    1:b(x) = x
+        0:    2:b(1)
+""")
+                write(joinpath("src", "c.jl.1234.cov"), """
+        -:    1:c(x) = x
+        0:    2:c(1)
+""")
+
+                CTBase.postprocess_coverage(; generate_report=true)
+
+                report = read(joinpath("coverage", "cov_report.md"), String)
+                @test occursin("top 20", report)
+                @test occursin("first 200", report)
+            end
+        end
+    end
+
+    @testset "Report limits - custom worst_n_files" begin
+        mktempdir() do tmp
+            cd(tmp) do
+                mkpath("src")
+                mkpath("coverage")
+
+                write(joinpath("src", "a.jl"), "a(x) = x\n")
+                write(joinpath("src", "b.jl"), "b(x) = x\n")
+                write(joinpath("src", "c.jl"), "c(x) = x\n")
+
+                write(joinpath("src", "a.jl.1234.cov"), """
+        -:    1:a(x) = x
+        0:    2:a(1)
+""")
+                write(joinpath("src", "b.jl.1234.cov"), """
+        -:    1:b(x) = x
+        0:    2:b(1)
+""")
+                write(joinpath("src", "c.jl.1234.cov"), """
+        -:    1:c(x) = x
+        0:    2:c(1)
+""")
+
+                CTBase.postprocess_coverage(; generate_report=true, worst_n_files=1)
+
+                report = read(joinpath("coverage", "cov_report.md"), String)
+                @test occursin("top 1", report)
+                @test !occursin("top 20", report)
+            end
+        end
+    end
+
+    @testset "Report limits - custom max_uncovered_lines" begin
+        mktempdir() do tmp
+            cd(tmp) do
+                mkpath("src")
+                mkpath("coverage")
+
+                write(joinpath("src", "a.jl"), "a(x) = x\n")
+                write(joinpath("src", "a.jl.1234.cov"), """
+        -:    1:a(x) = x
+        0:    2:a(1)
+        0:    3:a(2)
+        0:    4:a(3)
+""")
+
+                CTBase.postprocess_coverage(; generate_report=true, max_uncovered_lines=2)
+
+                report = read(joinpath("coverage", "cov_report.md"), String)
+                @test occursin("first 2", report)
+                @test !occursin("first 200", report)
+            end
+        end
+    end
+
+    @testset "Report limits - invalid options" begin
+        mktempdir() do tmp
+            cd(tmp) do
+                mkpath("src")
+                mkpath("test")
+                mkpath("ext")
+
+                write(joinpath("src", "a.jl.1234.cov"), """
+        -:    1:a(x) = x
+""")
+
+                err = try
+                    CTBase.postprocess_coverage(; generate_report=false, worst_n_files=0)
+                    nothing
+                catch e
+                    e
+                end
+                @test err isa CTBase.Exceptions.IncorrectArgument
+                @test occursin("worst_n_files must be > 0", err.msg)
+
+                err = try
+                    CTBase.postprocess_coverage(; generate_report=false, worst_n_files=-5)
+                    nothing
+                catch e
+                    e
+                end
+                @test err isa CTBase.Exceptions.IncorrectArgument
+                @test occursin("worst_n_files must be > 0", err.msg)
+
+                err = try
+                    CTBase.postprocess_coverage(; generate_report=false, max_uncovered_lines=0)
+                    nothing
+                catch e
+                    e
+                end
+                @test err isa CTBase.Exceptions.IncorrectArgument
+                @test occursin("max_uncovered_lines must be > 0", err.msg)
+
+                err = try
+                    CTBase.postprocess_coverage(; generate_report=false, max_uncovered_lines=-10)
+                    nothing
+                catch e
+                    e
+                end
+                @test err isa CTBase.Exceptions.IncorrectArgument
+                @test occursin("max_uncovered_lines must be > 0", err.msg)
             end
         end
     end

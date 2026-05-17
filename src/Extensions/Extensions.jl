@@ -166,6 +166,8 @@ is loaded.
 - `generate_report::Bool=true`: Whether to generate summary reports.
 - `root_dir::String=pwd()`: Project root directory used to locate coverage artifacts.
 - `dest_dir::String="coverage"`: Destination directory for coverage artifacts.
+- `worst_n_files::Int=20`: Maximum number of lowest-covered files to list in the report.
+- `max_uncovered_lines::Int=200`: Maximum number of uncovered lines to display in the report.
 
 # Throws
 
@@ -183,6 +185,8 @@ function postprocess_coverage(
     generate_report::Bool=true,
     root_dir::String=pwd(),
     dest_dir::String="coverage",
+    worst_n_files::Int=20,
+    max_uncovered_lines::Int=200,
 )
     throw(
         Exceptions.ExtensionError(
