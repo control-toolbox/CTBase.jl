@@ -2,6 +2,10 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.18.9-beta)
+
+- **Coverage post-processing options**: Added configurable report limits to `postprocess_coverage` with new keyword arguments `worst_n_files::Int=20` and `max_uncovered_lines::Int=200`. Defaults maintain backward compatibility. Validation throws `IncorrectArgument` for invalid values (≤ 0). No breaking changes; purely additive feature. No migration required.
+
 ## Table of Contents
 
 - [Exception System Overhaul](#exception-system-overhaul)

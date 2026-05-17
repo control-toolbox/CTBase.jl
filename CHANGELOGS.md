@@ -5,6 +5,31 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.9-beta] - 2026-05-17
+
+### ✨ New Features
+
+#### **Coverage Post-Processing Options**
+
+- **Configurable report limits**: Added `worst_n_files::Int=20` and `max_uncovered_lines::Int=200` keyword arguments to `postprocess_coverage`
+- **Backward compatibility**: Default values maintain existing behavior
+- **Input validation**: Throws `IncorrectArgument` for invalid values (≤ 0)
+- **Configurable constants**: Added `WORST_N_FILES` and `MAX_UNCOVERED_LINES` constants in `test/coverage.jl` for easy customization
+
+### 🧪 Testing
+
+- **Comprehensive test coverage**: Added tests for coverage post-processing options
+  - Default behavior tests (verifies 20/200 limits)
+  - Custom `worst_n_files` tests (verifies limit enforcement)
+  - Custom `max_uncovered_lines` tests (verifies limit enforcement)
+  - Invalid option tests (verifies `IncorrectArgument` for 0 and negative values)
+- **All tests passing**: 1141 tests pass including 6 new tests for coverage options
+
+### 📦 API Changes
+
+- **Extensions module**: Extended `postprocess_coverage` signature with new keyword arguments
+- **CoveragePostprocessing extension**: Updated backend implementation to use configurable limits
+
 ## [0.18.8] - 2026-05-04
 
 ### ✨ New Features
