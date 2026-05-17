@@ -31,6 +31,8 @@ This implementation:
 - `generate_report::Bool=true`: If `true`, write `coverage/lcov.info` and `coverage/cov_report.md`.
 - `root_dir::String=pwd()`: Root directory of the project.
 - `dest_dir::String="coverage"`: Destination directory for coverage artifacts.
+- `worst_n_files::Int=20`: Maximum number of lowest-covered files to list in the report.
+- `max_uncovered_lines::Int=200`: Maximum number of uncovered lines to display in the report.
 
 # Returns
 
@@ -53,7 +55,13 @@ function CTBase.postprocess_coverage(
     generate_report::Bool=true,
     root_dir::String=pwd(),
     dest_dir::String="coverage",
+    worst_n_files::Int=20,
+    max_uncovered_lines::Int=200,
 )
+    # Validate report limits
+    worst_n_files > 0 || throw(CTBase.Exceptions.IncorrectArgument("worst_n_files must be > 0, got $(worst_n_files)"))
+    max_uncovered_lines > 0 || throw(CTBase.Exceptions.IncorrectArgument("max_uncovered_lines must be > 0, got $(max_uncovered_lines)"))
+
     println("✓ Coverage post-processing start")
 
     # Define paths relative to root_dir
@@ -91,7 +99,7 @@ function CTBase.postprocess_coverage(
     n_cov == 0 &&
         error("Coverage requested but no usable .cov files were found after cleanup.")
 
-    generate_report && _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
+    generate_report && _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
 
     moved = _collect_and_move_cov_files!(source_dirs, cov_storage_dir)
     isempty(moved) && error("Coverage requested but no .cov files were found to move.")
@@ -220,16 +228,23 @@ function _collect_and_move_cov_files!(source_dirs, dest_dir)
 end
 
 """
-    _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
+    _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
 
 Internal helper that generates coverage reports from `.cov` files.
+
+# Arguments
+- `source_dirs::Vector{String}`: Directories to scan for `.cov` files.
+- `coverage_dir::String`: Destination directory for reports.
+- `root_dir::String`: Project root directory for path resolution.
+- `worst_n_files::Int`: Maximum number of lowest-covered files to list in the report.
+- `max_uncovered_lines::Int`: Maximum number of uncovered lines to display in the report.
 
 Writes:
 
 - `coverage/lcov.info`
 - `coverage/cov_report.md`
 """
-function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
+function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
     println("✓ Generating coverage report")
 
     # Process source directories for coverage
@@ -305,25 +320,25 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir)
         end
         println(io, "```\n")
 
-        println(io, "## Lowest-covered files (top 20)\n")
+        println(io, "## Lowest-covered files (top $(worst_n_files))\n")
         println(io, "| file | covered | total | % |")
         println(io, "|---|---:|---:|---:|")
-        for (f, h, t, p) in rows[1:min(end, 20)]
+        for (f, h, t, p) in rows[1:min(end, worst_n_files)]
             rel_f = relative_path(f, root_dir)
             println(io, "| `", rel_f, "` | ", h, " | ", t, " | ", round(p; digits=2), " |")
         end
         println(io)
 
-        println(io, "## Uncovered lines (first 200)\n\n```shell")
+        println(io, "## Uncovered lines (first $(max_uncovered_lines))\n\n```shell")
         n = 0
         for fc in cov
             rel_filename = relative_path(fc.filename, root_dir)
             for i in findall(v -> (v isa Integer) && v == 0, fc.coverage)
                 println(io, rel_filename, ":", i)
                 n += 1
-                n >= 200 && break
+                n >= max_uncovered_lines && break
             end
-            n >= 200 && break
+            n >= max_uncovered_lines && break
         end
         println(io, "```")
         return nothing
