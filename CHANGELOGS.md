@@ -5,6 +5,21 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.11-beta] - 2026-05-17
+
+### 🐛 Bug Fixes
+
+#### **Coverage Report Filtering**
+
+- **Fixed file filtering**: Coverage reports now only include files with actual .cov data
+- **Removed spurious 0% entries**: Files without coverage data no longer appear in reports
+- **Helper function added**: `_get_pid_suffix` extracts PID suffix from .cov file paths for matching
+- **Improved accuracy**: Global coverage percentages now reflect only tested files
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.18.11-beta for development.
+
 ## [0.18.10-beta] - 2026-05-17
 
 ### 🧹 Maintenance

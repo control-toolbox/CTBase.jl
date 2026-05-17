@@ -2,6 +2,10 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.18.11-beta)
+
+- **Coverage report filtering**: Fixed coverage post-processing to only include files with actual .cov data in reports. Previously, files without coverage data appeared with 0% coverage; now only tested files are shown. No API changes; purely report generation improvement. No migration required.
+
 ## Non-breaking note (0.18.10-beta)
 
 - **Version bump**: Bumped to 0.18.10-beta for development. No functional changes; version increment only.
