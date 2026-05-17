@@ -273,6 +273,10 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_
     end
     isempty(cov) && (cov = cov_all)
 
+    # Keep only files that actually had .cov data generated
+    # (files without .cov have all-nothing coverage arrays)
+    cov = filter(fc -> any(!isnothing, fc.coverage), cov)
+
     function line_stats(fc)
         hits = 0
         total = 0
