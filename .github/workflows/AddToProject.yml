@@ -8,6 +8,6 @@ on:
 
 jobs:
   call:
-    uses: control-toolbox/CTActions/.github/workflows/auto-add-to-project.yml@main
+    uses: control-toolbox/CTActions/.github/workflows/add-to-project.yml@main
     secrets:
       project_token: ${{ secrets.PROJECT_TOKEN }}
