@@ -59,8 +59,16 @@ function CTBase.postprocess_coverage(
     max_uncovered_lines::Int=200,
 )
     # Validate report limits
-    worst_n_files > 0 || throw(CTBase.Exceptions.IncorrectArgument("worst_n_files must be > 0, got $(worst_n_files)"))
-    max_uncovered_lines > 0 || throw(CTBase.Exceptions.IncorrectArgument("max_uncovered_lines must be > 0, got $(max_uncovered_lines)"))
+    worst_n_files > 0 || throw(
+        CTBase.Exceptions.IncorrectArgument(
+            "worst_n_files must be > 0, got $(worst_n_files)"
+        ),
+    )
+    max_uncovered_lines > 0 || throw(
+        CTBase.Exceptions.IncorrectArgument(
+            "max_uncovered_lines must be > 0, got $(max_uncovered_lines)"
+        ),
+    )
 
     println("✓ Coverage post-processing start")
 
@@ -99,7 +107,9 @@ function CTBase.postprocess_coverage(
     n_cov == 0 &&
         error("Coverage requested but no usable .cov files were found after cleanup.")
 
-    generate_report && _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
+    generate_report && _generate_coverage_reports!(
+        source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines
+    )
 
     moved = _collect_and_move_cov_files!(source_dirs, cov_storage_dir)
     isempty(moved) && error("Coverage requested but no .cov files were found to move.")
@@ -260,7 +270,9 @@ Writes:
 - `coverage/lcov.info`
 - `coverage/cov_report.md`
 """
-function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines)
+function _generate_coverage_reports!(
+    source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines
+)
     println("✓ Generating coverage report")
 
     # Collect set of existing .cov file paths
@@ -303,7 +315,16 @@ function _generate_coverage_reports!(source_dirs, coverage_dir, root_dir, worst_
 
     # Keep only files that have corresponding .cov files
     # This filters out files that were never actually tested
-    cov = filter(fc -> any(cov_file -> endswith(cov_file, basename(fc.filename) * "." * _get_pid_suffix(cov_file) * ".cov"), cov_files), cov)
+    cov = filter(
+        fc -> any(
+            cov_file -> endswith(
+                cov_file,
+                basename(fc.filename) * "." * _get_pid_suffix(cov_file) * ".cov",
+            ),
+            cov_files,
+        ),
+        cov,
+    )
 
     # Keep only files that actually had .cov data generated
     # (files without .cov have all-nothing coverage arrays)

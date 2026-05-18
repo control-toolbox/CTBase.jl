@@ -152,7 +152,9 @@ function test_coverage_post_process()
 """,
                 )
 
-                CP._generate_coverage_reports!(["src"], joinpath(tmp, "coverage"), tmp, 20, 200)
+                CP._generate_coverage_reports!(
+                    ["src"], joinpath(tmp, "coverage"), tmp, 20, 200
+                )
 
                 @test isfile(joinpath("coverage", "lcov.info"))
                 @test isfile(joinpath("coverage", "cov_report.md"))
@@ -252,18 +254,27 @@ function test_coverage_post_process()
                 write(joinpath("src", "b.jl"), "b(x) = x\n")
                 write(joinpath("src", "c.jl"), "c(x) = x\n")
 
-                write(joinpath("src", "a.jl.1234.cov"), """
+                write(
+                    joinpath("src", "a.jl.1234.cov"),
+                    """
         -:    1:a(x) = x
         0:    2:a(1)
-""")
-                write(joinpath("src", "b.jl.1234.cov"), """
+""",
+                )
+                write(
+                    joinpath("src", "b.jl.1234.cov"),
+                    """
         -:    1:b(x) = x
         0:    2:b(1)
-""")
-                write(joinpath("src", "c.jl.1234.cov"), """
+""",
+                )
+                write(
+                    joinpath("src", "c.jl.1234.cov"),
+                    """
         -:    1:c(x) = x
         0:    2:c(1)
-""")
+""",
+                )
 
                 CTBase.postprocess_coverage(; generate_report=true)
 
@@ -284,18 +295,27 @@ function test_coverage_post_process()
                 write(joinpath("src", "b.jl"), "b(x) = x\n")
                 write(joinpath("src", "c.jl"), "c(x) = x\n")
 
-                write(joinpath("src", "a.jl.1234.cov"), """
+                write(
+                    joinpath("src", "a.jl.1234.cov"),
+                    """
         -:    1:a(x) = x
         0:    2:a(1)
-""")
-                write(joinpath("src", "b.jl.1234.cov"), """
+""",
+                )
+                write(
+                    joinpath("src", "b.jl.1234.cov"),
+                    """
         -:    1:b(x) = x
         0:    2:b(1)
-""")
-                write(joinpath("src", "c.jl.1234.cov"), """
+""",
+                )
+                write(
+                    joinpath("src", "c.jl.1234.cov"),
+                    """
         -:    1:c(x) = x
         0:    2:c(1)
-""")
+""",
+                )
 
                 CTBase.postprocess_coverage(; generate_report=true, worst_n_files=1)
 
@@ -313,12 +333,15 @@ function test_coverage_post_process()
                 mkpath("coverage")
 
                 write(joinpath("src", "a.jl"), "a(x) = x\n")
-                write(joinpath("src", "a.jl.1234.cov"), """
+                write(
+                    joinpath("src", "a.jl.1234.cov"),
+                    """
         -:    1:a(x) = x
         0:    2:a(1)
         0:    3:a(2)
         0:    4:a(3)
-""")
+""",
+                )
 
                 CTBase.postprocess_coverage(; generate_report=true, max_uncovered_lines=2)
 
@@ -336,9 +359,12 @@ function test_coverage_post_process()
                 mkpath("test")
                 mkpath("ext")
 
-                write(joinpath("src", "a.jl.1234.cov"), """
+                write(
+                    joinpath("src", "a.jl.1234.cov"),
+                    """
         -:    1:a(x) = x
-""")
+""",
+                )
 
                 err = try
                     CTBase.postprocess_coverage(; generate_report=false, worst_n_files=0)
@@ -368,7 +394,9 @@ function test_coverage_post_process()
                 @test occursin("max_uncovered_lines must be > 0", err.msg)
 
                 err = try
-                    CTBase.postprocess_coverage(; generate_report=false, max_uncovered_lines=-10)
+                    CTBase.postprocess_coverage(;
+                        generate_report=false, max_uncovered_lines=-10
+                    )
                     nothing
                 catch e
                     e
