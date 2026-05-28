@@ -558,7 +558,7 @@ function test_testrunner()
             fmt(buf, info; cumulative_severity=2)
             output = String(take!(buf))
             @test occursin("\e[33m[", output) ||
-                occursin("\e[33m[", replace(output, "\e[0m"=>""))
+                occursin("\e[33m[", replace(output, "\e[0m" => ""))
         end
     end
 

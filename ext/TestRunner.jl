@@ -1238,7 +1238,7 @@ function _format_progress_line(
         max_sev = maximum(history)
         bracket_color = bracket_color_from(max_sev)
         blocks = String[]
-        for i in 1:info.total
+        for i in 1:(info.total)
             sev = history[i]
             if sev <= 0
                 push!(blocks, "$(dim)░$(reset)")
