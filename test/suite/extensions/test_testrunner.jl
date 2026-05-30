@@ -402,7 +402,7 @@ function test_testrunner()
             @test bar_width(0) == 0
         end
 
-        @testset "_bar_width with custom full_bar_threshold" begin
+        @testset "_bar_width with custom progress_bar_threshold" begin
             # Custom threshold of 30
             @test bar_width(1, 30) == 1
             @test bar_width(10, 30) == 10

@@ -105,7 +105,7 @@ Run tests with configurable file/function name builders and optional available t
 - `on_test_done::Union{Function,Nothing}`: Callback after eval (default: `nothing`)
 - `show_progress_line::Bool`: Show progress line with symbol, index, spec, and time (default: `true`)
 - `show_progress_bar::Bool`: Show graphical progress bar `[█░░░...]` within the line (default: `true`)
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
+- `progress_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Returns
 - `Nothing`: Tests are executed via side effects
@@ -149,7 +149,7 @@ function CTBase.run_tests(
     on_test_done::Union{Function,Nothing}=nothing,
     show_progress_line::Bool=true,
     show_progress_bar::Bool=true,
-    full_bar_threshold::Int=_FULL_BAR_THRESHOLD,
+    progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD,
 )
     # Guard: a subdirectory named "test" inside test_dir would conflict with
     # the automatic `test/` prefix stripping in _parse_test_args.
@@ -184,7 +184,7 @@ function CTBase.run_tests(
     effective_on_test_done = if on_test_done !== nothing
         on_test_done
     elseif show_progress_line
-        _make_default_on_test_done(stdout, total, full_bar_threshold, show_progress_bar)
+        _make_default_on_test_done(stdout, total, progress_bar_threshold, show_progress_bar)
     else
         nothing
     end
@@ -969,17 +969,17 @@ end
 # ============================================================================
 
 """
-    _FULL_BAR_THRESHOLD
+    _PROGRESS_BAR_THRESHOLD
 
 Internal constant defining the maximum number of tests for full-resolution progress bars.
 
-When the total number of tests is ≤ `_FULL_BAR_THRESHOLD` (100), the progress bar displays
+When the total number of tests is ≤ `_PROGRESS_BAR_THRESHOLD` (100), the progress bar displays
 one character per test with cumulative coloring (each test gets its own colored block).
 Beyond this threshold, the bar switches to compressed mode with uniform coloring.
 
 This threshold balances visual clarity with terminal width constraints.
 """
-const _FULL_BAR_THRESHOLD = 100
+const _PROGRESS_BAR_THRESHOLD = 100
 
 """
 $(TYPEDSIGNATURES)
@@ -1030,12 +1030,12 @@ $(TYPEDSIGNATURES)
 
 Compute the progress bar character width based on the number of tests.
 
-- `total ≤ full_bar_threshold`: width equals `total` (one block per test).
-- `total > full_bar_threshold`: fixed width of `full_bar_threshold` (some tests skip a block advance).
+- `total ≤ progress_bar_threshold`: width equals `total` (one block per test).
+- `total > progress_bar_threshold`: fixed width of `progress_bar_threshold` (some tests skip a block advance).
 
 # Arguments
 - `total::Int`: Total number of tests
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
+- `progress_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Returns
 - `Int`: Character width for the progress bar (0 if `total ≤ 0`)
@@ -1053,13 +1053,13 @@ julia> TestRunner._bar_width(25)
 julia> TestRunner._bar_width(0)
 0
 
-julia> TestRunner._bar_width(100, full_bar_threshold=30)
+julia> TestRunner._bar_width(100, progress_bar_threshold=30)
 30
 ```
 """
-function _bar_width(total::Int, full_bar_threshold::Int=_FULL_BAR_THRESHOLD)
+function _bar_width(total::Int, progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD)
     total <= 0 && return 0
-    return min(total, full_bar_threshold)
+    return min(total, progress_bar_threshold)
 end
 
 """
@@ -1166,7 +1166,7 @@ Uses ANSI colors: green for success, red for errors, yellow for skipped.
 - `info::TestRunInfo`: Test execution information
 - `history::Union{Vector{Int},Nothing}`: Optional history array for per-test coloring (default: `nothing`)
 - `cumulative_severity::Union{Int,Nothing}`: Optional cumulative severity for coloring (default: `nothing`)
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
+- `progress_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 - `show_progress_bar::Bool`: Show graphical progress bar `[█░░░...]` (default: `true`)
 
 # Notes
@@ -1200,7 +1200,7 @@ function _format_progress_line(
     info::TestRunInfo;
     history::Union{Vector{Int},Nothing}=nothing,
     cumulative_severity::Union{Int,Nothing}=nothing,
-    full_bar_threshold::Int=_FULL_BAR_THRESHOLD,
+    progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD,
     show_progress_bar::Bool=true,
 )
     # ANSI codes
@@ -1212,7 +1212,7 @@ function _format_progress_line(
     yellow = "\e[33m"
     cyan = "\e[36m"
 
-    bar_width = _bar_width(info.total, full_bar_threshold)
+    bar_width = _bar_width(info.total, progress_bar_threshold)
     bar = _progress_bar(info.index, info.total; width=bar_width)
 
     severity = _severity(info.status)
@@ -1305,7 +1305,7 @@ Create a stateful progress callback for `on_test_done`. Prints to `io`.
 # Arguments
 - `io::IO`: Output stream for progress display
 - `total::Int`: Total number of tests
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
+- `progress_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 - `show_progress_bar::Bool`: Show graphical progress bar `[█░░░...]` (default: `true`)
 
 # Returns
@@ -1337,8 +1337,8 @@ julia> cb(info)
 [█████░░░░░░░░░░░] ✓ [05/10] test_example (1.2s)
 ```
 """
-function _make_default_on_test_done(io::IO, total::Int, full_bar_threshold::Int=_FULL_BAR_THRESHOLD, show_progress_bar::Bool=true)
-    history = total <= full_bar_threshold ? fill(0, total) : Int[]
+function _make_default_on_test_done(io::IO, total::Int, progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD, show_progress_bar::Bool=true)
+    history = total <= progress_bar_threshold ? fill(0, total) : Int[]
     max_severity = Ref{Int}(0)
 
     function update(info::TestRunInfo)
@@ -1352,7 +1352,7 @@ function _make_default_on_test_done(io::IO, total::Int, full_bar_threshold::Int=
             info;
             history=!isempty(history) ? history : nothing,
             cumulative_severity=max_severity[],
-            full_bar_threshold=full_bar_threshold,
+            progress_bar_threshold=progress_bar_threshold,
             show_progress_bar=show_progress_bar,
         )
         return nothing

@@ -5,6 +5,7 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 ## Non-breaking note (0.18.14-beta)
 
 - **TestRunner progress display refactoring**: Renamed `progress` parameter to `show_progress_line` for clarity, and added new `show_progress_bar` parameter for granular control. Users with `progress=false` should change to `show_progress_line=false`. Users with `progress=true` (default) can keep using defaults or set `show_progress_line=true, show_progress_bar=false` for minimal display without the graphical bar. No breaking changes; purely parameter rename with backward-compatible defaults. Migration: replace `progress=` with `show_progress_line=`.
+- **Parameter rename**: Renamed `full_bar_threshold` to `progress_bar_threshold` for clarity and consistency with new naming scheme. Users with `full_bar_threshold=` should change to `progress_bar_threshold=`. No breaking changes; purely parameter rename with backward-compatible defaults. Migration: replace `full_bar_threshold=` with `progress_bar_threshold=`.
 
 ## Non-breaking note (0.18.13-beta)
 

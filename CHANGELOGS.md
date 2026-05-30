@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Parameter rename**: Renamed `progress` to `show_progress_line` for clearer semantics
 - **Granular control**: Added `show_progress_bar` parameter to control only the graphical bar `[█░░░...]`
 - **Minimal display**: Users can now set `show_progress_line=true, show_progress_bar=false` to display `✓ [01/76] suite/test.jl (0.2s)` without the graphical bar
+- **Parameter rename**: Renamed `full_bar_threshold` to `progress_bar_threshold` for consistency with new naming scheme
 - **Documentation updated**: TestRunner guide updated with new parameter names and examples
 - **Tests updated**: Added tests for `show_progress_bar=false` behavior
 

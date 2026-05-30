@@ -75,7 +75,7 @@ CTBase.run_tests(;
 | `on_test_done` | `Function` or `nothing` | `nothing` | Callback after eval (see [Callbacks](@ref)) |
 | `show_progress_line` | `Bool` | `true` | Show progress line with symbol, index, spec, and time. Ignored when `on_test_done` is provided |
 | `show_progress_bar` | `Bool` | `true` | Show graphical progress bar `[█░░░...]` within the line |
-| `full_bar_threshold` | `Int` | `100` | Maximum tests for full-resolution progress bar (see [Progress Bar](@ref)) |
+| `progress_bar_threshold` | `Int` | `100` | Maximum tests for full-resolution progress bar (see [Progress Bar](@ref)) |
 
 ## Writing Test Files
 
@@ -156,14 +156,14 @@ The bar width adapts to the number of tests:
 - **≤ 100 tests** (default): width equals the total number of tests (one block per test).
 - **> 100 tests** (default): fixed width of 100 characters. Some tests will not visually advance the bar (the fill is computed as `round(Int, index / total * 100)`).
 
-The threshold can be customized via the `full_bar_threshold` parameter:
+The threshold can be customized via the `progress_bar_threshold` parameter:
 
 ```julia
 # Use a smaller threshold for narrow terminals
-CTBase.run_tests(; args=String.(ARGS), full_bar_threshold=30)
+CTBase.run_tests(; args=String.(ARGS), progress_bar_threshold=30)
 
 # Use a larger threshold for wide displays
-CTBase.run_tests(; args=String.(ARGS), full_bar_threshold=100)
+CTBase.run_tests(; args=String.(ARGS), progress_bar_threshold=100)
 ```
 
 ### Cursor-style display
