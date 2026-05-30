@@ -5,6 +5,7 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 ## Non-breaking note (0.18.13-beta)
 
 - **TestRunner cursor-style progress bar**: Changed progress bar display to use cursor-style where only the current test position is filled for successes, while failures and skips persist at their positions. This creates a lighter visual with ephemeral successes but persistent error markers. No API changes; purely visual improvement. No migration required.
+- **Default threshold increased**: Changed default `full_bar_threshold` from 50 to 100 for better experience on modern wide displays. Users with narrow terminals can still customize via the parameter. No breaking changes; purely default value adjustment. No migration required.
 
 ## Non-breaking note (0.18.12-beta)
 

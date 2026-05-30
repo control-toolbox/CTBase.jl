@@ -395,10 +395,10 @@ function test_testrunner()
             @test bar_width(21) == 21
             @test bar_width(30) == 30
             @test bar_width(50) == 50
-            @test bar_width(51) == 50
-            @test bar_width(100) == 50
-            @test bar_width(500) == 50
-            @test bar_width(1000) == 50
+            @test bar_width(100) == 100
+            @test bar_width(101) == 100
+            @test bar_width(500) == 100
+            @test bar_width(1000) == 100
             @test bar_width(0) == 0
         end
 
@@ -445,9 +445,13 @@ function test_testrunner()
             bar = progress_bar(25, 50)
             @test length(bar) == 52  # 50 chars + 2 brackets
 
-            # Auto width: 500 tests → width=50
+            # Auto width: 100 tests → width=100
+            bar = progress_bar(50, 100)
+            @test length(bar) == 102  # 100 chars + 2 brackets
+
+            # Auto width: 500 tests → width=100
             bar = progress_bar(250, 500)
-            @test length(bar) == 52  # 50 chars + 2 brackets
+            @test length(bar) == 102  # 100 chars + 2 brackets
 
             # Edge case: total=0
             bar = progress_bar(0, 0; width=10)
