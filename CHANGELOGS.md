@@ -5,6 +5,23 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.12-beta] - 2026-05-30
+
+### ✨ New Features
+
+#### **TestRunner Progress Bar Customization**
+
+- **Configurable threshold**: Added `full_bar_threshold` parameter to `CTBase.run_tests` (default: 50)
+- **Flexible display**: Users can now customize the maximum number of tests for full-resolution progress bar
+- **Terminal adaptation**: Smaller thresholds for narrow terminals, larger for wide displays
+- **Internal propagation**: Parameter propagated to `_make_default_on_test_done`, `_format_progress_line`, and `_bar_width`
+- **Documentation updated**: TestRunner guide updated with examples and threshold explanation
+- **Test coverage**: Added 14 unit tests for custom threshold behavior
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.18.12-beta for development.
+
 ## [0.18.11-beta] - 2026-05-17
 
 ### 🐛 Bug Fixes

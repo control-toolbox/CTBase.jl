@@ -74,6 +74,7 @@ CTBase.run_tests(;
 | `on_test_start` | `Function` or `nothing` | `nothing` | Callback before eval (see [Callbacks](@ref)) |
 | `on_test_done` | `Function` or `nothing` | `nothing` | Callback after eval (see [Callbacks](@ref)) |
 | `progress` | `Bool` | `true` | Show built-in progress bar. Ignored when `on_test_done` is provided |
+| `full_bar_threshold` | `Int` | `50` | Maximum tests for full-resolution progress bar (see [Progress Bar](@ref)) |
 
 ## Writing Test Files
 
@@ -151,8 +152,18 @@ By default, `run_tests` displays a progress bar after each test completes:
 
 The bar width adapts to the number of tests:
 
-- **≤ 20 tests**: width equals the total number of tests (one block per test).
-- **> 20 tests**: fixed width of 20 characters. Some tests will not visually advance the bar (the fill is computed as `round(Int, index / total * 20)`).
+- **≤ 50 tests** (default): width equals the total number of tests (one block per test).
+- **> 50 tests** (default): fixed width of 50 characters. Some tests will not visually advance the bar (the fill is computed as `round(Int, index / total * 50)`).
+
+The threshold can be customized via the `full_bar_threshold` parameter:
+
+```julia
+# Use a smaller threshold for narrow terminals
+CTBase.run_tests(; args=String.(ARGS), full_bar_threshold=30)
+
+# Use a larger threshold for wide displays
+CTBase.run_tests(; args=String.(ARGS), full_bar_threshold=100)
+```
 
 ### Failure detection
 

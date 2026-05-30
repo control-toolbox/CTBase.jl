@@ -402,6 +402,28 @@ function test_testrunner()
             @test bar_width(0) == 0
         end
 
+        @testset "_bar_width with custom full_bar_threshold" begin
+            # Custom threshold of 30
+            @test bar_width(1, 30) == 1
+            @test bar_width(10, 30) == 10
+            @test bar_width(30, 30) == 30
+            @test bar_width(31, 30) == 30
+            @test bar_width(100, 30) == 30
+
+            # Custom threshold of 100
+            @test bar_width(1, 100) == 1
+            @test bar_width(50, 100) == 50
+            @test bar_width(100, 100) == 100
+            @test bar_width(101, 100) == 100
+            @test bar_width(500, 100) == 100
+
+            # Custom threshold of 10
+            @test bar_width(1, 10) == 1
+            @test bar_width(10, 10) == 10
+            @test bar_width(11, 10) == 10
+            @test bar_width(100, 10) == 10
+        end
+
         @testset "_progress_bar rendering" begin
             # Full bar (explicit width)
             bar = progress_bar(10, 10; width=10)

@@ -104,6 +104,7 @@ Run tests with configurable file/function name builders and optional available t
 - `on_test_start::Union{Function,Nothing}`: Callback before eval (default: `nothing`)
 - `on_test_done::Union{Function,Nothing}`: Callback after eval (default: `nothing`)
 - `progress::Bool`: Show built-in progress bar (default: `true`)
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
 
 # Returns
 - `Nothing`: Tests are executed via side effects
@@ -145,6 +146,7 @@ function CTBase.run_tests(
     on_test_start::Union{Function,Nothing}=nothing,
     on_test_done::Union{Function,Nothing}=nothing,
     progress::Bool=true,
+    full_bar_threshold::Int=_FULL_BAR_THRESHOLD,
 )
     # Guard: a subdirectory named "test" inside test_dir would conflict with
     # the automatic `test/` prefix stripping in _parse_test_args.
@@ -179,7 +181,7 @@ function CTBase.run_tests(
     effective_on_test_done = if on_test_done !== nothing
         on_test_done
     elseif progress
-        _make_default_on_test_done(stdout, total)
+        _make_default_on_test_done(stdout, total, full_bar_threshold)
     else
         nothing
     end
@@ -1025,11 +1027,12 @@ $(TYPEDSIGNATURES)
 
 Compute the progress bar character width based on the number of tests.
 
-- `total ≤ 50`: width equals `total` (one block per test).
-- `total > 50`: fixed width of 50 (some tests skip a block advance).
+- `total ≤ full_bar_threshold`: width equals `total` (one block per test).
+- `total > full_bar_threshold`: fixed width of `full_bar_threshold` (some tests skip a block advance).
 
 # Arguments
 - `total::Int`: Total number of tests
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
 
 # Returns
 - `Int`: Character width for the progress bar (0 if `total ≤ 0`)
@@ -1046,11 +1049,14 @@ julia> TestRunner._bar_width(25)
 
 julia> TestRunner._bar_width(0)
 0
+
+julia> TestRunner._bar_width(100, full_bar_threshold=30)
+30
 ```
 """
-function _bar_width(total::Int)
+function _bar_width(total::Int, full_bar_threshold::Int=_FULL_BAR_THRESHOLD)
     total <= 0 && return 0
-    return min(total, _FULL_BAR_THRESHOLD)
+    return min(total, full_bar_threshold)
 end
 
 """
@@ -1155,6 +1161,9 @@ Uses ANSI colors: green for success, red for errors, yellow for skipped.
 # Arguments
 - `io::IO`: Output stream to write to
 - `info::TestRunInfo`: Test execution information
+- `history::Union{Vector{Int},Nothing}`: Optional history array for per-test coloring (default: `nothing`)
+- `cumulative_severity::Union{Int,Nothing}`: Optional cumulative severity for coloring (default: `nothing`)
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
 
 # Notes
 - Format: `[progress_bar] symbol [index/total] spec (time) status`
@@ -1186,6 +1195,7 @@ function _format_progress_line(
     info::TestRunInfo;
     history::Union{Vector{Int},Nothing}=nothing,
     cumulative_severity::Union{Int,Nothing}=nothing,
+    full_bar_threshold::Int=_FULL_BAR_THRESHOLD,
 )
     # ANSI codes
     reset = "\e[0m"
@@ -1196,8 +1206,8 @@ function _format_progress_line(
     yellow = "\e[33m"
     cyan = "\e[36m"
 
-    bar_width = _bar_width(info.total)
-    bar = _progress_bar(info.index, info.total)
+    bar_width = _bar_width(info.total, full_bar_threshold)
+    bar = _progress_bar(info.index, info.total; width=bar_width)
 
     severity = _severity(info.status)
     if severity == 3
@@ -1273,18 +1283,26 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Default progress callback for `on_test_done`. Prints to `stdout`.
+Create a stateful progress callback for `on_test_done`. Prints to `io`.
 
 # Arguments
-- `info::TestRunInfo`: Test execution information to display
+- `io::IO`: Output stream for progress display
+- `total::Int`: Total number of tests
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
+
+# Returns
+- `Function`: Callback function that accepts `TestRunInfo` and updates progress display
 
 # Notes
 - This is the default callback used when `progress=true` and no custom `on_test_done` is provided
-- Outputs a formatted progress line to `stdout` with colors and timing information
+- The returned callback maintains state (history, max_severity) across invocations
+- Outputs a formatted progress line to `io` with colors and timing information
 
 # Example
 ```julia-repl
 julia> using CTBase.TestRunner
+
+julia> cb = TestRunner._make_default_on_test_done(stdout, 10)
 
 julia> info = TestRunner.TestRunInfo(
            :test_example, 
@@ -1296,12 +1314,12 @@ julia> info = TestRunner.TestRunInfo(
            1.23
        );
 
-julia> TestRunner._default_on_test_done(info)
+julia> cb(info)
 [█████░░░░░░░░░░░] ✓ [05/10] test_example (1.2s)
 ```
 """
-function _make_default_on_test_done(io::IO, total::Int)
-    history = total <= _FULL_BAR_THRESHOLD ? fill(0, total) : Int[]
+function _make_default_on_test_done(io::IO, total::Int, full_bar_threshold::Int=_FULL_BAR_THRESHOLD)
+    history = total <= full_bar_threshold ? fill(0, total) : Int[]
     max_severity = Ref{Int}(0)
 
     function update(info::TestRunInfo)
@@ -1315,6 +1333,7 @@ function _make_default_on_test_done(io::IO, total::Int)
             info;
             history=!isempty(history) ? history : nothing,
             cumulative_severity=max_severity[],
+            full_bar_threshold=full_bar_threshold,
         )
         return nothing
     end
