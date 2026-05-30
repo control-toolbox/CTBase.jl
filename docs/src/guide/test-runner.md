@@ -165,6 +165,36 @@ CTBase.run_tests(; args=String.(ARGS), full_bar_threshold=30)
 CTBase.run_tests(; args=String.(ARGS), full_bar_threshold=100)
 ```
 
+### Cursor-style display
+
+The progress bar uses a **cursor-style** display for a lighter visual:
+
+- **Full-resolution mode** (total ≤ threshold): Only the current test position is filled for successes. Failures and skips persist at their original positions. This creates a cursor-like effect where past successes are ephemeral but errors remain visible.
+
+Example with 6 tests (2 success, 2 failure, 2 success):
+
+```text
+[█░░░░░] ✓ [01/06] suite/test1.jl (0.2s)
+[░█░░░░] ✓ [02/06] suite/test2.jl (0.7s)
+[░░▚░░░] ✗ [03/06] suite/test3.jl FAILED, (1.2s)
+[░░▚▚░░] ✗ [04/06] suite/test4.jl FAILED, (0.5s)
+[░░▚▚█░] ✓ [05/06] suite/test5.jl (0.3s)
+[░░▚▚░█] ✓ [06/06] suite/test6.jl (0.4s)
+```
+
+- **Compressed mode** (total > threshold): A single cursor block advances without repetition. The cursor shows the current test's status (█ for success, ▚ for failure, ┆ for skip).
+
+Example with 60 tests and threshold 10:
+
+```text
+[█░░░░░░░░] ✓ [01/60] suite/test1.jl (0.2s)
+[░█░░░░░░░] ✓ [02/60] suite/test2.jl (0.7s)
+[░░▚░░░░░░] ✗ [03/60] suite/test3.jl FAILED, (1.2s)
+[░░░▚░░░░░] ✗ [04/60] suite/test4.jl FAILED, (0.5s)
+[░░░░█░░░░] ✓ [05/60] suite/test5.jl (0.3s)
+[░░░░░█░░░] ✓ [06/60] suite/test6.jl (0.4s)
+```
+
 ### Failure detection
 
 The progress bar correctly detects **both** types of failures:

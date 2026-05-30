@@ -5,6 +5,22 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.13-beta] - 2026-05-30
+
+### ✨ New Features
+
+#### **TestRunner Cursor-Style Progress Bar**
+
+- **Cursor-style display**: Progress bar now uses cursor-style where only the current test position is filled for successes
+- **Persistent error markers**: Failures and skips remain visible at their original positions while successes are ephemeral
+- **Lighter visual**: Creates a cleaner, less cluttered display that's easier to scan
+- **Compressed mode**: Single cursor block advances without repetition in compressed mode
+- **Documentation updated**: TestRunner guide updated with cursor-style examples
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.18.13-beta for development.
+
 ## [0.18.12-beta] - 2026-05-30
 
 ### ✨ New Features

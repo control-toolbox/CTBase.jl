@@ -104,7 +104,7 @@ Run tests with configurable file/function name builders and optional available t
 - `on_test_start::Union{Function,Nothing}`: Callback before eval (default: `nothing`)
 - `on_test_done::Union{Function,Nothing}`: Callback after eval (default: `nothing`)
 - `progress::Bool`: Show built-in progress bar (default: `true`)
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Returns
 - `Nothing`: Tests are executed via side effects
@@ -970,13 +970,13 @@ end
 
 Internal constant defining the maximum number of tests for full-resolution progress bars.
 
-When the total number of tests is ≤ `_FULL_BAR_THRESHOLD` (50), the progress bar displays
+When the total number of tests is ≤ `_FULL_BAR_THRESHOLD` (100), the progress bar displays
 one character per test with cumulative coloring (each test gets its own colored block).
 Beyond this threshold, the bar switches to compressed mode with uniform coloring.
 
 This threshold balances visual clarity with terminal width constraints.
 """
-const _FULL_BAR_THRESHOLD = 50
+const _FULL_BAR_THRESHOLD = 100
 
 """
 $(TYPEDSIGNATURES)
@@ -1032,7 +1032,7 @@ Compute the progress bar character width based on the number of tests.
 
 # Arguments
 - `total::Int`: Total number of tests
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Returns
 - `Int`: Character width for the progress bar (0 if `total ≤ 0`)
@@ -1163,12 +1163,13 @@ Uses ANSI colors: green for success, red for errors, yellow for skipped.
 - `info::TestRunInfo`: Test execution information
 - `history::Union{Vector{Int},Nothing}`: Optional history array for per-test coloring (default: `nothing`)
 - `cumulative_severity::Union{Int,Nothing}`: Optional cumulative severity for coloring (default: `nothing`)
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Notes
 - Format: `[progress_bar] symbol [index/total] spec (time) status`
 - Colors: green for success, red for errors, yellow for skipped
 - Time is displayed with one decimal place when available
+- **Cursor-style display**: In full-resolution mode (total ≤ threshold), only the current test position is filled for successes, while failures and skips persist at their positions. This creates a lighter, cursor-like visual where past successes are ephemeral.
 
 # Example
 ```julia-repl
@@ -1252,9 +1253,17 @@ function _format_progress_line(
             sev = history[i]
             if sev <= 0
                 push!(blocks, "$(dim)░$(reset)")
-            else
+            elseif sev >= 2
+                # Failures and skips persist at their positions
                 glyph = _block_char_for_severity(sev)
                 push!(blocks, "$( _color_for_severity(sev) )$(glyph)$(reset)")
+            elseif i == info.index
+                # Current test (success) is shown
+                glyph = _block_char_for_severity(sev)
+                push!(blocks, "$( _color_for_severity(sev) )$(glyph)$(reset)")
+            else
+                # Past successes are cleared (ephemeral cursor style)
+                push!(blocks, "$(dim)░$(reset)")
             end
         end
         # Reapply bracket_color for closing bracket so block-local resets do not strip it
@@ -1263,11 +1272,14 @@ function _format_progress_line(
     elseif !isempty(bar)
         bracket_sev = cumulative_severity === nothing ? severity : cumulative_severity
         bracket_color = bracket_color_from(bracket_sev)
-        # Rebuild inner bar with severity-specific glyphs for clarity (color + shape)
+        # Use single cursor style instead of repeating filled blocks
         filled_char = _block_char_for_severity(severity)
         w = bar_width
-        filled = clamp(round(Int, info.index / info.total * w), 0, w)
-        inner = repeat(filled_char, filled) * repeat("░", w - filled)
+        cursor_pos = clamp(round(Int, info.index / info.total * w), 1, w)
+        # Build bar with ░ everywhere except at cursor position
+        inner_chars = fill("░", w)
+        inner_chars[cursor_pos] = filled_char
+        inner = join(inner_chars)
         print(
             io,
             "$(bracket_color)[$(reset)$(color)$(inner)$(reset)$(bracket_color)]$(reset) ",
@@ -1288,7 +1300,7 @@ Create a stateful progress callback for `on_test_done`. Prints to `io`.
 # Arguments
 - `io::IO`: Output stream for progress display
 - `total::Int`: Total number of tests
-- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `50`)
+- `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Returns
 - `Function`: Callback function that accepts `TestRunInfo` and updates progress display
