@@ -2,6 +2,10 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.18.14-beta)
+
+- **TestRunner progress display refactoring**: Renamed `progress` parameter to `show_progress_line` for clarity, and added new `show_progress_bar` parameter for granular control. Users with `progress=false` should change to `show_progress_line=false`. Users with `progress=true` (default) can keep using defaults or set `show_progress_line=true, show_progress_bar=false` for minimal display without the graphical bar. No breaking changes; purely parameter rename with backward-compatible defaults. Migration: replace `progress=` with `show_progress_line=`.
+
 ## Non-breaking note (0.18.13-beta)
 
 - **TestRunner cursor-style progress bar**: Changed progress bar display to use cursor-style where only the current test position is filled for successes, while failures and skips persist at their positions. This creates a lighter visual with ephemeral successes but persistent error markers. No API changes; purely visual improvement. No migration required.

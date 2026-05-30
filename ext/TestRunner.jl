@@ -103,7 +103,8 @@ Run tests with configurable file/function name builders and optional available t
 - `test_dir::String`: Root directory for test files (default: `joinpath(pwd(), "test")`)
 - `on_test_start::Union{Function,Nothing}`: Callback before eval (default: `nothing`)
 - `on_test_done::Union{Function,Nothing}`: Callback after eval (default: `nothing`)
-- `progress::Bool`: Show built-in progress bar (default: `true`)
+- `show_progress_line::Bool`: Show progress line with symbol, index, spec, and time (default: `true`)
+- `show_progress_bar::Bool`: Show graphical progress bar `[█░░░...]` within the line (default: `true`)
 - `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
 
 # Returns
@@ -113,7 +114,8 @@ Run tests with configurable file/function name builders and optional available t
 - Test selection is driven by `args` (coverage flags are automatically filtered out)
 - Selection arguments are interpreted as glob patterns and matched against both test names and filenames
 - Arguments starting with `test/` are automatically stripped for convenience
-- When `on_test_done` is provided, the built-in progress bar is disabled unless `progress=true`
+- When `on_test_done` is provided, the built-in progress line is disabled unless `show_progress_line=true`
+- When `show_progress_line=true` but `show_progress_bar=false`, displays minimal output: `✓ [01/76] suite/test.jl (0.2s)` without the graphical bar
 
 # Example
 ```julia-repl
@@ -145,7 +147,8 @@ function CTBase.run_tests(
     test_dir::String=joinpath(pwd(), "test"),
     on_test_start::Union{Function,Nothing}=nothing,
     on_test_done::Union{Function,Nothing}=nothing,
-    progress::Bool=true,
+    show_progress_line::Bool=true,
+    show_progress_bar::Bool=true,
     full_bar_threshold::Int=_FULL_BAR_THRESHOLD,
 )
     # Guard: a subdirectory named "test" inside test_dir would conflict with
@@ -180,8 +183,8 @@ function CTBase.run_tests(
     # Wire up default progress callback when no custom on_test_done is provided
     effective_on_test_done = if on_test_done !== nothing
         on_test_done
-    elseif progress
-        _make_default_on_test_done(stdout, total, full_bar_threshold)
+    elseif show_progress_line
+        _make_default_on_test_done(stdout, total, full_bar_threshold, show_progress_bar)
     else
         nothing
     end
@@ -1164,6 +1167,7 @@ Uses ANSI colors: green for success, red for errors, yellow for skipped.
 - `history::Union{Vector{Int},Nothing}`: Optional history array for per-test coloring (default: `nothing`)
 - `cumulative_severity::Union{Int,Nothing}`: Optional cumulative severity for coloring (default: `nothing`)
 - `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
+- `show_progress_bar::Bool`: Show graphical progress bar `[█░░░...]` (default: `true`)
 
 # Notes
 - Format: `[progress_bar] symbol [index/total] spec (time) status`
@@ -1197,6 +1201,7 @@ function _format_progress_line(
     history::Union{Vector{Int},Nothing}=nothing,
     cumulative_severity::Union{Int,Nothing}=nothing,
     full_bar_threshold::Int=_FULL_BAR_THRESHOLD,
+    show_progress_bar::Bool=true,
 )
     # ANSI codes
     reset = "\e[0m"
@@ -1244,7 +1249,7 @@ function _format_progress_line(
 
     has_history =
         history !== nothing && length(history) == info.total && bar_width == info.total
-    if has_history
+    if show_progress_bar && has_history
         # Build colored bar per block using history; brackets colored by max severity seen
         max_sev = maximum(history)
         bracket_color = bracket_color_from(max_sev)
@@ -1269,7 +1274,7 @@ function _format_progress_line(
         # Reapply bracket_color for closing bracket so block-local resets do not strip it
         bar = "$(bracket_color)[" * join(blocks) * "$(bracket_color)]$(reset)"
         print(io, "$(bar) ")
-    elseif !isempty(bar)
+    elseif show_progress_bar && !isempty(bar)
         bracket_sev = cumulative_severity === nothing ? severity : cumulative_severity
         bracket_color = bracket_color_from(bracket_sev)
         # Use single cursor style instead of repeating filled blocks
@@ -1301,14 +1306,16 @@ Create a stateful progress callback for `on_test_done`. Prints to `io`.
 - `io::IO`: Output stream for progress display
 - `total::Int`: Total number of tests
 - `full_bar_threshold::Int`: Maximum tests for full-resolution progress bar (default: `100`)
+- `show_progress_bar::Bool`: Show graphical progress bar `[█░░░...]` (default: `true`)
 
 # Returns
 - `Function`: Callback function that accepts `TestRunInfo` and updates progress display
 
 # Notes
-- This is the default callback used when `progress=true` and no custom `on_test_done` is provided
+- This is the default callback used when `show_progress_line=true` and no custom `on_test_done` is provided
 - The returned callback maintains state (history, max_severity) across invocations
 - Outputs a formatted progress line to `io` with colors and timing information
+- When `show_progress_bar=false`, displays minimal output without the graphical bar
 
 # Example
 ```julia-repl
@@ -1330,7 +1337,7 @@ julia> cb(info)
 [█████░░░░░░░░░░░] ✓ [05/10] test_example (1.2s)
 ```
 """
-function _make_default_on_test_done(io::IO, total::Int, full_bar_threshold::Int=_FULL_BAR_THRESHOLD)
+function _make_default_on_test_done(io::IO, total::Int, full_bar_threshold::Int=_FULL_BAR_THRESHOLD, show_progress_bar::Bool=true)
     history = total <= full_bar_threshold ? fill(0, total) : Int[]
     max_severity = Ref{Int}(0)
 
@@ -1346,6 +1353,7 @@ function _make_default_on_test_done(io::IO, total::Int, full_bar_threshold::Int=
             history=!isempty(history) ? history : nothing,
             cumulative_severity=max_severity[],
             full_bar_threshold=full_bar_threshold,
+            show_progress_bar=show_progress_bar,
         )
         return nothing
     end

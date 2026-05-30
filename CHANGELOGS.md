@@ -5,6 +5,22 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.14-beta] - 2026-05-30
+
+### ✨ New Features
+
+#### **TestRunner Progress Display Refactoring**
+
+- **Parameter rename**: Renamed `progress` to `show_progress_line` for clearer semantics
+- **Granular control**: Added `show_progress_bar` parameter to control only the graphical bar `[█░░░...]`
+- **Minimal display**: Users can now set `show_progress_line=true, show_progress_bar=false` to display `✓ [01/76] suite/test.jl (0.2s)` without the graphical bar
+- **Documentation updated**: TestRunner guide updated with new parameter names and examples
+- **Tests updated**: Added tests for `show_progress_bar=false` behavior
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.18.14-beta for development.
+
 ## [0.18.13-beta] - 2026-05-30
 
 ### ✨ New Features

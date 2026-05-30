@@ -586,6 +586,34 @@ function test_testrunner()
             @test occursin("\e[33m[", output) ||
                 occursin("\e[33m[", replace(output, "\e[0m"=>""))
         end
+
+        @testset "_format_progress_line show_progress_bar=false" begin
+            fmt = TestRunner._format_progress_line
+            info = TestRunner.TestRunInfo(
+                :test_example,
+                "/tmp/test.jl",
+                :test_example,
+                5,
+                10,
+                :post_eval,
+                nothing,
+                1.2,
+            )
+            buf = IOBuffer()
+            fmt(buf, info; show_progress_bar=false)
+            output = String(take!(buf))
+            # Bar glyphs should not be present
+            @test !occursin("█", output)
+            @test !occursin("░", output)
+            # No bar pattern like [█ or [░
+            @test !occursin("[█", output)
+            @test !occursin("[░", output)
+            # Rest of line should be present
+            @test contains(output, "✓")
+            @test contains(output, "[05/10]")
+            @test contains(output, "test_example")
+            @test contains(output, "(1.2s)")
+        end
     end
 
     # ============================================================================

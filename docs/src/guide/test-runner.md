@@ -73,7 +73,8 @@ CTBase.run_tests(;
 | `test_dir` | `String` | `joinpath(pwd(), "test")` | Root directory for test files |
 | `on_test_start` | `Function` or `nothing` | `nothing` | Callback before eval (see [Callbacks](@ref)) |
 | `on_test_done` | `Function` or `nothing` | `nothing` | Callback after eval (see [Callbacks](@ref)) |
-| `progress` | `Bool` | `true` | Show built-in progress bar. Ignored when `on_test_done` is provided |
+| `show_progress_line` | `Bool` | `true` | Show progress line with symbol, index, spec, and time. Ignored when `on_test_done` is provided |
+| `show_progress_bar` | `Bool` | `true` | Show graphical progress bar `[█░░░...]` within the line |
 | `full_bar_threshold` | `Int` | `100` | Maximum tests for full-resolution progress bar (see [Progress Bar](@ref)) |
 
 ## Writing Test Files
@@ -202,15 +203,22 @@ The progress bar correctly detects **both** types of failures:
 - **Exceptions**: errors thrown during test execution (caught via `try/catch`).
 - **`@test` assertion failures**: detected by scanning the enclosing `DefaultTestSet` results before and after eval. This is more reliable than checking `anynonpass`, which is only updated when a testset finishes.
 
-### Disabling the progress bar
+### Disabling the progress display
 
-Set `progress=false` to disable the built-in progress display:
+Set `show_progress_line=false` to disable the entire progress line:
 
 ```julia
-CTBase.run_tests(; args=String.(ARGS), progress=false)
+CTBase.run_tests(; args=String.(ARGS), show_progress_line=false)
 ```
 
-The progress bar is also automatically disabled when a custom `on_test_done` callback is provided.
+To display minimal output without the graphical bar, set `show_progress_line=true` and `show_progress_bar=false`:
+
+```julia
+CTBase.run_tests(; args=String.(ARGS), show_progress_line=true, show_progress_bar=false)
+# Output: ✓ [01/76] suite/test.jl (0.2s)
+```
+
+The progress line is also automatically disabled when a custom `on_test_done` callback is provided.
 
 ## Callbacks
 
