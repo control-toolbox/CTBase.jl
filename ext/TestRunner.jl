@@ -1337,7 +1337,12 @@ julia> cb(info)
 [█████░░░░░░░░░░░] ✓ [05/10] test_example (1.2s)
 ```
 """
-function _make_default_on_test_done(io::IO, total::Int, progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD, show_progress_bar::Bool=true)
+function _make_default_on_test_done(
+    io::IO,
+    total::Int,
+    progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD,
+    show_progress_bar::Bool=true,
+)
     history = total <= progress_bar_threshold ? fill(0, total) : Int[]
     max_severity = Ref{Int}(0)
 
