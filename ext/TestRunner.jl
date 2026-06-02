@@ -1355,7 +1355,7 @@ function _make_default_on_test_done(
         _format_progress_line(
             io,
             info;
-            history=!isempty(history) ? history : nothing,
+            history=(!isempty(history) ? history : nothing),
             cumulative_severity=max_severity[],
             progress_bar_threshold=progress_bar_threshold,
             show_progress_bar=show_progress_bar,
