@@ -9,7 +9,7 @@ and extension functions.
 """
 module Extensions
 
-using DocStringExtensions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using ..Exceptions
 
 # --------------------------------------------------------------------------------------------------
