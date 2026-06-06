@@ -13,14 +13,14 @@ julia> CTBase.DescVarArg
 Vararg{Symbol}
 ```
 
-See also: `Description`
+See also: [`CTBase.Descriptions.Description`](@ref)
 """
 const DescVarArg = Vararg{Symbol}
 
 """
 $(TYPEDEF)
 
-A description is a tuple of symbols, used to declarative encode algorithms or configurations.
+A description is a tuple of symbols, used to declaratively encode algorithms or configurations.
 
 # Example
 `Base.show` is overloaded for descriptions, so tuples of descriptions are
@@ -34,6 +34,6 @@ julia> display(((:a, :b), (:b, :c)))
 (:b, :c)
 ```
 
-See also: `DescVarArg`
+See also: [`CTBase.Descriptions.DescVarArg`](@ref)
 """
 const Description = Tuple{DescVarArg}

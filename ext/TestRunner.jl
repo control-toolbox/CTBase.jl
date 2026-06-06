@@ -30,7 +30,7 @@ and internal test identifiers.
 - String specs are treated as relative paths from `test_dir`
 - Glob patterns are supported for String specs
 
-See also: `CTBase.run_tests`, `TestRunner._select_tests`
+See also: [`CTBase.run_tests`](@ref)
 """
 const TestSpec = Union{Symbol,String}
 
@@ -132,7 +132,7 @@ julia> CTBase.run_tests(;
        )
 ```
 
-See also: `TestRunner.TestRunInfo`, `TestRunner._parse_test_args`, `TestRunner._select_tests`
+See also: [`CTBase.run_tests`](@ref), [`TestRunner.TestRunInfo`](@ref)
 """
 function CTBase.run_tests(
     ::CTBase.Extensions.TestRunnerTag;
@@ -392,7 +392,7 @@ function _glob_to_regex(pattern::AbstractString)
 end
 
 """
-    _ensure_jl(filename::AbstractString) -> String
+$(TYPEDSIGNATURES)
 
 Ensure that a filename ends with `.jl` extension.
 
@@ -419,7 +419,7 @@ function _ensure_jl(filename::AbstractString)
 end
 
 """
-    _builder_to_string(x) -> String
+$(TYPEDSIGNATURES)
 
 Convert a Symbol or String to String.
 
@@ -446,7 +446,7 @@ function _builder_to_string(x)
 end
 
 """
-    _normalize_available_tests(available_tests) -> Vector{TestSpec}
+$(TYPEDSIGNATURES)
 
 Normalize and validate the `available_tests` argument.
 
@@ -499,7 +499,7 @@ function _normalize_available_tests(available_tests)
 end
 
 """
-    _collect_test_files_recursive(test_dir::AbstractString) -> Vector{String}
+$(TYPEDSIGNATURES)
 
 Recursively collect all `.jl` files in `test_dir` (excluding `runtests.jl`).
 
@@ -539,7 +539,7 @@ function _collect_test_files_recursive(test_dir::AbstractString)
 end
 
 """
-    _find_symbol_test_file_rel(name::Symbol, filename_builder::Function; test_dir::AbstractString) -> Union{String,Nothing}
+$(TYPEDSIGNATURES)
 
 Find the relative path to a test file for a given symbol name.
 
@@ -562,7 +562,7 @@ different subdirectories), prefers the shallowest path.
 - Prefers shallower paths when multiple matches exist
 - Returns the exact relative path if found
 
-See also: `TestRunner._collect_test_files_recursive`, `TestRunner._ensure_jl`
+See also: [`TestRunner._collect_test_files_recursive`](@ref), [`TestRunner._ensure_jl`](@ref)
 """
 function _find_symbol_test_file_rel(
     name::Symbol, filename_builder::Function; test_dir::AbstractString

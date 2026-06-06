@@ -149,6 +149,17 @@ Concrete tag type used to dispatch to the `CoveragePostprocessing` extension.
 
 Instances of this type are passed to `postprocess_coverage` to enable
 coverage post-processing when the extension is available.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> CTBase.CoveragePostprocessingTag() isa CTBase.AbstractCoveragePostprocessingTag
+true
+```
+
+See also: [`CTBase.Extensions.AbstractCoveragePostprocessingTag`](@ref)
 """
 struct CoveragePostprocessingTag <: AbstractCoveragePostprocessingTag end
 
@@ -231,6 +242,17 @@ Abstract supertype for tags used to select a particular implementation of
 
 Concrete subtypes identify a specific backend that provides the actual test
 runner logic.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> CTBase.TestRunnerTag() isa CTBase.AbstractTestRunnerTag
+true
+```
+
+See also: [`CTBase.Extensions.TestRunnerTag`](@ref)
 """
 abstract type AbstractTestRunnerTag end
 
@@ -241,6 +263,17 @@ Concrete tag type used to dispatch to the `TestRunner` extension.
 
 Instances of this type are passed to `run_tests` to enable the
 extension-based test runner when the extension is available.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> tag = CTBase.TestRunnerTag()
+CTBase.TestRunnerTag()
+```
+
+See also: [`CTBase.Extensions.AbstractTestRunnerTag`](@ref)
 """
 struct TestRunnerTag <: AbstractTestRunnerTag end
 

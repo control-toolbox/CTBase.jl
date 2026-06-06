@@ -11,10 +11,11 @@ module CoveragePostprocessing
 
 using CTBase: CTBase
 using Coverage: Coverage
+import DocStringExtensions: TYPEDSIGNATURES
 
 # Main entry point for coverage post-processing
 """
-    CTBase.postprocess_coverage(::CTBase.Extensions.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
+$(TYPEDSIGNATURES)
 
 Post-process coverage artifacts produced by `Pkg.test(; coverage=true)`.
 
@@ -42,7 +43,7 @@ This implementation:
 
 This function **creates/removes/moves files and directories** under `root_dir`.
 
-# Usage sketch (non-executed)
+# Example
 
 ```julia
 using CTBase
