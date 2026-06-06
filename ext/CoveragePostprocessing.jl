@@ -10,7 +10,7 @@ Most functions in this module have filesystem side effects.
 module CoveragePostprocessing
 
 using CTBase: CTBase
-using Coverage
+using Coverage: Coverage
 
 # Main entry point for coverage post-processing
 """
@@ -218,14 +218,8 @@ function _collect_and_move_cov_files!(source_dirs, dest_dir)
                 # But let's stick to the plan: just recursive collection.
 
                 src = joinpath(root, f)
-                dest = joinpath(dest_dir, f) # Wait, this might fail if f is just filename.
-
-                # The issue with joinpath(dest_dir, f) if f is just a filename is that it puts everything in root of dest_dir.
-                # If f comes from walkdir's `files`, it is just the filename.
-                # So `src` is correct. `dest` puts it in `coverage/cov/filename.cov`. 
-                # This matches previous behavior, just expanded to subdirs.
-
-                dest = joinpath(dest_dir, f)
+                flat = replace(relpath(src, dir), r"[/\\]" => "_")
+                dest = joinpath(dest_dir, flat)
                 mv(src, dest; force=true)
                 push!(moved, dest)
             end
@@ -347,12 +341,8 @@ function _generate_coverage_reports!(
 
     # Helper to make paths relative to root_dir
     function relative_path(path, root)
-        if startswith(path, root)
-            relpath = path[(length(root) + 1):end]
-            # Remove leading slash if present
-            return startswith(relpath, "/") ? relpath[2:end] : relpath
-        end
-        return path
+        startswith(path, root) || return path
+        return relpath(path, root)
     end
 
     function write_report(io)

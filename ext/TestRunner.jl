@@ -10,7 +10,7 @@ running testsets).
 module TestRunner
 
 using CTBase: CTBase
-using DocStringExtensions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using Test: Test, @testset
 
 """
@@ -327,7 +327,7 @@ julia> TestRunner._normalize_selections(
 ```
 """
 function _normalize_selections(selections::Vector{String}, candidates::Vector{<:TestSpec})
-    candidate_strs = [c isa Symbol ? String(c) : String(c) for c in candidates]
+    candidate_strs = [String(c) for c in candidates]
     normalized = String[]
     for sel in selections
         # Strip trailing slash(es)
@@ -442,7 +442,7 @@ julia> TestRunner._builder_to_string("utils")
 ```
 """
 function _builder_to_string(x)
-    x isa Symbol ? String(x) : String(x)
+    String(x)
 end
 
 """
