@@ -1,7 +1,5 @@
 # Type definitions for Descriptions module
 
-using DocStringExtensions
-
 """
 $(TYPEDEF)
 

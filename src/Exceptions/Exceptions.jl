@@ -36,8 +36,6 @@ The Exceptions module is organized into thematic files:
 """
 module Exceptions
 
-using CTBase
-
 # Type definitions
 include("types.jl")
 

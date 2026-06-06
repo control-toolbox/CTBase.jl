@@ -233,9 +233,10 @@ function CTBase.automatic_reference_documentation(
 )
     # Validate arguments
     if !public && !private
-        error(
-            "automatic_reference_documentation: both `public` and `private` cannot be false.",
-        )
+        throw(CTBase.Exceptions.IncorrectArgument(
+            "both `public` and `private` cannot be false",
+            context="automatic_reference_documentation",
+        ))
     end
 
     # Parse primary_modules into a Dict{Module, Vector{String}}
@@ -387,9 +388,11 @@ function _parse_primary_modules(primary_modules::Vector)
             files = last(m)
             result[mod] = _normalize_paths(files isa Vector ? files : [files])
         else
-            error(
+            throw(CTBase.Exceptions.IncorrectArgument(
                 "Invalid element in primary_modules: expected Module or Module => files pair",
-            )
+                got=string(typeof(m)),
+                context="_parse_primary_modules",
+            ))
         end
     end
     return result

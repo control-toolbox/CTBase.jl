@@ -16,7 +16,8 @@ julia> using CTBase
 
 julia> try
            throw(CTBase.Exceptions.IncorrectArgument("invalid input"))
-       catch e::CTBase.Exceptions.CTException
+       catch e
+           e isa CTBase.Exceptions.CTException || rethrow()
            println("Caught a domain-specific exception: ", e)
        end
 Caught a domain-specific exception: IncorrectArgument: invalid input
@@ -31,7 +32,8 @@ catching all exceptions of this family via `catch e::CTException`.
 try
     # code that may throw CTBase exceptions
     risky_operation()
-catch e::CTBase.Exceptions.CTException
+catch e
+    e isa CTBase.Exceptions.CTException || rethrow()
     # handle all CTBase domain errors uniformly
     handle_error(e)
 end
