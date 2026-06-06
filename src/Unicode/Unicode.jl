@@ -8,7 +8,7 @@ and superscript characters, useful for mathematical notation and display.
 """
 module Unicode
 
-using DocStringExtensions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using ..Exceptions
 
 """

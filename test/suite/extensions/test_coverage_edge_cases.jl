@@ -103,7 +103,6 @@ function test_coverage_edge_cases()
                     err = try
                         TR._run_single_test(
                             :phantom_test;
-                            available_tests=Symbol[],
                             filename_builder=identity,
                             funcname_builder=identity,
                             eval_mode=false,
@@ -114,8 +113,7 @@ function test_coverage_edge_cases()
                         e
                     end
 
-                    @test err isa ErrorException
-                    @test occursin("Test file", err.msg)
+                    @test err isa CTBase.Exceptions.IncorrectArgument
                     @test occursin("not found", err.msg)
 
                 finally

@@ -1,18 +1,22 @@
+```@meta
+CurrentModule = CTBase
+```
+
 # Error Handling and CTBase Exceptions
 
 CTBase defines a small hierarchy of domain-specific exceptions to make error
 handling explicit and consistent across the control-toolbox ecosystem.
 
-All custom exceptions inherit from `CTBase.CTException`:
+All custom exceptions inherit from [`CTBase.Exceptions.CTException`](@ref):
 
 ```julia
-abstract type CTBase.CTException <: Exception end
+abstract type CTBase.Exceptions.CTException <: Exception end
 ```
 
 ## Exception Hierarchy
 
 ```text
-CTException (abstract)
+CTBase.Exceptions.CTException (abstract)
 ├── IncorrectArgument      # Input validation errors
 ├── PreconditionError      # Order of operations, state validation
 ├── NotImplemented         # Unimplemented interface methods
@@ -30,7 +34,7 @@ You should generally catch exceptions like this:
 try
     # call into CTBase or a package built on top of it
 catch e
-    if e isa CTBase.CTException
+    if e isa CTBase.Exceptions.CTException
         # handle CTBase domain errors in a uniform way
         @warn "CTBase error" exception=(e, catch_backtrace())
     else
@@ -48,7 +52,7 @@ giving you a single place to handle all CTBase-specific problems.
 ### [IncorrectArgument](@id incorrect-argument-tutorial)
 
 ```julia
-CTBase.IncorrectArgument <: CTBase.CTException
+CTBase.Exceptions.IncorrectArgument <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Thrown when an individual argument is invalid or violates a constraint.
@@ -67,15 +71,15 @@ Adding a duplicate description:
 
 ```@repl
 using CTBase
-algorithms = CTBase.add((), (:a, :b))
-CTBase.add(algorithms, (:a, :b))  # Error: duplicate
+algorithms = CTBase.Descriptions.add((), (:a, :b))
+CTBase.Descriptions.add(algorithms, (:a, :b))  # Error: duplicate
 ```
 
 Using invalid indices for the Unicode helpers:
 
 ```@repl
 using CTBase
-CTBase.ctindice(-1)  # Error: must be between 0 and 9
+CTBase.Unicode.ctindice(-1)  # Error: must be between 0 and 9
 ```
 
 **Use this exception** whenever *one input value* is outside the allowed domain
@@ -84,7 +88,7 @@ CTBase.ctindice(-1)  # Error: must be between 0 and 9
 ### [AmbiguousDescription](@id ambiguous-description-tutorial)
 
 ```julia
-CTBase.AmbiguousDescription <: CTBase.CTException
+CTBase.Exceptions.AmbiguousDescription <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Thrown when a description (a tuple of `Symbol`s) cannot be matched to any known
@@ -102,7 +106,7 @@ valid description.
 ```@repl
 using CTBase
 D = ((:a, :b), (:a, :b, :c), (:b, :c))
-CTBase.complete(:f; descriptions=D)  # Error: no match found
+CTBase.Descriptions.complete(:f; descriptions=D)  # Error: no match found
 ```
 
 **Use this exception** when *the high-level choice of description itself* is wrong
@@ -113,7 +117,7 @@ or ambiguous and there is no sensible default.
 ### [PreconditionError](@id precondition-error-tutorial)
 
 ```julia
-CTBase.PreconditionError <: CTBase.CTException
+CTBase.Exceptions.PreconditionError <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Thrown when a function is called in the wrong order or when the system is in an invalid state.
@@ -132,7 +136,7 @@ System initialization order:
 ```julia
 function configure!(state::SystemState, config::Dict)
     if !state.initialized
-        throw(CTBase.PreconditionError(
+        throw(CTBase.Exceptions.PreconditionError(
             "System must be initialized before configuration",
             reason="initialize! not called yet",
             suggestion="Call initialize!(state) before configure!",
@@ -148,7 +152,7 @@ State validation:
 ```julia
 function dynamics!(ocp::PreModel, f::Function)
     if !__is_state_set(ocp)
-        throw(CTBase.PreconditionError(
+        throw(CTBase.Exceptions.PreconditionError(
             "State must be set before defining dynamics",
             reason="state has not been defined yet",
             suggestion="Call state!(ocp, dimension) before dynamics!",
@@ -168,15 +172,15 @@ end
 
 **Distinction from `IncorrectArgument`**:
 
-- `IncorrectArgument`: The *value* of an argument is wrong
-- `PreconditionError`: The *timing* or *state* is wrong
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): The *value* of an argument is wrong
+- [`CTBase.Exceptions.PreconditionError`](@ref): The *timing* or *state* is wrong
 
 ## Implementation Exceptions
 
 ### [NotImplemented](@id not-implemented-tutorial)
 
 ```julia
-CTBase.NotImplemented <: CTBase.CTException
+CTBase.Exceptions.NotImplemented <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Used to mark interface points that must be implemented by concrete subtypes.
@@ -197,7 +201,7 @@ The typical pattern is to provide a method on an abstract type that throws
 abstract type MyAbstractAlgorithm end
 
 function run!(algo::MyAbstractAlgorithm, state)
-    throw(CTBase.NotImplemented(
+    throw(CTBase.Exceptions.NotImplemented(
         "run! is not implemented for $(typeof(algo))",
         required_method="run!(::$(typeof(algo)), state)",
         suggestion="Implement run! for your algorithm type",
@@ -221,7 +225,7 @@ typed error rather than a generic `error("TODO")`.
 ### [ParsingError](@id parsing-error-tutorial)
 
 ```julia
-CTBase.ParsingError <: CTBase.CTException
+CTBase.Exceptions.ParsingError <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Intended for errors detected during parsing of input structures or DSLs
@@ -238,7 +242,7 @@ CTBase.ParsingError <: CTBase.CTException
 
 ```@repl
 using CTBase
-throw(CTBase.ParsingError(
+throw(CTBase.Exceptions.ParsingError(
     "unexpected token 'end'",
     location="line 42, column 10",
     suggestion="Check for unmatched 'begin' or remove extra 'end'",
@@ -251,7 +255,7 @@ throw(CTBase.ParsingError(
 ### [ExtensionError](@id extension-error-tutorial)
 
 ```julia
-CTBase.ExtensionError <: CTBase.CTException
+CTBase.Exceptions.ExtensionError <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Thrown when a feature requires optional dependencies (weak dependencies) that are not loaded.
@@ -267,7 +271,7 @@ CTBase.ExtensionError <: CTBase.CTException
 
 ```julia
 function plot_results(data)
-    throw(CTBase.ExtensionError(
+    throw(CTBase.Exceptions.ExtensionError(
         :Plots,
         feature="result visualization",
         context="plot_results function"
@@ -294,7 +298,7 @@ The enriched display automatically suggests:
 ### [SolverFailure](@id solver-failure-tutorial)
 
 ```julia
-CTBase.SolverFailure <: CTBase.CTException
+CTBase.Exceptions.SolverFailure <: CTBase.Exceptions.CTException
 ```
 
 **When to use**: Thrown when a solver (ODE integrator, optimization solver, linear solver, etc.)
@@ -313,7 +317,7 @@ fails to complete successfully or returns an error code.
 function integrate_ode(system, integrator)
     result = solve(system, integrator)
     if result.retcode != :Success
-        throw(CTBase.SolverFailure(
+        throw(CTBase.Exceptions.SolverFailure(
             "ODE integration failed",
             retcode=string(result.retcode),
             suggestion="Reduce time step or check initial conditions",
@@ -348,21 +352,21 @@ The enriched display shows the solver-specific return code:
 
 **Distinction from other exceptions**:
 
-- `IncorrectArgument`: The *input* is invalid
-- `PreconditionError`: The *state* or *timing* is wrong
-- `SolverFailure`: The *numerical computation* itself failed
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): The *input* is invalid
+- [`CTBase.Exceptions.PreconditionError`](@ref): The *state* or *timing* is wrong
+- [`CTBase.Exceptions.SolverFailure`](@ref): The *numerical computation* itself failed
 
 ## Quick Reference: Which Exception to Use?
 
 | Situation | Exception | Example |
 |-----------|-----------|---------|
-| Invalid argument value | `IncorrectArgument` | `throw(IncorrectArgument("x must be > 0", got="-5", expected="> 0"))` |
-| Wrong function call order | `PreconditionError` | `throw(PreconditionError("Must initialize before configure"))` |
-| Unimplemented interface | `NotImplemented` | `throw(NotImplemented("run! not implemented for MyType"))` |
-| Parsing error | `ParsingError` | `throw(ParsingError("unexpected token", location="line 10"))` |
-| Ambiguous description | `AmbiguousDescription` | `throw(AmbiguousDescription((:x,), candidates=["(:a,:b)", "(:c,:d)"]))` |
-| Missing optional dependency | `ExtensionError` | `throw(ExtensionError(:Plots, feature="plotting"))` |
-| Solver/integrator failure | `SolverFailure` | `throw(SolverFailure("ODE failed", retcode=":Unstable"))` |
+| Invalid argument value | [`CTBase.Exceptions.IncorrectArgument`](@ref) | `throw(IncorrectArgument("x must be > 0", got="-5", expected="> 0"))` |
+| Wrong function call order | [`CTBase.Exceptions.PreconditionError`](@ref) | `throw(PreconditionError("Must initialize before configure"))` |
+| Unimplemented interface | [`CTBase.Exceptions.NotImplemented`](@ref) | `throw(NotImplemented("run! not implemented for MyType"))` |
+| Parsing error | [`CTBase.Exceptions.ParsingError`](@ref) | `throw(ParsingError("unexpected token", location="line 10"))` |
+| Ambiguous description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) | `throw(AmbiguousDescription((:x,), candidates=["(:a,:b)", "(:c,:d)"]))` |
+| Missing optional dependency | [`CTBase.Exceptions.ExtensionError`](@ref) | `throw(ExtensionError(:Plots, feature="plotting"))` |
+| Solver/integrator failure | [`CTBase.Exceptions.SolverFailure`](@ref) | `throw(SolverFailure("ODE failed", retcode=":Unstable"))` |
 
 ## Enriched Error Display
 

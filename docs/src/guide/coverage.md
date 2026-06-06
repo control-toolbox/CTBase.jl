@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = CTBase
+```
+
 # Coverage Post-processing Guide
 
 This guide explains how to generate human-readable and machine-parseable coverage reports using the **CoveragePostprocessing** extension of `CTBase.jl`.
@@ -25,7 +29,7 @@ To generate actionable coverage reports, we use a dedicated `coverage.jl` script
 pushfirst!(LOAD_PATH, @__DIR__)
 
 using Pkg
-using CTBase # Provides postprocess_coverage
+using CTBase # Provides CTBase.postprocess_coverage
 using Coverage
 
 # This function:
@@ -33,6 +37,7 @@ using Coverage
 # 2. Generates an LCOV file (coverage/lcov.info).
 # 3. Generates a markdown summary (coverage/cov_report.md).
 # 4. Archives used .cov files to keep the directory clean.
+# See: CTBase.postprocess_coverage
 CTBase.postprocess_coverage(; 
     root_dir=dirname(@__DIR__) # Point to the package root
 )

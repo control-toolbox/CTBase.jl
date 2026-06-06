@@ -4,12 +4,16 @@ $(TYPEDSIGNATURES)
 Initialize a new description catalog with a single description `y`.
 
 # Arguments
-- `y::Description`: The initial description to add
+- `y::Description`: The initial description to add.
 
 # Returns
-- `Tuple{Vararg{Description}}`: A tuple containing only the description `y`
+- `Tuple{Vararg{Description}}`: A one-element tuple containing `y`.
+
+# Throws
+- (none)
 
 # Example
+
 ```julia-repl
 julia> using CTBase
 
@@ -22,7 +26,7 @@ julia> descriptions[1]
 (:a,)
 ```
 
-See also: `Description`
+See also: [`CTBase.Descriptions.Description`](@ref), [`CTBase.Descriptions.complete`](@ref), [`CTBase.Descriptions.remove`](@ref)
 """
 add(::Tuple{}, y::Description)::Tuple{Vararg{Description}} = (y,)
 
@@ -59,7 +63,7 @@ ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
        Context: description catalog management
 ```
 
-See also: `complete`, `remove`
+See also: [`CTBase.Descriptions.complete`](@ref), [`CTBase.Descriptions.remove`](@ref)
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
     if y ∈ x

@@ -1,7 +1,7 @@
-using Pkg
-Pkg.activate(@__DIR__)
-Pkg.develop(PackageSpec(; path=joinpath(@__DIR__, "..")))
-Pkg.instantiate()
+# to run the documentation generation:
+# julia --project=. docs/make.jl
+pushfirst!(LOAD_PATH, joinpath(@__DIR__))
+pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
 using Documenter
 using CTBase
@@ -54,7 +54,7 @@ with_api_reference(src_dir) do api_pages
     makedocs(;
         draft=draft,
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
-        warnonly=true,
+        warnonly=[:cross_references],
         sitename="CTBase.jl",
         format=Documenter.HTML(;
             repolink="https://" * repo_url,
@@ -67,6 +67,7 @@ with_api_reference(src_dir) do api_pages
         ),
         pages=[
             "Introduction" => "index.md",
+            "Getting Started" => "getting-started.md",
             "User Guides" => [
                 "Descriptions" => joinpath("guide", "descriptions.md"),
                 "Exceptions" => joinpath("guide", "exceptions.md"),

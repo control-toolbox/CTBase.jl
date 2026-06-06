@@ -2,6 +2,18 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.18.15-beta)
+
+- **Philosophy documentation**: Added comprehensive code philosophy documentation in `dev/philosophy/` covering modules, types/traits, exceptions, docstrings, testing, and documentation standards. No API changes; purely documentation additions.
+- **Agent guides**: Added `AGENTS.md` and `CLAUDE.md` for agent navigation and project context. No API changes; purely documentation additions.
+- **Documentation build improvements**: Changed `docs/make.jl` build method and fixed cross-references. No API changes; purely documentation improvements.
+- **Typed exceptions**: Replaced untyped `error()` and `ArgumentError` with structured CTBase exceptions in `ext/` files. No API changes; internal error handling improvement.
+- **Import qualification**: Qualified imports in submodules (`using DocStringExtensions` → `import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES`). No API changes; internal code quality improvement.
+- **Code cleanup**: Removed dead ternary branches, fixed byte-indexing, removed circular imports. No API changes; internal code quality improvement.
+- **TestRunner auto-discovery fix**: Fixed non-recursive test discovery in auto-discovery mode. No API changes; bug fix.
+- **Docstring refactoring**: Rewrote ExtensionError and SolverFailure docstrings with `$(TYPEDEF)` and standardized sections. No API changes; documentation improvement.
+- **No migration required**: All changes are internal or documentation-only. No breaking changes.
+
 ## Non-breaking note (0.18.14-beta)
 
 - **TestRunner progress display refactoring**: Renamed `progress` parameter to `show_progress_line` for clarity, and added new `show_progress_bar` parameter for granular control. Users with `progress=false` should change to `show_progress_line=false`. Users with `progress=true` (default) can keep using defaults or set `show_progress_line=true, show_progress_bar=false` for minimal display without the graphical bar. No breaking changes; purely parameter rename with backward-compatible defaults. Migration: replace `progress=` with `show_progress_line=`.

@@ -178,36 +178,35 @@ function test_testrunner()
                 # Empty args -> run all .jl files (excluding runtests.jl)
                 # Names derived as basenames
                 sel = select_tests(String[], Symbol[], false, identity; test_dir=temp_dir)
-                @test sort(sel) == [:test_core, :test_utils]
+                @test sort(sel) == ["test_core.jl", "test_utils.jl"]
 
                 # Run all (-a) -> same result
                 sel = select_tests(String[], Symbol[], true, identity; test_dir=temp_dir)
-                @test sort(sel) == [:test_core, :test_utils]
+                @test sort(sel) == ["test_core.jl", "test_utils.jl"]
 
                 # Globbing: select only utils
                 sel = select_tests(
                     ["test_utils"], Symbol[], false, identity; test_dir=temp_dir
                 )
-                @test sel == [:test_utils]
+                @test sel == ["test_utils.jl"]
 
                 # Globbing: pattern matching
                 sel = select_tests(
                     ["test_c*"], Symbol[], false, identity; test_dir=temp_dir
                 )
-                @test sel == [:test_core]
+                @test sel == ["test_core.jl"]
 
-                # Globbing: match filename? 
-                # candidate=:test_core -> filename="test_core.jl"
+                # Globbing: match filename?
                 sel = select_tests(
                     ["test_core_jl"], Symbol[], false, identity; test_dir=temp_dir
                 )
-                # This won't match regex "^test_core_jl$" against "test_core" or "test_core.jl"
+                # "^test_core_jl$" doesn't match "test_core.jl" or "test_core"
                 @test isempty(sel)
 
                 sel = select_tests(
                     ["test_core.jl"], Symbol[], false, identity; test_dir=temp_dir
                 )
-                @test sel == [:test_core]
+                @test sel == ["test_core.jl"]
             end
 
             # ==========================================================
@@ -643,8 +642,8 @@ function test_testrunner()
         end
 
         @testset verbose = VERBOSE showtiming = SHOWTIMING "available_tests input validation" begin
-            @test_throws ArgumentError normalize_available(123)
-            @test_throws ArgumentError normalize_available(Any[1])
+            @test_throws CTBase.Exceptions.IncorrectArgument normalize_available(123)
+            @test_throws CTBase.Exceptions.IncorrectArgument normalize_available(Any[1])
         end
 
         @testset verbose = VERBOSE showtiming = SHOWTIMING "symbol resolution: shallowest match" begin
@@ -680,7 +679,7 @@ function test_testrunner()
                 # Case 2: Auto-discovery order (filesystem order, filtered)
                 # We can't guarantee FS order, so checking set equality
                 sel = select_tests(["z", "a"], Symbol[], false, identity; test_dir=temp_dir)
-                @test Set(sel) == Set([:z, :a])
+                @test Set(sel) == Set(["a.jl", "z.jl"])
             end
         end
 
@@ -703,7 +702,6 @@ function test_testrunner()
             err = try
                 run_single(
                     :nonexistent_file_xyz123;
-                    available_tests=Symbol[],
                     filename_builder=identity,
                     funcname_builder=identity,
                     eval_mode=true,
@@ -713,7 +711,7 @@ function test_testrunner()
             catch e
                 e
             end
-            @test err isa ErrorException
+            @test err isa CTBase.Exceptions.IncorrectArgument
             @test occursin("not found", err.msg)
         end
 
@@ -721,7 +719,6 @@ function test_testrunner()
             err = try
                 run_single(
                     "does_not_exist_abc123.jl";
-                    available_tests=Symbol[],
                     filename_builder=identity,
                     funcname_builder=identity,
                     eval_mode=true,
@@ -731,7 +728,7 @@ function test_testrunner()
             catch e
                 e
             end
-            @test err isa ErrorException
+            @test err isa CTBase.Exceptions.IncorrectArgument
             @test occursin("not found", err.msg)
         end
 
@@ -750,7 +747,6 @@ function test_testrunner()
 
                 run_single(
                     stem;
-                    available_tests=Symbol[],
                     filename_builder=identity,
                     funcname_builder=identity,
                     eval_mode=false,
@@ -776,7 +772,6 @@ function test_testrunner()
 
                 run_single(
                     :sym_noeval;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> "test_" * String(n),
                     eval_mode=false,
@@ -797,7 +792,6 @@ function test_testrunner()
                 err = try
                     run_single(
                         stem;
-                        available_tests=Symbol[],
                         filename_builder=identity,
                         funcname_builder=identity,
                         eval_mode=true,
@@ -808,8 +802,7 @@ function test_testrunner()
                     e
                 end
 
-                @test err isa ErrorException
-                @test occursin("Function", err.msg)
+                @test err isa CTBase.Exceptions.PreconditionError
                 @test occursin("not found", err.msg)
             end
         end
@@ -821,7 +814,6 @@ function test_testrunner()
                 err = try
                     run_single(
                         :foo;
-                        available_tests=Symbol[],
                         filename_builder=n -> "test_" * String(n),
                         funcname_builder=_ -> nothing,
                         eval_mode=true,
@@ -832,8 +824,8 @@ function test_testrunner()
                     e
                 end
 
-                @test err isa ErrorException
-                @test occursin("Inconsistency", err.msg)
+                @test err isa CTBase.Exceptions.PreconditionError
+                @test occursin("eval_mode=true", err.msg)
             end
         end
 
@@ -844,7 +836,6 @@ function test_testrunner()
                 err = try
                     run_single(
                         :bar;
-                        available_tests=Symbol[],
                         filename_builder=n -> "test_" * String(n),
                         funcname_builder=n -> "test_" * String(n),
                         eval_mode=true,
@@ -855,8 +846,7 @@ function test_testrunner()
                     e
                 end
 
-                @test err isa ErrorException
-                @test occursin("Function", err.msg)
+                @test err isa CTBase.Exceptions.PreconditionError
                 @test occursin("not found", err.msg)
             end
         end
@@ -872,7 +862,6 @@ function test_testrunner()
                 # Test with funcname_builder returning String
                 run_single(
                     :baz;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> "test_" * String(n),  # Returns String
                     eval_mode=true,
@@ -883,7 +872,6 @@ function test_testrunner()
                 # Test with funcname_builder returning Symbol
                 run_single(
                     :baz;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),  # Returns Symbol
                     eval_mode=true,
@@ -969,7 +957,6 @@ function test_testrunner()
                 captured = Ref{Any}(nothing)
                 run_single(
                     :cb_start;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),
                     eval_mode=true,
@@ -1002,7 +989,6 @@ function test_testrunner()
                 captured = Ref{Any}(nothing)
                 run_single(
                     :cb_done;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),
                     eval_mode=true,
@@ -1037,7 +1023,6 @@ function test_testrunner()
                 done_captured = Ref{Any}(nothing)
                 run_single(
                     :cb_skip;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),
                     eval_mode=true,
@@ -1067,7 +1052,6 @@ function test_testrunner()
                 done_captured = Ref{Any}(nothing)
                 run_single(
                     :cb_noeval;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),
                     eval_mode=false,
@@ -1096,7 +1080,6 @@ function test_testrunner()
                 err = try
                     run_single(
                         :cb_err;
-                        available_tests=Symbol[],
                         filename_builder=n -> "test_" * String(n),
                         funcname_builder=n -> Symbol(:test_, n),
                         eval_mode=true,
@@ -1135,7 +1118,6 @@ function test_testrunner()
                 done_captured = Ref{Any}(nothing)
                 run_single(
                     :cb_both;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),
                     eval_mode=true,
@@ -1166,7 +1148,6 @@ function test_testrunner()
                 done_captured = Ref{Any}(nothing)
                 run_single(
                     "test_cb_str.jl";
-                    available_tests=Symbol[],
                     filename_builder=identity,
                     funcname_builder=identity,
                     eval_mode=true,
@@ -1194,7 +1175,6 @@ function test_testrunner()
                 # Should not error when callbacks are nothing
                 run_single(
                     :cb_none;
-                    available_tests=Symbol[],
                     filename_builder=n -> "test_" * String(n),
                     funcname_builder=n -> Symbol(:test_, n),
                     eval_mode=true,

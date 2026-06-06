@@ -1,6 +1,11 @@
+```@meta
+CurrentModule = CTBase
+```
+
 # Test Runner Guide
 
-This guide explains how to set up a modular testing infrastructure for Julia packages using the **TestRunner** extension of `CTBase.jl`. This setup enables granular test execution and is friendly both for human developers and AI agents.
+This guide explains how to set up a modular testing infrastructure for Julia packages using the **TestRunner** extension of `CTBase.jl`.
+The entry point is [`CTBase.run_tests`](@ref), activated by loading the `Test` weak dependency. This setup enables granular test execution and is friendly both for human developers and AI agents.
 
 ## Architecture Overview
 
@@ -32,7 +37,7 @@ MyPackage.jl/
 
 ## Setting up `runtests.jl`
 
-The `runtests.jl` file is the entry point for your test suite. By using `CTBase.run_tests`, you enable a powerful mechanism to filter and execute specific tests using command-line arguments. This is crucial for fast iteration cycles.
+The `runtests.jl` file is the entry point for your test suite. By using [`CTBase.run_tests`](@ref), you enable a powerful mechanism to filter and execute specific tests using command-line arguments. This is crucial for fast iteration cycles.
 
 ### Example `test/runtests.jl`
 
@@ -222,7 +227,7 @@ The progress line is also automatically disabled when a custom `on_test_done` ca
 
 ## Callbacks
 
-The `on_test_start` and `on_test_done` callbacks allow custom actions during the test lifecycle. Both receive a `TestRunInfo` struct.
+The `on_test_start` and `on_test_done` callbacks allow custom actions during the test lifecycle. Both receive a [`TestRunner.TestRunInfo`](@ref) struct.
 
 ### `TestRunInfo`
 
@@ -421,5 +426,5 @@ jobs:
 
 ## See Also
 
-- [Exception Handling](exceptions.md): Understanding test failures and exceptions
-- [Coverage Guide](coverage.md): Measuring test coverage
+- [Exceptions guide](exceptions.md) — understanding test failures and exceptions.
+- [Coverage guide](coverage.md) — measuring test coverage.

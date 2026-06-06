@@ -1,10 +1,14 @@
+```@meta
+CurrentModule = CTBase
+```
+
 # API Documentation Guide
 
 This guide explains how to set up automated API reference documentation generation using the **DocumenterReference** extension of `CTBase.jl`. This is particularly useful for maintaining comprehensive and up-to-date API documentation as your codebase evolves.
 
 ## Overview
 
-The `DocumenterReference` extension provides the `CTBase.automatic_reference_documentation()` function, which automatically generates API reference pages from your Julia source code. It:
+The `DocumenterReference` extension provides the [`CTBase.automatic_reference_documentation`](@ref) function, which automatically generates API reference pages from your Julia source code. It:
 
 - Extracts docstrings from your modules
 - Separates public and private APIs

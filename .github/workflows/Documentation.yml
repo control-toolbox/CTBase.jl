@@ -6,7 +6,8 @@ on:
       - main
     tags: '*'
   pull_request:
-  
+    types: [labeled, synchronize, opened, reopened]
+
 jobs:
   call:
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run documentation')

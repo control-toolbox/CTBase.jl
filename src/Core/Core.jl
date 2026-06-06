@@ -8,7 +8,7 @@ ecosystem, including type aliases and internal utilities.
 """
 module Core
 
-using DocStringExtensions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 # --------------------------------------------------------------------------------------------------
 # Type aliases and constants
