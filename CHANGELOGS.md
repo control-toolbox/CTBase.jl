@@ -5,6 +5,71 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.15-beta] - 2026-06-06
+
+### 📚 Documentation
+
+#### **Philosophy Documentation**
+
+- **Added philosophy documentation**: Added comprehensive code philosophy documentation in `dev/philosophy/`
+  - `modules.md`: Submodule organization, imports/qualification, DAG, exports
+  - `types-traits-interfaces.md`: Types vs traits, interfaces/contracts, SOLID/DRY/YAGNI, type stability
+  - `exceptions.md`: The 7 exceptions and the choice rule
+  - `docstrings.md`: Docstring templates, cross-references, example safety
+  - `testing.md`: Categories, fakes/stubs, module + callable function template
+  - `documentation.md`: API generation, guides, draft workflow
+- **Added agent guides**: Added `AGENTS.md` (agent navigation guide) and `CLAUDE.md` (Claude project context)
+- **Added planning template**: Added `dev/planning.md` for implementation plans
+- **Added operational rules**: Added `dev/RULES.md` for MCP, doc build, git, and output capture procedures
+
+#### **Documentation Build Improvements**
+
+- **Faster builds**: Changed `docs/make.jl` from `Pkg.activate/instantiate` to `pushfirst!(LOAD_PATH, ...)` for faster builds
+- **Fixed cross-references**: Fixed unresolved `@ref` links for extension tags (AbstractCoveragePostprocessingTag, TestRunnerTag, AbstractTestRunnerTag)
+- **Added examples**: Added example code blocks for extension tags in docstrings
+- **Refactored docstrings**: Rewrote ExtensionError and SolverFailure docstrings with `$(TYPEDEF)`, standardized sections, and cross-references
+
+### 🐛 Bug Fixes
+
+#### **TestRunner Auto-Discovery**
+
+- **Fixed non-recursive discovery**: Fixed test discovery in auto-discovery mode to use `_collect_test_files_recursive` instead of flat `readdir`
+- **Impact**: Tests in subdirectories were silently ignored in auto-discovery mode; now properly collected recursively
+
+#### **Typed Exceptions (Tenet 6)**
+
+- **Replaced untyped errors**: Replaced all `error()` and `ArgumentError` with structured CTBase exceptions across `ext/` files
+  - `ext/TestRunner.jl`: 7 replacements (IncorrectArgument, PreconditionError)
+  - `ext/CoveragePostprocessing.jl`: 4 replacements (PreconditionError)
+  - `ext/DocumenterReference.jl`: 2 replacements (IncorrectArgument)
+- **Fixed invalid Julia syntax**: Fixed 2 occurrences of `catch e::CTBase.Exceptions.CTException` → `catch e` + `e isa ... || rethrow()`
+- **Fixed docstring output**: Corrected incorrect output in `_progress_bar` docstring (width=20 → 10 blocks)
+- **Updated tests**: Updated 7 test files to reflect new exception types
+
+### 🧹 Code Quality
+
+#### **Import Qualification**
+
+- **Qualified imports**: Changed `using DocStringExtensions` to `import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES` in all submodules
+- **Qualified Coverage import**: Changed `using Coverage` to `using Coverage: Coverage` in CoveragePostprocessing
+- **Removed circular import**: Removed `using CTBase` from src/Exceptions/Exceptions.jl
+- **Removed redundant imports**: Removed redundant `using DocStringExtensions` from src/Descriptions/types.jl
+
+#### **Code Cleanup**
+
+- **Removed dead ternary branches**: Simplified `_normalize_selections` and `_builder_to_string` in TestRunner
+- **Fixed byte-indexing**: Changed path slicing from byte-indexing to `relpath()` in CoveragePostprocessing
+- **Fixed collision risk**: Normalized flat names in cov file flattening to prevent collisions
+
+### 🧪 Testing
+
+- **All tests pass**: 1161/1161 tests pass
+- **Documentation builds**: Documentation builds successfully with no extension errors
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.18.15-beta for development.
+
 ## [0.18.14-beta] - 2026-05-30
 
 ### ✨ New Features
