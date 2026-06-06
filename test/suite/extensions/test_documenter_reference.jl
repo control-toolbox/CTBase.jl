@@ -70,7 +70,7 @@ function test_documenter_reference()
     DR = DocumenterReference
 
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
-        @test_throws ErrorException CTBase.automatic_reference_documentation(
+        @test_throws CTBase.Exceptions.IncorrectArgument CTBase.automatic_reference_documentation(
             CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="ref",
             primary_modules=["invalid_string"], # String is not Module or Pair
@@ -386,7 +386,7 @@ function test_documenter_reference()
         )
 
         # public=false, private=false should error
-        @test_throws ErrorException CTBase.automatic_reference_documentation(
+        @test_throws CTBase.Exceptions.IncorrectArgument CTBase.automatic_reference_documentation(
             CTBase.Extensions.DocumenterReferenceTag();
             subdirectory="ref",
             primary_modules=[DocumenterReferenceTestMod],

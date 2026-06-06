@@ -1,7 +1,14 @@
 """
 $(TYPEDSIGNATURES)
 
-Print a tuple of descriptions, one per line.
+Print a tuple of descriptions, one per line, to `io`.
+
+# Arguments
+- `io::IO`: The output stream.
+- `descriptions::Tuple{Vararg{Description}}`: The tuple of descriptions to display.
+
+# Returns
+- `Nothing`
 
 # Example
 
@@ -12,6 +19,8 @@ julia> display(((:a, :b), (:b, :c)))
 (:a, :b)
 (:b, :c)
 ```
+
+See also: [`CTBase.Descriptions.Description`](@ref)
 """
 function Base.show(io::IO, ::MIME"text/plain", descriptions::Tuple{Vararg{Description}})
     N = length(descriptions)  # use length instead of size for 1D tuple

@@ -22,7 +22,7 @@ function test_coverage_post_process()
                     e
                 end
 
-                @test err isa ErrorException
+                @test err isa CTBase.Exceptions.PreconditionError
                 @test occursin("no .cov files", lowercase(err.msg))
             end
         end

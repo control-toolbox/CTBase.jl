@@ -40,7 +40,7 @@ Manifest*.toml
 reports/
 .coverage/
 .vscode/
-.windsurf/
+.devin/
 .cursor/
 .vscode/
 .extras/

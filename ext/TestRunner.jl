@@ -10,7 +10,7 @@ running testsets).
 module TestRunner
 
 using CTBase: CTBase
-using DocStringExtensions
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using Test: Test, @testset
 
 """
@@ -30,7 +30,7 @@ and internal test identifiers.
 - String specs are treated as relative paths from `test_dir`
 - Glob patterns are supported for String specs
 
-See also: `CTBase.run_tests`, `TestRunner._select_tests`
+See also: [`CTBase.run_tests`](@ref)
 """
 const TestSpec = Union{Symbol,String}
 
@@ -132,7 +132,7 @@ julia> CTBase.run_tests(;
        )
 ```
 
-See also: `TestRunner.TestRunInfo`, `TestRunner._parse_test_args`, `TestRunner._select_tests`
+See also: [`CTBase.run_tests`](@ref), [`TestRunner.TestRunInfo`](@ref)
 """
 function CTBase.run_tests(
     ::CTBase.Extensions.TestRunnerTag;
@@ -154,12 +154,11 @@ function CTBase.run_tests(
     # Guard: a subdirectory named "test" inside test_dir would conflict with
     # the automatic `test/` prefix stripping in _parse_test_args.
     if isdir(joinpath(test_dir, "test"))
-        error(
-            "A subdirectory \"test\" exists inside the test directory " *
-            "\"$(test_dir)\". This is not supported because selection " *
-            "arguments starting with \"test/\" are automatically stripped " *
-            "(e.g. \"test/suite\" → \"suite\"). Please rename the subdirectory.",
-        )
+        throw(CTBase.Exceptions.PreconditionError(
+            "A subdirectory \"test\" exists inside the test directory \"$(test_dir)\"",
+            reason="selection arguments starting with \"test/\" are automatically stripped (e.g. \"test/suite\" → \"suite\")",
+            suggestion="rename the subdirectory to avoid the conflict",
+        ))
     end
 
     # Parse command-line arguments
@@ -194,7 +193,6 @@ function CTBase.run_tests(
             @testset "$(spec)" begin
                 _run_single_test(
                     spec;
-                    available_tests=available_tests_vec,
                     filename_builder,
                     funcname_builder,
                     eval_mode,
@@ -329,7 +327,7 @@ julia> TestRunner._normalize_selections(
 ```
 """
 function _normalize_selections(selections::Vector{String}, candidates::Vector{<:TestSpec})
-    candidate_strs = [c isa Symbol ? String(c) : String(c) for c in candidates]
+    candidate_strs = [String(c) for c in candidates]
     normalized = String[]
     for sel in selections
         # Strip trailing slash(es)
@@ -394,7 +392,7 @@ function _glob_to_regex(pattern::AbstractString)
 end
 
 """
-    _ensure_jl(filename::AbstractString) -> String
+$(TYPEDSIGNATURES)
 
 Ensure that a filename ends with `.jl` extension.
 
@@ -421,7 +419,7 @@ function _ensure_jl(filename::AbstractString)
 end
 
 """
-    _builder_to_string(x) -> String
+$(TYPEDSIGNATURES)
 
 Convert a Symbol or String to String.
 
@@ -444,11 +442,11 @@ julia> TestRunner._builder_to_string("utils")
 ```
 """
 function _builder_to_string(x)
-    x isa Symbol ? String(x) : String(x)
+    String(x)
 end
 
 """
-    _normalize_available_tests(available_tests) -> Vector{TestSpec}
+$(TYPEDSIGNATURES)
 
 Normalize and validate the `available_tests` argument.
 
@@ -480,7 +478,10 @@ function _normalize_available_tests(available_tests)
     available_tests === nothing && return TestSpec[]
 
     if !(available_tests isa AbstractVector || available_tests isa Tuple)
-        throw(ArgumentError("available_tests must be a Vector or Tuple of Symbol/String"))
+        throw(CTBase.Exceptions.IncorrectArgument(
+            "available_tests must be a Vector or Tuple of Symbol/String",
+            got=string(typeof(available_tests)),
+        ))
     end
 
     out = TestSpec[]
@@ -488,14 +489,17 @@ function _normalize_available_tests(available_tests)
         if entry isa Symbol || entry isa String
             push!(out, entry)
         else
-            throw(ArgumentError("available_tests entries must be Symbol or String"))
+            throw(CTBase.Exceptions.IncorrectArgument(
+                "available_tests entries must be Symbol or String",
+                got=string(typeof(entry)),
+            ))
         end
     end
     return out
 end
 
 """
-    _collect_test_files_recursive(test_dir::AbstractString) -> Vector{String}
+$(TYPEDSIGNATURES)
 
 Recursively collect all `.jl` files in `test_dir` (excluding `runtests.jl`).
 
@@ -535,7 +539,7 @@ function _collect_test_files_recursive(test_dir::AbstractString)
 end
 
 """
-    _find_symbol_test_file_rel(name::Symbol, filename_builder::Function; test_dir::AbstractString) -> Union{String,Nothing}
+$(TYPEDSIGNATURES)
 
 Find the relative path to a test file for a given symbol name.
 
@@ -558,7 +562,7 @@ different subdirectories), prefers the shallowest path.
 - Prefers shallower paths when multiple matches exist
 - Returns the exact relative path if found
 
-See also: `TestRunner._collect_test_files_recursive`, `TestRunner._ensure_jl`
+See also: [`TestRunner._collect_test_files_recursive`](@ref), [`TestRunner._ensure_jl`](@ref)
 """
 function _find_symbol_test_file_rel(
     name::Symbol, filename_builder::Function; test_dir::AbstractString
@@ -609,47 +613,11 @@ function _select_tests(
     filename_builder::Function;
     test_dir::String=joinpath(pwd(), "test"), # Default assumption
 )
-    # 1. Identify all potential test files
-    # We look for .jl files in test_dir, excluding runtests.jl
-    all_files = filter(f -> endswith(f, ".jl") && f != "runtests.jl", readdir(test_dir))
-
-    # Map filenames back to "test names" is tricky without reverse builder.
-    # Strategy:
-    # We assume `available_tests` defines the canonical list of "names".
-    # If `available_tests` is empty, we derive names from files? 
-    #   -> User said: "list all .jl files... but only keep available if provided"
-
     candidates = TestSpec[]
 
     if isempty(available_tests)
-        # If no available_tests provided, every .jl file is a candidate!
-        # This effectively AUTO-DISCOVERS tests.
-        # We need to guess the "name" from the filename.
-        # This is hard because filename_builder is name -> filename.
-        #   utils -> test_utils.jl
-        #   test_utils.jl -> utils ??
-        # For now, let's keep the user's current behavior:
-        # If available_tests is empty, the logic relies on what the user passes.
-        # BUT the new logic says "if args empty -> run all".
-        # So we MUST perform auto-discovery if we want "run all" to work without explicit available_tests.
-
-        # Heuristic: if file starts with "test_", strip it?
-        # Or just use the basename as the symbol?
-        # Let's assume the "name" is the filename without extension for auto-discovery?
-        # Or better: don't guess names yet. Just work with filenames?
-        # But `run_tests` iterates over `names`.
-
-        # Let's look at existing files: test_utils.jl -> name=:utils (via filename_builder)
-        # We cannot invert `filename_builder` (F -> S).
-        # So we are stuck if we want to infer names from files.
-
-        # COMPROMISE: If available_tests is empty, we cannot guarantee auto-discovery compatibility with arbitrary filename_builders.
-        # We will assume a default mapping for auto-discovery: name = file_basename_without_extension.
-        for f in all_files
-            name_str = replace(f, ".jl" => "")
-            # If name starts with "test_", removing it is common convention, but maybe risky?
-            # Let's keep the full basename as the name if we are auto-discovering.
-            push!(candidates, Symbol(name_str))
+        for f in _collect_test_files_recursive(test_dir)
+            push!(candidates, f)
         end
     else
         # If available_tests IS provided, we only consider these.
@@ -764,7 +732,6 @@ This helper:
 
 # Arguments
 - `spec::TestSpec`: Test specification to run
-- `available_tests::AbstractVector{<:TestSpec}`: Available tests for validation
 - `filename_builder::Function`: Function to map test names to filenames
 - `funcname_builder::Function`: Function to map test names to function names
 - `eval_mode::Bool`: Whether to evaluate the function after include
@@ -780,7 +747,6 @@ This helper:
 """
 function _run_single_test(
     spec::TestSpec;
-    available_tests::AbstractVector{<:TestSpec},
     filename_builder::Function,
     funcname_builder::Function,
     eval_mode::Bool,
@@ -792,7 +758,7 @@ function _run_single_test(
 )
     # --- Resolve filename and func_symbol ---
     filename, func_symbol = _resolve_test(
-        spec; available_tests, filename_builder, funcname_builder, eval_mode, test_dir
+        spec; filename_builder, funcname_builder, eval_mode, test_dir
     )
 
     # --- Include the file ---
@@ -800,10 +766,11 @@ function _run_single_test(
 
     # --- Check function exists after include ---
     if eval_mode && func_symbol !== nothing && !isdefined(Main, func_symbol)
-        error("""
-        Function "$(func_symbol)" not found after including "$(filename)".
-        Make sure the file defines a function with this name.
-        """)
+        throw(CTBase.Exceptions.PreconditionError(
+            "Function \"$(func_symbol)\" not found after including \"$(filename)\"",
+            reason="the file does not define a function with this name",
+            suggestion="make sure the file defines a top-level function named $(func_symbol)",
+        ))
     end
 
     # --- on_test_start callback ---
@@ -879,7 +846,6 @@ Raises errors if the file is not found or if `eval_mode=true` but no function ca
 
 # Arguments
 - `spec::TestSpec`: Test specification to resolve
-- `available_tests::AbstractVector{<:TestSpec}`: Available tests for validation
 - `filename_builder::Function`: Function to map test names to filenames
 - `funcname_builder::Function`: Function to map test names to function names
 - `eval_mode::Bool`: Whether to resolve a function name
@@ -900,7 +866,6 @@ Raises errors if the file is not found or if `eval_mode=true` but no function ca
 """
 function _resolve_test(
     spec::TestSpec;
-    available_tests::AbstractVector{<:TestSpec},
     filename_builder::Function,
     funcname_builder::Function,
     eval_mode::Bool,
@@ -910,10 +875,10 @@ function _resolve_test(
         rel = _ensure_jl(spec)
         filename = joinpath(test_dir, rel)
         if !isfile(filename)
-            error("""
-            Test file "$(filename)" not found.
-            Current directory: $(pwd())
-            """)
+            throw(CTBase.Exceptions.IncorrectArgument(
+                "Test file \"$(filename)\" not found",
+                context="current directory: $(pwd())",
+            ))
         end
 
         func_symbol = if eval_mode
@@ -929,30 +894,29 @@ function _resolve_test(
 
     # Build filename
     rel = _find_symbol_test_file_rel(name, filename_builder; test_dir=test_dir)
-    rel === nothing && error("""
-    Test file not found for test "$(name)".
-    Current directory: $(pwd())
-    """)
+    rel === nothing && throw(CTBase.Exceptions.IncorrectArgument(
+        "Test file not found for test \"$(name)\"",
+        context="current directory: $(pwd())",
+    ))
 
     filename = joinpath(test_dir, rel)
 
     # Check file exists
-    !isfile(filename) && error("""
-        Test file "$(filename)" not found for test "$(name)".
-        Current directory: $(pwd())
-        """)
+    !isfile(filename) && throw(CTBase.Exceptions.IncorrectArgument(
+        "Test file \"$(filename)\" not found for test \"$(name)\"",
+        context="current directory: $(pwd())",
+    ))
 
     # Determine function name
     func_symbol = funcname_builder(name)
 
     # Check consistency: eval_mode=true but funcname_builder returns nothing
     if eval_mode && func_symbol === nothing
-        error(
-            """
-      Inconsistency: eval_mode=true but funcname_builder returned nothing for test "$(name)".
-      Either set eval_mode=false, or make funcname_builder return a Symbol.
-      """,
-        )
+        throw(CTBase.Exceptions.PreconditionError(
+            "eval_mode=true but funcname_builder returned nothing for test \"$(name)\"",
+            reason="funcname_builder must return a Symbol when eval_mode=true",
+            suggestion="set eval_mode=false, or make funcname_builder return a Symbol",
+        ))
     end
 
     if !eval_mode || func_symbol === nothing
@@ -1086,7 +1050,7 @@ julia> TestRunner._progress_bar(5, 10)
 "[█████░░░░░]"
 
 julia> TestRunner._progress_bar(5, 10; width=20)
-"[████████████████████░░░░░░]"
+"[██████████░░░░░░░░░░]"
 
 julia> TestRunner._progress_bar(0, 10; width=5)
 "[░░░░░]"

@@ -10,11 +10,12 @@ Most functions in this module have filesystem side effects.
 module CoveragePostprocessing
 
 using CTBase: CTBase
-using Coverage
+using Coverage: Coverage
+import DocStringExtensions: TYPEDSIGNATURES
 
 # Main entry point for coverage post-processing
 """
-    CTBase.postprocess_coverage(::CTBase.Extensions.CoveragePostprocessingTag; generate_report::Bool=true, root_dir::String=pwd())
+$(TYPEDSIGNATURES)
 
 Post-process coverage artifacts produced by `Pkg.test(; coverage=true)`.
 
@@ -42,7 +43,7 @@ This implementation:
 
 This function **creates/removes/moves files and directories** under `root_dir`.
 
-# Usage sketch (non-executed)
+# Example
 
 ```julia
 using CTBase
@@ -88,31 +89,28 @@ function CTBase.postprocess_coverage(
 
     n_cov = _count_cov_files(source_dirs)
     if n_cov == 0
-        error("""
-        Coverage requested but no .cov files were produced.
-
-        Expected locations:
-          - src/*.cov
-          - test/*.cov
-          - ext/*.cov
-
-        Did you run:
-          Pkg.test(...; coverage=true) ?
-        """)
+        throw(CTBase.Exceptions.PreconditionError(
+            "Coverage requested but no .cov files were produced",
+            reason="no .cov files found in src/, test/, or ext/",
+            suggestion="run Pkg.test(...; coverage=true) to generate coverage data",
+        ))
     end
 
     _clean_stale_cov_files!(source_dirs)
 
     n_cov = _count_cov_files(source_dirs)
-    n_cov == 0 &&
-        error("Coverage requested but no usable .cov files were found after cleanup.")
+    n_cov == 0 && throw(CTBase.Exceptions.PreconditionError(
+        "Coverage requested but no usable .cov files were found after cleanup",
+    ))
 
     generate_report && _generate_coverage_reports!(
         source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines
     )
 
     moved = _collect_and_move_cov_files!(source_dirs, cov_storage_dir)
-    isempty(moved) && error("Coverage requested but no .cov files were found to move.")
+    isempty(moved) && throw(CTBase.Exceptions.PreconditionError(
+        "Coverage requested but no .cov files were found to move",
+    ))
     println("✓ Moved $(length(moved)) .cov files to $cov_storage_dir")
 
     println("✓ Coverage post-processing completed successfully")
@@ -221,14 +219,8 @@ function _collect_and_move_cov_files!(source_dirs, dest_dir)
                 # But let's stick to the plan: just recursive collection.
 
                 src = joinpath(root, f)
-                dest = joinpath(dest_dir, f) # Wait, this might fail if f is just filename.
-
-                # The issue with joinpath(dest_dir, f) if f is just a filename is that it puts everything in root of dest_dir.
-                # If f comes from walkdir's `files`, it is just the filename.
-                # So `src` is correct. `dest` puts it in `coverage/cov/filename.cov`. 
-                # This matches previous behavior, just expanded to subdirs.
-
-                dest = joinpath(dest_dir, f)
+                flat = replace(relpath(src, dir), r"[/\\]" => "_")
+                dest = joinpath(dest_dir, flat)
                 mv(src, dest; force=true)
                 push!(moved, dest)
             end
@@ -295,7 +287,9 @@ function _generate_coverage_reports!(
         append!(cov_all, Coverage.process_folder(dir))
     end
 
-    isempty(cov_all) && error("No coverage data found in source directories")
+    isempty(cov_all) && throw(CTBase.Exceptions.PreconditionError(
+        "No coverage data found in source directories",
+    ))
 
     lcov_file = joinpath(coverage_dir, "lcov.info")
     Coverage.LCOV.writefile(lcov_file, cov_all)
@@ -348,12 +342,8 @@ function _generate_coverage_reports!(
 
     # Helper to make paths relative to root_dir
     function relative_path(path, root)
-        if startswith(path, root)
-            relpath = path[(length(root) + 1):end]
-            # Remove leading slash if present
-            return startswith(relpath, "/") ? relpath[2:end] : relpath
-        end
-        return path
+        startswith(path, root) || return path
+        return relpath(path, root)
     end
 
     function write_report(io)

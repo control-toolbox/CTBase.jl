@@ -1,59 +1,56 @@
-# CTBase.jl
+# CTBase.jl — Ecosystem Foundation
 
 ```@meta
 CurrentModule = CTBase
 ```
 
-The `CTBase.jl` package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
+CTBase.jl is the foundational package of the [control-toolbox](https://github.com/control-toolbox) ecosystem.
+It provides the **base layer** shared by all packages: common types, structured exceptions, description management, extension infrastructure, and developer tools.
 
-It provides the core types, utilities, and infrastructure used by other packages in the ecosystem, such as [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl).
+!!! note "Qualified access"
+    CTBase exports **no symbols** at the package level. Every public symbol is accessed
+    via its full qualified path, e.g. `CTBase.Exceptions.IncorrectArgument` or
+    `CTBase.Descriptions.add`. This makes the origin of every symbol explicit at every
+    call site and prevents namespace collisions between packages.
 
-!!! note
+    Downstream packages (e.g. [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl))
+    may re-export selected symbols for convenience.
 
-    The root package is [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl) which aims to provide tools to model and solve optimal control problems with ordinary differential equations by direct and indirect methods, both on CPU and GPU.
+## Submodule overview
 
-## Features and User Guides
+| Submodule | Role |
+|:---|:---|
+| [`CTBase.Core`](@ref) | Fundamental numeric type alias (`ctNumber`) and internal display helpers |
+| [`CTBase.Descriptions`](@ref) | Symbolic description tuples: catalogue management, pattern completion, similarity search |
+| [`CTBase.Exceptions`](@ref) | Typed exception hierarchy with rich context fields |
+| [`CTBase.Extensions`](@ref) | Tag-based extension dispatch for `run_tests`, `postprocess_coverage`, and `automatic_reference_documentation` |
+| [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
 
-CTBase provides several key features to build robust control-toolbox packages:
+## Quick Start
 
-- **[Descriptions: encoding algorithms](guide/descriptions.md)**: A declarative way to encode algorithms or configurations using tuples of symbols.
-- **[Error handling and Exceptions](guide/exceptions.md)**: A domain-specific exception hierarchy for consistent error reporting.
-- **[Test Runner](guide/test-runner.md)**: A modular test runner for granular test execution.
-- **[Coverage Post-processing](guide/coverage.md)**: Tools to generate readable coverage reports.
-- **[API Documentation Generation](guide/api-documentation.md)**: Automated API reference generation from docstrings.
+```@repl
+using CTBase
 
-## Note on Private Methods
+# --- Descriptions ---
+descs = CTBase.Descriptions.add((), (:euler, :explicit))
+descs = CTBase.Descriptions.add(descs, (:euler, :implicit))
+CTBase.Descriptions.complete(:euler, :explicit; descriptions=descs)
 
-In some examples in the documentation, private methods are shown without the module
-prefix. This is done for the sake of clarity and readability.
-
-```julia-repl
-julia> using CTBase
-julia> x = 1
-julia> private_fun(x) # throws an error
-```
-
-This should instead be written as:
-
-```julia-repl
-julia> using CTBase
-julia> x = 1
-julia> CTBase.private_fun(x)
-```
-
-If the method is re-exported by another package,
-
-```julia
-module OptimalControl
-    import CTBase: private_fun
-    export private_fun
+# --- Exceptions ---
+try
+    throw(CTBase.Exceptions.IncorrectArgument("n must be positive"; got="-1"))
+catch e
+    println(e)
 end
 ```
 
-then there is no need to prefix it with the original module name:
+## User Guides
 
-```julia-repl
-julia> using OptimalControl
-julia> x = 1
-julia> private_fun(x)
-```
+- **[Getting Started](getting-started.md)** — installation, mental model, 5-minute walkthrough.
+- **[Descriptions](guide/descriptions.md)** — catalogue API, pattern matching, error handling.
+- **[Exceptions](guide/exceptions.md)** — exception hierarchy, choosing the right type, best practices.
+- **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.run_tests`.
+- **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.postprocess_coverage`.
+- **[API Documentation](guide/api-documentation.md)** — auto-generating per-module API pages.
+
+To browse the complete API, see the **API Reference** section in the left sidebar.

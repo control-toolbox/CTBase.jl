@@ -2,12 +2,12 @@
 # Based on CTBase.jl but with enriched error handling
 
 """
-    CTException
+$(TYPEDEF)
 
 Abstract supertype for all CTBase exceptions.
-Compatible with CTBase.CTException for future migration.
 
-All exceptions inherit from this type to allow uniform error handling.
+All exceptions in the CTBase ecosystem inherit from this type, enabling
+uniform error handling via a single `catch` clause.
 
 # Example
 
@@ -16,51 +16,33 @@ julia> using CTBase
 
 julia> try
            throw(CTBase.Exceptions.IncorrectArgument("invalid input"))
-       catch e::CTBase.Exceptions.CTException
-           println("Caught a domain-specific exception: ", e)
+       catch e
+           e isa CTBase.Exceptions.CTException || rethrow()
+           println("Caught: ", e)
        end
-Caught a domain-specific exception: IncorrectArgument: invalid input
+Caught: IncorrectArgument: invalid input
 ```
 
-# Usage Pattern
-
-Use this as the common ancestor for all domain-specific errors to allow
-catching all exceptions of this family via `catch e::CTException`.
-
-```julia
-try
-    # code that may throw CTBase exceptions
-    risky_operation()
-catch e::CTBase.Exceptions.CTException
-    # handle all CTBase domain errors uniformly
-    handle_error(e)
-end
-```
+See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.NotImplemented`](@ref)
 """
 abstract type CTException <: Exception end
 
 """
-    IncorrectArgument <: CTException
+$(TYPEDEF)
 
-Exception thrown when an individual argument is invalid or violates a precondition.
+Exception thrown when an individual argument is invalid or violates a constraint.
 
-This exception is raised when **one input value** is outside the allowed domain, such as:
-- Wrong range or bounds (e.g., negative when positive is required)
-- Duplicate values when uniqueness is required
-- Empty collections when non-empty is required
-- Type mismatches or invalid combinations
-
-Use this exception to signal that the problem is with the **input data itself**, not with
-the state of the system or the calling context.
+Use when the problem is with the **input data itself** (wrong range, duplicate,
+empty collection, type mismatch) rather than the calling context or system state.
 
 # Fields
-- `msg::String`: Main error message describing the problem
-- `got::Union{String, Nothing}`: What value was received (optional)
-- `expected::Union{String, Nothing}`: What value was expected (optional)
-- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
+- `msg::String`: Main error message describing the problem.
+- `got::Union{String, Nothing}`: The invalid value received (optional).
+- `expected::Union{String, Nothing}`: What was expected (optional).
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional).
+- `context::Union{String, Nothing}`: Where the error occurred (optional).
 
-# Examples
+# Example
 
 ```julia-repl
 julia> using CTBase
@@ -69,22 +51,7 @@ julia> throw(CTBase.Exceptions.IncorrectArgument("the argument must be a non-emp
 ERROR: IncorrectArgument: the argument must be a non-empty tuple
 ```
 
-Adding a duplicate description to a catalogue:
-
-```julia-repl
-julia> algorithms = CTBase.add((), (:a, :b))
-julia> CTBase.add(algorithms, (:a, :b))
-ERROR: IncorrectArgument: the description (:a, :b) is already in ((:a, :b),)
-```
-
-Invalid indices for Unicode helpers:
-
-```julia-repl
-julia> CTBase.ctindice(-1)
-ERROR: IncorrectArgument: the subscript must be between 0 and 9
-```
-
-Enhanced version with detailed context:
+With optional fields:
 
 ```julia
 throw(CTBase.Exceptions.IncorrectArgument(
@@ -92,12 +59,11 @@ throw(CTBase.Exceptions.IncorrectArgument(
     got="vector of length 3",
     expected="vector of length 2",
     suggestion="Provide a vector matching the state dimension",
-    context="initial_guess for state"
+    context="initial_guess for state",
 ))
 ```
 
-# See Also
-- `AmbiguousDescription`: For high-level description matching errors
+See also: [`CTBase.Exceptions.AmbiguousDescription`](@ref), [`CTBase.Exceptions.PreconditionError`](@ref)
 """
 struct IncorrectArgument <: CTException
     msg::String
@@ -119,29 +85,23 @@ struct IncorrectArgument <: CTException
 end
 
 """
-    PreconditionError <: CTException
+$(TYPEDEF)
 
-Exception thrown when a function call violates a **precondition** or is not allowed in the
-**current state** of the object or system.
+Exception thrown when a function call violates a precondition or is not allowed in the
+current state of the system.
 
-This exception signals that the arguments may be valid, but the call is forbidden because
-of **when** or **how** it is made. This is distinct from `IncorrectArgument`, which
-indicates a problem with the input values themselves.
-
-Common use cases:
-- A method that is meant to be called only once
-- State already closed or finalized
-- Required setup not completed (e.g., state must be set before dynamics)
-- Illegal order of operations
-- Wrong phase of a computation
+Use when the **arguments are valid** but the call is forbidden because of when or how it
+is made (e.g., calling a method twice, missing a required prior setup step).
+Distinct from [`CTBase.Exceptions.IncorrectArgument`](@ref), which signals a problem
+with the input values themselves.
 
 # Fields
-- `msg::String`: Main error message
-- `reason::Union{String, Nothing}`: Why the precondition failed (optional)
-- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
+- `msg::String`: Main error message.
+- `reason::Union{String, Nothing}`: Why the precondition failed (optional).
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional).
+- `context::Union{String, Nothing}`: Where the error occurred (optional).
 
-# Examples
+# Example
 
 ```julia-repl
 julia> using CTBase
@@ -150,36 +110,18 @@ julia> throw(CTBase.Exceptions.PreconditionError("state must be set before dynam
 ERROR: PreconditionError: state must be set before dynamics
 ```
 
-Typical pattern for checking preconditions (as used in CTModels.jl):
-
-```julia
-function dynamics!(ocp::PreModel, f::Function)
-    if !__is_state_set(ocp)
-        throw(CTBase.Exceptions.PreconditionError(
-            "State must be set before defining dynamics",
-            reason="state has not been defined yet",
-            suggestion="Call state!(ocp, dimension) before dynamics!",
-            context="dynamics! function - state validation"
-        ))
-    end
-    # ... set dynamics ...
-end
-```
-
-Enhanced version with detailed context:
+With optional fields:
 
 ```julia
 throw(CTBase.Exceptions.PreconditionError(
     "Cannot call state! twice",
     reason="state has already been defined for this OCP",
-    suggestion="Create a new OCP instance or use a different component name",
-    context="state definition"
+    suggestion="Create a new OCP instance",
+    context="state definition",
 ))
 ```
 
-# See Also
-- `IncorrectArgument`: For input validation errors
-- `NotImplemented`: For unimplemented interface methods
+See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.NotImplemented`](@ref)
 """
 struct PreconditionError <: CTException
     msg::String
@@ -198,22 +140,19 @@ struct PreconditionError <: CTException
 end
 
 """
-    NotImplemented <: CTException
+$(TYPEDEF)
 
 Exception thrown to mark interface points that must be implemented by concrete subtypes.
 
-This exception is used to define abstract interfaces where a default method on an abstract
-type throws `NotImplemented`, and each concrete implementation must override it. This makes
-it easy to detect missing implementations during testing and development.
-
-Use `NotImplemented` when defining **interfaces** and you want an explicit, typed error
-rather than a generic `error("TODO")`.
+Use when a default method on an abstract type should explicitly signal that a concrete
+subtype has not provided the required implementation. Prefer this over a generic
+`error("not implemented")` to give users a typed, catchable error.
 
 # Fields
-- `msg::String`: Description of what is not implemented
-- `required_method::Union{String, Nothing}`: Method signature or requirement (optional)
-- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
+- `msg::String`: Description of what is not implemented.
+- `required_method::Union{String, Nothing}`: The missing method signature (optional).
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional).
+- `context::Union{String, Nothing}`: Where the error occurred (optional).
 
 # Example
 
@@ -224,7 +163,7 @@ julia> throw(CTBase.Exceptions.NotImplemented("feature X is not implemented"))
 ERROR: NotImplemented: feature X is not implemented
 ```
 
-A typical pattern for defining an interface:
+Typical interface stub pattern:
 
 ```julia
 abstract type MyAbstractAlgorithm end
@@ -233,27 +172,13 @@ function run!(algo::MyAbstractAlgorithm, state)
     throw(CTBase.Exceptions.NotImplemented(
         "run! is not implemented for \$(typeof(algo))",
         required_method="run!(::MyAbstractAlgorithm, state)",
+        suggestion="Implement run! for your concrete algorithm type",
         context="algorithm execution",
-        suggestion="Implement run! for your concrete algorithm type"
     ))
 end
 ```
 
-Concrete algorithms then provide their own `run!` method instead of raising this exception.
-
-Enhanced version with full context:
-
-```julia
-throw(CTBase.Exceptions.NotImplemented(
-    "Method solve! not implemented",
-    required_method="solve!(::MyStrategy, ...)",
-    context="solve call",
-    suggestion="Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
-))
-```
-
-# See Also
-- `IncorrectArgument`: For input validation errors
+See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.PreconditionError`](@ref)
 """
 struct NotImplemented <: CTException
     msg::String
@@ -272,21 +197,18 @@ struct NotImplemented <: CTException
 end
 
 """
-    ParsingError <: CTException
+$(TYPEDEF)
 
 Exception thrown during parsing when a syntax error or invalid structure is detected.
 
-This exception is intended for errors detected during parsing of input structures or
-domain-specific languages (DSLs). Use this when processing user input that follows a
-specific grammar or format, and the input violates the expected syntax.
-
-This exception is raised when **the structure or syntax** of the input is invalid,
-rather than the semantic meaning. For semantic errors, use `IncorrectArgument` instead.
+Use when the **structure or syntax** of the input is invalid (e.g., DSL grammar
+violation). For semantic errors on a valid-syntax input, prefer
+[`CTBase.Exceptions.IncorrectArgument`](@ref) instead.
 
 # Fields
-- `msg::String`: Description of the parsing error
-- `location::Union{String, Nothing}`: Where in the input the error occurred (optional)
-- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
+- `msg::String`: Description of the parsing error.
+- `location::Union{String, Nothing}`: Where in the input the error occurred (optional).
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional).
 
 # Example
 
@@ -303,26 +225,11 @@ With optional fields:
 throw(CTBase.Exceptions.ParsingError(
     "Unexpected token 'end'",
     location="line 42, column 15",
-    suggestion="Check syntax balance or remove extra 'end'"
+    suggestion="Check syntax balance or remove extra 'end'",
 ))
 ```
 
-As used in CTParser.jl (message only):
-
-```julia
-info = string("Line ", 42, ": x = 1\n", "Unexpected token 'end'")
-throw(CTBase.Exceptions.ParsingError(info))
-```
-
-Common use cases:
-- Parsing mathematical expressions or formulas
-- Reading configuration files or DSL syntax
-- Processing structured input with specific grammar rules
-- Validating syntax of domain-specific languages
-
-# See Also
-- `IncorrectArgument`: For general input validation errors
-- `AmbiguousDescription`: For description matching errors
+See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.AmbiguousDescription`](@ref)
 """
 struct ParsingError <: CTException
     msg::String
@@ -339,24 +246,21 @@ struct ParsingError <: CTException
 end
 
 """
-    AmbiguousDescription <: CTException
+$(TYPEDEF)
 
-Exception thrown when a description (a tuple of `Symbol`s) cannot be matched to any known
-valid descriptions.
+Exception thrown when a description (a tuple of `Symbol`s) cannot be matched to any
+known valid description in a catalogue.
 
-This exception is raised by `CTBase.complete()` when the user provides an incomplete or
-inconsistent description that doesn't match any of the available descriptions in the
-catalogue. Use this exception when **the high-level choice of description itself** is wrong
-or ambiguous and there is no sensible default.
-
-Enhanced version with additional context for better error reporting.
+Raised by [`CTBase.Descriptions.complete`](@ref) when the partial description provided
+by the user is not a subset of any catalogue entry.
 
 # Fields
-- `msg::String`: Main error message (auto-generated if not provided)
-- `description::Tuple{Vararg{Symbol}}`: The ambiguous or incorrect description tuple
-- `candidates::Union{Vector{String}, Nothing}`: Suggested valid descriptions (optional)
-- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
+- `msg::String`: Main error message.
+- `description::Tuple{Vararg{Symbol}}`: The ambiguous or unrecognised description tuple.
+- `candidates::Union{Vector{String}, Nothing}`: Suggested valid descriptions (optional).
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional).
+- `context::Union{String, Nothing}`: Where the error occurred (optional).
+- `diagnostic::Union{String, Nothing}`: Diagnostic tag, e.g. `"unknown symbols"` (optional).
 
 # Example
 
@@ -368,30 +272,18 @@ julia> CTBase.complete(:f; descriptions=D)
 ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 ```
 
-In this example, the symbol `:f` does not appear in any of the known descriptions,
-so `complete()` cannot determine which description to return.
-
-Enhanced version with full context:
+With optional fields:
 
 ```julia
 throw(CTBase.Exceptions.AmbiguousDescription(
     (:f,),
     candidates=["(:descent, :bfgs, :bisection)", "(:descent, :gradient, :fixedstep)"],
     suggestion="Use a complete description like (:descent, :bfgs, :bisection)",
-    context="algorithm selection"
+    context="algorithm selection",
 ))
 ```
 
-# Common Use Cases
-- Algorithm selection in optimization libraries
-- Configuration matching in DSL systems
-- Pattern matching in description-based APIs
-- Validation of symbolic descriptions in mathematical modeling
-
-# See Also
-- `complete`: Matches a partial description to a complete one
-- `add`: Adds descriptions to a catalogue (throws `IncorrectArgument` for duplicates)
-- `IncorrectArgument`: For input validation errors
+See also: [`CTBase.Descriptions.complete`](@ref), [`CTBase.Descriptions.add`](@ref), [`CTBase.Exceptions.IncorrectArgument`](@ref)
 """
 struct AmbiguousDescription <: CTException
     msg::String
@@ -414,40 +306,25 @@ struct AmbiguousDescription <: CTException
 end
 
 """
-    ExtensionError <: CTException
+$(TYPEDEF)
 
-Exception thrown when an extension or optional dependency is not loaded but
-a function requiring it is called.
+Exception thrown when an optional dependency (weak dependency) is required by a feature
+but has not been loaded.
 
-This exception is used to signal that a feature requires one or more optional dependencies
-(weak dependencies) to be loaded. When a user tries to use a feature without loading the
-required extensions, this exception provides a helpful message indicating exactly which
-packages need to be loaded.
-
-It is also used internally by `ExtensionError()` when called without any weak dependencies,
-in which case it throws `PreconditionError` instead.
-
-Enhanced version with additional context for better error reporting.
+Calling the zero-argument constructor `ExtensionError()` is forbidden and throws a
+[`CTBase.Exceptions.PreconditionError`](@ref) instead — at least one dependency symbol
+must be supplied.
 
 # Fields
-- `msg::String`: Main error message (auto-generated from message parameter)
-- `weakdeps::Tuple{Vararg{Symbol}}`: The tuple of symbols representing the missing dependencies
-- `feature::Union{String, Nothing}`: Which functionality requires these dependencies (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
+- `msg::String`: Auto-generated error message listing the missing packages.
+- `weakdeps::Tuple{Vararg{Symbol}}`: The missing dependency symbols.
+- `feature::Union{String, Nothing}`: The functionality that requires these dependencies (optional).
+- `context::Union{String, Nothing}`: Where the error occurred (optional).
 
-# Constructor
+# Throws
+- [`CTBase.Exceptions.PreconditionError`](@ref): If called with no arguments.
 
-```julia
-ExtensionError(weakdeps::Symbol...; message::String="", feature::Union{String, Nothing}=nothing, context::Union{String, Nothing}=nothing)
-```
-
-Throws `PreconditionError` if no weak dependencies are provided:
-
-```julia
-ExtensionError()  # Throws PreconditionError
-```
-
-# Examples
+# Example
 
 ```julia-repl
 julia> using CTBase
@@ -456,32 +333,25 @@ julia> throw(CTBase.Exceptions.ExtensionError(:MyExtension))
 ERROR: ExtensionError. Please make: julia> using MyExtension
 ```
 
-With multiple dependencies and a custom message:
+With multiple dependencies:
 
 ```julia-repl
 julia> throw(CTBase.Exceptions.ExtensionError(:MyExtension, :AnotherDep; message="to use this feature"))
 ERROR: ExtensionError. Please make: julia> using MyExtension, AnotherDep to use this feature
 ```
 
-Enhanced version with full context:
+With full context:
 
 ```julia
 throw(CTBase.Exceptions.ExtensionError(
-    (:Plots, :PlotlyJS),
+    :Plots;
     message="to plot optimization results",
     feature="plotting functionality",
-    context="solve! call"
+    context="solve! call",
 ))
 ```
 
-# Common Use Cases
-- Optional plotting functionality in optimization packages
-- Specialized solvers that require additional packages
-- Export/import features with format-specific dependencies
-- Advanced algorithms that depend on external libraries
-
-# See Also
-- `PreconditionError`: Thrown when `ExtensionError()` is called without arguments
+See also: [`CTBase.Exceptions.PreconditionError`](@ref)
 """
 struct ExtensionError <: CTException
     msg::String
@@ -506,26 +376,20 @@ struct ExtensionError <: CTException
 end
 
 """
-    SolverFailure <: CTException
+$(TYPEDEF)
 
-Exception thrown when a solver (ODE integrator, optimization solver, linear solver, etc.)
-fails to complete successfully or returns an error code.
+Exception thrown when a numerical solver (ODE integrator, NLP solver, linear solver, etc.)
+fails to complete successfully.
 
-This exception is used across the Control Toolbox to report solver failures in a uniform way.
-The `retcode` field is generic and can accommodate different solver types:
-- SciML integrators: `:Unstable`, `:DtLessThanMin`, `:MaxIters`, `:Success`
-- NLP solvers: `:Infeasible`, `:MaxIterations`, `:Stalled`, `:FirstOrder`
-- Linear solvers: condition number indicators, singular matrix flags, etc.
-
-This exception signals that the numerical computation itself failed, not that the input
-was invalid (use `IncorrectArgument` for that) or that a precondition was violated (use
-`PreconditionError` for that).
+Use this when the **numerical computation itself** fails, not when the input is invalid
+([`CTBase.Exceptions.IncorrectArgument`](@ref)) or a precondition is violated
+([`CTBase.Exceptions.PreconditionError`](@ref)).
 
 # Fields
-- `msg::String`: Main error message describing the failure
-- `retcode::Union{String, Nothing}`: Solver-specific return code (optional)
-- `suggestion::Union{String, Nothing}`: How to fix the problem (optional)
-- `context::Union{String, Nothing}`: Where the error occurred (optional)
+- `msg::String`: Main error message describing the failure.
+- `retcode::Union{String, Nothing}`: Solver-specific return code, e.g. `":Unstable"` (optional).
+- `suggestion::Union{String, Nothing}`: How to fix the problem (optional).
+- `context::Union{String, Nothing}`: Where the error occurred (optional).
 
 # Example
 
@@ -536,26 +400,18 @@ julia> throw(CTBase.Exceptions.SolverFailure("ODE integration failed", retcode="
 ERROR: SolverFailure: ODE integration failed
 ```
 
-Enhanced version with full context:
+With full context:
 
 ```julia
 throw(CTBase.Exceptions.SolverFailure(
     "Optimization solver did not converge",
     retcode=":MaxIterations",
     suggestion="Increase max iterations or adjust tolerance settings",
-    context="IPOPT solver in CTDirect"
+    context="IPOPT solver in CTDirect",
 ))
 ```
 
-# Common Use Cases
-- ODE integration failures in CTFlows (SciML integrators)
-- Non-convergence of optimization solvers in CTDirect
-- Ill-conditioned linear systems in numerical algorithms
-- Any numerical solver that returns a status code indicating failure
-
-# See Also
-- `IncorrectArgument`: For input validation errors
-- `PreconditionError`: For precondition violations
+See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.PreconditionError`](@ref)
 """
 struct SolverFailure <: CTException
     msg::String
