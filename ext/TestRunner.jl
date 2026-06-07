@@ -154,11 +154,13 @@ function CTBase.run_tests(
     # Guard: a subdirectory named "test" inside test_dir would conflict with
     # the automatic `test/` prefix stripping in _parse_test_args.
     if isdir(joinpath(test_dir, "test"))
-        throw(CTBase.Exceptions.PreconditionError(
-            "A subdirectory \"test\" exists inside the test directory \"$(test_dir)\"",
-            reason="selection arguments starting with \"test/\" are automatically stripped (e.g. \"test/suite\" → \"suite\")",
-            suggestion="rename the subdirectory to avoid the conflict",
-        ))
+        throw(
+            CTBase.Exceptions.PreconditionError(
+                "A subdirectory \"test\" exists inside the test directory \"$(test_dir)\"";
+                reason="selection arguments starting with \"test/\" are automatically stripped (e.g. \"test/suite\" → \"suite\")",
+                suggestion="rename the subdirectory to avoid the conflict",
+            ),
+        )
     end
 
     # Parse command-line arguments
@@ -415,7 +417,7 @@ julia> TestRunner._ensure_jl("test_utils.jl")
 ```
 """
 function _ensure_jl(filename::AbstractString)
-    endswith(filename, ".jl") ? filename : filename * ".jl"
+    return endswith(filename, ".jl") ? filename : filename * ".jl"
 end
 
 """
@@ -442,7 +444,7 @@ julia> TestRunner._builder_to_string("utils")
 ```
 """
 function _builder_to_string(x)
-    String(x)
+    return String(x)
 end
 
 """
@@ -478,10 +480,12 @@ function _normalize_available_tests(available_tests)
     available_tests === nothing && return TestSpec[]
 
     if !(available_tests isa AbstractVector || available_tests isa Tuple)
-        throw(CTBase.Exceptions.IncorrectArgument(
-            "available_tests must be a Vector or Tuple of Symbol/String",
-            got=string(typeof(available_tests)),
-        ))
+        throw(
+            CTBase.Exceptions.IncorrectArgument(
+                "available_tests must be a Vector or Tuple of Symbol/String";
+                got=string(typeof(available_tests)),
+            ),
+        )
     end
 
     out = TestSpec[]
@@ -489,10 +493,12 @@ function _normalize_available_tests(available_tests)
         if entry isa Symbol || entry isa String
             push!(out, entry)
         else
-            throw(CTBase.Exceptions.IncorrectArgument(
-                "available_tests entries must be Symbol or String",
-                got=string(typeof(entry)),
-            ))
+            throw(
+                CTBase.Exceptions.IncorrectArgument(
+                    "available_tests entries must be Symbol or String";
+                    got=string(typeof(entry)),
+                ),
+            )
         end
     end
     return out
@@ -766,11 +772,13 @@ function _run_single_test(
 
     # --- Check function exists after include ---
     if eval_mode && func_symbol !== nothing && !isdefined(Main, func_symbol)
-        throw(CTBase.Exceptions.PreconditionError(
-            "Function \"$(func_symbol)\" not found after including \"$(filename)\"",
-            reason="the file does not define a function with this name",
-            suggestion="make sure the file defines a top-level function named $(func_symbol)",
-        ))
+        throw(
+            CTBase.Exceptions.PreconditionError(
+                "Function \"$(func_symbol)\" not found after including \"$(filename)\"";
+                reason="the file does not define a function with this name",
+                suggestion="make sure the file defines a top-level function named $(func_symbol)",
+            ),
+        )
     end
 
     # --- on_test_start callback ---
@@ -875,10 +883,12 @@ function _resolve_test(
         rel = _ensure_jl(spec)
         filename = joinpath(test_dir, rel)
         if !isfile(filename)
-            throw(CTBase.Exceptions.IncorrectArgument(
-                "Test file \"$(filename)\" not found",
-                context="current directory: $(pwd())",
-            ))
+            throw(
+                CTBase.Exceptions.IncorrectArgument(
+                    "Test file \"$(filename)\" not found";
+                    context="current directory: $(pwd())",
+                ),
+            )
         end
 
         func_symbol = if eval_mode
@@ -894,29 +904,35 @@ function _resolve_test(
 
     # Build filename
     rel = _find_symbol_test_file_rel(name, filename_builder; test_dir=test_dir)
-    rel === nothing && throw(CTBase.Exceptions.IncorrectArgument(
-        "Test file not found for test \"$(name)\"",
-        context="current directory: $(pwd())",
-    ))
+    rel === nothing && throw(
+        CTBase.Exceptions.IncorrectArgument(
+            "Test file not found for test \"$(name)\"";
+            context="current directory: $(pwd())",
+        ),
+    )
 
     filename = joinpath(test_dir, rel)
 
     # Check file exists
-    !isfile(filename) && throw(CTBase.Exceptions.IncorrectArgument(
-        "Test file \"$(filename)\" not found for test \"$(name)\"",
-        context="current directory: $(pwd())",
-    ))
+    !isfile(filename) && throw(
+        CTBase.Exceptions.IncorrectArgument(
+            "Test file \"$(filename)\" not found for test \"$(name)\"";
+            context="current directory: $(pwd())",
+        ),
+    )
 
     # Determine function name
     func_symbol = funcname_builder(name)
 
     # Check consistency: eval_mode=true but funcname_builder returns nothing
     if eval_mode && func_symbol === nothing
-        throw(CTBase.Exceptions.PreconditionError(
-            "eval_mode=true but funcname_builder returned nothing for test \"$(name)\"",
-            reason="funcname_builder must return a Symbol when eval_mode=true",
-            suggestion="set eval_mode=false, or make funcname_builder return a Symbol",
-        ))
+        throw(
+            CTBase.Exceptions.PreconditionError(
+                "eval_mode=true but funcname_builder returned nothing for test \"$(name)\"";
+                reason="funcname_builder must return a Symbol when eval_mode=true",
+                suggestion="set eval_mode=false, or make funcname_builder return a Symbol",
+            ),
+        )
     end
 
     if !eval_mode || func_symbol === nothing

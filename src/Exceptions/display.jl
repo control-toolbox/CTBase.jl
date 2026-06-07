@@ -29,7 +29,7 @@ Print text with ANSI color formatting for Documenter compatibility.
 function _print_ansi_styled(
     io, text::Union{String,Symbol,Type}, color::Symbol, bold::Bool=false
 )
-    print(io, _ansi_color(color, bold), string(text), _ansi_reset())
+    return print(io, _ansi_color(color, bold), string(text), _ansi_reset())
 end
 
 """
@@ -262,7 +262,7 @@ Custom error display for IncorrectArgument.
 Shows user-friendly format with enriched information.
 """
 function Base.showerror(io::IO, e::IncorrectArgument)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end
 
 """
@@ -271,7 +271,7 @@ end
 Custom error display for PreconditionError.
 """
 function Base.showerror(io::IO, e::PreconditionError)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end
 
 """
@@ -280,7 +280,7 @@ end
 Custom error display for NotImplemented.
 """
 function Base.showerror(io::IO, e::NotImplemented)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end
 
 """
@@ -289,7 +289,7 @@ end
 Custom error display for ParsingError.
 """
 function Base.showerror(io::IO, e::ParsingError)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end
 
 """
@@ -298,7 +298,7 @@ end
 Custom error display for AmbiguousDescription.
 """
 function Base.showerror(io::IO, e::AmbiguousDescription)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end
 
 """
@@ -307,7 +307,7 @@ end
 Custom error display for ExtensionError.
 """
 function Base.showerror(io::IO, e::ExtensionError)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end
 
 """
@@ -316,5 +316,5 @@ end
 Custom error display for SolverFailure.
 """
 function Base.showerror(io::IO, e::SolverFailure)
-    format_user_friendly_error(io, e)
+    return format_user_friendly_error(io, e)
 end

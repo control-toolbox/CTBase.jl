@@ -89,28 +89,34 @@ function CTBase.postprocess_coverage(
 
     n_cov = _count_cov_files(source_dirs)
     if n_cov == 0
-        throw(CTBase.Exceptions.PreconditionError(
-            "Coverage requested but no .cov files were produced",
-            reason="no .cov files found in src/, test/, or ext/",
-            suggestion="run Pkg.test(...; coverage=true) to generate coverage data",
-        ))
+        throw(
+            CTBase.Exceptions.PreconditionError(
+                "Coverage requested but no .cov files were produced";
+                reason="no .cov files found in src/, test/, or ext/",
+                suggestion="run Pkg.test(...; coverage=true) to generate coverage data",
+            ),
+        )
     end
 
     _clean_stale_cov_files!(source_dirs)
 
     n_cov = _count_cov_files(source_dirs)
-    n_cov == 0 && throw(CTBase.Exceptions.PreconditionError(
-        "Coverage requested but no usable .cov files were found after cleanup",
-    ))
+    n_cov == 0 && throw(
+        CTBase.Exceptions.PreconditionError(
+            "Coverage requested but no usable .cov files were found after cleanup"
+        ),
+    )
 
     generate_report && _generate_coverage_reports!(
         source_dirs, coverage_dir, root_dir, worst_n_files, max_uncovered_lines
     )
 
     moved = _collect_and_move_cov_files!(source_dirs, cov_storage_dir)
-    isempty(moved) && throw(CTBase.Exceptions.PreconditionError(
-        "Coverage requested but no .cov files were found to move",
-    ))
+    isempty(moved) && throw(
+        CTBase.Exceptions.PreconditionError(
+            "Coverage requested but no .cov files were found to move"
+        ),
+    )
     println("✓ Moved $(length(moved)) .cov files to $cov_storage_dir")
 
     println("✓ Coverage post-processing completed successfully")
@@ -287,9 +293,9 @@ function _generate_coverage_reports!(
         append!(cov_all, Coverage.process_folder(dir))
     end
 
-    isempty(cov_all) && throw(CTBase.Exceptions.PreconditionError(
-        "No coverage data found in source directories",
-    ))
+    isempty(cov_all) && throw(
+        CTBase.Exceptions.PreconditionError("No coverage data found in source directories"),
+    )
 
     lcov_file = joinpath(coverage_dir, "lcov.info")
     Coverage.LCOV.writefile(lcov_file, cov_all)
@@ -392,7 +398,7 @@ function _generate_coverage_reports!(
     end
 
     open(joinpath(coverage_dir, "cov_report.md"), "w") do io
-        write_report(io)
+        return write_report(io)
     end
 
     println("✓ Wrote coverage report to $lcov_file")

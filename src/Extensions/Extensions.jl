@@ -117,7 +117,7 @@ using CTBase
 ```
 """
 function automatic_reference_documentation(; kwargs...)
-    automatic_reference_documentation(DocumenterReferenceTag(); kwargs...)
+    return automatic_reference_documentation(DocumenterReferenceTag(); kwargs...)
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -229,7 +229,7 @@ using CTBase
 ```
 """
 function postprocess_coverage(; kwargs...)
-    postprocess_coverage(CoveragePostprocessingTag(); kwargs...)
+    return postprocess_coverage(CoveragePostprocessingTag(); kwargs...)
 end
 
 # --------------------------------------------------------------------------------------------------
@@ -329,7 +329,7 @@ using CTBase
 ```
 """
 function run_tests(; kwargs...)
-    run_tests(TestRunnerTag(); kwargs...)
+    return run_tests(TestRunnerTag(); kwargs...)
 end
 
 # Export public API (only user-facing functions, tags are internal)
