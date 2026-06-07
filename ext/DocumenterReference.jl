@@ -233,10 +233,12 @@ function CTBase.automatic_reference_documentation(
 )
     # Validate arguments
     if !public && !private
-        throw(CTBase.Exceptions.IncorrectArgument(
-            "both `public` and `private` cannot be false",
-            context="automatic_reference_documentation",
-        ))
+        throw(
+            CTBase.Exceptions.IncorrectArgument(
+                "both `public` and `private` cannot be false";
+                context="automatic_reference_documentation",
+            ),
+        )
     end
 
     # Parse primary_modules into a Dict{Module, Vector{String}}
@@ -388,11 +390,13 @@ function _parse_primary_modules(primary_modules::Vector)
             files = last(m)
             result[mod] = _normalize_paths(files isa Vector ? files : [files])
         else
-            throw(CTBase.Exceptions.IncorrectArgument(
-                "Invalid element in primary_modules: expected Module or Module => files pair",
-                got=string(typeof(m)),
-                context="_parse_primary_modules",
-            ))
+            throw(
+                CTBase.Exceptions.IncorrectArgument(
+                    "Invalid element in primary_modules: expected Module or Module => files pair";
+                    got=string(typeof(m)),
+                    context="_parse_primary_modules",
+                ),
+            )
         end
     end
     return result
@@ -404,7 +408,7 @@ end
 Normalize a collection of paths to absolute paths.
 """
 function _normalize_paths(paths)
-    isempty(paths) ? String[] : [abspath(p) for p in paths]
+    return isempty(paths) ? String[] : [abspath(p) for p in paths]
 end
 
 """
@@ -1149,7 +1153,7 @@ function _finalize_api_pages(document::Documenter.Document)
         mkpath(dirname(source_path))
         open(source_path, "w") do io
             write(io, overview)
-            write(io, join(all_docstrings, "\n"))
+            return write(io, join(all_docstrings, "\n"))
         end
 
         document.blueprint.pages[filename] = Documenter.Page(

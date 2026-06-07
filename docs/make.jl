@@ -51,7 +51,7 @@ include("api_reference.jl")
 # ═══════════════════════════════════════════════════════════════════════════════
 
 with_api_reference(src_dir) do api_pages
-    makedocs(;
+    return makedocs(;
         draft=draft,
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
         warnonly=[:cross_references],

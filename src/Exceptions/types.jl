@@ -80,7 +80,7 @@ struct IncorrectArgument <: CTException
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
     )
-        new(msg, got, expected, suggestion, context)
+        return new(msg, got, expected, suggestion, context)
     end
 end
 
@@ -135,7 +135,7 @@ struct PreconditionError <: CTException
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
     )
-        new(msg, reason, suggestion, context)
+        return new(msg, reason, suggestion, context)
     end
 end
 
@@ -192,7 +192,7 @@ struct NotImplemented <: CTException
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
     )
-        new(msg, required_method, suggestion, context)
+        return new(msg, required_method, suggestion, context)
     end
 end
 
@@ -241,7 +241,7 @@ struct ParsingError <: CTException
         location::Union{String,Nothing}=nothing,
         suggestion::Union{String,Nothing}=nothing,
     )
-        new(msg, location, suggestion)
+        return new(msg, location, suggestion)
     end
 end
 
@@ -301,7 +301,7 @@ struct AmbiguousDescription <: CTException
         context::Union{String,Nothing}=nothing,
         diagnostic::Union{String,Nothing}=nothing,
     )
-        new(msg, description, candidates, suggestion, context, diagnostic)
+        return new(msg, description, candidates, suggestion, context, diagnostic)
     end
 end
 
@@ -425,6 +425,6 @@ struct SolverFailure <: CTException
         suggestion::Union{String,Nothing}=nothing,
         context::Union{String,Nothing}=nothing,
     )
-        new(msg, retcode, suggestion, context)
+        return new(msg, retcode, suggestion, context)
     end
 end

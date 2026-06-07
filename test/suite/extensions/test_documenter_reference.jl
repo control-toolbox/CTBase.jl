@@ -221,7 +221,7 @@ function test_documenter_reference()
 
         seen = Symbol[]
         DR._iterate_over_symbols(config, symbols) do key, type
-            push!(seen, key)
+            return push!(seen, key)
         end
 
         @test :keep in seen
@@ -260,7 +260,7 @@ function test_documenter_reference()
 
         seen1 = Symbol[]
         DR._iterate_over_symbols(config1, symbols1) do key, type
-            push!(seen1, key)
+            return push!(seen1, key)
         end
         @test :myfun in seen1
 
@@ -309,13 +309,13 @@ function test_documenter_reference()
 
         seen2 = Symbol[]
         DR._iterate_over_symbols(config2, symbols_module) do key, type
-            push!(seen2, key)
+            return push!(seen2, key)
         end
         @test isempty(seen2)
 
         seen3 = Symbol[]
         DR._iterate_over_symbols(config3, symbols_module) do key, type
-            push!(seen3, key)
+            return push!(seen3, key)
         end
         @test :SubModule in seen3
     end
@@ -609,7 +609,7 @@ function test_documenter_reference()
         )
         seen = Symbol[]
         DR._iterate_over_symbols(config, Pair{Symbol,DR.DocType}[]) do key, type
-            push!(seen, key)
+            return push!(seen, key)
         end
         @test isempty(seen)
 

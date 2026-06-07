@@ -168,7 +168,7 @@ function test_coverage_post_process()
                 cd(other) do
                     mkpath("src")
                     write(joinpath("src", "bar.jl"), "bar(x) = x\n")
-                    write(
+                    return write(
                         joinpath("src", "bar.jl.1234.cov"),
                         """
         -:    1:bar(x) = x
