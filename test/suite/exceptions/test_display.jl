@@ -202,12 +202,12 @@ function test_exception_display()
                 error("test error")
             catch e
                 st = stacktrace(catch_backtrace())
-                filtered = CTBase.Exceptions.extract_user_frames(st)
+                filtered = CTBase.Exceptions._extract_user_frames(st)
 
                 # Should return some frames (non-empty in normal test environment)
                 @test filtered isa Vector
                 # The filtering should work without errors
-                @test_nowarn CTBase.Exceptions.extract_user_frames(st)
+                @test_nowarn CTBase.Exceptions._extract_user_frames(st)
             end
         end
 

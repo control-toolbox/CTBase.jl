@@ -45,7 +45,7 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
        Context: description completion
 ```
 
-See also: [`CTBase.Descriptions.compute_similarity`](@ref), [`CTBase.Descriptions.find_similar_descriptions`](@ref), [`CTBase.Descriptions.format_description_candidates`](@ref), [`CTBase.Exceptions.AmbiguousDescription`](@ref)
+See also: [`CTBase.Descriptions._compute_similarity`](@ref), [`CTBase.Descriptions._find_similar_descriptions`](@ref), [`CTBase.Descriptions._format_description_candidates`](@ref), [`CTBase.Exceptions.AmbiguousDescription`](@ref)
 """
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
@@ -70,8 +70,8 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
 
     if maximum(table[:, 2]) == 0
         # Find similar descriptions for helpful suggestions
-        similar_descs = find_similar_descriptions(list, descriptions; max_results=5)
-        all_candidates = format_description_candidates(descriptions; max_show=10)
+        similar_descs = _find_similar_descriptions(list, descriptions; max_results=5)
+        all_candidates = _format_description_candidates(descriptions; max_show=10)
 
         # Build contextual suggestion
         suggestion = if !isempty(similar_descs)
