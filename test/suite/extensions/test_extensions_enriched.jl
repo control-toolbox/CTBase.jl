@@ -1,29 +1,32 @@
 module TestExtensionsEnriched
 
-using Test
-using CTBase
-using Main.TestOptions: VERBOSE, SHOWTIMING
+import Test
+import CTBase.Extensions
+import CTBase.Exceptions
+
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # Fake tag types for extension stub testing (testing-creation.md §6).
 # These subtype the abstract tags but are unknown to any extension,
 # so the stubs always throw ExtensionError regardless of which extensions are loaded.
-struct FakeDocumenterReferenceTag <: CTBase.AbstractDocumenterReferenceTag end
-struct FakeCoveragePostprocessingTag <: CTBase.AbstractCoveragePostprocessingTag end
-struct FakeTestRunnerTag <: CTBase.AbstractTestRunnerTag end
+struct FakeDocumenterReferenceTag <: Extensions.AbstractDocumenterReferenceTag end
+struct FakeCoveragePostprocessingTag <: Extensions.AbstractCoveragePostprocessingTag end
+struct FakeTestRunnerTag <: Extensions.AbstractTestRunnerTag end
 
 function test_extensions_enriched()
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Enriched Extension Errors" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Enriched Extension Errors" begin
 
         # ====================================================================
         # UNIT TESTS - Extension Error Contract
         # ====================================================================
 
-        @testset "ExtensionError Contract Implementation" begin
+        Test.@testset "ExtensionError Contract Implementation" begin
             # Test constructor throws if no dependencies provided
-            @test_throws CTBase.PreconditionError CTBase.ExtensionError()
+            Test.@test_throws Exceptions.PreconditionError Exceptions.ExtensionError()
 
             # Test enriched ExtensionError creation
-            e = CTBase.ExtensionError(
+            e = Exceptions.ExtensionError(
                 :Documenter,
                 :Markdown;
                 message="to generate documentation",
@@ -31,35 +34,35 @@ function test_extensions_enriched()
                 context="reference generation",
             )
 
-            @test e isa CTBase.ExtensionError
-            @test e.weakdeps == (:Documenter, :Markdown)
-            @test e.msg == "missing dependencies to generate documentation"
-            @test e.feature == "automatic documentation"
-            @test e.context == "reference generation"
+            Test.@test e isa Exceptions.ExtensionError
+            Test.@test e.weakdeps == (:Documenter, :Markdown)
+            Test.@test e.msg == "missing dependencies to generate documentation"
+            Test.@test e.feature == "automatic documentation"
+            Test.@test e.context == "reference generation"
         end
 
         # ====================================================================
         # INTEGRATION TESTS - Extension Functions
         # ====================================================================
 
-        @testset "Extension Function Error Handling" begin
+        Test.@testset "Extension Function Error Handling" begin
             # Test automatic_reference_documentation error
-            @testset "automatic_reference_documentation" begin
-                @test_throws CTBase.ExtensionError CTBase.automatic_reference_documentation(
+            Test.@testset "automatic_reference_documentation" begin
+                Test.@test_throws Exceptions.ExtensionError Extensions.automatic_reference_documentation(
                     FakeDocumenterReferenceTag()
                 )
             end
 
             # Test postprocess_coverage error
-            @testset "postprocess_coverage" begin
-                @test_throws CTBase.ExtensionError CTBase.postprocess_coverage(
+            Test.@testset "postprocess_coverage" begin
+                Test.@test_throws Exceptions.ExtensionError Extensions.postprocess_coverage(
                     FakeCoveragePostprocessingTag()
                 )
             end
 
             # Test run_tests error
-            @testset "run_tests" begin
-                @test_throws CTBase.ExtensionError CTBase.run_tests(FakeTestRunnerTag())
+            Test.@testset "run_tests" begin
+                Test.@test_throws Exceptions.ExtensionError Extensions.run_tests(FakeTestRunnerTag())
             end
         end
 
@@ -67,32 +70,32 @@ function test_extensions_enriched()
         # ERROR TESTS - Exception Quality
         # ====================================================================
 
-        @testset "ExtensionError Constructor Validation" begin
-            @testset "No dependencies provided" begin
-                @test_throws CTBase.PreconditionError CTBase.ExtensionError()
+        Test.@testset "ExtensionError Constructor Validation" begin
+            Test.@testset "No dependencies provided" begin
+                Test.@test_throws Exceptions.PreconditionError Exceptions.ExtensionError()
 
                 try
-                    CTBase.ExtensionError()
-                    @test false  # Should not reach here
+                    Exceptions.ExtensionError()
+                    Test.@test false  # Should not reach here
                 catch e
-                    @test e isa CTBase.PreconditionError
-                    @test occursin("weak dependence", e.msg)
-                    @test occursin("ExtensionError called without dependencies", e.reason)
+                    Test.@test e isa Exceptions.PreconditionError
+                    Test.@test occursin("weak dependence", e.msg)
+                    Test.@test occursin("ExtensionError called without dependencies", e.reason)
                 end
             end
 
-            @testset "Single dependency" begin
-                e = CTBase.ExtensionError(:MyExt)
-                @test e isa CTBase.ExtensionError
-                @test e.weakdeps == (:MyExt,)
-                @test e.msg == "missing dependencies"
+            Test.@testset "Single dependency" begin
+                e = Exceptions.ExtensionError(:MyExt)
+                Test.@test e isa Exceptions.ExtensionError
+                Test.@test e.weakdeps == (:MyExt,)
+                Test.@test e.msg == "missing dependencies"
             end
 
-            @testset "Multiple dependencies with message" begin
-                e = CTBase.ExtensionError(:Ext1, :Ext2; message="to enable feature X")
-                @test e isa CTBase.ExtensionError
-                @test e.weakdeps == (:Ext1, :Ext2)
-                @test e.msg == "missing dependencies to enable feature X"
+            Test.@testset "Multiple dependencies with message" begin
+                e = Exceptions.ExtensionError(:Ext1, :Ext2; message="to enable feature X")
+                Test.@test e isa Exceptions.ExtensionError
+                Test.@test e.weakdeps == (:Ext1, :Ext2)
+                Test.@test e.msg == "missing dependencies to enable feature X"
             end
         end
     end

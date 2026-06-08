@@ -1,3 +1,18 @@
+module TestDocumenterReference
+
+import Test
+import CTBase
+import CTBase.Exceptions: Exceptions
+import CTBase.Extensions: Extensions
+import Documenter
+
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+
+const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
+const DR = DocumenterReference
+
+# ------------------------------------------------------------------------------------------ #
 """
 Docstring for the main test module used to validate module-level documentation
 in the generated API pages.
@@ -37,156 +52,169 @@ end
 const MYCONST = 42
 
 end
+using .DocumenterReferenceTestMod
+# ------------------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------------------ #
 module DRTypeFormatTestMod
 struct Simple end
 struct Parametric{T} end
 struct WithValue{T,N} end
 end
+# ------------------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------------------ #
 module DRMethodTestMod
 f() = 1
 f(x::Int) = x
 g(x::Int, y::String) = x
 h(xs::Int...) = length(xs)
 end
+# ------------------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------------------ #
 module DRExternalTestMod
 extfun(x::Int) = x
 extfun(x::String) = length(x)
 end
+# ------------------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------------------ #
 module DRNoDocModule
 module Inner end
 end
+# ------------------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------------------ #
 module DRUnionAllTestMod
 f(x::T) where {T} = x
 end
-
-using .DocumenterReferenceTestMod
+# ------------------------------------------------------------------------------------------ #
 
 function test_documenter_reference()
-    DR = DocumenterReference
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
-        @test_throws CTBase.Exceptions.IncorrectArgument CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="ref",
-            primary_modules=["invalid_string"], # String is not Module or Pair
-            title="My API",
-        )
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Test.@test_throws Extensions.IncorrectArgument Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="ref",
+                    primary_modules=["invalid_string"], # String is not Module or Pair
+                    title="My API",
+                )
+            end
+        end
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "reset_config! clears CONFIG" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "reset_config! clears CONFIG" begin
         DR.reset_config!()
-        @test isempty(DR.CONFIG)
+        Test.@test isempty(DR.CONFIG)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_default_basename and _build_page_path" begin
-        @test DR._default_basename("manual", true, true) == "manual"
-        @test DR._default_basename("", true, true) == "api"
-        @test DR._default_basename("", true, false) == "public"
-        @test DR._default_basename("", false, true) == "private"
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_default_basename and _build_page_path" begin
+        Test.@test DR._default_basename("manual", true, true) == "manual"
+        Test.@test DR._default_basename("", true, true) == "api"
+        Test.@test DR._default_basename("", true, false) == "public"
+        Test.@test DR._default_basename("", false, true) == "private"
 
-        @test DR._build_page_path("api", "public") == "api/public"
-        @test DR._build_page_path(".", "public") == "public"
-        @test DR._build_page_path("", "public") == "public"
+        Test.@test DR._build_page_path("api", "public") == "api/public"
+        Test.@test DR._build_page_path(".", "public") == "public"
+        Test.@test DR._build_page_path("", "public") == "public"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_classify_symbol and _to_string" begin
-        @test DR._classify_symbol(nothing, "@mymacro") == DR.DOCTYPE_MACRO
-        @test DR._classify_symbol(DocumenterReferenceTestMod.SubModule, "SubModule") ==
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_classify_symbol and _to_string" begin
+        Test.@test DR._classify_symbol(nothing, "@mymacro") == DR.DOCTYPE_MACRO
+        Test.@test DR._classify_symbol(DocumenterReferenceTestMod.SubModule, "SubModule") ==
             DR.DOCTYPE_MODULE
-        @test DR._classify_symbol(DocumenterReferenceTestMod.AbstractFoo, "AbstractFoo") ==
+        Test.@test DR._classify_symbol(DocumenterReferenceTestMod.AbstractFoo, "AbstractFoo") ==
             DR.DOCTYPE_ABSTRACT_TYPE
-        @test DR._classify_symbol(DocumenterReferenceTestMod.Foo, "Foo") ==
+        Test.@test DR._classify_symbol(DocumenterReferenceTestMod.Foo, "Foo") ==
             DR.DOCTYPE_STRUCT
-        @test DR._classify_symbol(DocumenterReferenceTestMod.myfun, "myfun") ==
+        Test.@test DR._classify_symbol(DocumenterReferenceTestMod.myfun, "myfun") ==
             DR.DOCTYPE_FUNCTION
-        @test DR._classify_symbol(DocumenterReferenceTestMod.MYCONST, "MYCONST") ==
+        Test.@test DR._classify_symbol(DocumenterReferenceTestMod.MYCONST, "MYCONST") ==
             DR.DOCTYPE_CONSTANT
 
-        @test DR._to_string(DR.DOCTYPE_ABSTRACT_TYPE) == "abstract type"
-        @test DR._to_string(DR.DOCTYPE_CONSTANT) == "constant"
-        @test DR._to_string(DR.DOCTYPE_FUNCTION) == "function"
-        @test DR._to_string(DR.DOCTYPE_MACRO) == "macro"
-        @test DR._to_string(DR.DOCTYPE_MODULE) == "module"
-        @test DR._to_string(DR.DOCTYPE_STRUCT) == "struct"
+        Test.@test DR._to_string(DR.DOCTYPE_ABSTRACT_TYPE) == "abstract type"
+        Test.@test DR._to_string(DR.DOCTYPE_CONSTANT) == "constant"
+        Test.@test DR._to_string(DR.DOCTYPE_FUNCTION) == "function"
+        Test.@test DR._to_string(DR.DOCTYPE_MACRO) == "macro"
+        Test.@test DR._to_string(DR.DOCTYPE_MODULE) == "module"
+        Test.@test DR._to_string(DR.DOCTYPE_STRUCT) == "struct"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file" begin
         path = DR._get_source_file(DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION)
-        @test path === abspath(@__FILE__)
+        Test.@test path === abspath(@__FILE__)
 
         # No docstring => should use method-based resolution
         path2 = DR._get_source_file(
             DocumenterReferenceTestMod, :no_doc, DR.DOCTYPE_FUNCTION
         )
-        @test path2 === abspath(@__FILE__)
+        Test.@test path2 === abspath(@__FILE__)
 
         # Missing symbol should be caught and return nothing
         missing_path = DR._get_source_file(
             DocumenterReferenceTestMod, :__does_not_exist__, DR.DOCTYPE_FUNCTION
         )
-        @test missing_path === nothing
+        Test.@test missing_path === nothing
 
         const_path = DR._get_source_file(
             DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT
         )
-        @test const_path === nothing
+        Test.@test const_path === nothing
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_from_methods" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_from_methods" begin
         # For built-in operators like +, source detection behavior may vary by Julia version.
         # In Julia 1.12+, it may return a source file path even for +.
         # We just verify the function runs without error and returns String or nothing.
         result = DR._get_source_from_methods(+)
-        @test result === nothing || result isa String
+        Test.@test result === nothing || result isa String
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_parse_primary_modules with Pair" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_parse_primary_modules with Pair" begin
         d = DR._parse_primary_modules([DocumenterReferenceTestMod => @__FILE__])
-        @test d[DocumenterReferenceTestMod] == [abspath(@__FILE__)]
+        Test.@test d[DocumenterReferenceTestMod] == [abspath(@__FILE__)]
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_has_documentation: module documented elsewhere" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_has_documentation: module documented elsewhere" begin
         modules = Dict(DRNoDocModule.Inner => Any[])
-        @test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) ==
+        Test.@test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) ==
             true
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Type formatting helpers" begin
-        @test DR._format_datatype_for_docs(UInt) == "::UInt"
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Type formatting helpers" begin
+        Test.@test DR._format_datatype_for_docs(UInt) == "::UInt"
 
         # Parametric types without concrete params are UnionAll, use _format_type_for_docs
         param_result = DR._format_type_for_docs(DRTypeFormatTestMod.Parametric)
-        @test occursin("Parametric", param_result)
+        Test.@test occursin("Parametric", param_result)
 
         # Concrete params => kept (WithValue{Int,2} is a DataType)
         concrete_result = DR._format_datatype_for_docs(DRTypeFormatTestMod.WithValue{Int,2})
-        @test occursin("WithValue", concrete_result)
-        @test occursin("Int", concrete_result)
-        @test occursin("2", concrete_result)
+        Test.@test occursin("WithValue", concrete_result)
+        Test.@test occursin("Int", concrete_result)
+        Test.@test occursin("2", concrete_result)
 
         # Fallback branch for non-type inputs
-        @test DR._format_type_for_docs(1) == "::1"
+        Test.@test DR._format_type_for_docs(1) == "::1"
 
         # TypeVar formatting in _format_type_param - need to unwrap UnionAll first
         unwrapped = Base.unwrap_unionall(DRTypeFormatTestMod.Parametric)
         tv = unwrapped.parameters[1]
-        @test tv isa TypeVar
-        @test DR._format_type_param(tv) == "T"
+        Test.@test tv isa TypeVar
+        Test.@test DR._format_type_param(tv) == "T"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string handles UnionAll" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string handles UnionAll" begin
         m = first(methods(DRUnionAllTestMod.f))
         s = DR._method_signature_string(m, DRUnionAllTestMod, :f)
-        @test occursin("DRUnionAllTestMod.f", s)
-        @test occursin("T", s)
+        Test.@test occursin("DRUnionAllTestMod.f", s)
+        Test.@test occursin("T", s)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols filtering" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols filtering" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => Any[])
         exclude = Set{Symbol}([:skip])
@@ -220,16 +248,20 @@ function test_documenter_reference()
         ]
 
         seen = Symbol[]
-        DR._iterate_over_symbols(config, symbols) do key, type
-            return push!(seen, key)
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                DR._iterate_over_symbols(config, symbols) do key, type
+                    return push!(seen, key)
+                end
+            end
         end
 
-        @test :keep in seen
-        @test :skip ∉ seen
-        @test :no_doc ∉ seen
+        Test.@test :keep in seen
+        Test.@test :skip ∉ seen
+        Test.@test :no_doc ∉ seen
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols with source_files and include_without_source" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols with source_files and include_without_source" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => Any[])
         sort_by(x) = x
@@ -259,10 +291,14 @@ function test_documenter_reference()
         symbols1 = [:myfun => DR.DOCTYPE_FUNCTION]
 
         seen1 = Symbol[]
-        DR._iterate_over_symbols(config1, symbols1) do key, type
-            return push!(seen1, key)
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                DR._iterate_over_symbols(config1, symbols1) do key, type
+                    return push!(seen1, key)
+                end
+            end
         end
-        @test :myfun in seen1
+        Test.@test :myfun in seen1
 
         # Case 2: Module symbols without source are kept only when include_without_source=true
         config2 = DR._Config(
@@ -308,98 +344,122 @@ function test_documenter_reference()
         symbols_module = [:SubModule => DR.DOCTYPE_MODULE]
 
         seen2 = Symbol[]
-        DR._iterate_over_symbols(config2, symbols_module) do key, type
-            return push!(seen2, key)
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                DR._iterate_over_symbols(config2, symbols_module) do key, type
+                    return push!(seen2, key)
+                end
+            end
         end
-        @test isempty(seen2)
+        Test.@test isempty(seen2)
 
         seen3 = Symbol[]
-        DR._iterate_over_symbols(config3, symbols_module) do key, type
-            return push!(seen3, key)
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                DR._iterate_over_symbols(config3, symbols_module) do key, type
+                    return push!(seen3, key)
+                end
+            end
         end
-        @test :SubModule in seen3
+        Test.@test :SubModule in seen3
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation configuration" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation configuration" begin
         DR.reset_config!()
 
         # Single-module, public-only
-        pages1 = CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="ref",
-            primary_modules=[DocumenterReferenceTestMod],
-            public=true,
-            private=false,
-            title="My API",
-        )
-
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation default tag" begin
-            DR.reset_config!()
-
-            pages_default = CTBase.automatic_reference_documentation(;
-                subdirectory="ref",
-                primary_modules=[DocumenterReferenceTestMod],
-                public=true,
-                private=false,
-                title="My API",
-            )
-
-            @test length(DR.CONFIG) == 1
-            cfg_default = DR.CONFIG[1]
-            @test cfg_default.current_module === DocumenterReferenceTestMod
-            @test cfg_default.subdirectory == "ref"
-            @test cfg_default.public == true
-            @test cfg_default.private == false
-            @test cfg_default.filename == "public"
-            @test pages_default == pages1
+        pages1 = redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="ref",
+                    primary_modules=[DocumenterReferenceTestMod],
+                    public=true,
+                    private=false,
+                    title="My API",
+                )
+            end
         end
 
-        @test length(DR.CONFIG) == 1
+        Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation default tag" begin
+            DR.reset_config!()
+
+            pages_default = redirect_stdout(devnull) do
+                redirect_stderr(devnull) do
+                    Extensions.automatic_reference_documentation(;
+                        subdirectory="ref",
+                        primary_modules=[DocumenterReferenceTestMod],
+                        public=true,
+                        private=false,
+                        title="My API",
+                    )
+                end
+            end
+
+            Test.@test length(DR.CONFIG) == 1
+            cfg_default = DR.CONFIG[1]
+            Test.@test cfg_default.current_module === DocumenterReferenceTestMod
+            Test.@test cfg_default.subdirectory == "ref"
+            Test.@test cfg_default.public == true
+            Test.@test cfg_default.private == false
+            Test.@test cfg_default.filename == "public"
+            Test.@test pages_default == pages1
+        end
+
+        Test.@test length(DR.CONFIG) == 1
         cfg1 = DR.CONFIG[1]
-        @test cfg1.current_module === DocumenterReferenceTestMod
-        @test cfg1.subdirectory == "ref"
-        @test cfg1.public == true
-        @test cfg1.private == false
-        @test cfg1.filename == "public"
-        @test pages1 == ("My API" => "ref/public.md")
+        Test.@test cfg1.current_module === DocumenterReferenceTestMod
+        Test.@test cfg1.subdirectory == "ref"
+        Test.@test cfg1.public == true
+        Test.@test cfg1.private == false
+        Test.@test cfg1.filename == "public"
+        Test.@test pages1 == ("My API" => "ref/public.md")
 
         # Both public and private pages
         DR.reset_config!()
-        pages2 = CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="ref",
-            primary_modules=[DocumenterReferenceTestMod],
-            public=true,
-            private=true,
-            title="All API",
-        )
+        pages2 = redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="ref",
+                    primary_modules=[DocumenterReferenceTestMod],
+                    public=true,
+                    private=true,
+                    title="All API",
+                )
+            end
+        end
 
-        @test length(DR.CONFIG) == 1
+        Test.@test length(DR.CONFIG) == 1
         cfg2 = DR.CONFIG[1]
-        @test cfg2.filename == "api"
-        @test cfg2.public == true
-        @test cfg2.private == true
-        @test cfg2.title == "All API"
-        @test pages2 == (
+        Test.@test cfg2.filename == "api"
+        Test.@test cfg2.public == true
+        Test.@test cfg2.private == true
+        Test.@test cfg2.title == "All API"
+        Test.@test pages2 == (
             "All API" =>
                 ["Public" => "ref/api_public.md", "Private" => "ref/api_private.md"]
         )
 
         # public=false, private=false should error
-        @test_throws CTBase.Exceptions.IncorrectArgument CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="ref",
-            primary_modules=[DocumenterReferenceTestMod],
-            public=false,
-            private=false,
-        )
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Test.@test_throws Extensions.IncorrectArgument Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="ref",
+                    primary_modules=[DocumenterReferenceTestMod],
+                    public=false,
+                    private=false,
+                )
+            end
+        end
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
-        @test Documenter.Selectors.order(DR.APIBuilder) == 0.5
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
+        Test.@test Documenter.Selectors.order(DR.APIBuilder) == 0.5
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_collect_module_docstrings includes module docstring" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_collect_module_docstrings includes module docstring" begin
         DR.reset_config!()
 
         config = DR._Config(
@@ -425,7 +485,7 @@ function test_documenter_reference()
         symbols = DR._exported_symbols(DocumenterReferenceTestMod).exported
         docs = DR._collect_module_docstrings(config, symbols)
 
-        @test any(
+        Test.@test any(
             doc -> occursin("```@docs\n$(DocumenterReferenceTestMod)\n```", doc), docs
         )
     end
@@ -434,64 +494,68 @@ function test_documenter_reference()
     # NEW TESTS: _exported_symbols
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_exported_symbols classification" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_exported_symbols classification" begin
         # Test that _exported_symbols correctly classifies symbols
         result = DR._exported_symbols(DocumenterReferenceTestMod)
 
         # Check structure: should return NamedTuple with exported and private fields
-        @test haskey(result, :exported)
-        @test haskey(result, :private)
+        Test.@test haskey(result, :exported)
+        Test.@test haskey(result, :private)
 
         # Check that exported list contains expected symbols (none exported in test module)
-        @test result.exported isa Vector
+        Test.@test result.exported isa Vector
 
         # Check that private list contains our test symbols
         private_symbols = Dict(result.private)
-        @test haskey(private_symbols, :myfun)
-        @test private_symbols[:myfun] == DR.DOCTYPE_FUNCTION
-        @test haskey(private_symbols, :keep)
-        @test haskey(private_symbols, :skip)
-        @test haskey(private_symbols, :no_doc)
-        @test haskey(private_symbols, :SubModule)
-        @test private_symbols[:SubModule] == DR.DOCTYPE_MODULE
-        @test haskey(private_symbols, :AbstractFoo)
-        @test private_symbols[:AbstractFoo] == DR.DOCTYPE_ABSTRACT_TYPE
-        @test haskey(private_symbols, :Foo)
-        @test private_symbols[:Foo] == DR.DOCTYPE_STRUCT
-        @test haskey(private_symbols, :MYCONST)
-        @test private_symbols[:MYCONST] == DR.DOCTYPE_CONSTANT
+        Test.@test haskey(private_symbols, :myfun)
+        Test.@test private_symbols[:myfun] == DR.DOCTYPE_FUNCTION
+        Test.@test haskey(private_symbols, :keep)
+        Test.@test haskey(private_symbols, :skip)
+        Test.@test haskey(private_symbols, :no_doc)
+        Test.@test haskey(private_symbols, :SubModule)
+        Test.@test private_symbols[:SubModule] == DR.DOCTYPE_MODULE
+        Test.@test haskey(private_symbols, :AbstractFoo)
+        Test.@test private_symbols[:AbstractFoo] == DR.DOCTYPE_ABSTRACT_TYPE
+        Test.@test haskey(private_symbols, :Foo)
+        Test.@test private_symbols[:Foo] == DR.DOCTYPE_STRUCT
+        Test.@test haskey(private_symbols, :MYCONST)
+        Test.@test private_symbols[:MYCONST] == DR.DOCTYPE_CONSTANT
     end
 
     # ============================================================================
     # NEW TESTS: automatic_reference_documentation multi-module
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module" begin
         DR.reset_config!()
 
         # Create a second test module for multi-module testing
         mod1 = DocumenterReferenceTestMod
 
         # Test multi-module case (using same module twice as a proxy)
-        pages = CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="api",
-            primary_modules=[mod1, mod1],  # Two entries to trigger multi-module path
-            public=true,
-            private=true,
-            title="Multi API",
-        )
+        pages = redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="api",
+                    primary_modules=[mod1, mod1],  # Two entries to trigger multi-module path
+                    public=true,
+                    private=true,
+                    title="Multi API",
+                )
+            end
+        end
 
         # Should return a Pair with title and list of module pages
-        @test pages isa Pair
-        @test first(pages) == "Multi API"
-        @test last(pages) isa Vector
+        Test.@test pages isa Pair
+        Test.@test first(pages) == "Multi API"
+        Test.@test last(pages) isa Vector
 
         # CONFIG should have 1 entry (one per unique module)
-        @test length(DR.CONFIG) == 1
+        Test.@test length(DR.CONFIG) == 1
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module with filename" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "automatic_reference_documentation multi-module with filename" begin
         DR.reset_config!()
 
         mod1 = DocumenterReferenceTestMod
@@ -501,90 +565,94 @@ function test_documenter_reference()
         # Note: DocumenterReference currently splits public/private if both are true,
         # ignoring the filename for the split structure.
         # So we test public-only to verify filename is respected.
-        pages = CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="api",
-            primary_modules=[mod1, mod2],
-            public=true,
-            private=false,
-            title="Combined Public API",
-            filename="combined_public",
-        )
+        pages = redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="api",
+                    primary_modules=[mod1, mod2],
+                    public=true,
+                    private=false,
+                    title="Combined Public API",
+                    filename="combined_public",
+                )
+            end
+        end
 
         # Should return a Pair with title and path to the combined file
-        @test pages isa Pair
-        @test first(pages) == "Combined Public API"
-        @test last(pages) == "api/combined_public.md"
+        Test.@test pages isa Pair
+        Test.@test first(pages) == "Combined Public API"
+        Test.@test last(pages) == "api/combined_public.md"
 
         # CONFIG should have 2 entries (one per unique module)
-        @test length(DR.CONFIG) == 2
-        @test count(c -> c.current_module == mod1, DR.CONFIG) == 1
-        @test count(c -> c.current_module == mod2, DR.CONFIG) == 1
+        Test.@test length(DR.CONFIG) == 2
+        Test.@test count(c -> c.current_module == mod1, DR.CONFIG) == 1
+        Test.@test count(c -> c.current_module == mod2, DR.CONFIG) == 1
     end
 
     # ============================================================================
     # NEW TESTS: _get_source_file expanded
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file expanded cases" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file expanded cases" begin
         # Function case (already tested, but verify)
         func_path = DR._get_source_file(
             DocumenterReferenceTestMod, :myfun, DR.DOCTYPE_FUNCTION
         )
-        @test func_path !== nothing
-        @test endswith(func_path, "test_documenter_reference.jl")
+        Test.@test func_path !== nothing
+        Test.@test endswith(func_path, "test_documenter_reference.jl")
 
         # Struct case - should find source via constructor methods
         struct_path = DR._get_source_file(
             DocumenterReferenceTestMod, :Foo, DR.DOCTYPE_STRUCT
         )
         # Structs defined in test file should be found
-        @test struct_path === nothing ||
+        Test.@test struct_path === nothing ||
             endswith(struct_path, "test_documenter_reference.jl")
 
         # Abstract type case - typically returns nothing (no constructor)
         abstract_path = DR._get_source_file(
             DocumenterReferenceTestMod, :AbstractFoo, DR.DOCTYPE_ABSTRACT_TYPE
         )
-        @test abstract_path === nothing
+        Test.@test abstract_path === nothing
 
         # Module case - modules cannot reliably determine source
         mod_path = DR._get_source_file(
             DocumenterReferenceTestMod, :SubModule, DR.DOCTYPE_MODULE
         )
-        @test mod_path === nothing
+        Test.@test mod_path === nothing
 
         # Constant case (already tested)
         const_path = DR._get_source_file(
             DocumenterReferenceTestMod, :MYCONST, DR.DOCTYPE_CONSTANT
         )
-        @test const_path === nothing
+        Test.@test const_path === nothing
     end
 
     # ============================================================================
     # NEW TESTS: Edge cases
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Edge cases" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Edge cases" begin
         # _build_page_path with various inputs
-        @test DR._build_page_path("", "") == ""
-        @test DR._build_page_path(".", "") == ""
-        @test DR._build_page_path("dir", "") == "dir/"
-        @test DR._build_page_path("a/b/c", "file.md") == "a/b/c/file.md"
+        Test.@test DR._build_page_path("", "") == ""
+        Test.@test DR._build_page_path(".", "") == ""
+        Test.@test DR._build_page_path("dir", "") == "dir/"
+        Test.@test DR._build_page_path("a/b/c", "file.md") == "a/b/c/file.md"
 
         # _default_basename edge cases
-        @test DR._default_basename("custom", false, false) == "custom"  # Custom overrides flags
-        @test DR._default_basename("", false, false) == "private"  # Fallback when both false
+        Test.@test DR._default_basename("custom", false, false) == "custom"  # Custom overrides flags
+        Test.@test DR._default_basename("", false, false) == "private"  # Fallback when both false
 
         # _classify_symbol with edge cases
-        @test DR._classify_symbol(42, "fortytwo") == DR.DOCTYPE_CONSTANT  # Integer constant
-        @test DR._classify_symbol("hello", "greeting") == DR.DOCTYPE_CONSTANT  # String constant
-        @test DR._classify_symbol([1, 2, 3], "myarray") == DR.DOCTYPE_CONSTANT  # Array constant
+        Test.@test DR._classify_symbol(42, "fortytwo") == DR.DOCTYPE_CONSTANT  # Integer constant
+        Test.@test DR._classify_symbol("hello", "greeting") == DR.DOCTYPE_CONSTANT  # String constant
+        Test.@test DR._classify_symbol([1, 2, 3], "myarray") == DR.DOCTYPE_CONSTANT  # Array constant
 
         # _to_string covers all enum values (verify no error)
         for dt in instances(DR.DocType)
-            @test DR._to_string(dt) isa String
-            @test length(DR._to_string(dt)) > 0
+            Test.@test DR._to_string(dt) isa String
+            Test.@test length(DR._to_string(dt)) > 0
         end
 
         # _iterate_over_symbols with empty list
@@ -608,75 +676,79 @@ function test_documenter_reference()
             "",
         )
         seen = Symbol[]
-        DR._iterate_over_symbols(config, Pair{Symbol,DR.DocType}[]) do key, type
-            return push!(seen, key)
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                DR._iterate_over_symbols(config, Pair{Symbol,DR.DocType}[]) do key, type
+                    return push!(seen, key)
+                end
+            end
         end
-        @test isempty(seen)
+        Test.@test isempty(seen)
 
         # reset_config! is idempotent
         DR.reset_config!()
         DR.reset_config!()
-        @test isempty(DR.CONFIG)
+        Test.@test isempty(DR.CONFIG)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs and helpers" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs and helpers" begin
         simple_str = DR._format_type_for_docs(DRTypeFormatTestMod.Simple)
-        @test startswith(simple_str, "::")
-        @test occursin("DRTypeFormatTestMod.Simple", simple_str)
+        Test.@test startswith(simple_str, "::")
+        Test.@test occursin("DRTypeFormatTestMod.Simple", simple_str)
 
         param_type = DRTypeFormatTestMod.Parametric{DRTypeFormatTestMod.Simple}
         param_str = DR._format_type_for_docs(param_type)
-        @test occursin("Parametric", param_str)
-        @test occursin("Simple", param_str)
+        Test.@test occursin("Parametric", param_str)
+        Test.@test occursin("Simple", param_str)
 
         union_str = DR._format_type_for_docs(Union{DRTypeFormatTestMod.Simple,Nothing})
-        @test occursin("Union", union_str)
-        @test occursin("Simple", union_str)
-        @test occursin("Nothing", union_str)
+        Test.@test occursin("Union", union_str)
+        Test.@test occursin("Simple", union_str)
+        Test.@test occursin("Nothing", union_str)
 
         value_type = DRTypeFormatTestMod.WithValue{Int,3}
         value_str = DR._format_type_for_docs(value_type)
-        @test occursin("WithValue", value_str)
-        @test occursin("3", value_str)
+        Test.@test occursin("WithValue", value_str)
+        Test.@test occursin("3", value_str)
 
         param_fmt = DR._format_type_param(DRTypeFormatTestMod.Simple)
-        @test occursin("DRTypeFormatTestMod.Simple", param_fmt)
+        Test.@test occursin("DRTypeFormatTestMod.Simple", param_fmt)
 
         value_param_fmt = DR._format_type_param(3)
-        @test value_param_fmt == "3"
+        Test.@test value_param_fmt == "3"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string and method collection" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string and method collection" begin
         methods_f = methods(DRMethodTestMod.f)
         m0 = first(filter(m -> length(m.sig.parameters) == 1, methods_f))
         sig0 = DR._method_signature_string(m0, DRMethodTestMod, :f)
-        @test endswith(sig0, "DRMethodTestMod.f()")
+        Test.@test endswith(sig0, "DRMethodTestMod.f()")
 
         m1 = first(filter(m -> length(m.sig.parameters) == 2, methods_f))
         sig1 = DR._method_signature_string(m1, DRMethodTestMod, :f)
-        @test occursin("DRMethodTestMod.f", sig1)
-        @test occursin("Int", sig1)
+        Test.@test occursin("DRMethodTestMod.f", sig1)
+        Test.@test occursin("Int", sig1)
 
         methods_h = methods(DRMethodTestMod.h)
         mvar = first(methods_h)
         sigv = DR._method_signature_string(mvar, DRMethodTestMod, :h)
-        @test occursin("Vararg", sigv)
+        Test.@test occursin("Vararg", sigv)
 
         source_files = [abspath(@__FILE__)]
         methods_by_func = DR._collect_methods_from_source_files(
             DRMethodTestMod, source_files
         )
-        @test :f in keys(methods_by_func)
-        @test :h in keys(methods_by_func)
+        Test.@test :f in keys(methods_by_func)
+        Test.@test :h in keys(methods_by_func)
         for ms in values(methods_by_func)
             for m in ms
                 file = String(m.file)
-                @test abspath(file) in source_files
+                Test.@test abspath(file) in source_files
             end
         end
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders" begin
         modules_str = "ModA, ModB"
         module_contents_private = [
             (DocumenterReferenceTestMod, String[], ["priv_a"]),
@@ -686,11 +758,11 @@ function test_documenter_reference()
         overview_priv, docs_priv = DR._build_private_page_content(
             modules_str, module_contents_private, false
         )
-        @test occursin("Private API", overview_priv)
-        @test occursin("ModA, ModB", overview_priv)
-        @test !isempty(docs_priv)
-        @test any(occursin("priv_a", s) for s in docs_priv)
-        @test any(occursin("priv_b1", s) for s in docs_priv)
+        Test.@test occursin("Private API", overview_priv)
+        Test.@test occursin("ModA, ModB", overview_priv)
+        Test.@test !isempty(docs_priv)
+        Test.@test any(occursin("priv_a", s) for s in docs_priv)
+        Test.@test any(occursin("priv_b1", s) for s in docs_priv)
 
         module_contents_public = [
             (DocumenterReferenceTestMod, ["pub_a"], String[]),
@@ -700,23 +772,23 @@ function test_documenter_reference()
         overview_pub, docs_pub = DR._build_public_page_content(
             modules_str, module_contents_public, false
         )
-        @test occursin("Public API", overview_pub)
-        @test occursin("ModA, ModB", overview_pub)
-        @test !isempty(docs_pub)
-        @test any(occursin("pub_a", s) for s in docs_pub)
+        Test.@test occursin("Public API", overview_pub)
+        Test.@test occursin("ModA, ModB", overview_pub)
+        Test.@test !isempty(docs_pub)
+        Test.@test any(occursin("pub_a", s) for s in docs_pub)
 
         module_contents_combined = [(DocumenterReferenceTestMod, ["pub_a"], ["priv_a"])]
         overview_comb, docs_comb = DR._build_combined_page_content(
             modules_str, module_contents_combined
         )
-        @test occursin("API reference", overview_comb)
-        @test any(occursin("Public API", s) for s in docs_comb)
-        @test any(occursin("Private API", s) for s in docs_comb)
-        @test any(occursin("pub_a", s) for s in docs_comb)
-        @test any(occursin("priv_a", s) for s in docs_comb)
+        Test.@test occursin("API reference", overview_comb)
+        Test.@test any(occursin("Public API", s) for s in docs_comb)
+        Test.@test any(occursin("Private API", s) for s in docs_comb)
+        Test.@test any(occursin("pub_a", s) for s in docs_comb)
+        Test.@test any(occursin("priv_a", s) for s in docs_comb)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "external_modules_to_document" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "external_modules_to_document" begin
         current_module = DocumenterReferenceTestMod
         modules = Dict(current_module => String[])
         sort_by(x) = x
@@ -743,89 +815,101 @@ function test_documenter_reference()
         )
 
         private_docs = DR._collect_private_docstrings(config, Pair{Symbol,DR.DocType}[])
-        @test !isempty(private_docs)
-        @test any(occursin("DRExternalTestMod.extfun", s) for s in private_docs)
+        Test.@test !isempty(private_docs)
+        Test.@test any(occursin("DRExternalTestMod.extfun", s) for s in private_docs)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "APIBuilder runner integration" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "APIBuilder runner integration" begin
         DR.reset_config!()
 
-        pages = CTBase.automatic_reference_documentation(
-            CTBase.Extensions.DocumenterReferenceTag();
-            subdirectory="api_integration",
-            primary_modules=[DocumenterReferenceTestMod],
-            public=true,
-            private=true,
-            title="Integration API",
-        )
+        pages = redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Extensions.automatic_reference_documentation(
+                    Extensions.DocumenterReferenceTag();
+                    subdirectory="api_integration",
+                    primary_modules=[DocumenterReferenceTestMod],
+                    public=true,
+                    private=true,
+                    title="Integration API",
+                )
+            end
+        end
 
-        @test !isempty(DR.CONFIG)
+        Test.@test !isempty(DR.CONFIG)
 
-        doc = Documenter.Document(;
-            root=pwd(), source="_test_docs_src", build="_test_docs_build", remotes=nothing
-        )
+        doc = redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Documenter.Document(;
+                    root=pwd(), source="_test_docs_src", build="_test_docs_build", remotes=nothing
+                )
+            end
+        end
 
-        Documenter.Selectors.runner(DR.APIBuilder, doc)
+        redirect_stdout(devnull) do
+            redirect_stderr(devnull) do
+                Documenter.Selectors.runner(DR.APIBuilder, doc)
+            end
+        end
 
-        @test !isempty(doc.blueprint.pages)
-        @test any(endswith(k, "api_private.md") for k in keys(doc.blueprint.pages))
+        Test.@test !isempty(doc.blueprint.pages)
+        Test.@test any(endswith(k, "api_private.md") for k in keys(doc.blueprint.pages))
     end
 
     # ============================================================================
     # Edge Case Tests: Type Formatting Functions
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs edge cases" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_for_docs edge cases" begin
         # Test Union types formatting (covers L775-782)
         union_result = DR._format_type_for_docs(Union{Int,String})
-        @test occursin("Union", union_result)
-        @test occursin("Int", union_result)
-        @test occursin("String", union_result)
+        Test.@test occursin("Union", union_result)
+        Test.@test occursin("Int", union_result)
+        Test.@test occursin("String", union_result)
 
         # Test simple non-DataType fallback (covers L782)
-        @test DR._format_type_for_docs(Any) == "::Any"
+        Test.@test DR._format_type_for_docs(Any) == "::Any"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_datatype_for_docs with TypeVar" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_format_datatype_for_docs with TypeVar" begin
         # Test parametric type with concrete parameters
         concrete_result = DR._format_datatype_for_docs(Vector{Int})
-        @test occursin("Vector", concrete_result) || occursin("Array", concrete_result)
-        @test occursin("Int", concrete_result)
+        Test.@test occursin("Vector", concrete_result) || occursin("Array", concrete_result)
+        Test.@test occursin("Int", concrete_result)
 
         # Test parametric type - the function strips parameters when TypeVar present
         # Array{T,1} where T has a TypeVar, so it gets stripped
-        @test DR._format_datatype_for_docs(Int) == "::Int"
-        @test DR._format_datatype_for_docs(String) == "::String"
+        Test.@test DR._format_datatype_for_docs(Int) == "::Int"
+        Test.@test DR._format_datatype_for_docs(String) == "::String"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_param edge cases" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_format_type_param edge cases" begin
         # Test Type parameter (covers L824-826)
         type_result = DR._format_type_param(Int)
-        @test type_result == "Int"  # Should strip leading ::
+        Test.@test type_result == "Int"  # Should strip leading ::
 
         # Test value parameter (covers L830) - e.g., for sized arrays
-        @test DR._format_type_param(3) == "3"
-        @test DR._format_type_param(42) == "42"
+        Test.@test DR._format_type_param(3) == "3"
+        Test.@test DR._format_type_param(42) == "42"
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string edge cases" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_method_signature_string edge cases" begin
         # Test method signature generation for DRMethodTestMod
         m = first(methods(DRMethodTestMod.f))
         sig = DR._method_signature_string(m, DRMethodTestMod, :f)
-        @test occursin("DRMethodTestMod", sig)
-        @test occursin("f", sig)
+        Test.@test occursin("DRMethodTestMod", sig)
+        Test.@test occursin("f", sig)
 
         # Test with multiple arguments
         m2 = first(methods(DRMethodTestMod.g))
         sig2 = DR._method_signature_string(m2, DRMethodTestMod, :g)
-        @test occursin("g", sig2)
+        Test.@test occursin("g", sig2)
     end
 
     # ============================================================================
     # NEW TESTS: Title System with is_split Parameter
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders with is_split parameter" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Page content builders with is_split parameter" begin
         modules_str = "TestModule"
 
         # Test private page with is_split=false (single page)
@@ -834,16 +918,16 @@ function test_documenter_reference()
         overview_priv_single, docs_priv_single = DR._build_private_page_content(
             modules_str, module_contents_private, false
         )
-        @test occursin("# Private API", overview_priv_single)
-        @test !occursin("# Private\n", overview_priv_single)
-        @test occursin("non-exported", overview_priv_single)
+        Test.@test occursin("# Private API", overview_priv_single)
+        Test.@test !occursin("# Private\n", overview_priv_single)
+        Test.@test occursin("non-exported", overview_priv_single)
 
         # Test private page with is_split=true (split page)
         overview_priv_split, docs_priv_split = DR._build_private_page_content(
             modules_str, module_contents_private, true
         )
-        @test occursin("# Private API", overview_priv_split)
-        @test occursin("non-exported", overview_priv_split)
+        Test.@test occursin("# Private API", overview_priv_split)
+        Test.@test occursin("non-exported", overview_priv_split)
 
         # Test public page with is_split=false (single page)
         module_contents_public = [(DocumenterReferenceTestMod, ["pub_doc"], String[])]
@@ -851,18 +935,18 @@ function test_documenter_reference()
         overview_pub_single, docs_pub_single = DR._build_public_page_content(
             modules_str, module_contents_public, false
         )
-        @test occursin("# Public API", overview_pub_single)
-        @test occursin("exported", overview_pub_single)
+        Test.@test occursin("# Public API", overview_pub_single)
+        Test.@test occursin("exported", overview_pub_single)
 
         # Test public page with is_split=true (split page)
         overview_pub_split, docs_pub_split = DR._build_public_page_content(
             modules_str, module_contents_public, true
         )
-        @test occursin("# Public API", overview_pub_split)
-        @test occursin("exported", overview_pub_split)
+        Test.@test occursin("# Public API", overview_pub_split)
+        Test.@test occursin("exported", overview_pub_split)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Title consistency across different page types" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Title consistency across different page types" begin
         modules_str = "MyModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub"], ["priv"])]
 
@@ -870,34 +954,34 @@ function test_documenter_reference()
         overview_priv, _ = DR._build_private_page_content(
             modules_str, module_contents, false
         )
-        @test occursin("# Private API", overview_priv)
+        Test.@test occursin("# Private API", overview_priv)
 
         # Single public page should have "Public API" title
         overview_pub, _ = DR._build_public_page_content(modules_str, module_contents, false)
-        @test occursin("# Public API", overview_pub)
+        Test.@test occursin("# Public API", overview_pub)
 
         # Split private page should have "Private API" title
         overview_priv_split, _ = DR._build_private_page_content(
             modules_str, module_contents, true
         )
-        @test occursin("# Private API", overview_priv_split)
+        Test.@test occursin("# Private API", overview_priv_split)
 
         # Split public page should have "Public API" title
         overview_pub_split, _ = DR._build_public_page_content(
             modules_str, module_contents, true
         )
-        @test occursin("# Public API", overview_pub_split)
+        Test.@test occursin("# Public API", overview_pub_split)
 
         # Combined page should have "API reference" title
         overview_comb, _ = DR._build_combined_page_content(modules_str, module_contents)
-        @test occursin("# API reference", overview_comb)
+        Test.@test occursin("# API reference", overview_comb)
     end
 
     # ============================================================================
     # NEW TESTS: Customization Parameters
     # ============================================================================
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Custom titles for API pages" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Custom titles for API pages" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
 
@@ -905,32 +989,32 @@ function test_documenter_reference()
         overview_priv_custom, _ = DR._build_private_page_content(
             modules_str, module_contents, false; custom_title="Internal API"
         )
-        @test occursin("# Internal API", overview_priv_custom)
-        @test !occursin("# Private API", overview_priv_custom)
+        Test.@test occursin("# Internal API", overview_priv_custom)
+        Test.@test !occursin("# Private API", overview_priv_custom)
 
         # Test custom title for public page (single)
         overview_pub_custom, _ = DR._build_public_page_content(
             modules_str, module_contents, false; custom_title="Exported API"
         )
-        @test occursin("# Exported API", overview_pub_custom)
-        @test !occursin("# Public API", overview_pub_custom)
+        Test.@test occursin("# Exported API", overview_pub_custom)
+        Test.@test !occursin("# Public API", overview_pub_custom)
 
         # Test custom title for private page (split)
         overview_priv_split_custom, _ = DR._build_private_page_content(
             modules_str, module_contents, true; custom_title="Internal"
         )
-        @test occursin("# Internal", overview_priv_split_custom)
-        @test !occursin("# Private API", overview_priv_split_custom)
+        Test.@test occursin("# Internal", overview_priv_split_custom)
+        Test.@test !occursin("# Private API", overview_priv_split_custom)
 
         # Test custom title for public page (split)
         overview_pub_split_custom, _ = DR._build_public_page_content(
             modules_str, module_contents, true; custom_title="Exported"
         )
-        @test occursin("# Exported", overview_pub_split_custom)
-        @test !occursin("# Public API", overview_pub_split_custom)
+        Test.@test occursin("# Exported", overview_pub_split_custom)
+        Test.@test !occursin("# Public API", overview_pub_split_custom)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Custom descriptions for API pages" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Custom descriptions for API pages" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
 
@@ -939,20 +1023,20 @@ function test_documenter_reference()
         overview_priv_desc, _ = DR._build_private_page_content(
             modules_str, module_contents, false; custom_description=custom_desc_priv
         )
-        @test occursin(custom_desc_priv, overview_priv_desc)
-        @test !occursin("non-exported", overview_priv_desc)
+        Test.@test occursin(custom_desc_priv, overview_priv_desc)
+        Test.@test !occursin("non-exported", overview_priv_desc)
 
         # Test custom description for public page
         custom_desc_pub = "This page documents the public interface for end users."
         overview_pub_desc, _ = DR._build_public_page_content(
             modules_str, module_contents, false; custom_description=custom_desc_pub
         )
-        @test occursin(custom_desc_pub, overview_pub_desc)
-        @test !occursin("exported", overview_pub_desc) ||
+        Test.@test occursin(custom_desc_pub, overview_pub_desc)
+        Test.@test !occursin("exported", overview_pub_desc) ||
             occursin(custom_desc_pub, overview_pub_desc)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Combined custom title and description" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Combined custom title and description" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
 
@@ -968,13 +1052,13 @@ function test_documenter_reference()
             custom_description=custom_desc,
         )
 
-        @test occursin("# Developer Reference", overview)
-        @test occursin(custom_desc, overview)
-        @test !occursin("# Private API", overview)
-        @test !occursin("non-exported", overview)
+        Test.@test occursin("# Developer Reference", overview)
+        Test.@test occursin(custom_desc, overview)
+        Test.@test !occursin("# Private API", overview)
+        Test.@test !occursin("non-exported", overview)
     end
 
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Empty customization uses defaults" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Empty customization uses defaults" begin
         modules_str = "TestModule"
         module_contents = [(DocumenterReferenceTestMod, ["pub_doc"], ["priv_doc"])]
 
@@ -982,13 +1066,18 @@ function test_documenter_reference()
         overview_priv_empty, _ = DR._build_private_page_content(
             modules_str, module_contents, false; custom_title="", custom_description=""
         )
-        @test occursin("# Private API", overview_priv_empty)
-        @test occursin("non-exported", overview_priv_empty)
+        Test.@test occursin("# Private API", overview_priv_empty)
+        Test.@test occursin("non-exported", overview_priv_empty)
 
         overview_pub_empty, _ = DR._build_public_page_content(
             modules_str, module_contents, false; custom_title="", custom_description=""
         )
-        @test occursin("# Public API", overview_pub_empty)
-        @test occursin("exported", overview_pub_empty)
+        Test.@test occursin("# Public API", overview_pub_empty)
+        Test.@test occursin("exported", overview_pub_empty)
     end
 end
+
+end # module TestDocumenterReference
+
+# CRITICAL: redefine in outer scope so the test runner can call it
+test_documenter_reference() = TestDocumenterReference.test_documenter_reference()

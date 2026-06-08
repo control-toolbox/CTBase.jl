@@ -1,154 +1,157 @@
 module TestCatalog
 
-using Test
-using CTBase
-using Main.TestOptions: VERBOSE, SHOWTIMING
+import Test
+import CTBase.Descriptions
+import CTBase.Exceptions
+
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_catalog()
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Catalog Operations" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Catalog Operations" begin
 
         # ====================================================================
         # UNIT TESTS - Catalog Add Function
         # ====================================================================
 
-        @testset "Add to empty catalog" begin
+        Test.@testset "Add to empty catalog" begin
             # Initialize empty catalog
             descriptions = ()
-            @test isempty(descriptions)
+            Test.@test isempty(descriptions)
 
             # Add first description
-            descriptions = CTBase.add(descriptions, (:a,))
-            @test length(descriptions) == 1
-            @test descriptions[1] == (:a,)
-            @test typeof(descriptions) <: Tuple{Vararg{CTBase.Description}}
+            descriptions = Descriptions.add(descriptions, (:a,))
+            Test.@test length(descriptions) == 1
+            Test.@test descriptions[1] == (:a,)
+            Test.@test typeof(descriptions) <: Tuple{Vararg{Descriptions.Description}}
 
             # Add single-element description
             descriptions2 = ()
-            descriptions2 = CTBase.add(descriptions2, (:x,))
-            @test descriptions2[1] == (:x,)
+            descriptions2 = Descriptions.add(descriptions2, (:x,))
+            Test.@test descriptions2[1] == (:x,)
 
             # Add multi-element description
             descriptions3 = ()
-            descriptions3 = CTBase.add(descriptions3, (:a, :b, :c))
-            @test descriptions3[1] == (:a, :b, :c)
+            descriptions3 = Descriptions.add(descriptions3, (:a, :b, :c))
+            Test.@test descriptions3[1] == (:a, :b, :c)
         end
 
-        @testset "Add to non-empty catalog" begin
+        Test.@testset "Add to non-empty catalog" begin
             # Sequential additions
             descriptions = ()
-            descriptions = CTBase.add(descriptions, (:a,))
-            @test descriptions[1] == (:a,)
+            descriptions = Descriptions.add(descriptions, (:a,))
+            Test.@test descriptions[1] == (:a,)
 
-            descriptions = CTBase.add(descriptions, (:b,))
-            @test descriptions[1] == (:a,)
-            @test descriptions[2] == (:b,)
-            @test length(descriptions) == 2
+            descriptions = Descriptions.add(descriptions, (:b,))
+            Test.@test descriptions[1] == (:a,)
+            Test.@test descriptions[2] == (:b,)
+            Test.@test length(descriptions) == 2
 
             # Add third description
-            descriptions = CTBase.add(descriptions, (:c,))
-            @test length(descriptions) == 3
-            @test descriptions[3] == (:c,)
+            descriptions = Descriptions.add(descriptions, (:c,))
+            Test.@test length(descriptions) == 3
+            Test.@test descriptions[3] == (:c,)
 
             # Verify order is preserved
-            @test descriptions == ((:a,), (:b,), (:c,))
+            Test.@test descriptions == ((:a,), (:b,), (:c,))
         end
 
-        @testset "Add multiple descriptions in sequence" begin
+        Test.@testset "Add multiple descriptions in sequence" begin
             descriptions = ()
-            descriptions = CTBase.add(descriptions, (:a, :b))
-            descriptions = CTBase.add(descriptions, (:c, :d))
-            descriptions = CTBase.add(descriptions, (:e, :f))
-            descriptions = CTBase.add(descriptions, (:g, :h))
+            descriptions = Descriptions.add(descriptions, (:a, :b))
+            descriptions = Descriptions.add(descriptions, (:c, :d))
+            descriptions = Descriptions.add(descriptions, (:e, :f))
+            descriptions = Descriptions.add(descriptions, (:g, :h))
 
-            @test length(descriptions) == 4
-            @test descriptions[1] == (:a, :b)
-            @test descriptions[2] == (:c, :d)
-            @test descriptions[3] == (:e, :f)
-            @test descriptions[4] == (:g, :h)
+            Test.@test length(descriptions) == 4
+            Test.@test descriptions[1] == (:a, :b)
+            Test.@test descriptions[2] == (:c, :d)
+            Test.@test descriptions[3] == (:e, :f)
+            Test.@test descriptions[4] == (:g, :h)
         end
 
-        @testset "Add descriptions of varying sizes" begin
+        Test.@testset "Add descriptions of varying sizes" begin
             descriptions = ()
-            descriptions = CTBase.add(descriptions, (:a,))  # Size 1
-            descriptions = CTBase.add(descriptions, (:b, :c))  # Size 2
-            descriptions = CTBase.add(descriptions, (:d, :e, :f))  # Size 3
-            descriptions = CTBase.add(descriptions, (:g, :h, :i, :j))  # Size 4
+            descriptions = Descriptions.add(descriptions, (:a,))  # Size 1
+            descriptions = Descriptions.add(descriptions, (:b, :c))  # Size 2
+            descriptions = Descriptions.add(descriptions, (:d, :e, :f))  # Size 3
+            descriptions = Descriptions.add(descriptions, (:g, :h, :i, :j))  # Size 4
 
-            @test length(descriptions) == 4
-            @test length(descriptions[1]) == 1
-            @test length(descriptions[2]) == 2
-            @test length(descriptions[3]) == 3
-            @test length(descriptions[4]) == 4
+            Test.@test length(descriptions) == 4
+            Test.@test length(descriptions[1]) == 1
+            Test.@test length(descriptions[2]) == 2
+            Test.@test length(descriptions[3]) == 3
+            Test.@test length(descriptions[4]) == 4
         end
 
         # ====================================================================
         # TYPE STABILITY TESTS
         # ====================================================================
 
-        @testset "Type stability - add function" begin
+        Test.@testset "Type stability - add function" begin
             # Add to empty catalog
-            @test (@inferred CTBase.add((), (:a,))) isa Tuple{Vararg{CTBase.Description}}
-            @test (@inferred CTBase.add((), (:a, :b))) isa Tuple{Vararg{CTBase.Description}}
+            Test.@test (Test.@inferred Descriptions.add((), (:a,))) isa Tuple{Vararg{Descriptions.Description}}
+            Test.@test (Test.@inferred Descriptions.add((), (:a, :b))) isa Tuple{Vararg{Descriptions.Description}}
 
             # Add to non-empty catalog
             descriptions = ((:a,),)
-            @test (@inferred CTBase.add(descriptions, (:b,))) isa
-                Tuple{Vararg{CTBase.Description}}
+            Test.@test (Test.@inferred Descriptions.add(descriptions, (:b,))) isa
+                Tuple{Vararg{Descriptions.Description}}
 
             # Verify return type consistency
-            result = CTBase.add((), (:x, :y))
-            @test result isa Tuple{Vararg{Tuple{Vararg{Symbol}}}}
+            result = Descriptions.add((), (:x, :y))
+            Test.@test result isa Tuple{Vararg{Tuple{Vararg{Symbol}}}}
         end
 
         # ====================================================================
         # ERROR TESTS - Exception Quality
         # ====================================================================
 
-        @testset "Duplicate description error" begin
+        Test.@testset "Duplicate description error" begin
             algorithms = ()
-            algorithms = CTBase.add(algorithms, (:a, :b, :c))
+            algorithms = Descriptions.add(algorithms, (:a, :b, :c))
 
             # Basic error check
-            @test_throws CTBase.IncorrectArgument CTBase.add(algorithms, (:a, :b, :c))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(algorithms, (:a, :b, :c))
 
             # Enriched error check - verify all exception fields
             try
-                CTBase.add(algorithms, (:a, :b, :c))
-                @test false  # Should not reach here
+                Descriptions.add(algorithms, (:a, :b, :c))
+                Test.@test false  # Should not reach here
             catch e
-                @test e isa CTBase.IncorrectArgument
-                @test occursin("already in", e.msg)
-                @test e.got == "(:a, :b, :c)"
-                @test occursin("unique description", e.expected)
-                @test occursin("Check existing descriptions", e.suggestion)
-                @test e.context == "description catalog management"
+                Test.@test e isa Exceptions.IncorrectArgument
+                Test.@test occursin("already in", e.msg)
+                Test.@test e.got == "(:a, :b, :c)"
+                Test.@test occursin("unique description", e.expected)
+                Test.@test occursin("Check existing descriptions", e.suggestion)
+                Test.@test e.context == "description catalog management"
             end
         end
 
-        @testset "Duplicate detection at different positions" begin
+        Test.@testset "Duplicate detection at different positions" begin
             descriptions = ((:a,), (:b,), (:c,))
 
             # Try to add duplicate of first
-            @test_throws CTBase.IncorrectArgument CTBase.add(descriptions, (:a,))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(descriptions, (:a,))
 
             # Try to add duplicate of middle
-            @test_throws CTBase.IncorrectArgument CTBase.add(descriptions, (:b,))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(descriptions, (:b,))
 
             # Try to add duplicate of last
-            @test_throws CTBase.IncorrectArgument CTBase.add(descriptions, (:c,))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(descriptions, (:c,))
         end
 
-        @testset "Return type consistency" begin
+        Test.@testset "Return type consistency" begin
             # Verify add always returns correct type
             descriptions = ()
-            result1 = CTBase.add(descriptions, (:a,))
-            @test typeof(result1) <: Tuple{Vararg{CTBase.Description}}
+            result1 = Descriptions.add(descriptions, (:a,))
+            Test.@test typeof(result1) <: Tuple{Vararg{Descriptions.Description}}
 
-            result2 = CTBase.add(result1, (:b,))
-            @test typeof(result2) <: Tuple{Vararg{CTBase.Description}}
+            result2 = Descriptions.add(result1, (:b,))
+            Test.@test typeof(result2) <: Tuple{Vararg{Descriptions.Description}}
             # Both are tuples of descriptions (same supertype)
-            @test typeof(result1) <: Tuple{Vararg{CTBase.Description}}
-            @test typeof(result2) <: Tuple{Vararg{CTBase.Description}}
+            Test.@test typeof(result1) <: Tuple{Vararg{Descriptions.Description}}
+            Test.@test typeof(result2) <: Tuple{Vararg{Descriptions.Description}}
         end
     end
 end
