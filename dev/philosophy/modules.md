@@ -92,9 +92,31 @@ end
 Why: visible origin, safe refactors (only the `using ..X` line changes), no accidental
 shadowing, same rule for external and sibling symbols.
 
+## Naming conventions
+
+Three visibility levels, signalled by the name itself:
+
+- `symbol` — **public**: exported via `export`; part of the documented API.
+- `_symbol` — **private helper**: unexported; internal implementation detail.
+  Accessible via qualified path (`Module._symbol`) but not advertised.
+- `__symbol` — **default value**: unexported; provides a replaceable semantic
+  default (e.g. `__display() = true`). The double underscore distinguishes it
+  from a plain helper: it is a *default* that a higher-level layer may override,
+  not merely a utility function.
+
+```julia
+export build_thing           # public
+
+function _validate(x)        # private helper
+    ...
+end
+
+__verbose()::Bool = false    # default value (replaceable by extension or subtype)
+```
+
 ## Two-level exports
 
-- **Submodule**: `export` for its public API; internals (`_helper`) unexported.
+- **Submodule**: `export` for its public API; internals (`_helper`, `__default`) unexported.
 - **Package (top-level)**: **no** `export`. Load submodules with `using .Submodule`;
   users reach them via `Package.Submodule.sym`.
 

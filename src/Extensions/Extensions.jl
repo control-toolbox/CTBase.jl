@@ -332,7 +332,10 @@ function run_tests(; kwargs...)
     return run_tests(TestRunnerTag(); kwargs...)
 end
 
-# Export public API (only user-facing functions, tags are internal)
+# Export public API
 export automatic_reference_documentation, postprocess_coverage, run_tests
+export AbstractDocumenterReferenceTag, DocumenterReferenceTag
+export AbstractCoveragePostprocessingTag, CoveragePostprocessingTag
+export AbstractTestRunnerTag, TestRunnerTag
 
 end # module

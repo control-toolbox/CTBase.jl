@@ -4,6 +4,13 @@ using Test
 using CTBase
 using Main.TestOptions: VERBOSE, SHOWTIMING
 
+# Fake tag types for extension stub testing (testing-creation.md §6).
+# These subtype the abstract tags but are unknown to any extension,
+# so the stubs always throw ExtensionError regardless of which extensions are loaded.
+struct FakeDocumenterReferenceTag <: CTBase.AbstractDocumenterReferenceTag end
+struct FakeCoveragePostprocessingTag <: CTBase.AbstractCoveragePostprocessingTag end
+struct FakeTestRunnerTag <: CTBase.AbstractTestRunnerTag end
+
 function test_extensions_enriched()
     @testset verbose = VERBOSE showtiming = SHOWTIMING "Enriched Extension Errors" begin
 
@@ -38,46 +45,21 @@ function test_extensions_enriched()
         @testset "Extension Function Error Handling" begin
             # Test automatic_reference_documentation error
             @testset "automatic_reference_documentation" begin
-                @test_throws Exception CTBase.automatic_reference_documentation(
-                    CTBase.DocumenterReferenceTag()
+                @test_throws CTBase.ExtensionError CTBase.automatic_reference_documentation(
+                    FakeDocumenterReferenceTag()
                 )
-
-                # Test that it throws some kind of exception (ExtensionError or UndefVarError)
-                try
-                    CTBase.automatic_reference_documentation(
-                        CTBase.DocumenterReferenceTag()
-                    )
-                    @test false  # Should not reach here
-                catch e
-                    # Accept either ExtensionError (if function is available) or UndefVarError (if not)
-                    @test e isa CTBase.ExtensionError || e isa UndefVarError
-                end
             end
 
             # Test postprocess_coverage error
             @testset "postprocess_coverage" begin
-                @test_throws Exception CTBase.postprocess_coverage(
-                    CTBase.CoveragePostprocessingTag()
+                @test_throws CTBase.ExtensionError CTBase.postprocess_coverage(
+                    FakeCoveragePostprocessingTag()
                 )
-
-                try
-                    CTBase.postprocess_coverage(CTBase.CoveragePostprocessingTag())
-                    @test false  # Should not reach here
-                catch e
-                    @test e isa CTBase.ExtensionError || e isa UndefVarError
-                end
             end
 
             # Test run_tests error
             @testset "run_tests" begin
-                @test_throws Exception CTBase.run_tests(CTBase.TestRunnerTag())
-
-                try
-                    CTBase.run_tests(CTBase.TestRunnerTag())
-                    @test false  # Should not reach here
-                catch e
-                    @test e isa CTBase.ExtensionError || e isa UndefVarError
-                end
+                @test_throws CTBase.ExtensionError CTBase.run_tests(FakeTestRunnerTag())
             end
         end
 

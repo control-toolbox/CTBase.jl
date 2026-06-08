@@ -44,7 +44,7 @@ Filters out Julia stdlib.
 # Returns
 - `Vector`: Filtered stacktrace frames
 """
-function extract_user_frames(st::Vector)
+function _extract_user_frames(st::Vector)
     user_frames = filter(st) do frame
         file_str = string(frame.file)
         # Keep frames that are NOT from Julia stdlib or exception display internals
@@ -68,7 +68,7 @@ Display an error in a user-friendly format with clear sections and user code loc
 - `io::IO`: Output stream
 - `e::CTException`: The exception to display
 """
-function format_user_friendly_error(io::IO, e::CTException)
+function _format_user_friendly_error(io::IO, e::CTException)
     #println(io, "\n" * "━"^70)
     _print_ansi_styled(io, "Control Toolbox Error\n", :red, true)
     #println(io, "─"^28)
@@ -232,7 +232,7 @@ function format_user_friendly_error(io::IO, e::CTException)
     end
 
     # Add user code location
-    user_frames = extract_user_frames(stacktrace(catch_backtrace()))
+    user_frames = _extract_user_frames(stacktrace(catch_backtrace()))
     if !isempty(user_frames)
         println(io, "📍 In your code:")
         # Show up to 3 most relevant user frames
@@ -262,7 +262,7 @@ Custom error display for IncorrectArgument.
 Shows user-friendly format with enriched information.
 """
 function Base.showerror(io::IO, e::IncorrectArgument)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
 
 """
@@ -271,7 +271,7 @@ end
 Custom error display for PreconditionError.
 """
 function Base.showerror(io::IO, e::PreconditionError)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
 
 """
@@ -280,7 +280,7 @@ end
 Custom error display for NotImplemented.
 """
 function Base.showerror(io::IO, e::NotImplemented)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
 
 """
@@ -289,7 +289,7 @@ end
 Custom error display for ParsingError.
 """
 function Base.showerror(io::IO, e::ParsingError)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
 
 """
@@ -298,7 +298,7 @@ end
 Custom error display for AmbiguousDescription.
 """
 function Base.showerror(io::IO, e::AmbiguousDescription)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
 
 """
@@ -307,7 +307,7 @@ end
 Custom error display for ExtensionError.
 """
 function Base.showerror(io::IO, e::ExtensionError)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
 
 """
@@ -316,5 +316,5 @@ end
 Custom error display for SolverFailure.
 """
 function Base.showerror(io::IO, e::SolverFailure)
-    return format_user_friendly_error(io, e)
+    return _format_user_friendly_error(io, e)
 end
