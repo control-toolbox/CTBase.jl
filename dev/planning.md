@@ -29,6 +29,38 @@ Write the plan, share it, wait for confirmation before starting.
 - Files deleted: …
 - Public API changes: yes / no (describe if yes)
 
+## What changes
+
+| File | After |
+|---|---|
+| `src/A/B.jl` | split into `x.jl` + `y.jl` |
+
+**No behaviour change** / or: **Public API change: describe.**
+
+## Dependency graph
+
+```text
+Module A
+  ↓
+Module B   ← new
+  ↓
+Module C
+```
+
+## Step 0 — Branch
+
+Use MCP git tools when available:
+
+- `mcp3_git_checkout` → `develop`; `git pull`
+- `mcp3_git_create_branch` → `feat/<name>`; `mcp3_git_checkout` → new branch
+
+Fallback:
+
+```bash
+git checkout develop && git pull
+git checkout -b feat/<name>
+```
+
 ## Phases
 
 ### Phase A — <name>
@@ -77,6 +109,12 @@ grep -E "Error|Fail|Test Summary" /tmp/<branch>_final.log
 ## Out of scope
 
 <List things explicitly not done in this task.>
+
+## File summary
+
+**Added**: …
+**Modified**: …
+**Deleted**: …
 ````
 
 ---
@@ -122,8 +160,22 @@ implementer. This applies to:
   test pattern is non-obvious.
 Snippets should be *concise shapes*, not full implementations.
 
+**What changes** — use a table (current file → after) for structural tasks (splits,
+renames, moves). One row per file. End with a bold statement: "No behaviour change" or
+"Public API change: describe."
+
+**Dependency graph** — include when the task adds or reorders modules. Show the full
+dependency chain; mark new nodes with `← new`. Omit if nothing changes.
+
+**Step 0 — Branch** — always the first executable step. Prefer MCP git tools
+(`mcp3_git_checkout`, `mcp3_git_create_branch`). Include the bash fallback for
+environments where MCP is unavailable.
+
 **Out of scope** — explicit. Prevents scope creep and clarifies what the human should
 not expect after the plan is executed.
+
+**File summary** — last section. Three categories: Added / Modified / Deleted. Written
+once all steps are finalized so the count is accurate. Skip empty categories.
 
 ---
 
@@ -142,6 +194,20 @@ names the axis. Purely mechanical, no behavior change.
   src/Configs/*, src/Solutions/building.jl, docs/api_reference.jl
 - Files renamed: test/suite/traits/test_content.jl → test_dynamics.jl
 - Public API changes: yes — AbstractContentTrait → AbstractDynamicsTrait (+ values)
+
+## What changes
+
+| File | After |
+|---|---|
+| `src/Traits/content.jl` | renamed → `dynamics.jl`; all symbols renamed |
+| `src/Traits/Traits.jl` | updated include + exports |
+
+**Public API change**: `AbstractContentTrait` → `AbstractDynamicsTrait` (+ values).
+
+## Step 0 — Branch
+
+- `mcp3_git_checkout` → `develop`; `git pull`
+- `mcp3_git_create_branch` → `feat/rename-dynamics`; `mcp3_git_checkout` → new branch
 
 ## Phases
 
@@ -188,4 +254,9 @@ get_test_command   # MCP, no test_args = full suite
 ## Out of scope
 
 Parametrizing AbstractSystem/AbstractFlow by the dynamics trait (see action_plan.md Phase C/D).
+
+## File summary
+
+**Modified**: `src/Traits/content.jl` (→ `dynamics.jl`), `src/Traits/Traits.jl`, `src/Configs/*`, `src/Solutions/building.jl`, `docs/api_reference.jl`
+**Renamed**: `test/suite/traits/test_content.jl` → `test_dynamics.jl`
 ````
