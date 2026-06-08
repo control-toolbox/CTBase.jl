@@ -1,18 +1,20 @@
 module TestCore
 
-using Test
-using CTBase
-using Main.TestOptions: VERBOSE, SHOWTIMING
+import Test
+import CTBase.Core
+
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_core()
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Core" begin
-        @testset "Default value of the display during resolution" begin
-            @test CTBase.Core.__display()
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Core" begin
+        Test.@testset "Default value of the display during resolution" begin
+            Test.@test Core.__display()
         end
 
-        @testset "Type aliases" begin
-            @test CTBase.ctNumber === Real
-            @test CTBase.ctNumber === Real
+        Test.@testset "Type aliases" begin
+            Test.@test Core.ctNumber === Real
+            Test.@test Core.ctNumber === Real
         end
     end
 end

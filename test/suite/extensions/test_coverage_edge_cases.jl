@@ -1,9 +1,9 @@
 module TestCoverageEdgeCases
 
-using Test
-using CTBase
-using Documenter
-using Coverage
+import Test
+import CTBase
+import Documenter
+import Coverage
 
 # Access internal modules via get_extension
 const CP = Base.get_extension(CTBase, :CoveragePostprocessing)
@@ -14,7 +14,7 @@ const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 function test_coverage_edge_cases()
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Coverage and Test Edge Cases" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Coverage and Test Edge Cases" begin
 
         # ----------------------------------------------------------------------------------
         # CoveragePostprocessing: trigger error at line 92
@@ -22,8 +22,8 @@ function test_coverage_edge_cases()
         # Strategy: Mocking fails because the function is likely inlined.
         # We skip this test as the line is unreachable under normal conditions.
         # ----------------------------------------------------------------------------------
-        # @testset "CoveragePostprocessing: clean_stale_cov_files! deletes all" begin
-        #     @test CP !== nothing
+        # Test.@testset "CoveragePostprocessing: clean_stale_cov_files! deletes all" begin
+        #     Test.@test CP !== nothing
         #     mktempdir() do tmp
         #         cd(tmp) do
         #             mkpath("src")
@@ -63,8 +63,8 @@ function test_coverage_edge_cases()
         #                     e
         #                 end
 
-        #                 @test err isa ErrorException
-        #                 @test occursin("no usable .cov files", err.msg)
+        #                 Test.@test err isa ErrorException
+        #                 Test.@test occursin("no usable .cov files", err.msg)
 
         #             finally
         #                 # Restore original function by defining a method that calls the captured original
@@ -84,59 +84,44 @@ function test_coverage_edge_cases()
         # ----------------------------------------------------------------------------------
         # TestRunner: trigger error at line 424
         # Error: "Test file ... not found for test ..." inside _run_single_test
-        # Strategy: Mock _find_symbol_test_file_rel to return a non-existent file.
+        # Strategy: Create a file that exists during discovery but is deleted before execution.
         # ----------------------------------------------------------------------------------
-        @testset "TestRunner: file exists then disappears" begin
-            @test TR !== nothing
+        Test.@testset "TestRunner: file exists then disappears" begin
+            Test.@test TR !== nothing
             mktempdir() do tmp
-                # Redefine _find_symbol_test_file_rel to return a phantom file
-                original_find = TR._find_symbol_test_file_rel
+                # Create a test file that will be deleted before execution
+                test_file = joinpath(tmp, "phantom_test.jl")
+                touch(test_file)
 
-                try
-                    # Return a filename that definitely does not exist
-                    Base.eval(
-                        TR, :(function _find_symbol_test_file_rel(name, builder; test_dir)
-                            return "phantom.jl"
-                        end)
+                # Delete the file before calling _run_single_test
+                rm(test_file)
+
+                err = try
+                    TR._run_single_test(
+                        :phantom_test;
+                        filename_builder=identity,
+                        funcname_builder=identity,
+                        eval_mode=false,
+                        test_dir=tmp,
                     )
-
-                    err = try
-                        TR._run_single_test(
-                            :phantom_test;
-                            filename_builder=identity,
-                            funcname_builder=identity,
-                            eval_mode=false,
-                            test_dir=tmp,
-                        )
-                        nothing
-                    catch e
-                        e
-                    end
-
-                    @test err isa CTBase.Exceptions.IncorrectArgument
-                    @test occursin("not found", err.msg)
-
-                finally
-                    Base.eval(
-                        TR,
-                        quote
-                            function _find_symbol_test_file_rel(name, builder; test_dir)
-                                return $(original_find)(name, builder; test_dir=test_dir)
-                            end
-                        end,
-                    )
+                    nothing
+                catch e
+                    e
                 end
+
+                Test.@test err isa CTBase.Exceptions.IncorrectArgument
+                Test.@test occursin("not found", err.msg)
             end
         end
 
         # ----------------------------------------------------------------------------------
         # DocumenterReference: Missing coverage
         # ----------------------------------------------------------------------------------
-        @testset "DocumenterReference: Edge cases" begin
+        Test.@testset "DocumenterReference: Edge cases" begin
 
             # Line 327: Documenter.Selectors.order(::Type{APIBuilder})
             # Explicit call to ensure coverage
-            @test Documenter.Selectors.order(DR.APIBuilder) == 0.5
+            Test.@test Documenter.Selectors.order(DR.APIBuilder) == 0.5
 
             # Line 539: _exported_symbols getfield failure
             # Used BrokenExportMod defined at top level
@@ -144,7 +129,7 @@ function test_coverage_edge_cases()
             # This should catch the error and skip the symbol, covering the catch block
             syms = DR._exported_symbols(BrokenExportMod)
             # Verify undefined_sym is not in the result
-            @test !any(p -> first(p) == :undefined_sym, syms.exported)
+            Test.@test !any(p -> first(p) == :undefined_sym, syms.exported)
 
             # Line 607: _get_source_from_docstring
             # Used HackDocMod defined at top level
@@ -168,7 +153,7 @@ function test_coverage_edge_cases()
 
                             # Should return nothing now
                             src = DR._get_source_from_docstring(HackDocMod, :f)
-                            @test src === nothing
+                            Test.@test src === nothing
 
                         finally
                             # Restore
@@ -202,7 +187,7 @@ function test_coverage_edge_cases()
             path_plus = DR._get_source_from_methods(+)
             # valid outcome is either nothing (if all are built-in) or a path (if some are extended).
             # This at least runs the loop.
-            @test path_plus === nothing || path_plus isa String
+            Test.@test path_plus === nothing || path_plus isa String
         end
     end
 end

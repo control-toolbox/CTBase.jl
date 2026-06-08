@@ -26,7 +26,7 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 
 ## Non-breaking note (0.18.12-beta)
 
-- **TestRunner progress bar threshold**: Added configurable `full_bar_threshold` parameter to `CTBase.run_tests` (default: 50). Allows users to customize the maximum number of tests for full-resolution progress bar display. Propagated to internal functions `_make_default_on_test_done`, `_format_progress_line`, and `_bar_width`. Documentation and tests updated. No breaking changes; purely additive feature with backward-compatible default. No migration required.
+- **TestRunner progress bar threshold**: Added configurable `full_bar_threshold` parameter to `CTBase.Extensions.run_tests` (default: 50). Allows users to customize the maximum number of tests for full-resolution progress bar display. Propagated to internal functions `_make_default_on_test_done`, `_format_progress_line`, and `_bar_width`. Documentation and tests updated. No breaking changes; purely additive feature with backward-compatible default. No migration required.
 
 ## Non-breaking note (0.18.11-beta)
 
@@ -237,11 +237,11 @@ CTBase.postprocess_coverage()
 
 ```julia
 # v0.17.4 - Had basic implementation
-CTBase.run_tests()
+CTBase.Extensions.run_tests()
 
 # v0.18.0-beta - Requires extension  
 using CTBase.Extensions.TestRunner
-CTBase.run_tests()
+CTBase.Extensions.run_tests()
 ```
 
 #### Extension Error Handling
@@ -565,7 +565,7 @@ using CTBase
 using CTBase.Extensions.TestRunner
 
 # Test all functionality
-CTBase.run_tests()
+CTBase.Extensions.run_tests()
 ```
 
 ### 🧪 Testing Migration
@@ -591,7 +591,7 @@ end
 function test_extension_loading()
     # Test that extensions work
     using CTBase.Extensions.TestRunner
-    @test_nowarn CTBase.run_tests(dry_run=true)
+    @test_nowarn CTBase.Extensions.run_tests(dry_run=true)
 end
 ```
 

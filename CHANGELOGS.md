@@ -109,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### **TestRunner Progress Bar Customization**
 
-- **Configurable threshold**: Added `full_bar_threshold` parameter to `CTBase.run_tests` (default: 50)
+- **Configurable threshold**: Added `full_bar_threshold` parameter to `CTBase.Extensions.run_tests` (default: 50)
 - **Flexible display**: Users can now customize the maximum number of tests for full-resolution progress bar
 - **Terminal adaptation**: Smaller thresholds for narrow terminals, larger for wide displays
 - **Internal propagation**: Parameter propagated to `_make_default_on_test_done`, `_format_progress_line`, and `_bar_width`
