@@ -45,7 +45,7 @@ julia> CTBase.Extensions.run_tests(;
        )
 ```
 
-See also: [`CTBase.Extensions.run_tests`](@ref), [`CTBase.TestRunner.TestRunInfo`](@ref)
+See also: [`CTBase.Extensions.run_tests`](@ref)
 """
 function Extensions.run_tests(
     ::CTBase.Extensions.TestRunnerTag;

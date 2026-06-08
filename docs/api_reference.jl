@@ -17,7 +17,13 @@ function generate_api_reference(src_dir::String)
     pages = [
         CTBase.automatic_reference_documentation(;
             subdirectory="api",
-            primary_modules=[CTBase.Core => src(joinpath("Core", "Core.jl"))],
+            primary_modules=[
+                CTBase.Core => src(
+                    joinpath("Core", "Core.jl"),
+                    joinpath("Core", "default.jl"),
+                    joinpath("Core", "types.jl"),
+                ),
+            ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
@@ -63,7 +69,13 @@ function generate_api_reference(src_dir::String)
         ),
         CTBase.automatic_reference_documentation(;
             subdirectory="api",
-            primary_modules=[CTBase.Unicode => src(joinpath("Unicode", "Unicode.jl"))],
+            primary_modules=[
+                CTBase.Unicode => src(
+                    joinpath("Unicode", "Unicode.jl"),
+                    joinpath("Unicode", "subscripts.jl"),
+                    joinpath("Unicode", "superscripts.jl"),
+                ),
+            ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=false, # there is no private API
@@ -74,7 +86,12 @@ function generate_api_reference(src_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory="api",
             primary_modules=[
-                CTBase.Extensions => src(joinpath("Extensions", "Extensions.jl"))
+                CTBase.Extensions => src(
+                    joinpath("Extensions", "Extensions.jl"),
+                    joinpath("Extensions", "coverage_postprocessing.jl"),
+                    joinpath("Extensions", "documenter_reference.jl"),
+                    joinpath("Extensions", "test_runner.jl"),
+                ),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
@@ -102,7 +119,19 @@ function generate_api_reference(src_dir::String)
             pages,
             CTBase.automatic_reference_documentation(;
                 subdirectory="api",
-                primary_modules=[DocumenterReference => ext("DocumenterReference.jl")],
+                primary_modules=[
+                    DocumenterReference => ext(
+                        joinpath("DocumenterReference", "DocumenterReference.jl"),
+                        joinpath("DocumenterReference", "config_helpers.jl"),
+                        joinpath("DocumenterReference", "entry_point.jl"),
+                        joinpath("DocumenterReference", "page_building.jl"),
+                        joinpath("DocumenterReference", "source_file_detection.jl"),
+                        joinpath("DocumenterReference", "symbol_classification.jl"),
+                        joinpath("DocumenterReference", "symbol_iteration.jl"),
+                        joinpath("DocumenterReference", "type_formatting.jl"),
+                        joinpath("DocumenterReference", "types.jl"),
+                    ),
+                ],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_DOCREF,
                 public=false, # there is no public API
@@ -121,7 +150,11 @@ function generate_api_reference(src_dir::String)
             CTBase.automatic_reference_documentation(;
                 subdirectory="api",
                 primary_modules=[
-                    CoveragePostprocessing => ext("CoveragePostprocessing.jl")
+                    CoveragePostprocessing => ext(
+                        joinpath("CoveragePostprocessing", "CoveragePostprocessing.jl"),
+                        joinpath("CoveragePostprocessing", "entry_point.jl"),
+                        joinpath("CoveragePostprocessing", "helpers.jl"),
+                    ),
                 ],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
@@ -140,7 +173,17 @@ function generate_api_reference(src_dir::String)
             pages,
             CTBase.automatic_reference_documentation(;
                 subdirectory="api",
-                primary_modules=[TestRunner => ext("TestRunner.jl")],
+                primary_modules=[
+                    TestRunner => ext(
+                        joinpath("TestRunner", "TestRunner.jl"),
+                        joinpath("TestRunner", "arg_parsing.jl"),
+                        joinpath("TestRunner", "entry_point.jl"),
+                        joinpath("TestRunner", "progress.jl"),
+                        joinpath("TestRunner", "test_execution.jl"),
+                        joinpath("TestRunner", "test_selection.jl"),
+                        joinpath("TestRunner", "types.jl"),
+                    ),
+                ],
                 external_modules_to_document=[CTBase],
                 exclude=EXCLUDE_SYMBOLS,
                 public=false, # there is no public API

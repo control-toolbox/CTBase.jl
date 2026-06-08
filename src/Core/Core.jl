@@ -11,7 +11,7 @@ module Core
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 include("types.jl")
-include("utils.jl")
+include("default.jl")
 
 # Export public API
 export ctNumber

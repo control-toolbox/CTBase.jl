@@ -227,20 +227,20 @@ The progress line is also automatically disabled when a custom `on_test_done` ca
 
 ## Callbacks
 
-The `on_test_start` and `on_test_done` callbacks allow custom actions during the test lifecycle. Both receive a [`TestRunner.TestRunInfo`](@ref) struct.
+The `on_test_start` and `on_test_done` callbacks allow custom actions during the test lifecycle. Both receive a `TestRunInfo` struct with the following fields:
 
 ### `TestRunInfo`
 
 ```julia
 struct TestRunInfo
-    spec::Union{Symbol,String}          # Test identifier
+    spec::Union{Symbol,String}           # Test identifier
     filename::String                     # Absolute path of the test file
-    func_symbol::Union{Symbol,Nothing}  # Function to call (nothing if eval_mode=false)
+    func_symbol::Union{Symbol,Nothing}   # Function to call (nothing if eval_mode=false)
     index::Int                           # 1-based index in the selected list
     total::Int                           # Total number of selected tests
     status::Symbol                       # See below
-    error::Union{Exception,Nothing}     # Captured exception (only when status == :error)
-    elapsed::Union{Float64,Nothing}     # Wall-clock seconds (only in on_test_done)
+    error::Union{Exception,Nothing}      # Captured exception (only when status == :error)
+    elapsed::Union{Float64,Nothing}      # Wall-clock seconds (only in on_test_done)
 end
 ```
 
