@@ -1,8 +1,7 @@
 # CTBase.jl — Ecosystem Foundation
 
 !!! tip "Ask DeepWiki"
-    [DeepWiki](https://deepwiki.com/control-toolbox/CTBase.jl) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTBase.jl) offers an interactive,
-    AI-generated overview of this codebase. Answers may be inaccurate — use this
+    [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTBase.jl) offers an interactive, AI-generated overview of this codebase. Answers may be inaccurate — use this
     reference documentation as the source of truth.
 
 ```@meta
