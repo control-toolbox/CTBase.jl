@@ -46,9 +46,8 @@ function test_superscripts()
         catch e
             Test.@test e isa Exceptions.IncorrectArgument
             Test.@test e.got == "-1"
-            Test.@test e.expected == "0-9"
-            Test.@test occursin("superscript must be between 0 and 9", e.msg)
-            Test.@test occursin("ctupperscripts()", e.suggestion)
+            Test.@test e.expected == "≥ 0"
+            Test.@test occursin("superscript must be positive", e.msg)
             Test.@test e.context == "Unicode superscript generation"
         end
 
@@ -62,6 +61,7 @@ function test_superscripts()
             Test.@test e isa Exceptions.IncorrectArgument
             Test.@test e.got == "12"
             Test.@test e.expected == "0-9"
+            Test.@test occursin("superscript must be a single digit", e.msg)
             Test.@test occursin("ctupperscripts()", e.suggestion)
             Test.@test e.context == "Unicode superscript generation"
         end
