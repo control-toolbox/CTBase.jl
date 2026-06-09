@@ -1,6 +1,7 @@
 module TestDisplayDescription
 
 import Test
+import CTBase.Descriptions: Descriptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
