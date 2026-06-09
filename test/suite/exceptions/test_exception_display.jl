@@ -27,15 +27,15 @@ function test_exception_display()
             output = String(take!(io))
 
             # Check for key sections in user-friendly display
-            Test.@test contains(output, "Control Toolbox Error")
+            Test.@test contains(output, "IncorrectArgument")
             Test.@test contains(output, "Test error")
-            Test.@test contains(output, "Got:")
+            Test.@test contains(output, "Got")
             Test.@test contains(output, "value1")
-            Test.@test contains(output, "Expected:")
+            Test.@test contains(output, "Expected")
             Test.@test contains(output, "value2")
-            Test.@test contains(output, "Context:")
+            Test.@test contains(output, "Context")
             Test.@test contains(output, "test function")
-            Test.@test contains(output, "Suggestion:")
+            Test.@test contains(output, "Hint")
             Test.@test contains(output, "Fix it like this")
         end
 
@@ -51,9 +51,9 @@ function test_exception_display()
             # Check for compact format
             Test.@test contains(output, "IncorrectArgument")
             Test.@test contains(output, "Test error")
-            Test.@test contains(output, "Got:")
+            Test.@test contains(output, "Got")
             Test.@test contains(output, "value1")
-            Test.@test contains(output, "Expected:")
+            Test.@test contains(output, "Expected")
             Test.@test contains(output, "value2")
 
             # Reset to default
@@ -69,10 +69,10 @@ function test_exception_display()
             output = String(take!(io))
 
             Test.@test contains(output, "Simple error")
-            Test.@test !contains(output, "Got:")
-            Test.@test !contains(output, "Expected:")
-            Test.@test !contains(output, "Context:")
-            Test.@test !contains(output, "Suggestion:")
+            Test.@test !contains(output, "Got  ")
+            Test.@test !contains(output, "Expected  ")
+            Test.@test !contains(output, "Context  ")
+            Test.@test !contains(output, "Hint  ")
         end
 
         Test.@testset "PreconditionError - User-Friendly Display" begin
@@ -87,11 +87,11 @@ function test_exception_display()
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
 
-            Test.@test contains(output, "Control Toolbox Error")
+            Test.@test contains(output, "PreconditionError")
             Test.@test contains(output, "State must be set before dynamics")
-            Test.@test contains(output, "Reason:")
+            Test.@test contains(output, "Reason")
             Test.@test contains(output, "state has not been defined yet")
-            Test.@test contains(output, "Suggestion:")
+            Test.@test contains(output, "Hint")
             Test.@test contains(output, "Call state!(ocp, dimension)")
         end
 
@@ -104,7 +104,7 @@ function test_exception_display()
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "Feature not implemented")
-            Test.@test contains(output, "Required method:")
+            Test.@test contains(output, "Method")
             Test.@test contains(output, "MyType")
 
             # CTBase.set_show_full_stacktrace!(false)
@@ -119,7 +119,7 @@ function test_exception_display()
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "Syntax error")
-            Test.@test contains(output, "Location:")
+            Test.@test contains(output, "Location")
             Test.@test contains(output, "line 42")
 
             # CTBase.set_show_full_stacktrace!(false)
@@ -163,7 +163,7 @@ function test_exception_display()
             output = String(take!(io))
             Test.@test contains(output, "AmbiguousDescription")
             Test.@test contains(output, "(:f,)")
-            Test.@test contains(output, "Available descriptions:")
+            Test.@test contains(output, "Available")
             Test.@test contains(output, "(:a, :b)")
             Test.@test contains(output, "algorithm selection")
 
@@ -185,11 +185,11 @@ function test_exception_display()
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "ExtensionError")
-            Test.@test contains(output, "Missing dependencies:")
+            Test.@test contains(output, "Missing")
             Test.@test contains(output, "Plots")
             Test.@test contains(output, "PlotlyJS")
-            # Check for ANSI-formatted julia> using (colors now work in documentation)
-            Test.@test contains(output, "\e[1;32mjulia>\e[0m\e[35m using \e[0m")
+            # Check for generated Hint
+            Test.@test contains(output, "Run: using")
 
             # CTBase.set_show_full_stacktrace!(false)
         end
@@ -243,11 +243,11 @@ function test_exception_display()
 
             Test.@test contains(output, "NotImplemented")
             Test.@test contains(output, "Not implemented feature")
-            Test.@test contains(output, "Required method:")
+            Test.@test contains(output, "Method")
             Test.@test contains(output, "MyType")
-            Test.@test contains(output, "Context:")
+            Test.@test contains(output, "Context")
             Test.@test contains(output, "testing context")
-            Test.@test contains(output, "Suggestion:")
+            Test.@test contains(output, "Hint")
             Test.@test contains(output, "use this instead")
         end
 
@@ -263,8 +263,8 @@ function test_exception_display()
             Test.@test contains(output, "ParsingError")
             Test.@test contains(output, "Parse error")
             # Should not contain optional sections that are not provided
-            Test.@test !contains(output, "Location:")
-            Test.@test !contains(output, "Suggestion:")
+            Test.@test !contains(output, "Location  ")
+            Test.@test !contains(output, "Hint  ")
         end
 
         Test.@testset "ParsingError - All optional fields" begin
@@ -277,9 +277,9 @@ function test_exception_display()
 
             Test.@test contains(output, "ParsingError")
             Test.@test contains(output, "Parse error")
-            Test.@test contains(output, "Location:")
+            Test.@test contains(output, "Location")
             Test.@test contains(output, "line 10")
-            Test.@test contains(output, "Suggestion:")
+            Test.@test contains(output, "Hint")
             Test.@test contains(output, "check syntax")
         end
 
@@ -293,12 +293,12 @@ function test_exception_display()
             output = String(take!(io))
 
             Test.@test contains(output, "ExtensionError")
-            Test.@test contains(output, "Missing dependencies:")
+            Test.@test contains(output, "Missing")
             Test.@test contains(output, "TestDep")
             # Should not contain optional sections that are not provided
-            Test.@test !contains(output, "Feature:")
-            Test.@test !contains(output, "Context:")
-            Test.@test !contains(output, "Purpose:")
+            Test.@test !contains(output, "Feature  ")
+            Test.@test !contains(output, "Context  ")
+            Test.@test !contains(output, "Purpose  ")
         end
 
         Test.@testset "PreconditionError - Missing optional fields" begin
@@ -308,9 +308,9 @@ function test_exception_display()
             output = String(take!(io))
 
             Test.@test contains(output, "Simple error")
-            Test.@test !contains(output, "Reason:")
-            Test.@test !contains(output, "Context:")
-            Test.@test !contains(output, "Suggestion:")
+            Test.@test !contains(output, "Reason  ")
+            Test.@test !contains(output, "Context  ")
+            Test.@test !contains(output, "Hint  ")
         end
 
         Test.@testset "AmbiguousDescription - Missing optional fields" begin
@@ -321,9 +321,9 @@ function test_exception_display()
 
             Test.@test contains(output, "AmbiguousDescription")
             Test.@test contains(output, "(:f,)")
-            Test.@test !contains(output, "Available descriptions:")
-            Test.@test !contains(output, "Context:")
-            Test.@test !contains(output, "Suggestion:")
+            Test.@test !contains(output, "Available  ")
+            Test.@test !contains(output, "Context  ")
+            Test.@test !contains(output, "Hint  ")
         end
 
         Test.@testset "User code location display" begin
@@ -341,10 +341,10 @@ function test_exception_display()
 
             output = String(take!(io))
 
-            # The output should contain the user code location section
-            # (this tests the lines 173-187 that were uncovered)
-            Test.@test contains(output, "Control Toolbox Error")
-            Test.@test contains(output, "In your code:")
+            # The output should contain the type name and closing marker
+            # (this tests the location-aware formatting path)
+            Test.@test contains(output, "IncorrectArgument")
+            Test.@test contains(output, "└─")
             # In a real test environment, this should show user frames
             # The exact content depends on the test environment
         end
@@ -364,11 +364,11 @@ function test_exception_display()
             output = String(take!(io))
             Test.@test contains(output, "SolverFailure")
             Test.@test contains(output, "ODE integration failed")
-            Test.@test contains(output, "Return code:")
+            Test.@test contains(output, "Retcode")
             Test.@test contains(output, ":Unstable")
-            Test.@test contains(output, "Suggestion:")
+            Test.@test contains(output, "Hint")
             Test.@test contains(output, "Reduce time step")
-            Test.@test contains(output, "Context:")
+            Test.@test contains(output, "Context")
             Test.@test contains(output, "SciML integrator")
 
             # CTBase.set_show_full_stacktrace!(false)
@@ -386,9 +386,9 @@ function test_exception_display()
             Test.@test contains(output, "SolverFailure")
             Test.@test contains(output, "Solver failed")
             # Should not contain optional sections that are not provided
-            Test.@test !contains(output, "Return code:")
-            Test.@test !contains(output, "Context:")
-            Test.@test !contains(output, "Suggestion:")
+            Test.@test !contains(output, "Retcode  ")
+            Test.@test !contains(output, "Context  ")
+            Test.@test !contains(output, "Hint  ")
         end
 
         Test.@testset "SolverFailure - All optional fields" begin
@@ -406,11 +406,11 @@ function test_exception_display()
 
             Test.@test contains(output, "SolverFailure")
             Test.@test contains(output, "Optimization did not converge")
-            Test.@test contains(output, "Return code:")
+            Test.@test contains(output, "Retcode")
             Test.@test contains(output, ":MaxIterations")
-            Test.@test contains(output, "Context:")
+            Test.@test contains(output, "Context")
             Test.@test contains(output, "IPOPT solver")
-            Test.@test contains(output, "Suggestion:")
+            Test.@test contains(output, "Hint")
             Test.@test contains(output, "Increase max iterations")
         end
 
@@ -420,9 +420,9 @@ function test_exception_display()
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
 
-            Test.@test contains(output, "Got:")
+            Test.@test contains(output, "Got")
             Test.@test contains(output, "bad_value")
-            Test.@test !contains(output, "Expected:")
+            Test.@test !contains(output, "Expected  ")
         end
 
         Test.@testset "AmbiguousDescription - diagnostic rendering" begin
@@ -433,7 +433,7 @@ function test_exception_display()
             )
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
-            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "Diagnostic")
             Test.@test contains(output, "Empty catalog")
 
             # "unknown symbols" branch
@@ -443,7 +443,7 @@ function test_exception_display()
             )
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
-            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "Diagnostic")
             Test.@test contains(output, "Unknown symbols")
 
             # "no complete match" branch
@@ -453,7 +453,7 @@ function test_exception_display()
             )
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
-            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "Diagnostic")
             Test.@test contains(output, "No complete match")
 
             # else branch — arbitrary diagnostic value
@@ -463,7 +463,7 @@ function test_exception_display()
             )
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
-            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "Diagnostic")
             Test.@test contains(output, "custom diagnostic")
         end
 
