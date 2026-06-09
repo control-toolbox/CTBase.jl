@@ -44,7 +44,7 @@ CTBase.Descriptions.complete(:euler, :explicit; descriptions=descs)
 try
     throw(CTBase.Exceptions.IncorrectArgument("n must be positive"; got="-1"))
 catch e
-    println(e)
+    showerror(stdout, e)
 end
 ```
 
