@@ -17,13 +17,22 @@ julia> CTBase.ctindice(3)
 ```
 """
 function ctindice(i::Int)::Char
-    if i < 0 || i > 9
+    if i < 0
         throw(
             Exceptions.IncorrectArgument(
-                "the subscript must be between 0 and 9";
+                "the subscript must be positive";
+                got=string(i),
+                expected="≥ 0",
+                context="Unicode subscript generation",
+            ),
+        )
+    elseif i > 9
+        throw(
+            Exceptions.IncorrectArgument(
+                "the subscript must be a single digit";
                 got=string(i),
                 expected="0-9",
-                suggestion="Use ctindices() for numbers larger than 9, or check your input value",
+                suggestion="Use ctindices() for numbers with multiple digits",
                 context="Unicode subscript generation",
             ),
         )

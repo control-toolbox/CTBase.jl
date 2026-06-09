@@ -236,7 +236,6 @@ CTBase.Exceptions.ParsingError <: CTBase.Exceptions.CTException
 - `msg::String`: Error message
 - `location::Union{String,Nothing}`: Where in the input the error occurred (optional)
 - `suggestion::Union{String,Nothing}`: How to fix the syntax (optional)
-- `context::Union{String,Nothing}`: What was being parsed (optional)
 
 **Example**:
 
@@ -245,8 +244,7 @@ using CTBase
 throw(CTBase.Exceptions.ParsingError(
     "unexpected token 'end'",
     location="line 42, column 10",
-    suggestion="Check for unmatched 'begin' or remove extra 'end'",
-    context="control flow parsing"
+    suggestion="Check for unmatched 'begin' or remove extra 'end'"
 ))
 ```
 
@@ -282,9 +280,14 @@ end
 The enriched display automatically suggests:
 
 ```text
-❌ Error: ExtensionError, missing dependencies
-📦 Missing dependencies: Plots
-💡 Suggestion: julia> using Plots
+ExtensionError
+│
+│  missing dependencies
+│
+│  Missing  Plots
+│
+│  Hint     Run: using Plots
+└─
 ```
 
 **Use this exception** when:
@@ -331,10 +334,15 @@ end
 The enriched display shows the solver-specific return code:
 
 ```text
-❌ Error: SolverFailure, ODE integration failed
-🔧 Return code: :Unstable
-📂 Context: SciML integrator
-💡 Suggestion: Reduce time step or check initial conditions
+SolverFailure
+│
+│  ODE integration failed
+│
+│  Retcode  :Unstable
+│
+│  Context  SciML integrator
+│  Hint     Reduce time step or check initial conditions
+└─
 ```
 
 **Common return codes**:
@@ -372,23 +380,24 @@ The enriched display shows the solver-specific return code:
 
 All CTBase exceptions provide an enriched, user-friendly display with:
 
-- **🎯 Clear error type and message**
-- **📋 Contextual information** (got/expected, reason, location)
-- **💡 Actionable suggestions** for fixing the problem
-- **📍 User code location** tracking
-- **🎨 Emoji-based visual hierarchy**
+- **Type name** on line 1, with caller location when available
+- **Pipe-box layout** using `│` separators for visual structure
+- **Aligned labels** (Got, Expected, Reason, Hint, Context, …) padded to a common width
+- **Color coding**: red for type name, yellow for warnings, green for hints
+- **Dynamic Hint** for `ExtensionError` generated from `weakdeps`
 
 Example of enriched display:
 
 ```text
-Control Toolbox Error
-
-❌ Error: PreconditionError, System must be initialized before configuration
-❓ Reason: initialize! not called yet
-📂 Context: system configuration
-💡 Suggestion: Call initialize!(state) before configure!
-📍 In your code:
-     configure! at MyModule.jl:42
+PreconditionError → configure!  MyModule.jl:42
+│
+│  System must be initialized before configuration
+│
+│  Reason  initialize! not called yet
+│
+│  Context  system configuration
+│  Hint     Call initialize!(state) before configure!
+└─
 ```
 
 This makes debugging faster by providing all the information needed to understand and fix the problem.

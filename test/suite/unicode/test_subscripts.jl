@@ -46,9 +46,8 @@ function test_subscripts()
         catch e
             Test.@test e isa Exceptions.IncorrectArgument
             Test.@test e.got == "-1"
-            Test.@test e.expected == "0-9"
-            Test.@test occursin("subscript must be between 0 and 9", e.msg)
-            Test.@test occursin("ctindices()", e.suggestion)
+            Test.@test e.expected == "≥ 0"
+            Test.@test occursin("subscript must be positive", e.msg)
             Test.@test e.context == "Unicode subscript generation"
         end
 
@@ -62,6 +61,7 @@ function test_subscripts()
             Test.@test e isa Exceptions.IncorrectArgument
             Test.@test e.got == "15"
             Test.@test e.expected == "0-9"
+            Test.@test occursin("subscript must be a single digit", e.msg)
             Test.@test occursin("ctindices()", e.suggestion)
             Test.@test e.context == "Unicode subscript generation"
         end

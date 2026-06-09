@@ -1,36 +1,70 @@
 # Custom display functions for user-friendly error messages
 
+# ANSI formatting primitives
 """
-Generate ANSI escape sequence for the specified color and formatting.
+$(TYPEDSIGNATURES)
+
+Apply dimmed (faint) ANSI styling to a string.
+
+# Arguments
+- `s::AbstractString`: The string to style.
+
+# Returns
+- `String`: The string wrapped in dim ANSI escape codes.
 """
-function _ansi_color(color::Symbol, bold::Bool=false)
-    color_codes = Dict(
-        :black => 30,
-        :red => 31,
-        :green => 32,
-        :yellow => 33,
-        :blue => 34,
-        :magenta => 35,
-        :cyan => 36,
-        :white => 37,
-        :default => 39,
-    )
-
-    code = get(color_codes, color, 39)
-    return bold ? "\033[1;$(code)m" : "\033[$(code)m"
-end
-
-"""Generate ANSI reset sequence to clear formatting."""
-_ansi_reset() = "\033[0m"
+_dim(s)    = "\033[2m$(s)\033[0m"
 
 """
-Print text with ANSI color formatting for Documenter compatibility.
+$(TYPEDSIGNATURES)
+
+Apply bold ANSI styling to a string.
+
+# Arguments
+- `s::AbstractString`: The string to style.
+
+# Returns
+- `String`: The string wrapped in bold ANSI escape codes.
 """
-function _print_ansi_styled(
-    io, text::Union{String,Symbol,Type}, color::Symbol, bold::Bool=false
-)
-    return print(io, _ansi_color(color, bold), string(text), _ansi_reset())
-end
+_bold(s)   = "\033[1m$(s)\033[0m"
+
+"""
+$(TYPEDSIGNATURES)
+
+Apply red ANSI styling to a string.
+
+# Arguments
+- `s::AbstractString`: The string to style.
+
+# Returns
+- `String`: The string wrapped in red ANSI escape codes.
+"""
+_red(s)    = "\033[1;31m$(s)\033[0m"
+
+"""
+$(TYPEDSIGNATURES)
+
+Apply yellow ANSI styling to a string.
+
+# Arguments
+- `s::AbstractString`: The string to style.
+
+# Returns
+- `String`: The string wrapped in yellow ANSI escape codes.
+"""
+_yellow(s) = "\033[33m$(s)\033[0m"
+
+"""
+$(TYPEDSIGNATURES)
+
+Apply green ANSI styling to a string.
+
+# Arguments
+- `s::AbstractString`: The string to style.
+
+# Returns
+- `String`: The string wrapped in green ANSI escape codes.
+"""
+_green(s)  = "\033[32m$(s)\033[0m"
 
 """
     extract_user_frames(st::Vector)
@@ -60,6 +94,284 @@ function _extract_user_frames(st::Vector)
 end
 
 """
+$(TYPEDSIGNATURES)
+
+Format a diagnostic tag for `AmbiguousDescription` display, expanding shorthand tags into human-readable messages.
+
+# Arguments
+- `diagnostic::String`: The diagnostic tag (e.g., "empty catalog", "unknown symbols", "no complete match").
+
+# Returns
+- `String`: The expanded human-readable message.
+
+# Notes
+- Unknown tags are returned unchanged.
+"""
+function _format_diagnostic(diagnostic::String)
+    if diagnostic == "empty catalog"
+        return "Empty catalog — no descriptions available"
+    elseif diagnostic == "unknown symbols"
+        return "Unknown symbols — none of the requested symbols appear in any available description"
+    elseif diagnostic == "no complete match"
+        return "No complete match — no description contains all symbols"
+    else
+        return diagnostic
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `IncorrectArgument` display.
+
+# Arguments
+- `e::IncorrectArgument`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+  Colors are `:yellow` for warnings, `:green` for expected values, `:default` otherwise.
+
+# Notes
+- Only includes fields that are not `nothing`.
+"""
+function _build_primary_pairs(e::IncorrectArgument)
+    pairs = []
+    !isnothing(e.got)      && push!(pairs, ("Got",      string(e.got),      :yellow))
+    !isnothing(e.expected) && push!(pairs, ("Expected", string(e.expected), :green))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `PreconditionError` display.
+
+# Arguments
+- `e::PreconditionError`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+
+# Notes
+- Only includes fields that are not `nothing`.
+"""
+function _build_primary_pairs(e::PreconditionError)
+    pairs = []
+    !isnothing(e.reason) && push!(pairs, ("Reason", string(e.reason), :default))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `NotImplemented` display.
+
+# Arguments
+- `e::NotImplemented`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+
+# Notes
+- Only includes fields that are not `nothing`.
+"""
+function _build_primary_pairs(e::NotImplemented)
+    pairs = []
+    !isnothing(e.required_method) && push!(pairs, ("Method", string(e.required_method), :default))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `ParsingError` display.
+
+# Arguments
+- `e::ParsingError`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+
+# Notes
+- Only includes fields that are not `nothing`.
+"""
+function _build_primary_pairs(e::ParsingError)
+    pairs = []
+    !isnothing(e.location) && push!(pairs, ("Location", string(e.location), :default))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `AmbiguousDescription` display.
+
+# Arguments
+- `e::AmbiguousDescription`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+
+# Notes
+- The `candidates` field is passed as a `Vector{String}` for multi-line rendering.
+- Only includes fields that are not `nothing` or empty.
+"""
+function _build_primary_pairs(e::AmbiguousDescription)
+    pairs = []
+    !isnothing(e.diagnostic) && push!(pairs, ("Diagnostic", _format_diagnostic(e.diagnostic), :yellow))
+    push!(pairs, ("Requested", string(e.description), :default))
+    if !isnothing(e.candidates) && !isempty(e.candidates)
+        push!(pairs, ("Available", e.candidates, :default))
+    end
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `ExtensionError` display.
+
+# Arguments
+- `e::ExtensionError`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Single tuple with the missing dependencies.
+
+# Notes
+- Always includes the `Missing` field with joined `weakdeps`.
+"""
+function _build_primary_pairs(e::ExtensionError)
+    dep_str = join(string.(e.weakdeps), ", ")
+    return [("Missing", dep_str, :yellow)]
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build primary field `(label, value, color)` tuples for `SolverFailure` display.
+
+# Arguments
+- `e::SolverFailure`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+
+# Notes
+- Only includes fields that are not `nothing`.
+"""
+function _build_primary_pairs(e::SolverFailure)
+    pairs = []
+    !isnothing(e.retcode) && push!(pairs, ("Retcode", string(e.retcode), :yellow))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build secondary field `(label, value, color)` tuples for generic `CTException` display.
+
+# Arguments
+- `e::CTException`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples for
+  `Context` and `Hint` (from `suggestion`) fields.
+
+# Notes
+- Only includes fields that exist and are not `nothing`.
+- `Hint` is colored green for visibility.
+"""
+function _build_secondary_pairs(e::CTException)
+    pairs = []
+    hasfield(typeof(e), :context)    && !isnothing(e.context)    && push!(pairs, ("Context", e.context,    :default))
+    hasfield(typeof(e), :suggestion) && !isnothing(e.suggestion) && push!(pairs, ("Hint",    e.suggestion, :green))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build secondary field `(label, value, color)` tuples for `ExtensionError` display.
+
+# Arguments
+- `e::ExtensionError`: The exception instance.
+
+# Returns
+- `Vector{Tuple{String, Any, Symbol}}`: Vector of `(label, value, color)` tuples.
+  The `Hint` is dynamically generated from `weakdeps`.
+
+# Notes
+- The `Hint` field is generated as "Run: using " followed by the joined dependency names.
+- This override is necessary because `ExtensionError` does not have a `suggestion` field.
+"""
+function _build_secondary_pairs(e::ExtensionError)
+    pairs = []
+    !isnothing(e.context) && push!(pairs, ("Context", e.context, :default))
+    hint = "Run: using " * join(string.(e.weakdeps), ", ")
+    push!(pairs, ("Hint", hint, :green))
+    return pairs
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Print a pipe-formatted field with dynamic label alignment.
+
+# Arguments
+- `io::IO`: Output stream.
+- `label::String`: The field label.
+- `value`: The field value (can be a `Vector` for multi-line rendering).
+- `max_len::Int`: The maximum label length for alignment.
+- `color::Symbol`: The color symbol (`:yellow`, `:green`, or `:default`).
+
+# Notes
+- For `Vector` values, the first line includes the label, subsequent lines are indented.
+- The pipe character `│` is dimmed for visual hierarchy.
+"""
+function _print_pipe_field(io, label::String, value, max_len::Int, color::Symbol)
+    if value isa Vector
+        # Multi-line case: AmbiguousDescription.candidates
+        for (i, v) in enumerate(value)
+            if i == 1
+                print(io, _dim("│"), "  ", _bold(rpad(label, max_len)), "  ")
+                _print_colored(io, string(v), color)
+                println(io)
+            else
+                println(io, _dim("│"), "  ", " "^max_len, "  ", string(v))
+            end
+        end
+    else
+        # Single value
+        print(io, _dim("│"), "  ", _bold(rpad(label, max_len)), "  ")
+        _print_colored(io, string(value), color)
+        println(io)
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Print colored text based on a color symbol.
+
+# Arguments
+- `io::IO`: Output stream.
+- `text::AbstractString`: The text to print.
+- `color::Symbol`: The color symbol (`:yellow`, `:green`, or any other for default).
+
+# Notes
+- `:yellow` and `:green` apply ANSI styling; all other colors print as plain text.
+"""
+function _print_colored(io, text, color::Symbol)
+    if color == :yellow
+        print(io, _yellow(text))
+    elseif color == :green
+        print(io, _green(text))
+    else
+        print(io, text)
+    end
+end
+
+"""
     format_user_friendly_error(io::IO, e::CTException)
 
 Display an error in a user-friendly format with clear sections and user code location.
@@ -69,190 +381,58 @@ Display an error in a user-friendly format with clear sections and user code loc
 - `e::CTException`: The exception to display
 """
 function _format_user_friendly_error(io::IO, e::CTException)
-    #println(io, "\n" * "━"^70)
-    _print_ansi_styled(io, "Control Toolbox Error\n", :red, true)
-    #println(io, "─"^28)
-
-    # Main problem
-    print(io, "\n❌ Error: ")
-    _print_ansi_styled(io, typeof(e), :red, true)
-    println(io, ", ", e.msg)
-
-    # Type-specific details
-    if e isa IncorrectArgument
-        if !isnothing(e.got)
-            print(io, "🔍 Got: ", e.got)
-            if !isnothing(e.expected)
-                print(io, ", Expected: ", e.expected)
-            end
-            println(io)
-        end
-
-        if !isnothing(e.context)
-            println(io, "📂 Context: ", e.context)
-        end
-
-        if !isnothing(e.suggestion)
-            println(io, "💡 Suggestion: ", e.suggestion)
-        end
-
-    elseif e isa PreconditionError
-        if !isnothing(e.reason)
-            println(io, "❓ Reason: ", e.reason)
-        end
-
-        if !isnothing(e.context)
-            println(io, "📂 Context: ", e.context)
-        end
-
-        if !isnothing(e.suggestion)
-            println(io, "💡 Suggestion: ", e.suggestion)
-        end
-
-    elseif e isa NotImplemented
-        if !isnothing(e.required_method)
-            println(io, "🔧 Required method: ", e.required_method)
-        end
-
-        if !isnothing(e.context)
-            println(io, "📂 Context: ", e.context)
-        end
-
-        if !isnothing(e.suggestion)
-            println(io, "💡 Suggestion: ", e.suggestion)
-        end
-
-    elseif e isa ParsingError
-        if !isnothing(e.location)
-            println(io, "📍 Location: ", e.location)
-        end
-
-        if !isnothing(e.suggestion)
-            println(io, "💡 Suggestion: ", e.suggestion)
-        end
-
-    elseif e isa AmbiguousDescription
-        # Show diagnostic first for clarity - on one line
-        if !isnothing(e.diagnostic)
-            print(io, "⚠️  Diagnostic: ")
-            if e.diagnostic == "empty catalog"
-                _print_ansi_styled(io, "Empty catalog", :yellow, true)
-                print(io, " - no descriptions available")
-            elseif e.diagnostic == "unknown symbols"
-                _print_ansi_styled(io, "Unknown symbols", :yellow, true)
-                print(
-                    io,
-                    " - none of the requested symbols appear in any available description",
-                )
-            elseif e.diagnostic == "no complete match"
-                _print_ansi_styled(io, "No complete match", :yellow, true)
-                print(io, " - no available description contains all the requested symbols")
-            else
-                print(io, e.diagnostic)
-            end
-            println(io)
-        end
-
-        # Requested description on one line
-        println(io, "🎯 Requested description: ", e.description)
-
-        if !isnothing(e.candidates) && !isempty(e.candidates)
-            println(io, "📋 Available descriptions:")
-            for candidate in e.candidates
-                println(io, "   - ", candidate)
-            end
-        end
-
-        if !isnothing(e.context)
-            println(io, "📂 Context: ", e.context)
-        end
-
-        # Suggestion on one line
-        if !isnothing(e.suggestion)
-            print(io, "💡 Suggestion: ", e.suggestion)
-
-            # Show closest matches directly in the suggestion if it ends with ":"
-            if endswith(strip(e.suggestion), ":") &&
-                contains(e.suggestion, "closest matches")
-                if !isnothing(e.candidates) && !isempty(e.candidates)
-                    # Show up to 3 candidates as closest matches
-                    max_show = min(3, length(e.candidates))
-                    for i in 1:max_show
-                        if i == 1
-                            print(io, " ", e.candidates[i])
-                        else
-                            print(io, ", ", e.candidates[i])
-                        end
-                    end
-                end
-            end
-            println(io)
-        end
-
-    elseif e isa ExtensionError
-        # Missing dependencies on one line
-        print(io, "📦 Missing dependencies: ")
-        for (i, dep) in enumerate(e.weakdeps)
-            if i == 1
-                print(io, dep)
-            else
-                print(io, ", ", dep)
-            end
-        end
-        println(io)
-
-        # Suggestion on one line
-        print(io, "💡 Suggestion: ")
-        _print_ansi_styled(io, "julia>", :green, true)
-        _print_ansi_styled(io, " using ", :magenta)
-        for (i, dep) in enumerate(e.weakdeps)
-            if i == 1
-                print(io, dep)
-            else
-                print(io, ", ", dep)
-            end
-        end
-        println(io)
-
-    elseif e isa SolverFailure
-        # Return code
-        if !isnothing(e.retcode)
-            print(io, "🔧 Return code: ")
-            _print_ansi_styled(io, e.retcode, :yellow, true)
-            println(io)
-        end
-
-        if !isnothing(e.context)
-            println(io, "📂 Context: ", e.context)
-        end
-
-        if !isnothing(e.suggestion)
-            println(io, "💡 Suggestion: ", e.suggestion)
-        end
-    end
-
-    # Add user code location
+    # Line 1: TypeName → func  file:line
     user_frames = _extract_user_frames(stacktrace(catch_backtrace()))
-    if !isempty(user_frames)
-        println(io, "📍 In your code:")
-        # Show up to 3 most relevant user frames
-        for (i, frame) in enumerate(user_frames[1:min(3, length(user_frames))])
-            file_name = basename(string(frame.file))
-            line_info = frame.line
-            func_name = frame.func
+    frame = isempty(user_frames) ? nothing : user_frames[1]
 
-            if i == 1
-                # The most recent frame (where error occurred)
-                println(io, "     $func_name at $file_name:$line_info")
-            else
-                # Previous frames (call stack) - show call hierarchy with visual arrows
-                arrow_prefix = "     " * "    "^(i-2) * "└── "
-                println(io, "$(arrow_prefix)$func_name at $file_name:$line_info")
-            end
+    type_name = string(nameof(typeof(e)))
+    print(io, _red(type_name))
+
+    if !isnothing(frame)
+        func_name = string(frame.func)
+        file_name = basename(string(frame.file))
+        line_num = frame.line
+        print(io, " ", _dim("→"), " ", _bold(func_name), "  ")
+        print(io, _yellow("$(file_name):$(line_num)"))
+    end
+    println(io)
+
+    # Blank pipe separator
+    println(io, _dim("│"))
+
+    # Message
+    println(io, _dim("│"), "  ", _bold(e.msg))
+
+    # Build field pairs
+    primary_pairs   = _build_primary_pairs(e)
+    secondary_pairs = _build_secondary_pairs(e)
+    all_pairs = vcat(primary_pairs, secondary_pairs)
+
+    if !isempty(all_pairs)
+        # Global max_len for alignment
+        max_len = maximum(length(p[1]) for p in all_pairs)
+
+        # Blank pipe separator
+        println(io, _dim("│"))
+
+        # Primary fields
+        for p in primary_pairs
+            _print_pipe_field(io, p[1], p[2], max_len, p[3])
+        end
+
+        # Separator between primary and secondary
+        if !isempty(primary_pairs) && !isempty(secondary_pairs)
+            println(io, _dim("│"))
+        end
+
+        # Secondary fields
+        for p in secondary_pairs
+            _print_pipe_field(io, p[1], p[2], max_len, p[3])
         end
     end
 
-    #println(io, "━"^70 * "\n")
+    # Closing visual
+    println(io, _dim("└─"))
 end
 
 """

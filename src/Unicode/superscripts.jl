@@ -18,13 +18,22 @@ julia> CTBase.ctupperscript(2)
 ```
 """
 function ctupperscript(i::Int)::Char
-    if i < 0 || i > 9
+    if i < 0
         throw(
             Exceptions.IncorrectArgument(
-                "the superscript must be between 0 and 9";
+                "the superscript must be positive";
+                got=string(i),
+                expected="≥ 0",
+                context="Unicode superscript generation",
+            ),
+        )
+    elseif i > 9
+        throw(
+            Exceptions.IncorrectArgument(
+                "the superscript must be a single digit";
                 got=string(i),
                 expected="0-9",
-                suggestion="Use ctupperscripts() for numbers larger than 9, or check your input value",
+                suggestion="Use ctupperscripts() for numbers with multiple digits",
                 context="Unicode superscript generation",
             ),
         )
