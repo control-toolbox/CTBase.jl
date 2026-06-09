@@ -413,6 +413,73 @@ function test_exception_display()
             Test.@test contains(output, "Suggestion:")
             Test.@test contains(output, "Increase max iterations")
         end
+
+        Test.@testset "IncorrectArgument - got without expected" begin
+            io = IOBuffer()
+            e = Exceptions.IncorrectArgument("wrong value", got="bad_value")
+            Test.@test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            Test.@test contains(output, "Got:")
+            Test.@test contains(output, "bad_value")
+            Test.@test !contains(output, "Expected:")
+        end
+
+        Test.@testset "AmbiguousDescription - diagnostic rendering" begin
+            # "empty catalog" branch
+            io = IOBuffer()
+            e = Exceptions.AmbiguousDescription(
+                (:a,); diagnostic="empty catalog"
+            )
+            Test.@test_nowarn showerror(io, e)
+            output = String(take!(io))
+            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "Empty catalog")
+
+            # "unknown symbols" branch
+            io = IOBuffer()
+            e = Exceptions.AmbiguousDescription(
+                (:z,); diagnostic="unknown symbols"
+            )
+            Test.@test_nowarn showerror(io, e)
+            output = String(take!(io))
+            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "Unknown symbols")
+
+            # "no complete match" branch
+            io = IOBuffer()
+            e = Exceptions.AmbiguousDescription(
+                (:a, :z); diagnostic="no complete match"
+            )
+            Test.@test_nowarn showerror(io, e)
+            output = String(take!(io))
+            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "No complete match")
+
+            # else branch — arbitrary diagnostic value
+            io = IOBuffer()
+            e = Exceptions.AmbiguousDescription(
+                (:a,); diagnostic="custom diagnostic"
+            )
+            Test.@test_nowarn showerror(io, e)
+            output = String(take!(io))
+            Test.@test contains(output, "Diagnostic:")
+            Test.@test contains(output, "custom diagnostic")
+        end
+
+        Test.@testset "AmbiguousDescription - closest-matches inline suggestion" begin
+            io = IOBuffer()
+            e = Exceptions.AmbiguousDescription(
+                (:b, :f);
+                candidates=["(:a, :b, :c)", "(:a, :d, :e)", "(:x, :y, :z)"],
+                suggestion="Try one of the closest matches:",
+            )
+            Test.@test_nowarn showerror(io, e)
+            output = String(take!(io))
+
+            Test.@test contains(output, "closest matches")
+            Test.@test contains(output, "(:a, :b, :c)")
+        end
     end
 end
 

@@ -262,4 +262,4 @@ end
 
 end # module
 
-test_types() = TestExceptionTypes.test_exception_types()
+test_exception_types() = TestExceptionTypes.test_exception_types()

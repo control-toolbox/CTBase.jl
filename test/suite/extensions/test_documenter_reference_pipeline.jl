@@ -1,28 +1,27 @@
-module TestDocumenterReference
+module TestDocumenterReferencePipeline
 
 import Test
 import CTBase
 import CTBase.Extensions: Extensions
 import Documenter
 
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
-
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
 
-# Test module for integration tests
-module DocumenterReferenceIntegrationTestMod
-    """
-    Docstring for the main test module used to validate module-level documentation
-    in the generated API pages.
-    """
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+
+# Test module for pipeline tests
+module DocumenterReferencePipelineTestMod
     myfun(x) = x
 end
-using .DocumenterReferenceIntegrationTestMod
+using .DocumenterReferencePipelineTestMod
 
-function test_documenter_reference()
-    # Keep only integration tests - pipeline integration with Documenter
+function test_documenter_reference_pipeline()
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Documenter.Selectors.order for APIBuilder" begin
+        Test.@test Documenter.Selectors.order(DR.APIBuilder) == 0.5
+    end
+
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "APIBuilder runner integration" begin
         DR.reset_config!()
 
@@ -31,7 +30,7 @@ function test_documenter_reference()
                 Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="api_integration",
-                    primary_modules=[DocumenterReferenceIntegrationTestMod],
+                    primary_modules=[DocumenterReferencePipelineTestMod],
                     public=true,
                     private=true,
                     title="Integration API",
@@ -62,7 +61,6 @@ function test_documenter_reference()
     return nothing
 end
 
-end # module TestDocumenterReference
+end # module
 
-# CRITICAL: redefine in outer scope so the test runner can call it
-test_documenter_reference() = TestDocumenterReference.test_documenter_reference()
+test_documenter_reference_pipeline() = TestDocumenterReferencePipeline.test_documenter_reference_pipeline()
