@@ -39,12 +39,14 @@ function generate_api_reference(src_dir::String)
             primary_modules=[
                 CTBase.Interpolation => src(
                     joinpath("Interpolation", "Interpolation.jl"),
+                    joinpath("Interpolation", "types.jl"),
                     joinpath("Interpolation", "ctinterpolate.jl"),
+                    joinpath("Interpolation", "display.jl"),
                 ),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
-            private=false,
+            private=true,
             title="Interpolation",
             title_in_menu="Interpolation",
             filename="interpolation",
