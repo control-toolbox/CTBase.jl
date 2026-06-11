@@ -5,22 +5,8 @@
 # See test/README.md for usage instructions (running specific tests, coverage, etc.)
 #
 # ==============================================================================
-
-# Test dependencies
-using CTBase
-using Aqua
-using Documenter
-
-# Trigger loading of optional extensions
-using Test
-using Markdown
-using MarkdownAST
-using Coverage
-
-# Optional extension module access (loaded only when the package defines it).
-const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
-const TestRunner = Base.get_extension(CTBase, :TestRunner)
-const CoveragePostprocessing = Base.get_extension(CTBase, :CoveragePostprocessing)
+import Test
+import CTBase
 
 # Controls nested testset output formatting (used by individual test files)
 module TestOptions
@@ -33,11 +19,11 @@ using .TestOptions: VERBOSE, SHOWTIMING
 macro test_inferred(expr)
     q = quote
         try
-            @inferred $expr
-            @test true
+            Test.@inferred $expr
+            Test.@test true
         catch e
-            @test false
-            println("Error in @inferred: ", e)
+            Test.@test false
+            println("Error in Test.@inferred: ", e)
         end
     end
     return esc(q)

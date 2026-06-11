@@ -1,6 +1,15 @@
+module TestCodeQuality
+
+import Test
+import Aqua
+import CTBase
+
+const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+
 function test_code_quality()
-    @testset verbose = VERBOSE showtiming = SHOWTIMING "Code quality" begin
-        @testset verbose = VERBOSE showtiming = SHOWTIMING "Aqua" begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Code quality" begin
+        Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Aqua" begin
             Aqua.test_all(
                 CTBase;
                 ambiguities=false,
@@ -12,18 +21,23 @@ function test_code_quality()
             Aqua.test_ambiguities(CTBase)
         end
 
-        # @testset "JET" begin
+        # Test.@testset "JET" begin
         #     JET.test_package(CTBase; target_defined_modules=true)
         # end
 
-        # @testset "JuliaFormatter" begin
-        #     @test JuliaFormatter.format(CTBase; verbose=true, overwrite=false)
+        # Test.@testset "JuliaFormatter" begin
+        #     Test.@test JuliaFormatter.format(CTBase; verbose=true, overwrite=false)
         # end
 
-        # @testset "Doctests" begin
+        # Test.@testset "Doctests" begin
         #     Documenter.doctest(CTBase)
         # end
     end
 
     return nothing
 end
+
+end # module TestCodeQuality
+
+# CRITICAL: redefine in outer scope so the test runner can call it
+test_code_quality() = TestCodeQuality.test_code_quality()

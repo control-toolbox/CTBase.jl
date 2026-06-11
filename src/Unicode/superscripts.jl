@@ -1,0 +1,86 @@
+"""
+$(TYPEDSIGNATURES)
+
+Return the integer `i` ∈ [0, 9] as a Unicode **superscript (upper) character**.
+
+Throws an `CTBase.Exceptions.IncorrectArgument` exception if `i` is outside this range.
+
+Note: Unicode superscripts ¹ (U+00B9), ² (U+00B2), and ³ (U+00B3) are special cases.
+The other digits ⁰ (U+2070) and ⁴ to ⁹ (U+2074 to U+2079) are mostly contiguous.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> CTBase.ctupperscript(2)
+'²': Unicode U+00B2 (category No: Number, other)
+```
+"""
+function ctupperscript(i::Int)::Char
+    if i < 0
+        throw(
+            Exceptions.IncorrectArgument(
+                "the superscript must be positive";
+                got=string(i),
+                expected="≥ 0",
+                context="Unicode superscript generation",
+            ),
+        )
+    elseif i > 9
+        throw(
+            Exceptions.IncorrectArgument(
+                "the superscript must be a single digit";
+                got=string(i),
+                expected="0-9",
+                suggestion="Use ctupperscripts() for numbers with multiple digits",
+                context="Unicode superscript generation",
+            ),
+        )
+    elseif i == 0
+        return '\u2070'   # superscript zero
+    elseif i == 1
+        return '\u00B9'   # superscript one
+    elseif i == 2
+        return '\u00B2'   # superscript two
+    elseif i == 3
+        return '\u00B3'   # superscript three
+    else #if 4 <= i <= 9
+        # Unicode superscript digits 4-9 contiguous starting at U+2074
+        return Char(Int('\u2074') + (i - 4))
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the integer `i` ≥ 0 as a string of Unicode **superscript characters**.
+
+Throws an `CTBase.Exceptions.IncorrectArgument` if `i` is negative.
+
+# Example
+
+```julia-repl
+julia> using CTBase
+
+julia> CTBase.ctupperscripts(123)
+"¹²³"
+```
+"""
+function ctupperscripts(i::Int)::String
+    if i < 0
+        throw(
+            Exceptions.IncorrectArgument(
+                "the superscript must be positive";
+                got=string(i),
+                expected="≥ 0",
+                context="Unicode superscript string generation",
+            ),
+        )
+    end
+    s = ""
+    for d in digits(i)
+        s = ctupperscript(d) * s
+    end
+    return s
+end

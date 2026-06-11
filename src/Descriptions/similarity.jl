@@ -23,7 +23,7 @@ julia> CTBase.Descriptions.compute_similarity((:x, :y), (:a, :b))
 0.0
 ```
 """
-function compute_similarity(desc1::Description, desc2::Description)::Float64
+function _compute_similarity(desc1::Description, desc2::Description)::Float64
     if isempty(desc1) || isempty(desc2)
         return 0.0
     end
@@ -62,7 +62,7 @@ julia> CTBase.Descriptions.find_similar_descriptions((:a,), descriptions)
  "(:a, :c)"
 ```
 """
-function find_similar_descriptions(
+function _find_similar_descriptions(
     target::Tuple{Vararg{Symbol}},
     descriptions::Tuple{Vararg{Description}};
     max_results::Int=5,
@@ -73,7 +73,7 @@ function find_similar_descriptions(
 
     # Compute similarities
     similarities = [
-        (compute_similarity(target, desc), string(desc)) for desc in descriptions
+        (_compute_similarity(target, desc), string(desc)) for desc in descriptions
     ]
 
     # Sort by similarity (descending) and take top results
@@ -118,7 +118,7 @@ julia> CTBase.Descriptions.format_description_candidates(descriptions; max_show=
  "(:x, :y)"
 ```
 """
-function format_description_candidates(
+function _format_description_candidates(
     descriptions::Tuple{Vararg{Description}}; max_show::Int=5
 )::Vector{String}
     if isempty(descriptions)

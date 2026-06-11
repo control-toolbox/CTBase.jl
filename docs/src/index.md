@@ -1,5 +1,9 @@
 # CTBase.jl — Ecosystem Foundation
 
+!!! tip "Ask DeepWiki"
+    [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTBase.jl) offers an interactive, AI-generated overview of this codebase. Answers may be inaccurate — use this
+    reference documentation as the source of truth.
+
 ```@meta
 CurrentModule = CTBase
 ```
@@ -40,7 +44,7 @@ CTBase.Descriptions.complete(:euler, :explicit; descriptions=descs)
 try
     throw(CTBase.Exceptions.IncorrectArgument("n must be positive"; got="-1"))
 catch e
-    println(e)
+    showerror(stdout, e)
 end
 ```
 
@@ -49,7 +53,7 @@ end
 - **[Getting Started](getting-started.md)** — installation, mental model, 5-minute walkthrough.
 - **[Descriptions](guide/descriptions.md)** — catalogue API, pattern matching, error handling.
 - **[Exceptions](guide/exceptions.md)** — exception hierarchy, choosing the right type, best practices.
-- **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.run_tests`.
+- **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.Extensions.run_tests`.
 - **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.postprocess_coverage`.
 - **[API Documentation](guide/api-documentation.md)** — auto-generating per-module API pages.
 
