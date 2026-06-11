@@ -13,7 +13,14 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 include("types.jl")
 include("default.jl")
 
+# Private utilities
+include("function_utils.jl")
+include("macros.jl")
+
+# Public utilities
+include("matrix_utils.jl")
+
 # Export public API
-export ctNumber
+export ctNumber, matrix2vec, to_out_of_place, @ensure
 
 end # module

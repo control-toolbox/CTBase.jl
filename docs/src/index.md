@@ -1,9 +1,5 @@
 # CTBase.jl — Ecosystem Foundation
 
-!!! tip "Ask DeepWiki"
-    [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTBase.jl) offers an interactive, AI-generated overview of this codebase. Answers may be inaccurate — use this
-    reference documentation as the source of truth.
-
 ```@meta
 CurrentModule = CTBase
 ```
@@ -19,6 +15,10 @@ It provides the **base layer** shared by all packages: common types, structured 
 
     Downstream packages (e.g. [OptimalControl.jl](https://github.com/control-toolbox/OptimalControl.jl))
     may re-export selected symbols for convenience.
+
+!!! tip "Ask DeepWiki"
+    [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTBase.jl) offers an interactive, AI-generated overview of this codebase. Answers may be inaccurate — use this
+    reference documentation as the source of truth.
 
 ## Submodule overview
 

@@ -22,6 +22,9 @@ function generate_api_reference(src_dir::String)
                     joinpath("Core", "Core.jl"),
                     joinpath("Core", "default.jl"),
                     joinpath("Core", "types.jl"),
+                    joinpath("Core", "matrix_utils.jl"),
+                    joinpath("Core", "function_utils.jl"),
+                    joinpath("Core", "macros.jl"),
                 ),
             ],
             exclude=EXCLUDE_SYMBOLS,
@@ -30,6 +33,21 @@ function generate_api_reference(src_dir::String)
             title="Core",
             title_in_menu="Core",
             filename="core",
+        ),
+        CTBase.automatic_reference_documentation(;
+            subdirectory="api",
+            primary_modules=[
+                CTBase.Interpolation => src(
+                    joinpath("Interpolation", "Interpolation.jl"),
+                    joinpath("Interpolation", "ctinterpolate.jl"),
+                ),
+            ],
+            exclude=EXCLUDE_SYMBOLS,
+            public=true,
+            private=false,
+            title="Interpolation",
+            title_in_menu="Interpolation",
+            filename="interpolation",
         ),
         CTBase.automatic_reference_documentation(;
             subdirectory="api",
