@@ -44,6 +44,7 @@ reports/
 .cursor/
 .vscode/
 .extras/
+.tmp/
 
 # Temporary test artifacts (created during test runs)
 test/_test_*/
