@@ -1,6 +1,6 @@
 module TestExceptionTypes
 
-import Test
+using Test: Test
 import CTBase.Exceptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -65,7 +65,9 @@ function test_exception_types()
             Test.@test e.context == "objective! function"
 
             # Test that it can be thrown
-            Test.@test_throws Exceptions.IncorrectArgument throw(Exceptions.IncorrectArgument("Test error"))
+            Test.@test_throws Exceptions.IncorrectArgument throw(
+                Exceptions.IncorrectArgument("Test error")
+            )
         end
 
         Test.@testset "PreconditionError - Construction" begin
@@ -95,7 +97,9 @@ function test_exception_types()
             Test.@test e.context == "state! function"
 
             # Test that it can be thrown
-            Test.@test_throws Exceptions.PreconditionError throw(Exceptions.PreconditionError("Test error"))
+            Test.@test_throws Exceptions.PreconditionError throw(
+                Exceptions.PreconditionError("Test error")
+            )
         end
 
         Test.@testset "NotImplemented - Construction" begin
@@ -129,7 +133,9 @@ function test_exception_types()
                 "Import the relevant package (e.g. CTDirect) or implement solve!(::MyStrategy, ...)"
 
             # Test that it can be thrown
-            Test.@test_throws Exceptions.NotImplemented throw(Exceptions.NotImplemented("Test"))
+            Test.@test_throws Exceptions.NotImplemented throw(
+                Exceptions.NotImplemented("Test")
+            )
         end
 
         Test.@testset "ParsingError - Construction" begin
@@ -189,7 +195,9 @@ function test_exception_types()
             Test.@test e.context == "algorithm selection"
 
             # Test that it can be thrown
-            Test.@test_throws Exceptions.AmbiguousDescription throw(Exceptions.AmbiguousDescription((:test,)))
+            Test.@test_throws Exceptions.AmbiguousDescription throw(
+                Exceptions.AmbiguousDescription((:test,))
+            )
         end
 
         Test.@testset "ExtensionError - Construction" begin
@@ -221,7 +229,9 @@ function test_exception_types()
             Test.@test e.context == "solve! call"
 
             # Test that it can be thrown
-            Test.@test_throws Exceptions.ExtensionError throw(Exceptions.ExtensionError(:TestExt))
+            Test.@test_throws Exceptions.ExtensionError throw(
+                Exceptions.ExtensionError(:TestExt)
+            )
 
             # Test error when no dependencies provided
             Test.@test_throws Exceptions.PreconditionError Exceptions.ExtensionError()
@@ -255,7 +265,9 @@ function test_exception_types()
             Test.@test e.context == "IPOPT solver"
 
             # Test that it can be thrown
-            Test.@test_throws Exceptions.SolverFailure throw(Exceptions.SolverFailure("Test error"))
+            Test.@test_throws Exceptions.SolverFailure throw(
+                Exceptions.SolverFailure("Test error")
+            )
         end
     end
 end

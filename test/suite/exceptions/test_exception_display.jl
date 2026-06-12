@@ -1,6 +1,6 @@
 module TestExceptionDisplay
 
-import Test
+using Test: Test
 import CTBase.Exceptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -97,7 +97,9 @@ function test_exception_display()
 
         Test.@testset "NotImplemented - Display" begin
             io = IOBuffer()
-            e = Exceptions.NotImplemented("Feature not implemented", required_method="MyType")
+            e = Exceptions.NotImplemented(
+                "Feature not implemented", required_method="MyType"
+            )
 
             # User-friendly
             # CTBase.set_show_full_stacktrace!(false)
@@ -269,7 +271,9 @@ function test_exception_display()
 
         Test.@testset "ParsingError - All optional fields" begin
             io = IOBuffer()
-            e = Exceptions.ParsingError("Parse error"; location="line 10", suggestion="check syntax")
+            e = Exceptions.ParsingError(
+                "Parse error"; location="line 10", suggestion="check syntax"
+            )
 
             # CTBase.set_show_full_stacktrace!(false)
             Test.@test_nowarn showerror(io, e)
@@ -428,9 +432,7 @@ function test_exception_display()
         Test.@testset "AmbiguousDescription - diagnostic rendering" begin
             # "empty catalog" branch
             io = IOBuffer()
-            e = Exceptions.AmbiguousDescription(
-                (:a,); diagnostic="empty catalog"
-            )
+            e = Exceptions.AmbiguousDescription((:a,); diagnostic="empty catalog")
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "Diagnostic")
@@ -438,9 +440,7 @@ function test_exception_display()
 
             # "unknown symbols" branch
             io = IOBuffer()
-            e = Exceptions.AmbiguousDescription(
-                (:z,); diagnostic="unknown symbols"
-            )
+            e = Exceptions.AmbiguousDescription((:z,); diagnostic="unknown symbols")
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "Diagnostic")
@@ -448,9 +448,7 @@ function test_exception_display()
 
             # "no complete match" branch
             io = IOBuffer()
-            e = Exceptions.AmbiguousDescription(
-                (:a, :z); diagnostic="no complete match"
-            )
+            e = Exceptions.AmbiguousDescription((:a, :z); diagnostic="no complete match")
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "Diagnostic")
@@ -458,9 +456,7 @@ function test_exception_display()
 
             # else branch — arbitrary diagnostic value
             io = IOBuffer()
-            e = Exceptions.AmbiguousDescription(
-                (:a,); diagnostic="custom diagnostic"
-            )
+            e = Exceptions.AmbiguousDescription((:a,); diagnostic="custom diagnostic")
             Test.@test_nowarn showerror(io, e)
             output = String(take!(io))
             Test.@test contains(output, "Diagnostic")

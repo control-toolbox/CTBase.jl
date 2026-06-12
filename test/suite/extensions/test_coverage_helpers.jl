@@ -1,8 +1,8 @@
 module TestCoverageHelpers
 
-import Test
-import CTBase
-import Coverage
+using Test: Test
+using CTBase: CTBase
+using Coverage: Coverage
 
 const CP = Base.get_extension(CTBase, :CoveragePostprocessing)
 
@@ -18,7 +18,7 @@ function test_coverage_helpers()
             touch(joinpath(cov_dir, "test.jl.123.cov"))
 
             redirect_stdout(devnull) do
-                CP._reset_coverage_dir(cov_dir, cov_storage_dir)
+                return CP._reset_coverage_dir(cov_dir, cov_storage_dir)
             end
             Test.@test !isdir(cov_dir)
             Test.@test isdir(cov_storage_dir)

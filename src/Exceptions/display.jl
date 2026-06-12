@@ -12,7 +12,7 @@ Apply dimmed (faint) ANSI styling to a string.
 # Returns
 - `String`: The string wrapped in dim ANSI escape codes.
 """
-_dim(s)    = "\033[2m$(s)\033[0m"
+_dim(s) = "\033[2m$(s)\033[0m"
 
 """
 $(TYPEDSIGNATURES)
@@ -25,7 +25,7 @@ Apply bold ANSI styling to a string.
 # Returns
 - `String`: The string wrapped in bold ANSI escape codes.
 """
-_bold(s)   = "\033[1m$(s)\033[0m"
+_bold(s) = "\033[1m$(s)\033[0m"
 
 """
 $(TYPEDSIGNATURES)
@@ -38,7 +38,7 @@ Apply red ANSI styling to a string.
 # Returns
 - `String`: The string wrapped in red ANSI escape codes.
 """
-_red(s)    = "\033[1;31m$(s)\033[0m"
+_red(s) = "\033[1;31m$(s)\033[0m"
 
 """
 $(TYPEDSIGNATURES)
@@ -64,7 +64,7 @@ Apply green ANSI styling to a string.
 # Returns
 - `String`: The string wrapped in green ANSI escape codes.
 """
-_green(s)  = "\033[32m$(s)\033[0m"
+_green(s) = "\033[32m$(s)\033[0m"
 
 """
     extract_user_frames(st::Vector)
@@ -136,7 +136,7 @@ Build primary field `(label, value, color)` tuples for `IncorrectArgument` displ
 """
 function _build_primary_pairs(e::IncorrectArgument)
     pairs = []
-    !isnothing(e.got)      && push!(pairs, ("Got",      string(e.got),      :yellow))
+    !isnothing(e.got) && push!(pairs, ("Got", string(e.got), :yellow))
     !isnothing(e.expected) && push!(pairs, ("Expected", string(e.expected), :green))
     return pairs
 end
@@ -177,7 +177,8 @@ Build primary field `(label, value, color)` tuples for `NotImplemented` display.
 """
 function _build_primary_pairs(e::NotImplemented)
     pairs = []
-    !isnothing(e.required_method) && push!(pairs, ("Method", string(e.required_method), :default))
+    !isnothing(e.required_method) &&
+        push!(pairs, ("Method", string(e.required_method), :default))
     return pairs
 end
 
@@ -218,7 +219,8 @@ Build primary field `(label, value, color)` tuples for `AmbiguousDescription` di
 """
 function _build_primary_pairs(e::AmbiguousDescription)
     pairs = []
-    !isnothing(e.diagnostic) && push!(pairs, ("Diagnostic", _format_diagnostic(e.diagnostic), :yellow))
+    !isnothing(e.diagnostic) &&
+        push!(pairs, ("Diagnostic", _format_diagnostic(e.diagnostic), :yellow))
     push!(pairs, ("Requested", string(e.description), :default))
     if !isnothing(e.candidates) && !isempty(e.candidates)
         push!(pairs, ("Available", e.candidates, :default))
@@ -283,8 +285,12 @@ Build secondary field `(label, value, color)` tuples for generic `CTException` d
 """
 function _build_secondary_pairs(e::CTException)
     pairs = []
-    hasfield(typeof(e), :context)    && !isnothing(e.context)    && push!(pairs, ("Context", e.context,    :default))
-    hasfield(typeof(e), :suggestion) && !isnothing(e.suggestion) && push!(pairs, ("Hint",    e.suggestion, :green))
+    hasfield(typeof(e), :context) &&
+        !isnothing(e.context) &&
+        push!(pairs, ("Context", e.context, :default))
+    hasfield(typeof(e), :suggestion) &&
+        !isnothing(e.suggestion) &&
+        push!(pairs, ("Hint", e.suggestion, :green))
     return pairs
 end
 
@@ -404,7 +410,7 @@ function _format_user_friendly_error(io::IO, e::CTException)
     println(io, _dim("│"), "  ", _bold(e.msg))
 
     # Build field pairs
-    primary_pairs   = _build_primary_pairs(e)
+    primary_pairs = _build_primary_pairs(e)
     secondary_pairs = _build_secondary_pairs(e)
     all_pairs = vcat(primary_pairs, secondary_pairs)
 
@@ -432,7 +438,7 @@ function _format_user_friendly_error(io::IO, e::CTException)
     end
 
     # Closing visual
-    println(io, _dim("└─"))
+    return println(io, _dim("└─"))
 end
 
 """

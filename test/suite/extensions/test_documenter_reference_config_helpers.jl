@@ -1,8 +1,8 @@
 module TestDocumenterReferenceConfigHelpers
 
-import Test
-import CTBase
-import Documenter
+using Test: Test
+using CTBase: CTBase
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -46,4 +46,6 @@ end
 
 end # module
 
-test_documenter_reference_config_helpers() = TestDocumenterReferenceConfigHelpers.test_documenter_reference_config_helpers()
+function test_documenter_reference_config_helpers()
+    return TestDocumenterReferenceConfigHelpers.test_documenter_reference_config_helpers()
+end

@@ -1,7 +1,7 @@
 module TestTestRunnerSelection
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 
@@ -218,9 +218,7 @@ function test_testrunner_selection()
             touch(joinpath(temp_dir, "b.jl"))
 
             # Case 1: Available list order determines output order if provided
-            sel = select_tests(
-                ["z", "a"], [:a, :b, :z], false, identity; test_dir=temp_dir
-            )
+            sel = select_tests(["z", "a"], [:a, :b, :z], false, identity; test_dir=temp_dir)
             Test.@test sel == [:a, :z] # candidates order candidate list order
 
             # Case 2: Auto-discovery order (filesystem order, filtered)

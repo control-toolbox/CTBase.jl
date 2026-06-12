@@ -1,8 +1,8 @@
 module TestCoveragePostProcess
 
-import Test
-import Coverage
-import CTBase
+using Test: Test
+using Coverage: Coverage
+using CTBase: CTBase
 import CTBase.Extensions
 import CTBase.Exceptions
 
@@ -29,7 +29,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            Extensions.postprocess_coverage(; generate_report=false)
+                            return Extensions.postprocess_coverage(; generate_report=false)
                         end
                     end
                     nothing
@@ -47,7 +47,7 @@ function test_coverage_post_process()
         err = try
             redirect_stdout(devnull) do
                 redirect_stderr(devnull) do
-                    Extensions.postprocess_coverage(DummyCoverageTag())
+                    return Extensions.postprocess_coverage(DummyCoverageTag())
                 end
             end
             nothing
@@ -74,7 +74,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        Extensions.postprocess_coverage(; generate_report=false)
+                        return Extensions.postprocess_coverage(; generate_report=false)
                     end
                 end
 
@@ -150,7 +150,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        Extensions.postprocess_coverage(; generate_report=true)
+                        return Extensions.postprocess_coverage(; generate_report=true)
                     end
                 end
 
@@ -181,7 +181,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        CP._generate_coverage_reports!(
+                        return CP._generate_coverage_reports!(
                             ["src"], joinpath(tmp, "coverage"), tmp, 20, 200
                         )
                     end
@@ -211,8 +211,12 @@ function test_coverage_post_process()
                 mkpath(joinpath(root, "coverage"))
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        CP._generate_coverage_reports!(
-                            [joinpath(other, "src")], joinpath(root, "coverage"), root, 20, 200
+                        return CP._generate_coverage_reports!(
+                            [joinpath(other, "src")],
+                            joinpath(root, "coverage"),
+                            root,
+                            20,
+                            200,
                         )
                     end
                 end
@@ -313,7 +317,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        Extensions.postprocess_coverage(; generate_report=true)
+                        return Extensions.postprocess_coverage(; generate_report=true)
                     end
                 end
 
@@ -358,7 +362,9 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        Extensions.postprocess_coverage(; generate_report=true, worst_n_files=1)
+                        return Extensions.postprocess_coverage(;
+                            generate_report=true, worst_n_files=1
+                        )
                     end
                 end
 
@@ -388,7 +394,9 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        Extensions.postprocess_coverage(; generate_report=true, max_uncovered_lines=2)
+                        return Extensions.postprocess_coverage(;
+                            generate_report=true, max_uncovered_lines=2
+                        )
                     end
                 end
 
@@ -416,7 +424,9 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            Extensions.postprocess_coverage(; generate_report=false, worst_n_files=0)
+                            return Extensions.postprocess_coverage(;
+                                generate_report=false, worst_n_files=0
+                            )
                         end
                     end
                     nothing
@@ -429,7 +439,9 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            Extensions.postprocess_coverage(; generate_report=false, worst_n_files=-5)
+                            return Extensions.postprocess_coverage(;
+                                generate_report=false, worst_n_files=-5
+                            )
                         end
                     end
                     nothing
@@ -442,7 +454,9 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            Extensions.postprocess_coverage(; generate_report=false, max_uncovered_lines=0)
+                            return Extensions.postprocess_coverage(;
+                                generate_report=false, max_uncovered_lines=0
+                            )
                         end
                     end
                     nothing
@@ -455,7 +469,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            Extensions.postprocess_coverage(;
+                            return Extensions.postprocess_coverage(;
                                 generate_report=false, max_uncovered_lines=-10
                             )
                         end

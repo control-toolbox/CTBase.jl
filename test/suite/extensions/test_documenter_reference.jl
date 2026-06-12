@@ -1,9 +1,9 @@
 module TestDocumenterReference
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Extensions: Extensions
-import Documenter
+using Documenter: Documenter
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
@@ -28,7 +28,7 @@ function test_documenter_reference()
 
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Extensions.automatic_reference_documentation(
+                return Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="api_integration",
                     primary_modules=[DocumenterReferenceIntegrationTestMod],
@@ -43,15 +43,18 @@ function test_documenter_reference()
 
         doc = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Documenter.Document(;
-                    root=pwd(), source="_test_docs_src", build="_test_docs_build", remotes=nothing
+                return Documenter.Document(;
+                    root=pwd(),
+                    source="_test_docs_src",
+                    build="_test_docs_build",
+                    remotes=nothing,
                 )
             end
         end
 
         redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Documenter.Selectors.runner(DR.APIBuilder, doc)
+                return Documenter.Selectors.runner(DR.APIBuilder, doc)
             end
         end
 

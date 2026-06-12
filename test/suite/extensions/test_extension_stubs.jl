@@ -1,6 +1,6 @@
 module TestExtensionStubs
 
-import Test
+using Test: Test
 import CTBase.Extensions
 import CTBase.Exceptions
 
@@ -32,7 +32,9 @@ function test_extension_stubs()
 
         # Test run_tests error
         Test.@testset "run_tests" begin
-            Test.@test_throws Exceptions.ExtensionError Extensions.run_tests(FakeTestRunnerTag())
+            Test.@test_throws Exceptions.ExtensionError Extensions.run_tests(
+                FakeTestRunnerTag()
+            )
         end
     end
 

@@ -1,7 +1,7 @@
 module TestTestRunnerTypes
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Extensions
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
@@ -61,7 +61,7 @@ function test_testrunner_types()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "TestSpec" begin
         Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "TestSpec is Vector{Union{String, Symbol}}" begin
             spec = TestRunner.TestSpec[:a, "suite/*"]
-            Test.@test spec isa Vector{Union{String, Symbol}}
+            Test.@test spec isa Vector{Union{String,Symbol}}
             Test.@test spec == [:a, "suite/*"]
         end
     end

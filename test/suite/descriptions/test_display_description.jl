@@ -1,6 +1,6 @@
 module TestDisplayDescription
 
-import Test
+using Test: Test
 import CTBase.Descriptions: Descriptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

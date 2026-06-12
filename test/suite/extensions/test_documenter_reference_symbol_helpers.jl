@@ -1,8 +1,8 @@
 module TestDocumenterReferenceSymbolHelpers
 
-import Test
-import CTBase
-import Documenter
+using Test: Test
+using CTBase: CTBase
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -52,16 +52,19 @@ end
 function test_documenter_reference_symbol_helpers()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_classify_symbol" begin
         Test.@test DR._classify_symbol(nothing, "@mymacro") == DR.DOCTYPE_MACRO
-        Test.@test DR._classify_symbol(DocumenterReferenceSymbolTestMod.SubModule, "SubModule") ==
-            DR.DOCTYPE_MODULE
-        Test.@test DR._classify_symbol(DocumenterReferenceSymbolTestMod.AbstractFoo, "AbstractFoo") ==
-            DR.DOCTYPE_ABSTRACT_TYPE
+        Test.@test DR._classify_symbol(
+            DocumenterReferenceSymbolTestMod.SubModule, "SubModule"
+        ) == DR.DOCTYPE_MODULE
+        Test.@test DR._classify_symbol(
+            DocumenterReferenceSymbolTestMod.AbstractFoo, "AbstractFoo"
+        ) == DR.DOCTYPE_ABSTRACT_TYPE
         Test.@test DR._classify_symbol(DocumenterReferenceSymbolTestMod.Foo, "Foo") ==
             DR.DOCTYPE_STRUCT
         Test.@test DR._classify_symbol(DocumenterReferenceSymbolTestMod.myfun, "myfun") ==
             DR.DOCTYPE_FUNCTION
-        Test.@test DR._classify_symbol(DocumenterReferenceSymbolTestMod.MYCONST, "MYCONST") ==
-            DR.DOCTYPE_CONSTANT
+        Test.@test DR._classify_symbol(
+            DocumenterReferenceSymbolTestMod.MYCONST, "MYCONST"
+        ) == DR.DOCTYPE_CONSTANT
         Test.@test DR._classify_symbol(42, "fortytwo") == DR.DOCTYPE_CONSTANT
         Test.@test DR._classify_symbol("hello", "greeting") == DR.DOCTYPE_CONSTANT
         Test.@test DR._classify_symbol([1, 2, 3], "myarray") == DR.DOCTYPE_CONSTANT
@@ -83,7 +86,9 @@ function test_documenter_reference_symbol_helpers()
     end
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_get_source_file" begin
-        path = DR._get_source_file(DocumenterReferenceSymbolTestMod, :myfun, DR.DOCTYPE_FUNCTION)
+        path = DR._get_source_file(
+            DocumenterReferenceSymbolTestMod, :myfun, DR.DOCTYPE_FUNCTION
+        )
         Test.@test path === abspath(@__FILE__)
 
         # No docstring => should use method-based resolution
@@ -132,8 +137,9 @@ function test_documenter_reference_symbol_helpers()
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_has_documentation" begin
         modules = Dict(DRNoDocModule.Inner => Any[])
-        Test.@test DR._has_documentation(DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules) ==
-            true
+        Test.@test DR._has_documentation(
+            DRNoDocModule, :Inner, DR.DOCTYPE_MODULE, modules
+        ) == true
     end
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_iterate_over_symbols filtering" begin
@@ -246,4 +252,6 @@ end
 
 end # module
 
-test_documenter_reference_symbol_helpers() = TestDocumenterReferenceSymbolHelpers.test_documenter_reference_symbol_helpers()
+function test_documenter_reference_symbol_helpers()
+    return TestDocumenterReferenceSymbolHelpers.test_documenter_reference_symbol_helpers()
+end

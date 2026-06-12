@@ -1,6 +1,6 @@
 module TestSimilarity
 
-import Test
+using Test: Test
 import CTBase.Descriptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -66,8 +66,9 @@ function test_similarity()
 
         Test.@testset "Type stability - compute_similarity" begin
             # Basic case
-            Test.@test (Test.@inferred Descriptions._compute_similarity((:a, :b), (:a, :c))) isa
-                Float64
+            Test.@test (Test.@inferred Descriptions._compute_similarity(
+                (:a, :b), (:a, :c)
+            )) isa Float64
 
             # Edge cases
             Test.@test (Test.@inferred Descriptions._compute_similarity((), ())) isa Float64
@@ -93,9 +94,7 @@ function test_similarity()
             Test.@test !("(:x, :y)" in similar)
 
             # No similar descriptions
-            Test.@test isempty(
-                Descriptions._find_similar_descriptions((:z,), descriptions)
-            )
+            Test.@test isempty(Descriptions._find_similar_descriptions((:z,), descriptions))
         end
 
         Test.@testset "find_similar_descriptions - boundaries" begin
