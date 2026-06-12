@@ -32,4 +32,8 @@ using .Descriptions
 include(joinpath(@__DIR__, "Extensions", "Extensions.jl"))
 using .Extensions
 
+# Interpolation module - interpolation utilities
+include(joinpath(@__DIR__, "Interpolation", "Interpolation.jl"))
+using .Interpolation
+
 end
