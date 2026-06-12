@@ -2,6 +2,21 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.19.0-beta)
+
+- **Interpolation module**: Added new `Interpolation` module with interpolation utilities migrated from CTModels.Utils
+  - `ctinterpolate`: linear interpolation with flat extrapolation
+  - `ctinterpolate_constant`: piecewise-constant (steppost) interpolation
+  - `Interpolant{Linear}` and `Interpolant{Constant}` parametric types with type-stable call methods
+  - Custom `show` methods for interpolant display
+- **Core utilities**: Extended `Core` module with utilities from CTModels.Utils
+  - `matrix2vec`: public utility for matrix-to-vector conversion
+  - `to_out_of_place`: private utility for out-of-place function transformation
+  - `@ensure`: private macro for argument validation
+- **Documentation**: Updated `docs/api_reference.jl` to include new Interpolation module and Core utilities
+- **Tests**: Added comprehensive test suites for interpolation (56 tests), function_utils (18 tests), macros (14 tests), and matrix_utils (26 tests)
+- **No breaking changes**: All additions are new public API; existing CTBase API unchanged. No migration required.
+
 ## Non-breaking note (0.18.15-beta)
 
 - **Philosophy documentation**: Added comprehensive code philosophy documentation in `dev/philosophy/` covering modules, types/traits, exceptions, docstrings, testing, and documentation standards. No API changes; purely documentation additions.

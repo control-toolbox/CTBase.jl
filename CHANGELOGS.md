@@ -5,6 +5,49 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0-beta] - 2026-06-11
+
+### ✨ New Features
+
+#### **Interpolation Module**
+
+- **New module**: Added `Interpolation` module with interpolation utilities migrated from CTModels.Utils (issue #445)
+- **Linear interpolation**: `ctinterpolate(x, f)` creates a linear interpolant with flat extrapolation beyond bounds
+- **Constant interpolation**: `ctinterpolate_constant(x, f)` creates a right-continuous piecewise-constant (steppost) interpolant
+- **Typed interpolants**: `Interpolant{Linear}` and `Interpolant{Constant}` parametric types with type-stable call methods
+- **Custom display**: Added `show` methods for interpolants showing method type and node count
+- **Optimal control support**: Constant interpolation implements standard steppost behavior for control applications
+
+#### **Core Utilities**
+
+- **Matrix utilities**: Extended `Core` module with `matrix2vec` for matrix-to-vector conversion (public)
+- **Function utilities**: Added `to_out_of_place` for out-of-place function transformation (private)
+- **Validation macro**: Added `@ensure` macro for argument validation (private)
+
+### 📚 Documentation
+
+- **API reference**: Updated `docs/api_reference.jl` to include new Interpolation module with public and private documentation
+- **Core documentation**: Extended Core API reference to include matrix_utils, function_utils, and macros
+- **Docstrings**: Comprehensive docstrings with `$(TYPEDSIGNATURES)` and julia-repl examples
+
+### 🧪 Testing
+
+- **Interpolation tests**: 56 tests covering linear/constant interpolation, extrapolation, non-uniform grids, vector values, type stability, and display
+- **Function utils tests**: 18 tests for `to_out_of_place` function transformation
+- **Macro tests**: 14 tests for `@ensure` validation macro
+- **Matrix utils tests**: 26 tests for `matrix2vec` and related utilities
+- **All tests pass**: 1237/1237 tests pass (45.9s)
+
+### 🏗️ Architecture
+
+- **Modular design**: Split utilities by responsibility (Interpolation module + Core extensions) rather than monolithic Utils module
+- **Qualified imports**: All new code follows CTBase convention of qualified imports without top-level exports
+- **Type stability**: Interpolant call methods are type-stable with `@inferred` tests
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.19.0-beta for feature release.
+
 ## [0.18.15-beta] - 2026-06-06
 
 ### 📚 Documentation
