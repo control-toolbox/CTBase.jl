@@ -1,8 +1,8 @@
 module TestDocumenterReferenceTypeFormatting
 
-import Test
-import CTBase
-import Documenter
+using Test: Test
+using CTBase: CTBase
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -117,4 +117,6 @@ end
 
 end # module
 
-test_documenter_reference_type_formatting() = TestDocumenterReferenceTypeFormatting.test_documenter_reference_type_formatting()
+function test_documenter_reference_type_formatting()
+    return TestDocumenterReferenceTypeFormatting.test_documenter_reference_type_formatting()
+end

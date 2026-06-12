@@ -1,6 +1,6 @@
 module TestIntegration
 
-import Test
+using Test: Test
 import CTBase.Descriptions: Descriptions
 import CTBase.Extensions: Extensions
 import CTBase.Exceptions: Exceptions
@@ -22,8 +22,9 @@ function test_integration()
         # Successful completion from partial descriptions
         Test.@test Descriptions.complete((:descent,); descriptions=algorithms) ==
             (:descent, :bfgs, :bisection)
-        Test.@test Descriptions.complete((:gradient, :fixedstep); descriptions=algorithms) ==
-            (:descent, :gradient, :fixedstep)
+        Test.@test Descriptions.complete(
+            (:gradient, :fixedstep); descriptions=algorithms
+        ) == (:descent, :gradient, :fixedstep)
 
         # Removing known prefix from completed description
         full = Descriptions.complete((:descent,); descriptions=algorithms)

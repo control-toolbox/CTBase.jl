@@ -1,7 +1,7 @@
 module TestTestRunner
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Extensions
 import CTBase.Exceptions
 

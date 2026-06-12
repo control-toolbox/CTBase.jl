@@ -1,6 +1,6 @@
 module TestDescriptionTypes
 
-import Test
+using Test: Test
 import CTBase.Descriptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -106,7 +106,8 @@ function test_description_types()
             Test.@test result == (:a, :b, :c)
 
             # Test with Test.@inferred
-            Test.@test (Test.@inferred create_description(:x, :y)) isa Descriptions.Description
+            Test.@test (Test.@inferred create_description(:x, :y)) isa
+                Descriptions.Description
         end
     end
 end

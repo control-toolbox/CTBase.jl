@@ -5,8 +5,8 @@
 # See test/README.md for usage instructions (running specific tests, coverage, etc.)
 #
 # ==============================================================================
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 
 # Controls nested testset output formatting (used by individual test files)
 module TestOptions

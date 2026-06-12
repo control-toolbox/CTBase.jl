@@ -1,6 +1,6 @@
 module TestCatalog
 
-import Test
+using Test: Test
 import CTBase.Descriptions
 import CTBase.Exceptions
 
@@ -90,8 +90,10 @@ function test_catalog()
 
         Test.@testset "Type stability - add function" begin
             # Add to empty catalog
-            Test.@test (Test.@inferred Descriptions.add((), (:a,))) isa Tuple{Vararg{Descriptions.Description}}
-            Test.@test (Test.@inferred Descriptions.add((), (:a, :b))) isa Tuple{Vararg{Descriptions.Description}}
+            Test.@test (Test.@inferred Descriptions.add((), (:a,))) isa
+                Tuple{Vararg{Descriptions.Description}}
+            Test.@test (Test.@inferred Descriptions.add((), (:a, :b))) isa
+                Tuple{Vararg{Descriptions.Description}}
 
             # Add to non-empty catalog
             descriptions = ((:a,),)
@@ -112,7 +114,9 @@ function test_catalog()
             algorithms = Descriptions.add(algorithms, (:a, :b, :c))
 
             # Basic error check
-            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(algorithms, (:a, :b, :c))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(
+                algorithms, (:a, :b, :c)
+            )
 
             # Enriched error check - verify all exception fields
             try
@@ -132,13 +136,19 @@ function test_catalog()
             descriptions = ((:a,), (:b,), (:c,))
 
             # Try to add duplicate of first
-            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(descriptions, (:a,))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(
+                descriptions, (:a,)
+            )
 
             # Try to add duplicate of middle
-            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(descriptions, (:b,))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(
+                descriptions, (:b,)
+            )
 
             # Try to add duplicate of last
-            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(descriptions, (:c,))
+            Test.@test_throws Exceptions.IncorrectArgument Descriptions.add(
+                descriptions, (:c,)
+            )
         end
 
         Test.@testset "Return type consistency" begin

@@ -1,8 +1,8 @@
 module TestCodeQuality
 
-import Test
-import Aqua
-import CTBase
+using Test: Test
+using Aqua: Aqua
+using CTBase: CTBase
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true

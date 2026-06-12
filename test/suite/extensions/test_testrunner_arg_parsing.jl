@@ -1,7 +1,7 @@
 module TestTestRunnerArgParsing
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Exceptions
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)

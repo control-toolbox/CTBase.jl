@@ -1,9 +1,9 @@
 module TestDocumenterReferencePipeline
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Extensions: Extensions
-import Documenter
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -27,7 +27,7 @@ function test_documenter_reference_pipeline()
 
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Extensions.automatic_reference_documentation(
+                return Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="api_integration",
                     primary_modules=[DocumenterReferencePipelineTestMod],
@@ -42,15 +42,18 @@ function test_documenter_reference_pipeline()
 
         doc = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Documenter.Document(;
-                    root=pwd(), source="_test_docs_src", build="_test_docs_build", remotes=nothing
+                return Documenter.Document(;
+                    root=pwd(),
+                    source="_test_docs_src",
+                    build="_test_docs_build",
+                    remotes=nothing,
                 )
             end
         end
 
         redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Documenter.Selectors.runner(DR.APIBuilder, doc)
+                return Documenter.Selectors.runner(DR.APIBuilder, doc)
             end
         end
 
@@ -63,4 +66,6 @@ end
 
 end # module
 
-test_documenter_reference_pipeline() = TestDocumenterReferencePipeline.test_documenter_reference_pipeline()
+function test_documenter_reference_pipeline()
+    return TestDocumenterReferencePipeline.test_documenter_reference_pipeline()
+end

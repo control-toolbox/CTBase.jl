@@ -1,8 +1,8 @@
 module TestDocumenterReferencePageBuilding
 
-import Test
-import CTBase
-import Documenter
+using Test: Test
+using CTBase: CTBase
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -58,10 +58,10 @@ function test_documenter_reference_page_building()
 
         # Test with private symbols (which have docstrings)
         symbols = redirect_stderr(devnull) do
-            DR._exported_symbols(DocumenterReferencePageTestMod).private
+            return DR._exported_symbols(DocumenterReferencePageTestMod).private
         end
         docs = redirect_stderr(devnull) do
-            DR._collect_module_docstrings(config, symbols)
+            return DR._collect_module_docstrings(config, symbols)
         end
 
         # Should collect docstrings for documented symbols
@@ -76,7 +76,7 @@ function test_documenter_reference_page_building()
         ]
         # Test with is_split=false (single page)
         overview_priv, docs_priv = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents_private, false
             )
         end
@@ -92,9 +92,7 @@ function test_documenter_reference_page_building()
         ]
         # Test with is_split=false (single page)
         overview_pub, docs_pub = redirect_stderr(devnull) do
-            DR._build_public_page_content(
-                modules_str, module_contents_public, false
-            )
+            return DR._build_public_page_content(modules_str, module_contents_public, false)
         end
         Test.@test occursin("Public API", overview_pub)
         Test.@test occursin("ModA, ModB", overview_pub)
@@ -103,9 +101,7 @@ function test_documenter_reference_page_building()
 
         module_contents_combined = [(DocumenterReferencePageTestMod, ["pub_a"], ["priv_a"])]
         overview_comb, docs_comb = redirect_stderr(devnull) do
-            DR._build_combined_page_content(
-                modules_str, module_contents_combined
-            )
+            return DR._build_combined_page_content(modules_str, module_contents_combined)
         end
         Test.@test occursin("API reference", overview_comb)
         Test.@test any(occursin("Public API", s) for s in docs_comb)
@@ -121,7 +117,7 @@ function test_documenter_reference_page_building()
         module_contents_private = [(DocumenterReferencePageTestMod, String[], ["priv_doc"])]
 
         overview_priv_single, docs_priv_single = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents_private, false
             )
         end
@@ -131,7 +127,7 @@ function test_documenter_reference_page_building()
 
         # Test private page with is_split=true (split page)
         overview_priv_split, docs_priv_split = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents_private, true
             )
         end
@@ -142,18 +138,14 @@ function test_documenter_reference_page_building()
         module_contents_public = [(DocumenterReferencePageTestMod, ["pub_doc"], String[])]
 
         overview_pub_single, docs_pub_single = redirect_stderr(devnull) do
-            DR._build_public_page_content(
-                modules_str, module_contents_public, false
-            )
+            return DR._build_public_page_content(modules_str, module_contents_public, false)
         end
         Test.@test occursin("# Public API", overview_pub_single)
         Test.@test occursin("exported", overview_pub_single)
 
         # Test public page with is_split=true (split page)
         overview_pub_split, docs_pub_split = redirect_stderr(devnull) do
-            DR._build_public_page_content(
-                modules_str, module_contents_public, true
-            )
+            return DR._build_public_page_content(modules_str, module_contents_public, true)
         end
         Test.@test occursin("# Public API", overview_pub_split)
         Test.@test occursin("exported", overview_pub_split)
@@ -165,37 +157,31 @@ function test_documenter_reference_page_building()
 
         # Single private page should have "Private API" title
         overview_priv, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
-                modules_str, module_contents, false
-            )
+            return DR._build_private_page_content(modules_str, module_contents, false)
         end
         Test.@test occursin("# Private API", overview_priv)
 
         # Single public page should have "Public API" title
         overview_pub, _ = redirect_stderr(devnull) do
-            DR._build_public_page_content(modules_str, module_contents, false)
+            return DR._build_public_page_content(modules_str, module_contents, false)
         end
         Test.@test occursin("# Public API", overview_pub)
 
         # Split private page should have "Private API" title
         overview_priv_split, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
-                modules_str, module_contents, true
-            )
+            return DR._build_private_page_content(modules_str, module_contents, true)
         end
         Test.@test occursin("# Private API", overview_priv_split)
 
         # Split public page should have "Public API" title
         overview_pub_split, _ = redirect_stderr(devnull) do
-            DR._build_public_page_content(
-                modules_str, module_contents, true
-            )
+            return DR._build_public_page_content(modules_str, module_contents, true)
         end
         Test.@test occursin("# Public API", overview_pub_split)
 
         # Combined page should have "API reference" title
         overview_comb, _ = redirect_stderr(devnull) do
-            DR._build_combined_page_content(modules_str, module_contents)
+            return DR._build_combined_page_content(modules_str, module_contents)
         end
         Test.@test occursin("# API reference", overview_comb)
     end
@@ -206,7 +192,7 @@ function test_documenter_reference_page_building()
 
         # Test custom title for private page (single)
         overview_priv_custom, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents, false; custom_title="Internal API"
             )
         end
@@ -215,7 +201,7 @@ function test_documenter_reference_page_building()
 
         # Test custom title for public page (single)
         overview_pub_custom, _ = redirect_stderr(devnull) do
-            DR._build_public_page_content(
+            return DR._build_public_page_content(
                 modules_str, module_contents, false; custom_title="Exported API"
             )
         end
@@ -224,7 +210,7 @@ function test_documenter_reference_page_building()
 
         # Test custom title for private page (split)
         overview_priv_split_custom, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents, true; custom_title="Internal"
             )
         end
@@ -233,7 +219,7 @@ function test_documenter_reference_page_building()
 
         # Test custom title for public page (split)
         overview_pub_split_custom, _ = redirect_stderr(devnull) do
-            DR._build_public_page_content(
+            return DR._build_public_page_content(
                 modules_str, module_contents, true; custom_title="Exported"
             )
         end
@@ -248,7 +234,7 @@ function test_documenter_reference_page_building()
         # Test custom description for private page
         custom_desc_priv = "This page documents internal implementation details."
         overview_priv_desc, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents, false; custom_description=custom_desc_priv
             )
         end
@@ -258,7 +244,7 @@ function test_documenter_reference_page_building()
         # Test custom description for public page
         custom_desc_pub = "This page documents the public interface for end users."
         overview_pub_desc, _ = redirect_stderr(devnull) do
-            DR._build_public_page_content(
+            return DR._build_public_page_content(
                 modules_str, module_contents, false; custom_description=custom_desc_pub
             )
         end
@@ -276,7 +262,7 @@ function test_documenter_reference_page_building()
         custom_desc = "Advanced documentation for contributors and maintainers."
 
         overview, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str,
                 module_contents,
                 false;
@@ -297,7 +283,7 @@ function test_documenter_reference_page_building()
 
         # Empty strings should use default behavior
         overview_priv_empty, _ = redirect_stderr(devnull) do
-            DR._build_private_page_content(
+            return DR._build_private_page_content(
                 modules_str, module_contents, false; custom_title="", custom_description=""
             )
         end
@@ -305,7 +291,7 @@ function test_documenter_reference_page_building()
         Test.@test occursin("non-exported", overview_priv_empty)
 
         overview_pub_empty, _ = redirect_stderr(devnull) do
-            DR._build_public_page_content(
+            return DR._build_public_page_content(
                 modules_str, module_contents, false; custom_title="", custom_description=""
             )
         end
@@ -340,7 +326,7 @@ function test_documenter_reference_page_building()
         )
 
         private_docs = redirect_stderr(devnull) do
-            DR._collect_private_docstrings(config, Pair{Symbol,DR.DocType}[])
+            return DR._collect_private_docstrings(config, Pair{Symbol,DR.DocType}[])
         end
         Test.@test !isempty(private_docs)
         Test.@test any(occursin("DRExternalTestMod.extfun", s) for s in private_docs)
@@ -351,4 +337,6 @@ end
 
 end # module
 
-test_documenter_reference_page_building() = TestDocumenterReferencePageBuilding.test_documenter_reference_page_building()
+function test_documenter_reference_page_building()
+    return TestDocumenterReferencePageBuilding.test_documenter_reference_page_building()
+end

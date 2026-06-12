@@ -1,6 +1,6 @@
 module TestComplete
 
-import Test
+using Test: Test
 import CTBase.Descriptions
 import CTBase.Exceptions
 
@@ -36,7 +36,8 @@ function test_complete()
             algorithms = ()
             algorithms = Descriptions.add(algorithms, (:a, :b, :c))
             algorithms = Descriptions.add(algorithms, (:a, :b, :c, :d))
-            Test.@test Descriptions.complete((:a, :b); descriptions=algorithms) == (:a, :b, :c)
+            Test.@test Descriptions.complete((:a, :b); descriptions=algorithms) ==
+                (:a, :b, :c)
             Test.@test Descriptions.complete((:a, :b, :c, :d); descriptions=algorithms) ==
                 (:a, :b, :c, :d)
         end
@@ -46,12 +47,14 @@ function test_complete()
             algos_swapped = ()
             algos_swapped = Descriptions.add(algos_swapped, (:a, :b, :c, :d))
             algos_swapped = Descriptions.add(algos_swapped, (:a, :b, :c))
-            Test.@test Descriptions.complete((:a, :b); descriptions=algos_swapped) == (:a, :b, :c, :d)
+            Test.@test Descriptions.complete((:a, :b); descriptions=algos_swapped) ==
+                (:a, :b, :c, :d)
 
             algos_ordered = ()
             algos_ordered = Descriptions.add(algos_ordered, (:a, :b, :c))
             algos_ordered = Descriptions.add(algos_ordered, (:a, :b, :c, :d))
-            Test.@test Descriptions.complete((:a, :b); descriptions=algos_ordered) == (:a, :b, :c)
+            Test.@test Descriptions.complete((:a, :b); descriptions=algos_ordered) ==
+                (:a, :b, :c)
         end
 
         Test.@testset "Successful completion with exact and partial matches" begin
@@ -134,16 +137,20 @@ function test_complete()
             descriptions = ((:a, :b), (:a, :c), (:b, :c))
 
             # Varargs overload
-            Test.@test (Test.@inferred Descriptions.complete(:a; descriptions=descriptions)) isa
-                Descriptions.Description
-            Test.@test (Test.@inferred Descriptions.complete(:a, :b; descriptions=descriptions)) isa
-                Descriptions.Description
+            Test.@test (Test.@inferred Descriptions.complete(
+                :a; descriptions=descriptions
+            )) isa Descriptions.Description
+            Test.@test (Test.@inferred Descriptions.complete(
+                :a, :b; descriptions=descriptions
+            )) isa Descriptions.Description
 
             # Tuple overload
-            Test.@test (Test.@inferred Descriptions.complete((:a,); descriptions=descriptions)) isa
-                Descriptions.Description
-            Test.@test (Test.@inferred Descriptions.complete((:a, :b); descriptions=descriptions)) isa
-                Descriptions.Description
+            Test.@test (Test.@inferred Descriptions.complete(
+                (:a,); descriptions=descriptions
+            )) isa Descriptions.Description
+            Test.@test (Test.@inferred Descriptions.complete(
+                (:a, :b); descriptions=descriptions
+            )) isa Descriptions.Description
 
             # Verify return type consistency
             result = Descriptions.complete(:a; descriptions=descriptions)
@@ -161,7 +168,9 @@ function test_complete()
             )
 
             # Empty catalog
-            Test.@test_throws Exceptions.AmbiguousDescription Descriptions.complete(:a; descriptions=())
+            Test.@test_throws Exceptions.AmbiguousDescription Descriptions.complete(
+                :a; descriptions=()
+            )
 
             # Enriched error checks - rigorous
 

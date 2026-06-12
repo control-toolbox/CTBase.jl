@@ -1,8 +1,8 @@
 module TestDocumenterReferenceTypes
 
-import Test
-import CTBase
-import Documenter
+using Test: Test
+using CTBase: CTBase
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -28,7 +28,7 @@ function test_documenter_reference_types()
     end
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "DOCTYPE_ORDER" begin
-        Test.@test DR.DOCTYPE_ORDER isa Dict{DR.DocType, Int}
+        Test.@test DR.DOCTYPE_ORDER isa Dict{DR.DocType,Int}
         Test.@test length(DR.DOCTYPE_ORDER) > 0
     end
 
@@ -63,4 +63,6 @@ end
 
 end # module
 
-test_documenter_reference_types() = TestDocumenterReferenceTypes.test_documenter_reference_types()
+function test_documenter_reference_types()
+    return TestDocumenterReferenceTypes.test_documenter_reference_types()
+end

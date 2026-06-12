@@ -1,6 +1,6 @@
 module TestExtensionError
 
-import Test
+using Test: Test
 import CTBase.Exceptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

@@ -1,6 +1,6 @@
 module TestRemove
 
-import Test
+using Test: Test
 import CTBase.Descriptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

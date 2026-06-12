@@ -1,6 +1,6 @@
 module TestCoreUtils
 
-import Test
+using Test: Test
 import CTBase.Core
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

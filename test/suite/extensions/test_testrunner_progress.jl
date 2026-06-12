@@ -1,7 +1,7 @@
 module TestTestRunnerProgress
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 

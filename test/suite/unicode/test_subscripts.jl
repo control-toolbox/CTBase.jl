@@ -1,6 +1,6 @@
 module TestSubscripts
 
-import Test
+using Test: Test
 import CTBase.Exceptions: Exceptions
 import CTBase.Unicode: Unicode
 

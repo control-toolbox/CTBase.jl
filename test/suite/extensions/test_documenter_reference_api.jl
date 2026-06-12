@@ -1,10 +1,10 @@
 module TestDocumenterReferenceAPI
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Exceptions: Exceptions
 import CTBase.Extensions: Extensions
-import Documenter
+using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
 const DR = DocumenterReference
@@ -43,7 +43,7 @@ function test_documenter_reference_api()
         # Single-module, public-only
         pages1 = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Extensions.automatic_reference_documentation(
+                return Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="ref",
                     primary_modules=[DocumenterReferenceAPITestMod],
@@ -67,7 +67,7 @@ function test_documenter_reference_api()
         DR.reset_config!()
         pages2 = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Extensions.automatic_reference_documentation(
+                return Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="ref",
                     primary_modules=[DocumenterReferenceAPITestMod],
@@ -109,10 +109,12 @@ function test_documenter_reference_api()
         # Test multi-module case (using same module twice as a proxy)
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Extensions.automatic_reference_documentation(
+                return Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="api",
-                    primary_modules=[DocumenterReferenceAPITestMod, DocumenterReferenceAPITestMod],
+                    primary_modules=[
+                        DocumenterReferenceAPITestMod, DocumenterReferenceAPITestMod
+                    ],
                     public=true,
                     private=true,
                     title="Multi API",
@@ -135,10 +137,12 @@ function test_documenter_reference_api()
         # Test multi-module case with explicit filename (combined page - public only)
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Extensions.automatic_reference_documentation(
+                return Extensions.automatic_reference_documentation(
                     Extensions.DocumenterReferenceTag();
                     subdirectory="api",
-                    primary_modules=[DocumenterReferenceAPITestMod, DocumenterReferenceAPITestMod],
+                    primary_modules=[
+                        DocumenterReferenceAPITestMod, DocumenterReferenceAPITestMod
+                    ],
                     public=true,
                     private=false,
                     title="Combined Public API",
