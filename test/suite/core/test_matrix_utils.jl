@@ -1,6 +1,6 @@
 module TestCoreMatrixUtils
 
-import Test
+using Test: Test
 import CTBase.Core
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -8,7 +8,6 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 
 function test_matrix_utils()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "matrix2vec" begin
-
         Test.@testset "matrix2vec - dimension 1 (rows)" begin
             A = [0 1; 2 3]
             V = Core.matrix2vec(A)
@@ -62,7 +61,6 @@ function test_matrix_utils()
             Test.@test W[1] ≈ [1.5, 3.5]
             Test.@test W[2] ≈ [2.5, 4.5]
         end
-
     end
     return nothing
 end
