@@ -11,7 +11,7 @@ Interpolant (linear): 3 nodes
 """
 function Base.show(io::IO, interp::Interpolant{M}) where {M}
     label = M === Linear ? "linear" : "piecewise-constant"
-    print(io, "Interpolant ($label): $(length(interp.x)) nodes")
+    return print(io, "Interpolant ($label): $(length(interp.x)) nodes")
 end
 
 """

@@ -1,6 +1,6 @@
 module TestInterpolation
 
-import Test
+using Test: Test
 import CTBase.Interpolation
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -8,7 +8,6 @@ const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING :
 
 function test_interpolation()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Interpolation" begin
-
         Test.@testset "ctinterpolate - basic linear interpolation" begin
             x = [0.0, 1.0, 2.0]
             f = [0.0, 1.0, 0.0]
@@ -132,7 +131,6 @@ function test_interpolation()
             Test.@test_nowarn Test.@inferred interp(0.5)
             Test.@test_nowarn Test.@inferred c(0.5)
         end
-
     end
     return nothing
 end
