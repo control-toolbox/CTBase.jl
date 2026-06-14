@@ -37,6 +37,8 @@ function test_exception_display()
             Test.@test contains(output, "test function")
             Test.@test contains(output, "Hint")
             Test.@test contains(output, "Fix it like this")
+            # Regression: IOBuffer without :color should not contain ANSI codes
+            Test.@test !contains(output, "\033[")
         end
 
         Test.@testset "IncorrectArgument - Full Stacktrace Display" begin
@@ -475,6 +477,24 @@ function test_exception_display()
 
             Test.@test contains(output, "closest matches")
             Test.@test contains(output, "(:a, :b, :c)")
+        end
+
+        Test.@testset "Color-aware output" begin
+            e = Exceptions.IncorrectArgument("msg"; got="x")
+
+            # color=false — sortie texte brut
+            io_plain = IOContext(IOBuffer(), :color => false)
+            showerror(io_plain, e)
+            out_plain = String(take!(io_plain.io))
+            Test.@test !contains(out_plain, "\033[")
+            Test.@test contains(out_plain, "msg")
+
+            # color=true — sortie avec codes ANSI
+            io_color = IOContext(IOBuffer(), :color => true)
+            showerror(io_color, e)
+            out_color = String(take!(io_color.io))
+            Test.@test contains(out_color, "\033[")
+            Test.@test contains(out_color, "msg")
         end
     end
 end

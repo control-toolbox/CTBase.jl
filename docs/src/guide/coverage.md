@@ -105,7 +105,7 @@ julia --project=@v1.12 -e 'using Pkg; Pkg.add("Coverage")'
 julia --project -e 'using Pkg; Pkg.test("MyPackage"; coverage=true)'
 ```
 
-### Issue: Coverage report shows 0% for all files
+### Issue: Coverage report shows zero percent for all files
 
 **Problem**: Coverage data exists but shows no coverage
 
