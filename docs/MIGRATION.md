@@ -176,17 +176,32 @@ julia --project=docs -e 'using LiveServer; LiveServer.serve(dir="docs/build/1")'
 
   This is a known limitation tracked in [LuxDL/DocumenterVitepress.jl#321](https://github.com/LuxDL/DocumenterVitepress.jl/issues/321).
 
-- **Color-aware display functions**: If your package has custom display functions that use ANSI codes (e.g., error display helpers), make them color-aware by checking `get(io, :color, false)`:
+- **Color-aware display functions**: If your package has custom display functions that use ANSI codes (e.g., error display helpers), make them color-aware by checking `get(io, :color, false)`. For example, in CTBase we implemented a helper function and updated all ANSI styling primitives:
 
   ```julia
+  # src/Exceptions/display.jl
   _apply_ansi(s, code, io::IO) = get(io, :color, false) ? "\033[$(code)m$(s)\033[0m" : s
-  _red(s, io::IO) = _apply_ansi(s, "1;31", io)
-  # ... etc
+
+  _dim(s, io::IO)    = _apply_ansi(s, "2",    io)
+  _bold(s, io::IO)   = _apply_ansi(s, "1",    io)
+  _red(s, io::IO)    = _apply_ansi(s, "1;31", io)
+  _yellow(s, io::IO) = _apply_ansi(s, "33",   io)
+  _green(s, io::IO)  = _apply_ansi(s, "32",   io)
+  ```
+
+  Then propagate the `io` parameter to all call sites in display functions:
+
+  ```julia
+  function _format_user_friendly_error(io::IO, e::CTException)
+      # ...
+      print(io, _red(type_name, io))  # Pass io to the helper
+      # ...
+  end
   ```
 
   This ensures:
   - REPL / GitHub Actions → colors enabled (`:color => true` by default)
-  - Documenter / VitePress → plain text when wrapped with `IOContext(stdout, :color => false)`
+  - Documenter / VitePress → plain text when wrapped with `IOContext(stdout, :color => false)`)
 
 - **Git repository required**: DocumenterVitepress requires a git repository to function
 - **Build output**: Documentation is generated in `docs/build/1/` (not `docs/build/`)
