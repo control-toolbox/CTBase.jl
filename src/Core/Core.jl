@@ -11,6 +11,7 @@ module Core
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 include("types.jl")
+include("tags.jl")
 include("default.jl")
 
 # Private utilities
@@ -19,6 +20,7 @@ include("macros.jl")
 
 # Public utilities
 include("matrix_utils.jl")
+include("display.jl")
 
 # Export public API
 export ctNumber, matrix2vec, to_out_of_place, @ensure

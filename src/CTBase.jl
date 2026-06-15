@@ -12,13 +12,13 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 # MODULAR ORGANIZATION
 # ============================================================================ #
 
-# Exceptions module - enhanced error handling system (must load first)
-include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
-using .Exceptions
-
-# Core module - fundamental types and utilities
+# Core module - fundamental types and utilities (must load first)
 include(joinpath(@__DIR__, "Core", "Core.jl"))
 using .Core
+
+# Exceptions module - enhanced error handling system
+include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
+using .Exceptions
 
 # Unicode module - Unicode character utilities
 include(joinpath(@__DIR__, "Unicode", "Unicode.jl"))

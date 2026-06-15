@@ -1,92 +1,3 @@
-# Custom display functions for user-friendly error messages
-
-# ANSI formatting primitives
-"""
-    _apply_ansi(s, code, io::IO)
-
-Apply ANSI escape codes to a string if color is enabled in the IO context.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `code::String`: The ANSI code (e.g., "2" for dim, "1" for bold, "1;31" for red).
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in ANSI escape codes if `get(io, :color, false)` is true,
-  otherwise the plain string.
-"""
-_apply_ansi(s, code, io::IO) = get(io, :color, false) ? "\033[$(code)m$(s)\033[0m" : s
-
-"""
-$(TYPEDSIGNATURES)
-
-Apply dimmed (faint) ANSI styling to a string.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in dim ANSI escape codes if color is enabled.
-"""
-_dim(s, io::IO) = _apply_ansi(s, "2", io)
-
-"""
-$(TYPEDSIGNATURES)
-
-Apply bold ANSI styling to a string.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in bold ANSI escape codes if color is enabled.
-"""
-_bold(s, io::IO) = _apply_ansi(s, "1", io)
-
-"""
-$(TYPEDSIGNATURES)
-
-Apply red ANSI styling to a string.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in red ANSI escape codes if color is enabled.
-"""
-_red(s, io::IO) = _apply_ansi(s, "1;31", io)
-
-"""
-$(TYPEDSIGNATURES)
-
-Apply yellow ANSI styling to a string.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in yellow ANSI escape codes if color is enabled.
-"""
-_yellow(s, io::IO) = _apply_ansi(s, "33", io)
-
-"""
-$(TYPEDSIGNATURES)
-
-Apply green ANSI styling to a string.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in green ANSI escape codes if color is enabled.
-"""
-_green(s, io::IO) = _apply_ansi(s, "32", io)
-
 """
     extract_user_frames(st::Vector)
 
@@ -360,16 +271,16 @@ function _print_pipe_field(io, label::String, value, max_len::Int, color::Symbol
         # Multi-line case: AmbiguousDescription.candidates
         for (i, v) in enumerate(value)
             if i == 1
-                print(io, _dim("│", io), "  ", _bold(rpad(label, max_len), io), "  ")
+                print(io, Core._dim("│", io), "  ", Core._bold(rpad(label, max_len), io), "  ")
                 _print_colored(io, string(v), color)
                 println(io)
             else
-                println(io, _dim("│", io), "  ", " "^max_len, "  ", string(v))
+                println(io, Core._dim("│", io), "  ", " "^max_len, "  ", string(v))
             end
         end
     else
         # Single value
-        print(io, _dim("│", io), "  ", _bold(rpad(label, max_len), io), "  ")
+        print(io, Core._dim("│", io), "  ", Core._bold(rpad(label, max_len), io), "  ")
         _print_colored(io, string(value), color)
         println(io)
     end
@@ -390,9 +301,9 @@ Print colored text based on a color symbol.
 """
 function _print_colored(io, text, color::Symbol)
     if color == :yellow
-        print(io, _yellow(text, io))
+        print(io, Core._yellow(text, io))
     elseif color == :green
-        print(io, _green(text, io))
+        print(io, Core._green(text, io))
     else
         print(io, text)
     end
@@ -413,22 +324,22 @@ function _format_user_friendly_error(io::IO, e::CTException)
     frame = isempty(user_frames) ? nothing : user_frames[1]
 
     type_name = string(nameof(typeof(e)))
-    print(io, _red(type_name, io))
+    print(io, Core._red(type_name, io))
 
     if !isnothing(frame)
         func_name = string(frame.func)
         file_name = basename(string(frame.file))
         line_num = frame.line
-        print(io, " ", _dim("→", io), " ", _bold(func_name, io), "  ")
-        print(io, _yellow("$(file_name):$(line_num)", io))
+        print(io, " ", Core._dim("→", io), " ", Core._bold(func_name, io), "  ")
+        print(io, Core._yellow("$(file_name):$(line_num)", io))
     end
     println(io)
 
     # Blank pipe separator
-    println(io, _dim("│", io))
+    println(io, Core._dim("│", io))
 
     # Message
-    println(io, _dim("│", io), "  ", _bold(e.msg, io))
+    println(io, Core._dim("│", io), "  ", Core._bold(e.msg, io))
 
     # Build field pairs
     primary_pairs = _build_primary_pairs(e)
@@ -440,7 +351,7 @@ function _format_user_friendly_error(io::IO, e::CTException)
         max_len = maximum(length(p[1]) for p in all_pairs)
 
         # Blank pipe separator
-        println(io, _dim("│", io))
+        println(io, Core._dim("│", io))
 
         # Primary fields
         for p in primary_pairs
@@ -449,7 +360,7 @@ function _format_user_friendly_error(io::IO, e::CTException)
 
         # Separator between primary and secondary
         if !isempty(primary_pairs) && !isempty(secondary_pairs)
-            println(io, _dim("│", io))
+            println(io, Core._dim("│", io))
         end
 
         # Secondary fields
@@ -459,7 +370,7 @@ function _format_user_friendly_error(io::IO, e::CTException)
     end
 
     # Closing visual
-    return println(io, _dim("└─", io))
+    return println(io, Core._dim("└─", io))
 end
 
 """
