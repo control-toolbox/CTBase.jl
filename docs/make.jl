@@ -4,6 +4,7 @@ pushfirst!(LOAD_PATH, joinpath(@__DIR__))
 pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
 using Documenter
+using DocumenterVitepress
 using CTBase
 using Markdown
 using MarkdownAST: MarkdownAST
@@ -56,14 +57,11 @@ with_api_reference(src_dir) do api_pages
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
         warnonly=[:cross_references],
         sitename="CTBase.jl",
-        format=Documenter.HTML(;
-            repolink="https://" * repo_url,
-            prettyurls=false,
-            size_threshold_ignore=["api.md", "dev.md"],
-            assets=[
-                asset("https://control-toolbox.org/assets/css/documentation.css"),
-                asset("https://control-toolbox.org/assets/js/documentation.js"),
-            ],
+        format=DocumenterVitepress.MarkdownVitepress(;
+            repo="https://" * repo_url,
+            devbranch="main",
+            devurl="dev",
+            sidebar_drawer=true,
         ),
         pages=[
             "Introduction" => "index.md",
@@ -83,4 +81,8 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 # Deploy documentation to GitHub Pages
 # ═══════════════════════════════════════════════════════════════════════════════
-deploydocs(; repo=repo_url * ".git", devbranch="main")
+DocumenterVitepress.deploydocs(;
+    repo=repo_url * ".git",
+    devbranch="main",
+    push_preview=true,
+)
