@@ -2,6 +2,19 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.20.0-beta)
+
+- **ANSI display unification**: Centralized all ANSI formatting utilities in `Core/display.jl` to provide a single source of truth for terminal color support
+  - Added `_apply_ansi(s, code, io::IO)` base function with color detection
+  - Added semantic wrappers: `_dim`, `_bold`, `_red`, `_yellow`, `_green`
+  - Fixed `get_format_codes` bug: `supports_color = true` → `get(io, :color, false)` (detection was commented out)
+  - All ANSI functions remain private (underscore prefix, not exported)
+- **AbstractTag organization**: Moved `AbstractTag` from `Core/display.jl` to dedicated `Core/tags.jl` for better module organization
+- **Module load order**: Changed `CTBase.jl` to load Core before Exceptions (was stale comment "must load first")
+- **Qualified imports**: `Exceptions/display.jl` now uses qualified calls (`Core._dim`, `Core._bold`, etc.) instead of local definitions
+- **Testing**: Added `test_core_display.jl` with comprehensive tests for ANSI functions (52 assertions)
+- **No breaking changes**: All ANSI functions remain private and unexported; behavior unchanged; purely internal refactoring with bug fix. No migration required.
+
 ## Non-breaking note (0.19.0-beta)
 
 - **Interpolation module**: Added new `Interpolation` module with interpolation utilities migrated from CTModels.Utils
