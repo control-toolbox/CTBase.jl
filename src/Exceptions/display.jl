@@ -271,7 +271,9 @@ function _print_pipe_field(io, label::String, value, max_len::Int, color::Symbol
         # Multi-line case: AmbiguousDescription.candidates
         for (i, v) in enumerate(value)
             if i == 1
-                print(io, Core._dim("│", io), "  ", Core._bold(rpad(label, max_len), io), "  ")
+                print(
+                    io, Core._dim("│", io), "  ", Core._bold(rpad(label, max_len), io), "  "
+                )
                 _print_colored(io, string(v), color)
                 println(io)
             else

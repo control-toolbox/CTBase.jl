@@ -44,7 +44,10 @@ function test_core_display()
         end
 
         Test.@testset "each wrapper uses distinct ANSI code" begin
-            results = map(f -> f("x", io_color), (Core._dim, Core._bold, Core._red, Core._yellow, Core._green))
+            results = map(
+                f -> f("x", io_color),
+                (Core._dim, Core._bold, Core._red, Core._yellow, Core._green),
+            )
             Test.@test allunique(results)
         end
     end

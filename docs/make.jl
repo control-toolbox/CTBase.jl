@@ -58,10 +58,7 @@ with_api_reference(src_dir) do api_pages
         warnonly=[:cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
-            repo="https://" * repo_url,
-            devbranch="main",
-            devurl="dev",
-            sidebar_drawer=true,
+            repo="https://" * repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
         ),
         pages=[
             "Introduction" => "index.md",
@@ -82,7 +79,5 @@ end
 # Deploy documentation to GitHub Pages
 # ═══════════════════════════════════════════════════════════════════════════════
 DocumenterVitepress.deploydocs(;
-    repo=repo_url * ".git",
-    devbranch="main",
-    push_preview=true,
+    repo=repo_url * ".git", devbranch="main", push_preview=true
 )
