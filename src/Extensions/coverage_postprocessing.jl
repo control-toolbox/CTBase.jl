@@ -75,7 +75,7 @@ function postprocess_coverage(
     worst_n_files::Int=20,
     max_uncovered_lines::Int=200,
 )
-    throw(
+    return throw(
         Exceptions.ExtensionError(
             :Coverage;
             feature="coverage analysis and reporting",

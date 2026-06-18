@@ -68,7 +68,7 @@ automatic_reference_documentation(
 ```
 """
 function automatic_reference_documentation(::AbstractDocumenterReferenceTag; kwargs...)
-    throw(
+    return throw(
         Exceptions.ExtensionError(
             :Documenter,
             :Markdown,
