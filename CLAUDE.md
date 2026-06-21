@@ -1,34 +1,41 @@
-# CTBase.jl — Claude project context
+# CTBase.jl — Agent Navigation Guide
 
-## Essential rules
+Quick-reference for any agent working on this repository.
 
-1. **Never commit or push without explicit approval.** Ask first, every time.
-2. **Run tests via the `ct-dev-mcp` MCP** — `get_test_command` → run with `tee` →
-   `generate_report`. Never invent the test command.
-3. **Build docs draft-first** — `draft = true` globally to validate links, then per file
-   with `Draft = false`, then full build. See `dev/RULES.md`.
-4. **Qualify everything** — `Module.symbol` at every call site; `import Pkg: Pkg` not
-   `using Pkg`; no top-level package exports.
-5. **Write a plan before coding** — any task touching more than one file or a public
-   interface needs a plan confirmed by the user first. Template in `dev/planning.md`.
-6. **Docstrings last** — written only after the API is stable.
-7. **Fake types at module top-level** — never inside test functions (world-age issues).
+---
 
-## Where to find more
+## Repository Layout
 
-| Topic | File |
-| --- | --- |
-| Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`dev/philosophy/`](dev/philosophy/PHILOSOPHY.md) |
-| Operational rules (MCP, doc build, git, output capture) | [`dev/RULES.md`](dev/RULES.md) |
-| Plan template | [`dev/planning.md`](dev/planning.md) |
-
-## Project structure (quick reference)
+Standard control-toolbox package structure. Each directory may contain a `README.md`
+with package-specific details — read it before working in that directory.
 
 ```text
-src/CTBase.jl           # top-level manifest — exports nothing
-src/<Module>/<Module>.jl  # submodule manifests
-ext/                    # weak-dependency extensions (CoveragePostprocessing, DocumenterReference, TestRunner)
-test/suite/             # tests by functionality, not by src layout
-docs/                   # Documenter.jl site
-dev/                    # philosophy, rules, planning template (versioned)
+src/        # Source code: one submodule per responsibility, no top-level exports
+ext/        # Weak-dependency extensions (loaded on demand by Julia)
+test/suite/ # Test suite: organised by functionality, not by src/ layout
+docs/       # Documentation site (DocumenterVitepress)
 ```
+
+---
+
+## Developer Resources
+
+Design philosophy, operational rules, and plan templates live in the
+[control-toolbox Handbook](https://github.com/control-toolbox/Handbook):
+
+| Topic | Link |
+| --- | --- |
+| Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`PHILOSOPHY.md`](https://github.com/control-toolbox/Handbook/blob/main/PHILOSOPHY.md) |
+| Operational rules (tests, coverage, docs, git) | [`RULES.md`](https://github.com/control-toolbox/Handbook/blob/main/RULES.md) |
+| Plan template | [`PLAN.md`](https://github.com/control-toolbox/Handbook/blob/main/PLAN.md) |
+
+---
+
+## Key Conventions
+
+- **No top-level exports** — use `Package.Submodule.symbol` everywhere.
+- **Qualified imports** — `import Pkg: Pkg`, never bare `using`.
+- **Fake types at module top-level** — never inside test functions.
+- **Plans before code** — write a plan and confirm with the user before touching files.
+- **Docstrings last** — written only after all implementation steps are stable.
+- **Never commit or push without explicit user approval.**

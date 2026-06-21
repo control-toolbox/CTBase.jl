@@ -85,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `testing.md`: Categories, fakes/stubs, module + callable function template
   - `documentation.md`: API generation, guides, draft workflow
 - **Added agent guides**: Added `AGENTS.md` (agent navigation guide) and `CLAUDE.md` (Claude project context)
-- **Added planning template**: Added `dev/planning.md` for implementation plans
+- **Added planning template**: Added `dev/PLAN.md` for implementation plans
 - **Added operational rules**: Added `dev/RULES.md` for MCP, doc build, git, and output capture procedures
 
 #### **Documentation Build Improvements**

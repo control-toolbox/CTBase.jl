@@ -85,12 +85,12 @@ function _collect_module_docstrings(config::_Config, symbol_list; include_module
             effective_source_files,
             config.include_without_source,
         )
-        push!(docstrings, "## `$(current_module)`\n\n```@docs\n$(current_module)\n```\n\n")
+        push!(docstrings, "### `$(current_module)`\n\n```@docs\n$(current_module)\n```\n\n")
     end
 
     _iterate_over_symbols(config, symbol_list) do key, type
         type == DOCTYPE_MODULE && return nothing
-        push!(docstrings, "## `$key`\n\n```@docs\n$(current_module).$key\n```\n\n")
+        push!(docstrings, "### `$key`\n\n```@docs\n$(current_module).$key\n```\n\n")
         return nothing
     end
 
@@ -361,7 +361,7 @@ function _build_private_page_content(
     all_docstrings = String[]
     for (mod, _, private_docs) in module_contents
         if !isempty(private_docs)
-            push!(all_docstrings, "\n---\n\n### From `$(mod)`\n\n")
+            push!(all_docstrings, "\n---\n\n## From `$(mod)`\n\n")
             append!(all_docstrings, private_docs)
         end
     end
@@ -412,7 +412,7 @@ function _build_public_page_content(
     all_docstrings = String[]
     for (mod, public_docs, _) in module_contents
         if !isempty(public_docs)
-            push!(all_docstrings, "\n---\n\n### From `$(mod)`\n\n")
+            push!(all_docstrings, "\n---\n\n## From `$(mod)`\n\n")
             append!(all_docstrings, public_docs)
         end
     end
