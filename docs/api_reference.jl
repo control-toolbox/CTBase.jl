@@ -6,214 +6,101 @@ Generate the API reference documentation for CTBase.
 Returns the list of pages.
 """
 function generate_api_reference(src_dir::String)
-    # Helper to build absolute paths
     src(files...) = [abspath(joinpath(src_dir, f)) for f in files]
     ext_dir = abspath(joinpath(src_dir, "..", "ext"))
     ext(files...) = [abspath(joinpath(ext_dir, f)) for f in files]
 
-    # Symbols to exclude (must match make.jl if shared, or be defined here)
     EXCLUDE_SYMBOLS = Symbol[:include, :eval]
+    EXCLUDE_INTERNALS = vcat(EXCLUDE_SYMBOLS, Symbol[
+        :DOCTYPE_ABSTRACT_TYPE, :DOCTYPE_CONSTANT, :DOCTYPE_FUNCTION,
+        :DOCTYPE_MACRO, :DOCTYPE_MODULE, :DOCTYPE_STRUCT,
+    ])
+
+    # ── Public API: one flat page per module ──────────────────────────────────
+    modules_config = [
+        (mod=CTBase.Core, title="Core", filename="core", files=src(
+            joinpath("Core", "Core.jl"), joinpath("Core", "default.jl"),
+            joinpath("Core", "types.jl"), joinpath("Core", "matrix_utils.jl"),
+            joinpath("Core", "function_utils.jl"), joinpath("Core", "macros.jl"),
+        )),
+        (mod=CTBase.Interpolation, title="Interpolation", filename="interpolation", files=src(
+            joinpath("Interpolation", "Interpolation.jl"), joinpath("Interpolation", "types.jl"),
+            joinpath("Interpolation", "ctinterpolate.jl"), joinpath("Interpolation", "display.jl"),
+        )),
+        (mod=CTBase.Descriptions, title="Descriptions", filename="descriptions", files=src(
+            joinpath("Descriptions", "Descriptions.jl"), joinpath("Descriptions", "types.jl"),
+            joinpath("Descriptions", "similarity.jl"), joinpath("Descriptions", "display.jl"),
+            joinpath("Descriptions", "catalog.jl"), joinpath("Descriptions", "complete.jl"),
+            joinpath("Descriptions", "remove.jl"),
+        )),
+        (mod=CTBase.Exceptions, title="Exceptions", filename="exceptions", files=src(
+            joinpath("Exceptions", "Exceptions.jl"), joinpath("Exceptions", "types.jl"),
+            joinpath("Exceptions", "display.jl"),
+        )),
+        (mod=CTBase.Unicode, title="Unicode", filename="unicode", files=src(
+            joinpath("Unicode", "Unicode.jl"), joinpath("Unicode", "subscripts.jl"),
+            joinpath("Unicode", "superscripts.jl"),
+        )),
+        (mod=CTBase.DevTools, title="DevTools", filename="devtools", files=src(
+            joinpath("DevTools", "DevTools.jl"), joinpath("DevTools", "coverage_postprocessing.jl"),
+            joinpath("DevTools", "documenter_reference.jl"), joinpath("DevTools", "test_runner.jl"),
+        )),
+    ]
 
     pages = [
         CTBase.automatic_reference_documentation(;
             subdirectory="api",
-            primary_modules=[
-                CTBase.Core => src(
-                    joinpath("Core", "Core.jl"),
-                    joinpath("Core", "default.jl"),
-                    joinpath("Core", "types.jl"),
-                    joinpath("Core", "matrix_utils.jl"),
-                    joinpath("Core", "function_utils.jl"),
-                    joinpath("Core", "macros.jl"),
-                ),
-            ],
+            primary_modules=[cfg.mod => cfg.files],
             exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Core",
-            title_in_menu="Core",
-            filename="core",
-        ),
-        CTBase.automatic_reference_documentation(;
-            subdirectory="api",
-            primary_modules=[
-                CTBase.Interpolation => src(
-                    joinpath("Interpolation", "Interpolation.jl"),
-                    joinpath("Interpolation", "types.jl"),
-                    joinpath("Interpolation", "ctinterpolate.jl"),
-                    joinpath("Interpolation", "display.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Interpolation",
-            title_in_menu="Interpolation",
-            filename="interpolation",
-        ),
-        CTBase.automatic_reference_documentation(;
-            subdirectory="api",
-            primary_modules=[
-                CTBase.Descriptions => src(
-                    joinpath("Descriptions", "Descriptions.jl"),
-                    joinpath("Descriptions", "types.jl"),
-                    joinpath("Descriptions", "similarity.jl"),
-                    joinpath("Descriptions", "display.jl"),
-                    joinpath("Descriptions", "catalog.jl"),
-                    joinpath("Descriptions", "complete.jl"),
-                    joinpath("Descriptions", "remove.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Descriptions",
-            title_in_menu="Descriptions",
-            filename="descriptions",
-        ),
-        CTBase.automatic_reference_documentation(;
-            subdirectory="api",
-            primary_modules=[
-                CTBase.Exceptions => src(
-                    joinpath("Exceptions", "Exceptions.jl"),
-                    joinpath("Exceptions", "types.jl"),
-                    joinpath("Exceptions", "display.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="Exceptions",
-            title_in_menu="Exceptions",
-            filename="exceptions",
-        ),
-        CTBase.automatic_reference_documentation(;
-            subdirectory="api",
-            primary_modules=[
-                CTBase.Unicode => src(
-                    joinpath("Unicode", "Unicode.jl"),
-                    joinpath("Unicode", "subscripts.jl"),
-                    joinpath("Unicode", "superscripts.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=false, # there is no private API
-            title="Unicode",
-            title_in_menu="Unicode",
-            filename="unicode",
-        ),
-        CTBase.automatic_reference_documentation(;
-            subdirectory="api",
-            primary_modules=[
-                CTBase.DevTools => src(
-                    joinpath("DevTools", "DevTools.jl"),
-                    joinpath("DevTools", "coverage_postprocessing.jl"),
-                    joinpath("DevTools", "documenter_reference.jl"),
-                    joinpath("DevTools", "test_runner.jl"),
-                ),
-            ],
-            exclude=EXCLUDE_SYMBOLS,
-            public=true,
-            private=true,
-            title="DevTools",
-            title_in_menu="DevTools",
-            filename="devtools",
-        ),
+            public=true, private=false,
+            title=cfg.title, title_in_menu=cfg.title, filename=cfg.filename,
+        )
+        for cfg in modules_config
     ]
 
-    DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
-    if !isnothing(DocumenterReference)
-        EXCLUDE_DOCREF = vcat(
-            EXCLUDE_SYMBOLS,
-            Symbol[
-                :DOCTYPE_ABSTRACT_TYPE,
-                :DOCTYPE_CONSTANT,
-                :DOCTYPE_FUNCTION,
-                :DOCTYPE_MACRO,
-                :DOCTYPE_MODULE,
-                :DOCTYPE_STRUCT,
-            ],
-        )
-        push!(
-            pages,
-            CTBase.automatic_reference_documentation(;
-                subdirectory="api",
-                primary_modules=[
-                    DocumenterReference => ext(
-                        joinpath("DocumenterReference", "DocumenterReference.jl"),
-                        joinpath("DocumenterReference", "config_helpers.jl"),
-                        joinpath("DocumenterReference", "entry_point.jl"),
-                        joinpath("DocumenterReference", "page_building.jl"),
-                        joinpath("DocumenterReference", "source_file_detection.jl"),
-                        joinpath("DocumenterReference", "symbol_classification.jl"),
-                        joinpath("DocumenterReference", "symbol_iteration.jl"),
-                        joinpath("DocumenterReference", "type_formatting.jl"),
-                        joinpath("DocumenterReference", "types.jl"),
-                    ),
-                ],
-                external_modules_to_document=[CTBase],
-                exclude=EXCLUDE_DOCREF,
-                public=false, # there is no public API
-                private=true,
-                title="DocumenterReference",
-                title_in_menu="DocumenterReference",
-                filename="documenter_reference",
-            ),
-        )
+    # ── Internals: all private symbols in one page, sections by module ────────
+    internals_modules = Any[cfg.mod => cfg.files for cfg in modules_config]
+
+    for (sym, files) in [
+        (:DocumenterReference, ext(
+            joinpath("DocumenterReference", "DocumenterReference.jl"),
+            joinpath("DocumenterReference", "config_helpers.jl"),
+            joinpath("DocumenterReference", "entry_point.jl"),
+            joinpath("DocumenterReference", "page_building.jl"),
+            joinpath("DocumenterReference", "source_file_detection.jl"),
+            joinpath("DocumenterReference", "symbol_classification.jl"),
+            joinpath("DocumenterReference", "symbol_iteration.jl"),
+            joinpath("DocumenterReference", "type_formatting.jl"),
+            joinpath("DocumenterReference", "types.jl"),
+        )),
+        (:CoveragePostprocessing, ext(
+            joinpath("CoveragePostprocessing", "CoveragePostprocessing.jl"),
+            joinpath("CoveragePostprocessing", "entry_point.jl"),
+            joinpath("CoveragePostprocessing", "helpers.jl"),
+        )),
+        (:TestRunner, ext(
+            joinpath("TestRunner", "TestRunner.jl"),
+            joinpath("TestRunner", "arg_parsing.jl"),
+            joinpath("TestRunner", "entry_point.jl"),
+            joinpath("TestRunner", "progress.jl"),
+            joinpath("TestRunner", "test_execution.jl"),
+            joinpath("TestRunner", "test_selection.jl"),
+            joinpath("TestRunner", "types.jl"),
+        )),
+    ]
+        extmod = Base.get_extension(CTBase, sym)
+        isnothing(extmod) || push!(internals_modules, extmod => files)
     end
 
-    CoveragePostprocessing = Base.get_extension(CTBase, :CoveragePostprocessing)
-    if !isnothing(CoveragePostprocessing)
-        push!(
-            pages,
-            CTBase.automatic_reference_documentation(;
-                subdirectory="api",
-                primary_modules=[
-                    CoveragePostprocessing => ext(
-                        joinpath("CoveragePostprocessing", "CoveragePostprocessing.jl"),
-                        joinpath("CoveragePostprocessing", "entry_point.jl"),
-                        joinpath("CoveragePostprocessing", "helpers.jl"),
-                    ),
-                ],
-                external_modules_to_document=[CTBase],
-                exclude=EXCLUDE_SYMBOLS,
-                public=false, # there is no public API
-                private=true,
-                title="CoveragePostprocessing",
-                title_in_menu="CoveragePostprocessing",
-                filename="coverage_postprocessing",
-            ),
-        )
-    end
+    push!(pages, CTBase.automatic_reference_documentation(;
+        subdirectory="api",
+        primary_modules=internals_modules,
+        external_modules_to_document=[CTBase],
+        exclude=EXCLUDE_INTERNALS,
+        public=false, private=true,
+        title="Internals", title_in_menu="Internals", filename="internals",
+    ))
 
-    TestRunner = Base.get_extension(CTBase, :TestRunner)
-    if !isnothing(TestRunner)
-        push!(
-            pages,
-            CTBase.automatic_reference_documentation(;
-                subdirectory="api",
-                primary_modules=[
-                    TestRunner => ext(
-                        joinpath("TestRunner", "TestRunner.jl"),
-                        joinpath("TestRunner", "arg_parsing.jl"),
-                        joinpath("TestRunner", "entry_point.jl"),
-                        joinpath("TestRunner", "progress.jl"),
-                        joinpath("TestRunner", "test_execution.jl"),
-                        joinpath("TestRunner", "test_selection.jl"),
-                        joinpath("TestRunner", "types.jl"),
-                    ),
-                ],
-                external_modules_to_document=[CTBase],
-                exclude=EXCLUDE_SYMBOLS,
-                public=false, # there is no public API
-                private=true,
-                title="TestRunner",
-                title_in_menu="TestRunner",
-                filename="test_runner",
-            ),
-        )
-    end
     return pages
 end
 
