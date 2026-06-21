@@ -27,7 +27,7 @@ Run tests with configurable file/function name builders and optional available t
 - Test selection is driven by `args` (coverage flags are automatically filtered out)
 - Selection arguments are interpreted as glob patterns and matched against both test names and filenames
 - Arguments starting with `test/` are automatically stripped for convenience
-- When `on_test_done` is provided, the built-in progress line is disabled unless `show_progress_line=true`
+- When `on_test_done` is provided, it replaces the built-in progress callback; `show_progress_line` is then ignored
 - When `show_progress_line=true` but `show_progress_bar=false`, displays minimal output: `✓ [01/76] suite/test.jl (0.2s)` without the graphical bar
 
 # Example

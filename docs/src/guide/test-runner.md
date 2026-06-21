@@ -65,22 +65,22 @@ CTBase.DevTools.run_tests(;
 
 ### Keyword Arguments
 
-| Argument | Type | Default | Description |
-| :------- | :--- | :------ | :---------- |
-| `args` | `AbstractVector{<:AbstractString}` | `String[]` | Command-line arguments (typically `String.(ARGS)`) |
-| `testset_name` | `String` | `"Tests"` | Name of the main `@testset` |
-| `available_tests` | `Vector` | `Symbol[]` | Allowed tests (Symbols, Strings, or glob patterns). Empty = auto-discovery |
-| `filename_builder` | `Function` | `identity` | `name → filename` mapping |
-| `funcname_builder` | `Function` | `identity` | `name → function_name` mapping (return `nothing` to skip eval) |
-| `eval_mode` | `Bool` | `true` | Whether to call the function after `include` |
-| `verbose` | `Bool` | `true` | Verbose `@testset` output |
-| `showtiming` | `Bool` | `true` | Show timing in `@testset` output |
-| `test_dir` | `String` | `joinpath(pwd(), "test")` | Root directory for test files |
-| `on_test_start` | `Function` or `nothing` | `nothing` | Callback before eval (see [Callbacks](@ref)) |
-| `on_test_done` | `Function` or `nothing` | `nothing` | Callback after eval (see [Callbacks](@ref)) |
-| `show_progress_line` | `Bool` | `true` | Show progress line with symbol, index, spec, and time. Ignored when `on_test_done` is provided |
-| `show_progress_bar` | `Bool` | `true` | Show graphical progress bar `[█░░░...]` within the line |
-| `progress_bar_threshold` | `Int` | `100` | Maximum tests for full-resolution progress bar (see [Progress Bar](@ref)) |
+| Argument | Default | Description |
+| :------- | :------ | :---------- |
+| `args::AbstractVector{<:AbstractString}` | `String[]` | Command-line arguments (typically `String.(ARGS)`) |
+| `testset_name::String` | `"Tests"` | Name of the main `@testset` |
+| `available_tests::Vector` | `Symbol[]` | Allowed tests (Symbols, Strings, or glob patterns). Empty = auto-discovery |
+| `filename_builder::Function` | `identity` | `name → filename` mapping |
+| `funcname_builder::Function` | `identity` | `name → function_name` mapping (return `nothing` to skip eval) |
+| `eval_mode::Bool` | `true` | Whether to call the function after `include` |
+| `verbose::Bool` | `true` | Verbose `@testset` output |
+| `showtiming::Bool` | `true` | Show timing in `@testset` output |
+| `test_dir::String` | `joinpath(pwd(), "test")` | Root directory for test files |
+| `on_test_start::Function` or `Nothing` | `nothing` | Callback before eval (see [Callbacks](@ref)) |
+| `on_test_done::Function` or `Nothing` | `nothing` | Callback after eval (see [Callbacks](@ref)) |
+| `show_progress_line::Bool` | `true` | Show progress line with symbol, index, spec, and time. Ignored when `on_test_done` is provided |
+| `show_progress_bar::Bool` | `true` | Show graphical progress bar `[█░░░...]` within the line |
+| `progress_bar_threshold::Int` | `100` | Maximum tests for full-resolution progress bar (see [Progress Bar](@ref)) |
 
 ## Writing Test Files
 
@@ -137,17 +137,29 @@ Bare directory names are automatically expanded. For example, `suite/exceptions`
 
 ## Progress Bar
 
-By default, `run_tests` displays a progress bar after each test completes:
+By default, `run_tests` displays a progress bar after each test completes. The bar uses a **cursor-style** display: only the current test position is highlighted, past successes are cleared:
 
 ```text
-[████████░░░░░░░░░░░░] ✓ [08/19] suite/exceptions/test_display.jl (2.5s)
-[█████████░░░░░░░░░░░] ✓ [09/19] suite/exceptions/test_exceptions.jl (0.6s)
-[██████████░░░░░░░░░░] ✗ [10/19] suite/exceptions/test_types.jl FAILED, (0.9s)
+[░░░░░░░█░░░░░░░░░░░] ✓ [08/19] suite/exceptions/test_display.jl (2.5s)
+[░░░░░░░░█░░░░░░░░░░] ✓ [09/19] suite/exceptions/test_exceptions.jl (0.6s)
+[░░░░░░░░░▚░░░░░░░░░] ✗ [10/19] suite/exceptions/test_types.jl FAILED, (0.9s)
+```
+
+To hide the graphical bar while keeping the progress line, set `show_progress_bar=false`:
+
+```julia
+CTBase.DevTools.run_tests(; args=String.(ARGS), show_progress_bar=false)
+```
+
+```text
+✓ [08/19] suite/exceptions/test_display.jl (2.5s)
+✓ [09/19] suite/exceptions/test_exceptions.jl (0.6s)
+✗ [10/19] suite/exceptions/test_types.jl FAILED, (0.9s)
 ```
 
 ### Visual elements
 
-- **Bar**: `█` (filled) and `░` (empty), enclosed in `[…]`
+- **Bar**: `█` (success), `▚` (failure), `┆` (skip), and `░` (empty), enclosed in `[…]`
 - **Status symbol**: `✓` (green, success), `✗` (red, failure/error), `○` (yellow, skipped)
 - **Index**: zero-padded `[01/19]` for alignment
 - **Spec**: test identifier (relative path or symbol name)
@@ -159,7 +171,7 @@ By default, `run_tests` displays a progress bar after each test completes:
 The bar width adapts to the number of tests:
 
 - **≤ 100 tests** (default): width equals the total number of tests (one block per test).
-- **> 100 tests** (default): fixed width of 100 characters. Some tests will not visually advance the bar (the fill is computed as `round(Int, index / total * 100)`).
+- **> 100 tests** (default): fixed width of 100 characters. Some tests will not visually advance the cursor (position computed as `round(Int, index / total * progress_bar_threshold)`).
 
 The threshold can be customized via the `progress_bar_threshold` parameter:
 
@@ -172,8 +184,6 @@ CTBase.DevTools.run_tests(; args=String.(ARGS), progress_bar_threshold=100)
 ```
 
 ### Cursor-style display
-
-The progress bar uses a **cursor-style** display for a lighter visual:
 
 - **Full-resolution mode** (total ≤ threshold): Only the current test position is filled for successes. Failures and skips persist at their original positions. This creates a cursor-like effect where past successes are ephemeral but errors remain visible.
 
@@ -188,17 +198,17 @@ Example with 6 tests (2 success, 2 failure, 2 success):
 [░░▚▚░█] ✓ [06/06] suite/test6.jl (0.4s)
 ```
 
-- **Compressed mode** (total > threshold): A single cursor block advances without repetition. The cursor shows the current test's status (█ for success, ▚ for failure, ┆ for skip).
+- **Compressed mode** (total > threshold): A single cursor block moves across the bar as tests complete. The cursor shows the current test's status (█ for success, ▚ for failure, ┆ for skip). Failures do **not** persist. When total greatly exceeds threshold, multiple consecutive tests may share the same cursor position.
 
-Example with 60 tests and threshold 10:
+Example with 11 tests and threshold 10:
 
 ```text
-[█░░░░░░░░] ✓ [01/60] suite/test1.jl (0.2s)
-[░█░░░░░░░] ✓ [02/60] suite/test2.jl (0.7s)
-[░░▚░░░░░░] ✗ [03/60] suite/test3.jl FAILED, (1.2s)
-[░░░▚░░░░░] ✗ [04/60] suite/test4.jl FAILED, (0.5s)
-[░░░░█░░░░] ✓ [05/60] suite/test5.jl (0.3s)
-[░░░░░█░░░] ✓ [06/60] suite/test6.jl (0.4s)
+[█░░░░░░░░░] ✓ [01/11] suite/test1.jl (0.2s)
+[░█░░░░░░░░] ✓ [02/11] suite/test2.jl (0.7s)
+[░░▚░░░░░░░] ✗ [03/11] suite/test3.jl FAILED, (1.2s)
+[░░░▚░░░░░░] ✗ [04/11] suite/test4.jl FAILED, (0.5s)
+[░░░░█░░░░░] ✓ [05/11] suite/test5.jl (0.3s)
+[░░░░█░░░░░] ✓ [06/11] suite/test6.jl (0.4s)
 ```
 
 ### Failure detection
@@ -216,10 +226,10 @@ Set `show_progress_line=false` to disable the entire progress line:
 CTBase.DevTools.run_tests(; args=String.(ARGS), show_progress_line=false)
 ```
 
-To display minimal output without the graphical bar, set `show_progress_line=true` and `show_progress_bar=false`:
+To display minimal output without the graphical bar, set `show_progress_bar=false`:
 
 ```julia
-CTBase.DevTools.run_tests(; args=String.(ARGS), show_progress_line=true, show_progress_bar=false)
+CTBase.DevTools.run_tests(; args=String.(ARGS), show_progress_bar=false)
 # Output: ✓ [01/76] suite/test.jl (0.2s)
 ```
 
