@@ -30,30 +30,6 @@ It provides the **base layer** shared by all packages: common types, structured 
 | [`CTBase.DevTools`](@ref) | Developer tools with tag-based dispatch for `run_tests`, `postprocess_coverage`, and `automatic_reference_documentation` |
 | [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
 
-## Quick Start
-
-```@repl quick_start
-using CTBase
-```
-
-### Descriptions
-
-```@repl quick_start
-descs = CTBase.Descriptions.add((), (:euler, :explicit))
-descs = CTBase.Descriptions.add(descs, (:euler, :implicit))
-CTBase.Descriptions.complete(:explicit; descriptions=descs)
-```
-
-### Exceptions
-
-```@repl quick_start
-try # hide
-throw(CTBase.Exceptions.IncorrectArgument("n must be positive"; got="-1"))
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
-```
-
 ## User Guides
 
 - **[Getting Started](getting-started.md)** — installation, mental model, 5-minute walkthrough.

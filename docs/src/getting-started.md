@@ -59,9 +59,12 @@ descs = CTBase.Descriptions.add(descs, (:runge_kutta, :explicit))
 # Partial completion: find the unique entry containing :implicit
 CTBase.Descriptions.complete(:implicit; descriptions=descs)
 
-# Ambiguous completion raises AmbiguousDescription
-try # hide
+# :euler matches two entries; priority (first in catalog) resolves the tie
 CTBase.Descriptions.complete(:euler; descriptions=descs)
+
+# No entry contains both :runge_kutta and :implicit → raises AmbiguousDescription
+try # hide
+CTBase.Descriptions.complete(:runge_kutta, :implicit; descriptions=descs)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide

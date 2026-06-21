@@ -1,8 +1,8 @@
+# Descriptions: encoding algorithms
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Descriptions: encoding algorithms
 
 A *description* is a [`CTBase.Descriptions.Description`](@ref) — a `Tuple` of `Symbol`s
 that declaratively encodes an algorithm or configuration.
@@ -26,17 +26,16 @@ string-free, and composable way.
 algorithms = ()
 algorithms = CTBase.Descriptions.add(algorithms, (:descent, :bfgs, :bisection))
 algorithms = CTBase.Descriptions.add(algorithms, (:descent, :gradient, :fixedstep))
-display(algorithms)
 ```
 
 Attempting to add a duplicate raises [`CTBase.Exceptions.IncorrectArgument`](@ref):
 
 ```@repl desc
-try
-    CTBase.Descriptions.add(algorithms, (:descent, :bfgs, :bisection))
-catch e
-    println(e)
-end
+try # hide
+CTBase.Descriptions.add(algorithms, (:descent, :bfgs, :bisection))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 ## Completing a partial description
@@ -54,12 +53,11 @@ largest overlap is returned (first wins on tie). If no entry matches,
 [`CTBase.Exceptions.AmbiguousDescription`](@ref) is raised:
 
 ```@repl desc
-try
-    CTBase.Descriptions.complete(:euler; descriptions=algorithms)
-catch e
-    println(typeof(e))
-    println(e)
-end
+try # hide
+CTBase.Descriptions.complete(:euler; descriptions=algorithms)
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 ## Removing symbols from a description
@@ -75,7 +73,7 @@ CTBase.Descriptions.remove(full, (:descent, :bfgs))
 ## Function Reference
 
 | Function | Purpose | Throws |
-|:---|:---|:---|
+| :--- | :--- | :--- |
 | [`CTBase.Descriptions.add`](@ref) | Add a description to a catalogue | [`CTBase.Exceptions.IncorrectArgument`](@ref) on duplicate |
 | [`CTBase.Descriptions.complete`](@ref) | Complete a partial description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) on no/ambiguous match |
 | [`CTBase.Descriptions.remove`](@ref) | Remove symbols from a description | — |

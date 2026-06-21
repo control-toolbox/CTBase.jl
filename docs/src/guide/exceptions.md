@@ -72,14 +72,22 @@ Adding a duplicate description:
 ```@repl
 using CTBase
 algorithms = CTBase.Descriptions.add((), (:a, :b))
+try # hide
 CTBase.Descriptions.add(algorithms, (:a, :b))  # Error: duplicate
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 Using invalid indices for the Unicode helpers:
 
 ```@repl
 using CTBase
+try # hide
 CTBase.Unicode.ctindice(-1)  # Error: must be between 0 and 9
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 **Use this exception** whenever *one input value* is outside the allowed domain
@@ -106,7 +114,11 @@ valid description.
 ```@repl
 using CTBase
 D = ((:a, :b), (:a, :b, :c), (:b, :c))
+try # hide
 CTBase.Descriptions.complete(:f; descriptions=D)  # Error: no match found
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 **Use this exception** when *the high-level choice of description itself* is wrong
@@ -241,11 +253,15 @@ CTBase.Exceptions.ParsingError <: CTBase.Exceptions.CTException
 
 ```@repl
 using CTBase
+try # hide
 throw(CTBase.Exceptions.ParsingError(
     "unexpected token 'end'",
     location="line 42, column 10",
     suggestion="Check for unmatched 'begin' or remove extra 'end'"
 ))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 **Use this exception** when parsing user input, configuration files, or DSL expressions.
@@ -279,15 +295,13 @@ end
 
 The enriched display automatically suggests:
 
-```text
-ExtensionError
-│
-│  missing dependencies
-│
-│  Missing  Plots
-│
-│  Hint     Run: using Plots
-└─
+```@repl
+using CTBase
+try # hide
+throw(CTBase.Exceptions.ExtensionError(:Plots, feature="result visualization", context="plot_results function"))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 **Use this exception** when:
@@ -316,7 +330,8 @@ fails to complete successfully or returns an error code.
 
 **Example**:
 
-```julia
+```@example solver-failure
+using CTBase
 function integrate_ode(system, integrator)
     result = solve(system, integrator)
     if result.retcode != :Success
@@ -329,20 +344,17 @@ function integrate_ode(system, integrator)
     end
     return result
 end
+nothing # hide
 ```
 
 The enriched display shows the solver-specific return code:
 
-```text
-SolverFailure
-│
-│  ODE integration failed
-│
-│  Retcode  :Unstable
-│
-│  Context  SciML integrator
-│  Hint     Reduce time step or check initial conditions
-└─
+```@repl solver-failure
+try # hide
+throw(CTBase.Exceptions.SolverFailure("ODE integration failed", retcode=":Unstable", suggestion="Reduce time step or check initial conditions", context="SciML integrator"))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 **Common return codes**:
@@ -389,7 +401,7 @@ All CTBase exceptions provide an enriched, user-friendly display with:
 Example of enriched display:
 
 ```text
-PreconditionError → configure!  MyModule.jl:42
+PreconditionError → configure!,  MyModule.jl:42
 │
 │  System must be initialized before configuration
 │
