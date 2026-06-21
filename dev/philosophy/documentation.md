@@ -7,9 +7,12 @@ How docstrings become a published site via Documenter.jl and
 ## Principles
 
 1. **Auto-generated API reference** — never hand-write API pages; generate one per
-   submodule (and one per loaded extension).
-2. **Public + private documented** — both `public=true` and `private=true`: users reach
-   internals via qualified paths, so internals are part of the documented surface.
+   submodule (and one unified internals page for all private symbols).
+2. **Public + private documented, separately** — one flat page per submodule for
+   exported symbols (`public=true, private=false`); one unified "Internals" page for all
+   private symbols across all submodules and extensions (`public=false, private=true`).
+   Users reach internals via qualified paths, so internals are part of the documented
+   surface — but kept out of the main navigation.
 3. **Guides separate from API** — narrative guides are hand-written under
    `docs/src/<topic>/`; the API reference is generated and cleaned up after the build.
 4. **Index is the entry point** — `docs/src/index.md`: scope, module table, guide links,
@@ -30,24 +33,72 @@ docs/
     └── api/             # auto-generated (removed after build)
 ```
 
-## API generation (per submodule)
+## API generation pattern
+
+The standard pattern uses a shared `modules_config` list to avoid repeating file lists,
+then generates public pages in a loop and one unified Internals page.
 
 ```julia
-CTBase.automatic_reference_documentation(;
+# ── Shared config: one entry per submodule ────────────────────────────────────
+modules_config = [
+    (mod=MyPackage.SubA, title="SubA", filename="suba", files=src(
+        "SubA/SubA.jl", "SubA/types.jl", "SubA/helpers.jl",
+    )),
+    (mod=MyPackage.SubB, title="SubB", filename="subb", files=src(
+        "SubB/SubB.jl", "SubB/core.jl",
+    )),
+]
+
+EXCLUDE = Symbol[:include, :eval]
+
+# ── Public pages: one flat page per submodule ─────────────────────────────────
+pages = [
+    MyPackage.automatic_reference_documentation(;
+        subdirectory = "api",
+        primary_modules = [cfg.mod => cfg.files],
+        exclude  = EXCLUDE,
+        public   = true,
+        private  = false,
+        title    = cfg.title,
+        filename = cfg.filename,
+    )
+    for cfg in modules_config
+]
+
+# ── Internals: all private symbols in one page, sections by module ────────────
+internals_modules = Any[cfg.mod => cfg.files for cfg in modules_config]
+
+# Extensions are detected and added conditionally
+for (sym, files) in [
+    (:MyExt, ext("MyExt/MyExt.jl", "MyExt/helpers.jl")),
+]
+    extmod = Base.get_extension(MyPackage, sym)
+    isnothing(extmod) || push!(internals_modules, extmod => files)
+end
+
+push!(pages, MyPackage.automatic_reference_documentation(;
     subdirectory                 = "api",
-    primary_modules              = [MyPackage.SubA => src("SubA/SubA.jl", "SubA/x.jl")],
-    external_modules_to_document = [MyPackage],   # include re-exported symbols
-    exclude                      = Symbol[:include, :eval],
-    public                       = true,
+    primary_modules              = internals_modules,
+    external_modules_to_document = [MyPackage],
+    exclude                      = EXCLUDE,
+    public                       = false,
     private                      = true,
-    title                        = "SubA",
-    filename                     = "api_suba",
-)
+    title                        = "Internals",
+    filename                     = "internals",
+))
+```
+
+The resulting navigation is:
+
+```text
+API Reference
+    SubA        ← exported symbols only
+    SubB        ← exported symbols only
+    Internals   ← all private symbols, sections by module (including extensions)
 ```
 
 Keep the per-submodule file lists in sync with `src/` — a missing file silently drops
-docstrings and breaks `@ref` links. Extensions are detected with `Base.get_extension`
-and documented conditionally.
+docstrings and breaks `@ref` links.
 
 ## Cross-reference infrastructure
 
@@ -85,7 +136,7 @@ module table, guide links via `[@ref]`, and a short Quick Start with qualified c
 ## Checklist
 
 - [ ] `make.jl` uses `with_api_reference()`; `api_reference.jl` has generate/with/cleanup.
-- [ ] One `automatic_reference_documentation` per submodule, `public=true` + `private=true`.
+- [ ] One `automatic_reference_documentation` per submodule (`public=true, private=false`) + one unified Internals page (`public=false, private=true`).
 - [ ] Extensions detected via `Base.get_extension` and documented when present.
 - [ ] `InterLinks` set up and passed via `plugins=[links]` if `@extref` is used.
 - [ ] Guides under `docs/src/<topic>/`; no hand-written API pages.
