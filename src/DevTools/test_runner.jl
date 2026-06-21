@@ -65,7 +65,7 @@ using CTBase
 ```
 """
 function run_tests(::AbstractTestRunnerTag; kwargs...)
-    throw(
+    return throw(
         Exceptions.ExtensionError(
             :Test; feature="test execution and reporting", context="test running"
         ),
