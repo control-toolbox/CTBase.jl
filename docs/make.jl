@@ -1,5 +1,5 @@
-# to run the documentation generation:
-# julia --project=. docs/make.jl
+# to run the documentation generation: julia --project=. docs/make.jl
+# to serve the documentation: julia --project=docs -e 'using LiveServer; LiveServer.serve(dir="docs/build/1")'
 pushfirst!(LOAD_PATH, joinpath(@__DIR__))
 pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 

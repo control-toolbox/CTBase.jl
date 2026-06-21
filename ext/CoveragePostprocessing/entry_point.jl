@@ -36,7 +36,7 @@ using CTBase
 ```
 """
 function CTBase.postprocess_coverage(
-    ::CTBase.Extensions.CoveragePostprocessingTag;
+    ::CTBase.DevTools.CoveragePostprocessingTag;
     generate_report::Bool=true,
     root_dir::String=pwd(),
     dest_dir::String="coverage",

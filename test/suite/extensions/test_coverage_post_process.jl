@@ -3,14 +3,14 @@ module TestCoveragePostProcess
 using Test: Test
 using Coverage: Coverage
 using CTBase: CTBase
-import CTBase.Extensions
+import CTBase.DevTools
 import CTBase.Exceptions
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # TOP-LEVEL: Fake type for stub testing
-struct DummyCoverageTag <: Extensions.AbstractCoveragePostprocessingTag end
+struct DummyCoverageTag <: DevTools.AbstractCoveragePostprocessingTag end
 
 function test_coverage_post_process()
     CP = Base.get_extension(CTBase, :CoveragePostprocessing)
@@ -29,7 +29,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            return Extensions.postprocess_coverage(; generate_report=false)
+                            return DevTools.postprocess_coverage(; generate_report=false)
                         end
                     end
                     nothing
@@ -47,7 +47,7 @@ function test_coverage_post_process()
         err = try
             redirect_stdout(devnull) do
                 redirect_stderr(devnull) do
-                    return Extensions.postprocess_coverage(DummyCoverageTag())
+                    return DevTools.postprocess_coverage(DummyCoverageTag())
                 end
             end
             nothing
@@ -74,7 +74,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        return Extensions.postprocess_coverage(; generate_report=false)
+                        return DevTools.postprocess_coverage(; generate_report=false)
                     end
                 end
 
@@ -150,7 +150,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        return Extensions.postprocess_coverage(; generate_report=true)
+                        return DevTools.postprocess_coverage(; generate_report=true)
                     end
                 end
 
@@ -317,7 +317,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        return Extensions.postprocess_coverage(; generate_report=true)
+                        return DevTools.postprocess_coverage(; generate_report=true)
                     end
                 end
 
@@ -362,7 +362,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        return Extensions.postprocess_coverage(;
+                        return DevTools.postprocess_coverage(;
                             generate_report=true, worst_n_files=1
                         )
                     end
@@ -394,7 +394,7 @@ function test_coverage_post_process()
 
                 redirect_stdout(devnull) do
                     redirect_stderr(devnull) do
-                        return Extensions.postprocess_coverage(;
+                        return DevTools.postprocess_coverage(;
                             generate_report=true, max_uncovered_lines=2
                         )
                     end
@@ -424,7 +424,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            return Extensions.postprocess_coverage(;
+                            return DevTools.postprocess_coverage(;
                                 generate_report=false, worst_n_files=0
                             )
                         end
@@ -439,7 +439,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            return Extensions.postprocess_coverage(;
+                            return DevTools.postprocess_coverage(;
                                 generate_report=false, worst_n_files=-5
                             )
                         end
@@ -454,7 +454,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            return Extensions.postprocess_coverage(;
+                            return DevTools.postprocess_coverage(;
                                 generate_report=false, max_uncovered_lines=0
                             )
                         end
@@ -469,7 +469,7 @@ function test_coverage_post_process()
                 err = try
                     redirect_stdout(devnull) do
                         redirect_stderr(devnull) do
-                            return Extensions.postprocess_coverage(;
+                            return DevTools.postprocess_coverage(;
                                 generate_report=false, max_uncovered_lines=-10
                             )
                         end

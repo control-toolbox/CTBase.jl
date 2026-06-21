@@ -2,7 +2,7 @@ module TestTestRunner
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Extensions
+import CTBase.DevTools
 import CTBase.Exceptions
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
@@ -10,7 +10,7 @@ const TestRunner = Base.get_extension(CTBase, :TestRunner)
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
-struct DummyTestRunnerTag <: Extensions.AbstractTestRunnerTag end
+struct DummyTestRunnerTag <: DevTools.AbstractTestRunnerTag end
 
 function test_testrunner()
     # ============================================================================
@@ -23,7 +23,7 @@ function test_testrunner()
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "TestRunner stub dispatch" begin
         err = try
-            Extensions.run_tests(DummyTestRunnerTag())
+            DevTools.run_tests(DummyTestRunnerTag())
             nothing
         catch e
             e
@@ -52,7 +52,7 @@ function test_testrunner()
                 start_log = TestRunner.TestRunInfo[]
                 done_log = TestRunner.TestRunInfo[]
 
-                Extensions.run_tests(;
+                DevTools.run_tests(;
                     args=String[],
                     testset_name="CallbackIntegration",
                     available_tests=(:int_a, :int_b),

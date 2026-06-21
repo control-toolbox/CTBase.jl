@@ -27,14 +27,14 @@ Three things to keep in mind:
 1. **No top-level exports.** `using CTBase` loads the package but brings no symbols
    into scope. Every symbol is accessed via its qualified path:
    ```julia
-   CTBase.Descriptions.add       # ✓ always works
+   CTBase.Descriptions.add # ✓ always works
    CTBase.Exceptions.NotImplemented
    ```
 2. **Submodule-first API.** The public API lives in named submodules
-   (`Descriptions`, `Exceptions`, `Extensions`, `Core`, `Unicode`).
+   (`Descriptions`, `Exceptions`, `DevTools`, `Core`, `Unicode`).
    You can bring a submodule's exports into scope explicitly:
    ```julia
-   using CTBase.Exceptions        # brings IncorrectArgument, NotImplemented, … into scope
+   using CTBase.Exceptions # brings IncorrectArgument, NotImplemented, … into scope
    ```
 3. **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
    `automatic_reference_documentation` require loading the matching weak dependency
@@ -60,11 +60,11 @@ descs = CTBase.Descriptions.add(descs, (:runge_kutta, :explicit))
 CTBase.Descriptions.complete(:implicit; descriptions=descs)
 
 # Ambiguous completion raises AmbiguousDescription
-try
-    CTBase.Descriptions.complete(:euler; descriptions=descs)
-catch e
-    println(typeof(e))
-end
+try # hide
+CTBase.Descriptions.complete(:euler; descriptions=descs)
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 For more, see the **[Descriptions guide](guide/descriptions.md)**.
@@ -77,27 +77,27 @@ Each type carries structured context fields for actionable error messages.
 
 ```@repl walkthrough
 # IncorrectArgument — invalid input value
-try
-    throw(CTBase.Exceptions.IncorrectArgument(
-        "state dimension must be positive";
-        got="0",
-        expected="n > 0",
-        suggestion="Pass a positive integer for the state dimension",
-    ))
-catch e
-    println(e)
-end
+try # hide
+throw(CTBase.Exceptions.IncorrectArgument(
+    "state dimension must be positive";
+    got="0",
+    expected="n > 0",
+    suggestion="Pass a positive integer for the state dimension",
+))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 
 # NotImplemented — interface stub
-try
-    throw(CTBase.Exceptions.NotImplemented(
-        "solve! is not implemented";
-        required_method="solve!(::MyStrategy, ocp)",
-        suggestion="Import the package that provides this strategy",
-    ))
-catch e
-    println(typeof(e))
-end
+try # hide
+throw(CTBase.Exceptions.NotImplemented(
+    "solve! is not implemented";
+    required_method="solve!(::MyStrategy, ocp)",
+    suggestion="Import the package that provides this strategy",
+))
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
 For more, see the **[Exceptions guide](guide/exceptions.md)**.
@@ -105,7 +105,7 @@ For more, see the **[Exceptions guide](guide/exceptions.md)**.
 ## Next Steps
 
 | Topic | Guide |
-|:---|:---|
+| :--- | :--- |
 | Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Exception hierarchy and best practices | [Exceptions](guide/exceptions.md) |
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |

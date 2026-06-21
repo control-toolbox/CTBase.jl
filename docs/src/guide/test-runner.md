@@ -5,7 +5,7 @@ CurrentModule = CTBase
 # Test Runner Guide
 
 This guide explains how to set up a modular testing infrastructure for Julia packages using the **TestRunner** extension of `CTBase.jl`.
-The entry point is [`CTBase.Extensions.run_tests`](@ref), activated by loading the `Test` weak dependency. This setup enables granular test execution and is friendly both for human developers and AI agents.
+The entry point is [`CTBase.DevTools.run_tests`](@ref), activated by loading the `Test` weak dependency. This setup enables granular test execution and is friendly both for human developers and AI agents.
 
 ## Architecture Overview
 
@@ -37,7 +37,7 @@ MyPackage.jl/
 
 ## Setting up `runtests.jl`
 
-The `runtests.jl` file is the entry point for your test suite. By using [`CTBase.Extensions.run_tests`](@ref), you enable a powerful mechanism to filter and execute specific tests using command-line arguments. This is crucial for fast iteration cycles.
+The `runtests.jl` file is the entry point for your test suite. By using [`CTBase.DevTools.run_tests`](@ref), you enable a powerful mechanism to filter and execute specific tests using command-line arguments. This is crucial for fast iteration cycles.
 
 ### Example `test/runtests.jl`
 
@@ -51,7 +51,7 @@ using MyPackage # Your package
 const TEST_DIR = @__DIR__
 
 # Run tests using the CTBase test runner
-CTBase.Extensions.run_tests(;
+CTBase.DevTools.run_tests(;
     args=String.(ARGS),                 # Pass command line arguments
     testset_name="MyPackage Tests",     # Name of the main testset
     available_tests=[                   # List of available test groups/files
@@ -165,10 +165,10 @@ The threshold can be customized via the `progress_bar_threshold` parameter:
 
 ```julia
 # Use a smaller threshold for narrow terminals
-CTBase.Extensions.run_tests(; args=String.(ARGS), progress_bar_threshold=30)
+CTBase.DevTools.run_tests(; args=String.(ARGS), progress_bar_threshold=30)
 
 # Use a larger threshold for wide displays
-CTBase.Extensions.run_tests(; args=String.(ARGS), progress_bar_threshold=100)
+CTBase.DevTools.run_tests(; args=String.(ARGS), progress_bar_threshold=100)
 ```
 
 ### Cursor-style display
@@ -213,13 +213,13 @@ The progress bar correctly detects **both** types of failures:
 Set `show_progress_line=false` to disable the entire progress line:
 
 ```julia
-CTBase.Extensions.run_tests(; args=String.(ARGS), show_progress_line=false)
+CTBase.DevTools.run_tests(; args=String.(ARGS), show_progress_line=false)
 ```
 
 To display minimal output without the graphical bar, set `show_progress_line=true` and `show_progress_bar=false`:
 
 ```julia
-CTBase.Extensions.run_tests(; args=String.(ARGS), show_progress_line=true, show_progress_bar=false)
+CTBase.DevTools.run_tests(; args=String.(ARGS), show_progress_line=true, show_progress_bar=false)
 # Output: ✓ [01/76] suite/test.jl (0.2s)
 ```
 
@@ -268,7 +268,7 @@ Called after eval completes (or after skip/error). The built-in progress bar is 
 ### Example: custom callbacks
 
 ```julia
-CTBase.Extensions.run_tests(;
+CTBase.DevTools.run_tests(;
     args=String.(ARGS),
     on_test_start = info -> begin
         print("  [$(info.index)/$(info.total)] $(info.spec)...")
@@ -293,7 +293,7 @@ CTBase.Extensions.run_tests(;
 You can use glob patterns to organize tests hierarchically:
 
 ```julia
-CTBase.Extensions.run_tests(;
+CTBase.DevTools.run_tests(;
     args=String.(ARGS),
     testset_name="MyPackage Tests",
     available_tests=[

@@ -2,6 +2,13 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.20.x)
+
+- **Module renamed**: `CTBase.Extensions` → `CTBase.DevTools`
+  - The submodule previously named `Extensions` is now named `DevTools` to better reflect its purpose (internal developer tools, not a general extension system)
+  - All tag types and functions are unchanged: `run_tests`, `postprocess_coverage`, `automatic_reference_documentation`, `AbstractTestRunnerTag`, `TestRunnerTag`, `AbstractDocumenterReferenceTag`, `DocumenterReferenceTag`, `AbstractCoveragePostprocessingTag`, `CoveragePostprocessingTag`
+  - **Migration**: replace `CTBase.Extensions` with `CTBase.DevTools` and `import CTBase.Extensions` with `import CTBase.DevTools` at all call sites
+
 ## Non-breaking note (0.20.0-beta)
 
 - **ANSI display unification**: Centralized all ANSI formatting utilities in `Core/display.jl` to provide a single source of truth for terminal color support

@@ -28,9 +28,9 @@ using .Unicode
 include(joinpath(@__DIR__, "Descriptions", "Descriptions.jl"))
 using .Descriptions
 
-# Extensions module - extension system with tag-based dispatch
-include(joinpath(@__DIR__, "Extensions", "Extensions.jl"))
-using .Extensions
+# DevTools module - developer tools with tag-based dispatch
+include(joinpath(@__DIR__, "DevTools", "DevTools.jl"))
+using .DevTools
 
 # Interpolation module - interpolation utilities
 include(joinpath(@__DIR__, "Interpolation", "Interpolation.jl"))

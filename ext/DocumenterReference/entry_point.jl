@@ -63,7 +63,7 @@ Each time you call this function, a new object is added to the global variable
 `DocumenterReference.CONFIG`. Use `reset_config!()` to clear it between builds.
 """
 function CTBase.automatic_reference_documentation(
-    ::CTBase.Extensions.DocumenterReferenceTag;
+    ::CTBase.DevTools.DocumenterReferenceTag;
     subdirectory::String,
     primary_modules::Vector,
     sort_by::Function=identity,
