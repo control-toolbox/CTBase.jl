@@ -23,27 +23,55 @@ function generate_api_reference(src_dir::String)
             joinpath("Core", "types.jl"), joinpath("Core", "matrix_utils.jl"),
             joinpath("Core", "function_utils.jl"), joinpath("Core", "macros.jl"),
         )),
-        (mod=CTBase.Interpolation, title="Interpolation", filename="interpolation", files=src(
-            joinpath("Interpolation", "Interpolation.jl"), joinpath("Interpolation", "types.jl"),
-            joinpath("Interpolation", "ctinterpolate.jl"), joinpath("Interpolation", "display.jl"),
-        )),
         (mod=CTBase.Descriptions, title="Descriptions", filename="descriptions", files=src(
             joinpath("Descriptions", "Descriptions.jl"), joinpath("Descriptions", "types.jl"),
             joinpath("Descriptions", "similarity.jl"), joinpath("Descriptions", "display.jl"),
             joinpath("Descriptions", "catalog.jl"), joinpath("Descriptions", "complete.jl"),
             joinpath("Descriptions", "remove.jl"),
         )),
+        (mod=CTBase.DevTools, title="DevTools", filename="devtools", files=src(
+            joinpath("DevTools", "DevTools.jl"), joinpath("DevTools", "coverage_postprocessing.jl"),
+            joinpath("DevTools", "documenter_reference.jl"), joinpath("DevTools", "test_runner.jl"),
+        )),
         (mod=CTBase.Exceptions, title="Exceptions", filename="exceptions", files=src(
             joinpath("Exceptions", "Exceptions.jl"), joinpath("Exceptions", "types.jl"),
             joinpath("Exceptions", "display.jl"),
         )),
+        (mod=CTBase.Interpolation, title="Interpolation", filename="interpolation", files=src(
+            joinpath("Interpolation", "Interpolation.jl"), joinpath("Interpolation", "types.jl"),
+            joinpath("Interpolation", "ctinterpolate.jl"), joinpath("Interpolation", "display.jl"),
+        )),
+        (mod=CTBase.Options, title="Options", filename="options", files=src(
+            joinpath("Options", "Options.jl"), joinpath("Options", "not_provided.jl"),
+            joinpath("Options", "option_value.jl"), joinpath("Options", "option_definition.jl"),
+            joinpath("Options", "extraction.jl"),
+        )),
+        (mod=CTBase.Orchestration, title="Orchestration", filename="orchestration", files=src(
+            joinpath("Orchestration", "Orchestration.jl"),
+            joinpath("Orchestration", "disambiguation.jl"),
+            joinpath("Orchestration", "builders.jl"),
+            joinpath("Orchestration", "routing.jl"),
+        )),
+        (mod=CTBase.Strategies, title="Strategies", filename="strategies", files=src(
+            joinpath("Strategies", "Strategies.jl"),
+            joinpath("Strategies", "display_formatting.jl"),
+            joinpath("Strategies", "contract", "abstract_strategy.jl"),
+            joinpath("Strategies", "contract", "metadata.jl"),
+            joinpath("Strategies", "contract", "strategy_options.jl"),
+            joinpath("Strategies", "contract", "parameters.jl"),
+            joinpath("Strategies", "api", "registry.jl"),
+            joinpath("Strategies", "api", "describe_registry.jl"),
+            joinpath("Strategies", "api", "introspection.jl"),
+            joinpath("Strategies", "api", "bypass.jl"),
+            joinpath("Strategies", "api", "builders.jl"),
+            joinpath("Strategies", "api", "configuration.jl"),
+            joinpath("Strategies", "api", "utilities.jl"),
+            joinpath("Strategies", "api", "validation_helpers.jl"),
+            joinpath("Strategies", "api", "disambiguation.jl"),
+        )),
         (mod=CTBase.Unicode, title="Unicode", filename="unicode", files=src(
             joinpath("Unicode", "Unicode.jl"), joinpath("Unicode", "subscripts.jl"),
             joinpath("Unicode", "superscripts.jl"),
-        )),
-        (mod=CTBase.DevTools, title="DevTools", filename="devtools", files=src(
-            joinpath("DevTools", "DevTools.jl"), joinpath("DevTools", "coverage_postprocessing.jl"),
-            joinpath("DevTools", "documenter_reference.jl"), joinpath("DevTools", "test_runner.jl"),
         )),
     ]
 

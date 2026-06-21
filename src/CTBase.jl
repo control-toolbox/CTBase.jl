@@ -20,6 +20,18 @@ using .Core
 include(joinpath(@__DIR__, "Exceptions", "Exceptions.jl"))
 using .Exceptions
 
+# Options module - generic option handling
+include(joinpath(@__DIR__, "Options", "Options.jl"))
+using .Options
+
+# Strategies module - generic strategy contract and registry
+include(joinpath(@__DIR__, "Strategies", "Strategies.jl"))
+using .Strategies
+
+# Orchestration module - option routing and disambiguation
+include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
+using .Orchestration
+
 # Unicode module - Unicode character utilities
 include(joinpath(@__DIR__, "Unicode", "Unicode.jl"))
 using .Unicode

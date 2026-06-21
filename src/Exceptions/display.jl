@@ -340,8 +340,10 @@ function _format_user_friendly_error(io::IO, e::CTException)
     # Blank pipe separator
     println(io, Core._dim("│", io))
 
-    # Message
-    println(io, Core._dim("│", io), "  ", Core._bold(e.msg, io))
+    # Message (each line gets its own │ prefix)
+    for line in split(rstrip(e.msg), '\n')
+        println(io, Core._dim("│", io), "  ", Core._bold(line, io))
+    end
 
     # Build field pairs
     primary_pairs = _build_primary_pairs(e)
