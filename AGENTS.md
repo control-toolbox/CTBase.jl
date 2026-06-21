@@ -42,7 +42,7 @@ dev/                    # Code philosophy, operational rules, plan template (ver
 |---|---|
 | [`dev/philosophy/PHILOSOPHY.md`](dev/philosophy/PHILOSOPHY.md) | Code philosophy — modules, types/traits, exceptions, docstrings, testing, docs |
 | [`dev/RULES.md`](dev/RULES.md) | Operational rules — running tests (MCP), building docs, git, output capture |
-| [`dev/planning.md`](dev/planning.md) | Plan template — phases, steps, human checkpoints |
+| [`dev/PLAN.md`](dev/PLAN.md) | Plan template — phases, steps, human checkpoints |
 
 ---
 
@@ -70,6 +70,6 @@ Workflows live in `.devin/workflows/`.
 - **No top-level exports** — use `CTBase.Submodule.symbol` everywhere.
 - **Qualified imports** — `using PackageName: PackageName`, never bare `using`.
 - **Fake types at module top-level** — never inside test functions.
-- **Plans before code** — write a plan and confirm with the user before touching files. Template: [`dev/planning.md`](dev/planning.md).
+- **Plans before code** — write a plan and confirm with the user before touching files. Template: [`dev/PLAN.md`](dev/PLAN.md).
 - **Docstrings last** — written only after all implementation steps are stable.
 - **Never commit or push without explicit user approval.**

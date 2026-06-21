@@ -10,7 +10,7 @@
 4. **Qualify everything** — `Module.symbol` at every call site; `import Pkg: Pkg` not
    `using Pkg`; no top-level package exports.
 5. **Write a plan before coding** — any task touching more than one file or a public
-   interface needs a plan confirmed by the user first. Template in `dev/planning.md`.
+   interface needs a plan confirmed by the user first. Template in `dev/PLAN.md`.
 6. **Docstrings last** — written only after the API is stable.
 7. **Fake types at module top-level** — never inside test functions (world-age issues).
 
@@ -20,7 +20,7 @@
 | --- | --- |
 | Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`dev/philosophy/`](dev/philosophy/PHILOSOPHY.md) |
 | Operational rules (MCP, doc build, git, output capture) | [`dev/RULES.md`](dev/RULES.md) |
-| Plan template | [`dev/planning.md`](dev/planning.md) |
+| Plan template | [`dev/PLAN.md`](dev/PLAN.md) |
 
 ## Project structure (quick reference)
 

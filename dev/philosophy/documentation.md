@@ -20,6 +20,30 @@ How docstrings become a published site via Documenter.jl and
 5. **Cross-refs resolve at build time** — every `@extref` is backed by an `InterLinks`
    entry in `make.jl`.
 
+## Backend
+
+Two backends are used in the ecosystem:
+
+| Backend | Format | Node.js |
+| --- | --- | --- |
+| `Documenter.jl` | classic HTML | not required |
+| `DocumenterVitepress` | VitePress site | required |
+
+Selected via the `format` keyword in `makedocs`:
+
+```julia
+# Documenter.jl (classic)
+format = Documenter.HTML(...)
+
+# DocumenterVitepress
+format = DocumenterVitepress.MarkdownVitepress(; repo=..., devbranch=..., devurl=...)
+```
+
+Both backends use the same Julia API (`makedocs`, `with_api_reference`, `InterLinks`,
+`draft`). DocumenterVitepress adds a `docs/src/.vitepress/` directory for the VitePress
+site configuration and requires `node_modules/` in `docs/` (gitignored; install once
+with `npm install` from `docs/`).
+
 ## Layout
 
 ```text
@@ -28,6 +52,7 @@ docs/
 ├── api_reference.jl     # generate_api_reference() + with_api_reference() + cleanup
 ├── inventories/         # InterLinks fallback inventories (one per dependency)
 └── src/
+    ├── .vitepress/      # VitePress config (DocumenterVitepress only)
     ├── index.md         # landing page
     ├── <topic>/         # hand-written guides
     └── api/             # auto-generated (removed after build)
