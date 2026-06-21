@@ -332,7 +332,7 @@ function _format_user_friendly_error(io::IO, e::CTException)
         func_name = string(frame.func)
         file_name = basename(string(frame.file))
         line_num = frame.line
-        print(io, " ", Core._dim("→", io), " ", Core._bold(func_name, io), "  ")
+        print(io, " ", Core._dim("→", io), " ", Core._bold(func_name, io), ", ")
         print(io, Core._yellow("$(file_name):$(line_num)", io))
     end
     println(io)

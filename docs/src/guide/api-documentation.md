@@ -64,9 +64,12 @@ CTBase.automatic_reference_documentation(;
 - **`title`**: Title displayed at the top of the generated page.
 - **`title_in_menu`**: Title in the navigation menu (defaults to `title`).
 - **`filename`**: Base filename for the markdown file (without `.md` extension).
-- **`exclude`**: Vector of symbol names to skip from documentation.
+- **`exclude`**: `Vector{Symbol}` of symbol names to skip (e.g., `[:eval, :include]`).
 - **`public`**: Generate public API page (default: `true`).
 - **`private`**: Generate private API page (default: `true`).
+- **`sort_by`**: Custom sort function applied to symbol lists (default: `identity`).
+- **`include_without_source`**: If `true`, include symbols whose source file cannot be determined (default: `false`).
+- **`source_files`**: *(Deprecated)* Global source file paths. Prefer `primary_modules=[Module => files]` instead.
 - **`external_modules_to_document`**: Additional modules to search for docstrings (e.g., `[Base]`).
 - **`public_title`**: Custom title for public API page (empty string uses default).
 - **`private_title`**: Custom title for private API page (empty string uses default).
@@ -129,8 +132,7 @@ By default, the system automatically generates appropriate titles based on the p
 
 - **Single public page** (`public=true, private=false`): Title is "Public API"
 - **Single private page** (`public=false, private=true`): Title is "Private API"
-- **Split pages** (`public=true, private=true`): Titles are "Public API" and "Private API"
-- **Combined page** (both public and private on same page): Title is "API reference"
+- **Split pages** (`public=true, private=true`): Two sub-pages with nav labels "Public" and "Private"
 
 ### Custom Titles
 
@@ -225,7 +227,7 @@ end
 
 ## Integration with Documenter.jl
 
-In `docs/make.jl`, use `with_api_reference()` to integrate the generated pages:
+In `docs/make.jl`, use `with_api_reference()` (a helper defined in your own `docs/api_reference.jl`) to integrate the generated pages:
 
 ```julia
 using Documenter
@@ -245,10 +247,10 @@ with_api_reference(dirname(@__DIR__)) do api_pages
 end
 ```
 
-The `with_api_reference()` function:
+`with_api_reference()` is a project-level wrapper (not part of CTBase) that:
 
-1. Generates the API reference pages.
-2. Passes them to your `makedocs()` call.
+1. Calls `generate_api_reference()` to register configurations.
+2. Passes the resulting pages to your `makedocs()` call.
 3. Cleans up temporary generated files after the build.
 
 ## DocType System
@@ -332,11 +334,11 @@ push!(pages, CTBase.automatic_reference_documentation(;
 CTBase.automatic_reference_documentation(;
     subdirectory=".",
     primary_modules=[MyPackage],
-    exclude=[
-        "eval",           # Compiler-generated
-        "include",        # Compiler-generated
-        "__init__",       # Internal initialization
-        "PRIVATE_CONST",  # Internal constant
+    exclude=Symbol[
+        :eval,           # Compiler-generated
+        :include,        # Compiler-generated
+        :__init__,       # Internal initialization
+        :PRIVATE_CONST,  # Internal constant
     ],
     title="MyPackage API",
     filename="api",
@@ -365,6 +367,7 @@ const MyExt = Base.get_extension(MyPackage, :MyExt)
 **Problem**: Functions are listed but have no documentation
 
 **Solution**: Check that:
+
 1. Docstrings are properly formatted with `"""`
 2. Source files are correctly specified in `primary_modules`
 3. The module is properly loaded
@@ -373,10 +376,10 @@ const MyExt = Base.get_extension(MyPackage, :MyExt)
 
 **Problem**: Documentation includes internal/generated symbols
 
-**Solution**: Use the `exclude` parameter:
+**Solution**: Use the `exclude` parameter with symbols (not strings):
 
 ```julia
-exclude=["eval", "include", "#.*"]  # Exclude compiler-generated symbols
+exclude=[:eval, :include]  # Exclude compiler-generated symbols
 ```
 
 ### Issue: Methods from Base not showing

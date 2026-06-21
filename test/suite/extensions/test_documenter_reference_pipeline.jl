@@ -2,7 +2,7 @@ module TestDocumenterReferencePipeline
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Extensions: Extensions
+import CTBase.DevTools: DevTools
 using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
@@ -27,8 +27,8 @@ function test_documenter_reference_pipeline()
 
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                return Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                return DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="api_integration",
                     primary_modules=[DocumenterReferencePipelineTestMod],
                     public=true,

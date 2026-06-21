@@ -16,7 +16,7 @@ julia> CTBase.TestRunnerTag() isa CTBase.AbstractTestRunnerTag
 true
 ```
 
-See also: [`CTBase.Extensions.TestRunnerTag`](@ref)
+See also: [`CTBase.DevTools.TestRunnerTag`](@ref)
 """
 abstract type AbstractTestRunnerTag end
 
@@ -37,7 +37,7 @@ julia> tag = CTBase.TestRunnerTag()
 CTBase.TestRunnerTag()
 ```
 
-See also: [`CTBase.Extensions.AbstractTestRunnerTag`](@ref)
+See also: [`CTBase.DevTools.AbstractTestRunnerTag`](@ref)
 """
 struct TestRunnerTag <: AbstractTestRunnerTag end
 

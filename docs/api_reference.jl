@@ -106,19 +106,19 @@ function generate_api_reference(src_dir::String)
         CTBase.automatic_reference_documentation(;
             subdirectory="api",
             primary_modules=[
-                CTBase.Extensions => src(
-                    joinpath("Extensions", "Extensions.jl"),
-                    joinpath("Extensions", "coverage_postprocessing.jl"),
-                    joinpath("Extensions", "documenter_reference.jl"),
-                    joinpath("Extensions", "test_runner.jl"),
+                CTBase.DevTools => src(
+                    joinpath("DevTools", "DevTools.jl"),
+                    joinpath("DevTools", "coverage_postprocessing.jl"),
+                    joinpath("DevTools", "documenter_reference.jl"),
+                    joinpath("DevTools", "test_runner.jl"),
                 ),
             ],
             exclude=EXCLUDE_SYMBOLS,
             public=true,
             private=true,
-            title="Extensions",
-            title_in_menu="Extensions",
-            filename="extensions",
+            title="DevTools",
+            title_in_menu="DevTools",
+            filename="devtools",
         ),
     ]
 

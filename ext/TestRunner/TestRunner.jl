@@ -1,7 +1,7 @@
 """
 Test runner backend for CTBase.
 
-This extension implements `CTBase.Extensions.run_tests`, allowing test selection
+This extension implements `CTBase.DevTools.run_tests`, allowing test selection
 via command-line arguments (globs) and configurable filename/function-name builders.
 
 Most functions in this module have side effects (including file inclusion and
@@ -10,7 +10,7 @@ running testsets).
 module TestRunner
 
 using CTBase: CTBase
-import CTBase.Extensions
+import CTBase.DevTools
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using Test: Test, @testset
 

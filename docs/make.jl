@@ -1,5 +1,9 @@
-# to run the documentation generation:
-# julia --project=. docs/make.jl
+# to run the documentation generation: julia --project=. docs/make.jl
+# to serve the documentation (option 1 — handles clean URLs natively):
+#   npx serve docs/build/1 --listen 5173
+# to serve the documentation (option 2 — Julia only):
+#   julia --project=docs -e 'using LiveServer; LiveServer.serve(dir="docs/build/1", single_page=true)'
+# note: single_page=true is required so that reloading /getting-started serves the correct HTML
 pushfirst!(LOAD_PATH, joinpath(@__DIR__))
 pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
@@ -58,10 +62,12 @@ with_api_reference(src_dir) do api_pages
         warnonly=[:cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
-            repo="https://" * repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
+            repo=repo_url,
+            devbranch="main", 
+            devurl="dev", 
+            sidebar_drawer=true,
         ),
         pages=[
-            "Introduction" => "index.md",
             "Getting Started" => "getting-started.md",
             "User Guides" => [
                 "Descriptions" => joinpath("guide", "descriptions.md"),

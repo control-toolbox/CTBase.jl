@@ -4,7 +4,7 @@ $(TYPEDSIGNATURES)
 Run tests with configurable file/function name builders and optional available tests filter.
 
 # Arguments
-- `::CTBase.Extensions.TestRunnerTag`: Dispatch tag for the TestRunner extension
+- `::CTBase.DevTools.TestRunnerTag`: Dispatch tag for the TestRunner extension
 - `args::AbstractVector{<:AbstractString}`: Command-line arguments (typically `String.(ARGS)`)
 - `testset_name::String`: Name of the main testset (default: `"Tests"`)
 - `available_tests`: Allowed tests (Symbols, Strings, or glob patterns). Empty = auto-discovery
@@ -27,7 +27,7 @@ Run tests with configurable file/function name builders and optional available t
 - Test selection is driven by `args` (coverage flags are automatically filtered out)
 - Selection arguments are interpreted as glob patterns and matched against both test names and filenames
 - Arguments starting with `test/` are automatically stripped for convenience
-- When `on_test_done` is provided, the built-in progress line is disabled unless `show_progress_line=true`
+- When `on_test_done` is provided, it replaces the built-in progress callback; `show_progress_line` is then ignored
 - When `show_progress_line=true` but `show_progress_bar=false`, displays minimal output: `✓ [01/76] suite/test.jl (0.2s)` without the graphical bar
 
 # Example
@@ -35,20 +35,20 @@ Run tests with configurable file/function name builders and optional available t
 julia> using CTBase.TestRunner
 
 julia> # Run all tests with default settings
-julia> CTBase.Extensions.run_tests()
+julia> CTBase.DevTools.run_tests()
 
 julia> # Run specific tests with custom callbacks
-julia> CTBase.Extensions.run_tests(;
+julia> CTBase.DevTools.run_tests(;
            args=["utils", "core"],
            on_test_start = info -> (println("Running: ", info.spec); true),
            on_test_done = info -> println("Done: ", info.status)
        )
 ```
 
-See also: [`CTBase.Extensions.run_tests`](@ref)
+See also: [`CTBase.DevTools.run_tests`](@ref)
 """
-function Extensions.run_tests(
-    ::CTBase.Extensions.TestRunnerTag;
+function DevTools.run_tests(
+    ::CTBase.DevTools.TestRunnerTag;
     args::AbstractVector{<:AbstractString}=String[],
     testset_name::String="Tests",
     available_tests=Symbol[],

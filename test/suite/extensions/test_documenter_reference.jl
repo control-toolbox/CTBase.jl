@@ -2,7 +2,7 @@ module TestDocumenterReference
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Extensions: Extensions
+import CTBase.DevTools: DevTools
 using Documenter: Documenter
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -28,8 +28,8 @@ function test_documenter_reference()
 
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                return Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                return DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="api_integration",
                     primary_modules=[DocumenterReferenceIntegrationTestMod],
                     public=true,

@@ -3,7 +3,7 @@ module TestDocumenterReferenceAPI
 using Test: Test
 using CTBase: CTBase
 import CTBase.Exceptions: Exceptions
-import CTBase.Extensions: Extensions
+import CTBase.DevTools: DevTools
 using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)
@@ -27,8 +27,8 @@ function test_documenter_reference_api()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Invalid primary_modules input" begin
         redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Test.@test_throws Extensions.IncorrectArgument Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                Test.@test_throws DevTools.IncorrectArgument DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="ref",
                     primary_modules=["invalid_string"], # String is not Module or Pair
                     title="My API",
@@ -43,8 +43,8 @@ function test_documenter_reference_api()
         # Single-module, public-only
         pages1 = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                return Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                return DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="ref",
                     primary_modules=[DocumenterReferenceAPITestMod],
                     public=true,
@@ -67,8 +67,8 @@ function test_documenter_reference_api()
         DR.reset_config!()
         pages2 = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                return Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                return DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="ref",
                     primary_modules=[DocumenterReferenceAPITestMod],
                     public=true,
@@ -92,8 +92,8 @@ function test_documenter_reference_api()
         # public=false, private=false should error
         redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                Test.@test_throws Extensions.IncorrectArgument Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                Test.@test_throws DevTools.IncorrectArgument DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="ref",
                     primary_modules=[DocumenterReferenceAPITestMod],
                     public=false,
@@ -109,8 +109,8 @@ function test_documenter_reference_api()
         # Test multi-module case (using same module twice as a proxy)
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                return Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                return DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="api",
                     primary_modules=[
                         DocumenterReferenceAPITestMod, DocumenterReferenceAPITestMod
@@ -137,8 +137,8 @@ function test_documenter_reference_api()
         # Test multi-module case with explicit filename (combined page - public only)
         pages = redirect_stdout(devnull) do
             redirect_stderr(devnull) do
-                return Extensions.automatic_reference_documentation(
-                    Extensions.DocumenterReferenceTag();
+                return DevTools.automatic_reference_documentation(
+                    DevTools.DocumenterReferenceTag();
                     subdirectory="api",
                     primary_modules=[
                         DocumenterReferenceAPITestMod, DocumenterReferenceAPITestMod

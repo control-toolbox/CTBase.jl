@@ -2,7 +2,7 @@ module TestTestRunnerTypes
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Extensions
+import CTBase.DevTools
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 

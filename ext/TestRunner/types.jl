@@ -15,7 +15,7 @@ and internal test identifiers.
 - String specs are treated as relative paths from `test_dir`
 - Glob patterns are supported for String specs
 
-See also: [`CTBase.Extensions.run_tests`](@ref)
+See also: [`CTBase.DevTools.run_tests`](@ref)
 """
 const TestSpec = Union{Symbol,String}
 

@@ -142,7 +142,7 @@ using CTBase
 using Main.TestOptions
 
 # Define all structs and helpers at top-level
-struct DummyTag <: CTBase.Extensions.Abstract<Extension>Tag end
+struct DummyTag <: CTBase.DevTools.Abstract<Extension>Tag end
 
 function test_<module_name>()
     @testset "<Module Name> Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
@@ -174,7 +174,7 @@ src/
 ├── Core/Core.jl              → test/suite/core/test_default.jl
 ├── Unicode/Unicode.jl        → test/suite/unicode/test_utils.jl
 ├── Descriptions/Descriptions.jl → test/suite/descriptions/test_description.jl
-├── Extensions/Extensions.jl  → test/suite/extensions/test_*.jl
+├── DevTools/DevTools.jl       → test/suite/extensions/test_*.jl
 └── Exceptions/               → test/suite/exceptions/test_*.jl
 ```
 
@@ -182,6 +182,6 @@ src/
 
 - **Public API**: Test functions accessible via `CTBase.f`
 - **Internal Functions**: Test via qualification `CTBase.SubModule.f`
-- **Extension Tags**: Test via qualification `CTBase.Extensions.TagType`
+- **Extension Tags**: Test via qualification `CTBase.DevTools.TagType`
 
 This ensures tests validate both the user-facing API and internal implementation details.

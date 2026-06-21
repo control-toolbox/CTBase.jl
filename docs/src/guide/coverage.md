@@ -8,14 +8,17 @@ This guide explains how to generate human-readable and machine-parseable coverag
 
 ## ⚠️ Prerequisites
 
-**Important**: The `Coverage` package must be installed in your base Julia environment for coverage post-processing to work properly:
+**Important**: The `Coverage` package must be available when running `coverage.jl`. The simplest approach is to add it to your test environment:
 
 ```bash
-# In your base Julia environment (not the project environment)
-julia --project=@v1.12 -e 'using Pkg; Pkg.add("Coverage")'
+julia --project=test -e 'using Pkg; Pkg.add("Coverage")'
 ```
 
-This is required because coverage processing happens at the Julia level and needs the `Coverage` package to be available globally.
+Alternatively, install it globally so it is always accessible:
+
+```bash
+julia -e 'using Pkg; Pkg.add("Coverage")'
+```
 
 ## Setting up Coverage
 
@@ -24,7 +27,7 @@ To generate actionable coverage reports, we use a dedicated `coverage.jl` script
 ### Example `test/coverage.jl`
 
 ```julia
-# Add the test directory to the load path so Julia can find dependencies from 
+# Add the test directory to the load path so Julia can find dependencies from
 # test/Project.toml.
 pushfirst!(LOAD_PATH, @__DIR__)
 
@@ -33,13 +36,16 @@ using CTBase # Provides CTBase.postprocess_coverage
 using Coverage
 
 # This function:
-# 1. Aggregates coverage data.
-# 2. Generates an LCOV file (coverage/lcov.info).
-# 3. Generates a markdown summary (coverage/cov_report.md).
-# 4. Archives used .cov files to keep the directory clean.
-# See: CTBase.postprocess_coverage
-CTBase.postprocess_coverage(; 
-    root_dir=dirname(@__DIR__) # Point to the package root
+# 1. Resets the coverage/ directory.
+# 2. Removes stale .cov files, keeping the most complete PID run.
+# 3. Generates an LCOV file (coverage/lcov.info).
+# 4. Generates a markdown summary (coverage/cov_report.md).
+# 5. Moves .cov files into coverage/cov/.
+CTBase.postprocess_coverage(;
+    root_dir=dirname(@__DIR__),  # Point to the package root
+    # dest_dir="coverage",       # Output directory (default: "coverage")
+    # worst_n_files=20,          # Number of lowest-covered files to list
+    # max_uncovered_lines=200,   # Max uncovered lines to show
 )
 ```
 
@@ -70,16 +76,13 @@ The post-processing script produces:
 Here's a complete workflow from running tests to analyzing coverage:
 
 ```bash
-# 1. Clean previous coverage data
-rm -rf coverage/
-
-# 2. Run tests with coverage enabled
+# 1. Run tests with coverage enabled
 julia --project -e 'using Pkg; Pkg.test("MyPackage"; coverage=true)'
 
-# 3. Generate coverage report
+# 2. Generate coverage report (resets coverage/ automatically)
 julia --project -e 'include("test/coverage.jl")'
 
-# 4. View the report
+# 3. View the report
 cat coverage/cov_report.md
 ```
 
@@ -123,20 +126,53 @@ julia -e 'using Pkg; Pkg.add("Coverage")'
 
 ## Understanding Coverage Reports
 
-The `cov_report.md` file contains:
+The `cov_report.md` file has three sections:
 
-### File Coverage Summary
+### Overall
 
-```text
-File: src/MyModule.jl
-Coverage: 85.7% (60/70 lines)
-Uncovered lines: 15, 23-25, 42, 58-60
+A global summary computed by `Coverage.get_summary`:
+
+````markdown
+## Overall
+
+```shell
+(826, 854)
+
+Global coverage: 96.72% (826, 854)
 ```
+````
 
-This shows:
-- **Total coverage**: 85.7% of lines are executed
-- **Line counts**: 60 out of 70 lines covered
-- **Uncovered lines**: Specific line numbers that need tests
+The tuple `(covered_lines, total_lines)` is followed by the computed percentage.
+
+### Lowest-covered files
+
+A markdown table of the `worst_n_files` least-covered files (default: 20), sorted by ascending coverage:
+
+````markdown
+## Lowest-covered files (top 20)
+
+| file | covered | total | % |
+|---|---:|---:|---:|
+| `src/MyModule.jl` | 60 | 70 | 85.71 |
+| `ext/MyExt/foo.jl` | 10 | 20 | 50.0  |
+````
+
+Only `src/` and `ext/` files are included (test files are excluded).
+
+### Uncovered lines
+
+A shell code block listing `filename:line` pairs, up to `max_uncovered_lines` entries (default: 200):
+
+````markdown
+## Uncovered lines (first 200)
+
+```shell
+src/MyModule.jl:15
+src/MyModule.jl:23
+src/MyModule.jl:24
+src/MyModule.jl:42
+```
+````
 
 ### Interpreting Results
 

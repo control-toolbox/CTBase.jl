@@ -2,7 +2,7 @@ module TestIntegration
 
 using Test: Test
 import CTBase.Descriptions: Descriptions
-import CTBase.Extensions: Extensions
+import CTBase.DevTools: DevTools
 import CTBase.Exceptions: Exceptions
 import CTBase.Unicode: Unicode
 
@@ -10,7 +10,7 @@ const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
 
 # TOP-LEVEL: Fake type for extension testing
-struct DummyDocRefTag <: Extensions.AbstractDocumenterReferenceTag end
+struct DummyDocRefTag <: DevTools.AbstractDocumenterReferenceTag end
 
 function test_integration()
     # Integration test: description workflow combining add, complete, remove, and exceptions
@@ -83,7 +83,7 @@ function test_integration()
     # Integration test: automatic_reference_documentation fallback when extension is not used
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Integration: automatic_reference_documentation fallback" begin
         err = try
-            Extensions.automatic_reference_documentation(DummyDocRefTag();)
+            DevTools.automatic_reference_documentation(DummyDocRefTag();)
             nothing
         catch e
             e

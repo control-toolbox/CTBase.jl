@@ -1,13 +1,13 @@
 """
-    Extensions
+    DevTools
 
-Extension system for CTBase with tag-based dispatch.
+Developer tools for CTBase with tag-based dispatch.
 
-This module provides the extension point infrastructure used throughout
-the CTBase ecosystem, including abstract tags, concrete implementations,
-and extension functions.
+This module provides the extension point infrastructure for internal
+control-toolbox development tools: test running, API documentation
+generation, and coverage post-processing.
 """
-module Extensions
+module DevTools
 
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using ..Exceptions

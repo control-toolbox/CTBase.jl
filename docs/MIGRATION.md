@@ -37,12 +37,19 @@ using DocumenterVitepress
 makedocs(;
     # ... other arguments ...
     format=DocumenterVitepress.MarkdownVitepress(;
-        repo="https://github.com/control-toolbox/CTBase.jl",
+        repo="github.com/control-toolbox/CTBase.jl",  # no https:// prefix — DocumenterVitepress adds it
         devbranch="main",
         devurl="dev",
         sidebar_drawer=true,
     ),
-    # ...
+    pages=[
+        # Do NOT list index.md here — it is automatically the root page at /
+        # Adding it as "Introduction" => "index.md" creates a duplicate /index entry
+        # in the sidebar and causes the Next page link from / to loop back to /index
+        # instead of going to the first real page.
+        "Getting Started" => "getting-started.md",
+        # ...
+    ],
 )
 
 DocumenterVitepress.deploydocs(;
@@ -158,9 +165,20 @@ cd docs && npm install
 # Generate documentation
 julia --project=docs docs/make.jl
 
-# Local preview (output is in docs/build/1/, not docs/build/)
-julia --project=docs -e 'using LiveServer; LiveServer.serve(dir="docs/build/1")'
+# Local preview — option 1: npx serve (recommended, handles clean URLs natively)
+# Output is in docs/build/1/, not docs/build/
+npx serve docs/build/1 --listen 5173
+
+# Local preview — option 2: Julia LiveServer
+# single_page=true is required: without it, reloading any page other than / returns a blank page
+# because VitePress uses clean URLs (/getting-started maps to getting-started.html, not a directory)
+julia --project=docs -e 'using LiveServer; LiveServer.serve(dir="docs/build/1", single_page=true)'
 ```
+
+> **Why `single_page=true`?** VitePress builds with `cleanUrls: true`, generating `getting-started.html`
+> for the URL `/getting-started`. A plain static server returns 404 for that URL on hard reload.
+> With `single_page=true`, LiveServer falls back to serving `index.html` for unknown URLs, letting
+> the VitePress router handle the rest. `npx serve` avoids this issue by trying `<path>.html` automatically.
 
 ## Important notes
 
