@@ -62,10 +62,7 @@ with_api_reference(src_dir) do api_pages
         warnonly=[:cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
-            repo=repo_url,
-            devbranch="main", 
-            devurl="dev", 
-            sidebar_drawer=true,
+            repo=repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
         ),
         pages=[
             "Getting Started" => "getting-started.md",
