@@ -1,14 +1,29 @@
 """
-    _to_string(x::DocType) -> String
+    $(TYPEDSIGNATURES)
 
 Convert a DocType enumeration value to its string representation.
+
+# Arguments
+- `x::DocType`: the DocType value to convert.
+
+# Returns
+- `String`: human-readable string representation.
+
 """
 _to_string(x::DocType) = DOCTYPE_NAMES[x]
 
 """
-    _classify_symbol(obj, name_str::String) -> DocType
+    $(TYPEDSIGNATURES)
 
 Classify a symbol by its type (function, macro, struct, constant, module, abstract type).
+
+# Arguments
+- `obj`: the symbol object to classify.
+- `name_str::String`: the name of the symbol as a string.
+
+# Returns
+- `DocType`: the classification of the symbol.
+
 """
 function _classify_symbol(obj, name_str::String)
     startswith(name_str, "@") && return DOCTYPE_MACRO
@@ -20,11 +35,18 @@ function _classify_symbol(obj, name_str::String)
 end
 
 """
-    _exported_symbols(mod::Module) -> NamedTuple
+    $(TYPEDSIGNATURES)
 
 Classify all symbols in a module into exported and private categories.
 Returns a NamedTuple with `exported` and `private` fields, each containing
 sorted lists of `(Symbol, DocType)` pairs.
+
+# Arguments
+- `mod::Module`: the module to analyze.
+
+# Returns
+- `NamedTuple`: with `exported` and `private` fields, each containing sorted lists of `(Symbol, DocType)` pairs.
+
 """
 function _exported_symbols(mod::Module)
     exported = Pair{Symbol,DocType}[]

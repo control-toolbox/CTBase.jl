@@ -1,8 +1,16 @@
 """
-    _build_api_page(document::Documenter.Document, config::_Config)
+    $(TYPEDSIGNATURES)
 
 Generate public and/or private API reference pages for a module.
 Accumulates content in `PAGE_CONTENT_ACCUMULATOR` for later finalization.
+
+# Arguments
+- `document::Documenter.Document`: the Documenter document object.
+- `config::_Config`: configuration for the API page generation.
+
+# Returns
+- `Nothing`.
+
 """
 function _build_api_page(document::Documenter.Document, config::_Config)
     current_module = config.current_module
@@ -64,9 +72,18 @@ function _build_api_page(document::Documenter.Document, config::_Config)
 end
 
 """
-    _collect_module_docstrings(config::_Config, symbol_list) -> Vector{String}
+    $(TYPEDSIGNATURES)
 
 Collect docstring blocks for symbols from the current module.
+
+# Arguments
+- `config::_Config`: configuration for documentation generation.
+- `symbol_list`: list of symbols to document.
+- `include_module::Bool`: whether to include the module docstring (default: `true`).
+
+# Returns
+- `Vector{String}`: docstring blocks formatted for Documenter.
+
 """
 function _collect_module_docstrings(config::_Config, symbol_list; include_module::Bool=true)
     docstrings = String[]
@@ -85,12 +102,14 @@ function _collect_module_docstrings(config::_Config, symbol_list; include_module
             effective_source_files,
             config.include_without_source,
         )
-        push!(docstrings, "### `$(current_module)`\n\n```@docs\n$(current_module)\n```\n\n")
+        mod_anchor = _heading_anchor(current_module, nameof(current_module))
+        push!(docstrings, "### `$(current_module)` {#$mod_anchor}\n\n```@docs\n$(current_module)\n```\n\n")
     end
 
     _iterate_over_symbols(config, symbol_list) do key, type
         type == DOCTYPE_MODULE && return nothing
-        push!(docstrings, "### `$key`\n\n```@docs\n$(current_module).$key\n```\n\n")
+        anchor = _heading_anchor(current_module, key)
+        push!(docstrings, "### `$key` {#$anchor}\n\n```@docs\n$(current_module).$key\n```\n\n")
         return nothing
     end
 
@@ -98,9 +117,17 @@ function _collect_module_docstrings(config::_Config, symbol_list; include_module
 end
 
 """
-    _collect_private_docstrings(config::_Config, symbol_list) -> Vector{String}
+    $(TYPEDSIGNATURES)
 
 Collect docstring blocks for private symbols, including external module methods.
+
+# Arguments
+- `config::_Config`: configuration for documentation generation.
+- `symbol_list`: list of private symbols to document.
+
+# Returns
+- `Vector{String}`: docstring blocks formatted for Documenter.
+
 """
 function _collect_private_docstrings(config::_Config, symbol_list)
     docstrings = _collect_module_docstrings(config, symbol_list; include_module=false)
@@ -115,9 +142,16 @@ function _collect_private_docstrings(config::_Config, symbol_list)
 end
 
 """
-    _collect_external_module_docstrings(config::_Config) -> Vector{String}
+    $(TYPEDSIGNATURES)
 
 Collect docstrings for methods from external modules defined in source files.
+
+# Arguments
+- `config::_Config`: configuration for documentation generation.
+
+# Returns
+- `Vector{String}`: docstring blocks for external module methods.
+
 """
 function _collect_external_module_docstrings(config::_Config)
     docstrings = String[]
@@ -144,9 +178,17 @@ function _collect_external_module_docstrings(config::_Config)
 end
 
 """
-    _collect_methods_from_source_files(mod::Module, source_files::Vector{String}) -> Dict{Symbol, Vector{Method}}
+    $(TYPEDSIGNATURES)
 
 Collect all methods from a module that are defined in the given source files.
+
+# Arguments
+- `mod::Module`: the module to search for methods.
+- `source_files::Vector{String}`: source file paths to filter by.
+
+# Returns
+- `Dict{Symbol, Vector{Method}}`: mapping of function names to their methods.
+
 """
 function _collect_methods_from_source_files(mod::Module, source_files::Vector{String})
     methods_by_func = Dict{Symbol,Vector{Method}}()
@@ -180,9 +222,16 @@ function _collect_methods_from_source_files(mod::Module, source_files::Vector{St
 end
 
 """
-    _finalize_api_pages(document::Documenter.Document)
+    $(TYPEDSIGNATURES)
 
 Finalize all accumulated API pages by combining content from multiple modules.
+
+# Arguments
+- `document::Documenter.Document`: the Documenter document object.
+
+# Returns
+- `Nothing`.
+
 """
 function _finalize_api_pages(document::Documenter.Document)
     for (filename, module_contents) in PAGE_CONTENT_ACCUMULATOR
@@ -284,9 +333,17 @@ function _finalize_api_pages(document::Documenter.Document)
 end
 
 """
-    _build_combined_page_content(modules_str, module_contents) -> Tuple{String, Vector{String}}
+    $(TYPEDSIGNATURES)
 
 Build the overview and docstrings for a combined (Public + Private) API page.
+
+# Arguments
+- `modules_str::String`: comma-separated list of module names.
+- `module_contents`: vector of (module, public_docs, private_docs) tuples.
+
+# Returns
+- `Tuple{String, Vector{String}}`: overview markdown and docstring blocks.
+
 """
 function _build_combined_page_content(modules_str::String, module_contents)
     overview = """
@@ -315,16 +372,20 @@ function _build_combined_page_content(modules_str::String, module_contents)
 end
 
 """
-    _build_private_page_content(modules_str, module_contents, is_split; custom_title="", custom_description="") -> Tuple{String, Vector{String}}
+    $(TYPEDSIGNATURES)
 
 Build the overview and docstrings for a private API page.
 
 # Arguments
-- `modules_str`: Comma-separated list of module names
-- `module_contents`: Vector of (module, public_docs, private_docs) tuples
-- `is_split`: Whether this is part of a split public/private documentation
-- `custom_title`: Optional custom title (empty string uses default)
-- `custom_description`: Optional custom description (empty string uses default)
+- `modules_str::String`: comma-separated list of module names.
+- `module_contents`: vector of (module, public_docs, private_docs) tuples.
+- `is_split::Bool`: whether this is part of a split public/private documentation.
+- `custom_title::String`: optional custom title (empty string uses default).
+- `custom_description::String`: optional custom description (empty string uses default).
+
+# Returns
+- `Tuple{String, Vector{String}}`: overview markdown and docstring blocks.
+
 """
 function _build_private_page_content(
     modules_str::String,
@@ -370,16 +431,20 @@ function _build_private_page_content(
 end
 
 """
-    _build_public_page_content(modules_str, module_contents, is_split; custom_title="", custom_description="") -> Tuple{String, Vector{String}}
+    $(TYPEDSIGNATURES)
 
 Build the overview and docstrings for a public API page.
 
 # Arguments
-- `modules_str`: Comma-separated list of module names
-- `module_contents`: Vector of (module, public_docs, private_docs) tuples
-- `is_split`: Whether this is part of a split public/private documentation
-- `custom_title`: Optional custom title (empty string uses default)
-- `custom_description`: Optional custom description (empty string uses default)
+- `modules_str::String`: comma-separated list of module names.
+- `module_contents`: vector of (module, public_docs, private_docs) tuples.
+- `is_split::Bool`: whether this is part of a split public/private documentation.
+- `custom_title::String`: optional custom title (empty string uses default).
+- `custom_description::String`: optional custom description (empty string uses default).
+
+# Returns
+- `Tuple{String, Vector{String}}`: overview markdown and docstring blocks.
+
 """
 function _build_public_page_content(
     modules_str::String,
