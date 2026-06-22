@@ -187,7 +187,9 @@ function test_testrunner_progress()
                 :final, "/tmp/final.jl", :final, 5, 5, :post_eval, nothing, 0.5
             )
             buf = IOBuffer()
-            fmt(buf, info; history=history, cumulative_severity=maximum(history))
+            # Use a color-enabled IOContext so ANSI codes are actually emitted
+            io_c = IOContext(buf, :color => true)
+            fmt(io_c, info; history=history, cumulative_severity=maximum(history))
             output = String(take!(buf))
             Test.@test contains(output, "[")
             Test.@test occursin("\e[31m[", output)  # brackets red because of failure
@@ -207,7 +209,9 @@ function test_testrunner_progress()
                 0.2,
             )
             buf = IOBuffer()
-            fmt(buf, info; cumulative_severity=2)
+            # Use a color-enabled IOContext so ANSI codes are actually emitted
+            io_c = IOContext(buf, :color => true)
+            fmt(io_c, info; cumulative_severity=2)
             output = String(take!(buf))
             Test.@test occursin("\e[33m[", output) ||
                 occursin("\e[33m[", replace(output, "\e[0m"=>""))
@@ -239,6 +243,23 @@ function test_testrunner_progress()
             Test.@test contains(output, "[05/10]")
             Test.@test contains(output, "test_example")
             Test.@test contains(output, "(1.2s)")
+        end
+
+        Test.@testset "palette IO-awareness — no ANSI in plain IO buffer" begin
+            info = TestRunner.TestRunInfo(
+                :test_example,
+                "/tmp/test.jl",
+                :test_example,
+                5, 10,
+                :post_eval,
+                nothing,
+                1.23,
+            )
+            buf = IOBuffer()
+            # Plain IOBuffer without :color => true must produce zero ANSI codes
+            TestRunner._format_progress_line(buf, info; show_progress_bar=false)
+            output = String(take!(buf))
+            Test.@test !occursin("\e[", output) && !occursin("\033[", output)
         end
     end
 

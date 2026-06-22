@@ -1,5 +1,5 @@
 """
-    DocType
+$(TYPEDEF)
 
 Enumeration of documentation element types recognized by the API reference generator.
 
@@ -11,6 +11,7 @@ Enumeration of documentation element types recognized by the API reference gener
 - `DOCTYPE_MACRO`: A macro (name starts with `@`)
 - `DOCTYPE_MODULE`: A submodule
 - `DOCTYPE_STRUCT`: A concrete struct type
+
 """
 @enum(
     DocType,
@@ -26,6 +27,7 @@ Enumeration of documentation element types recognized by the API reference gener
     DOCTYPE_NAMES::Dict{DocType, String}
 
 Mapping from DocType enum values to their human-readable string representations.
+
 """
 const DOCTYPE_NAMES = Dict{DocType,String}(
     DOCTYPE_ABSTRACT_TYPE => "abstract type",
@@ -41,6 +43,7 @@ const DOCTYPE_NAMES = Dict{DocType,String}(
 
 Ordering for DocType values used when sorting symbols for display.
 Lower values appear first.
+
 """
 const DOCTYPE_ORDER = Dict{DocType,Int}(
     DOCTYPE_MODULE => 0,
@@ -52,7 +55,7 @@ const DOCTYPE_ORDER = Dict{DocType,Int}(
 )
 
 """
-    _Config
+$(TYPEDEF)
 
 Internal configuration for API reference generation.
 
@@ -76,6 +79,7 @@ Internal configuration for API reference generation.
 - `private_title::String`: Custom title for private API page (empty string uses default).
 - `public_description::String`: Custom description for public API page (empty string uses default).
 - `private_description::String`: Custom description for private API page (empty string uses default).
+
 """
 struct _Config
     current_module::Module
@@ -104,6 +108,7 @@ Global configuration storage for API reference generation.
 
 Each call to `CTBase.automatic_reference_documentation` appends a new `_Config`
 entry to this vector. Use `reset_config!` to clear it between builds.
+
 """
 const CONFIG = _Config[]
 
@@ -112,6 +117,7 @@ const CONFIG = _Config[]
 
 Global accumulator for multi-module combined pages.
 Maps output filename to a list of (module, public_docstrings, private_docstrings) tuples.
+
 """
 const PAGE_CONTENT_ACCUMULATOR = Dict{
     String,Vector{Tuple{Module,Vector{String},Vector{String}}}

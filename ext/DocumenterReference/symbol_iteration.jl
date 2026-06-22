@@ -1,8 +1,17 @@
 """
-    _iterate_over_symbols(f, config, symbol_list)
+    $(TYPEDSIGNATURES)
 
 Iterate over symbols, applying a function to each documented symbol.
 Filters symbols based on exclusion list, documentation presence, and source files.
+
+# Arguments
+- `f`: function to apply to each symbol, receives `(key::Symbol, type::DocType)`.
+- `config::_Config`: configuration for documentation generation.
+- `symbol_list`: list of symbols to iterate over.
+
+# Returns
+- `Nothing`.
+
 """
 function _iterate_over_symbols(f, config::_Config, symbol_list)
     current_module = config.current_module
@@ -32,9 +41,19 @@ function _iterate_over_symbols(f, config::_Config, symbol_list)
 end
 
 """
-    _has_documentation(mod::Module, key::Symbol, type::DocType, modules::Dict) -> Bool
+    $(TYPEDSIGNATURES)
 
 Check if a symbol has documentation. Logs a warning if not.
+
+# Arguments
+- `mod::Module`: the module containing the symbol.
+- `key::Symbol`: the symbol name.
+- `type::DocType`: the type of the symbol.
+- `modules::Dict`: mapping of modules to their source files.
+
+# Returns
+- `Bool`: `true` if the symbol has documentation, `false` otherwise.
+
 """
 function _has_documentation(mod::Module, key::Symbol, type::DocType, modules::Dict)
     binding = Base.Docs.Binding(mod, key)
@@ -60,9 +79,20 @@ function _has_documentation(mod::Module, key::Symbol, type::DocType, modules::Di
 end
 
 """
-    _passes_source_filter(mod, key, type, source_files, include_without_source) -> Bool
+    $(TYPEDSIGNATURES)
 
 Check if a symbol passes the source file filter.
+
+# Arguments
+- `mod::Module`: the module containing the symbol.
+- `key::Symbol`: the symbol name.
+- `type::DocType`: the type of the symbol.
+- `source_files::Vector{String}`: source file paths to filter by.
+- `include_without_source::Bool`: whether to include symbols without source location.
+
+# Returns
+- `Bool`: `true` if the symbol passes the filter, `false` otherwise.
+
 """
 function _passes_source_filter(
     mod::Module,

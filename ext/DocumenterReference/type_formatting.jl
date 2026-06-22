@@ -1,8 +1,17 @@
 """
-    _method_signature_string(m::Method, mod::Module, key::Symbol) -> String
+    $(TYPEDSIGNATURES)
 
 Generate a Documenter-compatible signature string for a method.
 Returns a string like `Module.func(::Type1, ::Type2)` for use in `@docs` blocks.
+
+# Arguments
+- `m::Method`: the method to format.
+- `mod::Module`: the module containing the method.
+- `key::Symbol`: the function name.
+
+# Returns
+- `String`: Documenter-compatible signature string.
+
 """
 function _method_signature_string(m::Method, mod::Module, key::Symbol)
     sig = m.sig
@@ -26,10 +35,17 @@ function _method_signature_string(m::Method, mod::Module, key::Symbol)
 end
 
 """
-    _format_type_for_docs(T) -> String
+    $(TYPEDSIGNATURES)
 
 Format a type for use in Documenter's `@docs` block.
 Always fully qualifies types to avoid UndefVarError when Documenter evaluates in Main.
+
+# Arguments
+- `T`: the type to format.
+
+# Returns
+- `String`: formatted type string with `::` prefix and full module qualification.
+
 """
 function _format_type_for_docs(T)
     # Vararg
@@ -62,9 +78,16 @@ function _format_type_for_docs(T)
 end
 
 """
-    _format_datatype_for_docs(T::DataType) -> String
+    $(TYPEDSIGNATURES)
 
 Format a DataType for use in @docs blocks.
+
+# Arguments
+- `T::DataType`: the DataType to format.
+
+# Returns
+- `String`: formatted DataType string with full module qualification.
+
 """
 function _format_datatype_for_docs(T::DataType)
     type_mod = parentmodule(T)
@@ -101,9 +124,16 @@ function _format_datatype_for_docs(T::DataType)
 end
 
 """
-    _format_type_param(p) -> String
+    $(TYPEDSIGNATURES)
 
 Format a type parameter (can be a type or a value like an integer).
+
+# Arguments
+- `p`: the type parameter to format.
+
+# Returns
+- `String`: formatted type parameter string.
+
 """
 function _format_type_param(p)
     if p isa Type

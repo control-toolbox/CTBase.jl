@@ -22,6 +22,7 @@ function generate_api_reference(src_dir::String)
             joinpath("Core", "Core.jl"), joinpath("Core", "default.jl"),
             joinpath("Core", "types.jl"), joinpath("Core", "matrix_utils.jl"),
             joinpath("Core", "function_utils.jl"), joinpath("Core", "macros.jl"),
+            joinpath("Core", "palette.jl"), joinpath("Core", "display.jl"),
         )),
         (mod=CTBase.Descriptions, title="Descriptions", filename="descriptions", files=src(
             joinpath("Descriptions", "Descriptions.jl"), joinpath("Descriptions", "types.jl"),

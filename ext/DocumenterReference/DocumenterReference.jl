@@ -17,6 +17,7 @@
 module DocumenterReference
 
 using CTBase: CTBase
+import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using Documenter: Documenter
 using Markdown: Markdown
 using MarkdownAST: MarkdownAST

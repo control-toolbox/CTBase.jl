@@ -83,6 +83,7 @@ with_api_reference(src_dir) do api_pages
                 "Test Runner" => joinpath("guide", "test-runner.md"),
                 "Coverage" => joinpath("guide", "coverage.md"),
                 "API Documentation" => joinpath("guide", "api-documentation.md"),
+                "Color System" => joinpath("guide", "color-system.md"),
             ],
             "API Reference" => api_pages,
         ],

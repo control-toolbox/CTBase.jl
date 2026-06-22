@@ -1,8 +1,17 @@
 """
-    _get_source_file(mod::Module, key::Symbol, type::DocType) -> Union{String, Nothing}
+    $(TYPEDSIGNATURES)
 
 Determine the source file path where a symbol is defined.
 Returns `nothing` if the source file cannot be determined.
+
+# Arguments
+- `mod::Module`: the module containing the symbol.
+- `key::Symbol`: the symbol name.
+- `type::DocType`: the type of the symbol.
+
+# Returns
+- `Union{String, Nothing}`: absolute path to the source file, or `nothing` if undetermined.
+
 """
 function _get_source_file(mod::Module, key::Symbol, type::DocType)
     try
@@ -32,9 +41,17 @@ function _get_source_file(mod::Module, key::Symbol, type::DocType)
 end
 
 """
-    _get_source_from_docstring(mod::Module, key::Symbol) -> Union{String, Nothing}
+    $(TYPEDSIGNATURES)
 
 Try to get source file path from docstring metadata.
+
+# Arguments
+- `mod::Module`: the module containing the symbol.
+- `key::Symbol`: the symbol name.
+
+# Returns
+- `Union{String, Nothing}`: absolute path to the source file, or `nothing` if not found.
+
 """
 function _get_source_from_docstring(mod::Module, key::Symbol)
     binding = Base.Docs.Binding(mod, key)
@@ -56,9 +73,16 @@ function _get_source_from_docstring(mod::Module, key::Symbol)
 end
 
 """
-    _get_source_from_methods(obj) -> Union{String, Nothing}
+    $(TYPEDSIGNATURES)
 
 Try to get source file path from method definitions.
+
+# Arguments
+- `obj`: the function or type object to inspect.
+
+# Returns
+- `Union{String, Nothing}`: absolute path to the source file, or `nothing` if not found.
+
 """
 function _get_source_from_methods(obj)
     for m in methods(obj)

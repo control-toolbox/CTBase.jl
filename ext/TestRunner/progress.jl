@@ -102,20 +102,24 @@ Internal helper to map test status to severity level for display formatting.
     (status == :error || status == :test_failed) ? 3 : (status == :skipped ? 2 : 1)
 
 """
-    _color_for_severity(sev::Int) -> String
+    _color_for_severity(sev::Int, io::IO) -> String
 
-Internal helper to map severity level to ANSI color code.
+Internal helper to map severity level to an ANSI opening code, respecting the
+colour capability of `io` and the active CTBase colour palette.
 
 # Arguments
 - `sev::Int`: Severity level (3=failure, 2=skipped, 1=success)
+- `io::IO`: Output stream (checked for colour support)
 
 # Returns
-- `String`: ANSI color escape code (red for failure, yellow for skipped, green for success)
+- `String`: ANSI colour escape code, or empty string when colour is disabled
 """
-@inline function _color_for_severity(sev::Int)
-    sev >= 3 && return "\e[31m" # red
-    sev == 2 && return "\e[33m" # yellow
-    return "\e[32m"             # green
+@inline function _color_for_severity(sev::Int, io::IO)
+    get(io, :color, false) || return ""
+    p = CTBase.Core.current_palette()
+    st = sev >= 3 ? p.error : (sev == 2 ? p.warning : p.success)
+    isempty(st.code) && return ""
+    return "\033[$(st.code)m"
 end
 
 """
@@ -145,7 +149,10 @@ $(TYPEDSIGNATURES)
 
 Write a styled progress line for a completed test to `io`.
 
-Uses ANSI colors: green for success, red for errors, yellow for skipped.
+Uses the active CTBase colour palette (see `CTBase.Core.set_palette!`): the
+`success`, `warning`, and `error` roles drive the status colour; `type` drives
+the index; `emphasis` and `muted` drive boldness and the time suffix.
+Colour is only emitted when `get(io, :color, false)` is true.
 
 # Arguments
 - `io::IO`: Output stream to write to
@@ -157,7 +164,6 @@ Uses ANSI colors: green for success, red for errors, yellow for skipped.
 
 # Notes
 - Format: `[progress_bar] symbol [index/total] spec (time) status`
-- Colors: green for success, red for errors, yellow for skipped
 - Time is displayed with one decimal place when available
 - **Cursor-style display**: In full-resolution mode (total ≤ threshold), only the current test position is filled for successes, while failures and skips persist at their positions. This creates a lighter, cursor-like visual where past successes are ephemeral.
 
@@ -166,12 +172,12 @@ Uses ANSI colors: green for success, red for errors, yellow for skipped.
 julia> using CTBase.TestRunner, IOBuffer
 
 julia> info = TestRunner.TestRunInfo(
-           :test_example, 
-           "/path/to/test.jl", 
-           :test_example, 
-           5, 10, 
-           :post_eval, 
-           nothing, 
+           :test_example,
+           "/path/to/test.jl",
+           :test_example,
+           5, 10,
+           :post_eval,
+           nothing,
            1.23
        );
 
@@ -189,27 +195,22 @@ function _format_progress_line(
     progress_bar_threshold::Int=_PROGRESS_BAR_THRESHOLD,
     show_progress_bar::Bool=true,
 )
-    # ANSI codes
-    reset = "\e[0m"
-    bold = "\e[1m"
-    dim = "\e[2m"
-    green = "\e[32m"
-    red = "\e[31m"
-    yellow = "\e[33m"
-    cyan = "\e[36m"
+    # Derive styled codes from active palette, respecting IO colour capability
+    fmt = CTBase.Core.get_format_codes(io)
+    reset  = fmt.reset
+    bold   = fmt.emphasis
+    dim    = fmt.muted
 
     bar_width = _bar_width(info.total, progress_bar_threshold)
     bar = _progress_bar(info.index, info.total; width=bar_width)
 
     severity = _severity(info.status)
+    color  = _color_for_severity(severity, io)
     if severity == 3
-        color = red
         symbol = "✗"
     elseif severity == 2
-        color = yellow
         symbol = "○"
     else
-        color = green
         symbol = "✓"
     end
 
@@ -221,16 +222,17 @@ function _format_progress_line(
         ""
     end
     status_str = if (info.status == :error || info.status == :test_failed)
-        " $(bold)$(red)FAILED$(reset)$(dim),"
+        err_color = _color_for_severity(3, io)
+        " $(bold)$(err_color)FAILED$(reset)$(dim),"
     else
         ""
     end
 
     function bracket_color_from(sev::Union{Int,Nothing})
-        sev === nothing && return green
-        sev <= 1 && return green
-        sev == 2 && return yellow
-        return red
+        sev === nothing && return _color_for_severity(1, io)
+        sev <= 1 && return _color_for_severity(1, io)
+        sev == 2 && return _color_for_severity(2, io)
+        return _color_for_severity(3, io)
     end
 
     has_history =
@@ -247,11 +249,11 @@ function _format_progress_line(
             elseif sev >= 2
                 # Failures and skips persist at their positions
                 glyph = _block_char_for_severity(sev)
-                push!(blocks, "$( _color_for_severity(sev) )$(glyph)$(reset)")
+                push!(blocks, "$(_color_for_severity(sev, io))$(glyph)$(reset)")
             elseif i == info.index
                 # Current test (success) is shown
                 glyph = _block_char_for_severity(sev)
-                push!(blocks, "$( _color_for_severity(sev) )$(glyph)$(reset)")
+                push!(blocks, "$(_color_for_severity(sev, io))$(glyph)$(reset)")
             else
                 # Past successes are cleared (ephemeral cursor style)
                 push!(blocks, "$(dim)░$(reset)")
@@ -277,7 +279,7 @@ function _format_progress_line(
         )
     end
     print(io, "$(bold)$(color)$(symbol)$(reset) ")
-    print(io, "$(cyan)$(idx_str)$(reset) ")
+    print(io, "$(fmt.type)$(idx_str)$(reset) ")
     print(io, "$(bold)$(info.spec)$(reset)")
     println(io, "$(status_str)$(time_str)")
     return nothing
@@ -310,12 +312,12 @@ julia> using CTBase.TestRunner
 julia> cb = TestRunner._make_default_on_test_done(stdout, 10)
 
 julia> info = TestRunner.TestRunInfo(
-           :test_example, 
-           "/path/to/test.jl", 
-           :test_example, 
-           5, 10, 
-           :post_eval, 
-           nothing, 
+           :test_example,
+           "/path/to/test.jl",
+           :test_example,
+           5, 10,
+           :post_eval,
+           nothing,
            1.23
        );
 
