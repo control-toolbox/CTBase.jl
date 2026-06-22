@@ -5,7 +5,7 @@ For instructions on how to customize this README.template.md and use the central
 please see the user guide: https://github.com/orgs/control-toolbox/discussions/67
 -->
 
-The CTBase.jl package is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
+CTBase.jl is the **foundational layer** of the [control-toolbox ecosystem](https://github.com/control-toolbox): it provides the shared types, exception infrastructure, extensions scaffolding, and development utilities that all other packages in the ecosystem build on.
 
 | **Category** | **Badge** |
 |-----------------------|-----------|
