@@ -69,9 +69,17 @@ with_api_reference(src_dir) do api_pages
         ),
         pages=[
             "Getting Started" => "getting-started.md",
-            "User Guides" => [
+            "Core Concepts" => [
                 "Descriptions" => joinpath("guide", "descriptions.md"),
                 "Exceptions" => joinpath("guide", "exceptions.md"),
+            ],
+            "Strategies & Options" => [
+                "Options System" => joinpath("guide", "options-system.md"),
+                "Implementing a Strategy" => joinpath("guide", "implementing-a-strategy.md"),
+                "Strategy Parameters" => joinpath("guide", "strategy-parameters.md"),
+                "Orchestration & Routing" => joinpath("guide", "orchestration-and-routing.md"),
+            ],
+            "Developer Tools" => [
                 "Test Runner" => joinpath("guide", "test-runner.md"),
                 "Coverage" => joinpath("guide", "coverage.md"),
                 "API Documentation" => joinpath("guide", "api-documentation.md"),

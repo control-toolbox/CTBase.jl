@@ -281,10 +281,16 @@ function _print_pipe_field(io, label::String, value, max_len::Int, color::Symbol
             end
         end
     else
-        # Single value
+        # String value — split on newlines so continuation lines keep the │ prefix
+        lines = split(string(value), '\n')
         print(io, Core._dim("│", io), "  ", Core._bold(rpad(label, max_len), io), "  ")
-        _print_colored(io, string(value), color)
+        _print_colored(io, lines[1], color)
         println(io)
+        for line in lines[2:end]
+            print(io, Core._dim("│", io), "  ", " "^max_len, "  ")
+            _print_colored(io, line, color)
+            println(io)
+        end
     end
 end
 
@@ -340,8 +346,10 @@ function _format_user_friendly_error(io::IO, e::CTException)
     # Blank pipe separator
     println(io, Core._dim("│", io))
 
-    # Message
-    println(io, Core._dim("│", io), "  ", Core._bold(e.msg, io))
+    # Message (each line gets its own │ prefix)
+    for line in split(rstrip(e.msg), '\n')
+        println(io, Core._dim("│", io), "  ", Core._bold(line, io))
+    end
 
     # Build field pairs
     primary_pairs = _build_primary_pairs(e)
