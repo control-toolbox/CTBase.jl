@@ -218,35 +218,6 @@ end
 """
     $(TYPEDSIGNATURES)
 
-Build a stable, unique HTML anchor ID for a section heading.
-
-The anchor is formed as `module-key` with dots and non-alphanumeric characters
-replaced by hyphens, so it never collides with the symbol's own `@docs` anchor
-(which is typically just `key`).
-
-# Arguments
-- `mod::Module`: the module containing the symbol.
-- `key::Symbol`: the symbol name.
-
-# Returns
-- `String`: HTML anchor ID.
-
-# Example
-
-```julia-repl
-julia> DocumenterReference._heading_anchor(CTBase.Core, :DEFAULT_PALETTE)
-"CTBase-Core-DEFAULT_PALETTE"
-```
-
-"""
-function _heading_anchor(mod::Module, key::Symbol)
-    normalize(s) = strip(replace(s, r"[^A-Za-z0-9_]+" => "-"), '-'::Char)
-    return "$(normalize(string(mod)))-$(normalize(string(key)))"
-end
-
-"""
-    $(TYPEDSIGNATURES)
-
 Determine the effective source files for filtering symbols.
 Priority: module-specific files > global source_files > empty (no filtering).
 
