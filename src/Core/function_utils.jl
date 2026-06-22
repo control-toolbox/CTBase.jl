@@ -30,3 +30,38 @@ function to_out_of_place(f!, n; T=Float64)
     end
     return isnothing(f!) ? nothing : f
 end
+
+"""
+    make_coerce(x) -> coerce_fn
+
+Return a coercion function matching the shape of `x`.
+
+For scalars (`Number`), returns `only`, which extracts the single element from a
+1-element vector. For arrays (`AbstractVector`, `AbstractMatrix`), returns
+`identity` (a no-op). This is used to map a uniform vector-valued result back to
+the natural shape of the original input.
+
+# Arguments
+- `x`: A value whose type determines the coercion strategy.
+
+# Returns
+- A coercion function with signature `(y) -> coerced_y`.
+
+# Example
+```julia-repl
+julia> coerce_scalar = make_coerce(1.0);
+
+julia> coerce_scalar([5.0])
+5.0
+
+julia> coerce_vector = make_coerce([1.0, 2.0]);
+
+julia> coerce_vector([3.0, 4.0])
+2-element Vector{Float64}:
+ 3.0
+ 4.0
+```
+"""
+make_coerce(::Number) = only
+make_coerce(::AbstractVector) = identity
+make_coerce(::AbstractMatrix) = identity

@@ -12,6 +12,7 @@ import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 include("types.jl")
 include("tags.jl")
+include("caches.jl")
 include("default.jl")
 
 # Private utilities
@@ -24,7 +25,8 @@ include("palette.jl")
 include("display.jl")
 
 # Export public API
-export ctNumber, matrix2vec, to_out_of_place, @ensure
+export ctNumber, matrix2vec, to_out_of_place, make_coerce, @ensure
+export AbstractTag, AbstractCache
 export Style, Palette
 export DEFAULT_PALETTE, MONOCHROME_PALETTE, HIGH_CONTRAST_PALETTE
 export current_palette, set_palette!, set_color!, reset_palette!, show_palette
