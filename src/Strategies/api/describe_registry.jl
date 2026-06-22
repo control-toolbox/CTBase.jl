@@ -541,10 +541,7 @@ function _describe_single_metadata(io::IO, fmt, strategy_type::Type)
                 fmt.label,
                 "options: ",
                 fmt.reset,
-                "\033[31m",  # Red color
-                "requires extension ",
-                ext_names,
-                "\033[0m",  # Reset color
+                Core._red("requires extension $(ext_names)", io),
             )
             return nothing
         else
@@ -621,10 +618,7 @@ function _describe_multi_param_metadata(io::IO, fmt, strategy_types::Vector, par
             fmt.label,
             "options: ",
             fmt.reset,
-            "\033[31m",  # Red color
-            "requires extension ",
-            ext_names,
-            "\033[0m",  # Reset color
+            Core._red("requires extension $(ext_names)", io),
         )
         return nothing
     end
@@ -681,10 +675,7 @@ function _describe_multi_param_metadata(io::IO, fmt, strategy_types::Vector, par
                 nameof(P),
                 fmt.reset,
                 ": ",
-                "\033[31m",  # Red color
-                "requires extension ",
-                ext_names,
-                "\033[0m",  # Reset color
+                Core._red("requires extension $(ext_names)", io),
             )
             if !is_last_param || !isempty(common_options)
                 println(io, "│")

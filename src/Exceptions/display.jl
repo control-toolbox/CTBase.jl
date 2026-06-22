@@ -309,9 +309,9 @@ Print colored text based on a color symbol.
 """
 function _print_colored(io, text, color::Symbol)
     if color == :yellow
-        print(io, Core._yellow(text, io))
+        print(io, Core._yellow(text, io))  # warning role
     elseif color == :green
-        print(io, Core._green(text, io))
+        print(io, Core._green(text, io))   # success role
     else
         print(io, text)
     end

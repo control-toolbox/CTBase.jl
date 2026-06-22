@@ -53,16 +53,22 @@ function test_core_display()
     end
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "get_format_codes" begin
+        all_fields = (
+            :bold, :dim, :reset,
+            :name, :type, :value, :keyword, :count, :label,
+            :emphasis, :muted, :error, :warning, :success,
+        )
+
         Test.@testset "no color — all fields are empty strings" begin
             fmt = Core.get_format_codes(io_plain)
-            for field in (:bold, :reset, :name, :type, :value, :keyword, :count, :label)
+            for field in all_fields
                 Test.@test fmt[field] == ""
             end
         end
 
         Test.@testset "with color — all fields are non-empty" begin
             fmt = Core.get_format_codes(io_color)
-            for field in (:bold, :reset, :name, :type, :value, :keyword, :count, :label)
+            for field in all_fields
                 Test.@test fmt[field] != ""
             end
         end
@@ -70,14 +76,15 @@ function test_core_display()
         Test.@testset "returns a NamedTuple with expected fields" begin
             fmt = Core.get_format_codes(io_plain)
             Test.@test fmt isa NamedTuple
-            Test.@test haskey(fmt, :bold)
-            Test.@test haskey(fmt, :reset)
-            Test.@test haskey(fmt, :name)
-            Test.@test haskey(fmt, :type)
-            Test.@test haskey(fmt, :value)
-            Test.@test haskey(fmt, :keyword)
-            Test.@test haskey(fmt, :count)
-            Test.@test haskey(fmt, :label)
+            for field in all_fields
+                Test.@test haskey(fmt, field)
+            end
+        end
+
+        Test.@testset "legacy aliases match semantic fields" begin
+            fmt = Core.get_format_codes(io_color)
+            Test.@test fmt.bold == fmt.emphasis
+            Test.@test fmt.dim  == fmt.muted
         end
     end
 

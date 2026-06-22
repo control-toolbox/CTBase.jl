@@ -1,131 +1,149 @@
 """
-    _apply_ansi(s, code, io::IO)
+$(TYPEDSIGNATURES)
 
-Apply ANSI escape codes to a string if color is enabled in the IO context.
+Apply a [`CTBase.Core.Style`](@ref) to string `s`, respecting the IO colour capability.
 
-# Arguments
-- `s::AbstractString`: The string to style.
-- `code::String`: The ANSI code (e.g., `"2"` for dim, `"1"` for bold, `"1;31"` for red).
-- `io::IO`: Output stream to check for color support.
+Returns `s` wrapped in ANSI escape codes when `get(io, :color, false)` is `true`
+and `st.code` is non-empty; returns the plain string otherwise.
 
-# Returns
-- `String`: The string wrapped in ANSI escape codes if `get(io, :color, false)` is true,
-  otherwise the plain string.
+See also: [`CTBase.Core._apply_ansi`](@ref), [`CTBase.Core.get_format_codes`](@ref)
 """
-_apply_ansi(s, code, io::IO) = get(io, :color, false) ? "\033[$(code)m$(s)\033[0m" : s
+function _style(st::Style, s, io::IO)
+    get(io, :color, false) && !isempty(st.code) || return string(s)
+    return "\033[$(st.code)m$(s)\033[0m"
+end
 
 """
 $(TYPEDSIGNATURES)
 
-Apply dimmed (faint) ANSI styling to a string.
+Apply a raw ANSI numeric code string to `s`, respecting the IO colour capability.
 
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in dim ANSI escape codes if color is enabled.
+Prefer [`CTBase.Core._style`](@ref) with a [`CTBase.Core.Style`](@ref) from the
+active palette over calling this function directly.
 """
-_dim(s, io::IO) = _apply_ansi(s, "2", io)
+_apply_ansi(s, code, io::IO) = get(io, :color, false) ? "\033[$(code)m$(s)\033[0m" : string(s)
 
-"""
-$(TYPEDSIGNATURES)
-
-Apply bold ANSI styling to a string.
-
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in bold ANSI escape codes if color is enabled.
-"""
-_bold(s, io::IO) = _apply_ansi(s, "1", io)
+# ---------------------------------------------------------------------------
+# Named helpers — backed by the active palette roles
+# ---------------------------------------------------------------------------
 
 """
 $(TYPEDSIGNATURES)
 
-Apply red ANSI styling to a string.
+Apply the `muted` role style from the active palette.
 
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in red ANSI escape codes if color is enabled.
+See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
 """
-_red(s, io::IO) = _apply_ansi(s, "1;31", io)
+_dim(s, io::IO) = _style(current_palette().muted, s, io)
 
 """
 $(TYPEDSIGNATURES)
 
-Apply yellow ANSI styling to a string.
+Apply the `emphasis` role style from the active palette.
 
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
-
-# Returns
-- `String`: The string wrapped in yellow ANSI escape codes if color is enabled.
+See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
 """
-_yellow(s, io::IO) = _apply_ansi(s, "33", io)
+_bold(s, io::IO) = _style(current_palette().emphasis, s, io)
 
 """
 $(TYPEDSIGNATURES)
 
-Apply green ANSI styling to a string.
+Apply the `error` role style from the active palette (defaults to red).
 
-# Arguments
-- `s::AbstractString`: The string to style.
-- `io::IO`: Output stream to check for color support.
+See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+"""
+_red(s, io::IO) = _style(current_palette().error, s, io)
+
+"""
+$(TYPEDSIGNATURES)
+
+Apply the `warning` role style from the active palette (defaults to yellow).
+
+See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+"""
+_yellow(s, io::IO) = _style(current_palette().warning, s, io)
+
+"""
+$(TYPEDSIGNATURES)
+
+Apply the `success` role style from the active palette (defaults to green).
+
+See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+"""
+_green(s, io::IO) = _style(current_palette().success, s, io)
+
+# ---------------------------------------------------------------------------
+# Structured format codes NamedTuple
+# ---------------------------------------------------------------------------
+
+"""
+$(TYPEDSIGNATURES)
+
+Return ANSI opening codes for every semantic role in the active
+[`CTBase.Core.Palette`](@ref), respecting the colour capability of `io`.
+
+Each field is an *opening* escape sequence; callers must close styling with
+the `reset` field. Returns empty strings for all codes when `get(io, :color,
+false)` is `false`, or when the active palette has an empty code for that role
+(e.g. [`CTBase.Core.MONOCHROME_PALETTE`](@ref)).
 
 # Returns
-- `String`: The string wrapped in green ANSI escape codes if color is enabled.
-"""
-_green(s, io::IO) = _apply_ansi(s, "32", io)
 
-"""
-    get_format_codes(io::IO) -> NamedTuple
+A `NamedTuple` with the following fields:
 
-Get ANSI formatting codes based on terminal color support.
+| Field | Default colour | Semantic role |
+| --- | --- | --- |
+| `name` | bold blue | identifiers, type names, option keys |
+| `type` | cyan | type annotations, hierarchy entries |
+| `value` | green | data values |
+| `keyword` | yellow | Julia symbols, aliases |
+| `count` | magenta | numeric counts |
+| `label` | gray | secondary labels, metadata tags |
+| `emphasis` / `bold` | bold | message text, function names |
+| `muted` / `dim` | dim | structural chars, time suffix |
+| `error` | red | failures, missing extensions |
+| `warning` | yellow | notable attention values |
+| `success` | green | positive hints, expected values |
+| `reset` | — | resets all styling |
 
-Returns a NamedTuple with formatting codes for consistent display across all show() methods.
-
-# Fields
-- `bold`: Bold text
-- `reset`: Reset all formatting
-- `name`: Bold blue for names (options, types, etc.)
-- `type`: Cyan for types
-- `value`: Green for values
-- `keyword`: Yellow for keywords/aliases
-- `count`: Magenta for counts
-- `label`: Gray for labels/descriptions
+`bold` and `dim` are legacy aliases for `emphasis` and `muted`; prefer the
+semantic names in new code.
 
 # Example
-```julia
-fmt = get_format_codes(io)
-print(io, fmt.name, "option_name", fmt.reset, "::", fmt.type, "Int", fmt.reset)
+
+```julia-repl
+julia> using CTBase
+
+julia> io = IOContext(stdout, :color => true);
+
+julia> fmt = CTBase.Core.get_format_codes(io);
+
+julia> print(io, fmt.name, "option_name", fmt.reset, "::", fmt.type, "Int", fmt.reset)
+option_name::Int
 ```
 
-# Notes
-- Automatically detects color support via `get(io, :color, false)`
-- Returns empty strings for all codes if colors are not supported
-- Ensures consistent color scheme across the entire package
+See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.Palette`](@ref)
 """
 function get_format_codes(io::IO)
-    supports_color = get(io, :color, false)
-
+    p = current_palette()
+    open(st) = get(io, :color, false) && !isempty(st.code) ? "\033[$(st.code)m" : ""
+    rst = get(io, :color, false) ? "\033[0m" : ""
     return (
-        # Text formatting
-        bold=supports_color ? "\033[1m" : "",
-        reset=supports_color ? "\033[0m" : "",
-
-        # Colors for different semantic elements
-        name=supports_color ? "\033[1m\033[34m" : "",      # Bold blue for names
-        type=supports_color ? "\033[36m" : "",             # Cyan for types
-        value=supports_color ? "\033[32m" : "",            # Green for values
-        keyword=supports_color ? "\033[33m" : "",          # Yellow for keywords/aliases
-        count=supports_color ? "\033[35m" : "",            # Magenta for counts
-        label=supports_color ? "\033[90m" : "",            # Gray for labels
+        # Semantic roles
+        name     = open(p.name),
+        type     = open(p.type),
+        value    = open(p.value),
+        keyword  = open(p.keyword),
+        count    = open(p.count),
+        label    = open(p.label),
+        emphasis = open(p.emphasis),
+        muted    = open(p.muted),
+        error    = open(p.error),
+        warning  = open(p.warning),
+        success  = open(p.success),
+        reset    = rst,
+        # Legacy aliases
+        bold     = open(p.emphasis),
+        dim      = open(p.muted),
     )
 end
