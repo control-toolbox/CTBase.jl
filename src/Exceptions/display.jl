@@ -281,10 +281,16 @@ function _print_pipe_field(io, label::String, value, max_len::Int, color::Symbol
             end
         end
     else
-        # Single value
+        # String value — split on newlines so continuation lines keep the │ prefix
+        lines = split(string(value), '\n')
         print(io, Core._dim("│", io), "  ", Core._bold(rpad(label, max_len), io), "  ")
-        _print_colored(io, string(value), color)
+        _print_colored(io, lines[1], color)
         println(io)
+        for line in lines[2:end]
+            print(io, Core._dim("│", io), "  ", " "^max_len, "  ")
+            _print_colored(io, line, color)
+            println(io)
+        end
     end
 end
 

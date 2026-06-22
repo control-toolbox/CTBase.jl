@@ -412,13 +412,18 @@ function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractSt
     strategy_id = id(T)
     opts = options(strategy)
 
+    # Build display name: include parameter type when present (e.g. FakeOptimizer{CPU})
+    param = get_parameter_type(T)
+    display_name =
+        param === nothing ? string(type_name) : string(type_name, "{", nameof(param), "}")
+
     # Header with ID on first line
     println(
         io,
         fmt.name,
-        type_name,
+        display_name,
         fmt.reset,
-        " (instance, id: ",
+        " (instance, id=",
         fmt.keyword,
         ":",
         strategy_id,
@@ -480,7 +485,11 @@ function Base.show(io::IO, strategy::T) where {T<:AbstractStrategy}
     type_name = nameof(T)
     opts = options(strategy)
 
-    print(io, fmt.name, type_name, fmt.reset, "(")
+    param = get_parameter_type(T)
+    display_name =
+        param === nothing ? string(type_name) : string(type_name, "{", nameof(param), "}")
+
+    print(io, fmt.name, display_name, fmt.reset, "(")
     print(
         io,
         join(
@@ -602,6 +611,10 @@ function describe(io::IO, ::Type{T}) where {T<:AbstractStrategy}
     println(io, "└─ metadata: ", n_opts, " option", n_opts == 1 ? "" : "s", " defined")
     items = collect(pairs(meta))
     for (i, (key, def)) in enumerate(items)
+        is_first = i == 1
+        if is_first
+            println(io, "   │  ")
+        end
         is_last = i == length(items)
         prefix = is_last ? "   └─ " : "   ├─ "
         cont = is_last ? "      " : "   │  "

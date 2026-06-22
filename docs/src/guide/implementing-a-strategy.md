@@ -1,8 +1,8 @@
+# Implementing a Strategy
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Implementing a Strategy
 
 This guide walks you through implementing a complete strategy family using the `AbstractStrategy` contract. We use **Collocation** and **DirectShooting** discretizers as concrete examples.
 
@@ -21,7 +21,7 @@ Every strategy implements a **two-level contract** that separates static metadat
 
 ```text
 Type-Level (no instantiation needed)
-├─ id(::Type{<:S})        → Symbol           (routing, registry lookup)
+├─ id(::Type{<:S})        → Symbol            (routing, registry lookup)
 └─ metadata(::Type{<:S})  → StrategyMetadata  (option specs + validation rules)
             │
             ▼  routing, validation
@@ -48,6 +48,7 @@ nothing # hide
 ```
 
 This type enables:
+
 - Grouping discretizers in a `StrategyRegistry` by family
 - Dispatching on the family in option routing
 - Adding methods common to all discretizers
@@ -56,7 +57,7 @@ This type enables:
 
 ### Step 1 — Define the struct
 
-A strategy struct needs exactly one field: `options::Strategies.StrategyOptions`.
+A strategy struct needs a field: `options::Strategies.StrategyOptions`.
 
 ```@example strategy
 struct Collocation <: AbstractOptimalControlDiscretizer
@@ -110,7 +111,7 @@ nothing # hide
 
 Let's verify the metadata:
 
-```@repl strategy
+```@example strategy
 Strategies.metadata(Collocation)
 ```
 
@@ -137,30 +138,29 @@ nothing # hide
 
 Now let's create instances and inspect them:
 
-```@repl strategy
+```@example strategy
 c = Collocation()
 ```
 
-```@repl strategy
+```@example strategy
 c = Collocation(grid_size = 500, scheme = :trapeze)
 ```
 
-### Step 7 — Verify the contract
-
-Use `validate_strategy_contract` to check that all contract methods are correctly implemented:
-
-```@repl strategy
-Strategies.validate_strategy_contract(Collocation)
+```@example strategy
+describe(Collocation)
 ```
 
-### Step 8 — Access options
+### Step 7 — Access options
 
 The `StrategyOptions` object tracks both values and their provenance. You can access options in two ways:
 
 **Via the `options` getter:**
 
-```@repl strategy
+```@example strategy
 c = Collocation(grid_size = 100)
+```
+
+```@example strategy
 Strategies.options(c)
 ```
 
@@ -238,15 +238,11 @@ nothing # hide
 !!! note "Same option name, different definitions"
     Both `Collocation` and `DirectShooting` define a `:grid_size` option, but with different defaults (250 vs 100) and descriptions. Each strategy has its own independent `OptionDefinition` set.
 
-```@repl strategy
-Strategies.validate_strategy_contract(DirectShooting)
-```
-
-```@repl strategy
+```@example strategy
 DirectShooting()
 ```
 
-```@repl strategy
+```@example strategy
 DirectShooting(grid_size = 50)
 ```
 
@@ -254,7 +250,7 @@ DirectShooting(grid_size = 50)
 
 A `StrategyRegistry` maps abstract family types to their concrete strategies. This enables lookup by symbol and automated construction.
 
-```@repl strategy
+```@example strategy
 registry = Strategies.create_registry(
     AbstractOptimalControlDiscretizer => (Collocation, DirectShooting),
 )
@@ -272,11 +268,11 @@ Strategies.type_from_id(:collocation, AbstractOptimalControlDiscretizer, registr
 
 Build a strategy from the registry:
 
-```@repl strategy
+```@example strategy
 Strategies.build_strategy(:collocation, AbstractOptimalControlDiscretizer, registry; grid_size = 300)
 ```
 
-```@repl strategy
+```@example strategy
 Strategies.build_strategy(:direct_shooting, AbstractOptimalControlDiscretizer, registry; grid_size = 50)
 ```
 
@@ -291,11 +287,9 @@ Strategies.extract_id_from_method(method, AbstractOptimalControlDiscretizer, reg
 
 Build a strategy directly from a method tuple:
 
-```@repl strategy
-Strategies.build_strategy_from_method(
-    method, AbstractOptimalControlDiscretizer, registry;
-    grid_size = 500, scheme = :trapeze,
-)
+```@example strategy
+id = Strategies.extract_id_from_method(method, AbstractOptimalControlDiscretizer, registry)
+Strategies.build_strategy(id, AbstractOptimalControlDiscretizer, registry; grid_size = 500, scheme = :trapeze)
 ```
 
 See [Orchestration & Routing](@ref) for the full multi-strategy routing system.
@@ -334,11 +328,49 @@ Strategies.option_description(Collocation, :grid_size)
 
 Use `mode = :permissive` to accept backend-specific options that are not declared in the metadata:
 
-```@repl strategy
+```@example strategy
 Collocation(grid_size = 500, custom_backend_param = 42; mode = :permissive)
 ```
 
 Unknown options are stored with `:user` source but bypass type validation. Known options are still fully validated.
+
+### Bypass Validation for Specific Options
+
+Use `bypass(val)` (or its alias `force(val)`) to skip validation for a **single option value** while keeping strict mode for everything else.
+
+**Unknown option** — accepted silently, no warning:
+
+```@example strategy
+Collocation(grid_size = 500, custom_backend_param = bypass(42))
+```
+
+**Known option with wrong type** — normally rejected, accepted with `bypass`:
+
+```@repl strategy
+try # hide
+Collocation(grid_size = "oops")   # type error: grid_size expects Int
+catch e; showerror(IOContext(stdout, :color => false), e) end # hide
+```
+
+```@example strategy
+Collocation(grid_size = bypass("oops"))   # no error: validation skipped
+```
+
+This is more surgical than `mode = :permissive`:
+
+| Approach                       | Scope       | Unknown option names  | Type validation             |
+|--------------------------------|-------------|-----------------------|-----------------------------|
+| `mode = :permissive`           | all options | accepted with warning | skipped for unknowns        |
+| `bypass(val)` / `force(val)`   | one value   | accepted silently     | skipped for that value only |
+
+`force` is an alias for `bypass` — choose the name that fits your mental model:
+
+```julia
+Collocation(grid_size = force("oops"))   # same as bypass("oops")
+```
+
+!!! warning "Use with care"
+    Bypassed values are not type-checked, even for declared options. A wrong type or invalid value will only surface as a backend-level error.
 
 ### Option Aliases
 

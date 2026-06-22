@@ -1,20 +1,25 @@
+# Orchestration and Routing
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Orchestration and Routing
 
 This guide explains how the Orchestration module routes user-provided keyword arguments to the correct strategy in a multi-strategy pipeline. It covers the method tuple concept, automatic routing, disambiguation syntax, and the helper functions that power the system.
 
 !!! tip "Prerequisites"
     Read [Implementing a Strategy](@ref) first. Orchestration builds on top of the strategy metadata system.
 
-We first set up three fake strategies (discretizer, modeler, solver) with a shared `backend` option to demonstrate routing and disambiguation:
-
-```@example routing
+```@setup routing
 using CTBase
 using CTBase.Options: OptionDefinition
+using CTBase.Strategies: route_to
+using CTBase.Orchestration: resolve_method, route_all_options
+using CTBase.Orchestration: extract_strategy_ids, build_strategy_to_family_map, build_option_ownership_map
+```
 
+We define three fake strategies — a discretizer, a modeler, and a solver — with a shared `backend` option to demonstrate routing and disambiguation:
+
+```@example routing
 # --- Fake discretizer family ---
 abstract type AbstractFakeDiscretizer <: CTBase.Strategies.AbstractStrategy end
 struct FakeCollocation <: AbstractFakeDiscretizer; options::CTBase.Strategies.StrategyOptions; end
@@ -57,6 +62,7 @@ A **method tuple** identifies which concrete strategy to use for each role in th
 
 ```@example routing
 method = (:collocation, :adnlp, :ipopt)
+nothing # hide
 ```
 
 Each symbol is a strategy `id` (returned by `Strategies.id(::Type)`). The **families** mapping associates each role with its abstract type:
@@ -67,13 +73,6 @@ families = (
     modeler     = AbstractFakeModeler,
     solver      = AbstractFakeSolver,
 )
-nothing # hide
-```
-
-```@example routing
-using CTBase.Orchestration: resolve_method
-
-resolved = resolve_method(method, families, registry)
 nothing # hide
 ```
 
@@ -126,44 +125,95 @@ Build option ownership map
 
 When an option name appears in multiple strategies (e.g., `backend` is defined by both the modeler and the solver), the user must disambiguate using `route_to`:
 
+`route_to` accepts two equivalent syntaxes — keyword and positional — choose based on preference:
+
+| Syntax      | Example                      |
+|-------------|------------------------------|
+| Keyword     | `route_to(adnlp = :sparse)`  |
+| Positional  | `route_to(:adnlp, :sparse)`  |
+
 ### Single strategy
 
 ```julia
+# keyword syntax
 solve(ocp, :collocation, :adnlp, :ipopt;
-    backend = route_to(adnlp = :sparse),  # route to modeler only
+    backend = route_to(adnlp = :sparse),
+)
+
+# positional syntax (equivalent)
+solve(ocp, :collocation, :adnlp, :ipopt;
+    backend = route_to(:adnlp, :sparse),
 )
 ```
 
 ### Multiple strategies
 
 ```julia
+# keyword syntax
 solve(ocp, :collocation, :adnlp, :ipopt;
-    backend = route_to(adnlp = :sparse, ipopt = :cpu),  # route to both
+    backend = route_to(adnlp = :sparse, ipopt = :cpu),
+)
+
+# positional syntax (equivalent)
+solve(ocp, :collocation, :adnlp, :ipopt;
+    backend = route_to(:adnlp, :sparse, :ipopt, :cpu),
 )
 ```
 
 ### How `route_to` works
 
-`route_to` creates a `RoutedOption` object that carries `(strategy_id => value)` pairs. The `extract_strategy_ids` function detects this type and returns the routing information:
+`route_to` creates a `RoutedOption` object that carries `(strategy_id => value)` pairs:
 
 ```@example routing
-using CTBase.Strategies: route_to
-using CTBase.Orchestration: extract_strategy_ids
-
 opt = route_to(ipopt = 100, adnlp = 50)
 ```
 
+The orchestration layer uses `extract_strategy_ids` to unpack this object during routing — see [Helper Functions](@ref) below.
+
+## Helper Functions
+
+The helper functions below are used internally by `route_all_options`. They operate on a `ResolvedMethod` — a precomputed view of the method tuple. In normal usage you do not need to call them directly; they are exposed for advanced use cases (custom routing logic, introspection, testing).
+
+To use them, first call `resolve_method`:
+
 ```@example routing
-extract_strategy_ids(opt, resolved)
+resolved = resolve_method(method, families, registry)
+nothing # hide
 ```
 
-No disambiguation detected for plain values:
+### `build_strategy_to_family_map`
+
+Maps each strategy ID in the method to its family name:
 
 ```@example routing
+build_strategy_to_family_map(resolved, families, registry)
+```
+
+### `build_option_ownership_map`
+
+Scans all strategy metadata and maps each option name to the set of families that define it:
+
+```@example routing
+build_option_ownership_map(resolved, families, registry)
+```
+
+Note that `:backend` is owned by both `:modeler` and `:solver` — it is ambiguous and requires disambiguation.
+
+### `extract_strategy_ids`
+
+Unpacks a `RoutedOption` into a vector of `(value, strategy_id)` pairs:
+
+```@example routing
+extract_strategy_ids(route_to(ipopt = 100, adnlp = 50), resolved)
+```
+
+For plain (non-routed) values, no disambiguation is detected — the function returns `nothing`:
+
+```@repl routing
 extract_strategy_ids(:plain_value, resolved)
 ```
 
-Invalid strategy ID in `route_to`:
+Passing an unknown strategy ID throws an error:
 
 ```@repl routing
 try # hide
@@ -173,56 +223,11 @@ showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
 ```
 
-## Strict and Permissive Modes
-
-The routing system supports two validation modes, consistent with strategy-level validation:
-
-| Mode | Unknown option | Ambiguous option |
-|------|---------------|-----------------|
-| `:strict` (default) | Error with available options listed | Error with disambiguation syntax |
-| `:permissive` | Warning, passed through if disambiguated | Error (always requires disambiguation) |
-
-## Helper Functions
-
-### `build_strategy_to_family_map`
-
-Maps each strategy ID in the method to its family name:
-
-```@example routing
-using CTBase.Orchestration: build_strategy_to_family_map
-build_strategy_to_family_map(resolved, families, registry)
-```
-
-### `build_option_ownership_map`
-
-Scans all strategy metadata and maps each option name to the set of families that define it:
-
-```@example routing
-using CTBase.Orchestration: build_option_ownership_map
-build_option_ownership_map(resolved, families, registry)
-```
-
-Note that `:backend` is owned by both `:modeler` and `:solver` — it is ambiguous and requires disambiguation.
-
-### `extract_strategy_ids`
-
-Detects disambiguation syntax and extracts `(value, strategy_id)` pairs:
-
-```@example routing
-extract_strategy_ids(route_to(ipopt = 1000), resolved)
-```
-
-```@example routing
-extract_strategy_ids(42, resolved)
-```
-
 ## Complete Example
 
 Auto-routing with disambiguation and action option extraction:
 
 ```@example routing
-using CTBase.Orchestration: route_all_options
-
 action_defs = [
     OptionDefinition(name = :display, type = Bool, default = true,
                      description = "Display solver progress"),

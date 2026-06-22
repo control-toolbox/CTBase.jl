@@ -24,10 +24,10 @@ function test_parameter_contract_helpers()
         # ====================================================================
 
         Test.@testset "Predicates and aliases" begin
-            Test.@test Strategies.is_parameter_type(Strategies.CPU)
-            Test.@test Strategies.is_parameter_type(Strategies.GPU)
-            Test.@test Strategies.is_parameter_type(FakeParamOk)
-            Test.@test !Strategies.is_parameter_type(Int)
+            Test.@test Strategies.is_a_parameter(Strategies.CPU)
+            Test.@test Strategies.is_a_parameter(Strategies.GPU)
+            Test.@test Strategies.is_a_parameter(FakeParamOk)
+            Test.@test !Strategies.is_a_parameter(Int)
 
             Test.@test Strategies.parameter_id(Strategies.CPU) == :cpu
             Test.@test Strategies.parameter_id(Strategies.GPU) == :gpu

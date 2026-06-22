@@ -78,16 +78,27 @@ need to distinguish parameter types from other types.
 
 # Example
 ```julia-repl
-julia> Strategies.is_parameter_type(Strategies.CPU)
+julia> Strategies.is_a_parameter(Strategies.CPU)
 true
 
-julia> Strategies.is_parameter_type(Int)
+julia> Strategies.is_a_parameter(Int)
 false
 ```
 
 See also: `AbstractStrategyParameter`, `validate_parameter_type`
 """
-is_parameter_type(::Type{T}) where {T} = T <: AbstractStrategyParameter
+is_a_parameter(::Type{T}) where {T} = T <: AbstractStrategyParameter
+
+"""
+$(TYPEDSIGNATURES)
+
+!!! warning "Deprecated"
+    `is_parameter_type` is deprecated; use `is_a_parameter` instead.
+"""
+function is_parameter_type(::Type{T}) where {T}
+    Base.depwarn("`is_parameter_type` is deprecated, use `is_a_parameter` instead.", :is_parameter_type)
+    return is_a_parameter(T)
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -144,7 +155,7 @@ Strategies.validate_parameter_type(MyParam)  # returns nothing
 # Notes
 - This function does not validate global ID uniqueness; that is handled by registry construction.
 
-See also: `id`, `parameter_id`, `is_parameter_type`
+See also: `id`, `parameter_id`, `is_a_parameter`
 """
 function validate_parameter_type(parameter_type::Type{<:AbstractStrategyParameter})
     if !isconcretetype(parameter_type)

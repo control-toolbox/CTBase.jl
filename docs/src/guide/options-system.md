@@ -179,7 +179,7 @@ println("Value: ", opt.value)
 println("Source: ", opt.source)
 ```
 
-## Accessing Option Properties (Getters)
+## Accessing Option Properties
 
 Use the getters in `Options` to access `OptionDefinition` and `OptionValue` fields instead of reading struct fields directly. This keeps encapsulation intact and aligns with Strategies overrides.
 
@@ -210,7 +210,7 @@ Options.is_default(opt2)
 Options.is_computed(opt2)
 ```
 
-## StrategyMetadata Overview (Strategies)
+## StrategyMetadata Overview
 
 `StrategyMetadata` is a collection of `OptionDefinition` objects that describes all configurable options for a strategy. It is returned by `Strategies.metadata(::Type)`.
 

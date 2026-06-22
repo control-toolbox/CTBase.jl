@@ -570,6 +570,10 @@ function _describe_single_metadata(io::IO, fmt, strategy_type::Type)
 
     items = collect(pairs(meta))
     for (i, (key, def)) in enumerate(items)
+        is_first = i == 1
+        if is_first
+            println(io, "   │  ")
+        end
         is_last = i == length(items)
         prefix = is_last ? "   └─ " : "   ├─ "
         cont = is_last ? "      " : "   │  "

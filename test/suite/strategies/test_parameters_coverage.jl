@@ -116,16 +116,16 @@ function test_parameters_coverage()
         end
 
         # ====================================================================
-        # UNIT TESTS - is_parameter_type() Predicate
+        # UNIT TESTS - is_a_parameter() Predicate
         # ====================================================================
 
-        Test.@testset "is_parameter_type() Predicate" begin
-            # Test is_parameter_type() predicate
-            Test.@test Strategies.is_parameter_type(Strategies.CPU) === true
-            Test.@test Strategies.is_parameter_type(Strategies.GPU) === true
-            Test.@test Strategies.is_parameter_type(Int) === false
-            Test.@test Strategies.is_parameter_type(String) === false
-            Test.@test Strategies.is_parameter_type(
+        Test.@testset "is_a_parameter() Predicate" begin
+            # Test is_a_parameter() predicate
+            Test.@test Strategies.is_a_parameter(Strategies.CPU) === true
+            Test.@test Strategies.is_a_parameter(Strategies.GPU) === true
+            Test.@test Strategies.is_a_parameter(Int) === false
+            Test.@test Strategies.is_a_parameter(String) === false
+            Test.@test Strategies.is_a_parameter(
                 Strategies.AbstractStrategyParameter
             ) === true
         end

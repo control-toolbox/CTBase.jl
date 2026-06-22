@@ -491,106 +491,96 @@ end
 function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
     fmt = Core.get_format_codes(io)
     n_families = length(registry.families)
-    println(
+    n_params = length(registry.parameters)
+    has_params = n_params > 0
+
+    # Header: "StrategyRegistry with N families and M parameters:"
+    print(
         io,
-        fmt.name,
-        "StrategyRegistry",
-        fmt.reset,
+        fmt.name, "StrategyRegistry", fmt.reset,
         " with ",
-        fmt.count,
-        n_families,
-        fmt.reset,
-        " ",
-        n_families == 1 ? "family" : "families",
-        ":",
+        fmt.count, n_families, fmt.reset, " ", n_families == 1 ? "family" : "families",
     )
+    if has_params
+        print(
+            io,
+            " and ",
+            fmt.count, n_params, fmt.reset, " ", n_params == 1 ? "parameter" : "parameters",
+        )
+    end
+    println(io, ":")
 
     items = collect(registry.families)
     for (i, (family, strategies)) in enumerate(items)
-        is_last_family = i == length(items)
+        # A family is "last" (uses └─) only when it is the last family AND no parameters follow
+        is_last_family = i == length(items) && !has_params
         family_prefix = is_last_family ? "└─ " : "├─ "
         println(io, family_prefix, fmt.name, nameof(family), fmt.reset)
 
-        # Group strategies by ID
+        # Group strategies by ID, preserving registration order
+        seen_ids = Symbol[]
         id_to_types = Dict{Symbol,Vector{Type}}()
         for T in strategies
             strategy_id = id(T)
             if !haskey(id_to_types, strategy_id)
                 id_to_types[strategy_id] = []
+                push!(seen_ids, strategy_id)
             end
             push!(id_to_types[strategy_id], T)
         end
 
-        # Display each unique strategy ID with its types and parameters
-        strategy_items = collect(id_to_types)
-        for (j, (strategy_id, types)) in enumerate(strategy_items)
-            is_last_strategy = j == length(strategy_items)
-
-            # Determine prefix based on family and strategy position
-            if is_last_family
-                strategy_prefix = is_last_strategy ? "   └─ " : "   ├─ "
-                cont_prefix = "      "
+        # Display each unique strategy ID on one line
+        for (j, strategy_id) in enumerate(seen_ids)
+            types = id_to_types[strategy_id]
+            is_last_strategy = j == length(seen_ids)
+            strategy_prefix = if is_last_family
+                is_last_strategy ? "   └─ " : "   ├─ "
             else
-                strategy_prefix = is_last_strategy ? "│  └─ " : "│  ├─ "
-                cont_prefix = is_last_strategy ? "│     " : "│  │  "
+                is_last_strategy ? "│  └─ " : "│  ├─ "
             end
 
-            # Display strategy ID
-            println(io, strategy_prefix, fmt.keyword, ":", strategy_id, fmt.reset)
+            # Base type name (without parameter)
+            base_name = string(nameof(first(types)))
 
-            # Display each type variant with its parameter
-            for (k, T) in enumerate(types)
-                is_last_type = k == length(types)
-                type_prefix = if is_last_family
-                    is_last_type ? "      └─ " : "      ├─ "
-                else
-                    if is_last_strategy
-                        is_last_type ? "│     └─ " : "│     ├─ "
-                    else
-                        is_last_type ? "│  │  └─ " : "│  │  ├─ "
-                    end
-                end
+            # Collect parameter types if any
+            params = filter(!isnothing, [get_parameter_type(T) for T in types])
 
-                # Get parameter if exists
-                param = get_parameter_type(T)
-                if param !== nothing
-                    println(
-                        io,
-                        type_prefix,
-                        fmt.type,
-                        T,
-                        fmt.reset,
-                        " (",
-                        fmt.keyword,
-                        nameof(param),
-                        fmt.reset,
-                        ")",
-                    )
-                else
-                    println(io, type_prefix, fmt.type, T, fmt.reset)
-                end
+            if isempty(params)
+                println(
+                    io,
+                    strategy_prefix,
+                    fmt.type, base_name, fmt.reset,
+                    " (", fmt.label, "id=", fmt.reset, fmt.keyword, ":", strategy_id, fmt.reset, ")",
+                )
+            else
+                # Show parameter routing keys as symbols: [:cpu, :gpu]
+                param_str = join(
+                    [fmt.keyword * ":" * string(id(P)) * fmt.reset for P in params], ", "
+                )
+                println(
+                    io,
+                    strategy_prefix,
+                    fmt.type, base_name, fmt.reset,
+                    " (", fmt.label, "id=", fmt.reset, fmt.keyword, ":", strategy_id, fmt.reset,
+                    ") [", param_str, "]",
+                )
             end
         end
     end
 
-    if !isempty(registry.parameters)
-        println(io)
-        println(io, fmt.label, "Parameters:", fmt.reset)
-        param_items = collect(registry.parameters)
-        for (p_id, p_type) in param_items
-            println(
-                io,
-                "  ",
-                fmt.keyword,
-                ":",
-                p_id,
-                fmt.reset,
-                " => ",
-                fmt.type,
-                p_type,
-                fmt.reset,
-            )
-        end
+    # Parameters section as last tree entry: "└─ parameters: :cpu → CPU, :gpu → GPU"
+    if has_params
+        param_items = sort(collect(registry.parameters); by=p -> string(p[1]))
+        param_str = join(
+            [
+                fmt.keyword * ":" * string(p_id) * fmt.reset *
+                " → " *
+                fmt.type * string(nameof(p_type)) * fmt.reset
+                for (p_id, p_type) in param_items
+            ],
+            ", ",
+        )
+        println(io, "└─ ", fmt.label, "parameters: ", fmt.reset, param_str)
     end
 end
 
