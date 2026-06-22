@@ -2,12 +2,38 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
-## Non-breaking note (0.20.x)
+## Non-breaking note (0.21.x)
 
 - **Module renamed**: `CTBase.Extensions` → `CTBase.DevTools`
   - The submodule previously named `Extensions` is now named `DevTools` to better reflect its purpose (internal developer tools, not a general extension system)
   - All tag types and functions are unchanged: `run_tests`, `postprocess_coverage`, `automatic_reference_documentation`, `AbstractTestRunnerTag`, `TestRunnerTag`, `AbstractDocumenterReferenceTag`, `DocumenterReferenceTag`, `AbstractCoveragePostprocessingTag`, `CoveragePostprocessingTag`
   - **Migration**: replace `CTBase.Extensions` with `CTBase.DevTools` and `import CTBase.Extensions` with `import CTBase.DevTools` at all call sites
+
+## Non-breaking note (0.21.0-beta)
+
+- **Configurable color palette system**: Added flexible color palette system for terminal output customization
+  - New `Style` and `Palette` types for ANSI color management in `Core/palette.jl`
+  - Three built-in palettes: `DEFAULT` (standard colors), `MONOCHROME` (grayscale), `HIGH_CONTRAST` (accessibility-focused)
+  - Runtime palette switching via `set_palette!(palette)` and `reset_palette!()`
+  - Fine-grained color customization with `set_color!(role, color)` for specific semantic roles
+  - Visual palette preview with `show_palette()` to display current palette configuration
+  - Updated all display paths (Core, Exceptions, TestRunner) to use active palette
+  - Comprehensive test coverage in `test/suite/core/test_palette.jl` (259 tests)
+  - Documentation guide in `docs/src/guide/color-system.md`
+  - No breaking changes; purely additive feature with backward-compatible defaults. No migration required.
+- **CTSolvers infrastructure**: Moved CTSolvers core infrastructure to CTBase
+  - Added `Strategies` module with options, orchestration, and strategy abstractions
+  - Provides foundational infrastructure for solver selection and configuration
+  - No breaking changes; purely internal addition. No migration required.
+- **Documentation structure refactor**: Moved `dev/` directory to control-toolbox/Handbook repository
+  - `AGENTS.md` and `CLAUDE.md` rewritten to redirect Developer Resources to Handbook
+  - Added `README.md` in `src/`, `ext/`, `test/`, `docs/` with package-specific context
+  - All READMEs point to control-toolbox Handbook for conventions
+  - No breaking changes; purely documentation reorganization. No migration required.
+- **README update**: Updated README with latest ABOUT.md, INSTALL.md, CONTRIBUTING.md and badges
+  - No breaking changes; purely documentation improvement. No migration required.
+- **Typos configuration**: Added `_typos.toml` for spell checking
+  - No breaking changes; purely development tooling addition. No migration required.
 
 ## Non-breaking note (0.20.0-beta)
 

@@ -5,6 +5,58 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0-beta] - 2026-06-22
+
+### ✨ New Features
+
+#### **Configurable Color Palette System**
+
+- **Flexible color management**: Added `Style` and `Palette` types for ANSI color management in `Core/palette.jl`
+- **Built-in palettes**: Three pre-configured palettes for different use cases
+  - `DEFAULT`: Standard colors for general use
+  - `MONOCHROME`: Grayscale palette for monochrome terminals
+  - `HIGH_CONTRAST`: Accessibility-focused palette with high contrast colors
+- **Runtime switching**: `set_palette!(palette)` to switch palettes at runtime, `reset_palette!()` to restore defaults
+- **Fine-grained customization**: `set_color!(role, color)` to customize specific semantic roles (success, error, warning, info, etc.)
+- **Visual preview**: `show_palette()` displays current palette configuration with color samples
+- **Integration**: Updated all display paths (Core, Exceptions, TestRunner) to use active palette
+- **Documentation**: Comprehensive guide in `docs/src/guide/color-system.md`
+
+#### **CTSolvers Infrastructure**
+
+- **Strategies module**: Moved CTSolvers core infrastructure to CTBase
+  - Options system for solver configuration
+  - Orchestration layer for solver selection
+  - Strategy abstractions for extensible solver implementations
+- **Foundational infrastructure**: Provides shared infrastructure for solver selection and configuration across control-toolbox packages
+
+### 📚 Documentation
+
+#### **Documentation Structure Refactor**
+
+- **Handbook migration**: Moved `dev/` directory to control-toolbox/Handbook repository
+  - Philosophy, rules, and planning templates now maintained in centralized Handbook
+- **Agent guides**: Rewrote `AGENTS.md` and `CLAUDE.md` to redirect Developer Resources to Handbook
+- **Directory READMEs**: Added `README.md` in `src/`, `ext/`, `test/`, `docs/` with package-specific context
+  - All READMEs point to control-toolbox Handbook for conventions
+- **README update**: Updated main README with latest ABOUT.md, INSTALL.md, CONTRIBUTING.md and badges
+
+### 🧪 Testing
+
+- **Color palette tests**: Added comprehensive test suite in `test/suite/core/test_palette.jl` (259 tests)
+  - Palette construction and validation
+  - Color role mapping and customization
+  - Runtime palette switching
+  - Visual preview generation
+  - Integration with display paths
+- **TestRunner progress tests**: Updated progress display tests for palette integration (25 new assertions)
+- **Core display tests**: Updated existing display tests for palette system (27 assertions modified)
+
+### 🧹 Maintenance
+
+- **Typos configuration**: Added `_typos.toml` for spell checking across the codebase
+- **Version bump**: Bumped to 0.21.0-beta for feature release.
+
 ## [0.20.0-beta] - 2026-06-15
 
 ### 🐛 Bug Fixes
