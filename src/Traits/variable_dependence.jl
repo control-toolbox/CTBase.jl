@@ -76,7 +76,7 @@ for better error messages.
 - `obj::Any`: The object to check.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always, indicating the object does not have the trait.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always, indicating the object does not have the trait.
 
 See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref).
 """
@@ -102,7 +102,7 @@ to return the specific trait value (`Fixed` or `NonFixed`).
 - `obj::Any`: The object to query.
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@extref): Always, indicating the method must be implemented.
+- [`CTBase.Exceptions.NotImplemented`](@ref): Always, indicating the method must be implemented.
 
 See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.has_variable_dependence_trait`](@ref).
 """
@@ -135,8 +135,8 @@ if `variable_dependence(obj)` is `NonFixed`.
 - `Bool`: true if the object depends on variable parameters.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support variable-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@extref): If `variable_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
 
 See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref).
 """
@@ -160,8 +160,8 @@ if `variable_dependence(obj)` is `Fixed`.
 - `Bool`: true if the object does not depend on variable parameters.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support variable-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@extref): If `variable_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
 
 See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref).
 """
@@ -185,8 +185,8 @@ if `variable_dependence(obj)` is `NonFixed`.
 - `Bool`: true if the object depends on variable parameters.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support variable-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@extref): If `variable_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
 
 See also: `is_variable`, [`CTBase.Traits.VariableDependence`](@ref).
 """

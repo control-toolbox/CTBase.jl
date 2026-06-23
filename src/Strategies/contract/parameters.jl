@@ -242,7 +242,7 @@ julia> description(GPU)
 "GPU-based computation"
 \`\`\`
 
-See also: [`id`](@ref), [`AbstractStrategyParameter`](@ref)
+See also: [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
 """
 function description(parameter_type::Type{<:AbstractStrategyParameter})
     throw(
@@ -297,7 +297,7 @@ CPU (parameter)
 └─ description: CPU-based computation
 \`\`\`
 
-See also: [`describe(::Symbol, ::StrategyRegistry)`](@ref), [`id`](@ref), [`description`](@ref)
+See also: [`CTBase.Strategies.describe(::Symbol, ::StrategyRegistry)`](@ref), [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.description`](@ref)
 """
 function describe(parameter_type::Type{T}) where {T<:AbstractStrategyParameter}
     describe(stdout, parameter_type)
@@ -308,7 +308,7 @@ $(TYPEDSIGNATURES)
 
 Display parameter information to a specific IO stream.
 
-See [`describe(::Type{<:AbstractStrategyParameter})`](@ref) for details.
+See [`CTBase.Strategies.describe(::Type{<:AbstractStrategyParameter})`](@ref) for details.
 """
 function describe(io::IO, parameter_type::Type{T}) where {T<:AbstractStrategyParameter}
     fmt = Core.get_format_codes(io)
