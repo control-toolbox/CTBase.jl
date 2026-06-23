@@ -301,7 +301,7 @@ julia> modeler[:maxiter]   # Alias - automatically resolved
 - All functionality (alias resolution, provenance tracking) is handled by StrategyOptions
 - Use `options(strategy)` for full access to OptionValue objects with source information
 
-See also: [`options`](@ref), [`Base.haskey`](@ref), [`Base.keys`](@ref), [`CTBase.Strategies.StrategyOptions`](@extref)
+See also: [`CTBase.Strategies.options`](@ref), [`Base.haskey`](@ref), [`Base.keys`](@ref), [`CTBase.Strategies.StrategyOptions`](@ref)
 """
 function Base.getindex(strategy::AbstractStrategy, key::Symbol)
     return options(strategy)[key]
@@ -340,7 +340,7 @@ false
 - This is syntactic sugar for `haskey(options(strategy), key)`
 - Aliases are automatically resolved to canonical names
 
-See also: [`options`](@ref), [`Base.getindex`](@ref), [`Base.keys`](@ref), [`CTBase.Strategies.StrategyOptions`](@extref)
+See also: [`CTBase.Strategies.options`](@ref), [`Base.getindex`](@ref), [`Base.keys`](@ref), [`CTBase.Strategies.StrategyOptions`](@ref)
 """
 function Base.haskey(strategy::AbstractStrategy, key::Symbol)
     return haskey(options(strategy), key)
@@ -372,7 +372,7 @@ julia> collect(keys(modeler))
 - This is syntactic sugar for `keys(options(strategy))`
 - Returns canonical names only (not aliases)
 
-See also: [`options`](@ref), [`Base.getindex`](@ref), [`Base.haskey`](@ref), [`CTBase.Strategies.StrategyOptions`](@extref)
+See also: [`CTBase.Strategies.options`](@ref), [`Base.getindex`](@ref), [`Base.haskey`](@ref), [`CTBase.Strategies.StrategyOptions`](@ref)
 """
 function Base.keys(strategy::AbstractStrategy)
     return keys(options(strategy))
@@ -566,7 +566,7 @@ description(::Type{<:Modelers.ADNLP}) =
     "NLP modeler using ADNLPModels.\\nSee: https://jso.dev/ADNLPModels.jl"
 ```
 
-See also: [`describe`](@ref), [`AbstractStrategy`](@ref)
+See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.AbstractStrategy`](@ref)
 """
 description(::Type{<:AbstractStrategy}) = nothing
 

@@ -395,7 +395,7 @@ julia> _strategy_type_name(Collocation)
 - This is the most common case, handling concrete instantiated types
 - For parameterized types, each parameter is formatted recursively
 
-See also: [`describe`](@ref), [`_describe_parameter_registry`](@ref)
+See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies._describe_parameter_registry`](@ref)
 """
 function _strategy_type_name(T::DataType)
     base_name = string(T.name.name)
@@ -427,7 +427,7 @@ the type parameter variable name.
 - This is a fallback for generic types that are not yet instantiated
 - Less common than the DataType method in typical usage
 
-See also: [`_strategy_type_name(::DataType)`](@ref)
+See also: [`CTBase.Strategies._strategy_type_name(::DataType)`](@ref)
 """
 function _strategy_type_name(T::UnionAll)
     base_name = string(T.body.name.name)
@@ -452,7 +452,7 @@ This is the most general fallback method for types that don't match more specifi
 - This is the ultimate fallback for edge cases
 - Simply converts the type to a string representation
 
-See also: [`_strategy_type_name(::DataType)`](@ref), [`_strategy_type_name(::UnionAll)`](@ref)
+See also: [`CTBase.Strategies._strategy_type_name(::DataType)`](@ref), [`CTBase.Strategies._strategy_type_name(::UnionAll)`](@ref)
 """
 function _strategy_type_name(T::Type)
     return string(T)
@@ -488,7 +488,7 @@ julia> _strategy_base_name(Collocation)
 - Used specifically for strategy headers to avoid redundancy with parameter display
 - Handles both DataType and UnionAll types
 
-See also: [`_strategy_type_name`](@ref), [`describe`](@ref)
+See also: [`CTBase.Strategies._strategy_type_name`](@ref), [`CTBase.Strategies.describe`](@ref)
 """
 function _strategy_base_name(T::DataType)
     return string(T.name.name)

@@ -27,6 +27,7 @@ It provides the **base layer** shared by all packages: common types, structured 
 | [`CTBase.Core`](@ref) | Fundamental numeric type alias (`ctNumber`) and internal display helpers |
 | [`CTBase.Descriptions`](@ref) | Symbolic description tuples: catalogue management, pattern completion, similarity search |
 | [`CTBase.Exceptions`](@ref) | Typed exception hierarchy with rich context fields |
+| [`CTBase.Traits`](@ref) | Compile-time trait types for time dependence, variable dependence, mutability, and dynamics dispatch |
 | [`CTBase.DevTools`](@ref) | Developer tools with tag-based dispatch for `run_tests`, `postprocess_coverage`, and `automatic_reference_documentation` |
 | [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
 
@@ -35,6 +36,7 @@ It provides the **base layer** shared by all packages: common types, structured 
 - **[Getting Started](getting-started.md)** — installation, mental model, 5-minute walkthrough.
 - **[Descriptions](guide/descriptions.md)** — catalogue API, pattern matching, error handling.
 - **[Exceptions](guide/exceptions.md)** — exception hierarchy, choosing the right type, best practices.
+- **[Traits](guide/traits.md)** — compile-time trait types, the opt-in contract, and predicate functions.
 - **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.DevTools.run_tests`.
 - **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.postprocess_coverage`.
 - **[API Documentation](guide/api-documentation.md)** — auto-generating per-module API pages.
