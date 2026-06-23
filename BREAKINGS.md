@@ -2,6 +2,28 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.22.0-beta)
+
+- **Traits module**: Added comprehensive trait system for type-level dispatch across control-toolbox ecosystem
+  - **Time dependence traits**: `TimeDependence`, `Autonomous`, `NonAutonomous` for distinguishing autonomous vs non-autonomous systems
+  - **Variable dependence traits**: `VariableDependence`, `Fixed`, `NonFixed` for systems with/without variable parameters
+  - **Mutability traits**: `AbstractMutabilityTrait`, `InPlace`, `OutOfPlace` for in-place vs out-of-place evaluation
+  - **Mode traits**: `AbstractModeTrait`, `EndPointMode`, `TrajectoryMode` for point-to-point vs trajectory integration
+  - **Dynamics traits**: `AbstractDynamicsTrait`, `StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics` for dynamics type specification
+  - **AD traits**: `AbstractADTrait`, `WithAD`, `WithoutAD` for automatic differentiation capability
+  - **Variable costate traits**: `AbstractVariableCostateCapability`, `SupportsVariableCostate`, `NoVariableCostate` for costate variable support
+  - **Abstract trait base**: `AbstractTrait` as root of trait hierarchy
+  - **Helper functions**: Boolean predicates (`is_autonomous`, `is_variable`, `is_inplace`, etc.) and trait query functions
+  - **Full test coverage**: 1138+ tests across all trait modules
+  - **Documentation**: Complete trait system guide in `docs/src/guide/traits.md`
+  - **Migration from CTFlows**: Traits moved from CTFlows to CTBase for ecosystem-wide sharing
+  - **No breaking changes**: Purely additive feature with backward-compatible API. No migration required.
+- **Docstring compliance**: Fixed all docstring cross-references in Traits and Strategies modules
+  - Added full module paths to all internal `@ref` references
+  - Changed `@extref` to `@ref` for internal symbols
+  - Removed CTFlows references from trait docstrings
+  - **No breaking changes**: Purely documentation improvements. No migration required.
+
 ## Non-breaking note (0.21.1-beta)
 
 - **Module renamed**: `CTBase.Extensions` → `CTBase.DevTools`

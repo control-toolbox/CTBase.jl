@@ -5,6 +5,42 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0-beta] - 2026-06-23
+
+### ✨ New Features
+
+#### **Traits Module**
+
+- **Comprehensive trait system**: Added full trait infrastructure for type-level dispatch across control-toolbox ecosystem
+  - **Time dependence traits**: `TimeDependence`, `Autonomous`, `NonAutonomous` for distinguishing autonomous vs non-autonomous systems
+  - **Variable dependence traits**: `VariableDependence`, `Fixed`, `NonFixed` for systems with/without variable parameters
+  - **Mutability traits**: `AbstractMutabilityTrait`, `InPlace`, `OutOfPlace` for in-place vs out-of-place evaluation
+  - **Mode traits**: `AbstractModeTrait`, `EndPointMode`, `TrajectoryMode` for point-to-point vs trajectory integration
+  - **Dynamics traits**: `AbstractDynamicsTrait`, `StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics` for dynamics type specification
+  - **AD traits**: `AbstractADTrait`, `WithAD`, `WithoutAD` for automatic differentiation capability
+  - **Variable costate traits**: `AbstractVariableCostateCapability`, `SupportsVariableCostate`, `NoVariableCostate` for costate variable support
+  - **Abstract trait base**: `AbstractTrait` as root of trait hierarchy
+  - **Helper functions**: Boolean predicates (`is_autonomous`, `is_variable`, `is_inplace`, etc.) and trait query functions
+- **Full test coverage**: Added comprehensive test suites for all trait modules (1138+ tests total)
+- **Documentation**: Added `docs/src/guide/traits.md` with complete trait system guide
+- **Migration from CTFlows**: Traits moved from CTFlows to CTBase for ecosystem-wide sharing
+- **No breaking changes**: Purely additive feature with backward-compatible API. No migration required.
+
+### 🏗️ Architecture
+
+- **Shared trait infrastructure**: Moved trait types from CTFlows to CTBase.Traits
+  - Enables trait-based dispatch across control-toolbox packages without duplication
+  - Provides type-level abstractions for system properties (time dependence, mutability, dynamics, etc.)
+  - Supports compile-time optimizations through trait-based dispatch
+
+### 🧹 Maintenance
+
+- **Docstring compliance**: Fixed all docstring cross-references in Traits and Strategies modules
+  - Added full module paths to all internal `@ref` references
+  - Changed `@extref` to `@ref` for internal symbols
+  - Removed CTFlows references from trait docstrings
+- **Version bump**: Bumped to 0.22.0-beta for Traits module addition.
+
 ## [0.21.1-beta] - 2026-06-23
 
 ### 🔄 Breaking Changes
