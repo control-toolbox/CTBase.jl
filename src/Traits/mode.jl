@@ -17,17 +17,13 @@ true
 julia> TrajectoryMode <: Traits.AbstractModeTrait
 true
 
-julia> # Used in configuration type parameters:
-julia> StateEndPointConfig <: CTFlows.Configs.AbstractConfig{<:Any, EndPointMode, <:Traits.AbstractDynamicsTrait}
-true
 \`\`\`
 
 # Notes
-- Mode traits are used as the second type parameter in `AbstractConfigWithMaC`
 - Point mode indicates integration from a single initial condition to a specific final time
 - Trajectory mode indicates integration over a continuous time interval
 
-See also: [`CTBase.Traits.EndPointMode`](@ref), [`CTBase.Traits.TrajectoryMode`](@ref), [`CTFlows.Configs.AbstractConfig`](@ref).
+See also: [`CTBase.Traits.EndPointMode`](@ref), [`CTBase.Traits.TrajectoryMode`](@ref).
 """
 abstract type AbstractModeTrait <: AbstractTrait end
 
@@ -49,9 +45,6 @@ EndPointMode()
 julia> pt isa Traits.AbstractModeTrait
 true
 
-julia> # Used in point-to-point configurations:
-julia> StateEndPointConfig <: CTFlows.Configs.AbstractConfig{<:Any, EndPointMode, <:Traits.AbstractDynamicsTrait}
-true
 \`\`\`
 
 # Notes
@@ -59,7 +52,7 @@ true
 - This mode is suitable for boundary value problems and shooting methods
 - The `tspan` accessor returns `(c.t0, c.tf)` for point configurations
 
-See also: [`CTBase.Traits.TrajectoryMode`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref), [`CTFlows.Configs.StateEndPointConfig`](@ref).
+See also: [`CTBase.Traits.TrajectoryMode`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref).
 """
 struct EndPointMode <: AbstractModeTrait end
 
@@ -81,9 +74,6 @@ TrajectoryMode()
 julia> traj isa Traits.AbstractModeTrait
 true
 
-julia> # Used in trajectory configurations:
-julia> StateTrajectoryConfig <: CTFlows.Configs.AbstractConfig{<:Any, TrajectoryMode, <:Traits.AbstractDynamicsTrait}
-true
 \`\`\`
 
 # Notes
@@ -91,6 +81,6 @@ true
 - This mode is suitable for generating full time evolution and visualization
 - The `tspan` accessor returns `c.tspan` directly for trajectory configurations
 
-See also: [`CTBase.Traits.EndPointMode`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref), [`CTFlows.Configs.StateTrajectoryConfig`](@ref).
+See also: [`CTBase.Traits.EndPointMode`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref).
 """
 struct TrajectoryMode <: AbstractModeTrait end

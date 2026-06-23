@@ -1,29 +1,20 @@
 """
 $(TYPEDEF)
 
-Abstract base type for trait markers in CTFlows.
+Abstract base type for all trait markers.
 
-Traits are empty marker types used as type parameters to encode configuration
-properties at compile time. Unlike tags (which mark extension implementations),
-traits encode semantic properties of the configuration itself (e.g., integration
-mode, content type, mutability).
-
-# Trait Pattern
-
-Traits are used as type parameters in abstract configuration types to enable
-compile-time dispatch without runtime type checks. For example, `AbstractConfig`
-uses `EndPointMode` vs `TrajectoryMode` to distinguish integration modes, and
-`StateDynamics` vs `HamiltonianDynamics` to distinguish dynamics types.
-
-All concrete trait types are empty structs with no fields, making them zero-cost
-at runtime.
+Traits are empty marker types used as type parameters to encode properties at
+compile time. Unlike tags (which mark extension implementations), traits encode
+semantic properties of an object (e.g., integration mode, dynamics type,
+mutability). All concrete trait types are empty structs with no fields, making
+them zero-cost at runtime.
 
 # Interface Requirements
 
 Concrete trait subtypes should:
 - Be empty structs with no fields (pure markers)
 - Subtype an intermediate abstract trait category (e.g., `AbstractModeTrait`)
-- Be used as type parameters in configuration types
+- Be used as type parameters or returned by accessor functions
 
 # Example
 \`\`\`julia-repl
@@ -33,10 +24,6 @@ julia> EndPointMode <: Traits.AbstractTrait
 true
 
 julia> EndPointMode <: Traits.AbstractModeTrait
-true
-
-julia> # Used as type parameters in configs:
-julia> StateEndPointConfig <: CTFlows.Configs.AbstractConfig{<:Any, EndPointMode, StateDynamics}
 true
 \`\`\`
 

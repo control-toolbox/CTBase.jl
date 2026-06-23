@@ -1,23 +1,47 @@
 """
     Traits
 
-Trait types and trait-based dispatch shared across the control-toolbox ecosystem.
+Compile-time trait types and trait-based dispatch utilities.
 
-This module provides the trait system used for compile-time dispatch on:
-- Time dependence: [`Autonomous`](@ref), [`NonAutonomous`](@ref)
-- Variable dependence: [`Fixed`](@ref), [`NonFixed`](@ref)
-- Integration mode: [`EndPointMode`](@ref), [`TrajectoryMode`](@ref)
-- Dynamics type: [`StateDynamics`](@ref), [`HamiltonianDynamics`](@ref), [`AugmentedHamiltonianDynamics`](@ref)
-- Mutability: [`InPlace`](@ref), [`OutOfPlace`](@ref)
-- Automatic differentiation: [`WithAD`](@ref), [`WithoutAD`](@ref)
-- Variable costate capability: [`SupportsVariableCostate`](@ref), [`NoVariableCostate`](@ref)
+Traits are abstract or empty concrete types used as type parameters or returned
+by accessor functions. Behaviour is selected by dispatch at compile time, with
+no runtime cost.
 
-Traits are used as type parameters in configuration types, vector fields, and systems
-to enable static dispatch without runtime type checks.
+# Organization
 
-The time-dependence trait types (`TimeDependence`, `Autonomous`, `NonAutonomous`)
-historically lived in `CTModels.Components`; they are now defined here so the whole
-ecosystem shares a single set of types (CTModels consumes them from here).
+- **abstract.jl**: Root abstract type `AbstractTrait` and family abstractions
+- **time_dependence.jl**: Time-dependence traits and the opt-in contract
+- **variable_dependence.jl**: Variable-dependence traits and the opt-in contract
+- **mutability.jl**: Mutability traits and the opt-in contract
+- **mode.jl**: Integration-mode traits (`EndPointMode`, `TrajectoryMode`)
+- **dynamics.jl**: Dynamics-type traits (`StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics`)
+- **ad.jl**: Automatic-differentiation traits (`WithAD`, `WithoutAD`)
+- **variable_costate.jl**: Variable-costate traits (`SupportsVariableCostate`, `NoVariableCostate`)
+- **helpers.jl**: Internal utility (`_caller_function_name`)
+
+# Public API
+
+## Trait families
+
+- **Time dependence**: `TimeDependence`, `Autonomous`, `NonAutonomous`
+- **Variable dependence**: `VariableDependence`, `Fixed`, `NonFixed`
+- **Mutability**: `InPlace`, `OutOfPlace`
+- **Integration mode**: `EndPointMode`, `TrajectoryMode`
+- **Dynamics**: `StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics`
+- **Automatic differentiation**: `WithAD`, `WithoutAD`
+- **Variable costate**: `SupportsVariableCostate`, `NoVariableCostate`
+
+## Trait contract
+
+For time-dependence, variable-dependence, and mutability, a type opts in by
+implementing two methods — `has_<family>_trait` returning `true`, and an accessor
+(`time_dependence`, `variable_dependence`, `mutability`) returning the trait type.
+Boolean predicates (`is_autonomous`, `is_variable`, `is_inplace`, …) are then
+derived generically.
+
+The remaining families (`EndPointMode`, `StateDynamics`, `WithAD`,
+`SupportsVariableCostate`) are used as type parameters only and do not use the
+two-method contract.
 """
 module Traits
 

@@ -31,10 +31,11 @@ Three things to keep in mind:
    CTBase.Exceptions.NotImplemented
    ```
 2. **Submodule-first API.** The public API lives in named submodules
-   (`Descriptions`, `Exceptions`, `DevTools`, `Core`, `Unicode`).
+   (`Core`, `Descriptions`, `Exceptions`, `Traits`, `DevTools`, `Unicode`, …).
    You can bring a submodule's exports into scope explicitly:
    ```julia
    using CTBase.Exceptions # brings IncorrectArgument, NotImplemented, … into scope
+   using CTBase.Traits     # brings Autonomous, NonAutonomous, is_autonomous, … into scope
    ```
 3. **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
    `automatic_reference_documentation` require loading the matching weak dependency
@@ -111,6 +112,7 @@ For more, see the **[Exceptions guide](guide/exceptions.md)**.
 | :--- | :--- |
 | Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Exception hierarchy and best practices | [Exceptions](guide/exceptions.md) |
+| Compile-time traits and dispatch | [Traits](guide/traits.md) |
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |
 | Coverage report generation | [Coverage](guide/coverage.md) |
 | Auto-generated API reference | [API Documentation](guide/api-documentation.md) |

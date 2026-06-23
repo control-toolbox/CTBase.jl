@@ -5,8 +5,8 @@ CurrentModule = CTBase
 ```
 
 [`CTBase.Traits`](@ref CTBase.Traits) provides a small set of **compile-time
-traits** shared across the control-toolbox ecosystem. Traits are empty marker
-types used as type parameters (or returned by accessor functions) so that
+traits** shared across the control-toolbox ecosystem. A trait is an abstract type
+used as a **type parameter** or returned by an accessor function so that
 behaviour can be selected by dispatch, with **no runtime cost**.
 
 ```@repl traits
@@ -14,9 +14,10 @@ using CTBase
 import CTBase.Traits
 ```
 
-Downstream packages use these traits to encode, for example, the **call
-signature** of a vector field or Hamiltonian, and to dispatch system builders
-without runtime branches.
+A typical use case is encoding a property of a callable object — does it take a
+time argument? does it depend on an extra variable? is it evaluated in-place? —
+so that a wrapper type can select the correct call path at compile time, without
+runtime conditionals.
 
 ## Trait families
 
@@ -30,8 +31,8 @@ Does the object depend on time ``t``?
 | [`Traits.NonAutonomous`](@ref CTBase.Traits.NonAutonomous) | ``t`` must be supplied |
 
 Both are abstract subtypes of [`Traits.TimeDependence`](@ref CTBase.Traits.TimeDependence).
-They are used as the time-dependence type parameter of `CTModels.Model` and of
-CTFlows data wrappers.
+Because they are abstract, they can only appear as type parameters — they are not
+instantiated, only dispatched upon.
 
 ```@repl traits
 Traits.Autonomous <: Traits.TimeDependence
@@ -47,6 +48,8 @@ design variable)?
 |---|---|
 | [`Traits.Fixed`](@ref CTBase.Traits.Fixed) | no ``v`` argument |
 | [`Traits.NonFixed`](@ref CTBase.Traits.NonFixed) | ``v`` must be supplied |
+
+Both are concrete subtypes of [`Traits.VariableDependence`](@ref CTBase.Traits.VariableDependence):
 
 ```@repl traits
 Traits.Fixed <: Traits.VariableDependence
@@ -64,6 +67,10 @@ Does a function allocate a new output, or write into a pre-allocated buffer?
 
 ### Other families
 
+These traits encode properties that are fixed at construction time and carried
+as type parameters. They are not opted into via the two-method contract described
+below — they are passed directly as type arguments.
+
 | Family | Values |
 |---|---|
 | Integration mode | [`Traits.EndPointMode`](@ref CTBase.Traits.EndPointMode), [`Traits.TrajectoryMode`](@ref CTBase.Traits.TrajectoryMode) |
@@ -79,7 +86,7 @@ A type opts in to a trait by implementing **two methods**: one declaring that it
 [`Traits.is_variable`](@ref CTBase.Traits.is_variable), …) then follow
 generically — they are not implemented per type.
 
-For time dependence, implement `has_time_dependence_trait` and `time_dependence`:
+For time and variable dependence:
 
 ```@repl traits
 struct MyObject end
@@ -91,24 +98,40 @@ Traits.has_variable_dependence_trait(::MyObject) = true
 Traits.variable_dependence(::MyObject) = Traits.Fixed
 
 obj = MyObject()
-Traits.is_autonomous(obj)      # false  (derived from time_dependence)
-Traits.is_nonautonomous(obj)   # true
-Traits.is_variable(obj)        # false  (derived from variable_dependence)
-Traits.is_nonvariable(obj)     # true
+Traits.is_autonomous(obj)
+Traits.is_nonautonomous(obj)
+Traits.is_variable(obj)
+Traits.is_nonvariable(obj)
+```
+
+For mutability, the same pattern applies with `has_mutability_trait` and `mutability`:
+
+```@repl traits
+struct MyMutableObject end
+
+Traits.has_mutability_trait(::MyMutableObject) = true
+Traits.mutability(::MyMutableObject) = Traits.InPlace
+
+Traits.is_inplace(MyMutableObject())
+Traits.is_outofplace(MyMutableObject())
 ```
 
 If a type does not declare a trait, the predicates throw an informative error
 rather than returning a wrong default:
 
 ```@repl traits
+try # hide
 Traits.is_autonomous(3.14)
+catch e # hide
+showerror(IOContext(stdout, :color => false), e) # hide
+end # hide
 ```
 
-!!! note "Single source of truth"
-    `Traits.Autonomous` / `Traits.NonAutonomous` are the very types used as the
-    `CTModels.Model` time-dependence parameter, so `Traits.time_dependence(model)`
-    and `Traits.is_autonomous(model)` work out of the box on a real optimal
-    control problem.
+!!! note "Trait types are shared"
+    Because trait types (e.g. `Traits.Autonomous`) are defined in a single place,
+    a type that carries `Traits.Autonomous` as a type parameter and an object that
+    implements `time_dependence` returning `Traits.Autonomous` are compatible by
+    construction — no conversion or mapping needed.
 
 ## Accessor / predicate summary
 
@@ -120,3 +143,7 @@ Traits.is_autonomous(3.14)
 | [`Traits.ad_trait`](@ref CTBase.Traits.ad_trait) | — |
 | [`Traits.variable_costate_trait`](@ref CTBase.Traits.variable_costate_trait) | — |
 | [`Traits.dynamics_trait`](@ref CTBase.Traits.dynamics_trait) | — |
+
+## See Also
+
+- [Exceptions guide](exceptions.md) — understanding `IncorrectArgument` and `NotImplemented`.

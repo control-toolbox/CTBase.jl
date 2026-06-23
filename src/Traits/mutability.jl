@@ -89,7 +89,7 @@ for better error messages.
 - `obj::Any`: The object to check.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always, indicating the object does not have the trait.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always, indicating the object does not have the trait.
 
 See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
 """
@@ -115,7 +115,7 @@ to return the specific trait value (`InPlace` or `OutOfPlace`).
 - `obj::Any`: The object to query.
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@extref): Always, indicating the method must be implemented.
+- [`CTBase.Exceptions.NotImplemented`](@ref): Always, indicating the method must be implemented.
 
 See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.has_mutability_trait`](@ref).
 """
@@ -144,8 +144,8 @@ if `mutability(obj)` is `InPlace`.
 - `Bool`: true if the object uses in-place evaluation.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support mutability queries.
-- [`CTBase.Exceptions.NotImplemented`](@extref): If `mutability` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support mutability queries.
+- [`CTBase.Exceptions.NotImplemented`](@ref): If `mutability` is not implemented for the object type.
 
 See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
 """
@@ -169,8 +169,8 @@ if `mutability(obj)` is `OutOfPlace`.
 - `Bool`: true if the object uses out-of-place evaluation.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support mutability queries.
-- [`CTBase.Exceptions.NotImplemented`](@extref): If `mutability` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support mutability queries.
+- [`CTBase.Exceptions.NotImplemented`](@ref): If `mutability` is not implemented for the object type.
 
 See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
 """

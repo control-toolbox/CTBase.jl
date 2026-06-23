@@ -31,7 +31,7 @@ true
 - `WithoutAD` indicates the system uses pre-computed derivatives or manual implementations
 - The specific meaning depends on the system type and context
 
-See also: [`CTBase.Traits.WithAD`](@ref), [`CTBase.Traits.WithoutAD`](@ref), [`CTBase.Core.AbstractCache`](@ref).
+See also: [`CTBase.Traits.WithAD`](@ref), [`CTBase.Traits.WithoutAD`](@ref), `CTBase.Core.AbstractCache`.
 """
 abstract type AbstractADTrait <: AbstractTrait end
 
@@ -66,7 +66,7 @@ true
 - The cache is passed through parameters during integration or evaluation
 - The specific operations enabled depend on the system type and AD backend
 
-See also: [`CTBase.Traits.AbstractADTrait`](@ref), [`CTBase.Traits.WithoutAD`](@ref), [`CTBase.Core.AbstractCache`](@ref).
+See also: [`CTBase.Traits.AbstractADTrait`](@ref), [`CTBase.Traits.WithoutAD`](@ref), `CTBase.Core.AbstractCache`.
 """
 struct WithAD <: AbstractADTrait end  # system carries H + AD backend
 
