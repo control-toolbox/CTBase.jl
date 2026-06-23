@@ -72,6 +72,7 @@ with_api_reference(src_dir) do api_pages
             "Core Concepts" => [
                 "Descriptions" => joinpath("guide", "descriptions.md"),
                 "Exceptions" => joinpath("guide", "exceptions.md"),
+                "Traits" => joinpath("guide", "traits.md"),
             ],
             "Strategies & Options" => [
                 "Options System" => joinpath("guide", "options-system.md"),
