@@ -2,12 +2,17 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
-## Non-breaking note (0.21.x)
+## Non-breaking note (0.21.1-beta)
 
 - **Module renamed**: `CTBase.Extensions` → `CTBase.DevTools`
   - The submodule previously named `Extensions` is now named `DevTools` to better reflect its purpose (internal developer tools, not a general extension system)
   - All tag types and functions are unchanged: `run_tests`, `postprocess_coverage`, `automatic_reference_documentation`, `AbstractTestRunnerTag`, `TestRunnerTag`, `AbstractDocumenterReferenceTag`, `DocumenterReferenceTag`, `AbstractCoveragePostprocessingTag`, `CoveragePostprocessingTag`
   - **Migration**: replace `CTBase.Extensions` with `CTBase.DevTools` and `import CTBase.Extensions` with `import CTBase.DevTools` at all call sites
+- **Core utilities**: Added generic building blocks to CTBase.Core for sharing across control-toolbox ecosystem
+  - `AbstractCache`: abstract base type for computation caches (e.g. prepared AD plans), exported from Core
+  - `make_coerce`: shape-matching coercion helper (`only` for scalars, `identity` for arrays), exported from Core
+  - Both moved from CTFlows to CTBase for reuse across packages
+  - No breaking changes; purely additive public API. No migration required.
 
 ## Non-breaking note (0.21.0-beta)
 

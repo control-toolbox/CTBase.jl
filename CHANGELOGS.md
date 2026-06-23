@@ -5,6 +5,47 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.1-beta] - 2026-06-23
+
+### 🔄 Breaking Changes
+
+#### **Module Rename: Extensions → DevTools**
+
+- **Renamed submodule**: `CTBase.Extensions` → `CTBase.DevTools` to better reflect its purpose (internal developer tools, not a general extension system)
+- **Unchanged API**: All tag types and functions remain unchanged:
+  - `run_tests`
+  - `postprocess_coverage`
+  - `automatic_reference_documentation`
+  - `AbstractTestRunnerTag`, `TestRunnerTag`
+  - `AbstractDocumenterReferenceTag`, `DocumenterReferenceTag`
+  - `AbstractCoveragePostprocessingTag`, `CoveragePostprocessingTag`
+- **Migration**: Replace `CTBase.Extensions` with `CTBase.DevTools` and `import CTBase.Extensions` with `import CTBase.DevTools` at all call sites
+
+### ✨ New Features
+
+#### **Core Utilities**
+
+- **AbstractCache**: Added abstract base type for computation caches in `Core/caches.jl`
+  - Generic type for storing pre-allocated buffers and prepared plans (e.g. AD plans)
+  - Concrete cache subtypes defined by packages/extensions providing specific backends
+  - Exported from `CTBase.Core` for reuse across control-toolbox ecosystem
+- **make_coerce**: Added shape-matching coercion helper in `Core/function_utils.jl`
+  - Returns `only` for scalars to extract single element from 1-element vectors
+  - Returns `identity` for arrays (`AbstractVector`, `AbstractMatrix`) as no-op
+  - Used to map uniform vector-valued results back to natural input shape
+  - Exported from `CTBase.Core` for reuse across control-toolbox ecosystem
+
+### 🏗️ Architecture
+
+- **Shared infrastructure**: Moved generic, dependency-free building blocks from CTFlows to CTBase.Core
+  - Enables sharing across control-toolbox packages without duplication
+  - `AbstractCache` provides common interface for computation caches
+  - `make_coerce` provides uniform shape coercion strategy
+
+### 🧹 Maintenance
+
+- **Version bump**: Bumped to 0.21.1-beta for module rename and core utilities.
+
 ## [0.21.0-beta] - 2026-06-22
 
 ### ✨ New Features
