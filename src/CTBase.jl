@@ -32,6 +32,10 @@ using .Strategies
 include(joinpath(@__DIR__, "Orchestration", "Orchestration.jl"))
 using .Orchestration
 
+# Traits module - trait types and trait-based dispatch (moved from CTFlows)
+include(joinpath(@__DIR__, "Traits", "Traits.jl"))
+using .Traits
+
 # Unicode module - Unicode character utilities
 include(joinpath(@__DIR__, "Unicode", "Unicode.jl"))
 using .Unicode
