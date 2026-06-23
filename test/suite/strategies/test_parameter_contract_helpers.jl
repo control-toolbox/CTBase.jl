@@ -53,5 +53,5 @@ end # module
 
 # Redefine in outer scope for TestRunner
 function test_parameter_contract_helpers()
-    TestParameterContractHelpers.test_parameter_contract_helpers()
+    return TestParameterContractHelpers.test_parameter_contract_helpers()
 end

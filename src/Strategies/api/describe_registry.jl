@@ -55,7 +55,7 @@ Exa (strategy)
 See also: `describe(::Type{<:AbstractStrategy})`, `StrategyRegistry`, `create_registry`
 """
 function describe(id_symbol::Symbol, registry::StrategyRegistry)
-    describe(stdout, id_symbol, registry)
+    return describe(stdout, id_symbol, registry)
 end
 
 function describe(io::IO, id_symbol::Symbol, registry::StrategyRegistry)
@@ -164,7 +164,7 @@ function _describe_strategy_registry(
     end
 
     # 6. Retrieve and display metadata
-    _describe_metadata(io, fmt, strategy_types, params, registry)
+    return _describe_metadata(io, fmt, strategy_types, params, registry)
 end
 
 """
@@ -353,7 +353,7 @@ function _find_strategy_in_registry(strategy_id::Symbol, registry::StrategyRegis
         )
     end
 
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "ID not found in registry";
             got=":$strategy_id",
@@ -401,7 +401,7 @@ function _strategy_type_name(T::DataType)
     base_name = string(T.name.name)
     if !isempty(T.parameters)
         param_names = map(T.parameters) do p
-            p isa DataType ? _strategy_type_name(p) : string(nameof(p))
+            return p isa DataType ? _strategy_type_name(p) : string(nameof(p))
         end
         return "$base_name{$(join(param_names, ", "))}"
     end

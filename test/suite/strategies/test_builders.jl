@@ -40,7 +40,7 @@ Strategies.id(::Type{<:TestSolverX}) = :solver_x
 Strategies.id(::Type{<:TestSolverY}) = :solver_y
 
 function Strategies.metadata(::Type{<:TestModelerA})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend, type=Symbol, default=:dense, description="Backend type"
         ),
@@ -51,7 +51,7 @@ function Strategies.metadata(::Type{<:TestModelerA})
 end
 
 function Strategies.metadata(::Type{<:TestModelerB})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:precision, type=Int, default=64, description="Precision bits"
         ),
@@ -59,7 +59,7 @@ function Strategies.metadata(::Type{<:TestModelerB})
 end
 
 function Strategies.metadata(::Type{<:TestSolverX})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter, type=Int, default=100, description="Maximum iterations"
         ),
@@ -67,7 +67,7 @@ function Strategies.metadata(::Type{<:TestSolverX})
 end
 
 function Strategies.metadata(::Type{<:TestSolverY})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:tol, type=Float64, default=1e-6, description="Tolerance"
         ),

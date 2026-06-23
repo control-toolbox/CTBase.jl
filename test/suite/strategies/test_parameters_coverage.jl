@@ -125,9 +125,8 @@ function test_parameters_coverage()
             Test.@test Strategies.is_a_parameter(Strategies.GPU) === true
             Test.@test Strategies.is_a_parameter(Int) === false
             Test.@test Strategies.is_a_parameter(String) === false
-            Test.@test Strategies.is_a_parameter(
-                Strategies.AbstractStrategyParameter
-            ) === true
+            Test.@test Strategies.is_a_parameter(Strategies.AbstractStrategyParameter) ===
+                true
         end
 
         # ====================================================================

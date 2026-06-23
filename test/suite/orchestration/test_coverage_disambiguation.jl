@@ -22,7 +22,7 @@ struct CovCollocation <: CovDiscretizer
 end
 Strategies.id(::Type{CovCollocation}) = :collocation
 function Strategies.metadata(::Type{CovCollocation})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:grid_size, type=Int, default=100, description="Grid size"
         ),
@@ -34,7 +34,7 @@ struct CovADNLP <: CovModeler
 end
 Strategies.id(::Type{CovADNLP}) = :adnlp
 function Strategies.metadata(::Type{CovADNLP})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend,
             type=Symbol,
@@ -50,7 +50,7 @@ struct CovIpopt <: CovSolver
 end
 Strategies.id(::Type{CovIpopt}) = :ipopt
 function Strategies.metadata(::Type{CovIpopt})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter,
             type=Int,

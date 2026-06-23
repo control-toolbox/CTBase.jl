@@ -26,7 +26,7 @@ end
 Strategies.id(::Type{<:IntrospectionTestStrategy}) = :introspection_test
 
 function Strategies.metadata(::Type{<:IntrospectionTestStrategy})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter,
             type=Int,

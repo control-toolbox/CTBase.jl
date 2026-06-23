@@ -191,7 +191,7 @@ the `id` method to provide its unique identifier.
 - `Exceptions.NotImplemented`: When the concrete type doesn't override this method
 """
 function id(::Type{T}) where {T<:AbstractStrategy}
-    throw(
+    return throw(
         Exceptions.NotImplemented(
             "Strategy ID method not implemented";
             required_method="id(::Type{<:$T})",
@@ -215,7 +215,7 @@ a `Dict` of `OptionDefinition` objects.
 - `Exceptions.NotImplemented`: When the concrete type doesn't override this method
 """
 function metadata(::Type{T}) where {T<:AbstractStrategy}
-    throw(
+    return throw(
         Exceptions.NotImplemented(
             "Strategy metadata method not implemented";
             required_method="metadata(::Type{<:$T})",
@@ -453,7 +453,7 @@ function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractSt
         )
     end
 
-    println(
+    return println(
         io,
         fmt.label,
         "Tip: use describe(",
@@ -505,7 +505,7 @@ function Base.show(io::IO, strategy::T) where {T<:AbstractStrategy}
             ", ",
         ),
     )
-    print(io, ")")
+    return print(io, ")")
 end
 
 # ============================================================================
@@ -571,7 +571,7 @@ See also: [`describe`](@ref), [`AbstractStrategy`](@ref)
 description(::Type{<:AbstractStrategy}) = nothing
 
 function describe(strategy_type::Type{T}) where {T<:AbstractStrategy}
-    describe(stdout, strategy_type)
+    return describe(stdout, strategy_type)
 end
 
 function describe(io::IO, ::Type{T}) where {T<:AbstractStrategy}

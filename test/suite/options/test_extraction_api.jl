@@ -15,12 +15,12 @@ positive_validator(x::Int) = x > 0 || throw(ArgumentError("$x must be positive")
 
 # Range validator for testing
 function range_validator(x::Int)
-    (1 <= x <= 100) || throw(ArgumentError("$x must be between 1 and 100"))
+    return (1 <= x <= 100) || throw(ArgumentError("$x must be between 1 and 100"))
 end
 
 # String validator for testing
 function nonempty_validator(s::String)
-    !isempty(s) || throw(ArgumentError("String must not be empty"))
+    return !isempty(s) || throw(ArgumentError("String must not be empty"))
 end
 
 # ============================================================================
@@ -107,7 +107,7 @@ function test_extraction_api()
             # Test with failed validation (redirect stderr to hide @error logs)
             kwargs = (grid_size=-5,)
             Test.@test_throws ArgumentError redirect_stderr(devnull) do
-                Options.extract_option(kwargs, def)
+                return Options.extract_option(kwargs, def)
             end
         end
 
@@ -236,7 +236,7 @@ function test_extraction_api()
 
             # Test validation error propagation (redirect stderr to hide @error logs)
             Test.@test_throws ArgumentError redirect_stderr(devnull) do
-                Options.extract_option(kwargs, def)
+                return Options.extract_option(kwargs, def)
             end
 
             # Test with multiple definitions, one fails
@@ -255,7 +255,7 @@ function test_extraction_api()
             kwargs = (good=100, bad=200)
 
             Test.@test_throws ArgumentError redirect_stderr(devnull) do
-                Options.extract_options(kwargs, defs)
+                return Options.extract_options(kwargs, defs)
             end
         end
 
@@ -292,7 +292,7 @@ function test_extraction_api()
             # Pass correct type but invalid value - should get ArgumentError from validator
             kwargs = (test_option=-5,)
             Test.@test_throws ArgumentError redirect_stderr(devnull) do
-                Options.extract_option(kwargs, def)
+                return Options.extract_option(kwargs, def)
             end
         end
     end # UNIT TESTS
