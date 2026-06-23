@@ -153,6 +153,34 @@ let ctOutDir = ''
 
 And reference them in `head` using `${baseTemp.base}assets/...` instead of the remote URLs.
 
+#### Simplify nav configuration
+
+The generated `docs/src/.vitepress/config.mts` includes a placeholder for the navigation that spreads from `navTemp.nav`. Replace it with a direct array definition:
+
+Replace:
+
+```typescript
+const navTemp = {
+  nav: 'REPLACE_ME_DOCUMENTER_VITEPRESS',
+}
+
+const nav = [
+  ...navTemp.nav,
+  {
+    component: 'VersionPicker'
+  }
+]
+```
+
+With:
+
+```typescript
+const nav = [
+  { text: 'Home', link: '/index' },
+  {component: 'VersionPicker'}
+]
+```
+
 ### 6. Install npm dependencies
 
 ```bash

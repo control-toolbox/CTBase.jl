@@ -17,15 +17,9 @@ const baseTemp = {
   base: 'REPLACE_ME_DOCUMENTER_VITEPRESS',// TODO: replace this in makedocs!
 }
 
-const navTemp = {
-  nav: 'REPLACE_ME_DOCUMENTER_VITEPRESS',
-}
-
 const nav = [
-  ...navTemp.nav,
-  {
-    component: 'VersionPicker'
-  }
+  { text: 'Home', link: '/index' },
+  {component: 'VersionPicker'}
 ]
 
 // https://vitepress.dev/reference/site-config
