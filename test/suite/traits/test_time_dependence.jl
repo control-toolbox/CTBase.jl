@@ -1,6 +1,6 @@
 module TestTimeDependence
 
-import Test
+using Test: Test
 import CTBase.Exceptions
 import CTBase.Traits
 
@@ -50,7 +50,9 @@ function test_time_dependence()
         Test.@testset "ERROR TESTS - Fallback Methods" begin
             Test.@testset "has_time_dependence_trait throws IncorrectArgument" begin
                 obj = "not a trait object"
-                Test.@test_throws Exceptions.IncorrectArgument Traits.has_time_dependence_trait(obj)
+                Test.@test_throws Exceptions.IncorrectArgument Traits.has_time_dependence_trait(
+                    obj
+                )
             end
 
             Test.@testset "time_dependence throws IncorrectArgument" begin

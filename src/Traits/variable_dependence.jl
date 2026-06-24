@@ -82,11 +82,13 @@ See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_d
 """
 function has_variable_dependence_trait(obj::Any)
     source_method = _caller_function_name()
-    throw(Exceptions.IncorrectArgument(
-        "Cannot call $(source_method) on object of type $(typeof(obj)): no variable-dependence trait";
-        suggestion = "Implement has_variable_dependence_trait(obj::$(typeof(obj))) = true and variable_dependence(obj::$(typeof(obj))) to enable variable-dependence trait support.",
-        context = "Variable-dependence trait not available",
-    ))
+    return throw(
+        Exceptions.IncorrectArgument(
+            "Cannot call $(source_method) on object of type $(typeof(obj)): no variable-dependence trait";
+            suggestion="Implement has_variable_dependence_trait(obj::$(typeof(obj))) = true and variable_dependence(obj::$(typeof(obj))) to enable variable-dependence trait support.",
+            context="Variable-dependence trait not available",
+        ),
+    )
 end
 
 """
@@ -108,12 +110,14 @@ See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.has_variab
 """
 function variable_dependence(obj::Any)
     has_variable_dependence_trait(obj)
-    throw(Exceptions.NotImplemented(
-        "variable_dependence not implemented for $(typeof(obj))";
-        required_method = "variable_dependence(obj::$(typeof(obj)))",
-        suggestion = "Implement variable_dependence for your concrete object type to return the specific variable-dependence trait (Fixed or NonFixed).",
-        context = "Variable-dependence trait - required method implementation",
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "variable_dependence not implemented for $(typeof(obj))";
+            required_method="variable_dependence(obj::$(typeof(obj)))",
+            suggestion="Implement variable_dependence for your concrete object type to return the specific variable-dependence trait (Fixed or NonFixed).",
+            context="Variable-dependence trait - required method implementation",
+        ),
+    )
 end
 
 # =============================================================================

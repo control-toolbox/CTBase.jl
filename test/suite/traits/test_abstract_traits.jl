@@ -1,6 +1,6 @@
 module TestAbstractTraits
 
-import Test
+using Test: Test
 import CTBase.Traits
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true

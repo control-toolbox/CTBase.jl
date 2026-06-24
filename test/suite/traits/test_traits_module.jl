@@ -19,8 +19,8 @@
 
 module TestTraitsModule
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Traits
 using CTBase.Traits  # For testing exported symbols
 
@@ -81,9 +81,7 @@ const EXPORTED_FUNCTIONS = (
     :has_variable,
 )
 
-const PRIVATE_SYMBOLS = (
-    :_caller_function_name,
-)
+const PRIVATE_SYMBOLS = (:_caller_function_name,)
 
 # ============================================================================
 # Helper functions (generic for reuse in other modules)
@@ -189,13 +187,16 @@ function test_traits_module()
                 Test.@test Traits.TrajectoryMode <: Traits.AbstractModeTrait
                 Test.@test Traits.StateDynamics <: Traits.AbstractDynamicsTrait
                 Test.@test Traits.HamiltonianDynamics <: Traits.AbstractDynamicsTrait
-                Test.@test Traits.AugmentedHamiltonianDynamics <: Traits.AbstractDynamicsTrait
+                Test.@test Traits.AugmentedHamiltonianDynamics <:
+                    Traits.AbstractDynamicsTrait
                 Test.@test Traits.InPlace <: Traits.AbstractMutabilityTrait
                 Test.@test Traits.OutOfPlace <: Traits.AbstractMutabilityTrait
                 Test.@test Traits.WithAD <: Traits.AbstractADTrait
                 Test.@test Traits.WithoutAD <: Traits.AbstractADTrait
-                Test.@test Traits.SupportsVariableCostate <: Traits.AbstractVariableCostateCapability
-                Test.@test Traits.NoVariableCostate <: Traits.AbstractVariableCostateCapability
+                Test.@test Traits.SupportsVariableCostate <:
+                    Traits.AbstractVariableCostateCapability
+                Test.@test Traits.NoVariableCostate <:
+                    Traits.AbstractVariableCostateCapability
                 Test.@test Traits.Autonomous <: Traits.TimeDependence
                 Test.@test Traits.NonAutonomous <: Traits.TimeDependence
                 Test.@test Traits.Fixed <: Traits.VariableDependence

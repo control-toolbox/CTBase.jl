@@ -24,7 +24,7 @@ Strategies.id(::Type{<:TestStratB}) = :teststratb
 
 # Simple metadata for testing
 function Strategies.metadata(::Type{T}) where {T<:TestStratA}
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Strategies.OptionDefinition(;
             name=:opt1, type=Int, default=10, description="Test option 1"
         ),
@@ -32,7 +32,7 @@ function Strategies.metadata(::Type{T}) where {T<:TestStratA}
 end
 
 function Strategies.metadata(::Type{T}) where {T<:TestStratB}
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Strategies.OptionDefinition(;
             name=:opt1, type=Int, default=20, description="Test option 1"
         ),

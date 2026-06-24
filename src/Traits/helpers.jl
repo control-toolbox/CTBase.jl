@@ -15,10 +15,10 @@ function _caller_function_name()
         func_name = frame.func
         func_str = string(func_name)
         if func_str != "_caller_function_name" &&
-           !startswith(func_str, "#") &&
-           func_str != "has_time_dependence_trait" &&
-           func_str != "has_variable_dependence_trait" &&
-           func_str != "has_mutability_trait"
+            !startswith(func_str, "#") &&
+            func_str != "has_time_dependence_trait" &&
+            func_str != "has_variable_dependence_trait" &&
+            func_str != "has_mutability_trait"
             return func_name
         end
     end

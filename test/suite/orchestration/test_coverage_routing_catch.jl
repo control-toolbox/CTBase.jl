@@ -29,7 +29,7 @@ Strategies.id(::Type{FakeMod}) = :fake_mod
 
 # Both have a 'backend' option to create ambiguity
 function Strategies.metadata(::Type{FakeDisc})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend, type=Symbol, default=:cpu, description="Backend"
         ),
@@ -37,7 +37,7 @@ function Strategies.metadata(::Type{FakeDisc})
 end
 
 function Strategies.metadata(::Type{FakeMod})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend, type=Symbol, default=:dense, description="Backend"
         ),

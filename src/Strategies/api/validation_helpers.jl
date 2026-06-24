@@ -69,7 +69,7 @@ function _error_unknown_options_strict(
       $strategy_name(...; mode=:permissive)
     """
 
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             message; context="build_strategy_options - strict validation"
         ),

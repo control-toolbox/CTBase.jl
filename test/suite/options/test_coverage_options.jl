@@ -21,7 +21,7 @@ end
 Strategies.id(::Type{<:CovOptFakeStrategy}) = :cov_opt_fake
 
 function Strategies.metadata(::Type{<:CovOptFakeStrategy})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:alpha, type=Float64, default=1.0, description="Alpha parameter"
         ),
