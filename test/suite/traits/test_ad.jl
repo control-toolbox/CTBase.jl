@@ -3,8 +3,8 @@ module TestAD
 import Test
 import CTBase.Traits
 
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_ad()
     Test.@testset "AD Trait Tests" verbose=VERBOSE showtiming=SHOWTIMING begin

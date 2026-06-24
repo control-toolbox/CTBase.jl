@@ -4,8 +4,8 @@ using Test: Test
 using Aqua: Aqua
 using CTBase: CTBase
 
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_code_quality()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Code quality" begin

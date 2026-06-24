@@ -6,8 +6,8 @@ import CTBase.Exceptions
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_testrunner_execution()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_run_single_test" begin

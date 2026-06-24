@@ -6,8 +6,8 @@ import CTBase.DevTools: DevTools
 import CTBase.Exceptions: Exceptions
 import CTBase.Unicode: Unicode
 
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # TOP-LEVEL: Fake type for extension testing
 struct DummyDocRefTag <: DevTools.AbstractDocumenterReferenceTag end

@@ -4,8 +4,8 @@ using Test: Test
 import CTBase.DevTools
 import CTBase.Exceptions
 
-const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
-const SHOWTIMING = isdefined(Main, :TestOptions) ? Main.TestOptions.SHOWTIMING : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Fake tag types for extension stub testing (testing-creation.md §6).
 # These subtype the abstract tags but are unknown to any extension,
