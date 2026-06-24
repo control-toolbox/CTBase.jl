@@ -36,6 +36,10 @@ using .Orchestration
 include(joinpath(@__DIR__, "Traits", "Traits.jl"))
 using .Traits
 
+# Data module - vector fields and Hamiltonians with traits (moved from CTFlows)
+include(joinpath(@__DIR__, "Data", "Data.jl"))
+using .Data
+
 # Unicode module - Unicode character utilities
 include(joinpath(@__DIR__, "Unicode", "Unicode.jl"))
 using .Unicode
