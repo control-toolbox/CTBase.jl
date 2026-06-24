@@ -24,6 +24,14 @@ function generate_api_reference(src_dir::String)
             joinpath("Core", "function_utils.jl"), joinpath("Core", "macros.jl"),
             joinpath("Core", "palette.jl"), joinpath("Core", "display.jl"),
         )),
+        (mod=CTBase.Data, title="Data", filename="data", files=src(
+            joinpath("Data", "Data.jl"), joinpath("Data", "default.jl"),
+            joinpath("Data", "helpers.jl"),
+            joinpath("Data", "abstract_vector_field.jl"), joinpath("Data", "vector_field.jl"),
+            joinpath("Data", "abstract_hamiltonian.jl"), joinpath("Data", "hamiltonian.jl"),
+            joinpath("Data", "abstract_hamiltonian_vector_field.jl"),
+            joinpath("Data", "hamiltonian_vector_field.jl"),
+        )),
         (mod=CTBase.Descriptions, title="Descriptions", filename="descriptions", files=src(
             joinpath("Descriptions", "Descriptions.jl"), joinpath("Descriptions", "types.jl"),
             joinpath("Descriptions", "similarity.jl"), joinpath("Descriptions", "display.jl"),
@@ -41,13 +49,6 @@ function generate_api_reference(src_dir::String)
         (mod=CTBase.Interpolation, title="Interpolation", filename="interpolation", files=src(
             joinpath("Interpolation", "Interpolation.jl"), joinpath("Interpolation", "types.jl"),
             joinpath("Interpolation", "ctinterpolate.jl"), joinpath("Interpolation", "display.jl"),
-        )),
-        (mod=CTBase.Traits, title="Traits", filename="traits", files=src(
-            joinpath("Traits", "Traits.jl"), joinpath("Traits", "helpers.jl"),
-            joinpath("Traits", "abstract.jl"), joinpath("Traits", "mode.jl"),
-            joinpath("Traits", "dynamics.jl"), joinpath("Traits", "ad.jl"),
-            joinpath("Traits", "variable_costate.jl"), joinpath("Traits", "mutability.jl"),
-            joinpath("Traits", "time_dependence.jl"), joinpath("Traits", "variable_dependence.jl"),
         )),
         (mod=CTBase.Options, title="Options", filename="options", files=src(
             joinpath("Options", "Options.jl"), joinpath("Options", "not_provided.jl"),
@@ -76,6 +77,13 @@ function generate_api_reference(src_dir::String)
             joinpath("Strategies", "api", "utilities.jl"),
             joinpath("Strategies", "api", "validation_helpers.jl"),
             joinpath("Strategies", "api", "disambiguation.jl"),
+        )),
+        (mod=CTBase.Traits, title="Traits", filename="traits", files=src(
+            joinpath("Traits", "Traits.jl"), joinpath("Traits", "helpers.jl"),
+            joinpath("Traits", "abstract.jl"), joinpath("Traits", "mode.jl"),
+            joinpath("Traits", "dynamics.jl"), joinpath("Traits", "ad.jl"),
+            joinpath("Traits", "variable_costate.jl"), joinpath("Traits", "mutability.jl"),
+            joinpath("Traits", "time_dependence.jl"), joinpath("Traits", "variable_dependence.jl"),
         )),
         (mod=CTBase.Unicode, title="Unicode", filename="unicode", files=src(
             joinpath("Unicode", "Unicode.jl"), joinpath("Unicode", "subscripts.jl"),
