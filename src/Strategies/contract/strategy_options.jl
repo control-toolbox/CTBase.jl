@@ -114,7 +114,7 @@ struct StrategyOptions{NT<:NamedTuple}
                 )
             end
         end
-        new{NT}(options, alias_map)
+        return new{NT}(options, alias_map)
     end
 
     StrategyOptions(; kwargs...) = StrategyOptions((; kwargs...), Dict{Symbol,Symbol}())
@@ -196,7 +196,7 @@ julia> get(opts, Val(:max_iter))  # Type-stable
 See also: `Base.getproperty`, `source`, `get(::StrategyOptions, ::Val)`
 """
 function Base.getindex(opts::StrategyOptions, key::Symbol)
-    Options.value(option(opts, _resolve_key(opts, key)))
+    return Options.value(option(opts, _resolve_key(opts, key)))
 end
 
 """
@@ -489,7 +489,7 @@ julia> collect(values(opts))
 See also: `Base.keys`, `Base.pairs`
 """
 function Base.values(opts::StrategyOptions)
-    (Options.value(opt) for opt in values(_raw_options(opts)))
+    return (Options.value(opt) for opt in values(_raw_options(opts)))
 end
 """
 $(TYPEDSIGNATURES)
@@ -511,7 +511,7 @@ julia> collect(pairs(opts))
 See also: `Base.keys`, `Base.values`
 """
 function Base.pairs(opts::StrategyOptions)
-    (k => Options.value(v) for (k, v) in pairs(_raw_options(opts)))
+    return (k => Options.value(v) for (k, v) in pairs(_raw_options(opts)))
 end
 
 """
@@ -615,7 +615,7 @@ false
 See also: `Base.length`, `Base.isempty`
 """
 function Base.haskey(opts::StrategyOptions, key::Symbol)
-    haskey(_raw_options(opts), _resolve_key(opts, key))
+    return haskey(_raw_options(opts), _resolve_key(opts, key))
 end
 
 # ============================================================================
@@ -768,5 +768,5 @@ function Base.show(io::IO, opts::StrategyOptions)
             ", ",
         ),
     )
-    print(io, ")")
+    return print(io, ")")
 end

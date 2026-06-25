@@ -20,7 +20,7 @@ abstract type InternalTestSolver <: Strategies.AbstractStrategy end
 struct InternalCollocation <: InternalTestDiscretizer end
 Strategies.id(::Type{InternalCollocation}) = :collocation
 function Strategies.metadata(::Type{InternalCollocation})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:grid_size, type=Int, default=100, description="Grid size"
         ),
@@ -30,7 +30,7 @@ end
 struct InternalADNLP <: InternalTestModeler end
 Strategies.id(::Type{InternalADNLP}) = :adnlp
 function Strategies.metadata(::Type{InternalADNLP})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend, type=Symbol, default=:dense, description="Backend type"
         ),
@@ -40,7 +40,7 @@ end
 struct InternalIpopt <: InternalTestSolver end
 Strategies.id(::Type{InternalIpopt}) = :ipopt
 function Strategies.metadata(::Type{InternalIpopt})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter, type=Int, default=100, description="Max iterations"
         ),
@@ -54,7 +54,7 @@ end
 struct InternalMadNLP <: InternalTestSolver end
 Strategies.id(::Type{InternalMadNLP}) = :madnlp
 function Strategies.metadata(::Type{InternalMadNLP})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter, type=Int, default=1000, description="Max iterations"
         ),

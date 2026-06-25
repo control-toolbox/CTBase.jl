@@ -1,6 +1,6 @@
 module TestMutability
 
-import Test
+using Test: Test
 import CTBase.Exceptions
 import CTBase.Traits
 
@@ -117,7 +117,9 @@ function test_mutability()
         Test.@testset "ERROR TESTS - Fallback Methods" begin
             Test.@testset "has_mutability_trait throws IncorrectArgument" begin
                 obj = "not a trait object"
-                Test.@test_throws Exceptions.IncorrectArgument Traits.has_mutability_trait(obj)
+                Test.@test_throws Exceptions.IncorrectArgument Traits.has_mutability_trait(
+                    obj
+                )
             end
 
             Test.@testset "mutability throws IncorrectArgument" begin

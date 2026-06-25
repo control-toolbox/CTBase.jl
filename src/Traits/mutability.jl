@@ -95,11 +95,13 @@ See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutab
 """
 function has_mutability_trait(obj::Any)
     source_method = _caller_function_name()
-    throw(Exceptions.IncorrectArgument(
-        "Cannot call $(source_method) on object of type $(typeof(obj)): no mutability trait";
-        suggestion = "Implement has_mutability_trait(obj::$(typeof(obj))) = true and mutability(obj::$(typeof(obj))) to enable mutability trait support.",
-        context = "Mutability trait not available",
-    ))
+    return throw(
+        Exceptions.IncorrectArgument(
+            "Cannot call $(source_method) on object of type $(typeof(obj)): no mutability trait";
+            suggestion="Implement has_mutability_trait(obj::$(typeof(obj))) = true and mutability(obj::$(typeof(obj))) to enable mutability trait support.",
+            context="Mutability trait not available",
+        ),
+    )
 end
 
 """
@@ -121,12 +123,14 @@ See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.has_m
 """
 function mutability(obj::Any)
     has_mutability_trait(obj)
-    throw(Exceptions.NotImplemented(
-        "mutability not implemented for $(typeof(obj))";
-        required_method = "mutability(obj::$(typeof(obj)))",
-        suggestion = "Implement mutability for your concrete object type to return the specific mutability trait (InPlace or OutOfPlace).",
-        context = "Mutability trait - required method implementation",
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "mutability not implemented for $(typeof(obj))";
+            required_method="mutability(obj::$(typeof(obj)))",
+            suggestion="Implement mutability for your concrete object type to return the specific mutability trait (InPlace or OutOfPlace).",
+            context="Mutability trait - required method implementation",
+        ),
+    )
 end
 
 """

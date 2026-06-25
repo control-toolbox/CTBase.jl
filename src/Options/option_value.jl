@@ -44,7 +44,7 @@ struct OptionValue{T}
     source::Symbol
 
     function OptionValue(value::T, source::Symbol) where {T}
-        _construct_option_value(value, Val(source))
+        return _construct_option_value(value, Val(source))
     end
 
     # Internal constructor dispatch functions
@@ -61,7 +61,7 @@ struct OptionValue{T}
     end
 
     function _construct_option_value(value, source::Val)
-        throw(
+        return throw(
             Exceptions.IncorrectArgument(
                 "Invalid option source";
                 got="source=$(typeof(source).parameters[1])",

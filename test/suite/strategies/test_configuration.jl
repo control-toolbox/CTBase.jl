@@ -25,7 +25,7 @@ Strategies.id(::Type{TestStrategyA}) = :test_a
 Strategies.id(::Type{TestStrategyB}) = :test_b
 
 function Strategies.metadata(::Type{TestStrategyA})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter,
             type=Int,
@@ -47,7 +47,7 @@ function Strategies.metadata(::Type{TestStrategyA})
 end
 
 function Strategies.metadata(::Type{TestStrategyB})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend, type=Symbol, default=:default, description="Backend to use"
         ),

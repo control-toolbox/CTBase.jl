@@ -40,7 +40,7 @@ Strategies.metadata(::Type{MySolver}) = Strategies.StrategyMetadata()
 struct MyOtherSolver <: TestSolverFamily end
 Strategies.id(::Type{MyOtherSolver}) = :test_other_solver
 function Strategies.metadata(::Type{MyOtherSolver})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:custom_opt, type=Int, default=42, description="Custom option"
         ),

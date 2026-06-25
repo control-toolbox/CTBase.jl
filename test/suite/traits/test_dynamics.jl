@@ -1,6 +1,6 @@
 module TestDynamics
 
-import Test
+using Test: Test
 import CTBase.Traits
 
 const VERBOSE = isdefined(Main, :TestOptions) ? Main.TestOptions.VERBOSE : true
@@ -87,7 +87,8 @@ function test_dynamics()
                 end
 
                 Test.@testset "AugmentedHamiltonianDynamics subtypes AbstractDynamicsTrait" begin
-                    Test.@test Traits.AugmentedHamiltonianDynamics <: Traits.AbstractDynamicsTrait
+                    Test.@test Traits.AugmentedHamiltonianDynamics <:
+                        Traits.AbstractDynamicsTrait
                 end
             end
         end
@@ -106,7 +107,9 @@ function test_dynamics()
             Test.@testset "Dynamics traits are distinct from mode traits" begin
                 Test.@test !(Traits.StateDynamics <: Traits.AbstractModeTrait)
                 Test.@test !(Traits.HamiltonianDynamics <: Traits.AbstractModeTrait)
-                Test.@test !(Traits.AugmentedHamiltonianDynamics <: Traits.AbstractModeTrait)
+                Test.@test !(
+                    Traits.AugmentedHamiltonianDynamics <: Traits.AbstractModeTrait
+                )
             end
         end
 
@@ -116,7 +119,12 @@ function test_dynamics()
 
         Test.@testset "Exports Verification" begin
             Test.@testset "Exported dynamics trait types" begin
-                for sym in (:AbstractDynamicsTrait, :StateDynamics, :HamiltonianDynamics, :AugmentedHamiltonianDynamics)
+                for sym in (
+                    :AbstractDynamicsTrait,
+                    :StateDynamics,
+                    :HamiltonianDynamics,
+                    :AugmentedHamiltonianDynamics,
+                )
                     Test.@test isdefined(Traits, sym)
                 end
             end

@@ -474,7 +474,7 @@ end
 function Base.show(io::IO, registry::StrategyRegistry)
     fmt = Core.get_format_codes(io)
     n_families = length(registry.families)
-    print(
+    return print(
         io,
         fmt.name,
         "StrategyRegistry",
@@ -497,15 +497,25 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
     # Header: "StrategyRegistry with N families and M parameters:"
     print(
         io,
-        fmt.name, "StrategyRegistry", fmt.reset,
+        fmt.name,
+        "StrategyRegistry",
+        fmt.reset,
         " with ",
-        fmt.count, n_families, fmt.reset, " ", n_families == 1 ? "family" : "families",
+        fmt.count,
+        n_families,
+        fmt.reset,
+        " ",
+        n_families == 1 ? "family" : "families",
     )
     if has_params
         print(
             io,
             " and ",
-            fmt.count, n_params, fmt.reset, " ", n_params == 1 ? "parameter" : "parameters",
+            fmt.count,
+            n_params,
+            fmt.reset,
+            " ",
+            n_params == 1 ? "parameter" : "parameters",
         )
     end
     println(io, ":")
@@ -549,8 +559,18 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
                 println(
                     io,
                     strategy_prefix,
-                    fmt.type, base_name, fmt.reset,
-                    " (", fmt.label, "id=", fmt.reset, fmt.keyword, ":", strategy_id, fmt.reset, ")",
+                    fmt.type,
+                    base_name,
+                    fmt.reset,
+                    " (",
+                    fmt.label,
+                    "id=",
+                    fmt.reset,
+                    fmt.keyword,
+                    ":",
+                    strategy_id,
+                    fmt.reset,
+                    ")",
                 )
             else
                 # Show parameter routing keys as symbols: [:cpu, :gpu]
@@ -560,9 +580,20 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
                 println(
                     io,
                     strategy_prefix,
-                    fmt.type, base_name, fmt.reset,
-                    " (", fmt.label, "id=", fmt.reset, fmt.keyword, ":", strategy_id, fmt.reset,
-                    ") [", param_str, "]",
+                    fmt.type,
+                    base_name,
+                    fmt.reset,
+                    " (",
+                    fmt.label,
+                    "id=",
+                    fmt.reset,
+                    fmt.keyword,
+                    ":",
+                    strategy_id,
+                    fmt.reset,
+                    ") [",
+                    param_str,
+                    "]",
                 )
             end
         end
@@ -573,10 +604,14 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
         param_items = sort(collect(registry.parameters); by=p -> string(p[1]))
         param_str = join(
             [
-                fmt.keyword * ":" * string(p_id) * fmt.reset *
+                fmt.keyword *
+                ":" *
+                string(p_id) *
+                fmt.reset *
                 " → " *
-                fmt.type * string(nameof(p_type)) * fmt.reset
-                for (p_id, p_type) in param_items
+                fmt.type *
+                string(nameof(p_type)) *
+                fmt.reset for (p_id, p_type) in param_items
             ],
             ", ",
         )

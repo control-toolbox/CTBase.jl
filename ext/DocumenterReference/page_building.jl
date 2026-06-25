@@ -102,13 +102,18 @@ function _collect_module_docstrings(config::_Config, symbol_list; include_module
             effective_source_files,
             config.include_without_source,
         )
-        push!(docstrings, "### `$(current_module)` [Module]\n\n```@docs\n$(current_module)\n```\n\n")
+        push!(
+            docstrings,
+            "### `$(current_module)` [Module]\n\n```@docs\n$(current_module)\n```\n\n",
+        )
     end
 
     _iterate_over_symbols(config, symbol_list) do key, type
         type == DOCTYPE_MODULE && return nothing
         label = titlecase(DOCTYPE_NAMES[type])
-        push!(docstrings, "### `$key` [$label]\n\n```@docs\n$(current_module).$key\n```\n\n")
+        push!(
+            docstrings, "### `$key` [$label]\n\n```@docs\n$(current_module).$key\n```\n\n"
+        )
         return nothing
     end
 
