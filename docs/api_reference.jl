@@ -32,6 +32,12 @@ function generate_api_reference(src_dir::String)
             joinpath("Data", "abstract_hamiltonian_vector_field.jl"),
             joinpath("Data", "hamiltonian_vector_field.jl"),
         )),
+        (mod=CTBase.Differentiation, title="Differentiation", filename="differentiation", files=src(
+            joinpath("Differentiation", "Differentiation.jl"), joinpath("Differentiation", "default.jl"),
+            joinpath("Differentiation", "abstract_ad_backend.jl"),
+            joinpath("Differentiation", "differentiation_interface.jl"),
+            joinpath("Differentiation", "building.jl"),
+        )),
         (mod=CTBase.Descriptions, title="Descriptions", filename="descriptions", files=src(
             joinpath("Descriptions", "Descriptions.jl"), joinpath("Descriptions", "types.jl"),
             joinpath("Descriptions", "similarity.jl"), joinpath("Descriptions", "display.jl"),
@@ -106,6 +112,9 @@ function generate_api_reference(src_dir::String)
     internals_modules = Any[cfg.mod => cfg.files for cfg in modules_config]
 
     for (sym, files) in [
+        (:CTBaseDifferentiationInterface, ext(
+            joinpath("CTBaseDifferentiationInterface.jl"),
+        )),
         (:DocumenterReference, ext(
             joinpath("DocumenterReference", "DocumenterReference.jl"),
             joinpath("DocumenterReference", "config_helpers.jl"),
