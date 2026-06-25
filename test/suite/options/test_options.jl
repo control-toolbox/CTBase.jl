@@ -8,6 +8,7 @@ using CTBase.Options  # For testing exported symbols
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
+
 const CurrentModule = TestOptions
 
 """

@@ -9,11 +9,11 @@ using Test: Test
 using CTBase: CTBase
 
 # Controls nested testset output formatting (used by individual test files)
-module TestOptions
+module TestData
 const VERBOSE = true
 const SHOWTIMING = true
 end
-using .TestOptions: VERBOSE, SHOWTIMING
+using .TestData: VERBOSE, SHOWTIMING
 
 # Macro to check if an expression is type-stable and inferred correctly
 macro test_inferred(expr)

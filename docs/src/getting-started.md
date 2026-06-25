@@ -1,8 +1,8 @@
+# Getting Started
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Getting Started
 
 ## Installation
 
@@ -31,7 +31,7 @@ Three things to keep in mind:
    CTBase.Exceptions.NotImplemented
    ```
 2. **Submodule-first API.** The public API lives in named submodules
-   (`Core`, `Descriptions`, `Exceptions`, `Traits`, `DevTools`, `Unicode`, …).
+   (`Core`, `Descriptions`, `Exceptions`, `Traits`, `Data`, `DevTools`, `Unicode`, …).
    You can bring a submodule's exports into scope explicitly:
    ```julia
    using CTBase.Exceptions # brings IncorrectArgument, NotImplemented, … into scope
@@ -106,13 +106,34 @@ end # hide
 
 For more, see the **[Exceptions guide](guide/exceptions.md)**.
 
+### Working with Data
+
+The [`CTBase.Data`](@ref) submodule wraps a Julia function together with its
+**trait metadata** (time, variable, and mutability dependence). The wrapper picks
+the right call path at compile time, and the traits can be recovered from the type.
+
+```@repl walkthrough
+# Autonomous, fixed, out-of-place vector field: X(x)
+vf = CTBase.Data.VectorField(x -> -x)
+
+CTBase.Traits.time_dependence(vf)   # Autonomous
+CTBase.Traits.mutability(vf)        # OutOfPlace (auto-detected from arity)
+CTBase.Traits.dynamics_trait(vf)    # StateDynamics
+
+vf([1.0, 2.0])                      # natural call
+vf(0.0, [1.0, 2.0], nothing)        # uniform call (ignores t and v)
+```
+
+For more, see the **[Data guide](guide/data.md)**.
+
 ## Next Steps
 
 | Topic | Guide |
 | :--- | :--- |
-| Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Exception hierarchy and best practices | [Exceptions](guide/exceptions.md) |
 | Compile-time traits and dispatch | [Traits](guide/traits.md) |
+| Trait-carrying vector fields and Hamiltonians | [Data](guide/data.md) |
+| Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |
 | Coverage report generation | [Coverage](guide/coverage.md) |
 | Auto-generated API reference | [API Documentation](guide/api-documentation.md) |

@@ -4,6 +4,7 @@ using Test: Test
 import CTBase.Exceptions
 using CTBase: CTBase
 import CTBase.Options
+
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
