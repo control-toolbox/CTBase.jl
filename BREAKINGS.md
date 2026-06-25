@@ -2,6 +2,25 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.24.0-beta)
+
+- **Differentiation module**: Added comprehensive AD backend infrastructure for computing gradients
+  - **AbstractADBackend**: Abstract contract for AD backends with trait-based dispatch
+  - **DifferentiationInterface strategy**: Concrete strategy wrapping DifferentiationInterface.jl backends (e.g., `AutoForwardDiff()`)
+  - **Hamiltonian gradient computation**: `hamiltonian_gradient(backend, h, t, x, p, v)` → (∂H/∂x, ∂H/∂p)
+  - **Variable gradient computation**: `variable_gradient(backend, h, t, x, p, v)` → ∂H/∂v
+  - **Generic differentiation methods**: `gradient`, `derivative`, `differentiate`, `pushforward` for flexible AD operations
+  - **ADTypes integration**: Hard dependency on ADTypes.jl with `AutoForwardDiff` as default backend
+  - **DifferentiationInterface extension**: CTBaseDifferentiationInterface extension for gradient computation
+  - **Construction defaults**: `__ad_backend` for trait-based backend selection
+  - **Full test coverage**: Comprehensive test suite for Differentiation module
+  - **Documentation**: Complete Differentiation module guide in `docs/src/guide/differentiation.md`
+  - **Migration from CTFlows**: AD backend strategies moved from CTFlows to CTBase for ecosystem-wide sharing
+  - **Self-contained module**: CTBase.Differentiation depends on CTBase.Data, CTBase.Strategies, CTBase.Exceptions, and ADTypes
+  - **No breaking changes**: Purely additive feature with backward-compatible API. No migration required.
+- **Dependencies**: Added ADTypes.jl as hard dependency and DifferentiationInterface.jl as weak dependency with extension
+- **No breaking changes**: Purely additive feature with new dependencies. No migration required.
+
 ## Non-breaking note (0.23.0-beta)
 
 - **Data module**: Added comprehensive data structures for vector fields and Hamiltonian systems

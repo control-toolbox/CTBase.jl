@@ -5,6 +5,46 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0-beta] - 2026-06-25
+
+### ✨ New Features
+
+#### **Differentiation Module**
+
+- **Automatic differentiation backend strategies**: Added comprehensive AD backend infrastructure for computing gradients
+  - **AbstractADBackend**: Abstract contract for AD backends with trait-based dispatch
+  - **DifferentiationInterface strategy**: Concrete strategy wrapping DifferentiationInterface.jl backends (e.g., `AutoForwardDiff()`)
+  - **Hamiltonian gradient computation**: `hamiltonian_gradient(backend, h, t, x, p, v)` → (∂H/∂x, ∂H/∂p)
+  - **Variable gradient computation**: `variable_gradient(backend, h, t, x, p, v)` → ∂H/∂v
+  - **Generic differentiation methods**: `gradient`, `derivative`, `differentiate`, `pushforward` for flexible AD operations
+  - **ADTypes integration**: Hard dependency on ADTypes.jl with `AutoForwardDiff` as default backend
+  - **DifferentiationInterface extension**: CTBaseDifferentiationInterface extension for gradient computation
+  - **Construction defaults**: `__ad_backend` for trait-based backend selection
+- **Full test coverage**: Added comprehensive test suite for Differentiation module
+- **Documentation**: Added `docs/src/guide/differentiation.md` with complete Differentiation module guide
+- **Migration from CTFlows**: AD backend strategies moved from CTFlows to CTBase.Differentiation for ecosystem-wide sharing
+- **Self-contained module**: CTBase.Differentiation depends on CTBase.Data, CTBase.Strategies, CTBase.Exceptions, and ADTypes
+- **No breaking changes**: Purely additive feature with backward-compatible API. No migration required.
+
+### 🔄 Dependencies
+
+- **ADTypes.jl**: Added as hard dependency for AD backend type definitions
+- **DifferentiationInterface.jl**: Added as weak dependency with extension support
+
+### 🏗️ Architecture
+
+- **Shared AD infrastructure**: Moved AD backend strategies from CTFlows to CTBase.Differentiation
+  - Enables automatic differentiation across control-toolbox packages without duplication
+  - Provides abstract contract for AD backends with trait-based dispatch
+  - Supports multiple AD backends through strategy pattern
+  - Integrates with CTBase.Strategies for solver configuration
+
+### 🧹 Maintenance
+
+- **Documentation refinement**: Refined Differentiation docstrings and guide synchronization
+- **Test coverage**: Added gradient/derivative tests for DifferentiationInterface extension
+- **Version bump**: Bumped to 0.24.0-beta for Differentiation module addition.
+
 ## [0.23.0-beta] - 2026-06-25
 
 ### ✨ New Features
