@@ -130,10 +130,10 @@ For more, see the **[Data guide](guide/data.md)**.
 
 | Topic | Guide |
 | :--- | :--- |
-| Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Exception hierarchy and best practices | [Exceptions](guide/exceptions.md) |
 | Compile-time traits and dispatch | [Traits](guide/traits.md) |
 | Trait-carrying vector fields and Hamiltonians | [Data](guide/data.md) |
+| Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |
 | Coverage report generation | [Coverage](guide/coverage.md) |
 | Auto-generated API reference | [API Documentation](guide/api-documentation.md) |
