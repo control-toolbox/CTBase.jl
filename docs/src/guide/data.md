@@ -159,21 +159,48 @@ dx, dp = hvf(x0, p0)   # natural call: returns (ẋ, ṗ)
 ### The `variable_costate` keyword
 
 For **non-fixed** Hamiltonian vector fields, the call accepts an optional
-`variable_costate` keyword (default `false`):
+`variable_costate` keyword (default `false`).
 
-```julia
-hvf(x, p, v; variable_costate=true)        # out-of-place, Autonomous/NonFixed
-hvf(dx, dp, x, p, v; variable_costate=true) # in-place
+When `false` (default), the out-of-place call returns `(dx, dp)`; when `true`,
+it returns the extended tuple `(dx, dp, dpv)` where `dpv = ∂ṗ/∂v` is the
+derivative of the costate equations with respect to the variable `v`. For
+in-place fields, `dpv` is passed as an optional pre-allocated buffer
+(`dpv=nothing` skips the computation):
+
+```@example data
+# Inner function that implements the variable_costate path.
+# H(x, p, v) = v[1] * dot(p, x)  →  ẋ = v[1]*x,  ṗ = -v[1]*p,  ∂ṗ/∂v[1] = -p
+function f_vc(x, p, v; variable_costate=false)
+    dx = v[1] .* x
+    dp = -v[1] .* p
+    variable_costate ? (dx, dp, -p) : (dx, dp)
+end
+
+hvf_nf = Data.HamiltonianVectorField(f_vc; is_variable=true)
+v0 = [2.0]
+
+dx, dp = hvf_nf(x0, p0, v0)                            # returns (ẋ, ṗ)
+(dx, dp)
 ```
 
-When `true`, the field also propagates the derivative of the costate with respect
-to the variable `v`. This is only supported by Hamiltonian vector fields whose
-inner function implements that extra path — typically those **derived from a
-[`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian)** by differentiation. For a
-plain user-supplied function the default `variable_costate=false` is the only
-valid value; passing `true` raises a
-[`CTBase.Exceptions.PreconditionError`](@ref) (see the [Exceptions](exceptions.md)
-guide).
+```@example data
+dx, dp, dpv = hvf_nf(x0, p0, v0; variable_costate=true)  # returns (ẋ, ṗ, ∂ṗ/∂v)
+(dx, dp, dpv)
+```
+
+For in-place non-fixed fields the signature is:
+
+```julia
+dpv = zeros(length(p0))
+hvf_ip_nf(dx, dp, x, p, v; dpv=dpv, variable_costate=true)  # fills dx, dp, dpv in place
+```
+
+This is only supported by inner functions that implement the `variable_costate`
+keyword path — typically those **derived from a
+[`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian)** by automatic differentiation.
+For a plain user-supplied function that does not accept `variable_costate`, passing
+`true` raises a [`CTBase.Exceptions.PreconditionError`](@ref) (see the
+[Exceptions](exceptions.md) guide).
 
 ---
 
