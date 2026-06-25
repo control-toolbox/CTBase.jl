@@ -14,7 +14,10 @@ implement the contract methods to provide actual gradient computation.
 # Notes
  - `AbstractADBackend` subtypes `CTBase.Strategies.AbstractStrategy` — they are
    first-class strategies in the CTBase.Strategies ecosystem.
- - The contract consists of two methods: `hamiltonian_gradient` and `variable_gradient`.
+ - The contract comprises `ad_backend` (the wrapped ADTypes backend), the domain
+   methods `hamiltonian_gradient` and `variable_gradient`, and the generic primitives
+   `gradient`, `derivative`, `differentiate` and `pushforward`. All but `ad_backend`
+   are supplied by the `CTBaseDifferentiationInterface` extension.
  - Gradient methods return **non-negated** partial derivatives; the RHS closures
    apply the signs (ṗ = -∂H/∂x, ṽ = -∂H/∂v).
 

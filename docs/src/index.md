@@ -29,6 +29,11 @@ It provides the **base layer** shared by all packages: common types, structured 
 | [`CTBase.Traits`](@ref) | Compile-time trait types for time dependence, variable dependence, mutability, and dynamics dispatch |
 | [`CTBase.Data`](@ref) | Trait-carrying function wrappers: `VectorField`, `Hamiltonian`, `HamiltonianVectorField` |
 | [`CTBase.Descriptions`](@ref) | Symbolic description tuples: catalogue management, pattern completion, similarity search |
+| [`CTBase.Options`](@ref) | Generic option handling: provenance tracking, schema definition, validation, and aliases |
+| [`CTBase.Strategies`](@ref) | Strategy contract, registry, building/validation, and metadata for pluggable algorithmic components |
+| [`CTBase.Orchestration`](@ref) | Option routing and disambiguation between problem-level actions and strategies |
+| [`CTBase.Differentiation`](@ref) | AD-backend strategies for gradients, derivatives, partial derivatives, and Jacobian–vector products |
+| [`CTBase.Interpolation`](@ref) | Linear and piecewise-constant interpolation with flat extrapolation |
 | [`CTBase.DevTools`](@ref) | Developer tools with tag-based dispatch for `run_tests`, `postprocess_coverage`, and `automatic_reference_documentation` |
 | [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
 
@@ -39,6 +44,11 @@ It provides the **base layer** shared by all packages: common types, structured 
 - **[Traits](guide/traits.md)** — compile-time trait types, the opt-in contract, and predicate functions.
 - **[Data](guide/data.md)** — trait-carrying wrappers for vector fields and Hamiltonians.
 - **[Descriptions](guide/descriptions.md)** — catalogue API, pattern matching, error handling.
+- **[Options System](guide/options-system.md)** — option schema, validation, aliases, and provenance.
+- **[Implementing a Strategy](guide/implementing-a-strategy.md)** — the strategy contract and how to add one.
+- **[Strategy Parameters](guide/strategy-parameters.md)** — declaring and resolving strategy options.
+- **[Orchestration & Routing](guide/orchestration-and-routing.md)** — routing options to strategies with disambiguation.
+- **[Differentiation](guide/differentiation.md)** — AD-backend strategies and differentiation primitives (extension-backed).
 - **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.DevTools.run_tests`.
 - **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.postprocess_coverage`.
 - **[API Documentation](guide/api-documentation.md)** — auto-generating per-module API pages.

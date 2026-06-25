@@ -36,8 +36,10 @@ $(TYPEDSIGNATURES)
 Constructor for `DifferentiationInterface` with a specific backend.
 
 # Arguments
-- `backend=AutoForwardDiff()`: The DifferentiationInterface.jl backend.
-- `kwargs...`: Additional options passed to `StrategyOptions`.
+- `mode::Symbol=:strict`: Validation mode forwarded to `build_strategy_options`.
+- `kwargs...`: Options passed to `StrategyOptions`. The AD backend is set through the
+  `:ad_backend` option (aliases `backend` and `ad`), e.g. `backend=AutoForwardDiff()`;
+  it defaults to `AutoForwardDiff()`.
 
 # Returns
 - `DifferentiationInterface`: A new backend strategy instance.

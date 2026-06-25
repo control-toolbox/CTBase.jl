@@ -62,6 +62,26 @@ function test_differentiation_interface_extension()
             Test.@test grad_v ≈ v atol=1e-8
         end
 
+        Test.@testset "Integration: gradient (vector input)" begin
+            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            f(x) = sum(x .^ 2)            # ∇f = 2x
+            g = Differentiation.gradient(backend, f, [1.0, 2.0])
+            Test.@test g isa AbstractVector
+            Test.@test g ≈ [2.0, 4.0] atol=1e-8
+        end
+
+        Test.@testset "Integration: gradient (scalar overload)" begin
+            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            f(x) = x^3                    # f'(x) = 3x²
+            Test.@test Differentiation.gradient(backend, f, 2.0) ≈ 12.0 atol=1e-8
+        end
+
+        Test.@testset "Integration: derivative (scalar input)" begin
+            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            g(t) = t^3                    # g'(t) = 3t²
+            Test.@test Differentiation.derivative(backend, g, 2.0) ≈ 12.0 atol=1e-8
+        end
+
     end
 end
 

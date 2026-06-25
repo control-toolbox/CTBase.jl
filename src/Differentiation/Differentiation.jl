@@ -9,6 +9,7 @@ for computing gradients of scalar Hamiltonian functions.
 ## Architecture
 
 The module defines an abstract contract `AbstractADBackend` with the following methods:
+- `ad_backend(backend)` → the wrapped ADTypes backend (resolved in core)
 - `hamiltonian_gradient(backend, h, t, x, p, v)` → (∂H/∂x, ∂H/∂p)
 - `variable_gradient(backend, h, t, x, p, v)` → ∂H/∂v
 - `gradient(backend, f, x)` → ∇f (extension contract)

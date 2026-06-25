@@ -127,6 +127,28 @@ function test_ad_backend()
             end
         end
 
+        Test.@testset "Error: gradient stub throws NotImplemented" begin
+            backend = FakeADBackend()
+            try
+                Differentiation.gradient(backend, x -> sum(x), [1.0, 2.0])
+                Test.@test false  # Should not reach here
+            catch err
+                Test.@test err isa Exceptions.NotImplemented
+                Test.@test occursin("gradient", err.required_method)
+            end
+        end
+
+        Test.@testset "Error: derivative stub throws NotImplemented" begin
+            backend = FakeADBackend()
+            try
+                Differentiation.derivative(backend, t -> t^2, 1.0)
+                Test.@test false  # Should not reach here
+            catch err
+                Test.@test err isa Exceptions.NotImplemented
+                Test.@test occursin("derivative", err.required_method)
+            end
+        end
+
     end
 end
 

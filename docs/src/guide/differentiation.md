@@ -42,6 +42,11 @@ The concrete strategy stores a single option, `:ad_backend`, holding an
 `AutoForwardDiff()`). `ADTypes` is a hard dependency of CTBase, so the default is
 always available.
 
+The contract has seven methods.
+[`Differentiation.ad_backend`](@ref CTBase.Differentiation.ad_backend) — the accessor
+returning the wrapped ADTypes backend — is resolved in core and always available; the
+six differentiation primitives below live in an extension.
+
 !!! note "The differentiation methods live in an extension"
     The contract methods (`gradient`, `derivative`, `differentiate`,
     `pushforward`, `hamiltonian_gradient`, `variable_gradient`) are implemented in
