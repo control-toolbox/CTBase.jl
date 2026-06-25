@@ -80,6 +80,7 @@ with_api_reference(src_dir) do api_pages
                 "Implementing a Strategy" => joinpath("guide", "implementing-a-strategy.md"),
                 "Strategy Parameters" => joinpath("guide", "strategy-parameters.md"),
                 "Orchestration & Routing" => joinpath("guide", "orchestration-and-routing.md"),
+                "Differentiation" => joinpath("guide", "differentiation.md"),
             ],
             "Developer Tools" => [
                 "Test Runner" => joinpath("guide", "test-runner.md"),

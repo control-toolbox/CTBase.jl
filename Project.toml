@@ -1,42 +1,57 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
-version = "0.23.0-beta"
+version = "0.24.0-beta"
 authors = ["Olivier Cots <olivier.cots@irit.fr>", "Jean-Baptiste Caillau <caillau@univ-cotedazur.fr>"]
 
 [deps]
+ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 
 [weakdeps]
 Coverage = "a2441757-f6aa-5fb2-8edb-039e3f45d037"
+DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 MarkdownAST = "d0879d2d-cac2-40c8-9cee-1863dc0c7391"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
+CTBaseDifferentiationInterface = ["DifferentiationInterface"]
 CoveragePostprocessing = ["Coverage"]
 DocumenterReference = ["Documenter", "Markdown", "MarkdownAST"]
 TestRunner = ["Test"]
 
 [extras]
+ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+Coverage = "a2441757-f6aa-5fb2-8edb-039e3f45d037"
+DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+MarkdownAST = "d0879d2d-cac2-40c8-9cee-1863dc0c7391"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = [
     "Aqua",
     "Coverage",
+    "DifferentiationInterface",
     "Documenter",
+    "ForwardDiff",
     "Markdown",
     "MarkdownAST",
     "Test"
 ]
 
 [compat]
+ADTypes = "1"
 Aqua = "0.8"
 Coverage = "1"
+DifferentiationInterface = "0.7"
 DocStringExtensions = "0.9"
 Documenter = "1"
+ForwardDiff = "0.10, 1"
 Markdown = "1"
 MarkdownAST = "0.1"
 Test = "1"

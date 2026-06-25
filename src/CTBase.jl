@@ -40,6 +40,10 @@ using .Traits
 include(joinpath(@__DIR__, "Data", "Data.jl"))
 using .Data
 
+# Differentiation module - AD backend strategies (moved from CTFlows)
+include(joinpath(@__DIR__, "Differentiation", "Differentiation.jl"))
+using .Differentiation
+
 # Unicode module - Unicode character utilities
 include(joinpath(@__DIR__, "Unicode", "Unicode.jl"))
 using .Unicode

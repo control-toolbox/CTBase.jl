@@ -31,7 +31,8 @@ Three things to keep in mind:
    CTBase.Exceptions.NotImplemented
    ```
 2. **Submodule-first API.** The public API lives in named submodules
-   (`Core`, `Descriptions`, `Exceptions`, `Traits`, `Data`, `DevTools`, `Unicode`, …).
+   (`Core`, `Exceptions`, `Traits`, `Data`, `Descriptions`, `Options`, `Strategies`,
+   `Orchestration`, `Differentiation`, `Interpolation`, `DevTools`, `Unicode`, …).
    You can bring a submodule's exports into scope explicitly:
    ```julia
    using CTBase.Exceptions # brings IncorrectArgument, NotImplemented, … into scope
@@ -40,6 +41,8 @@ Three things to keep in mind:
 3. **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
    `automatic_reference_documentation` require loading the matching weak dependency
    (`Test`, `Coverage`, `Documenter` respectively) before they become active.
+   Likewise, the differentiation primitives of `CTBase.Differentiation` become active
+   only once `DifferentiationInterface` and an AD package (e.g. `ForwardDiff`) are loaded.
 
 ## 5-Minute Walkthrough
 
@@ -134,6 +137,10 @@ For more, see the **[Data guide](guide/data.md)**.
 | Compile-time traits and dispatch | [Traits](guide/traits.md) |
 | Trait-carrying vector fields and Hamiltonians | [Data](guide/data.md) |
 | Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
+| Option schema, validation, and aliases | [Options System](guide/options-system.md) |
+| Strategy contract and registration | [Implementing a Strategy](guide/implementing-a-strategy.md) |
+| Routing options to strategies | [Orchestration & Routing](guide/orchestration-and-routing.md) |
+| AD backends and differentiation primitives | [Differentiation](guide/differentiation.md) |
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |
 | Coverage report generation | [Coverage](guide/coverage.md) |
 | Auto-generated API reference | [API Documentation](guide/api-documentation.md) |
