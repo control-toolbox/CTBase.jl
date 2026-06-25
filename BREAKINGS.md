@@ -2,6 +2,26 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.23.0-beta)
+
+- **Data module**: Added comprehensive data structures for vector fields and Hamiltonian systems
+  - **VectorField**: Encapsulates vector-field functions with time-dependence and variable-dependence traits
+  - **AbstractVectorField**: Abstract base type for vector fields
+  - **Hamiltonian**: Hamiltonian function representation with traits
+  - **AbstractHamiltonian**: Abstract base type for Hamiltonians
+  - **HamiltonianVectorField**: Hamiltonian vector field combining Hamiltonian and vector field concepts
+  - **AbstractHamiltonianVectorField**: Abstract base type for Hamiltonian vector fields
+  - **Construction defaults**: `__is_autonomous`, `__is_variable`, `__is_inplace` for trait-based construction
+  - **Helper functions**: Utilities for working with vector fields and Hamiltonians
+  - **Full test coverage**: Comprehensive test suite for Data module
+  - **Documentation**: Complete Data module guide in `docs/src/guide/data.md`
+  - **Migration from CTFlows**: Vector fields and Hamiltonian structures moved from CTFlows to CTBase for ecosystem-wide sharing
+  - **Self-contained module**: CTBase.Data depends only on CTBase.Traits and CTBase.Exceptions
+  - **No breaking changes**: Purely additive feature with backward-compatible API. No migration required.
+- **Documentation improvements**: Reordered Core Concepts sidebar by conceptual layers
+- **Test runner improvements**: Renamed TestOptions to TestData for clarity
+- **No breaking changes**: Purely documentation and test improvements. No migration required.
+
 ## Non-breaking note (0.22.0-beta)
 
 - **Traits module**: Added comprehensive trait system for type-level dispatch across control-toolbox ecosystem

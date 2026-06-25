@@ -5,6 +5,40 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0-beta] - 2026-06-25
+
+### ✨ New Features
+
+#### **Data Module**
+
+- **Vector fields and Hamiltonian structures**: Added comprehensive data structures for vector fields and Hamiltonian systems
+  - **VectorField**: Encapsulates vector-field functions with time-dependence and variable-dependence traits
+  - **AbstractVectorField**: Abstract base type for vector fields
+  - **Hamiltonian**: Hamiltonian function representation with traits
+  - **AbstractHamiltonian**: Abstract base type for Hamiltonians
+  - **HamiltonianVectorField**: Hamiltonian vector field combining Hamiltonian and vector field concepts
+  - **AbstractHamiltonianVectorField**: Abstract base type for Hamiltonian vector fields
+  - **Construction defaults**: `__is_autonomous`, `__is_variable`, `__is_inplace` for trait-based construction
+  - **Helper functions**: Utilities for working with vector fields and Hamiltonians
+- **Full test coverage**: Added comprehensive test suite for Data module
+- **Documentation**: Added `docs/src/guide/data.md` with complete Data module guide
+- **Migration from CTFlows**: Vector fields and Hamiltonian structures moved from CTFlows to CTBase.Data for ecosystem-wide sharing
+- **Self-contained module**: CTBase.Data depends only on CTBase.Traits and CTBase.Exceptions
+- **No breaking changes**: Purely additive feature with backward-compatible API. No migration required.
+
+### 🏗️ Architecture
+
+- **Shared data infrastructure**: Moved vector fields and Hamiltonian structures from CTFlows to CTBase.Data
+  - Enables vector field and Hamiltonian representation across control-toolbox packages without duplication
+  - Provides common abstractions for dynamical systems with trait-based dispatch
+  - Supports type-safe handling of time-dependence and variable-dependence traits
+
+### 🧹 Maintenance
+
+- **Documentation improvements**: Reordered Core Concepts sidebar by conceptual layers
+- **Test runner improvements**: Renamed TestOptions to TestData for clarity
+- **Version bump**: Bumped to 0.23.0-beta for Data module addition.
+
 ## [0.22.0-beta] - 2026-06-23
 
 ### ✨ New Features
