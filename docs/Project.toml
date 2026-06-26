@@ -11,6 +11,7 @@ MarkdownAST = "d0879d2d-cac2-40c8-9cee-1863dc0c7391"
 
 [compat]
 ADTypes = "1"
+CTBase = "0.18"
 Coverage = "1"
 DifferentiationInterface = "0.7"
 Documenter = "1"
