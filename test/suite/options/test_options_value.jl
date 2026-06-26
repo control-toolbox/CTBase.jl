@@ -4,6 +4,7 @@ using Test: Test
 import CTBase.Exceptions
 using CTBase: CTBase
 import CTBase.Options
+import CTBase.Core
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -18,7 +19,6 @@ function test_options_value()
         Test.@testset "Exports verification" begin
             Test.@test isdefined(CTBase, :Options)
             Test.@test isdefined(Options, :OptionValue)
-            Test.@test isdefined(Options, :NotProvided)
             Test.@test isdefined(Options, :value)
             Test.@test isdefined(Options, :source)
             Test.@test isdefined(Options, :is_user)

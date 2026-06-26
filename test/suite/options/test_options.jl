@@ -4,6 +4,7 @@ using Test: Test
 import CTBase.Exceptions
 using CTBase: CTBase
 import CTBase.Options
+import CTBase.Core
 using CTBase.Options  # For testing exported symbols
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -38,7 +39,7 @@ function test_options()
 
             # Test exported types
             Test.@testset "Exported Types" begin
-                for T in (NotProvidedType, OptionValue, OptionDefinition)
+                for T in (OptionValue, OptionDefinition)
                     Test.@testset "$(nameof(T))" begin
                         Test.@test isdefined(Options, nameof(T))
                         Test.@test isdefined(CurrentModule, nameof(T))
@@ -47,14 +48,12 @@ function test_options()
                 end
             end
 
-            # Test exported constants
-            Test.@testset "Exported Constants" begin
-                for c in (:NotProvided,)
-                    Test.@testset "$c" begin
-                        Test.@test isdefined(Options, c)
-                        Test.@test isdefined(CurrentModule, c)
-                    end
-                end
+            # NotProvided / NotProvidedType live in CTBase.Core, not in Options
+            Test.@testset "NotProvided moved to Core" begin
+                Test.@test isdefined(Core, :NotProvided)
+                Test.@test isdefined(Core, :NotProvidedType)
+                Test.@test !isdefined(Options, :NotProvided)
+                Test.@test !isdefined(Options, :NotProvidedType)
             end
 
             # Test exported functions
@@ -95,7 +94,7 @@ function test_options()
         Test.@testset "NotProvided and NotStored" begin
             Test.@testset "NotProvided display" begin
                 buf = IOBuffer()
-                show(buf, Options.NotProvided)
+                show(buf, Core.NotProvided)
                 Test.@test String(take!(buf)) == "NotProvided"
             end
 
@@ -263,7 +262,7 @@ function test_options()
                 opt_def_no_default = Options.OptionDefinition(
                     name=:required_option,
                     type=Int,
-                    default=Options.NotProvided,
+                    default=Core.NotProvided,
                     description="Required option",
                 )
 
@@ -316,7 +315,7 @@ function test_options()
                 opt_def_no_default = Options.OptionDefinition(
                     name=:required_option,
                     type=Int,
-                    default=Options.NotProvided,
+                    default=Core.NotProvided,
                     description="Required option",
                 )
                 options = NamedTuple()
@@ -339,7 +338,7 @@ function test_options()
                     Options.OptionDefinition(
                         name=:option3,
                         type=Float64,
-                        default=Options.NotProvided,
+                        default=Core.NotProvided,
                         description="Third option (required)",
                     ),
                 ]

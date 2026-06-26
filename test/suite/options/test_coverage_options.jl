@@ -3,6 +3,7 @@ module TestCoverageOptions
 using Test: Test
 import CTBase.Exceptions
 import CTBase.Options
+import CTBase.Core
 import CTBase.Strategies
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -43,7 +44,7 @@ function test_coverage_options()
 
         Test.@testset "NotProvided display" begin
             buf = IOBuffer()
-            show(buf, Options.NotProvided)
+            show(buf, Core.NotProvided)
             Test.@test String(take!(buf)) == "NotProvided"
         end
 

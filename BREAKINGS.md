@@ -2,6 +2,30 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Breaking changes (0.25.0-beta)
+
+- **`NotProvided` / `NotProvidedType` removed from `CTBase.Options`.** They now live and are
+  exported **only** in `CTBase.Core`. `CTBase.Options.NotProvided` and
+  `CTBase.Options.NotProvidedType` no longer exist, and `using CTBase.Options` no longer
+  brings these names into scope.
+
+  **Migration:** replace `Options.NotProvided` → `Core.NotProvided` and
+  `Options.NotProvidedType` → `Core.NotProvidedType` (fully qualified: `CTBase.Core.NotProvided`).
+
+  ```julia
+  # before
+  using CTBase.Options
+  OptionDefinition(name=:x, type=Int, default=NotProvided)
+
+  # after
+  import CTBase.Core
+  using CTBase.Options
+  OptionDefinition(name=:x, type=Int, default=Core.NotProvided)
+  ```
+
+- `NotStored` / `NotStoredType` are unchanged and remain extraction-internal to
+  `CTBase.Options` (the defining file was renamed `not_provided.jl` → `not_stored.jl`).
+
 ## Non-breaking note (0.24.0-beta)
 
 - **Differentiation module**: Added comprehensive AD backend infrastructure for computing gradients

@@ -77,7 +77,7 @@ function extract_option(kwargs::NamedTuple, def::OptionDefinition)
     end
 
     # Not found - check if default is NotProvided
-    if def.default isa NotProvidedType
+    if def.default isa Core.NotProvidedType
         # No default and not provided by user - return NotStored to signal "don't store"
         return NotStored, kwargs
     end
@@ -223,7 +223,7 @@ builders to use their own defaults. Options with explicit `nothing` values are i
 opts = (backend = OptionValue(:optimized, :user), 
         show_time = OptionValue(false, :default),
         minimize = OptionValue(nothing, :default),
-        optional = OptionValue(NotProvided, :default))
+        optional = OptionValue(CTBase.Core.NotProvided, :default))
 
 extract_raw_options(opts)
 # (backend = :optimized, show_time = false, minimize = nothing)
@@ -236,7 +236,7 @@ function extract_raw_options(options::NamedTuple)
     for (k, v) in pairs(options)
         val = v isa OptionValue ? v.value : v
         # Filter out NotProvided values, but keep nothing values
-        if !(val isa NotProvidedType)
+        if !(val isa Core.NotProvidedType)
             raw_opts_dict[k] = val
         end
     end
