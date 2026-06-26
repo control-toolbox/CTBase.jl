@@ -2,6 +2,7 @@ module TestOptionsNotProvided
 
 using Test: Test
 import CTBase.Options
+import CTBase.Core
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
@@ -13,9 +14,9 @@ Test the NotProvided type and its behavior in the option system.
 function test_not_provided()
     Test.@testset "NotProvided Type Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
         Test.@testset "NotProvided Basic Properties" begin
-            Test.@test Options.NotProvided isa Options.NotProvidedType
-            Test.@test typeof(Options.NotProvided) == Options.NotProvidedType
-            Test.@test string(Options.NotProvided) == "NotProvided"
+            Test.@test Core.NotProvided isa Core.NotProvidedType
+            Test.@test typeof(Core.NotProvided) == Core.NotProvidedType
+            Test.@test string(Core.NotProvided) == "NotProvided"
         end
 
         Test.@testset "OptionDefinition with NotProvided" begin
@@ -23,12 +24,12 @@ function test_not_provided()
             def_not_provided = Options.OptionDefinition(
                 name=:optional_param,
                 type=Union{Int,Nothing},
-                default=Options.NotProvided,
+                default=Core.NotProvided,
                 description="Optional parameter",
             )
 
-            Test.@test Options.default(def_not_provided) === Options.NotProvided
-            Test.@test Options.default(def_not_provided) isa Options.NotProvidedType
+            Test.@test Options.default(def_not_provided) === Core.NotProvided
+            Test.@test Options.default(def_not_provided) isa Core.NotProvidedType
 
             # Option with nothing default (different!)
             def_nothing = Options.OptionDefinition(
@@ -39,14 +40,14 @@ function test_not_provided()
             )
 
             Test.@test Options.default(def_nothing) === nothing
-            Test.@test !(Options.default(def_nothing) isa Options.NotProvidedType)
+            Test.@test !(Options.default(def_nothing) isa Core.NotProvidedType)
         end
 
         Test.@testset "extract_option with NotProvided" begin
             def = Options.OptionDefinition(
                 name=:optional,
                 type=Union{Int,Nothing},
-                default=Options.NotProvided,
+                default=Core.NotProvided,
                 description="Optional",
             )
 
@@ -79,7 +80,7 @@ function test_not_provided()
                 Options.OptionDefinition(
                     name=:optional,
                     type=Union{Int,Nothing},
-                    default=Options.NotProvided,
+                    default=Core.NotProvided,
                     description="Optional",
                 ),
                 Options.OptionDefinition(
@@ -104,7 +105,7 @@ function test_not_provided()
 
             # Verify NO NotProvidedType in extracted values
             for (k, v) in pairs(extracted)
-                Test.@test !(Options.value(v) isa Options.NotProvidedType)
+                Test.@test !(Options.value(v) isa Core.NotProvidedType)
             end
         end
 
@@ -120,7 +121,7 @@ function test_not_provided()
                 Options.OptionDefinition(
                     name=:minimize,
                     type=Union{Bool,Nothing},
-                    default=Options.NotProvided,
+                    default=Core.NotProvided,
                     description="Minimize with NotProvided",
                 ),
             ]
@@ -168,7 +169,7 @@ function test_not_provided()
 
             # Verify NO NotProvidedType in raw values
             for (k, v) in pairs(stored_options)
-                Test.@test !(Options.value(v) isa Options.NotProvidedType)
+                Test.@test !(Options.value(v) isa Core.NotProvidedType)
             end
         end
 
@@ -181,7 +182,7 @@ function test_not_provided()
                 minimize=Options.OptionDefinition(
                     name=:minimize,
                     type=Union{Bool,Nothing},
-                    default=Options.NotProvided,
+                    default=Core.NotProvided,
                     description="Minimize flag",
                 ),
                 backend=Options.OptionDefinition(
@@ -202,7 +203,7 @@ function test_not_provided()
 
             # Verify NO NotProvidedType in extracted
             for (k, v) in pairs(extracted)
-                Test.@test !(v.value isa Options.NotProvidedType)
+                Test.@test !(v.value isa Core.NotProvidedType)
             end
 
             # Extract raw options (what gets passed to builder)
@@ -215,7 +216,7 @@ function test_not_provided()
 
             # Verify NO NotProvidedType in raw
             for (k, v) in pairs(raw)
-                Test.@test !(v isa Options.NotProvidedType)
+                Test.@test !(v isa Core.NotProvidedType)
             end
         end
     end

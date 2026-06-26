@@ -5,6 +5,23 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0-beta] - 2026-06-26
+
+### ⚠️ Breaking Changes
+
+- **NotProvided moved to Core (no re-export)**: `NotProvidedType` and `NotProvided` are now
+  defined and exported **only** from `CTBase.Core`. They are **no longer available** from
+  `CTBase.Options` — `CTBase.Options.NotProvided` / `CTBase.Options.NotProvidedType` no longer
+  exist. Replace any `Options.NotProvided` usage with `Core.NotProvided` (or
+  `CTBase.Core.NotProvided`).
+- `CTBase.Core.NotProvided` is the canonical ecosystem-wide "not provided" sentinel.
+
+### 🔄 Refactoring
+
+- `CTBase.Options` now only defines the extraction-internal `NotStored` / `NotStoredType`
+  sentinels (file renamed `not_provided.jl` → `not_stored.jl`). Internal Options/Strategies
+  code references `Core.NotProvidedType` directly.
+
 ## [0.24.0-beta] - 2026-06-25
 
 ### ✨ New Features

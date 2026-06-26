@@ -85,7 +85,7 @@ struct OptionDefinition{T}
         computed::Bool=false,
     ) where {T}
         # Validate with custom validator if provided (skip for NotProvided)
-        if validator !== nothing && !(default isa NotProvidedType)
+        if validator !== nothing && !(default isa Core.NotProvidedType)
             try
                 validator(default)
             catch e
@@ -152,7 +152,7 @@ julia> # No default - creates NotProvidedType
 julia> def3 = OptionDefinition(
            name = :input_file,
            type = String,
-           default = NotProvided,
+           default = CTBase.Core.NotProvided,
            description = "Input file path"
        )
 OptionDefinition{NotProvidedType}(...)
@@ -270,7 +270,7 @@ julia> using CTBase.Options
 julia> def = _construct_option_definition(
            :input_file,
            String,
-           NotProvided,
+           CTBase.Core.NotProvided,
            "Input file path",
            (:input,)
        )
@@ -285,13 +285,13 @@ See also: `OptionDefinition`, `NotProvided`, `is_required`
 function _construct_option_definition(
     name::Symbol,
     type::Type,
-    default::NotProvidedType,
+    default::Core.NotProvidedType,
     description::String,
     aliases::Tuple{Vararg{Symbol}},
     validator::Union{Function,Nothing},
     computed::Bool,
 )
-    return OptionDefinition{NotProvidedType}(;
+    return OptionDefinition{Core.NotProvidedType}(;
         name=name,
         type=type,
         default=default,
@@ -543,7 +543,7 @@ Returns `true` when the default value is `NotProvided`.
 ```julia-repl
 julia> using CTBase.Options
 
-julia> def = OptionDefinition(name=:input, type=String, default=NotProvided,
+julia> def = OptionDefinition(name=:input, type=String, default=CTBase.Core.NotProvided,
                           description="Input file")
 OptionDefinition{NotProvidedType}(...)
 
@@ -553,7 +553,7 @@ true
 
 See also: `has_default`, `default`
 """
-is_required(def::OptionDefinition) = def.default isa NotProvidedType
+is_required(def::OptionDefinition) = def.default isa Core.NotProvidedType
 
 """
 $(TYPEDSIGNATURES)
@@ -579,7 +579,7 @@ true
 
 See also: `is_required`, `default`
 """
-has_default(def::OptionDefinition) = !(def.default isa NotProvidedType)
+has_default(def::OptionDefinition) = !(def.default isa Core.NotProvidedType)
 
 """
 $(TYPEDSIGNATURES)

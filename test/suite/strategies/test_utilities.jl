@@ -3,6 +3,7 @@ module TestStrategiesUtilities
 using Test: Test
 import CTBase.Strategies
 import CTBase.Options
+import CTBase.Core
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -372,7 +373,7 @@ function test_utilities()
                 # Create StrategyOptions with NotProvided value
                 opts = Strategies.StrategyOptions(
                     max_iter=Options.OptionValue(500, :user),
-                    optional=Options.OptionValue(Options.NotProvided, :default),
+                    optional=Options.OptionValue(Core.NotProvided, :default),
                 )
 
                 # Convert to Dict

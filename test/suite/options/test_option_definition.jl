@@ -3,6 +3,7 @@ module TestOptionsOptionDefinition
 using Test: Test
 import CTBase.Exceptions
 import CTBase.Options
+import CTBase.Core
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
@@ -147,7 +148,7 @@ function test_option_definition()
             def_required = Options.OptionDefinition(
                 name=:input,
                 type=String,
-                default=Options.NotProvided,
+                default=Core.NotProvided,
                 description="Input file",
             )
             def_optional = Options.OptionDefinition(
@@ -211,17 +212,17 @@ function test_option_definition()
                 def = Options._construct_option_definition(
                     :input_file,
                     String,
-                    Options.NotProvided,
+                    Core.NotProvided,
                     "Input file path",
                     (:input,),
                     nothing,
                     false,
                 )
 
-                Test.@test def isa Options.OptionDefinition{Options.NotProvidedType}
+                Test.@test def isa Options.OptionDefinition{Core.NotProvidedType}
                 Test.@test Options.name(def) == :input_file
                 Test.@test Options.type(def) == String
-                Test.@test Options.default(def) === Options.NotProvided
+                Test.@test Options.default(def) === Core.NotProvided
                 Test.@test Options.description(def) == "Input file path"
                 Test.@test Options.aliases(def) == (:input,)
                 Test.@test Options.validator(def) === nothing
@@ -331,11 +332,11 @@ function test_option_definition()
                 def_not_provided = Options.OptionDefinition(
                     name=:input_file,
                     type=String,
-                    default=Options.NotProvided,
+                    default=Core.NotProvided,
                     description="Input file",
                 )
                 Test.@test def_not_provided isa
-                    Options.OptionDefinition{Options.NotProvidedType}
+                    Options.OptionDefinition{Core.NotProvidedType}
                 Test.@test Options.type(def_not_provided) == String  # type is preserved
 
                 # Test that public constructor with concrete value creates correct type
@@ -423,7 +424,7 @@ function test_option_definition()
             required_def = Options.OptionDefinition(
                 name=:input,
                 type=String,
-                default=Options.NotProvided,
+                default=Core.NotProvided,
                 description="Input file",
             )
             Test.@test Options.has_default(required_def) === false
@@ -608,7 +609,7 @@ Test.@testset "Getters and introspection" begin
     Test.@test Options.has_validator(def) === true
 
     required_def = Options.OptionDefinition(
-        name=:input, type=String, default=Options.NotProvided, description="Input file"
+        name=:input, type=String, default=Core.NotProvided, description="Input file"
     )
     Test.@test Options.has_default(required_def) === false
     Test.@test Options.is_required(required_def) === true
