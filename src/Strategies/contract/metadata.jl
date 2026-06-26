@@ -158,7 +158,7 @@ struct StrategyMetadata{NT<:NamedTuple}
         specs_nt = NamedTuple{names_tuple}(defs)
         NT = typeof(specs_nt)
 
-        new{NT}(specs_nt)
+        return new{NT}(specs_nt)
     end
 end
 

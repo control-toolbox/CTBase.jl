@@ -58,7 +58,7 @@ Hamiltonian: non-autonomous, fixed (no variable)
 
 See also: [`CTBase.Data.AbstractHamiltonian`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-struct Hamiltonian{F<:Function, TD, VD} <: AbstractHamiltonian{TD, VD}
+struct Hamiltonian{F<:Function,TD,VD} <: AbstractHamiltonian{TD,VD}
     f::F
 end
 
@@ -105,13 +105,12 @@ Hamiltonian: autonomous, non-fixed (variable)
 
 See also: [`CTBase.Data.Hamiltonian`](@ref), [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref).
 """
-function Hamiltonian(f;
-    is_autonomous::Bool = __is_autonomous(),
-    is_variable::Bool   = __is_variable()
+function Hamiltonian(
+    f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
 )
     TD = is_autonomous ? Traits.Autonomous : Traits.NonAutonomous
-    VD = is_variable   ? Traits.NonFixed   : Traits.Fixed
-    return Hamiltonian{typeof(f), TD, VD}(f)
+    VD = is_variable ? Traits.NonFixed : Traits.Fixed
+    return Hamiltonian{typeof(f),TD,VD}(f)
 end
 
 # =============================================================================
@@ -119,23 +118,21 @@ end
 # =============================================================================
 
 function Hamiltonian(
-    f,
-    ::Type{TD}, ::Type{VD},
-) where {
-    TD <: Traits.TimeDependence,
-    VD <: Traits.VariableDependence,
-}
-    return Hamiltonian{typeof(f), TD, VD}(f)
+    f, ::Type{TD}, ::Type{VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
+    return Hamiltonian{typeof(f),TD,VD}(f)
 end
 
 # =============================================================================
 # Natural call signatures - one per trait combination
 # =============================================================================
 
-(H::Hamiltonian{<:Function, Traits.Autonomous, Traits.Fixed})(x, p) = H.f(x, p)
-(H::Hamiltonian{<:Function, Traits.NonAutonomous, Traits.Fixed})(t, x, p) = H.f(t, x, p)
-(H::Hamiltonian{<:Function, Traits.Autonomous, Traits.NonFixed})(x, p, v) = H.f(x, p, v)
-(H::Hamiltonian{<:Function, Traits.NonAutonomous, Traits.NonFixed})(t, x, p, v) = H.f(t, x, p, v)
+(H::Hamiltonian{<:Function,Traits.Autonomous,Traits.Fixed})(x, p) = H.f(x, p)
+(H::Hamiltonian{<:Function,Traits.NonAutonomous,Traits.Fixed})(t, x, p) = H.f(t, x, p)
+(H::Hamiltonian{<:Function,Traits.Autonomous,Traits.NonFixed})(x, p, v) = H.f(x, p, v)
+function (H::Hamiltonian{<:Function,Traits.NonAutonomous,Traits.NonFixed})(t, x, p, v)
+    return H.f(t, x, p, v)
+end
 
 # =============================================================================
 # Uniform (t, x, p, v) call - used by future HamiltonianSystem.rhs
@@ -143,9 +140,9 @@ end
 # (NonAutonomous, NonFixed) is already covered by the natural signature above.
 # =============================================================================
 
-(H::Hamiltonian{<:Function, Traits.Autonomous, Traits.Fixed})(_, x, p, _) = H.f(x, p)
-(H::Hamiltonian{<:Function, Traits.NonAutonomous, Traits.Fixed})(t, x, p, _) = H.f(t, x, p)
-(H::Hamiltonian{<:Function, Traits.Autonomous, Traits.NonFixed})(_, x, p, v) = H.f(x, p, v)
+(H::Hamiltonian{<:Function,Traits.Autonomous,Traits.Fixed})(_, x, p, _) = H.f(x, p)
+(H::Hamiltonian{<:Function,Traits.NonAutonomous,Traits.Fixed})(t, x, p, _) = H.f(t, x, p)
+(H::Hamiltonian{<:Function,Traits.Autonomous,Traits.NonFixed})(_, x, p, v) = H.f(x, p, v)
 
 # =============================================================================
 # Base.show
@@ -174,13 +171,13 @@ Hamiltonian: autonomous, fixed (no variable)
   uniform call: h(t, x, p, v)
 ```
 """
-function Base.show(io::IO, ::Hamiltonian{F, TD, VD}) where {F, TD, VD}
+function Base.show(io::IO, ::Hamiltonian{F,TD,VD}) where {F,TD,VD}
     header = "Hamiltonian: $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_h(TD, VD)
     uniform = _uniform_sig_h()
     println(io, header)
     println(io, "  natural call: ", natural)
-    print(io, "  uniform call: ", uniform)
+    return print(io, "  uniform call: ", uniform)
 end
 
 """
@@ -197,6 +194,6 @@ This method is called automatically when displaying a Hamiltonian in the Julia R
 
 See also: [`CTBase.Data.Hamiltonian`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", h::Hamiltonian{F, TD, VD}) where {F, TD, VD}
-    show(io, h)
+function Base.show(io::IO, ::MIME"text/plain", h::Hamiltonian{F,TD,VD}) where {F,TD,VD}
+    return show(io, h)
 end

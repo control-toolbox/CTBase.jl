@@ -29,7 +29,7 @@ Strategies.id(::Type{<:FakeStrategy}) = :fake
 Strategies.id(::Type{<:IncompleteStrategy}) = :incomplete
 
 function Strategies.metadata(::Type{<:FakeStrategy})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter,
             type=Int,
@@ -57,13 +57,13 @@ end
 
 Strategies.id(::Type{<:FakeStrategyWithDescription}) = :fake_described
 function Strategies.metadata(::Type{<:FakeStrategyWithDescription})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(; name=:n, type=Int, default=10, description="Grid size.")
     )
 end
 Strategies.options(s::FakeStrategyWithDescription) = s.options
 function Strategies.description(::Type{<:FakeStrategyWithDescription})
-    "A strategy for testing description display.\nSee: https://example.com"
+    return "A strategy for testing description display.\nSee: https://example.com"
 end
 
 # ============================================================================
@@ -145,7 +145,9 @@ function test_abstract_strategy()
 
             Test.@testset "Collection interface - getindex" begin
                 # Use build_strategy_options to properly initialize alias_map
-                fake_opts = Strategies.build_strategy_options(FakeStrategy; max_iter=200, tol=1e-8)
+                fake_opts = Strategies.build_strategy_options(
+                    FakeStrategy; max_iter=200, tol=1e-8
+                )
                 fake_strategy = FakeStrategy(fake_opts)
 
                 # Test getindex with canonical name
@@ -159,7 +161,9 @@ function test_abstract_strategy()
 
             Test.@testset "Collection interface - haskey" begin
                 # Use build_strategy_options to properly initialize alias_map
-                fake_opts = Strategies.build_strategy_options(FakeStrategy; max_iter=200, tol=1e-8)
+                fake_opts = Strategies.build_strategy_options(
+                    FakeStrategy; max_iter=200, tol=1e-8
+                )
                 fake_strategy = FakeStrategy(fake_opts)
 
                 # Test haskey with canonical name
@@ -176,7 +180,9 @@ function test_abstract_strategy()
 
             Test.@testset "Collection interface - keys" begin
                 # Use build_strategy_options to properly initialize alias_map
-                fake_opts = Strategies.build_strategy_options(FakeStrategy; max_iter=200, tol=1e-8)
+                fake_opts = Strategies.build_strategy_options(
+                    FakeStrategy; max_iter=200, tol=1e-8
+                )
                 fake_strategy = FakeStrategy(fake_opts)
 
                 # Test keys returns all option names

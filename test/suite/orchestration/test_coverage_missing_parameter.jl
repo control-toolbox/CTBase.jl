@@ -136,5 +136,5 @@ end
 end # module
 
 function test_coverage_missing_parameter()
-    TestCoverageMissingParameter.test_coverage_missing_parameter()
+    return TestCoverageMissingParameter.test_coverage_missing_parameter()
 end

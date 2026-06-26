@@ -1,6 +1,6 @@
 module TestHelpers
 
-import Test
+using Test: Test
 import CTBase.Data
 import CTBase.Traits
 
@@ -42,9 +42,12 @@ function test_helpers()
         Test.@testset "Hamiltonian Signature Helpers" begin
             Test.@testset "_natural_sig_h" begin
                 Test.@test Data._natural_sig_h(Traits.Autonomous, Traits.Fixed) == "h(x, p)"
-                Test.@test Data._natural_sig_h(Traits.NonAutonomous, Traits.Fixed) == "h(t, x, p)"
-                Test.@test Data._natural_sig_h(Traits.Autonomous, Traits.NonFixed) == "h(x, p, v)"
-                Test.@test Data._natural_sig_h(Traits.NonAutonomous, Traits.NonFixed) == "h(t, x, p, v)"
+                Test.@test Data._natural_sig_h(Traits.NonAutonomous, Traits.Fixed) ==
+                    "h(t, x, p)"
+                Test.@test Data._natural_sig_h(Traits.Autonomous, Traits.NonFixed) ==
+                    "h(x, p, v)"
+                Test.@test Data._natural_sig_h(Traits.NonAutonomous, Traits.NonFixed) ==
+                    "h(t, x, p, v)"
             end
 
             Test.@testset "_uniform_sig_h" begin
@@ -58,17 +61,33 @@ function test_helpers()
 
         Test.@testset "VectorField Signature Helpers" begin
             Test.@testset "_natural_sig_vf - OutOfPlace" begin
-                Test.@test Data._natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace) == "f(x)"
-                Test.@test Data._natural_sig_vf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace) == "f(t, x)"
-                Test.@test Data._natural_sig_vf(Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace) == "f(x, v)"
-                Test.@test Data._natural_sig_vf(Traits.NonAutonomous, Traits.NonFixed, Traits.OutOfPlace) == "f(t, x, v)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(t, x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace
+                ) == "f(x, v)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.NonAutonomous, Traits.NonFixed, Traits.OutOfPlace
+                ) == "f(t, x, v)"
             end
 
             Test.@testset "_natural_sig_vf - InPlace" begin
-                Test.@test Data._natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.InPlace) == "f(dx, x)"
-                Test.@test Data._natural_sig_vf(Traits.NonAutonomous, Traits.Fixed, Traits.InPlace) == "f(dx, t, x)"
-                Test.@test Data._natural_sig_vf(Traits.Autonomous, Traits.NonFixed, Traits.InPlace) == "f(dx, x, v)"
-                Test.@test Data._natural_sig_vf(Traits.NonAutonomous, Traits.NonFixed, Traits.InPlace) == "f(dx, t, x, v)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.Autonomous, Traits.Fixed, Traits.InPlace
+                ) == "f(dx, x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.NonAutonomous, Traits.Fixed, Traits.InPlace
+                ) == "f(dx, t, x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.Autonomous, Traits.NonFixed, Traits.InPlace
+                ) == "f(dx, x, v)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.NonAutonomous, Traits.NonFixed, Traits.InPlace
+                ) == "f(dx, t, x, v)"
             end
 
             Test.@testset "_uniform_sig_vf" begin
@@ -83,17 +102,33 @@ function test_helpers()
 
         Test.@testset "HamiltonianVectorField Signature Helpers" begin
             Test.@testset "_natural_sig_hvf - OutOfPlace" begin
-                Test.@test Data._natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace) == "f(x, p)"
-                Test.@test Data._natural_sig_hvf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace) == "f(t, x, p)"
-                Test.@test Data._natural_sig_hvf(Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace) == "f(x, p, v)"
-                Test.@test Data._natural_sig_hvf(Traits.NonAutonomous, Traits.NonFixed, Traits.OutOfPlace) == "f(t, x, p, v)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(t, x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace
+                ) == "f(x, p, v)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.NonAutonomous, Traits.NonFixed, Traits.OutOfPlace
+                ) == "f(t, x, p, v)"
             end
 
             Test.@testset "_natural_sig_hvf - InPlace" begin
-                Test.@test Data._natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.InPlace) == "f(dx, dp, x, p)"
-                Test.@test Data._natural_sig_hvf(Traits.NonAutonomous, Traits.Fixed, Traits.InPlace) == "f(dx, dp, t, x, p)"
-                Test.@test Data._natural_sig_hvf(Traits.Autonomous, Traits.NonFixed, Traits.InPlace) == "f(dx, dp, x, p, v)"
-                Test.@test Data._natural_sig_hvf(Traits.NonAutonomous, Traits.NonFixed, Traits.InPlace) == "f(dx, dp, t, x, p, v)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.Autonomous, Traits.Fixed, Traits.InPlace
+                ) == "f(dx, dp, x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.NonAutonomous, Traits.Fixed, Traits.InPlace
+                ) == "f(dx, dp, t, x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.Autonomous, Traits.NonFixed, Traits.InPlace
+                ) == "f(dx, dp, x, p, v)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.NonAutonomous, Traits.NonFixed, Traits.InPlace
+                ) == "f(dx, dp, t, x, p, v)"
             end
 
             Test.@testset "_uniform_sig_hvf" begin
@@ -109,7 +144,8 @@ function test_helpers()
 
                 Test.@testset "HamiltonianVectorField uniform signatures" begin
                     Test.@test Data._uniform_sig_hvf(Traits.OutOfPlace) == "f(t, x, p, v)"
-                    Test.@test Data._uniform_sig_hvf(Traits.InPlace) == "f(dx, dp, t, x, p, v)"
+                    Test.@test Data._uniform_sig_hvf(Traits.InPlace) ==
+                        "f(dx, dp, t, x, p, v)"
                 end
             end
 

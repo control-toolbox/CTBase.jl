@@ -64,7 +64,10 @@ avoiding silent zero-gradient bugs in nested-AD contexts (e.g. inside NonlinearS
 function Differentiation.hamiltonian_gradient(
     backend::Differentiation.DifferentiationInterface,
     h::Data.AbstractHamiltonian,
-    t, x, p, v,
+    t,
+    x,
+    p,
+    v,
 )
     di_backend = Differentiation.ad_backend(backend)
     h_x(x_) = h(t, x_, p, v)
@@ -87,7 +90,10 @@ See the note in [`hamiltonian_gradient`](@ref) on why anonymous closures are use
 function Differentiation.variable_gradient(
     backend::Differentiation.DifferentiationInterface,
     h::Data.AbstractHamiltonian,
-    t, x, p, v,
+    t,
+    x,
+    p,
+    v,
 )
     di_backend = Differentiation.ad_backend(backend)
     h_v(v_) = h(t, x, p, v_)
@@ -115,9 +121,7 @@ Compute the gradient of a scalar function using DifferentiationInterface.jl.
 - [`CTBase.Differentiation.derivative`](@ref)
 """
 function Differentiation.gradient(
-    backend::Differentiation.DifferentiationInterface,
-    f::Function,
-    x::AbstractArray,
+    backend::Differentiation.DifferentiationInterface, f::Function, x::AbstractArray
 )
     ad = Differentiation.ad_backend(backend)
     return DI.gradient(f, ad, x)
@@ -140,9 +144,7 @@ Compute the gradient of a scalar function using DifferentiationInterface.jl (sca
 - [`CTBase.Differentiation.derivative`](@ref)
 """
 function Differentiation.gradient(
-    backend::Differentiation.DifferentiationInterface,
-    f::Function,
-    x::Real,
+    backend::Differentiation.DifferentiationInterface, f::Function, x::Real
 )
     ad = Differentiation.ad_backend(backend)
     return DI.derivative(f, ad, x)
@@ -165,9 +167,7 @@ Compute the derivative of a scalar function using DifferentiationInterface.jl.
 - [`CTBase.Differentiation.gradient`](@ref)
 """
 function Differentiation.derivative(
-    backend::Differentiation.DifferentiationInterface,
-    g::Function,
-    t::Real,
+    backend::Differentiation.DifferentiationInterface, g::Function, t::Real
 )
     ad = Differentiation.ad_backend(backend)
     return DI.derivative(g, ad, t)
@@ -194,10 +194,11 @@ function Differentiation.differentiate(
     f,
     ::Val{Slot},
     active,
-    consts::Vararg{Any, N},
-) where {Slot, N}
+    consts::Vararg{Any,N},
+) where {Slot,N}
     di = Differentiation.ad_backend(backend)
-    f_active(active_) = f(ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
+    f_active(active_) =
+        f(ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
     return _derivator(typeof(active))(f_active, di, active)
 end
 
@@ -218,10 +219,11 @@ function Differentiation.pushforward(
     ::Val{Slot},
     x,
     dx,
-    consts::Vararg{Any, N},
-) where {Slot, N}
+    consts::Vararg{Any,N},
+) where {Slot,N}
     di = Differentiation.ad_backend(backend)
-    f_slot(x_) = f(ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
+    f_slot(x_) =
+        f(ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
     return only(DI.pushforward(f_slot, di, x, (dx,)))
 end
 

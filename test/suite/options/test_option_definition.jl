@@ -112,7 +112,7 @@ function test_option_definition()
 
             # Invalid validator with invalid default (redirect stderr to hide @error logs)
             Test.@test_throws ErrorException redirect_stderr(devnull) do
-                Options.OptionDefinition(
+                return Options.OptionDefinition(
                     name=:test,
                     type=Int,
                     default=-5,

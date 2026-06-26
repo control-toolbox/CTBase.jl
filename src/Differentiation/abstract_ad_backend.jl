@@ -54,16 +54,16 @@ Compute the Hamiltonian gradient (∂H/∂x, ∂H/∂p) using the backend.
 See also: [`CTBase.Differentiation.variable_gradient`](@ref).
 """
 function hamiltonian_gradient(
-    backend::AbstractADBackend,
-    h::Data.AbstractHamiltonian,
-    t, x, p, v,
+    backend::AbstractADBackend, h::Data.AbstractHamiltonian, t, x, p, v
 )
-    throw(Exceptions.NotImplemented(
-        "hamiltonian_gradient not implemented for $(typeof(backend))",
-        required_method = "hamiltonian_gradient(backend::$(typeof(backend)), h, t, x, p, v)",
-        suggestion = "Implement hamiltonian_gradient for $(typeof(backend)) or load an extension that provides gradient computation (e.g., CTBaseDifferentiationInterface)",
-        context = "AD backend contract"
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "hamiltonian_gradient not implemented for $(typeof(backend))";
+            required_method="hamiltonian_gradient(backend::$(typeof(backend)), h, t, x, p, v)",
+            suggestion="Implement hamiltonian_gradient for $(typeof(backend)) or load an extension that provides gradient computation (e.g., CTBaseDifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
 end
 
 """
@@ -89,16 +89,16 @@ Compute the variable gradient ∂H/∂v using the backend.
 See also: [`CTBase.Differentiation.hamiltonian_gradient`](@ref).
 """
 function variable_gradient(
-    backend::AbstractADBackend,
-    h::Data.AbstractHamiltonian,
-    t, x, p, v,
+    backend::AbstractADBackend, h::Data.AbstractHamiltonian, t, x, p, v
 )
-    throw(Exceptions.NotImplemented(
-        "variable_gradient not implemented for $(typeof(backend))",
-        required_method = "variable_gradient(backend::$(typeof(backend)), h, t, x, p, v)",
-        suggestion = "Implement variable_gradient for $(typeof(backend)) or load an extension that provides gradient computation (e.g., CTBaseDifferentiationInterface)",
-        context = "AD backend contract"
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "variable_gradient not implemented for $(typeof(backend))";
+            required_method="variable_gradient(backend::$(typeof(backend)), h, t, x, p, v)",
+            suggestion="Implement variable_gradient for $(typeof(backend)) or load an extension that provides gradient computation (e.g., CTBaseDifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
 end
 
 """
@@ -124,12 +124,14 @@ Extract the AD backend from a backend strategy.
 See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref).
 """
 function ad_backend(backend::AbstractADBackend)
-    throw(Exceptions.NotImplemented(
-        "ad_backend not implemented for $(typeof(backend))";
-        required_method = "ad_backend(backend::$(typeof(backend)))",
-        suggestion = "Implement ad_backend for $(typeof(backend))",
-        context = "AD backend contract",
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "ad_backend not implemented for $(typeof(backend))";
+            required_method="ad_backend(backend::$(typeof(backend)))",
+            suggestion="Implement ad_backend for $(typeof(backend))",
+            context="AD backend contract",
+        ),
+    )
 end
 
 # =============================================================================
@@ -161,12 +163,14 @@ See also: [`CTBase.Differentiation.derivative`](@ref),
 [`CTBase.Differentiation.hamiltonian_gradient`](@ref).
 """
 function gradient(backend::AbstractADBackend, f::Function, x)
-    throw(Exceptions.NotImplemented(
-        "gradient not implemented for $(typeof(backend))",
-        required_method = "gradient(backend::$(typeof(backend)), f::Function, x)",
-        suggestion = "Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
-        context = "AD backend contract",
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "gradient not implemented for $(typeof(backend))";
+            required_method="gradient(backend::$(typeof(backend)), f::Function, x)",
+            suggestion="Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
 end
 
 """
@@ -194,12 +198,14 @@ See also: [`CTBase.Differentiation.gradient`](@ref),
 [`CTBase.Differentiation.variable_gradient`](@ref).
 """
 function derivative(backend::AbstractADBackend, g::Function, t::Real)
-    throw(Exceptions.NotImplemented(
-        "derivative not implemented for $(typeof(backend))",
-        required_method = "derivative(backend::$(typeof(backend)), g::Function, t::Real)",
-        suggestion = "Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
-        context = "AD backend contract",
-    ))
+    return throw(
+        Exceptions.NotImplemented(
+            "derivative not implemented for $(typeof(backend))";
+            required_method="derivative(backend::$(typeof(backend)), g::Function, t::Real)",
+            suggestion="Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
 end
 
 # =============================================================================
@@ -231,13 +237,17 @@ slot order (skipping `Slot`).
 
 See also: [`CTBase.Differentiation.pushforward`](@ref).
 """
-function differentiate(backend::AbstractADBackend, f, ::Val{Slot}, active, consts...) where {Slot}
-    throw(Exceptions.NotImplemented(
-        "differentiate not implemented for $(typeof(backend))";
-        required_method = "differentiate(backend::$(typeof(backend)), f, ::Val{Slot}, active, consts...)",
-        suggestion = "Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
-        context = "AD backend contract",
-    ))
+function differentiate(
+    backend::AbstractADBackend, f, ::Val{Slot}, active, consts...
+) where {Slot}
+    return throw(
+        Exceptions.NotImplemented(
+            "differentiate not implemented for $(typeof(backend))";
+            required_method="differentiate(backend::$(typeof(backend)), f, ::Val{Slot}, active, consts...)",
+            suggestion="Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
 end
 
 """
@@ -265,11 +275,15 @@ at `x` along `dx`, with all other arguments frozen.
 
 See also: [`CTBase.Differentiation.differentiate`](@ref).
 """
-function pushforward(backend::AbstractADBackend, f, ::Val{Slot}, x, dx, consts...) where {Slot}
-    throw(Exceptions.NotImplemented(
-        "pushforward not implemented for $(typeof(backend))";
-        required_method = "pushforward(backend::$(typeof(backend)), f, ::Val{Slot}, x, dx, consts...)",
-        suggestion = "Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
-        context = "AD backend contract",
-    ))
+function pushforward(
+    backend::AbstractADBackend, f, ::Val{Slot}, x, dx, consts...
+) where {Slot}
+    return throw(
+        Exceptions.NotImplemented(
+            "pushforward not implemented for $(typeof(backend))";
+            required_method="pushforward(backend::$(typeof(backend)), f, ::Val{Slot}, x, dx, consts...)",
+            suggestion="Load CTBaseDifferentiationInterface (load DifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
 end

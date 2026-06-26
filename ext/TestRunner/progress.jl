@@ -197,15 +197,15 @@ function _format_progress_line(
 )
     # Derive styled codes from active palette, respecting IO colour capability
     fmt = CTBase.Core.get_format_codes(io)
-    reset  = fmt.reset
-    bold   = fmt.emphasis
-    dim    = fmt.muted
+    reset = fmt.reset
+    bold = fmt.emphasis
+    dim = fmt.muted
 
     bar_width = _bar_width(info.total, progress_bar_threshold)
     bar = _progress_bar(info.index, info.total; width=bar_width)
 
     severity = _severity(info.status)
-    color  = _color_for_severity(severity, io)
+    color = _color_for_severity(severity, io)
     if severity == 3
         symbol = "✗"
     elseif severity == 2

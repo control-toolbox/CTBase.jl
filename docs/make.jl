@@ -62,10 +62,7 @@ with_api_reference(src_dir) do api_pages
         warnonly=[:cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
-            repo=repo_url,
-            devbranch="main", 
-            devurl="dev", 
-            sidebar_drawer=true,
+            repo=repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
         ),
         pages=[
             "Getting Started" => "getting-started.md",
@@ -77,9 +74,11 @@ with_api_reference(src_dir) do api_pages
             ],
             "Strategies & Options" => [
                 "Options System" => joinpath("guide", "options-system.md"),
-                "Implementing a Strategy" => joinpath("guide", "implementing-a-strategy.md"),
+                "Implementing a Strategy" =>
+                    joinpath("guide", "implementing-a-strategy.md"),
                 "Strategy Parameters" => joinpath("guide", "strategy-parameters.md"),
-                "Orchestration & Routing" => joinpath("guide", "orchestration-and-routing.md"),
+                "Orchestration & Routing" =>
+                    joinpath("guide", "orchestration-and-routing.md"),
                 "Differentiation" => joinpath("guide", "differentiation.md"),
             ],
             "Developer Tools" => [

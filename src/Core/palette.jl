@@ -105,8 +105,17 @@ julia> CTBase.Core.set_palette!(CTBase.Core.MONOCHROME_PALETTE)
 See also: [`CTBase.Core.DEFAULT_PALETTE`](@ref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@ref), [`CTBase.Core.reset_palette!`](@ref)
 """
 const MONOCHROME_PALETTE = Palette(
-    Style(""), Style(""), Style(""), Style(""), Style(""), Style(""),
-    Style(""), Style(""), Style(""), Style(""), Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
+    Style(""),
 )
 
 """
@@ -228,17 +237,17 @@ function set_color!(role::Symbol, code::AbstractString)
     p = _ACTIVE_PALETTE[]
     new_style = Style(code)
     new_palette = Palette(
-        role == :name      ? new_style : p.name,
-        role == :type      ? new_style : p.type,
-        role == :value     ? new_style : p.value,
-        role == :keyword   ? new_style : p.keyword,
-        role == :count     ? new_style : p.count,
-        role == :label     ? new_style : p.label,
-        role == :emphasis  ? new_style : p.emphasis,
-        role == :muted     ? new_style : p.muted,
-        role == :error     ? new_style : p.error,
-        role == :warning   ? new_style : p.warning,
-        role == :success   ? new_style : p.success,
+        role == :name ? new_style : p.name,
+        role == :type ? new_style : p.type,
+        role == :value ? new_style : p.value,
+        role == :keyword ? new_style : p.keyword,
+        role == :count ? new_style : p.count,
+        role == :label ? new_style : p.label,
+        role == :emphasis ? new_style : p.emphasis,
+        role == :muted ? new_style : p.muted,
+        role == :error ? new_style : p.error,
+        role == :warning ? new_style : p.warning,
+        role == :success ? new_style : p.success,
     )
     _ACTIVE_PALETTE[] = new_palette
     return new_palette
@@ -301,7 +310,7 @@ julia> CTBase.Core.reset_palette!()
 See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.current_palette`](@ref), [`CTBase.Core.DEFAULT_PALETTE`](@ref)
 """
 function show_palette(io::IO=IOContext(stdout, :color => true))
-    p  = current_palette()
+    p = current_palette()
     fmt = (
         bold=get(io, :color, false) ? "\033[1m" : "",
         reset=get(io, :color, false) ? "\033[0m" : "",
@@ -327,20 +336,20 @@ function show_palette(io::IO=IOContext(stdout, :color => true))
     println(io, fmt.bold, "Semantic roles", rst)
     println(io)
     role_rows = [
-        (:name,     "MyStrategy",          "identifiers, type names, option keys"),
-        (:type,     "AbstractStrategy",    "type annotations, hierarchy entries"),
-        (:value,    "0.01",                "data / option values"),
-        (:keyword,  ":gradient",           "Julia symbols, aliases, IDs"),
-        (:count,    "3",                   "numeric counts, lengths"),
-        (:label,    "[default]",           "secondary labels, metadata tags"),
-        (:emphasis, "important text",      "message text, function names"),
-        (:muted,    "│ └─ → (0.5s)",       "structural chars, time suffix"),
-        (:error,    "IncorrectArgument",   "failures, missing extensions"),
-        (:warning,  "got: -0.5",           "notable values, skipped tests"),
-        (:success,  "hint: use set_color!", "positive info, passing tests"),
+        (:name, "MyStrategy", "identifiers, type names, option keys"),
+        (:type, "AbstractStrategy", "type annotations, hierarchy entries"),
+        (:value, "0.01", "data / option values"),
+        (:keyword, ":gradient", "Julia symbols, aliases, IDs"),
+        (:count, "3", "numeric counts, lengths"),
+        (:label, "[default]", "secondary labels, metadata tags"),
+        (:emphasis, "important text", "message text, function names"),
+        (:muted, "│ └─ → (0.5s)", "structural chars, time suffix"),
+        (:error, "IncorrectArgument", "failures, missing extensions"),
+        (:warning, "got: -0.5", "notable values, skipped tests"),
+        (:success, "hint: use set_color!", "positive info, passing tests"),
     ]
     for (role, sample, desc) in role_rows
-        st   = getfield(p, role)
+        st = getfield(p, role)
         name = rpad(string(role), 10)
         print(io, "  $(open(p.muted))$(name)$(rst)  $(swatch(st))  ")
         println(io, "$(open(st))$(sample)$(rst)  $(open(p.muted))$(desc)$(rst)")
@@ -350,33 +359,56 @@ function show_palette(io::IO=IOContext(stdout, :color => true))
     println(io)
     println(io, fmt.bold, "Mock describe / show", rst)
     println(io)
-    n  = open(p.name);    t  = open(p.type)
-    v  = open(p.value);   kw = open(p.keyword)
-    c  = open(p.count);   lb = open(p.label)
+    n = open(p.name);
+    t = open(p.type)
+    v = open(p.value);
+    kw = open(p.keyword)
+    c = open(p.count);
+    lb = open(p.label)
     mu = open(p.muted)
     println(io, "  $(n)MyStrategy$(rst) (instance, id=$(kw):gradient$(rst))")
     println(io, "  $(mu)│$(rst)")
-    println(io, "  $(mu)│$(rst)  $(lb)hierarchy: $(rst)$(t)MyStrategy$(rst) $(mu)→$(rst) $(t)AbstractStrategy$(rst)")
+    println(
+        io,
+        "  $(mu)│$(rst)  $(lb)hierarchy: $(rst)$(t)MyStrategy$(rst) $(mu)→$(rst) $(t)AbstractStrategy$(rst)",
+    )
     println(io, "  $(mu)│$(rst)  $(lb)options ($(rst)$(c)3$(rst)$(lb)):$(rst)")
     println(io, "  $(mu)│$(rst)")
-    println(io, "  $(mu)│  ├─$(rst)  $(n)step$(rst)::$(t)Float64$(rst)  = $(v)0.01$(rst)  $(lb)[default]$(rst)")
-    println(io, "  $(mu)│  ├─$(rst)  $(n)tol$(rst) ::$(t)Float64$(rst)  = $(v)1e-6$(rst)  $(lb)[user]$(rst)")
-    println(io, "  $(mu)│  └─$(rst)  $(n)verbose$(rst)::$(t)Bool$(rst)    = $(v)false$(rst) $(lb)[computed]$(rst)")
+    println(
+        io,
+        "  $(mu)│  ├─$(rst)  $(n)step$(rst)::$(t)Float64$(rst)  = $(v)0.01$(rst)  $(lb)[default]$(rst)",
+    )
+    println(
+        io,
+        "  $(mu)│  ├─$(rst)  $(n)tol$(rst) ::$(t)Float64$(rst)  = $(v)1e-6$(rst)  $(lb)[user]$(rst)",
+    )
+    println(
+        io,
+        "  $(mu)│  └─$(rst)  $(n)verbose$(rst)::$(t)Bool$(rst)    = $(v)false$(rst) $(lb)[computed]$(rst)",
+    )
 
     # ── Mock error ─────────────────────────────────────────────────────────
     println(io)
     println(io, fmt.bold, "Mock exception", rst)
     println(io)
-    er = open(p.error);   em = open(p.emphasis)
-    wa = open(p.warning); su = open(p.success)
-    println(io, "  $(er)IncorrectArgument$(rst) $(mu)→$(rst) $(em)my_solver$(rst), $(kw)script.jl:42$(rst)")
+    er = open(p.error);
+    em = open(p.emphasis)
+    wa = open(p.warning);
+    su = open(p.success)
+    println(
+        io,
+        "  $(er)IncorrectArgument$(rst) $(mu)→$(rst) $(em)my_solver$(rst), $(kw)script.jl:42$(rst)",
+    )
     println(io, "  $(mu)│$(rst)")
     println(io, "  $(mu)│$(rst)  $(em)Invalid value for option :step$(rst)")
     println(io, "  $(mu)│$(rst)")
     println(io, "  $(mu)│$(rst)  $(em)Got     $(rst)  $(wa)-0.5$(rst)")
     println(io, "  $(mu)│$(rst)  $(em)Expected$(rst)  $(su)> 0.0$(rst)")
     println(io, "  $(mu)│$(rst)")
-    println(io, "  $(mu)│$(rst)  $(em)Hint    $(rst)  $(su)Use a positive step size for :step$(rst)")
+    println(
+        io,
+        "  $(mu)│$(rst)  $(em)Hint    $(rst)  $(su)Use a positive step size for :step$(rst)",
+    )
     println(io, "  $(mu)└─$(rst)")
     return nothing
 end

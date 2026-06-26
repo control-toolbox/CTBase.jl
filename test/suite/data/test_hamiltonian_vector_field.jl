@@ -1,6 +1,6 @@
 module TestHamiltonianVectorField
 
-import Test
+using Test: Test
 import CTBase.Data: Data
 import CTBase.Traits: Traits
 import CTBase.Exceptions
@@ -18,106 +18,136 @@ _bad_arity_hvf(x) = (x, -x)
 
 function test_hamiltonian_vector_field()
     Test.@testset "Hamiltonian Vector Field Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
-        
+
         # ====================================================================
         # UNIT TESTS - Construction
         # ====================================================================
-        
+
         Test.@testset "Construction" begin
             # Autonomous, Fixed
-            hvf_autonomous_fixed = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+            hvf_autonomous_fixed = Data.HamiltonianVectorField(
+                (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+            )
             Test.@test hvf_autonomous_fixed isa Data.HamiltonianVectorField
             Test.@test Traits.time_dependence(hvf_autonomous_fixed) == Traits.Autonomous
             Test.@test Traits.variable_dependence(hvf_autonomous_fixed) == Traits.Fixed
-            
+
             # NonAutonomous, Fixed
-            hvf_nonautonomous_fixed = Data.HamiltonianVectorField((t, x, p) -> (x, -p); is_autonomous=false, is_variable=false)
+            hvf_nonautonomous_fixed = Data.HamiltonianVectorField(
+                (t, x, p) -> (x, -p); is_autonomous=false, is_variable=false
+            )
             Test.@test hvf_nonautonomous_fixed isa Data.HamiltonianVectorField
-            Test.@test Traits.time_dependence(hvf_nonautonomous_fixed) == Traits.NonAutonomous
+            Test.@test Traits.time_dependence(hvf_nonautonomous_fixed) ==
+                Traits.NonAutonomous
             Test.@test Traits.variable_dependence(hvf_nonautonomous_fixed) == Traits.Fixed
-            
+
             # Autonomous, NonFixed
-            hvf_autonomous_nonfixed = Data.HamiltonianVectorField((x, p, v) -> (x .* v, -p); is_autonomous=true, is_variable=true)
+            hvf_autonomous_nonfixed = Data.HamiltonianVectorField(
+                (x, p, v) -> (x .* v, -p); is_autonomous=true, is_variable=true
+            )
             Test.@test hvf_autonomous_nonfixed isa Data.HamiltonianVectorField
             Test.@test Traits.time_dependence(hvf_autonomous_nonfixed) == Traits.Autonomous
-            Test.@test Traits.variable_dependence(hvf_autonomous_nonfixed) == Traits.NonFixed
-            
+            Test.@test Traits.variable_dependence(hvf_autonomous_nonfixed) ==
+                Traits.NonFixed
+
             # NonAutonomous, NonFixed
-            hvf_nonautonomous_nonfixed = Data.HamiltonianVectorField((t, x, p, v) -> (x .* v, -p); is_autonomous=false, is_variable=true)
+            hvf_nonautonomous_nonfixed = Data.HamiltonianVectorField(
+                (t, x, p, v) -> (x .* v, -p); is_autonomous=false, is_variable=true
+            )
             Test.@test hvf_nonautonomous_nonfixed isa Data.HamiltonianVectorField
-            Test.@test Traits.time_dependence(hvf_nonautonomous_nonfixed) == Traits.NonAutonomous
-            Test.@test Traits.variable_dependence(hvf_nonautonomous_nonfixed) == Traits.NonFixed
+            Test.@test Traits.time_dependence(hvf_nonautonomous_nonfixed) ==
+                Traits.NonAutonomous
+            Test.@test Traits.variable_dependence(hvf_nonautonomous_nonfixed) ==
+                Traits.NonFixed
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Natural signatures
         # ====================================================================
-        
+
         Test.@testset "Natural Signatures" begin
             # (x, p) for Autonomous, Fixed
-            hvf1 = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+            hvf1 = Data.HamiltonianVectorField(
+                (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+            )
             dx, dp = hvf1([1.0, 2.0], [3.0, 4.0])
             Test.@test dx == [1.0, 2.0]
             Test.@test dp == [-3.0, -4.0]
-            
+
             # (t, x, p) for NonAutonomous, Fixed
-            hvf2 = Data.HamiltonianVectorField((t, x, p) -> (t .* x, -p); is_autonomous=false, is_variable=false)
+            hvf2 = Data.HamiltonianVectorField(
+                (t, x, p) -> (t .* x, -p); is_autonomous=false, is_variable=false
+            )
             dx, dp = hvf2(2.0, [1.0, 2.0], [3.0, 4.0])
             Test.@test dx == [2.0, 4.0]
             Test.@test dp == [-3.0, -4.0]
-            
+
             # (x, p, v) for Autonomous, NonFixed
-            hvf3 = Data.HamiltonianVectorField((x, p, v) -> (x .* v, -p); is_autonomous=true, is_variable=true)
+            hvf3 = Data.HamiltonianVectorField(
+                (x, p, v) -> (x .* v, -p); is_autonomous=true, is_variable=true
+            )
             dx, dp = hvf3([1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test dx == [2.0, 4.0]
             Test.@test dp == [-3.0, -4.0]
-            
+
             # (t, x, p, v) for NonAutonomous, NonFixed
-            hvf4 = Data.HamiltonianVectorField((t, x, p, v) -> (t .* x .* v, -p); is_autonomous=false, is_variable=true)
+            hvf4 = Data.HamiltonianVectorField(
+                (t, x, p, v) -> (t .* x .* v, -p); is_autonomous=false, is_variable=true
+            )
             dx, dp = hvf4(2.0, [1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test dx == [4.0, 8.0]
             Test.@test dp == [-3.0, -4.0]
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Uniform signature
         # ====================================================================
-        
+
         Test.@testset "Uniform Signature" begin
             # All combinations should work with (t, x, p, v)
-            hvf_autonomous_fixed = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+            hvf_autonomous_fixed = Data.HamiltonianVectorField(
+                (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+            )
             dx, dp = hvf_autonomous_fixed(0.0, [1.0, 2.0], [3.0, 4.0], nothing)
             Test.@test dx == [1.0, 2.0]
             Test.@test dp == [-3.0, -4.0]
-            
-            hvf_nonautonomous_fixed = Data.HamiltonianVectorField((t, x, p) -> (t .* x, -p); is_autonomous=false, is_variable=false)
+
+            hvf_nonautonomous_fixed = Data.HamiltonianVectorField(
+                (t, x, p) -> (t .* x, -p); is_autonomous=false, is_variable=false
+            )
             dx, dp = hvf_nonautonomous_fixed(2.0, [1.0, 2.0], [3.0, 4.0], nothing)
             Test.@test dx == [2.0, 4.0]
             Test.@test dp == [-3.0, -4.0]
-            
-            hvf_autonomous_nonfixed = Data.HamiltonianVectorField((x, p, v) -> (x .* v, -p); is_autonomous=true, is_variable=true)
+
+            hvf_autonomous_nonfixed = Data.HamiltonianVectorField(
+                (x, p, v) -> (x .* v, -p); is_autonomous=true, is_variable=true
+            )
             dx, dp = hvf_autonomous_nonfixed(0.0, [1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test dx == [2.0, 4.0]
             Test.@test dp == [-3.0, -4.0]
-            
+
             # Test variable_costate kwarg for NonFixed
-            dx, dp = hvf_autonomous_nonfixed(0.0, [1.0, 2.0], [3.0, 4.0], 2.0; variable_costate=false)
+            dx, dp = hvf_autonomous_nonfixed(
+                0.0, [1.0, 2.0], [3.0, 4.0], 2.0; variable_costate=false
+            )
             Test.@test dx == [2.0, 4.0]
             Test.@test dp == [-3.0, -4.0]
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Trait accessors
         # ====================================================================
-        
+
         Test.@testset "Trait Accessors" begin
-            hvf = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+            hvf = Data.HamiltonianVectorField(
+                (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+            )
             Test.@test Traits.has_time_dependence_trait(hvf) == true
             Test.@test Traits.has_variable_dependence_trait(hvf) == true
             Test.@test Traits.time_dependence(hvf) == Traits.Autonomous
             Test.@test Traits.variable_dependence(hvf) == Traits.Fixed
         end
-        
+
         # ====================================================================
         # UNIT TESTS - Typed constructor (trait types passed positionally)
         # ====================================================================
@@ -141,7 +171,9 @@ function test_hamiltonian_vector_field()
 
         Test.@testset "Subtyping" begin
             Test.@testset "HamiltonianVectorField is an AbstractVectorField" begin
-                hvf = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+                hvf = Data.HamiltonianVectorField(
+                    (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+                )
                 Test.@test hvf isa Data.AbstractVectorField
             end
         end
@@ -151,7 +183,9 @@ function test_hamiltonian_vector_field()
         # ====================================================================
 
         Test.@testset "Base.show" begin
-            hvf = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+            hvf = Data.HamiltonianVectorField(
+                (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+            )
             # Just check that show doesn't throw
             Test.@test_nowarn sprint(show, hvf)
         end
@@ -182,7 +216,9 @@ function test_hamiltonian_vector_field()
 
         Test.@testset "PreconditionError for multiple methods" begin
             Test.@testset "Throws PreconditionError when is_inplace is not specified" begin
-                Test.@test_throws Exceptions.PreconditionError Data.HamiltonianVectorField(_multi_method_hvf)
+                Test.@test_throws Exceptions.PreconditionError Data.HamiltonianVectorField(
+                    _multi_method_hvf
+                )
             end
 
             Test.@testset "No error when is_inplace is explicitly specified" begin
@@ -204,15 +240,23 @@ function test_hamiltonian_vector_field()
             end
 
             Test.@testset "_natural_sig_hvf helpers" begin
-                Test.@test Data._natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace) == "f(x, p)"
-                Test.@test Data._natural_sig_hvf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace) == "f(t, x, p)"
-                Test.@test Data._natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.InPlace) == "f(dx, dp, x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(t, x, p)"
+                Test.@test Data._natural_sig_hvf(
+                    Traits.Autonomous, Traits.Fixed, Traits.InPlace
+                ) == "f(dx, dp, x, p)"
                 Test.@test Data._uniform_sig_hvf(Traits.OutOfPlace) == "f(t, x, p, v)"
                 Test.@test Data._uniform_sig_hvf(Traits.InPlace) == "f(dx, dp, t, x, p, v)"
             end
 
             Test.@testset "_detect_mutability_hvf invalid arity" begin
-                Test.@test_throws Exceptions.IncorrectArgument Data._detect_mutability_hvf(_bad_arity_hvf, Traits.Autonomous, Traits.Fixed)
+                Test.@test_throws Exceptions.IncorrectArgument Data._detect_mutability_hvf(
+                    _bad_arity_hvf, Traits.Autonomous, Traits.Fixed
+                )
             end
         end
 
@@ -222,9 +266,11 @@ function test_hamiltonian_vector_field()
 
         Test.@testset "InPlace Call Signatures" begin
             Test.@testset "Autonomous Fixed - (dx, dp, x, p)" begin
-                f(dx, dp, x, p) = (dx .= -x; dp .= -p)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=false, is_inplace=true)
-                
+                f(dx, dp, x, p) = (dx.=(-x); dp.=(-p))
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=true, is_variable=false, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     dp = [0.0]
@@ -232,7 +278,7 @@ function test_hamiltonian_vector_field()
                     Test.@test dx[1] == -3.0
                     Test.@test dp[1] == -1.0
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     dp = [0.0, 0.0]
@@ -243,9 +289,11 @@ function test_hamiltonian_vector_field()
             end
 
             Test.@testset "NonAutonomous Fixed - (dx, dp, t, x, p)" begin
-                f(dx, dp, t, x, p) = (dx .= t .* x; dp .= t .* p)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=false, is_variable=false, is_inplace=true)
-                
+                f(dx, dp, t, x, p) = (dx.=t .* x; dp.=t .* p)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=false, is_variable=false, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     dp = [0.0]
@@ -253,7 +301,7 @@ function test_hamiltonian_vector_field()
                     Test.@test dx[1] == 6.0
                     Test.@test dp[1] == 2.0
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     dp = [0.0, 0.0]
@@ -264,9 +312,11 @@ function test_hamiltonian_vector_field()
             end
 
             Test.@testset "Autonomous NonFixed - (dx, dp, x, p, v)" begin
-                f(dx, dp, x, p, v) = (dx .= x .+ v; dp .= p .+ v)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=true, is_inplace=true)
-                
+                f(dx, dp, x, p, v) = (dx.=x .+ v; dp.=p .+ v)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=true, is_variable=true, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     dp = [0.0]
@@ -274,7 +324,7 @@ function test_hamiltonian_vector_field()
                     Test.@test dx[1] == 3.5
                     Test.@test dp[1] == 1.5
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     dp = [0.0, 0.0]
@@ -285,9 +335,11 @@ function test_hamiltonian_vector_field()
             end
 
             Test.@testset "NonAutonomous NonFixed - (dx, dp, t, x, p, v)" begin
-                f(dx, dp, t, x, p, v) = (dx .= t .* x .+ v; dp .= t .* p .+ v)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=false, is_variable=true, is_inplace=true)
-                
+                f(dx, dp, t, x, p, v) = (dx.=t .* x .+ v; dp.=t .* p .+ v)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=false, is_variable=true, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     dp = [0.0]
@@ -295,7 +347,7 @@ function test_hamiltonian_vector_field()
                     Test.@test dx[1] == 6.5
                     Test.@test dp[1] == 2.5
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     dp = [0.0, 0.0]
@@ -312,9 +364,11 @@ function test_hamiltonian_vector_field()
 
         Test.@testset "Uniform InPlace Signature" begin
             Test.@testset "Autonomous Fixed InPlace uniform" begin
-                f(dx, dp, x, p) = (dx .= -x; dp .= -p)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=false, is_inplace=true)
-                
+                f(dx, dp, x, p) = (dx.=(-x); dp.=(-p))
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=true, is_variable=false, is_inplace=true
+                )
+
                 dx = [0.0, 0.0]
                 dp = [0.0, 0.0]
                 hvf(dx, dp, 0.0, [1.0, 2.0], [0.5, 1.0], 0.0)
@@ -323,9 +377,11 @@ function test_hamiltonian_vector_field()
             end
 
             Test.@testset "NonAutonomous Fixed InPlace uniform" begin
-                f(dx, dp, t, x, p) = (dx .= t .* x; dp .= t .* p)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=false, is_variable=false, is_inplace=true)
-                
+                f(dx, dp, t, x, p) = (dx.=t .* x; dp.=t .* p)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=false, is_variable=false, is_inplace=true
+                )
+
                 dx = [0.0, 0.0]
                 dp = [0.0, 0.0]
                 hvf(dx, dp, 2.0, [1.0, 2.0], [0.5, 1.0], 0.0)
@@ -334,15 +390,17 @@ function test_hamiltonian_vector_field()
             end
 
             Test.@testset "Autonomous NonFixed InPlace uniform" begin
-                f(dx, dp, x, p, v) = (dx .= x .+ v; dp .= p .+ v)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=true, is_inplace=true)
-                
+                f(dx, dp, x, p, v) = (dx.=x .+ v; dp.=p .+ v)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=true, is_variable=true, is_inplace=true
+                )
+
                 dx = [0.0, 0.0]
                 dp = [0.0, 0.0]
                 hvf(dx, dp, 0.0, [1.0, 2.0], [0.5, 1.0], 0.5)
                 Test.@test dx == [1.5, 2.5]
                 Test.@test dp == [1.0, 1.5]
-                
+
                 # Test variable_costate kwarg
                 dx = [0.0, 0.0]
                 dp = [0.0, 0.0]
@@ -353,7 +411,9 @@ function test_hamiltonian_vector_field()
         end
 
         Test.@testset "Show Methods" begin
-            hvf = Data.HamiltonianVectorField((x, p) -> (x, -p); is_autonomous=true, is_variable=false)
+            hvf = Data.HamiltonianVectorField(
+                (x, p) -> (x, -p); is_autonomous=true, is_variable=false
+            )
 
             Test.@testset "Base.show (compact)" begin
                 io = IOBuffer()
@@ -385,37 +445,55 @@ function test_hamiltonian_vector_field()
             Test.@testset "OOP NonFixed: variable_costate=true on user-built HVF throws PreconditionError" begin
                 f = (x, p, v) -> (p, -x)   # no variable_costate kwarg
                 hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=true)
-                x = [1.0]; p = [0.5]; v = [0.1]
+                x = [1.0];
+                p = [0.5];
+                v = [0.1]
                 Test.@test_throws Exception hvf(x, p, v; variable_costate=true)
             end
 
             Test.@testset "IP NonFixed: variable_costate=true on user-built HVF throws PreconditionError" begin
-                f = (dx, dp, x, p, v) -> (dx .= p; dp .= .-x; nothing)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=true, is_inplace=true)
-                x = [1.0]; p = [0.5]; v = [0.1]
-                dx = similar(x); dp = similar(p)
+                f = (dx, dp, x, p, v) -> (dx.=p; dp.=(.-x); nothing)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=true, is_variable=true, is_inplace=true
+                )
+                x = [1.0];
+                p = [0.5];
+                v = [0.1]
+                dx = similar(x);
+                dp = similar(p)
                 Test.@test_throws Exception hvf(dx, dp, x, p, v; variable_costate=true)
             end
 
             Test.@testset "OOP NonAutonomous NonFixed: variable_costate=true on user-built HVF throws PreconditionError" begin
                 f = (t, x, p, v) -> (p, -x)   # no variable_costate kwarg
                 hvf = Data.HamiltonianVectorField(f; is_autonomous=false, is_variable=true)
-                t = 0.5; x = [1.0]; p = [0.5]; v = [0.1]
+                t = 0.5;
+                x = [1.0];
+                p = [0.5];
+                v = [0.1]
                 Test.@test_throws Exception hvf(t, x, p, v; variable_costate=true)
             end
 
             Test.@testset "IP NonAutonomous NonFixed: variable_costate=true on user-built HVF throws PreconditionError" begin
-                f = (dx, dp, t, x, p, v) -> (dx .= p; dp .= .-x; nothing)
-                hvf = Data.HamiltonianVectorField(f; is_autonomous=false, is_variable=true, is_inplace=true)
-                t = 0.5; x = [1.0]; p = [0.5]; v = [0.1]
-                dx = similar(x); dp = similar(p)
+                f = (dx, dp, t, x, p, v) -> (dx.=p; dp.=(.-x); nothing)
+                hvf = Data.HamiltonianVectorField(
+                    f; is_autonomous=false, is_variable=true, is_inplace=true
+                )
+                t = 0.5;
+                x = [1.0];
+                p = [0.5];
+                v = [0.1]
+                dx = similar(x);
+                dp = similar(p)
                 Test.@test_throws Exception hvf(dx, dp, t, x, p, v; variable_costate=true)
             end
 
             Test.@testset "OOP NonFixed: variable_costate=false (default) on user-built HVF works" begin
                 f = (x, p, v) -> (p, -x)
                 hvf = Data.HamiltonianVectorField(f; is_autonomous=true, is_variable=true)
-                x = [1.0]; p = [0.5]; v = [0.1]
+                x = [1.0];
+                p = [0.5];
+                v = [0.1]
                 result = hvf(x, p, v)
                 Test.@test result == (p, -x)
             end

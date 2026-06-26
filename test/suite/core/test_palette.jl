@@ -99,8 +99,19 @@ function _run_palette_tests(io_plain, io_color)
         end
 
         Test.@testset "all roles are settable" begin
-            roles = (:name, :type, :value, :keyword, :count, :label,
-                     :emphasis, :muted, :error, :warning, :success)
+            roles = (
+                :name,
+                :type,
+                :value,
+                :keyword,
+                :count,
+                :label,
+                :emphasis,
+                :muted,
+                :error,
+                :warning,
+                :success,
+            )
             Core.reset_palette!()
             for role in roles
                 Core.set_color!(role, "99")
@@ -145,9 +156,19 @@ function _run_palette_tests(io_plain, io_color)
             # :reset is palette-independent (it's "\033[0m" whenever color is on)
             # so we only check the style-bearing fields here
             for field in (
-                :name, :type, :value, :keyword, :count, :label,
-                :emphasis, :muted, :error, :warning, :success,
-                :bold, :dim,
+                :name,
+                :type,
+                :value,
+                :keyword,
+                :count,
+                :label,
+                :emphasis,
+                :muted,
+                :error,
+                :warning,
+                :success,
+                :bold,
+                :dim,
             )
                 Test.@test fmt[field] == ""
             end
@@ -200,8 +221,19 @@ function _run_palette_tests(io_plain, io_color)
             Test.@test contains(output, "Mock describe")
             Test.@test contains(output, "Mock exception")
             # All 11 role names appear in the role swatches
-            for role in ("name", "type", "value", "keyword", "count",
-                         "label", "emphasis", "muted", "error", "warning", "success")
+            for role in (
+                "name",
+                "type",
+                "value",
+                "keyword",
+                "count",
+                "label",
+                "emphasis",
+                "muted",
+                "error",
+                "warning",
+                "success",
+            )
                 Test.@test contains(output, role)
             end
         end
@@ -226,9 +258,17 @@ function _run_palette_tests(io_plain, io_color)
 
         Test.@testset "names custom palette as 'custom'" begin
             my = Core.Palette(
-                Core.Style("35"), Core.Style("35"), Core.Style("35"), Core.Style("35"),
-                Core.Style("35"), Core.Style("35"), Core.Style("35"), Core.Style("35"),
-                Core.Style("35"), Core.Style("35"), Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
+                Core.Style("35"),
             )
             Core.set_palette!(my)
             buf = IOBuffer()
@@ -251,7 +291,6 @@ function _run_palette_tests(io_plain, io_color)
             Test.@test !occursin("\033[31m", output)     # error role code absent
         end
     end
-
 end
 
 end # module
