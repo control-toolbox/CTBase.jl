@@ -15,12 +15,12 @@ positive_validator(x::Int) = x > 0 || throw(ArgumentError("$x must be positive")
 
 # Range validator for testing
 function range_validator(x::Int)
-    (1 <= x <= 100) || throw(ArgumentError("$x must be between 1 and 100"))
+    return (1 <= x <= 100) || throw(ArgumentError("$x must be between 1 and 100"))
 end
 
 # String validator for testing
 function nonempty_validator(s::String)
-    !isempty(s) || throw(ArgumentError("String must not be empty"))
+    return !isempty(s) || throw(ArgumentError("String must not be empty"))
 end
 
 # ============================================================================

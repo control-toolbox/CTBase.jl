@@ -21,7 +21,9 @@ Apply a raw ANSI numeric code string to `s`, respecting the IO colour capability
 Prefer [`CTBase.Core._style`](@ref) with a [`CTBase.Core.Style`](@ref) from the
 active palette over calling this function directly.
 """
-_apply_ansi(s, code, io::IO) = get(io, :color, false) ? "\033[$(code)m$(s)\033[0m" : string(s)
+function _apply_ansi(s, code, io::IO)
+    return get(io, :color, false) ? "\033[$(code)m$(s)\033[0m" : string(s)
+end
 
 # ---------------------------------------------------------------------------
 # Named helpers — backed by the active palette roles
@@ -130,20 +132,20 @@ function get_format_codes(io::IO)
     rst = get(io, :color, false) ? "\033[0m" : ""
     return (
         # Semantic roles
-        name     = open(p.name),
-        type     = open(p.type),
-        value    = open(p.value),
-        keyword  = open(p.keyword),
-        count    = open(p.count),
-        label    = open(p.label),
-        emphasis = open(p.emphasis),
-        muted    = open(p.muted),
-        error    = open(p.error),
-        warning  = open(p.warning),
-        success  = open(p.success),
-        reset    = rst,
+        name=open(p.name),
+        type=open(p.type),
+        value=open(p.value),
+        keyword=open(p.keyword),
+        count=open(p.count),
+        label=open(p.label),
+        emphasis=open(p.emphasis),
+        muted=open(p.muted),
+        error=open(p.error),
+        warning=open(p.warning),
+        success=open(p.success),
+        reset=rst,
         # Legacy aliases
-        bold     = open(p.emphasis),
-        dim      = open(p.muted),
+        bold=open(p.emphasis),
+        dim=open(p.muted),
     )
 end

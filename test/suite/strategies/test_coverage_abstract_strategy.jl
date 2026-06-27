@@ -19,7 +19,7 @@ end
 Strategies.id(::Type{<:CovFakeStrategy}) = :cov_fake
 
 function Strategies.metadata(::Type{<:CovFakeStrategy})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter,
             type=Int,
@@ -57,7 +57,7 @@ end
 Strategies.id(::Type{<:CovSingleOptStrategy}) = :cov_single
 
 function Strategies.metadata(::Type{<:CovSingleOptStrategy})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:value, type=Int, default=42, description="Single value"
         ),
@@ -248,5 +248,5 @@ end
 end # module
 
 function test_coverage_abstract_strategy()
-    TestCoverageAbstractStrategy.test_coverage_abstract_strategy()
+    return TestCoverageAbstractStrategy.test_coverage_abstract_strategy()
 end

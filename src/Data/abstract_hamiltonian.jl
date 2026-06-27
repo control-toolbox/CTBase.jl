@@ -19,10 +19,7 @@ out-of-place) because a scalar return has no meaningful in-place form.
 
 See also: [`CTBase.Data.Hamiltonian`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-abstract type AbstractHamiltonian{
-    TD <: Traits.TimeDependence,
-    VD <: Traits.VariableDependence
-} end
+abstract type AbstractHamiltonian{TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} end
 
 # =============================================================================
 # Trait accessors for AbstractHamiltonian
@@ -69,7 +66,9 @@ Return the time-dependence trait of a Hamiltonian.
 
 See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
 """
-function Traits.time_dependence(::AbstractHamiltonian{TD, <:Traits.VariableDependence}) where {TD <: Traits.TimeDependence}
+function Traits.time_dependence(
+    ::AbstractHamiltonian{TD,<:Traits.VariableDependence}
+) where {TD<:Traits.TimeDependence}
     return TD
 end
 
@@ -86,7 +85,9 @@ Return the variable-dependence trait of a Hamiltonian.
 
 See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-function Traits.variable_dependence(::AbstractHamiltonian{<:Traits.TimeDependence, VD}) where {VD <: Traits.VariableDependence}
+function Traits.variable_dependence(
+    ::AbstractHamiltonian{<:Traits.TimeDependence,VD}
+) where {VD<:Traits.VariableDependence}
     return VD
 end
 

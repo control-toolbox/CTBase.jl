@@ -4,13 +4,13 @@ Unit and error tests for the AD backend contract and DifferentiationInterface st
 
 module TestADBackend
 
-import Test
+using Test: Test
 import CTBase.Differentiation
 import CTBase.Data
 import CTBase.Traits
 import CTBase.Exceptions
 import CTBase.Strategies
-import ADTypes
+using ADTypes: ADTypes
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -29,7 +29,7 @@ FakeADBackend() = FakeADBackend(Strategies.StrategyOptions())
 # Fake Hamiltonian for Testing (at module top-level)
 # ==============================================================================
 
-struct FakeHamiltonian <: Data.AbstractHamiltonian{Traits.Autonomous, Traits.Fixed}
+struct FakeHamiltonian <: Data.AbstractHamiltonian{Traits.Autonomous,Traits.Fixed}
     f::Function
 end
 
@@ -59,14 +59,15 @@ function test_ad_backend()
             Test.@test metadata[:ad_backend].default === ADTypes.AutoForwardDiff()
 
             # Custom backend
-            di_custom = Differentiation.DifferentiationInterface(backend=ADTypes.AutoZygote())
+            di_custom = Differentiation.DifferentiationInterface(
+                backend=ADTypes.AutoZygote()
+            )
             Test.@test di_custom isa Differentiation.DifferentiationInterface
         end
 
         Test.@testset "Unit: CTBase.Strategies contract" begin
             # id
-            Test.@test Strategies.id(Differentiation.DifferentiationInterface) ===
-                  :di
+            Test.@test Strategies.id(Differentiation.DifferentiationInterface) === :di
 
             # description
             desc = Strategies.description(Differentiation.DifferentiationInterface)
@@ -148,7 +149,6 @@ function test_ad_backend()
                 Test.@test occursin("derivative", err.required_method)
             end
         end
-
     end
 end
 

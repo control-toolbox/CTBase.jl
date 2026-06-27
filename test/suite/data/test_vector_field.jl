@@ -1,6 +1,6 @@
 module TestVectorField
 
-import Test
+using Test: Test
 import CTBase.Data
 import CTBase.Traits
 import CTBase.Exceptions
@@ -45,19 +45,27 @@ function test_vector_field()
             end
 
             Test.@testset "keyword constructor with explicit flags" begin
-                vf_autonomous = Data.VectorField(x -> x; is_autonomous=true, is_variable=false)
+                vf_autonomous = Data.VectorField(
+                    x -> x; is_autonomous=true, is_variable=false
+                )
                 Test.@test Traits.time_dependence(vf_autonomous) === Traits.Autonomous
                 Test.@test Traits.variable_dependence(vf_autonomous) === Traits.Fixed
 
-                vf_nonautonomous = Data.VectorField((t, x) -> t .* x; is_autonomous=false, is_variable=false)
+                vf_nonautonomous = Data.VectorField(
+                    (t, x) -> t .* x; is_autonomous=false, is_variable=false
+                )
                 Test.@test Traits.time_dependence(vf_nonautonomous) === Traits.NonAutonomous
                 Test.@test Traits.variable_dependence(vf_nonautonomous) === Traits.Fixed
 
-                vf_nonfixed = Data.VectorField((x, v) -> x .+ v; is_autonomous=true, is_variable=true)
+                vf_nonfixed = Data.VectorField(
+                    (x, v) -> x .+ v; is_autonomous=true, is_variable=true
+                )
                 Test.@test Traits.time_dependence(vf_nonfixed) === Traits.Autonomous
                 Test.@test Traits.variable_dependence(vf_nonfixed) === Traits.NonFixed
 
-                vf_full = Data.VectorField((t, x, v) -> t .* x .+ v; is_autonomous=false, is_variable=true)
+                vf_full = Data.VectorField(
+                    (t, x, v) -> t .* x .+ v; is_autonomous=false, is_variable=true
+                )
                 Test.@test Traits.time_dependence(vf_full) === Traits.NonAutonomous
                 Test.@test Traits.variable_dependence(vf_full) === Traits.NonFixed
             end
@@ -69,9 +77,13 @@ function test_vector_field()
 
         Test.@testset "Trait Methods" begin
             vf_aut = Data.VectorField(x -> x; is_autonomous=true, is_variable=false)
-            vf_nonaut = Data.VectorField((t, x) -> t .* x; is_autonomous=false, is_variable=false)
+            vf_nonaut = Data.VectorField(
+                (t, x) -> t .* x; is_autonomous=false, is_variable=false
+            )
             vf_fixed = Data.VectorField(x -> x; is_autonomous=true, is_variable=false)
-            vf_nonfixed = Data.VectorField((x, v) -> x .+ v; is_autonomous=true, is_variable=true)
+            vf_nonfixed = Data.VectorField(
+                (x, v) -> x .+ v; is_autonomous=true, is_variable=true
+            )
 
             Test.@testset "has_time_dependence_trait returns true" begin
                 Test.@test Traits.has_time_dependence_trait(vf_aut) === true
@@ -101,15 +113,15 @@ function test_vector_field()
         Test.@testset "Natural Call Signatures" begin
             Test.@testset "Autonomous Fixed - (x)" begin
                 vf = Data.VectorField(x -> -x; is_autonomous=true, is_variable=false)
-                
+
                 Test.@testset "scalar" begin
                     Test.@test vf(3.0) == -3.0
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf([1.0, 2.0]) == [-1.0, -2.0]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(x0)
@@ -118,16 +130,18 @@ function test_vector_field()
             end
 
             Test.@testset "NonAutonomous Fixed - (t, x)" begin
-                vf = Data.VectorField((t, x) -> t .* x; is_autonomous=false, is_variable=false)
-                
+                vf = Data.VectorField(
+                    (t, x) -> t .* x; is_autonomous=false, is_variable=false
+                )
+
                 Test.@testset "scalar" begin
                     Test.@test vf(2.0, 3.0) == 6.0
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf(2.0, [1.0, 2.0]) == [2.0, 4.0]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(2.0, x0)
@@ -136,16 +150,18 @@ function test_vector_field()
             end
 
             Test.@testset "Autonomous NonFixed - (x, v)" begin
-                vf = Data.VectorField((x, v) -> x .+ v; is_autonomous=true, is_variable=true)
-                
+                vf = Data.VectorField(
+                    (x, v) -> x .+ v; is_autonomous=true, is_variable=true
+                )
+
                 Test.@testset "scalar" begin
                     Test.@test vf(3.0, 0.5) == 3.5
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf([1.0, 2.0], 0.5) == [1.5, 2.5]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(x0, 0.5)
@@ -154,16 +170,18 @@ function test_vector_field()
             end
 
             Test.@testset "NonAutonomous NonFixed - (t, x, v)" begin
-                vf = Data.VectorField((t, x, v) -> t .* x .+ v; is_autonomous=false, is_variable=true)
-                
+                vf = Data.VectorField(
+                    (t, x, v) -> t .* x .+ v; is_autonomous=false, is_variable=true
+                )
+
                 Test.@testset "scalar" begin
                     Test.@test vf(2.0, 3.0, 0.5) == 6.5
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf(2.0, [1.0, 2.0], 0.5) == [2.5, 4.5]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(2.0, x0, 0.5)
@@ -179,15 +197,15 @@ function test_vector_field()
         Test.@testset "Uniform Call Signature" begin
             Test.@testset "Autonomous Fixed ignores t and v" begin
                 vf = Data.VectorField(x -> -x; is_autonomous=true, is_variable=false)
-                
+
                 Test.@testset "scalar" begin
                     Test.@test vf(0.0, 3.0, 0.0) == -3.0
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf(0.0, [1.0, 2.0], 0.0) == [-1.0, -2.0]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(0.0, x0, 0.0)
@@ -196,16 +214,18 @@ function test_vector_field()
             end
 
             Test.@testset "NonAutonomous Fixed uses t, ignores v" begin
-                vf = Data.VectorField((t, x) -> t .* x; is_autonomous=false, is_variable=false)
-                
+                vf = Data.VectorField(
+                    (t, x) -> t .* x; is_autonomous=false, is_variable=false
+                )
+
                 Test.@testset "scalar" begin
                     Test.@test vf(2.0, 3.0, 0.0) == 6.0
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf(2.0, [1.0, 2.0], 0.0) == [2.0, 4.0]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(2.0, x0, 0.0)
@@ -214,16 +234,18 @@ function test_vector_field()
             end
 
             Test.@testset "Autonomous NonFixed ignores t, uses v" begin
-                vf = Data.VectorField((x, v) -> x .+ v; is_autonomous=true, is_variable=true)
-                
+                vf = Data.VectorField(
+                    (x, v) -> x .+ v; is_autonomous=true, is_variable=true
+                )
+
                 Test.@testset "scalar" begin
                     Test.@test vf(0.0, 3.0, 0.5) == 3.5
                 end
-                
+
                 Test.@testset "vector" begin
                     Test.@test vf(0.0, [1.0, 2.0], 0.5) == [1.5, 2.5]
                 end
-                
+
                 Test.@testset "matrix" begin
                     x0 = [1.0 2.0; 3.0 4.0]
                     result = vf(0.0, x0, 0.5)
@@ -239,15 +261,17 @@ function test_vector_field()
         Test.@testset "InPlace Call Signatures" begin
             Test.@testset "Autonomous Fixed - (dx, x)" begin
                 f(dx, x) = dx .= -x
-                vf = Data.VectorField(f; is_autonomous=true, is_variable=false, is_inplace=true)
-                
+                vf = Data.VectorField(
+                    f; is_autonomous=true, is_variable=false, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     x = 3.0
                     vf(dx, x)
                     Test.@test dx[1] == -3.0
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     x = [1.0, 2.0]
@@ -258,14 +282,16 @@ function test_vector_field()
 
             Test.@testset "NonAutonomous Fixed - (dx, t, x)" begin
                 f(dx, t, x) = dx .= t .* x
-                vf = Data.VectorField(f; is_autonomous=false, is_variable=false, is_inplace=true)
-                
+                vf = Data.VectorField(
+                    f; is_autonomous=false, is_variable=false, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     vf(dx, 2.0, 3.0)
                     Test.@test dx[1] == 6.0
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     vf(dx, 2.0, [1.0, 2.0])
@@ -275,14 +301,16 @@ function test_vector_field()
 
             Test.@testset "Autonomous NonFixed - (dx, x, v)" begin
                 f(dx, x, v) = dx .= x .+ v
-                vf = Data.VectorField(f; is_autonomous=true, is_variable=true, is_inplace=true)
-                
+                vf = Data.VectorField(
+                    f; is_autonomous=true, is_variable=true, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     vf(dx, 3.0, 0.5)
                     Test.@test dx[1] == 3.5
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     vf(dx, [1.0, 2.0], 0.5)
@@ -292,14 +320,16 @@ function test_vector_field()
 
             Test.@testset "NonAutonomous NonFixed - (dx, t, x, v)" begin
                 f(dx, t, x, v) = dx .= t .* x .+ v
-                vf = Data.VectorField(f; is_autonomous=false, is_variable=true, is_inplace=true)
-                
+                vf = Data.VectorField(
+                    f; is_autonomous=false, is_variable=true, is_inplace=true
+                )
+
                 Test.@testset "scalar" begin
                     dx = [0.0]
                     vf(dx, 2.0, 3.0, 0.5)
                     Test.@test dx[1] == 6.5
                 end
-                
+
                 Test.@testset "vector" begin
                     dx = [0.0, 0.0]
                     vf(dx, 2.0, [1.0, 2.0], 0.5)
@@ -315,8 +345,10 @@ function test_vector_field()
         Test.@testset "Uniform InPlace Signature" begin
             Test.@testset "Autonomous Fixed InPlace uniform" begin
                 f(dx, x) = dx .= -x
-                vf = Data.VectorField(f; is_autonomous=true, is_variable=false, is_inplace=true)
-                
+                vf = Data.VectorField(
+                    f; is_autonomous=true, is_variable=false, is_inplace=true
+                )
+
                 dx = [0.0, 0.0]
                 vf(dx, 0.0, [1.0, 2.0], 0.0)
                 Test.@test dx == [-1.0, -2.0]
@@ -324,8 +356,10 @@ function test_vector_field()
 
             Test.@testset "NonAutonomous Fixed InPlace uniform" begin
                 f(dx, t, x) = dx .= t .* x
-                vf = Data.VectorField(f; is_autonomous=false, is_variable=false, is_inplace=true)
-                
+                vf = Data.VectorField(
+                    f; is_autonomous=false, is_variable=false, is_inplace=true
+                )
+
                 dx = [0.0, 0.0]
                 vf(dx, 2.0, [1.0, 2.0], 0.0)
                 Test.@test dx == [2.0, 4.0]
@@ -333,7 +367,9 @@ function test_vector_field()
 
             Test.@testset "Autonomous NonFixed InPlace uniform" begin
                 f(dx, x, v) = dx .= x .+ v
-                vf = Data.VectorField(f; is_autonomous=true, is_variable=true, is_inplace=true)
+                vf = Data.VectorField(
+                    f; is_autonomous=true, is_variable=true, is_inplace=true
+                )
 
                 dx = [0.0, 0.0]
                 vf(dx, 0.0, [1.0, 2.0], 0.5)
@@ -343,7 +379,9 @@ function test_vector_field()
             Test.@testset "NonAutonomous NonFixed InPlace uniform" begin
                 # natural signature (dx, t, x, v) coincides with the uniform one
                 f(dx, t, x, v) = dx .= t .* x .+ v
-                vf = Data.VectorField(f; is_autonomous=false, is_variable=true, is_inplace=true)
+                vf = Data.VectorField(
+                    f; is_autonomous=false, is_variable=true, is_inplace=true
+                )
 
                 dx = [0.0, 0.0]
                 vf(dx, 2.0, [1.0, 2.0], 0.5)
@@ -356,7 +394,9 @@ function test_vector_field()
         # ====================================================================
 
         Test.@testset "Typed constructor" begin
-            vf = Data.VectorField(x -> -x, Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace)
+            vf = Data.VectorField(
+                x -> -x, Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace
+            )
             Test.@test vf isa Data.VectorField
             Test.@test Traits.time_dependence(vf) === Traits.Autonomous
             Test.@test Traits.variable_dependence(vf) === Traits.Fixed
@@ -371,9 +411,13 @@ function test_vector_field()
 
         Test.@testset "Common Trait Predicates" begin
             vf_aut = Data.VectorField(x -> x; is_autonomous=true, is_variable=false)
-            vf_nonaut = Data.VectorField((t, x) -> t .* x; is_autonomous=false, is_variable=false)
+            vf_nonaut = Data.VectorField(
+                (t, x) -> t .* x; is_autonomous=false, is_variable=false
+            )
             vf_fixed = Data.VectorField(x -> x; is_autonomous=true, is_variable=false)
-            vf_nonfixed = Data.VectorField((x, v) -> x .+ v; is_autonomous=true, is_variable=true)
+            vf_nonfixed = Data.VectorField(
+                (x, v) -> x .+ v; is_autonomous=true, is_variable=true
+            )
 
             Test.@testset "is_autonomous / is_nonautonomous" begin
                 Test.@test Traits.is_autonomous(vf_aut) === true
@@ -466,7 +510,9 @@ function test_vector_field()
 
         Test.@testset "PreconditionError for multiple methods" begin
             Test.@testset "Throws PreconditionError when is_inplace is not specified" begin
-                Test.@test_throws Exceptions.PreconditionError Data.VectorField(_multi_method_f)
+                Test.@test_throws Exceptions.PreconditionError Data.VectorField(
+                    _multi_method_f
+                )
             end
 
             Test.@testset "No error when is_inplace is explicitly specified" begin
@@ -488,15 +534,23 @@ function test_vector_field()
             end
 
             Test.@testset "_natural_sig_vf helpers" begin
-                Test.@test Data._natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace) == "f(x)"
-                Test.@test Data._natural_sig_vf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace) == "f(t, x)"
-                Test.@test Data._natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.InPlace) == "f(dx, x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace
+                ) == "f(t, x)"
+                Test.@test Data._natural_sig_vf(
+                    Traits.Autonomous, Traits.Fixed, Traits.InPlace
+                ) == "f(dx, x)"
                 Test.@test Data._uniform_sig_vf(Traits.OutOfPlace) == "f(t, x, v)"
                 Test.@test Data._uniform_sig_vf(Traits.InPlace) == "f(dx, t, x, v)"
             end
 
             Test.@testset "_detect_mutability_vf invalid arity" begin
-                Test.@test_throws Exceptions.IncorrectArgument Data._detect_mutability_vf(_bad_arity_f, Traits.Autonomous, Traits.Fixed)
+                Test.@test_throws Exceptions.IncorrectArgument Data._detect_mutability_vf(
+                    _bad_arity_f, Traits.Autonomous, Traits.Fixed
+                )
             end
         end
     end

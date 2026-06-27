@@ -64,7 +64,7 @@ struct RoutedOption
                 ),
             )
         end
-        new(routes)
+        return new(routes)
     end
 end
 

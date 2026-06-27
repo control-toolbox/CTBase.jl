@@ -40,7 +40,12 @@ buffers as the first two arguments (e.g., `(dx, dp, x, p)` for Autonomous/Fixed)
 
 See also: [`CTBase.Data.AbstractVectorField`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.AbstractMutabilityTrait`](@ref).
 """
-struct HamiltonianVectorField{F<:Function, TD<:Traits.TimeDependence, VD<:Traits.VariableDependence, MD<:Traits.AbstractMutabilityTrait} <: AbstractHamiltonianVectorField{TD, VD, MD}
+struct HamiltonianVectorField{
+    F<:Function,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+} <: AbstractHamiltonianVectorField{TD,VD,MD}
     f::F
 end
 
@@ -109,12 +114,14 @@ See also: [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Traits.InPlace`
 function _detect_mutability_hvf(f::Function, TD, VD)
     method_count = length(methods(f))
     if method_count > 1
-        throw(Exceptions.PreconditionError(
-            "Cannot auto-detect mutability: function has multiple methods";
-            reason = "The function has $method_count methods, making automatic arity detection ambiguous",
-            suggestion = "Specify `is_inplace=true` or `is_inplace=false` explicitly in the constructor",
-            context = "HamiltonianVectorField mutability detection",
-        ))
+        throw(
+            Exceptions.PreconditionError(
+                "Cannot auto-detect mutability: function has multiple methods";
+                reason="The function has $method_count methods, making automatic arity detection ambiguous",
+                suggestion="Specify `is_inplace=true` or `is_inplace=false` explicitly in the constructor",
+                context="HamiltonianVectorField mutability detection",
+            ),
+        )
     end
 
     arity = first(methods(f)).nargs - 1
@@ -126,11 +133,13 @@ function _detect_mutability_hvf(f::Function, TD, VD)
     elseif arity == ip_arity
         return Traits.InPlace
     else
-        throw(Exceptions.IncorrectArgument(
-            "Invalid function arity: expected $oop_arity (out-of-place) or $ip_arity (in-place), got $arity";
-            suggestion = "Ensure your function signature matches the expected pattern for the given traits.",
-            context = "HamiltonianVectorField mutability detection",
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid function arity: expected $oop_arity (out-of-place) or $ip_arity (in-place), got $arity";
+                suggestion="Ensure your function signature matches the expected pattern for the given traits.",
+                context="HamiltonianVectorField mutability detection",
+            ),
+        )
     end
 end
 
@@ -174,10 +183,11 @@ HamiltonianVectorField: autonomous, fixed (no variable), in-place
 
 See also: [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref), [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
 """
-function HamiltonianVectorField(f; 
-    is_autonomous::Bool = __is_autonomous(), 
-    is_variable::Bool = __is_variable(), 
-    is_inplace::Union{Bool, Nothing} = __is_inplace()
+function HamiltonianVectorField(
+    f;
+    is_autonomous::Bool=__is_autonomous(),
+    is_variable::Bool=__is_variable(),
+    is_inplace::Union{Bool,Nothing}=__is_inplace(),
 )
     TD = is_autonomous ? Traits.Autonomous : Traits.NonAutonomous
     VD = is_variable ? Traits.NonFixed : Traits.Fixed
@@ -186,7 +196,7 @@ function HamiltonianVectorField(f;
     else
         is_inplace ? Traits.InPlace : Traits.OutOfPlace
     end
-    return HamiltonianVectorField{typeof(f), TD, VD, MD}(f)
+    return HamiltonianVectorField{typeof(f),TD,VD,MD}(f)
 end
 
 # =============================================================================
@@ -194,14 +204,13 @@ end
 # =============================================================================
 
 function HamiltonianVectorField(
-    f,
-    ::Type{TD}, ::Type{VD}, ::Type{MD},
+    f, ::Type{TD}, ::Type{VD}, ::Type{MD}
 ) where {
-    TD <: Traits.TimeDependence,
-    VD <: Traits.VariableDependence,
-    MD <: Traits.AbstractMutabilityTrait,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
 }
-    return HamiltonianVectorField{typeof(f), TD, VD, MD}(f)
+    return HamiltonianVectorField{typeof(f),TD,VD,MD}(f)
 end
 
 # =============================================================================
@@ -209,52 +218,105 @@ end
 # =============================================================================
 
 # OutOfPlace signatures (existing)
-(H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace})(x, p) = H.f(x, p)
-(H::HamiltonianVectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace})(t, x, p) = H.f(t, x, p)
-function (H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace})(x, p, v; variable_costate::Bool=false)
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.Fixed,Traits.OutOfPlace
+})(
+    x, p
+)
+    return H.f(x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.NonAutonomous,Traits.Fixed,Traits.OutOfPlace
+})(
+    t, x, p
+)
+    return H.f(t, x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.NonFixed,Traits.OutOfPlace
+})(
+    x, p, v; variable_costate::Bool=false
+)
     variable_costate || return H.f(x, p, v)
-    hasmethod(H.f, Tuple{typeof(x), typeof(p), typeof(v)}, (:variable_costate,)) ||
-        throw(Exceptions.PreconditionError(
+    hasmethod(H.f, Tuple{typeof(x),typeof(p),typeof(v)}, (:variable_costate,)) || throw(
+        Exceptions.PreconditionError(
             "variable_costate=true is not supported by this HamiltonianVectorField's inner function";
-            suggestion = "Use hamiltonian_vector_field(h; ...) to obtain a HVF that supports variable_costate",
-            context = "HamiltonianVectorField Autonomous/NonFixed call",
-        ))
+            suggestion="Use hamiltonian_vector_field(h; ...) to obtain a HVF that supports variable_costate",
+            context="HamiltonianVectorField Autonomous/NonFixed call",
+        ),
+    )
     return H.f(x, p, v; variable_costate=true)
 end
 
-function (H::HamiltonianVectorField{<:Function, Traits.NonAutonomous, Traits.NonFixed, Traits.OutOfPlace})(t, x, p, v; variable_costate::Bool=false)
+function (H::HamiltonianVectorField{
+    <:Function,Traits.NonAutonomous,Traits.NonFixed,Traits.OutOfPlace
+})(
+    t, x, p, v; variable_costate::Bool=false
+)
     variable_costate || return H.f(t, x, p, v)
-    hasmethod(H.f, Tuple{typeof(t), typeof(x), typeof(p), typeof(v)}, (:variable_costate,)) ||
-        throw(Exceptions.PreconditionError(
-            "variable_costate=true is not supported by this HamiltonianVectorField's inner function";
-            suggestion = "Use hamiltonian_vector_field(h; ...) to obtain a HVF that supports variable_costate",
-            context = "HamiltonianVectorField NonAutonomous/NonFixed call",
-        ))
+    hasmethod(H.f, Tuple{typeof(t),typeof(x),typeof(p),typeof(v)}, (:variable_costate,)) ||
+        throw(
+            Exceptions.PreconditionError(
+                "variable_costate=true is not supported by this HamiltonianVectorField's inner function";
+                suggestion="Use hamiltonian_vector_field(h; ...) to obtain a HVF that supports variable_costate",
+                context="HamiltonianVectorField NonAutonomous/NonFixed call",
+            ),
+        )
     return H.f(t, x, p, v; variable_costate=true)
 end
 
 # InPlace signatures (new)
-(H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.InPlace})(dx, dp, x, p) = H.f(dx, dp, x, p)
-(H::HamiltonianVectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.InPlace})(dx, dp, t, x, p) = H.f(dx, dp, t, x, p)
-function (H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.InPlace})(dx, dp, x, p, v; dpv=nothing, variable_costate::Bool=false)
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.Fixed,Traits.InPlace
+})(
+    dx, dp, x, p
+)
+    return H.f(dx, dp, x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.NonAutonomous,Traits.Fixed,Traits.InPlace
+})(
+    dx, dp, t, x, p
+)
+    return H.f(dx, dp, t, x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.NonFixed,Traits.InPlace
+})(
+    dx, dp, x, p, v; dpv=nothing, variable_costate::Bool=false
+)
     variable_costate || return H.f(dx, dp, x, p, v)
-    hasmethod(H.f, Tuple{typeof(dx), typeof(dp), typeof(x), typeof(p), typeof(v)}, (:variable_costate,)) ||
-        throw(Exceptions.PreconditionError(
+    hasmethod(
+        H.f,
+        Tuple{typeof(dx),typeof(dp),typeof(x),typeof(p),typeof(v)},
+        (:variable_costate,),
+    ) || throw(
+        Exceptions.PreconditionError(
             "variable_costate=true is not supported by this HamiltonianVectorField's inner function";
-            suggestion = "Use hamiltonian_vector_field(h; inplace=true) to obtain a HVF that supports variable_costate",
-            context = "HamiltonianVectorField IP Autonomous/NonFixed call",
-        ))
+            suggestion="Use hamiltonian_vector_field(h; inplace=true) to obtain a HVF that supports variable_costate",
+            context="HamiltonianVectorField IP Autonomous/NonFixed call",
+        ),
+    )
     return H.f(dx, dp, x, p, v; dpv=dpv, variable_costate=true)
 end
 
-function (H::HamiltonianVectorField{<:Function, Traits.NonAutonomous, Traits.NonFixed, Traits.InPlace})(dx, dp, t, x, p, v; dpv=nothing, variable_costate::Bool=false)
+function (H::HamiltonianVectorField{
+    <:Function,Traits.NonAutonomous,Traits.NonFixed,Traits.InPlace
+})(
+    dx, dp, t, x, p, v; dpv=nothing, variable_costate::Bool=false
+)
     variable_costate || return H.f(dx, dp, t, x, p, v)
-    hasmethod(H.f, Tuple{typeof(dx), typeof(dp), typeof(t), typeof(x), typeof(p), typeof(v)}, (:variable_costate,)) ||
-        throw(Exceptions.PreconditionError(
+    hasmethod(
+        H.f,
+        Tuple{typeof(dx),typeof(dp),typeof(t),typeof(x),typeof(p),typeof(v)},
+        (:variable_costate,),
+    ) || throw(
+        Exceptions.PreconditionError(
             "variable_costate=true is not supported by this HamiltonianVectorField's inner function";
-            suggestion = "Use hamiltonian_vector_field(h; inplace=true) to obtain a HVF that supports variable_costate",
-            context = "HamiltonianVectorField IP NonAutonomous/NonFixed call",
-        ))
+            suggestion="Use hamiltonian_vector_field(h; inplace=true) to obtain a HVF that supports variable_costate",
+            context="HamiltonianVectorField IP NonAutonomous/NonFixed call",
+        ),
+    )
     return H.f(dx, dp, t, x, p, v; dpv=dpv, variable_costate=true)
 end
 
@@ -265,14 +327,50 @@ end
 # =============================================================================
 
 # OutOfPlace uniform signatures
-(H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace})(t, x, p, v; variable_costate::Bool=false) = H.f(x, p)
-(H::HamiltonianVectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace})(t, x, p, v; variable_costate::Bool=false) = H.f(t, x, p)
-(H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace})(t, x, p, v; variable_costate::Bool=false) = H(x, p, v; variable_costate=variable_costate) # delegate to natural signature
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.Fixed,Traits.OutOfPlace
+})(
+    t, x, p, v; variable_costate::Bool=false
+)
+    return H.f(x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.NonAutonomous,Traits.Fixed,Traits.OutOfPlace
+})(
+    t, x, p, v; variable_costate::Bool=false
+)
+    return H.f(t, x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.NonFixed,Traits.OutOfPlace
+})(
+    t, x, p, v; variable_costate::Bool=false
+)
+    return H(x, p, v; variable_costate=variable_costate)
+end # delegate to natural signature
 
 # InPlace uniform signatures
-(H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.InPlace})(dx, dp, t, x, p, v; variable_costate::Bool=false, dpv=nothing) = H.f(dx, dp, x, p)
-(H::HamiltonianVectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.InPlace})(dx, dp, t, x, p, v; variable_costate::Bool=false, dpv=nothing) = H.f(dx, dp, t, x, p)
-(H::HamiltonianVectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.InPlace})(dx, dp, t, x, p, v; variable_costate::Bool=false, dpv=nothing) = H(dx, dp, x, p, v; dpv=dpv, variable_costate=variable_costate) # delegate to natural signature
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.Fixed,Traits.InPlace
+})(
+    dx, dp, t, x, p, v; variable_costate::Bool=false, dpv=nothing
+)
+    return H.f(dx, dp, x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.NonAutonomous,Traits.Fixed,Traits.InPlace
+})(
+    dx, dp, t, x, p, v; variable_costate::Bool=false, dpv=nothing
+)
+    return H.f(dx, dp, t, x, p)
+end
+function (H::HamiltonianVectorField{
+    <:Function,Traits.Autonomous,Traits.NonFixed,Traits.InPlace
+})(
+    dx, dp, t, x, p, v; variable_costate::Bool=false, dpv=nothing
+)
+    return H(dx, dp, x, p, v; dpv=dpv, variable_costate=variable_costate)
+end # delegate to natural signature
 
 # =============================================================================
 # Base.show
@@ -291,13 +389,13 @@ Shows the type name, time dependence, variable dependence, mutability, and funct
 
 See also: [`CTBase.Data.HamiltonianVectorField`](@ref).
 """
-function Base.show(io::IO, ::HamiltonianVectorField{F, TD, VD, MD}) where {F, TD, VD, MD}
+function Base.show(io::IO, ::HamiltonianVectorField{F,TD,VD,MD}) where {F,TD,VD,MD}
     header = "HamiltonianVectorField: $(_td_label(TD)), $(_vd_label(VD)), $(_md_label(MD))"
     natural = _natural_sig_hvf(TD, VD, MD)
     uniform = _uniform_sig_hvf(MD)
     println(io, header)
     println(io, "  natural call: ", natural)
-    print(io, "  uniform call: ", uniform)
+    return print(io, "  uniform call: ", uniform)
 end
 
 """
@@ -314,6 +412,8 @@ Delegates to the compact show method.
 
 See also: [`CTBase.Data.HamiltonianVectorField`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", hvf::HamiltonianVectorField{F, TD, VD, MD}) where {F, TD, VD, MD}
-    show(io, hvf)
+function Base.show(
+    io::IO, ::MIME"text/plain", hvf::HamiltonianVectorField{F,TD,VD,MD}
+) where {F,TD,VD,MD}
+    return show(io, hvf)
 end

@@ -24,7 +24,7 @@ Strategies.metadata(::Type{CollocationMock}) = Strategies.StrategyMetadata()
 struct ADNLPMock <: TestModeler end
 Strategies.id(::Type{ADNLPMock}) = :adnlp
 function Strategies.metadata(::Type{ADNLPMock})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:backend,
             type=Symbol,
@@ -38,7 +38,7 @@ end
 struct IpoptMock <: TestSolver end
 Strategies.id(::Type{IpoptMock}) = :ipopt
 function Strategies.metadata(::Type{IpoptMock})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter, type=Int, default=1000, description="Maximum iterations"
         ),
@@ -224,5 +224,5 @@ end
 end # module
 
 function test_orchestration_disambiguation()
-    TestOrchestrationDisambiguation.test_orchestration_disambiguation()
+    return TestOrchestrationDisambiguation.test_orchestration_disambiguation()
 end

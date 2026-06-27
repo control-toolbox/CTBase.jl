@@ -34,10 +34,10 @@ true
 See also: [`CTBase.Data.AbstractVectorField`](@ref), [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Data.Hamiltonian`](@ref).
 """
 abstract type AbstractHamiltonianVectorField{
-    TD <: Traits.TimeDependence,
-    VD <: Traits.VariableDependence,
-    MD <: Traits.AbstractMutabilityTrait
-} <: AbstractVectorField{TD, VD, MD} end
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+} <: AbstractVectorField{TD,VD,MD} end
 
 """
 $(TYPEDSIGNATURES)

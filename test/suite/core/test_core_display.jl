@@ -54,9 +54,20 @@ function test_core_display()
 
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "get_format_codes" begin
         all_fields = (
-            :bold, :dim, :reset,
-            :name, :type, :value, :keyword, :count, :label,
-            :emphasis, :muted, :error, :warning, :success,
+            :bold,
+            :dim,
+            :reset,
+            :name,
+            :type,
+            :value,
+            :keyword,
+            :count,
+            :label,
+            :emphasis,
+            :muted,
+            :error,
+            :warning,
+            :success,
         )
 
         Test.@testset "no color — all fields are empty strings" begin
@@ -84,7 +95,7 @@ function test_core_display()
         Test.@testset "legacy aliases match semantic fields" begin
             fmt = Core.get_format_codes(io_color)
             Test.@test fmt.bold == fmt.emphasis
-            Test.@test fmt.dim  == fmt.muted
+            Test.@test fmt.dim == fmt.muted
         end
     end
 

@@ -1,6 +1,6 @@
 module TestAD
 
-import Test
+using Test: Test
 import CTBase.Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

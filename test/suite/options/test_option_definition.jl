@@ -146,10 +146,7 @@ function test_option_definition()
 
         Test.@testset "Helper functions" begin
             def_required = Options.OptionDefinition(
-                name=:input,
-                type=String,
-                default=Core.NotProvided,
-                description="Input file",
+                name=:input, type=String, default=Core.NotProvided, description="Input file"
             )
             def_optional = Options.OptionDefinition(
                 name=:max_iter, type=Int, default=100, description="Max iterations"
@@ -422,10 +419,7 @@ function test_option_definition()
             Test.@test Options.has_validator(def) === true
 
             required_def = Options.OptionDefinition(
-                name=:input,
-                type=String,
-                default=Core.NotProvided,
-                description="Input file",
+                name=:input, type=String, default=Core.NotProvided, description="Input file"
             )
             Test.@test Options.has_default(required_def) === false
             Test.@test Options.is_required(required_def) === true

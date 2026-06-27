@@ -53,7 +53,7 @@ module Differentiation
 # External Imports
 # ==============================================================================
 
-import ADTypes
+using ADTypes: ADTypes
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 import CTBase.Data
 import CTBase.Exceptions
