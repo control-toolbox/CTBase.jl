@@ -29,7 +29,8 @@ OptionDefinition (schema)
 An `OptionDefinition` is the schema for a single option. It specifies the name, type, default, description, aliases, and an optional validator.
 
 ```@example options
-using CTBase.Options: OptionDefinition, OptionValue, NotProvided # hide
+using CTBase.Options: OptionDefinition, OptionValue # hide
+using CTBase.Core: NotProvided # hide
 using CTBase.Options: all_names, extract_option, extract_options, extract_raw_options # hide
 def = OptionDefinition(
     name        = :max_iter,
