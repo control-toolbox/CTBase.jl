@@ -13,8 +13,8 @@
 
 module TestDifferentiationModule
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Differentiation
 using CTBase.Differentiation  # For testing exported symbols
 
@@ -28,13 +28,9 @@ const CurrentModule = TestDifferentiationModule
 # ============================================================================
 # These lists define the expected public API of the Differentiation module.
 
-const EXPORTED_ABSTRACT_TYPES = (
-    :AbstractADBackend,
-)
+const EXPORTED_ABSTRACT_TYPES = (:AbstractADBackend,)
 
-const EXPORTED_CONCRETE_TYPES = (
-    :DifferentiationInterface,
-)
+const EXPORTED_CONCRETE_TYPES = (:DifferentiationInterface,)
 
 const EXPORTED_FUNCTIONS = (
     :build_ad_backend,
@@ -135,7 +131,8 @@ function test_differentiation_module()
             end
 
             Test.@testset "Concrete types inherit from abstract types" begin
-                Test.@test Differentiation.DifferentiationInterface <: Differentiation.AbstractADBackend
+                Test.@test Differentiation.DifferentiationInterface <:
+                    Differentiation.AbstractADBackend
             end
         end
     end

@@ -21,7 +21,7 @@ end
 Strategies.id(::Type{TestUtilStrategy}) = :test_util
 
 function Strategies.metadata(::Type{TestUtilStrategy})
-    Strategies.StrategyMetadata(
+    return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
             name=:max_iter,
             type=Int,

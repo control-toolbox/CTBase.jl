@@ -4,14 +4,14 @@ Tests for Differentiation.differentiate and Differentiation.pushforward.
 
 module TestArgPlacement
 
-import Test
-import ForwardDiff  # ensure DI ForwardDiff extension is loaded (AutoForwardDiff backend)
-import DifferentiationInterface   # activates CTBaseDifferentiationInterface extension
+using Test: Test
+using ForwardDiff: ForwardDiff  # ensure DI ForwardDiff extension is loaded (AutoForwardDiff backend)
+using DifferentiationInterface: DifferentiationInterface   # activates CTBaseDifferentiationInterface extension
 import CTBase.Differentiation
 import CTBase.Exceptions
 import CTBase.Strategies
 
-const VERBOSE    = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # ==============================================================================
@@ -90,7 +90,10 @@ function test_arg_placement()
             b = _default_backend()
             # H(t, x, p, v) = t*v + ½‖p‖² + ‖x‖²
             H(t, x, p, v) = t * v + 0.5 * sum(p .^ 2) + sum(x .^ 2)
-            t = 1.0; x = [1.0, 2.0]; p = [3.0, 4.0]; v = 5.0
+            t = 1.0;
+            x = [1.0, 2.0];
+            p = [3.0, 4.0];
+            v = 5.0
             # ∂H/∂x = 2x (slot 2), consts in order t,p,v
             gx = Differentiation.differentiate(b, H, Val(2), x, t, p, v)
             # ∂H/∂p = p (slot 3), consts in order t,x,v
@@ -138,7 +141,6 @@ function test_arg_placement()
             jvp = Differentiation.pushforward(b, foo, Val(1), x, d, v)
             Test.@test jvp ≈ v .* d
         end
-
     end
 end
 

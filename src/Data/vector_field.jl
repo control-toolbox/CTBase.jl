@@ -38,7 +38,12 @@ as the first argument (e.g., `(dx, x)` for Autonomous/Fixed).
 
 See also: [`CTBase.Data.AbstractVectorField`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.AbstractMutabilityTrait`](@ref).
 """
-struct VectorField{F<:Function, TD<:Traits.TimeDependence, VD<:Traits.VariableDependence, MD<:Traits.AbstractMutabilityTrait} <: AbstractVectorField{TD, VD, MD}
+struct VectorField{
+    F<:Function,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+} <: AbstractVectorField{TD,VD,MD}
     f::F
 end
 
@@ -106,12 +111,14 @@ See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Traits.InPlace`](@ref), [`
 function _detect_mutability_vf(f::Function, TD, VD)
     method_count = length(methods(f))
     if method_count > 1
-        throw(Exceptions.PreconditionError(
-            "Cannot auto-detect mutability: function has multiple methods";
-            reason = "The function has $method_count methods, making automatic arity detection ambiguous",
-            suggestion = "Specify `is_inplace=true` or `is_inplace=false` explicitly in the constructor",
-            context = "VectorField mutability detection",
-        ))
+        throw(
+            Exceptions.PreconditionError(
+                "Cannot auto-detect mutability: function has multiple methods";
+                reason="The function has $method_count methods, making automatic arity detection ambiguous",
+                suggestion="Specify `is_inplace=true` or `is_inplace=false` explicitly in the constructor",
+                context="VectorField mutability detection",
+            ),
+        )
     end
 
     arity = first(methods(f)).nargs - 1
@@ -123,11 +130,13 @@ function _detect_mutability_vf(f::Function, TD, VD)
     elseif arity == ip_arity
         return Traits.InPlace
     else
-        throw(Exceptions.IncorrectArgument(
-            "Invalid function arity: expected $oop_arity (out-of-place) or $ip_arity (in-place), got $arity";
-            suggestion = "Ensure your function signature matches the expected pattern for the given traits.",
-            context = "VectorField mutability detection",
-        ))
+        throw(
+            Exceptions.IncorrectArgument(
+                "Invalid function arity: expected $oop_arity (out-of-place) or $ip_arity (in-place), got $arity";
+                suggestion="Ensure your function signature matches the expected pattern for the given traits.",
+                context="VectorField mutability detection",
+            ),
+        )
     end
 end
 
@@ -171,10 +180,11 @@ VectorField: autonomous, fixed (no variable), in-place
 
 See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref), [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
 """
-function VectorField(f; 
-    is_autonomous::Bool = __is_autonomous(), 
-    is_variable::Bool = __is_variable(), 
-    is_inplace::Union{Bool, Nothing} = __is_inplace()
+function VectorField(
+    f;
+    is_autonomous::Bool=__is_autonomous(),
+    is_variable::Bool=__is_variable(),
+    is_inplace::Union{Bool,Nothing}=__is_inplace(),
 )
     TD = is_autonomous ? Traits.Autonomous : Traits.NonAutonomous
     VD = is_variable ? Traits.NonFixed : Traits.Fixed
@@ -183,7 +193,7 @@ function VectorField(f;
     else
         is_inplace ? Traits.InPlace : Traits.OutOfPlace
     end
-    return VectorField{typeof(f), TD, VD, MD}(f)
+    return VectorField{typeof(f),TD,VD,MD}(f)
 end
 
 # =============================================================================
@@ -191,14 +201,13 @@ end
 # =============================================================================
 
 function VectorField(
-    f,
-    ::Type{TD}, ::Type{VD}, ::Type{MD},
+    f, ::Type{TD}, ::Type{VD}, ::Type{MD}
 ) where {
-    TD <: Traits.TimeDependence,
-    VD <: Traits.VariableDependence,
-    MD <: Traits.AbstractMutabilityTrait,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
 }
-    return VectorField{typeof(f), TD, VD, MD}(f)
+    return VectorField{typeof(f),TD,VD,MD}(f)
 end
 
 # =============================================================================
@@ -206,16 +215,42 @@ end
 # =============================================================================
 
 # OutOfPlace signatures (existing)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace})(x) = F.f(x)
-(F::VectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace})(t, x) = F.f(t, x)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace})(x, v) = F.f(x, v)
-(F::VectorField{<:Function, Traits.NonAutonomous, Traits.NonFixed, Traits.OutOfPlace})(t, x, v) = F.f(t, x, v)
+(F::VectorField{<:Function,Traits.Autonomous,Traits.Fixed,Traits.OutOfPlace})(x) = F.f(x)
+function (F::VectorField{<:Function,Traits.NonAutonomous,Traits.Fixed,Traits.OutOfPlace})(
+    t, x
+)
+    return F.f(t, x)
+end
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.NonFixed,Traits.OutOfPlace})(
+    x, v
+)
+    return F.f(x, v)
+end
+function (F::VectorField{<:Function,Traits.NonAutonomous,Traits.NonFixed,Traits.OutOfPlace})(
+    t, x, v
+)
+    return F.f(t, x, v)
+end
 
 # InPlace signatures (new)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.InPlace})(dx, x) = F.f(dx, x)
-(F::VectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.InPlace})(dx, t, x) = F.f(dx, t, x)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.InPlace})(dx, x, v) = F.f(dx, x, v)
-(F::VectorField{<:Function, Traits.NonAutonomous, Traits.NonFixed, Traits.InPlace})(dx, t, x, v) = F.f(dx, t, x, v)
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.Fixed,Traits.InPlace})(dx, x)
+    return F.f(dx, x)
+end
+function (F::VectorField{<:Function,Traits.NonAutonomous,Traits.Fixed,Traits.InPlace})(
+    dx, t, x
+)
+    return F.f(dx, t, x)
+end
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.NonFixed,Traits.InPlace})(
+    dx, x, v
+)
+    return F.f(dx, x, v)
+end
+function (F::VectorField{<:Function,Traits.NonAutonomous,Traits.NonFixed,Traits.InPlace})(
+    dx, t, x, v
+)
+    return F.f(dx, t, x, v)
+end
 
 # =============================================================================
 # Uniform (t, x, v) call - used by VectorFieldSystem.rhs
@@ -224,14 +259,38 @@ end
 # =============================================================================
 
 # OutOfPlace uniform signatures (existing)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.OutOfPlace})(t, x, v) = F.f(x)
-(F::VectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace})(t, x, v) = F.f(t, x)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.OutOfPlace})(t, x, v) = F.f(x, v)
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.Fixed,Traits.OutOfPlace})(
+    t, x, v
+)
+    return F.f(x)
+end
+function (F::VectorField{<:Function,Traits.NonAutonomous,Traits.Fixed,Traits.OutOfPlace})(
+    t, x, v
+)
+    return F.f(t, x)
+end
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.NonFixed,Traits.OutOfPlace})(
+    t, x, v
+)
+    return F.f(x, v)
+end
 
 # InPlace uniform signatures (new)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.Fixed, Traits.InPlace})(dx, t, x, v) = F.f(dx, x)
-(F::VectorField{<:Function, Traits.NonAutonomous, Traits.Fixed, Traits.InPlace})(dx, t, x, v) = F.f(dx, t, x)
-(F::VectorField{<:Function, Traits.Autonomous, Traits.NonFixed, Traits.InPlace})(dx, t, x, v) = F.f(dx, x, v)
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.Fixed,Traits.InPlace})(
+    dx, t, x, v
+)
+    return F.f(dx, x)
+end
+function (F::VectorField{<:Function,Traits.NonAutonomous,Traits.Fixed,Traits.InPlace})(
+    dx, t, x, v
+)
+    return F.f(dx, t, x)
+end
+function (F::VectorField{<:Function,Traits.Autonomous,Traits.NonFixed,Traits.InPlace})(
+    dx, t, x, v
+)
+    return F.f(dx, x, v)
+end
 
 # =============================================================================
 # Base.show
@@ -250,13 +309,13 @@ Shows the type name, time dependence, variable dependence, mutability, and funct
 
 See also: [`CTBase.Data.VectorField`](@ref).
 """
-function Base.show(io::IO, vf::VectorField{F, TD, VD, MD}) where {F, TD, VD, MD}
+function Base.show(io::IO, vf::VectorField{F,TD,VD,MD}) where {F,TD,VD,MD}
     header = "VectorField: $(_td_label(TD)), $(_vd_label(VD)), $(_md_label(MD))"
     natural = _natural_sig_vf(TD, VD, MD)
     uniform = _uniform_sig_vf(MD)
     println(io, header)
     println(io, "  natural call: ", natural)
-    print(io, "  uniform call: ", uniform)
+    return print(io, "  uniform call: ", uniform)
 end
 
 """
@@ -273,6 +332,8 @@ Delegates to the compact show method.
 
 See also: [`CTBase.Data.VectorField`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", vf::VectorField{F, TD, VD, MD}) where {F, TD, VD, MD}
-    show(io, vf)
+function Base.show(
+    io::IO, ::MIME"text/plain", vf::VectorField{F,TD,VD,MD}
+) where {F,TD,VD,MD}
+    return show(io, vf)
 end

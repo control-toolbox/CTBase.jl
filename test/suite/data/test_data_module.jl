@@ -18,8 +18,8 @@
 
 module TestDataModule
 
-import Test
-import CTBase
+using Test: Test
+using CTBase: CTBase
 import CTBase.Data
 using CTBase.Data  # For testing exported symbols
 
@@ -34,16 +34,10 @@ const CurrentModule = TestDataModule
 # These lists define the expected public API of the Data module.
 
 const EXPORTED_ABSTRACT_TYPES = (
-    :AbstractVectorField,
-    :AbstractHamiltonianVectorField,
-    :AbstractHamiltonian,
+    :AbstractVectorField, :AbstractHamiltonianVectorField, :AbstractHamiltonian
 )
 
-const EXPORTED_CONCRETE_TYPES = (
-    :VectorField,
-    :HamiltonianVectorField,
-    :Hamiltonian,
-)
+const EXPORTED_CONCRETE_TYPES = (:VectorField, :HamiltonianVectorField, :Hamiltonian)
 
 const PRIVATE_SYMBOLS = (
     :__is_autonomous,
@@ -152,7 +146,8 @@ function test_data_module()
 
             Test.@testset "Concrete types inherit from abstract types" begin
                 Test.@test Data.VectorField <: Data.AbstractVectorField
-                Test.@test Data.HamiltonianVectorField <: Data.AbstractHamiltonianVectorField
+                Test.@test Data.HamiltonianVectorField <:
+                    Data.AbstractHamiltonianVectorField
                 # Note: Hamiltonian is parametric (Hamiltonian{F, TD, VD} <: AbstractHamiltonian{TD, VD})
                 # Test via instance instead of type
                 h = Data.Hamiltonian((x, p) -> 0.0)

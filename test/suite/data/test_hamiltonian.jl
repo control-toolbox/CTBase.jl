@@ -1,6 +1,6 @@
 module TestHamiltonian
 
-import Test
+using Test: Test
 import CTBase.Data
 import CTBase.Traits
 import CTBase.Exceptions
@@ -17,25 +17,33 @@ function test_hamiltonian()
 
         Test.@testset "Unit: Construction with all trait combinations" begin
             # Autonomous, Fixed
-            h_aut_fixed = Data.Hamiltonian((x, p) -> x + p; is_autonomous=true, is_variable=false)
+            h_aut_fixed = Data.Hamiltonian(
+                (x, p) -> x + p; is_autonomous=true, is_variable=false
+            )
             Test.@test h_aut_fixed isa Data.Hamiltonian
             Test.@test Traits.time_dependence(h_aut_fixed) == Traits.Autonomous
             Test.@test Traits.variable_dependence(h_aut_fixed) == Traits.Fixed
 
             # NonAutonomous, Fixed
-            h_nonaut_fixed = Data.Hamiltonian((t, x, p) -> t + x + p; is_autonomous=false, is_variable=false)
+            h_nonaut_fixed = Data.Hamiltonian(
+                (t, x, p) -> t + x + p; is_autonomous=false, is_variable=false
+            )
             Test.@test h_nonaut_fixed isa Data.Hamiltonian
             Test.@test Traits.time_dependence(h_nonaut_fixed) == Traits.NonAutonomous
             Test.@test Traits.variable_dependence(h_nonaut_fixed) == Traits.Fixed
 
             # Autonomous, NonFixed
-            h_aut_nonfixed = Data.Hamiltonian((x, p, v) -> x + p + v; is_autonomous=true, is_variable=true)
+            h_aut_nonfixed = Data.Hamiltonian(
+                (x, p, v) -> x + p + v; is_autonomous=true, is_variable=true
+            )
             Test.@test h_aut_nonfixed isa Data.Hamiltonian
             Test.@test Traits.time_dependence(h_aut_nonfixed) == Traits.Autonomous
             Test.@test Traits.variable_dependence(h_aut_nonfixed) == Traits.NonFixed
 
             # NonAutonomous, NonFixed
-            h_nonaut_nonfixed = Data.Hamiltonian((t, x, p, v) -> t + x + p + v; is_autonomous=false, is_variable=true)
+            h_nonaut_nonfixed = Data.Hamiltonian(
+                (t, x, p, v) -> t + x + p + v; is_autonomous=false, is_variable=true
+            )
             Test.@test h_nonaut_nonfixed isa Data.Hamiltonian
             Test.@test Traits.time_dependence(h_nonaut_nonfixed) == Traits.NonAutonomous
             Test.@test Traits.variable_dependence(h_nonaut_nonfixed) == Traits.NonFixed
@@ -52,17 +60,23 @@ function test_hamiltonian()
             Test.@test result == [4.0, 6.0]
 
             # (t, x, p) for NonAutonomous, Fixed
-            h2 = Data.Hamiltonian((t, x, p) -> x .+ p; is_autonomous=false, is_variable=false)
+            h2 = Data.Hamiltonian(
+                (t, x, p) -> x .+ p; is_autonomous=false, is_variable=false
+            )
             result = h2(2.0, [1.0, 2.0], [3.0, 4.0])
             Test.@test result == [4.0, 6.0]
 
             # (x, p, v) for Autonomous, NonFixed
-            h3 = Data.Hamiltonian((x, p, v) -> x .+ p .+ v; is_autonomous=true, is_variable=true)
+            h3 = Data.Hamiltonian(
+                (x, p, v) -> x .+ p .+ v; is_autonomous=true, is_variable=true
+            )
             result = h3([1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test result == [6.0, 8.0]
 
             # (t, x, p, v) for NonAutonomous, NonFixed
-            h4 = Data.Hamiltonian((t, x, p, v) -> x .+ p .+ v; is_autonomous=false, is_variable=true)
+            h4 = Data.Hamiltonian(
+                (t, x, p, v) -> x .+ p .+ v; is_autonomous=false, is_variable=true
+            )
             result = h4(2.0, [1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test result == [6.0, 8.0]
         end
@@ -78,17 +92,23 @@ function test_hamiltonian()
             Test.@test result == [4.0, 6.0]
 
             # NonAutonomous Fixed - ignores v
-            h2 = Data.Hamiltonian((t, x, p) -> x .+ p; is_autonomous=false, is_variable=false)
+            h2 = Data.Hamiltonian(
+                (t, x, p) -> x .+ p; is_autonomous=false, is_variable=false
+            )
             result = h2(2.0, [1.0, 2.0], [3.0, 4.0], nothing)
             Test.@test result == [4.0, 6.0]
 
             # Autonomous NonFixed - ignores t
-            h3 = Data.Hamiltonian((x, p, v) -> x .+ p .+ v; is_autonomous=true, is_variable=true)
+            h3 = Data.Hamiltonian(
+                (x, p, v) -> x .+ p .+ v; is_autonomous=true, is_variable=true
+            )
             result = h3(0.0, [1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test result == [6.0, 8.0]
 
             # NonAutonomous NonFixed - uses all
-            h4 = Data.Hamiltonian((t, x, p, v) -> x .+ p .+ v; is_autonomous=false, is_variable=true)
+            h4 = Data.Hamiltonian(
+                (t, x, p, v) -> x .+ p .+ v; is_autonomous=false, is_variable=true
+            )
             result = h4(2.0, [1.0, 2.0], [3.0, 4.0], 2.0)
             Test.@test result == [6.0, 8.0]
         end
@@ -149,7 +169,9 @@ function test_hamiltonian()
 
         Test.@testset "Subtyping" begin
             Test.@testset "Hamiltonian is an AbstractHamiltonian" begin
-                h = Data.Hamiltonian((x, p) -> x .+ p; is_autonomous=true, is_variable=false)
+                h = Data.Hamiltonian(
+                    (x, p) -> x .+ p; is_autonomous=true, is_variable=false
+                )
                 Test.@test h isa Data.AbstractHamiltonian
             end
         end

@@ -1,6 +1,6 @@
 module TestVariableCostate
 
-import Test
+using Test: Test
 import CTBase.Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -24,7 +24,8 @@ function test_variable_costate()
                 end
 
                 Test.@testset "AbstractVariableCostateCapability subtypes AbstractTrait" begin
-                    Test.@test Traits.AbstractVariableCostateCapability <: Traits.AbstractTrait
+                    Test.@test Traits.AbstractVariableCostateCapability <:
+                        Traits.AbstractTrait
                 end
             end
         end
@@ -49,7 +50,8 @@ function test_variable_costate()
                 end
 
                 Test.@testset "SupportsVariableCostate subtypes AbstractVariableCostateCapability" begin
-                    Test.@test Traits.SupportsVariableCostate <: Traits.AbstractVariableCostateCapability
+                    Test.@test Traits.SupportsVariableCostate <:
+                        Traits.AbstractVariableCostateCapability
                 end
             end
 
@@ -68,7 +70,8 @@ function test_variable_costate()
                 end
 
                 Test.@testset "NoVariableCostate subtypes AbstractVariableCostateCapability" begin
-                    Test.@test Traits.NoVariableCostate <: Traits.AbstractVariableCostateCapability
+                    Test.@test Traits.NoVariableCostate <:
+                        Traits.AbstractVariableCostateCapability
                 end
             end
         end
@@ -84,8 +87,10 @@ function test_variable_costate()
             end
 
             Test.@testset "Variable costate traits subtype AbstractVariableCostateCapability" begin
-                Test.@test Traits.SupportsVariableCostate <: Traits.AbstractVariableCostateCapability
-                Test.@test Traits.NoVariableCostate <: Traits.AbstractVariableCostateCapability
+                Test.@test Traits.SupportsVariableCostate <:
+                    Traits.AbstractVariableCostateCapability
+                Test.@test Traits.NoVariableCostate <:
+                    Traits.AbstractVariableCostateCapability
             end
         end
 
@@ -96,8 +101,10 @@ function test_variable_costate()
         Test.@testset "UNIT TESTS - variable_costate_trait function" begin
             Test.@testset "variable_costate_trait default returns NoVariableCostate" begin
                 Test.@test Traits.variable_costate_trait(42) === Traits.NoVariableCostate
-                Test.@test Traits.variable_costate_trait("anything") === Traits.NoVariableCostate
-                Test.@test Traits.variable_costate_trait(nothing) === Traits.NoVariableCostate
+                Test.@test Traits.variable_costate_trait("anything") ===
+                    Traits.NoVariableCostate
+                Test.@test Traits.variable_costate_trait(nothing) ===
+                    Traits.NoVariableCostate
             end
         end
 
@@ -107,7 +114,11 @@ function test_variable_costate()
 
         Test.@testset "Exports Verification" begin
             Test.@testset "Exported variable costate trait types" begin
-                for sym in (:AbstractVariableCostateCapability, :SupportsVariableCostate, :NoVariableCostate)
+                for sym in (
+                    :AbstractVariableCostateCapability,
+                    :SupportsVariableCostate,
+                    :NoVariableCostate,
+                )
                     Test.@test isdefined(Traits, sym)
                 end
             end

@@ -641,7 +641,7 @@ function _error_unknown_option(
     # Combine all suggestions
     suggestion = join(suggestion_parts, "")
 
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "Unknown option provided";
             got="option :$key in method $(resolved.tokens)",

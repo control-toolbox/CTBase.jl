@@ -96,7 +96,7 @@ struct OptionDefinition{T}
             end
         end
 
-        new{T}(name, type, default, description, aliases, validator, computed)
+        return new{T}(name, type, default, description, aliases, validator, computed)
     end
 end
 

@@ -35,7 +35,11 @@ Traits.mutability(vf)  # Returns OutOfPlace
 
 See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.mutability`](@ref).
 """
-abstract type AbstractVectorField{TD<:Traits.TimeDependence, VD<:Traits.VariableDependence, MD<:Traits.AbstractMutabilityTrait} end
+abstract type AbstractVectorField{
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+} end
 
 # =============================================================================
 # Trait accessors for AbstractVectorField
@@ -105,7 +109,9 @@ Traits.time_dependence(hvf)  # Returns NonAutonomous
 
 See also: [`CTBase.Traits.has_time_dependence_trait`](@ref), `is_autonomous`.
 """
-function Traits.time_dependence(vf::AbstractVectorField{TD, <:Traits.VariableDependence, <:Traits.AbstractMutabilityTrait}) where {TD <: Traits.TimeDependence}
+function Traits.time_dependence(
+    vf::AbstractVectorField{TD,<:Traits.VariableDependence,<:Traits.AbstractMutabilityTrait}
+) where {TD<:Traits.TimeDependence}
     return TD
 end
 
@@ -131,7 +137,9 @@ Traits.variable_dependence(hvf)  # Returns NonFixed
 
 See also: [`CTBase.Traits.has_variable_dependence_trait`](@ref), `is_variable`.
 """
-function Traits.variable_dependence(vf::AbstractVectorField{<:Traits.TimeDependence, VD, <:Traits.AbstractMutabilityTrait}) where {VD <: Traits.VariableDependence}
+function Traits.variable_dependence(
+    vf::AbstractVectorField{<:Traits.TimeDependence,VD,<:Traits.AbstractMutabilityTrait}
+) where {VD<:Traits.VariableDependence}
     return VD
 end
 
@@ -157,7 +165,9 @@ Traits.mutability(vf2)  # Returns OutOfPlace
 
 See also: [`CTBase.Traits.has_mutability_trait`](@ref), [`CTBase.Traits.is_inplace`](@ref).
 """
-function Traits.mutability(vf::AbstractVectorField{<:Traits.TimeDependence, <:Traits.VariableDependence, MD}) where {MD <: Traits.AbstractMutabilityTrait}
+function Traits.mutability(
+    vf::AbstractVectorField{<:Traits.TimeDependence,<:Traits.VariableDependence,MD}
+) where {MD<:Traits.AbstractMutabilityTrait}
     return MD
 end
 

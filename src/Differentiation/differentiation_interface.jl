@@ -25,8 +25,7 @@ See also: [`CTBase.Differentiation.AbstractADBackend`](@ref),
 [`CTBase.Differentiation.hamiltonian_gradient`](@ref),
 [`CTBase.Differentiation.variable_gradient`](@ref).
 """
-struct DifferentiationInterface{O<:Strategies.StrategyOptions} <:
-       AbstractADBackend
+struct DifferentiationInterface{O<:Strategies.StrategyOptions} <: AbstractADBackend
     options::O
 end
 
@@ -65,8 +64,9 @@ $(TYPEDSIGNATURES)
 
 Return a human-readable description of the `DifferentiationInterface` strategy.
 """
-Strategies.description(::Type{<:DifferentiationInterface}) =
-    "AD backend wrapping DifferentiationInterface.jl backends (e.g., AutoForwardDiff)."
+function Strategies.description(::Type{<:DifferentiationInterface})
+    return "AD backend wrapping DifferentiationInterface.jl backends (e.g., AutoForwardDiff)."
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -76,10 +76,10 @@ Return metadata defining `DifferentiationInterface` options and their specificat
 function Strategies.metadata(::Type{<:DifferentiationInterface})
     return Strategies.StrategyMetadata(
         Strategies.OptionDefinition(;
-            name = :ad_backend,
-            type = ADTypes.AbstractADType,
-            default = __ad_backend(),
-            description = "DifferentiationInterface.jl backend (e.g. AutoForwardDiff()).",
+            name=:ad_backend,
+            type=ADTypes.AbstractADType,
+            default=__ad_backend(),
+            description="DifferentiationInterface.jl backend (e.g. AutoForwardDiff()).",
             aliases=(:backend, :ad),
         ),
     )
@@ -102,5 +102,6 @@ Extract the AD backend from a `DifferentiationInterface` strategy.
 
 See also: [`CTBase.Differentiation.ad_backend`](@ref).
 """
-ad_backend(backend::DifferentiationInterface) =
-    Base.get(Strategies.options(backend), Val(:ad_backend))
+function ad_backend(backend::DifferentiationInterface)
+    return Base.get(Strategies.options(backend), Val(:ad_backend))
+end
