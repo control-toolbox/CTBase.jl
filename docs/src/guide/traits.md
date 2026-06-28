@@ -56,6 +56,22 @@ Traits.Fixed <: Traits.VariableDependence
 Traits.NonFixed <: Traits.VariableDependence
 ```
 
+### Control dependence
+
+Does the optimal control problem carry a control input ``u``?
+
+| Type | Meaning |
+|---|---|
+| [`Traits.ControlFree`](@ref CTBase.Traits.ControlFree) | no control: ``ẋ = f(t, x, v)`` |
+| [`Traits.WithControl`](@ref CTBase.Traits.WithControl) | control ``u``: ``ẋ = f(t, x, u, v)`` |
+
+Both are concrete subtypes of [`Traits.ControlDependence`](@ref CTBase.Traits.ControlDependence):
+
+```@repl traits
+Traits.ControlFree <: Traits.ControlDependence
+Traits.WithControl <: Traits.ControlDependence
+```
+
 ### Mutability
 
 Does a function allocate a new output, or write into a pre-allocated buffer?
@@ -78,15 +94,39 @@ below — they are passed directly as type arguments.
 | Automatic differentiation | [`Traits.WithAD`](@ref CTBase.Traits.WithAD), [`Traits.WithoutAD`](@ref CTBase.Traits.WithoutAD) |
 | Variable costate | [`Traits.SupportsVariableCostate`](@ref CTBase.Traits.SupportsVariableCostate), [`Traits.NoVariableCostate`](@ref CTBase.Traits.NoVariableCostate) |
 
-## The trait contract
+!!! note "Abstract tags vs. concrete tags"
+    Time-dependence tags (`Autonomous`, `NonAutonomous`) are **abstract** types
+    because they are only ever used as type-parameter *values* (e.g. `Model{Autonomous}`)
+    — never instantiated. All other tags (`Fixed`/`NonFixed`, `ControlFree`/`WithControl`,
+    `InPlace`/`OutOfPlace`, …) are **concrete** empty singletons. In practice every tag
+    is compared as a type (`control_dependence(obj) === Traits.ControlFree`), so the
+    two forms are used interchangeably; the distinction is historical, not semantic.
 
-A type opts in to a trait by implementing **two methods**: one declaring that it
-*has* the trait, and one returning the trait *value*. The boolean predicates
-([`Traits.is_autonomous`](@ref CTBase.Traits.is_autonomous),
-[`Traits.is_variable`](@ref CTBase.Traits.is_variable), …) then follow
-generically — they are not implemented per type.
+## The trait contract — two templates
 
-For time and variable dependence:
+Trait families follow one of **two contracts**, and the choice is dictated by a
+single question: **does a safe default value exist?**
+
+- **Strict opt-in (no safe default).** Time-, variable-, and control-dependence,
+  and mutability. An object is *either* autonomous or not, *either* control-free or
+  not — guessing silently would be a correctness bug, so there is no default. A type
+  must opt in by implementing **two methods**: one declaring that it *has* the trait,
+  one returning the trait *value*. The boolean predicates
+  ([`Traits.is_autonomous`](@ref CTBase.Traits.is_autonomous),
+  [`Traits.is_control_free`](@ref CTBase.Traits.is_control_free), …) then follow
+  generically. If a type does not opt in, the predicates throw rather than guess.
+- **Default-valued capability (safe default exists).** Automatic differentiation
+  and variable costate are *capabilities*: a conservative "no" is always safe. The
+  extractor returns a default for any object
+  ([`Traits.ad_trait`](@ref CTBase.Traits.ad_trait) ``→`` `WithoutAD`,
+  [`Traits.variable_costate_trait`](@ref CTBase.Traits.variable_costate_trait) ``→``
+  `NoVariableCostate`) and concrete types override it — no `has_*` method, no
+  predicates.
+
+The "Other families" above (integration mode, dynamics) use neither contract: they
+are read directly from a concrete type's parameters.
+
+For the strict opt-in families — time, variable and control dependence:
 
 ```@repl traits
 struct MyObject end
@@ -97,11 +137,16 @@ Traits.time_dependence(::MyObject) = Traits.NonAutonomous
 Traits.has_variable_dependence_trait(::MyObject) = true
 Traits.variable_dependence(::MyObject) = Traits.Fixed
 
+Traits.has_control_dependence_trait(::MyObject) = true
+Traits.control_dependence(::MyObject) = Traits.WithControl
+
 obj = MyObject()
 Traits.is_autonomous(obj)
 Traits.is_nonautonomous(obj)
 Traits.is_variable(obj)
 Traits.is_nonvariable(obj)
+Traits.is_control_free(obj)
+Traits.has_control(obj)
 ```
 
 For mutability, the same pattern applies with `has_mutability_trait` and `mutability`:
@@ -139,6 +184,7 @@ end # hide
 |---|---|
 | [`Traits.time_dependence`](@ref CTBase.Traits.time_dependence) | `is_autonomous`, `is_nonautonomous` |
 | [`Traits.variable_dependence`](@ref CTBase.Traits.variable_dependence) | `is_variable`, `is_nonvariable`, `has_variable` |
+| [`Traits.control_dependence`](@ref CTBase.Traits.control_dependence) | `is_control_free`, `has_control` |
 | [`Traits.mutability`](@ref CTBase.Traits.mutability) | `is_inplace`, `is_outofplace` |
 | [`Traits.ad_trait`](@ref CTBase.Traits.ad_trait) | — |
 | [`Traits.variable_costate_trait`](@ref CTBase.Traits.variable_costate_trait) | — |

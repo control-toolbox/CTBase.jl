@@ -26,6 +26,15 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 - `NotStored` / `NotStoredType` are unchanged and remain extraction-internal to
   `CTBase.Options` (the defining file was renamed `not_provided.jl` → `not_stored.jl`).
 
+## Non-breaking note (0.25.0-beta)
+
+- **Traits**: New `ControlDependence` family added for encoding control presence in optimal control problems
+  - **New trait family**: `ControlDependence` with tags `ControlFree` and `WithControl`
+  - **Opt-in contract**: types implement `has_control_dependence_trait` and `control_dependence`
+  - **Derived predicates**: `is_control_free(obj)` and `has_control(obj)`
+  - **Internal refactoring**: shared helpers for strict-contract error handling reduce duplication
+  - **No breaking changes**: Purely additive. Existing code unaffected. New trait enables dispatch in downstream packages (CTModels, CTFlows).
+
 ## Non-breaking note (0.24.0-beta)
 
 - **Differentiation module**: Added comprehensive AD backend infrastructure for computing gradients
