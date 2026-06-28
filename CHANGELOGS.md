@@ -5,6 +5,39 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0-beta] - 2026-06-28
+
+### ✨ New Features
+
+#### **Control Dependence Trait**
+
+- **New `ControlDependence` trait family** in `CTBase.Traits` for encoding control presence in optimal control problems at the type level:
+  - **Tags**: `ControlFree` (no control input, `ẋ = f(t, x, v)`) and `WithControl` (control input, `ẋ = f(t, x, u, v)`)
+  - **Opt-in contract**: types implement `has_control_dependence_trait` and `control_dependence` to enable trait support
+  - **Derived predicates**: `is_control_free(obj)` and `has_control(obj)` follow generically
+  - **Concrete singleton tags**: consistent with `Fixed`/`NonFixed`, suitable for reading from a field type
+- **Purpose**: enables Holy-trait dispatch in downstream packages (CTModels declares the trait on `Model`; CTFlows dispatches `Flow(ocp)` on control presence to route control-free vs with-control problems)
+
+### 🔄 Refactoring
+
+- **Strict-contract machinery**: factored the fallback exception bodies shared by the strict opt-in families (time-dependence, variable-dependence, mutability, control-dependence) into two internal helpers `_throw_missing_trait` and `_throw_trait_not_implemented`, eliminating ~70% duplication. Error messages and behaviour are byte-identical.
+- **`_caller_function_name`**: generalised the stacktrace filter to match any `has_<family>_trait` predicate via a `startswith`/`endswith` pattern instead of a hard-coded name list (auto-handles future families).
+- **`has_variable`**: collapsed the duplicate body to a direct alias `has_variable(obj) = is_variable(obj)`.
+
+### 📚 Documentation
+
+- **Traits guide**: documented the two trait contract templates (strict opt-in vs default-valued capability) with the selection criterion; added a *Control dependence* section and a note on abstract-vs-concrete trait types.
+- **Module docstring**: `CTBase.Traits` now describes both contract templates.
+- **API reference**: added `control_dependence.jl` to the auto-generated Traits API page.
+
+### 🧪 Testing
+
+- Added `test/suite/traits/test_control_dependence.jl` (25 tests) mirroring the variable-dependence test structure; updated export-list checks in `test_traits_module.jl`. Traits suite: **301/301** passing.
+
+### ✅ Compatibility
+
+- **No breaking changes**: purely additive. Existing predicates and trait families are unchanged. See [BREAKINGS.md](BREAKINGS.md).
+
 ## [0.25.0-beta] - 2026-06-26
 
 ### ⚠️ Breaking Changes
