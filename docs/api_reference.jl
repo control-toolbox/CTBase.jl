@@ -174,6 +174,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Traits", "mutability.jl"),
                 joinpath("Traits", "time_dependence.jl"),
                 joinpath("Traits", "variable_dependence.jl"),
+                joinpath("Traits", "control_dependence.jl"),
             ),
         ),
         (

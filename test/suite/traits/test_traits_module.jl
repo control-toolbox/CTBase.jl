@@ -15,6 +15,7 @@
 # - test_time_dependence.jl for time dependence traits
 # - test_variable_costate.jl for variable costate traits
 # - test_variable_dependence.jl for variable dependence traits
+# - test_control_dependence.jl for control dependence traits
 """
 
 module TestTraitsModule
@@ -43,6 +44,7 @@ const EXPORTED_ABSTRACT_TYPES = (
     :AbstractVariableCostateCapability,
     :TimeDependence,
     :VariableDependence,
+    :ControlDependence,
 )
 
 const EXPORTED_CONCRETE_TYPES = (
@@ -61,6 +63,8 @@ const EXPORTED_CONCRETE_TYPES = (
     :NonAutonomous,
     :Fixed,
     :NonFixed,
+    :ControlFree,
+    :WithControl,
 )
 
 const EXPORTED_FUNCTIONS = (
@@ -79,9 +83,15 @@ const EXPORTED_FUNCTIONS = (
     :is_variable,
     :is_nonvariable,
     :has_variable,
+    :has_control_dependence_trait,
+    :control_dependence,
+    :is_control_free,
+    :has_control,
 )
 
-const PRIVATE_SYMBOLS = (:_caller_function_name,)
+const PRIVATE_SYMBOLS = (
+    :_caller_function_name, :_throw_missing_trait, :_throw_trait_not_implemented
+)
 
 # ============================================================================
 # Helper functions (generic for reuse in other modules)

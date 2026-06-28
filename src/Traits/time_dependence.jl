@@ -65,13 +65,8 @@ for better error messages.
 See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.time_dependence`](@ref).
 """
 function has_time_dependence_trait(obj::Any)
-    source_method = _caller_function_name()
-    return throw(
-        Exceptions.IncorrectArgument(
-            "Cannot call $(source_method) on object of type $(typeof(obj)): no time-dependence trait";
-            suggestion="Implement has_time_dependence_trait(obj::$(typeof(obj))) = true and time_dependence(obj::$(typeof(obj))) to enable time-dependence trait support.",
-            context="Time-dependence trait not available",
-        ),
+    return _throw_missing_trait(
+        obj, :has_time_dependence_trait, :time_dependence, "time-dependence"
     )
 end
 
@@ -94,13 +89,8 @@ See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.has_time_depen
 """
 function time_dependence(obj::Any)
     has_time_dependence_trait(obj)
-    return throw(
-        Exceptions.NotImplemented(
-            "time_dependence not implemented for $(typeof(obj))";
-            required_method="time_dependence(obj::$(typeof(obj)))",
-            suggestion="Implement time_dependence for your concrete object type to return the specific time-dependence trait (Autonomous or NonAutonomous).",
-            context="Time-dependence trait - required method implementation",
-        ),
+    return _throw_trait_not_implemented(
+        obj, :time_dependence, "time-dependence", "Autonomous or NonAutonomous"
     )
 end
 

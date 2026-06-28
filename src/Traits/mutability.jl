@@ -94,14 +94,7 @@ for better error messages.
 See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
 """
 function has_mutability_trait(obj::Any)
-    source_method = _caller_function_name()
-    return throw(
-        Exceptions.IncorrectArgument(
-            "Cannot call $(source_method) on object of type $(typeof(obj)): no mutability trait";
-            suggestion="Implement has_mutability_trait(obj::$(typeof(obj))) = true and mutability(obj::$(typeof(obj))) to enable mutability trait support.",
-            context="Mutability trait not available",
-        ),
-    )
+    return _throw_missing_trait(obj, :has_mutability_trait, :mutability, "mutability")
 end
 
 """
@@ -123,13 +116,8 @@ See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.has_m
 """
 function mutability(obj::Any)
     has_mutability_trait(obj)
-    return throw(
-        Exceptions.NotImplemented(
-            "mutability not implemented for $(typeof(obj))";
-            required_method="mutability(obj::$(typeof(obj)))",
-            suggestion="Implement mutability for your concrete object type to return the specific mutability trait (InPlace or OutOfPlace).",
-            context="Mutability trait - required method implementation",
-        ),
+    return _throw_trait_not_implemented(
+        obj, :mutability, "mutability", "InPlace or OutOfPlace"
     )
 end
 
