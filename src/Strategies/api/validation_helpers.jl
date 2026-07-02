@@ -53,6 +53,13 @@ function _error_unknown_options_strict(
         end
     end
 
+    # Build bypass example with the actual option name when there is only one
+    bypass_example = if length(unknown_keys) == 1
+        "$strategy_name(..., $(only(unknown_keys))=bypass(value))"
+    else
+        "$strategy_name(..., my_option=bypass(value))"
+    end
+
     # Build complete error message
     message = """
     Unknown options provided for $strategy_name
@@ -64,9 +71,11 @@ function _error_unknown_options_strict(
     Available options:
     $available_str
     $suggestions_str
-    If you are certain these options exist for the backend,
-    use permissive mode:
-      $strategy_name(...; mode=:permissive)
+    If you are certain these options exist for the backend, you can:
+    - bypass validation for a specific option (recommended):
+        $bypass_example   # or force(value)
+    - or accept all unknown options with permissive mode:
+        $strategy_name(..., mode=:permissive)
     """
 
     return throw(
