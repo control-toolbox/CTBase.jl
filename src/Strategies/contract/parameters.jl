@@ -85,7 +85,7 @@ julia> Strategies.is_a_parameter(Int)
 false
 ```
 
-See also: `AbstractStrategyParameter`, `validate_parameter_type`
+See also: [`CTBase.Strategies.AbstractStrategyParameter`](@ref), [`CTBase.Strategies.validate_parameter_type`](@ref)
 """
 is_a_parameter(::Type{T}) where {T} = T <: AbstractStrategyParameter
 
@@ -123,7 +123,7 @@ julia> Strategies.parameter_id(Strategies.CPU)
 :cpu
 ```
 
-See also: `id`, `AbstractStrategyParameter`
+See also: [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
 """
 parameter_id(parameter_type::Type{<:AbstractStrategyParameter}) = id(parameter_type)
 
@@ -158,7 +158,7 @@ Strategies.validate_parameter_type(MyParam)  # returns nothing
 # Notes
 - This function does not validate global ID uniqueness; that is handled by registry construction.
 
-See also: `id`, `parameter_id`, `is_a_parameter`
+See also: [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.parameter_id`](@ref), [`CTBase.Strategies.is_a_parameter`](@ref)
 """
 function validate_parameter_type(parameter_type::Type{<:AbstractStrategyParameter})
     if !isconcretetype(parameter_type)
@@ -362,7 +362,7 @@ _default_parameter(::Type{<:MyStrategy}) = CPU
 _default_parameter(::Type{<:MyOtherStrategy}) = GPU
 ```
 
-See also: `CPU`, `GPU`
+See also: [`CTBase.Strategies.CPU`](@ref), [`CTBase.Strategies.GPU`](@ref)
 """
 function _default_parameter(::Type{<:AbstractStrategy})
     return throw(

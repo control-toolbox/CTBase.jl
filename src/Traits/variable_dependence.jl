@@ -182,6 +182,6 @@ if `variable_dependence(obj)` is `NonFixed`.
 - [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
 - [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
 
-See also: `is_variable`, [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.is_variable`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
 has_variable(obj::Any) = is_variable(obj)

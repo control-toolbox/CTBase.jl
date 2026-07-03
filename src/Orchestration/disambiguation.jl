@@ -20,7 +20,7 @@ then reused by routing and builder utilities.
 # Notes
 - This type is internal to `CTBase.Orchestration`.
 
-See also: `resolve_method`, `route_all_options`
+See also: [`CTBase.Orchestration.resolve_method`](@ref), [`CTBase.Orchestration.route_all_options`](@ref)
 """
 struct ResolvedMethod{T<:Tuple,I<:NamedTuple}
     tokens::T
@@ -55,7 +55,7 @@ resolved = resolve_method(method, families, registry)
 resolved.strategy_ids
 ```
 
-See also: `extract_strategy_ids`, `build_strategy_to_family_map`
+See also: [`CTBase.Orchestration.extract_strategy_ids`](@ref), [`CTBase.Orchestration.build_strategy_to_family_map`](@ref)
 """
 function resolve_method(
     method::Tuple{Vararg{Symbol}},
@@ -111,7 +111,7 @@ routed = route_to(solver=100, modeler=50)
 ids = extract_strategy_ids(routed, resolved)
 ```
 
-See also: `route_to`, `RoutedOption`, `extract_strategy_ids(::Any, ::ResolvedMethod)`
+See also: [`CTBase.Strategies.route_to`](@ref), [`CTBase.Strategies.RoutedOption`](@ref), [`CTBase.Orchestration.extract_strategy_ids`](@ref)
 """
 function extract_strategy_ids(
     raw::Strategies.RoutedOption, resolved::ResolvedMethod
@@ -160,7 +160,7 @@ resolved = resolve_method(method, families, registry)
 map = build_strategy_to_family_map(resolved, families, registry)
 ```
 
-See also: `build_option_ownership_map`, `extract_strategy_ids`
+See also: [`CTBase.Orchestration.build_option_ownership_map`](@ref), [`CTBase.Orchestration.extract_strategy_ids`](@ref)
 """
 function build_strategy_to_family_map(
     resolved::ResolvedMethod, families::NamedTuple, registry::Strategies.StrategyRegistry
@@ -200,7 +200,7 @@ map = build_option_ownership_map(resolved, families, registry)
 - Options appearing in multiple families require disambiguation syntax
 - Options not appearing in any family will trigger an error during routing
 
-See also: `build_strategy_to_family_map`, `route_all_options`
+See also: [`CTBase.Orchestration.build_strategy_to_family_map`](@ref), [`CTBase.Orchestration.route_all_options`](@ref)
 """
 function build_option_ownership_map(
     resolved::ResolvedMethod, families::NamedTuple, registry::Strategies.StrategyRegistry
@@ -251,7 +251,7 @@ resolved = resolve_method(method, families, registry)
 result = extract_strategy_ids(100, resolved)  # Returns nothing
 ```
 
-See also: `extract_strategy_ids(::Strategies.RoutedOption, ::ResolvedMethod)`, `route_to`
+See also: [`CTBase.Orchestration.extract_strategy_ids`](@ref), [`CTBase.Strategies.route_to`](@ref)
 """
 function extract_strategy_ids(raw, resolved::ResolvedMethod)::Nothing
     return nothing
@@ -276,7 +276,7 @@ resolved = resolve_method(method, families, registry)
 alias_map = build_alias_to_primary_map(resolved, families, registry)
 ```
 
-See also: `build_option_ownership_map`, `resolve_method`
+See also: [`CTBase.Orchestration.build_option_ownership_map`](@ref), [`CTBase.Orchestration.resolve_method`](@ref)
 
 """
 function build_alias_to_primary_map(

@@ -23,7 +23,7 @@ julia> filter_options(opts, :debug)
 (max_iter = 100, tol = 1.0e-6)
 ```
 
-See also: `filter_options(::NamedTuple, ::Tuple)`
+See also: [`CTBase.Strategies.filter_options`](@ref)
 """
 function filter_options(nt::NamedTuple, exclude::Symbol)
     return filter_options(nt, (exclude,))
@@ -48,7 +48,7 @@ julia> filter_options(opts, (:debug, :tol))
 (max_iter = 100,)
 ```
 
-See also: `filter_options(::NamedTuple, ::Symbol)`
+See also: [`CTBase.Strategies.filter_options`](@ref)
 """
 function filter_options(nt::NamedTuple, exclude::Tuple{Vararg{Symbol}})
     exclude_set = Set(exclude)
@@ -93,7 +93,7 @@ This function delegates to `options_dict(StrategyOptions)` for the actual conver
 It is particularly useful in solver extensions and modelers where you need to extract
 options and potentially modify them before passing to backend solvers or model builders.
 
-See also: `options`, `options_dict(::StrategyOptions)`
+See also: [`CTBase.Strategies.options`](@ref), [`CTBase.Strategies.options_dict`](@ref)
 """
 function options_dict(strategy::AbstractStrategy)
     return options_dict(options(strategy))
@@ -131,7 +131,7 @@ julia> suggest_options(:adnlp_backen, MyStrategy)
 The distance of an option to the key is `min(dist(key, primary), dist(key, alias1), ...)`.
 This ensures that options with a close alias are suggested even if the primary name is far.
 
-See also: `resolve_alias`, `levenshtein_distance`
+See also: [`CTBase.Strategies.resolve_alias`](@ref), [`CTBase.Strategies.levenshtein_distance`](@ref)
 """
 function suggest_options(
     key::Symbol, strategy_type::Type{<:AbstractStrategy}; max_suggestions::Int=3
@@ -220,7 +220,7 @@ julia> levenshtein_distance("max_iter", "max_it")
 Uses dynamic programming with O(m*n) time and space complexity,
 where m and n are the lengths of the input strings.
 
-See also: `suggest_options`
+See also: [`CTBase.Strategies.suggest_options`](@ref)
 """
 function levenshtein_distance(s1::String, s2::String)
     m, n = length(s1), length(s2)

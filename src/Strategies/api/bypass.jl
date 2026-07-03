@@ -20,7 +20,7 @@ julia> val = bypass(42)
 BypassValue(42)
 ```
 
-See also: `bypass`
+See also: [`CTBase.Strategies.bypass`](@ref)
 """
 struct BypassValue{T}
     value::T
@@ -75,7 +75,7 @@ julia> solve(ocp, method;
 - Can be combined with `route_to` for strategy-specific bypassing
 - `force` is an alias for `bypass` - they are identical functions
 
-See also: `BypassValue`, `route_to`, `force`
+See also: [`CTBase.Strategies.BypassValue`](@ref), [`CTBase.Strategies.route_to`](@ref), [`CTBase.Strategies.force`](@ref)
 """
 bypass(val) = BypassValue(val)
 
@@ -116,6 +116,6 @@ true
 - Both functions create `BypassValue` wrappers
 - Use with caution for the same reasons as `bypass`
 
-See also: `BypassValue`, `bypass`, `route_to`
+See also: [`CTBase.Strategies.BypassValue`](@ref), [`CTBase.Strategies.bypass`](@ref), [`CTBase.Strategies.route_to`](@ref)
 """
 const force = bypass

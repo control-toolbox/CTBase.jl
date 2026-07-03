@@ -301,7 +301,7 @@ julia> modeler[:maxiter]   # Alias - automatically resolved
 - All functionality (alias resolution, provenance tracking) is handled by StrategyOptions
 - Use `options(strategy)` for full access to OptionValue objects with source information
 
-See also: [`CTBase.Strategies.options`](@ref), [`Base.haskey`](@ref), [`Base.keys`](@ref), [`CTBase.Strategies.StrategyOptions`](@ref)
+See also: [`CTBase.Strategies.options`](@ref), `Base.haskey`, `Base.keys`, [`CTBase.Strategies.StrategyOptions`](@ref)
 """
 function Base.getindex(strategy::AbstractStrategy, key::Symbol)
     return options(strategy)[key]
@@ -340,7 +340,7 @@ false
 - This is syntactic sugar for `haskey(options(strategy), key)`
 - Aliases are automatically resolved to canonical names
 
-See also: [`CTBase.Strategies.options`](@ref), [`Base.getindex`](@ref), [`Base.keys`](@ref), [`CTBase.Strategies.StrategyOptions`](@ref)
+See also: [`CTBase.Strategies.options`](@ref), `Base.getindex`, `Base.keys`, [`CTBase.Strategies.StrategyOptions`](@ref)
 """
 function Base.haskey(strategy::AbstractStrategy, key::Symbol)
     return haskey(options(strategy), key)
@@ -372,7 +372,7 @@ julia> collect(keys(modeler))
 - This is syntactic sugar for `keys(options(strategy))`
 - Returns canonical names only (not aliases)
 
-See also: [`CTBase.Strategies.options`](@ref), [`Base.getindex`](@ref), [`Base.haskey`](@ref), [`CTBase.Strategies.StrategyOptions`](@ref)
+See also: [`CTBase.Strategies.options`](@ref), `Base.getindex`, `Base.haskey`, [`CTBase.Strategies.StrategyOptions`](@ref)
 """
 function Base.keys(strategy::AbstractStrategy)
     return keys(options(strategy))
@@ -404,7 +404,7 @@ FakeSolver (instance, id: :fake_solver)
 Tip: use describe(FakeSolver) to see all available options.
 ```
 
-See also: `describe`, `options`
+See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.options`](@ref)
 """
 function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractStrategy}
     fmt = Core.get_format_codes(io)
@@ -478,7 +478,7 @@ julia> print(FakeSolver())
 FakeSolver(max_iter=1000, tol=1.0e-8)
 ```
 
-See also: `Base.show(::IO, ::MIME"text/plain", ::AbstractStrategy)`
+See also: `Base.show`
 """
 function Base.show(io::IO, strategy::T) where {T<:AbstractStrategy}
     fmt = Core.get_format_codes(io)
@@ -539,7 +539,7 @@ Modelers.ADNLP (strategy type)
       description: Enable matrix-free mode
 ```
 
-See also: `metadata`, `id`, `options`
+See also: [`CTBase.Strategies.metadata`](@ref), [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.options`](@ref)
 """
 function describe end
 

@@ -92,7 +92,7 @@ julia> for (name, value) in opts
        end
 ```
 
-See also: `OptionValue`, `source`, `is_user`, `is_default`, `is_computed`
+See also: [`CTBase.Options.OptionValue`](@ref), [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
 """
 struct StrategyOptions{NT<:NamedTuple}
     options::NT
@@ -193,7 +193,7 @@ julia> get(opts, Val(:max_iter))  # Type-stable
 - Aliases are automatically resolved to canonical names
 - Both canonical names and aliases can be used interchangeably
 
-See also: `Base.getproperty`, `source`, `get(::StrategyOptions, ::Val)`
+See also: `Base.getproperty`, [`CTBase.Options.source`](@ref), `Base.get`
 """
 function Base.getindex(opts::StrategyOptions, key::Symbol)
     return Options.value(option(opts, _resolve_key(opts, key)))
@@ -252,7 +252,7 @@ julia> opts.max_iter.source
 - Only canonical field names work with dot notation
 - Use bracket notation `opts[:alias]` for alias support
 
-See also: `Base.getindex`, `source`
+See also: `Base.getindex`, [`CTBase.Options.source`](@ref)
 """
 function Base.getproperty(opts::StrategyOptions, key::Symbol)
     # Special handling for internal fields
@@ -296,7 +296,7 @@ julia> Options.value(opt)
 # Notes
 - Aliases are automatically resolved to canonical names
 
-See also: `Base.getproperty`, `Options.source`
+See also: `Base.getproperty`, [`CTBase.Options.source`](@ref)
 """
 option(opts::StrategyOptions, key::Symbol) = _raw_options(opts)[_resolve_key(opts, key)]
 
@@ -321,7 +321,7 @@ julia> Options.value(opts, :max_iter)
 200
 ```
 
-See also: `Options.is_user`, `Options.is_default`, `Options.is_computed`
+See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
 """
 function Options.value(opts::StrategyOptions, key::Symbol)
     return Options.value(option(opts, key))
@@ -345,7 +345,7 @@ julia> Options.source(opts, :max_iter)
 :user
 ```
 
-See also: `Options.is_user`, `Options.is_default`, `Options.is_computed`
+See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
 """
 function Options.source(opts::StrategyOptions, key::Symbol)
     return Options.source(option(opts, key))
@@ -369,7 +369,7 @@ julia> Options.is_user(opts, :max_iter)
 true
 ```
 
-See also: `Options.source`, `Options.is_default`, `Options.is_computed`
+See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
 """
 function Options.is_user(opts::StrategyOptions, key::Symbol)
     return Options.is_user(option(opts, key))
@@ -393,7 +393,7 @@ julia> Options.is_default(opts, :tol)
 true
 ```
 
-See also: `Options.source`, `Options.is_user`, `Options.is_computed`
+See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_computed`](@ref)
 """
 function Options.is_default(opts::StrategyOptions, key::Symbol)
     return Options.is_default(option(opts, key))
@@ -417,7 +417,7 @@ julia> Options.is_computed(opts, :step)
 true
 ```
 
-See also: `Options.source`, `Options.is_user`, `Options.is_default`
+See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref)
 """
 function Options.is_computed(opts::StrategyOptions, key::Symbol)
     return Options.is_computed(option(opts, key))
@@ -660,7 +660,7 @@ true
 - Explicit nothing values are preserved
 - The returned Dict is mutable and independent from the original StrategyOptions
 
-See also: `Options.extract_raw_options`, `_raw_options`
+See also: [`CTBase.Options.extract_raw_options`](@ref), [`CTBase.Strategies._raw_options`](@ref)
 """
 function options_dict(opts::StrategyOptions)
     raw_opts = Options.extract_raw_options(_raw_options(opts))
@@ -748,7 +748,7 @@ julia> print(opts)
 StrategyOptions(max_iter=200, tol=1.0e-6)
 ```
 
-See also: `Base.show(::IO, ::MIME"text/plain", ::StrategyOptions)`
+See also: `Base.show`
 """
 function Base.show(io::IO, opts::StrategyOptions)
     fmt = Core.get_format_codes(io)

@@ -37,7 +37,7 @@ julia> opt.source
 # Throws
 - `Exceptions.IncorrectArgument`: If source is not one of `:default`, `:user`, or `:computed`
 
-See also: `value`, `source`, `is_user`
+See also: [`CTBase.Options.value`](@ref), [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref)
 """
 struct OptionValue{T}
     value::T
@@ -107,7 +107,7 @@ opt = OptionValue(100, :user)
 value(opt)  # 100
 ```
 
-See also: `source`, `is_user`
+See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref)
 """
 value(opt::OptionValue) = opt.value
 
@@ -125,7 +125,7 @@ opt = OptionValue(100, :user)
 source(opt)  # :user
 ```
 
-See also: `value`, `is_user`
+See also: [`CTBase.Options.value`](@ref), [`CTBase.Options.is_user`](@ref)
 """
 source(opt::OptionValue) = opt.source
 
@@ -143,7 +143,7 @@ opt = OptionValue(100, :user)
 is_user(opt)  # true
 ```
 
-See also: `is_default`, `is_computed`, `source`
+See also: [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref), [`CTBase.Options.source`](@ref)
 """
 is_user(opt::OptionValue) = opt.source === :user
 
@@ -161,7 +161,7 @@ opt = OptionValue(100, :default)
 is_default(opt)  # true
 ```
 
-See also: `is_user`, `is_computed`, `source`
+See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_computed`](@ref), [`CTBase.Options.source`](@ref)
 """
 is_default(opt::OptionValue) = opt.source === :default
 
@@ -179,7 +179,7 @@ opt = OptionValue(100, :computed)
 is_computed(opt)  # true
 ```
 
-See also: `is_user`, `is_default`, `source`
+See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.source`](@ref)
 """
 is_computed(opt::OptionValue) = opt.source === :computed
 

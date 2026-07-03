@@ -21,7 +21,7 @@ Return a user-friendly label for time dependence traits.
 # Returns
 - `String`: User-friendly label ("autonomous" or "non-autonomous")
 
-See also: [`_vd_label`](@ref), [`_md_label`](@ref).
+See also: [`CTBase.Data._vd_label`](@ref), [`CTBase.Data._md_label`](@ref).
 """
 function _td_label(::Type{Traits.Autonomous})
     return "autonomous"
@@ -42,7 +42,7 @@ Return a user-friendly label for variable dependence traits.
 # Returns
 - `String`: User-friendly label ("fixed (no variable)" or "variable")
 
-See also: [`_td_label`](@ref), [`_md_label`](@ref).
+See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._md_label`](@ref).
 """
 function _vd_label(::Type{Traits.Fixed})
     return "fixed (no variable)"
@@ -63,7 +63,7 @@ Return a user-friendly label for mutability traits.
 # Returns
 - `String`: User-friendly label ("out-of-place" or "in-place")
 
-See also: [`_td_label`](@ref), [`_vd_label`](@ref).
+See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._vd_label`](@ref).
 """
 function _md_label(::Type{Traits.OutOfPlace})
     return "out-of-place"
@@ -97,7 +97,7 @@ _natural_sig_vf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace)  # Return
 _natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.InPlace)  # Returns "f(dx, x)"
 \`\`\`
 
-See also: [`_uniform_sig_vf`](@ref).
+See also: [`CTBase.Data._uniform_sig_vf`](@ref).
 """
 function _natural_sig_vf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) where {TD,VD}
     args = String[]
@@ -130,7 +130,7 @@ and includes the derivative buffer (dx) for in-place variants.
 # Returns
 - `String`: Uniform call signature ("f(t, x, v)" or "f(dx, t, x, v)")
 
-See also: [`_natural_sig_vf`](@ref).
+See also: [`CTBase.Data._natural_sig_vf`](@ref).
 """
 function _uniform_sig_vf(::Type{Traits.OutOfPlace})
     return "f(t, x, v)"
@@ -164,7 +164,7 @@ _natural_sig_hvf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace)  # Retur
 _natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.InPlace)  # Returns "f(dx, dp, x, p)"
 \`\`\`
 
-See also: [`_uniform_sig_hvf`](@ref).
+See also: [`CTBase.Data._uniform_sig_hvf`](@ref).
 """
 function _natural_sig_hvf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) where {TD,VD}
     args = String[]
@@ -199,7 +199,7 @@ and includes the derivative buffers (dx, dp) for in-place variants.
 # Returns
 - `String`: Uniform call signature ("f(t, x, p, v)" or "f(dx, dp, t, x, p, v)")
 
-See also: [`_natural_sig_hvf`](@ref).
+See also: [`CTBase.Data._natural_sig_hvf`](@ref).
 """
 function _uniform_sig_hvf(::Type{Traits.OutOfPlace})
     return "f(t, x, p, v)"
@@ -230,7 +230,7 @@ _natural_sig_h(Autonomous, Fixed)  # Returns "h(x, p)"
 _natural_sig_h(NonAutonomous, Fixed)  # Returns "h(t, x, p)"
 \`\`\`
 
-See also: [`_uniform_sig_h`](@ref).
+See also: [`CTBase.Data._uniform_sig_h`](@ref).
 """
 function _natural_sig_h(::Type{TD}, ::Type{VD}) where {TD,VD}
     args = String[]
@@ -251,7 +251,7 @@ The uniform signature always includes all arguments (t, x, p, v) regardless of t
 # Returns
 - `String`: Uniform call signature ("h(t, x, p, v)")
 
-See also: [`_natural_sig_h`](@ref).
+See also: [`CTBase.Data._natural_sig_h`](@ref).
 """
 function _uniform_sig_h()
     return "h(t, x, p, v)"

@@ -369,7 +369,7 @@ persistent callback that maintains test history across multiple invocations.
 # Arguments
 - `info::TestRunInfo`: Test execution information
 
-See also: `_make_default_on_test_done`
+See also: `CTBase.TestRunner._make_default_on_test_done`
 """
 function _default_on_test_done(info::TestRunInfo)
     cb = _make_default_on_test_done(stdout, info.total)

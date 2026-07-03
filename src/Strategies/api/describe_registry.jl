@@ -52,7 +52,7 @@ Exa (strategy)
 # Throws
 - `Exceptions.IncorrectArgument`: If the strategy ID is not found in the registry
 
-See also: `describe(::Type{<:AbstractStrategy})`, `StrategyRegistry`, `create_registry`
+See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.create_registry`](@ref)
 """
 function describe(id_symbol::Symbol, registry::StrategyRegistry)
     return describe(stdout, id_symbol, registry)

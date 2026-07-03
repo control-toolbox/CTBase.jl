@@ -48,7 +48,7 @@ solver => 100
 modeler => 50
 ```
 
-See also: `route_to`
+See also: [`CTBase.Strategies.route_to`](@ref)
 """
 struct RoutedOption
     routes::NamedTuple
@@ -154,7 +154,7 @@ solve(ocp, method;
 - This is the recommended way to disambiguate options
 - The orchestration layer will validate that the strategy IDs exist
 
-See also: `RoutedOption`, `route_all_options`
+See also: [`CTBase.Strategies.RoutedOption`](@ref), [`CTBase.Orchestration.route_all_options`](@ref)
 """
 function route_to(; kwargs...)
     return _route_to_from_namedtuple(NamedTuple(kwargs))
@@ -197,7 +197,7 @@ RoutedOption((solver = 100, modeler = 50))
 - Strategy identifiers must be Symbols (e.g., `:solver`, not `"solver"`)
 - The number of arguments must be even (pairs of Symbol-value)
 
-See also: `route_to(; kwargs...)`, `RoutedOption`
+See also: [`CTBase.Strategies.route_to`](@ref), [`CTBase.Strategies.RoutedOption`](@ref)
 """
 function route_to(args::Vararg{Any})
     # Validate at least one pair

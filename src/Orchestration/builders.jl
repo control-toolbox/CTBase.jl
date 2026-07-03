@@ -28,7 +28,7 @@ resolved = resolve_method(method, families, registry)
 names = option_names_from_resolved(resolved, :solver, families, registry)
 ```
 
-See also: `resolve_method`, `build_strategy_from_resolved`, `Strategies.option_names`
+See also: [`CTBase.Orchestration.resolve_method`](@ref), [`CTBase.Orchestration.build_strategy_from_resolved`](@ref), [`CTBase.Strategies.option_names`](@ref)
 """
 function option_names_from_resolved(
     resolved::ResolvedMethod,
@@ -93,7 +93,7 @@ resolved = resolve_method(method, families, registry)
 solver = build_strategy_from_resolved(resolved, :solver, families, registry; mode=:strict, kwargs...)
 ```
 
-See also: `resolve_method`, `Strategies.build_strategy`, `option_names_from_resolved`
+See also: [`CTBase.Orchestration.resolve_method`](@ref), [`CTBase.Strategies.build_strategy`](@ref), [`CTBase.Orchestration.option_names_from_resolved`](@ref)
 """
 function build_strategy_from_resolved(
     resolved::ResolvedMethod,

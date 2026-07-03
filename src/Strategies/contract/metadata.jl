@@ -132,7 +132,7 @@ StrategyOptions(max_iter=200, tol=1.0e-8)
 # Throws
 - `Exceptions.IncorrectArgument`: If duplicate option names are provided
 
-See also: `OptionDefinition`, `AbstractStrategy`, `build_strategy_options`
+See also: [`CTBase.Options.OptionDefinition`](@ref), [`CTBase.Strategies.AbstractStrategy`](@ref), [`CTBase.Strategies.build_strategy_options`](@ref)
 """
 struct StrategyMetadata{NT<:NamedTuple}
     specs::NT

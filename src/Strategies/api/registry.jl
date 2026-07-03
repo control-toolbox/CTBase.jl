@@ -41,7 +41,7 @@ julia> T = type_from_id(:adnlp, AbstractNLPModeler, registry)
 Modelers.ADNLP
 ```
 
-See also: `create_registry`, `strategy_ids`, `type_from_id`
+See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref)
 """
 struct StrategyRegistry
     families::Dict{Type{<:AbstractStrategy},Vector{Type}}
@@ -89,7 +89,7 @@ julia> strategy_ids(AbstractNLPModeler, registry)
 - `ErrorException`: If a strategy is not a subtype of its family
 - `ErrorException`: If a family appears multiple times
 
-See also: `StrategyRegistry`, `strategy_ids`, `type_from_id`
+See also: [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref)
 """
 function create_registry(pairs::Pair...)
     families = Dict{Type{<:AbstractStrategy},Vector{Type}}()
@@ -336,7 +336,7 @@ Available: exa
 # Throws
 - `ErrorException`: If the family is not found in the registry
 
-See also: `type_from_id`, `create_registry`
+See also: [`CTBase.Strategies.type_from_id`](@ref), [`CTBase.Strategies.create_registry`](@ref)
 """
 function strategy_ids(family::Type{<:AbstractStrategy}, registry::StrategyRegistry)
     if !haskey(registry.families, family)
@@ -398,7 +398,7 @@ julia> id(T)
 - `Exceptions.IncorrectArgument`: If the family is not found in the registry
 - `Exceptions.IncorrectArgument`: If the ID is not found within the family (includes suggestions)
 
-See also: `strategy_ids`, `build_strategy`
+See also: [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.build_strategy`](@ref)
 """
 function type_from_id(
     strategy_id::Symbol,

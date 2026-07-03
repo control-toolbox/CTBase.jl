@@ -4,16 +4,16 @@ $(TYPEDEF)
 Singleton type marking the absence of a provided value.
 
 Ecosystem-wide sentinel for "no default / argument not given". The canonical
-value is [`NotProvided`](@ref).
+value is `CTBase.Core.NotProvided`.
 
-See also: [`NotProvided`](@ref).
+See also: `CTBase.Core.NotProvided`.
 """
 struct NotProvidedType end
 
 """
     NotProvided
 
-Singleton instance of [`NotProvidedType`](@ref).
+Singleton instance of `CTBase.Core.NotProvidedType`.
 
 The canonical "not provided" sentinel used across the control-toolbox ecosystem
 (option defaults, optional variable parameters, optional AD backends, …).
@@ -32,7 +32,7 @@ julia> x === NotProvided
 true
 ```
 
-See also: [`NotProvidedType`](@ref).
+See also: `CTBase.Core.NotProvidedType`.
 """
 const NotProvided = NotProvidedType()
 

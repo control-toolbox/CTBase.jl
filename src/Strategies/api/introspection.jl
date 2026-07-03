@@ -36,7 +36,7 @@ Available option: backend
 - This function operates on types, not instances
 - If you have an instance, use `option_names(typeof(strategy))`
 
-See also: `option_type`, `option_description`, `option_default`
+See also: [`CTBase.Strategies.option_type`](@ref), [`CTBase.Strategies.option_description`](@ref), [`CTBase.Strategies.option_default`](@ref)
 """
 function option_names(strategy_type::Type{<:AbstractStrategy})
     meta = metadata(strategy_type)
@@ -76,7 +76,7 @@ Float64
 - This function operates on types, not instances
 - If you have an instance, use `option_type(typeof(strategy), key)`
 
-See also: `option_description`, `option_default`
+See also: [`CTBase.Strategies.option_description`](@ref), [`CTBase.Strategies.option_default`](@ref)
 """
 function option_type(strategy_type::Type{<:AbstractStrategy}, key::Symbol)
     meta = metadata(strategy_type)
@@ -116,7 +116,7 @@ julia> option_description(MyStrategy, :tol)
 - This function operates on types, not instances
 - If you have an instance, use `option_description(typeof(strategy), key)`
 
-See also: `option_type`, `option_default`
+See also: [`CTBase.Strategies.option_type`](@ref), [`CTBase.Strategies.option_default`](@ref)
 """
 function option_description(strategy_type::Type{<:AbstractStrategy}, key::Symbol)
     meta = metadata(strategy_type)
@@ -156,7 +156,7 @@ julia> option_default(MyStrategy, :tol)
 - This function operates on types, not instances
 - If you have an instance, use `option_default(typeof(strategy), key)`
 
-See also: `option_defaults`, `option_type`
+See also: [`CTBase.Strategies.option_defaults`](@ref), [`CTBase.Strategies.option_type`](@ref)
 """
 function option_default(strategy_type::Type{<:AbstractStrategy}, key::Symbol)
     meta = metadata(strategy_type)
@@ -194,7 +194,7 @@ julia> defaults.max_iter
 - This function operates on types, not instances
 - If you have an instance, use `option_defaults(typeof(strategy))`
 
-See also: `option_default`, `option_names`
+See also: [`CTBase.Strategies.option_default`](@ref), [`CTBase.Strategies.option_names`](@ref)
 """
 function option_defaults(strategy_type::Type{<:AbstractStrategy})
     meta = metadata(strategy_type)
@@ -232,7 +232,7 @@ julia> option_value(strategy, :tol)  # Uses default
 # Throws
 - `KeyError`: If the option name does not exist
 
-See also: `option_source`, `options`
+See also: [`CTBase.Strategies.option_source`](@ref), [`CTBase.Strategies.options`](@ref)
 """
 function option_value(strategy::AbstractStrategy, key::Symbol)
     opts = options(strategy)
@@ -271,7 +271,7 @@ julia> option_source(strategy, :tol)
 # Throws
 - `KeyError`: If the option name does not exist
 
-See also: `option_value`, `is_user`, `is_default`
+See also: [`CTBase.Strategies.option_value`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref)
 """
 function option_source(strategy::AbstractStrategy, key::Symbol)
     return Options.source(options(strategy), key)
@@ -308,7 +308,7 @@ julia> has_option(strategy, :nonexistent)
 false
 ```
 
-See also: `option_value`, `option_source`
+See also: [`CTBase.Strategies.option_value`](@ref), [`CTBase.Strategies.option_source`](@ref)
 """
 function has_option(strategy::AbstractStrategy, key::Symbol)
     return haskey(options(strategy), key)
@@ -341,7 +341,7 @@ julia> is_user(strategy, :tol)
 false
 ```
 
-See also: `is_default`, `is_computed`, `option_source`
+See also: [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref), [`CTBase.Strategies.option_source`](@ref)
 """
 function option_is_user(strategy::AbstractStrategy, key::Symbol)
     return Options.is_user(options(strategy), key)
@@ -374,7 +374,7 @@ julia> is_default(strategy, :tol)
 true
 ```
 
-See also: `is_user`, `is_computed`, `option_source`
+See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_computed`](@ref), [`CTBase.Strategies.option_source`](@ref)
 """
 function option_is_default(strategy::AbstractStrategy, key::Symbol)
     return Options.is_default(options(strategy), key)
@@ -404,7 +404,7 @@ julia> is_computed(strategy, :derived_value)
 true
 ```
 
-See also: `is_user`, `is_default`, `option_source`
+See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Strategies.option_source`](@ref)
 """
 function option_is_computed(strategy::AbstractStrategy, key::Symbol)
     return Options.is_computed(options(strategy), key)
