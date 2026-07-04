@@ -41,6 +41,9 @@ $(TYPEDSIGNATURES)
 
 Indicates that all `AbstractPseudoHamiltonian` types support time-dependence queries.
 
+# Returns
+- `true`: Always returns `true` for pseudo-Hamiltonian types.
+
 See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
 """
 function Traits.has_time_dependence_trait(::AbstractPseudoHamiltonian)
@@ -52,6 +55,9 @@ $(TYPEDSIGNATURES)
 
 Indicates that all `AbstractPseudoHamiltonian` types support variable-dependence queries.
 
+# Returns
+- `true`: Always returns `true` for pseudo-Hamiltonian types.
+
 See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
 """
 function Traits.has_variable_dependence_trait(::AbstractPseudoHamiltonian)
@@ -62,6 +68,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return the time-dependence trait of a pseudo-Hamiltonian.
+
+# Arguments
+- `h̃::AbstractPseudoHamiltonian`: The pseudo-Hamiltonian object.
+
+# Returns
+- `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
 See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
 """
@@ -76,6 +88,12 @@ $(TYPEDSIGNATURES)
 
 Return the variable-dependence trait of a pseudo-Hamiltonian.
 
+# Arguments
+- `h̃::AbstractPseudoHamiltonian`: The pseudo-Hamiltonian object.
+
+# Returns
+- `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
+
 See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
 function Traits.variable_dependence(
@@ -89,6 +107,9 @@ $(TYPEDSIGNATURES)
 
 Return the dynamics trait of an `AbstractPseudoHamiltonian`, namely
 [`CTBase.Traits.HamiltonianDynamics`](@ref).
+
+# Returns
+- `CTBase.Traits.HamiltonianDynamics`: The dynamics trait.
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
 """

@@ -60,6 +60,9 @@ $(TYPEDSIGNATURES)
 
 Indicates that all `AbstractControlLaw` types support time-dependence queries.
 
+# Returns
+- `true`: Always returns `true` for control law types.
+
 See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractControlLaw`](@ref).
 """
 function Traits.has_time_dependence_trait(::AbstractControlLaw)
@@ -71,6 +74,9 @@ $(TYPEDSIGNATURES)
 
 Indicates that all `AbstractControlLaw` types support variable-dependence queries.
 
+# Returns
+- `true`: Always returns `true` for control law types.
+
 See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractControlLaw`](@ref).
 """
 function Traits.has_variable_dependence_trait(::AbstractControlLaw)
@@ -81,6 +87,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return the time-dependence trait of a control law.
+
+# Arguments
+- `cl::AbstractControlLaw`: The control law object.
+
+# Returns
+- `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
 See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
 """
@@ -94,6 +106,12 @@ end
 $(TYPEDSIGNATURES)
 
 Return the variable-dependence trait of a control law.
+
+# Arguments
+- `cl::AbstractControlLaw`: The control law object.
+
+# Returns
+- `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
 
 See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
@@ -115,6 +133,9 @@ Return the dynamics trait of an open-loop control law, namely [`CTBase.Traits.St
 Open-loop and closed-loop control laws do not involve the costate, so they are
 associated with state dynamics.
 
+# Returns
+- `CTBase.Traits.StateDynamics`: The dynamics trait.
+
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
 """
 Traits.dynamics_trait(::AbstractControlLaw{<:Traits.OpenLoopFeedback}) = Traits.StateDynamics
@@ -123,6 +144,9 @@ Traits.dynamics_trait(::AbstractControlLaw{<:Traits.OpenLoopFeedback}) = Traits.
 $(TYPEDSIGNATURES)
 
 Return the dynamics trait of a closed-loop control law, namely [`CTBase.Traits.StateDynamics`](@ref).
+
+# Returns
+- `CTBase.Traits.StateDynamics`: The dynamics trait.
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
 """
@@ -135,6 +159,9 @@ Return the dynamics trait of a dynamic closed-loop control law, namely [`CTBase.
 
 Dynamic closed-loop control laws depend on the costate, so they are associated
 with Hamiltonian dynamics.
+
+# Returns
+- `CTBase.Traits.HamiltonianDynamics`: The dynamics trait.
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.HamiltonianDynamics`](@ref).
 """
@@ -149,6 +176,9 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the control law is open-loop, `false` otherwise.
 
+# Returns
+- `Bool`: `true` if the feedback trait is `OpenLoopFeedback`, `false` otherwise.
+
 See also: [`CTBase.Traits.OpenLoopFeedback`](@ref), [`CTBase.Traits.feedback`](@ref).
 """
 Traits.is_open_loop(::AbstractControlLaw) = false
@@ -159,6 +189,9 @@ $(TYPEDSIGNATURES)
 
 Return `true` if the control law is closed-loop, `false` otherwise.
 
+# Returns
+- `Bool`: `true` if the feedback trait is `ClosedLoopFeedback`, `false` otherwise.
+
 See also: [`CTBase.Traits.ClosedLoopFeedback`](@ref), [`CTBase.Traits.feedback`](@ref).
 """
 Traits.is_closed_loop(::AbstractControlLaw) = false
@@ -168,6 +201,9 @@ Traits.is_closed_loop(::AbstractControlLaw{<:Traits.ClosedLoopFeedback}) = true
 $(TYPEDSIGNATURES)
 
 Return `true` if the control law is dynamic closed-loop, `false` otherwise.
+
+# Returns
+- `Bool`: `true` if the feedback trait is `DynClosedLoopFeedback`, `false` otherwise.
 
 See also: [`CTBase.Traits.DynClosedLoopFeedback`](@ref), [`CTBase.Traits.feedback`](@ref).
 """

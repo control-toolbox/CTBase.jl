@@ -93,6 +93,14 @@ $(TYPEDSIGNATURES)
 
 Typed constructor for `PseudoHamiltonian` with explicit trait types.
 
+# Arguments
+- `f`: The pseudo-Hamiltonian function.
+- `::Type{TD}`: The time-dependence trait type.
+- `::Type{VD}`: The variable-dependence trait type.
+
+# Returns
+- `PseudoHamiltonian`: A pseudo-Hamiltonian with the specified traits.
+
 See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
 function PseudoHamiltonian(
@@ -140,6 +148,16 @@ $(TYPEDSIGNATURES)
 
 Display a compact representation of a `PseudoHamiltonian` showing its traits and call signatures.
 
+# Arguments
+- `io::IO`: The IO stream.
+- `h̃::PseudoHamiltonian`: The pseudo-Hamiltonian object.
+
+# Output
+Displays three lines:
+- Header with time and variable dependence traits
+- Natural call signature
+- Uniform call signature
+
 See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
 function Base.show(io::IO, ::PseudoHamiltonian{F,TD,VD}) where {F,TD,VD}
@@ -155,6 +173,13 @@ end
 $(TYPEDSIGNATURES)
 
 Display a `PseudoHamiltonian` in the REPL with the same format as the compact `show`.
+
+This method is called automatically when displaying a pseudo-Hamiltonian in the Julia REPL.
+
+# Arguments
+- `io::IO`: The IO stream.
+- `mime::MIME"text/plain"`: The MIME type.
+- `h̃::PseudoHamiltonian`: The pseudo-Hamiltonian object.
 
 See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
 """

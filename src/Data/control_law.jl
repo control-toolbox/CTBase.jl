@@ -286,6 +286,10 @@ $(TYPEDSIGNATURES)
 
 Display a compact representation of a `ControlLaw` showing its traits and call signatures.
 
+# Arguments
+- `io::IO`: The IO stream.
+- `cl::ControlLaw`: The control law object.
+
 # Output
 Displays three lines:
 - Header with feedback, time, and variable dependence traits
@@ -307,6 +311,13 @@ end
 $(TYPEDSIGNATURES)
 
 Display a `ControlLaw` in the REPL with the same format as the compact `show`.
+
+This method is called automatically when displaying a control law in the Julia REPL.
+
+# Arguments
+- `io::IO`: The IO stream.
+- `mime::MIME"text/plain"`: The MIME type.
+- `cl::ControlLaw`: The control law object.
 
 See also: [`CTBase.Data.ControlLaw`](@ref).
 """
