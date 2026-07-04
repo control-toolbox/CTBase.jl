@@ -77,6 +77,8 @@ export DifferentiationInterface
 export build_ad_backend
 export ad_backend
 export hamiltonian_gradient
+export pseudo_hamiltonian_gradient
+export pseudo_hamiltonian_control_gradient
 export variable_gradient
 export gradient
 export derivative

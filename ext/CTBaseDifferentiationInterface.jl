@@ -100,6 +100,88 @@ function Differentiation.variable_gradient(
     return _derivator(typeof(v))(h_v, di_backend, v)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Compute pseudo-Hamiltonian gradients (∂H̃/∂x, ∂H̃/∂p) via DifferentiationInterface.jl.
+
+Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
+Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
+[`pseudo_hamiltonian_control_gradient`](@ref) for ∂H̃/∂u.
+
+Anonymous closures are used deliberately so that ForwardDiff `tagcount` values
+are assigned at runtime in the correct left-to-right order inside `ForwardDiff.≺`,
+avoiding silent zero-gradient bugs in nested-AD contexts (e.g. inside NonlinearSolve).
+
+# Arguments
+- `backend::Differentiation.DifferentiationInterface`: The DI backend strategy.
+- `h̃::Data.AbstractPseudoHamiltonian`: The pseudo-Hamiltonian.
+- `t`: Time (scalar).
+- `x`: State vector.
+- `p`: Costate vector.
+- `u`: Control (scalar or vector).
+- `v`: Variable (scalar or `nothing` for Fixed problems).
+
+# Returns
+- Tuple `(grad_x, grad_p)` where `grad_x` = ∂H̃/∂x, `grad_p` = ∂H̃/∂p.
+
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@ref).
+"""
+function Differentiation.pseudo_hamiltonian_gradient(
+    backend::Differentiation.DifferentiationInterface,
+    h̃::Data.AbstractPseudoHamiltonian,
+    t,
+    x,
+    p,
+    u,
+    v,
+)
+    di_backend = Differentiation.ad_backend(backend)
+    h̃_x(x_) = h̃(t, x_, p, u, v)
+    h̃_p(p_) = h̃(t, x, p_, u, v)
+    grad_x = _derivator(typeof(x))(h̃_x, di_backend, x)
+    grad_p = _derivator(typeof(p))(h̃_p, di_backend, p)
+    return (grad_x, grad_p)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compute the pseudo-Hamiltonian control gradient ∂H̃/∂u via DifferentiationInterface.jl.
+
+This is typically used to check the PMP stationarity condition ∂H̃/∂u = 0,
+not for the Hamiltonian flow itself.
+
+# Arguments
+- `backend::Differentiation.DifferentiationInterface`: The DI backend strategy.
+- `h̃::Data.AbstractPseudoHamiltonian`: The pseudo-Hamiltonian.
+- `t`: Time (scalar).
+- `x`: State vector.
+- `p`: Costate vector.
+- `u`: Control (scalar or vector).
+- `v`: Variable (scalar or `nothing` for Fixed problems).
+
+# Returns
+- `grad_u`: ∂H̃/∂u.
+
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref).
+"""
+function Differentiation.pseudo_hamiltonian_control_gradient(
+    backend::Differentiation.DifferentiationInterface,
+    h̃::Data.AbstractPseudoHamiltonian,
+    t,
+    x,
+    p,
+    u,
+    v,
+)
+    di_backend = Differentiation.ad_backend(backend)
+    h̃_u(u_) = h̃(t, x, p, u_, v)
+    grad_u = _derivator(typeof(u))(h̃_u, di_backend, u)
+    return grad_u
+end
+
 # =============================================================================
 # Differentiation.gradient — extension contract methods
 # =============================================================================

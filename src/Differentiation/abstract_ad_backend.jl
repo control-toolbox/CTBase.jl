@@ -104,6 +104,89 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Compute the pseudo-Hamiltonian gradient (∂H̃/∂x, ∂H̃/∂p) using the backend.
+
+Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
+Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
+[`pseudo_hamiltonian_control_gradient`](@ref) to compute ∂H̃/∂u separately
+(e.g. for checking the stationarity condition).
+
+# Arguments
+- `backend::AbstractADBackend`: The AD backend.
+- `h̃`: The pseudo-Hamiltonian function or type.
+- `t`: Time (scalar).
+- `x`: State vector.
+- `p`: Costate vector.
+- `u`: Control (scalar or vector).
+- `v`: Variable (scalar or `nothing` for Fixed problems).
+
+# Returns
+- `(∂H̃_∂x, ∂H̃_∂p)`: Tuple of partial derivatives, **non-negated**. The RHS
+  closure is responsible for applying the signs (ṗ = -∂H̃/∂x).
+
+# Throws
+- `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
+
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@ref),
+[`CTBase.Differentiation.variable_gradient`](@ref).
+"""
+function pseudo_hamiltonian_gradient(
+    backend::AbstractADBackend, h̃::Data.AbstractPseudoHamiltonian, t, x, p, u, v
+)
+    return throw(
+        Exceptions.NotImplemented(
+            "pseudo_hamiltonian_gradient not implemented for $(typeof(backend))";
+            required_method="pseudo_hamiltonian_gradient(backend::$(typeof(backend)), h̃, t, x, p, u, v)",
+            suggestion="Implement pseudo_hamiltonian_gradient for $(typeof(backend)) or load an extension that provides gradient computation (e.g., CTBaseDifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compute the pseudo-Hamiltonian control gradient ∂H̃/∂u using the backend.
+
+This is typically used to check the PMP stationarity condition ∂H̃/∂u = 0,
+not for the Hamiltonian flow itself (which only needs ∂H̃/∂x and ∂H̃/∂p;
+see [`pseudo_hamiltonian_gradient`](@ref)).
+
+# Arguments
+- `backend::AbstractADBackend`: The AD backend.
+- `h̃`: The pseudo-Hamiltonian function or type.
+- `t`: Time (scalar).
+- `x`: State vector.
+- `p`: Costate vector.
+- `u`: Control (scalar or vector).
+- `v`: Variable (scalar or `nothing` for Fixed problems).
+
+# Returns
+- `∂H̃_∂u`: The partial derivative with respect to the control.
+
+# Throws
+- `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
+
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref),
+[`CTBase.Differentiation.variable_gradient`](@ref).
+"""
+function pseudo_hamiltonian_control_gradient(
+    backend::AbstractADBackend, h̃::Data.AbstractPseudoHamiltonian, t, x, p, u, v
+)
+    return throw(
+        Exceptions.NotImplemented(
+            "pseudo_hamiltonian_control_gradient not implemented for $(typeof(backend))";
+            required_method="pseudo_hamiltonian_control_gradient(backend::$(typeof(backend)), h̃, t, x, p, u, v)",
+            suggestion="Implement pseudo_hamiltonian_control_gradient for $(typeof(backend)) or load an extension that provides gradient computation (e.g., CTBaseDifferentiationInterface)",
+            context="AD backend contract",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Extract the AD backend from a backend strategy.
 
 # Arguments

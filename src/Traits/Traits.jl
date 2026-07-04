@@ -13,6 +13,7 @@ no runtime cost.
 - **time_dependence.jl**: Time-dependence traits and the opt-in contract
 - **variable_dependence.jl**: Variable-dependence traits and the opt-in contract
 - **control_dependence.jl**: Control-dependence traits and the opt-in contract
+- **feedback.jl**: Feedback traits (`OpenLoopFeedback`, `ClosedLoopFeedback`, `DynClosedLoopFeedback`)
 - **mutability.jl**: Mutability traits and the opt-in contract
 - **mode.jl**: Integration-mode traits (`EndPointMode`, `TrajectoryMode`)
 - **dynamics.jl**: Dynamics-type traits (`StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics`)
@@ -27,6 +28,7 @@ no runtime cost.
 - **Time dependence**: `TimeDependence`, `Autonomous`, `NonAutonomous`
 - **Variable dependence**: `VariableDependence`, `Fixed`, `NonFixed`
 - **Control dependence**: `ControlDependence`, `ControlFree`, `WithControl`
+- **Feedback**: `AbstractFeedback`, `OpenLoopFeedback`, `ClosedLoopFeedback`, `DynClosedLoopFeedback`
 - **Mutability**: `InPlace`, `OutOfPlace`
 - **Integration mode**: `EndPointMode`, `TrajectoryMode`
 - **Dynamics**: `StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics`
@@ -83,6 +85,7 @@ include(joinpath(@__DIR__, "mutability.jl"))
 include(joinpath(@__DIR__, "time_dependence.jl"))
 include(joinpath(@__DIR__, "variable_dependence.jl"))
 include(joinpath(@__DIR__, "control_dependence.jl"))
+include(joinpath(@__DIR__, "feedback.jl"))
 
 # ==============================================================================
 # Module exports
@@ -101,7 +104,9 @@ export WithAD, WithoutAD
 export SupportsVariableCostate, NoVariableCostate
 export VariableDependence, Fixed, NonFixed
 export ControlDependence, ControlFree, WithControl
-export ad_trait, variable_costate_trait, dynamics_trait
+export AbstractFeedback, OpenLoopFeedback, ClosedLoopFeedback, DynClosedLoopFeedback
+export ad_trait, variable_costate_trait, dynamics_trait, feedback
+export is_open_loop, is_closed_loop, is_dyn_closed_loop
 export is_inplace, is_outofplace
 export is_autonomous, is_nonautonomous, is_variable, is_nonvariable, has_variable
 export is_control_free, has_control
