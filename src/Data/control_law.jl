@@ -10,7 +10,7 @@ time-dependence, and variable-dependence traits.
 
 The function provides the control input `u(...)` for an optimal control problem.
 The feedback trait determines which arguments the control law depends on (see
-[`AbstractControlLaw`](@ref)).
+[`CTBase.Data.AbstractControlLaw`](@ref)).
 
 # Type Parameters
 - `F`: concrete type of the wrapped function.

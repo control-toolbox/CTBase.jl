@@ -10,7 +10,7 @@ time-dependence and variable-dependence traits.
 
 A pseudo-Hamiltonian is a scalar function `H̃(t, x, p, u[, v]) → ℝ` that extends
 the standard Hamiltonian with an explicit control argument `u`. Unlike
-[`AbstractHamiltonian`](@ref), which encodes the control implicitly, a
+[`CTBase.Data.AbstractHamiltonian`](@ref), which encodes the control implicitly, a
 pseudo-Hamiltonian takes the control as an additional argument, enabling
 dynamic closed-loop flows where the control is computed from the
 pseudo-Hamiltonian's maximisation condition.

@@ -9,7 +9,7 @@ Abstract supertype for control laws together with their feedback,
 time-dependence, and variable-dependence traits.
 
 A control law is a function `u(...)` that provides the control input for an
-optimal control problem. The feedback trait ([`AbstractFeedback`](@ref))
+optimal control problem. The feedback trait ([`CTBase.Traits.AbstractFeedback`](@ref))
 determines which arguments the control law depends on:
 
 - **Open-loop**: `u(t[, v])` — depends on time (and variable) only.
@@ -110,7 +110,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of an open-loop control law, namely [`StateDynamics`](@ref).
+Return the dynamics trait of an open-loop control law, namely [`CTBase.Traits.StateDynamics`](@ref).
 
 Open-loop and closed-loop control laws do not involve the costate, so they are
 associated with state dynamics.
@@ -122,7 +122,7 @@ Traits.dynamics_trait(::AbstractControlLaw{<:Traits.OpenLoopFeedback}) = Traits.
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of a closed-loop control law, namely [`StateDynamics`](@ref).
+Return the dynamics trait of a closed-loop control law, namely [`CTBase.Traits.StateDynamics`](@ref).
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
 """
@@ -131,7 +131,7 @@ Traits.dynamics_trait(::AbstractControlLaw{<:Traits.ClosedLoopFeedback}) = Trait
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of a dynamic closed-loop control law, namely [`HamiltonianDynamics`](@ref).
+Return the dynamics trait of a dynamic closed-loop control law, namely [`CTBase.Traits.HamiltonianDynamics`](@ref).
 
 Dynamic closed-loop control laws depend on the costate, so they are associated
 with Hamiltonian dynamics.

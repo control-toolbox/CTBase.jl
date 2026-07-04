@@ -108,7 +108,7 @@ Compute the pseudo-Hamiltonian gradient (∂H̃/∂x, ∂H̃/∂p) using the bac
 
 Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
 Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
-[`pseudo_hamiltonian_control_gradient`](@ref) to compute ∂H̃/∂u separately
+[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref) to compute ∂H̃/∂u separately
 (e.g. for checking the stationarity condition).
 
 # Arguments
@@ -151,7 +151,7 @@ Compute the pseudo-Hamiltonian control gradient ∂H̃/∂u using the backend.
 
 This is typically used to check the PMP stationarity condition ∂H̃/∂u = 0,
 not for the Hamiltonian flow itself (which only needs ∂H̃/∂x and ∂H̃/∂p;
-see [`pseudo_hamiltonian_gradient`](@ref)).
+see [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref)).
 
 # Arguments
 - `backend::AbstractADBackend`: The AD backend.

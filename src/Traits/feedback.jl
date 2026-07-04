@@ -11,7 +11,7 @@ closed-loop control (state and costate dependence).
 # Trait Pattern
 
 This trait follows the **type-parameter-only** contract (like
-[`AbstractDynamicsTrait`](@ref)): the trait value is read from a type parameter
+[`CTBase.Traits.AbstractDynamicsTrait`](@ref)): the trait value is read from a type parameter
 of the concrete data type (e.g. `ControlLaw{F,FB,TD,VD}`) by the `feedback`
 accessor. No `has_feedback_trait` guard is provided; calling `feedback` on a
 type that does not implement it yields a standard `MethodError`.
@@ -86,8 +86,8 @@ $(TYPEDSIGNATURES)
 Return the feedback trait of `x`.
 
 Methods are defined on concrete types in `Data` (e.g. `AbstractControlLaw`).
-The trait value is one of [`OpenLoopFeedback`](@ref), [`ClosedLoopFeedback`](@ref),
-or [`DynClosedLoopFeedback`](@ref).
+The trait value is one of [`CTBase.Traits.OpenLoopFeedback`](@ref), [`CTBase.Traits.ClosedLoopFeedback`](@ref),
+or [`CTBase.Traits.DynClosedLoopFeedback`](@ref).
 
 # See also
 

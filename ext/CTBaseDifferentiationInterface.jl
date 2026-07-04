@@ -30,7 +30,7 @@ Return the scalar DI differentiation primitive for a `Number` active argument.
 
 Dispatches to `DI.derivative`, which computes `df/dx` for scalar `x`.
 
-See also: [`_derivator(::Type{<:AbstractArray})`](@ref)
+See also: [`CTBaseDifferentiationInterface._derivator`](@ref)
 """
 function _derivator(::Type{<:Number})
     return DI.derivative
@@ -43,7 +43,7 @@ Return the array DI differentiation primitive for an `AbstractArray` active argu
 
 Dispatches to `DI.gradient`, which computes `∇f` for array `x`.
 
-See also: [`_derivator(::Type{<:Number})`](@ref)
+See also: [`CTBaseDifferentiationInterface._derivator`](@ref)
 """
 function _derivator(::Type{<:AbstractArray})
     return DI.gradient
@@ -82,7 +82,7 @@ $(TYPEDSIGNATURES)
 
 Compute variable gradient ∂H/∂v via DifferentiationInterface.jl.
 
-See the note in [`hamiltonian_gradient`](@ref) on why anonymous closures are used.
+See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@ref) on why anonymous closures are used.
 
 # Returns
 - `grad_v` = ∂H/∂v.
@@ -107,7 +107,7 @@ Compute pseudo-Hamiltonian gradients (∂H̃/∂x, ∂H̃/∂p) via Differentiat
 
 Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
 Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
-[`pseudo_hamiltonian_control_gradient`](@ref) for ∂H̃/∂u.
+[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref) for ∂H̃/∂u.
 
 Anonymous closures are used deliberately so that ForwardDiff `tagcount` values
 are assigned at runtime in the correct left-to-right order inside `ForwardDiff.≺`,
@@ -266,7 +266,7 @@ Compute the partial derivative or gradient of `f` with respect to the argument a
 slot `Slot`, using DifferentiationInterface.jl.
 
 An anonymous closure captures the constant arguments and places `active_` at `Slot`
-via `ntuple` — same rationale as [`hamiltonian_gradient`](@ref) (ForwardDiff tag ordering).
+via `ntuple` — same rationale as [`CTBase.Differentiation.hamiltonian_gradient`](@ref) (ForwardDiff tag ordering).
 `_derivator` dispatches to `DI.gradient` for array `active` and `DI.derivative` for scalar.
 
 See also: [`CTBase.Differentiation.pushforward`](@ref).
