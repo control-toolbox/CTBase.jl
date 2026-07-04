@@ -42,14 +42,15 @@ The concrete strategy stores a single option, `:ad_backend`, holding an
 `AutoForwardDiff()`). `ADTypes` is a hard dependency of CTBase, so the default is
 always available.
 
-The contract has seven methods.
+The contract has nine methods.
 [`Differentiation.ad_backend`](@ref CTBase.Differentiation.ad_backend) — the accessor
 returning the wrapped ADTypes backend — is resolved in core and always available; the
-six differentiation primitives below live in an extension.
+eight differentiation primitives below live in an extension.
 
 !!! note "The differentiation methods live in an extension"
     The contract methods (`gradient`, `derivative`, `differentiate`,
-    `pushforward`, `hamiltonian_gradient`, `variable_gradient`) are implemented in
+    `pushforward`, `hamiltonian_gradient`, `variable_gradient`,
+    `pseudo_hamiltonian_gradient`, `pseudo_hamiltonian_control_gradient`) are implemented in
     the `CTBaseDifferentiationInterface` **package extension**. They become
     available only once `DifferentiationInterface` *and* a concrete AD package
     (e.g. `ForwardDiff`) are loaded. Without the extension, every contract method
@@ -164,6 +165,38 @@ hv = Data.Hamiltonian((x, p, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p) + sum(abs2
 Differentiation.variable_gradient(backend, hv, 0.0, [1.0, 2.0], [3.0, 4.0], [5.0, 6.0])
 ```
 
+## Pseudo-Hamiltonian gradients
+
+The two pseudo-Hamiltonian methods operate directly on a
+[`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) (see the [Data](data.md)
+guide).
+[`Differentiation.pseudo_hamiltonian_gradient`](@ref CTBase.Differentiation.pseudo_hamiltonian_gradient)
+returns `(∂H̃/∂x, ∂H̃/∂p)`, **non-negated** — the caller applies the signs of
+Hamilton's equations:
+
+```@example diff
+# H̃(x, p, u) = ½(‖x‖² + ‖p‖²) + u²  →  ∂H̃/∂x = x, ∂H̃/∂p = p
+ph = Data.PseudoHamiltonian((x, p, u) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2)
+∂x, ∂p = Differentiation.pseudo_hamiltonian_gradient(backend, ph, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, nothing)
+(∂x, ∂p)
+```
+
+[`Differentiation.pseudo_hamiltonian_control_gradient`](@ref CTBase.Differentiation.pseudo_hamiltonian_control_gradient)
+returns `∂H̃/∂u`, which vanishes along optimal trajectories by the Pontryagin
+Maximum Principle stationarity condition:
+
+```@example diff
+# ∂H̃/∂u = 2u = 4.0
+Differentiation.pseudo_hamiltonian_control_gradient(backend, ph, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, nothing)
+```
+
+For a non-fixed pseudo-Hamiltonian, the `v` argument carries the variable:
+
+```@example diff
+phv = Data.PseudoHamiltonian((x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1]; is_variable=true)
+Differentiation.pseudo_hamiltonian_control_gradient(backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0])
+```
+
 ## The contract without the extension
 
 Every contract method has a fallback on `AbstractADBackend` that throws
@@ -186,5 +219,5 @@ end # hide
 
 - [`Differentiation.AbstractADBackend`](@ref CTBase.Differentiation.AbstractADBackend), [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface) — the strategy types.
 - [Implementing a Strategy](@ref), [Options System](@ref) — the contract these build on.
-- [Data](data.md) — `Hamiltonian` wrappers consumed by the gradient methods.
+- [Data](data.md) — `Hamiltonian` and `PseudoHamiltonian` wrappers consumed by the gradient methods.
 - [Exceptions](exceptions.md) — `NotImplemented`, raised by the contract fallbacks.

@@ -54,6 +54,10 @@ function generate_api_reference(src_dir::String)
                 joinpath("Data", "hamiltonian.jl"),
                 joinpath("Data", "abstract_hamiltonian_vector_field.jl"),
                 joinpath("Data", "hamiltonian_vector_field.jl"),
+                joinpath("Data", "abstract_control_law.jl"),
+                joinpath("Data", "control_law.jl"),
+                joinpath("Data", "abstract_pseudo_hamiltonian.jl"),
+                joinpath("Data", "pseudo_hamiltonian.jl"),
             ),
         ),
         (
@@ -175,6 +179,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Traits", "time_dependence.jl"),
                 joinpath("Traits", "variable_dependence.jl"),
                 joinpath("Traits", "control_dependence.jl"),
+                joinpath("Traits", "feedback.jl"),
             ),
         ),
         (

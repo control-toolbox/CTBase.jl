@@ -30,7 +30,7 @@ Return the scalar DI differentiation primitive for a `Number` active argument.
 
 Dispatches to `DI.derivative`, which computes `df/dx` for scalar `x`.
 
-See also: [`_derivator(::Type{<:AbstractArray})`](@ref)
+See also: [`CTBaseDifferentiationInterface._derivator`](@ref)
 """
 function _derivator(::Type{<:Number})
     return DI.derivative
@@ -43,7 +43,7 @@ Return the array DI differentiation primitive for an `AbstractArray` active argu
 
 Dispatches to `DI.gradient`, which computes `∇f` for array `x`.
 
-See also: [`_derivator(::Type{<:Number})`](@ref)
+See also: [`CTBaseDifferentiationInterface._derivator`](@ref)
 """
 function _derivator(::Type{<:AbstractArray})
     return DI.gradient
@@ -82,7 +82,7 @@ $(TYPEDSIGNATURES)
 
 Compute variable gradient ∂H/∂v via DifferentiationInterface.jl.
 
-See the note in [`hamiltonian_gradient`](@ref) on why anonymous closures are used.
+See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@ref) on why anonymous closures are used.
 
 # Returns
 - `grad_v` = ∂H/∂v.
@@ -98,6 +98,88 @@ function Differentiation.variable_gradient(
     di_backend = Differentiation.ad_backend(backend)
     h_v(v_) = h(t, x, p, v_)
     return _derivator(typeof(v))(h_v, di_backend, v)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compute pseudo-Hamiltonian gradients (∂H̃/∂x, ∂H̃/∂p) via DifferentiationInterface.jl.
+
+Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
+Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
+[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref) for ∂H̃/∂u.
+
+Anonymous closures are used deliberately so that ForwardDiff `tagcount` values
+are assigned at runtime in the correct left-to-right order inside `ForwardDiff.≺`,
+avoiding silent zero-gradient bugs in nested-AD contexts (e.g. inside NonlinearSolve).
+
+# Arguments
+- `backend::Differentiation.DifferentiationInterface`: The DI backend strategy.
+- `h̃::Data.AbstractPseudoHamiltonian`: The pseudo-Hamiltonian.
+- `t`: Time (scalar).
+- `x`: State vector.
+- `p`: Costate vector.
+- `u`: Control (scalar or vector).
+- `v`: Variable (scalar or `nothing` for Fixed problems).
+
+# Returns
+- Tuple `(grad_x, grad_p)` where `grad_x` = ∂H̃/∂x, `grad_p` = ∂H̃/∂p.
+
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@ref).
+"""
+function Differentiation.pseudo_hamiltonian_gradient(
+    backend::Differentiation.DifferentiationInterface,
+    h̃::Data.AbstractPseudoHamiltonian,
+    t,
+    x,
+    p,
+    u,
+    v,
+)
+    di_backend = Differentiation.ad_backend(backend)
+    h̃_x(x_) = h̃(t, x_, p, u, v)
+    h̃_p(p_) = h̃(t, x, p_, u, v)
+    grad_x = _derivator(typeof(x))(h̃_x, di_backend, x)
+    grad_p = _derivator(typeof(p))(h̃_p, di_backend, p)
+    return (grad_x, grad_p)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compute the pseudo-Hamiltonian control gradient ∂H̃/∂u via DifferentiationInterface.jl.
+
+This is typically used to check the PMP stationarity condition ∂H̃/∂u = 0,
+not for the Hamiltonian flow itself.
+
+# Arguments
+- `backend::Differentiation.DifferentiationInterface`: The DI backend strategy.
+- `h̃::Data.AbstractPseudoHamiltonian`: The pseudo-Hamiltonian.
+- `t`: Time (scalar).
+- `x`: State vector.
+- `p`: Costate vector.
+- `u`: Control (scalar or vector).
+- `v`: Variable (scalar or `nothing` for Fixed problems).
+
+# Returns
+- `grad_u`: ∂H̃/∂u.
+
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref).
+"""
+function Differentiation.pseudo_hamiltonian_control_gradient(
+    backend::Differentiation.DifferentiationInterface,
+    h̃::Data.AbstractPseudoHamiltonian,
+    t,
+    x,
+    p,
+    u,
+    v,
+)
+    di_backend = Differentiation.ad_backend(backend)
+    h̃_u(u_) = h̃(t, x, p, u_, v)
+    grad_u = _derivator(typeof(u))(h̃_u, di_backend, u)
+    return grad_u
 end
 
 # =============================================================================
@@ -184,7 +266,7 @@ Compute the partial derivative or gradient of `f` with respect to the argument a
 slot `Slot`, using DifferentiationInterface.jl.
 
 An anonymous closure captures the constant arguments and places `active_` at `Slot`
-via `ntuple` — same rationale as [`hamiltonian_gradient`](@ref) (ForwardDiff tag ordering).
+via `ntuple` — same rationale as [`CTBase.Differentiation.hamiltonian_gradient`](@ref) (ForwardDiff tag ordering).
 `_derivator` dispatches to `DI.gradient` for array `active` and `DI.derivative` for scalar.
 
 See also: [`CTBase.Differentiation.pushforward`](@ref).

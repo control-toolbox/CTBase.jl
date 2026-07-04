@@ -36,6 +36,8 @@ const EXPORTED_FUNCTIONS = (
     :build_ad_backend,
     :ad_backend,
     :hamiltonian_gradient,
+    :pseudo_hamiltonian_gradient,
+    :pseudo_hamiltonian_control_gradient,
     :variable_gradient,
     :gradient,
     :derivative,

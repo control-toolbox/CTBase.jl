@@ -26,6 +26,22 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 - `NotStored` / `NotStoredType` are unchanged and remain extraction-internal to
   `CTBase.Options` (the defining file was renamed `not_provided.jl` → `not_stored.jl`).
 
+## Non-breaking note (0.26.1-beta)
+
+- **Traits**: New `Feedback` trait family added for encoding how a control law closes the loop
+  - **New trait family**: `AbstractFeedback` with tags `OpenLoopFeedback`, `ClosedLoopFeedback`, `DynClosedLoopFeedback`
+  - **Type-parameter-only contract**: trait value read from a type parameter by the `feedback` accessor; no `has_feedback_trait` guard
+  - **Derived predicates**: `is_open_loop(obj)`, `is_closed_loop(obj)`, `is_dyn_closed_loop(obj)`
+  - **No breaking changes**: Purely additive. Existing code unaffected.
+- **Data**: New `PseudoHamiltonian` and `ControlLaw` data types added
+  - **PseudoHamiltonian**: scalar function `H̃(t, x, p, u[, v]) → ℝ` with explicit control argument; `AbstractPseudoHamiltonian` supertype and `PseudoHamiltonian` concrete struct
+  - **ControlLaw**: control law function `u(⋯) → 𝒰` with feedback trait; `AbstractControlLaw` supertype, `ControlLaw` concrete struct, and `OpenLoop`/`ClosedLoop`/`DynClosedLoop` user-facing constructors
+  - **No breaking changes**: Purely additive. Existing data types unchanged.
+- **Differentiation**: New pseudo-Hamiltonian gradient methods added
+  - `pseudo_hamiltonian_gradient(backend, h̃, t, x, p, u, v) → (∂H̃/∂x, ∂H̃/∂p)`
+  - `pseudo_hamiltonian_control_gradient(backend, h̃, t, x, p, u, v) → ∂H̃/∂u`
+  - **No breaking changes**: Purely additive. Existing gradient methods unchanged.
+
 ## Non-breaking note (0.26.0-beta)
 
 - **Traits**: New `ControlDependence` family added for encoding control presence in optimal control problems

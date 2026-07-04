@@ -81,6 +81,53 @@ Does a function allocate a new output, or write into a pre-allocated buffer?
 | [`Traits.OutOfPlace`](@ref CTBase.Traits.OutOfPlace) | returns a new value |
 | [`Traits.InPlace`](@ref CTBase.Traits.InPlace) | writes into a buffer (first arg) |
 
+### Feedback
+
+How does a control law close the loop? The feedback trait encodes which arguments
+the control law depends on, and therefore which dynamics trait it implies.
+
+| Type | Meaning | Control law signature |
+|---|---|---|
+| [`Traits.OpenLoopFeedback`](@ref CTBase.Traits.OpenLoopFeedback) | time (and variable) only | `u(t[, v])` |
+| [`Traits.ClosedLoopFeedback`](@ref CTBase.Traits.ClosedLoopFeedback) | time and state | `u(t, x[, v])` |
+| [`Traits.DynClosedLoopFeedback`](@ref CTBase.Traits.DynClosedLoopFeedback) | time, state, and costate | `u(t, x, p[, v])` |
+
+All three are concrete subtypes of
+[`Traits.AbstractFeedback`](@ref CTBase.Traits.AbstractFeedback):
+
+```@repl traits
+Traits.OpenLoopFeedback <: Traits.AbstractFeedback
+Traits.ClosedLoopFeedback <: Traits.AbstractFeedback
+Traits.DynClosedLoopFeedback <: Traits.AbstractFeedback
+```
+
+!!! note "Type-parameter-only contract"
+    Unlike time-, variable-, and control-dependence (which use the two-method
+    opt-in contract), feedback follows a **type-parameter-only** contract: the
+    trait value is read from a type parameter of the concrete data type (e.g.
+    `ControlLaw{F,FB,TD,VD}`) by the
+    [`Traits.feedback`](@ref CTBase.Traits.feedback) accessor. No
+    `has_feedback_trait` guard is provided; calling `feedback` on a type that
+    does not implement it yields a standard `MethodError`.
+
+The boolean predicates
+[`Traits.is_open_loop`](@ref CTBase.Traits.is_open_loop),
+[`Traits.is_closed_loop`](@ref CTBase.Traits.is_closed_loop), and
+[`Traits.is_dyn_closed_loop`](@ref CTBase.Traits.is_dyn_closed_loop) dispatch
+on the feedback type parameter:
+
+```@repl traits
+using CTBase.Data
+u = Data.OpenLoop(() -> 1.0)
+Traits.feedback(u)
+Traits.is_open_loop(u)
+```
+
+The feedback trait also determines the dynamics trait: open-loop and closed-loop
+control laws carry [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics)
+(no costate), while dynamic closed-loop control laws carry
+[`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics).
+
 ### Other families
 
 These traits encode properties that are fixed at construction time and carried
@@ -93,6 +140,7 @@ below — they are passed directly as type arguments.
 | Dynamics | [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics), [`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics), [`Traits.AugmentedHamiltonianDynamics`](@ref CTBase.Traits.AugmentedHamiltonianDynamics) |
 | Automatic differentiation | [`Traits.WithAD`](@ref CTBase.Traits.WithAD), [`Traits.WithoutAD`](@ref CTBase.Traits.WithoutAD) |
 | Variable costate | [`Traits.SupportsVariableCostate`](@ref CTBase.Traits.SupportsVariableCostate), [`Traits.NoVariableCostate`](@ref CTBase.Traits.NoVariableCostate) |
+| Feedback | [`Traits.OpenLoopFeedback`](@ref CTBase.Traits.OpenLoopFeedback), [`Traits.ClosedLoopFeedback`](@ref CTBase.Traits.ClosedLoopFeedback), [`Traits.DynClosedLoopFeedback`](@ref CTBase.Traits.DynClosedLoopFeedback) |
 
 !!! note "Abstract tags vs. concrete tags"
     Time-dependence tags (`Autonomous`, `NonAutonomous`) are **abstract** types
@@ -189,6 +237,7 @@ end # hide
 | [`Traits.ad_trait`](@ref CTBase.Traits.ad_trait) | — |
 | [`Traits.variable_costate_trait`](@ref CTBase.Traits.variable_costate_trait) | — |
 | [`Traits.dynamics_trait`](@ref CTBase.Traits.dynamics_trait) | — |
+| [`Traits.feedback`](@ref CTBase.Traits.feedback) | `is_open_loop`, `is_closed_loop`, `is_dyn_closed_loop` |
 
 ## See Also
 

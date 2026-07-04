@@ -22,10 +22,13 @@ using LinearAlgebra
 |---|---|---|
 | [`Data.VectorField`](@ref CTBase.Data.VectorField) | ``X : \mathcal{X} \to \mathbb{R}^n`` | `X(x)` |
 | [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H(x, p)` |
+| [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃(x, p, u)` |
 | [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) | ``\vec{H} : T^*\mathcal{X} \to \mathbb{R}^{2n}`` | `HVF(x, p)` |
+| [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) | ``u : \cdots \to \mathcal{U}`` | `u()` / `u(x)` / `u(x, p)` |
 
-All three share the same trait axes — time dependence, variable dependence and
-mutability. See [Traits](traits.md) for the full call-signature tables.
+All five share the same trait axes — time dependence and variable dependence.
+`VectorField` and `HamiltonianVectorField` also carry a mutability trait;
+`ControlLaw` carries a feedback trait (see [Traits](traits.md)).
 
 ---
 
@@ -204,6 +207,117 @@ For a plain user-supplied function that does not accept `variable_costate`, pass
 
 ---
 
+## PseudoHamiltonian
+
+A `PseudoHamiltonian` wraps a scalar function ``\tilde{H}(x, p, u) \in \mathbb{R}``
+that extends the standard Hamiltonian with an explicit control argument ``u``.
+
+```math
+\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}, \quad (x, p, u) \mapsto \tilde{H}(x, p, u).
+```
+
+Unlike [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), which encodes the
+control implicitly, a pseudo-Hamiltonian takes the control as an additional
+argument. This enables dynamic closed-loop flows where the control is computed
+from the pseudo-Hamiltonian's maximisation condition (PMP stationarity:
+``\partial \tilde{H} / \partial u = 0``).
+
+### Construction
+
+```@example data
+# Autonomous, fixed (default): H̃(x, p, u)
+ph1 = Data.PseudoHamiltonian((x, p, u) -> dot(p, x) + u^2)
+
+# Non-autonomous, fixed: H̃(t, x, p, u)
+ph2 = Data.PseudoHamiltonian((t, x, p, u) -> t * dot(p, x) + u^2; is_autonomous=false)
+
+# Autonomous, non-fixed: H̃(x, p, u, v)
+ph3 = Data.PseudoHamiltonian((x, p, u, v) -> dot(p, x) + u^2 + v[1]; is_variable=true)
+
+ph1
+```
+
+### Calling
+
+```@example data
+x0, p0, u0 = [1.0, 0.5], [0.3, 0.7], 2.0
+
+ph1(x0, p0, u0)                    # natural call
+ph1(0.0, x0, p0, u0, nothing)      # uniform call
+ph2(0.5, x0, p0, u0)               # non-autonomous
+```
+
+The dynamics trait of a `PseudoHamiltonian` is always
+[`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics), since
+pseudo-Hamiltonians involve both state and costate.
+
+---
+
+## ControlLaw
+
+A `ControlLaw` wraps a function ``u(\cdots)`` that provides the control input for
+an optimal control problem. The feedback trait (see [Traits](traits.md))
+determines which arguments the control law depends on.
+
+Three user-facing constructors fix the feedback trait:
+
+| Constructor | Feedback trait | Natural signature (autonomous/fixed) |
+|---|---|---|
+| [`Data.OpenLoop`](@ref CTBase.Data.OpenLoop) | `OpenLoopFeedback` | `u()` |
+| [`Data.ClosedLoop`](@ref CTBase.Data.ClosedLoop) | `ClosedLoopFeedback` | `u(x)` |
+| [`Data.DynClosedLoop`](@ref CTBase.Data.DynClosedLoop) | `DynClosedLoopFeedback` | `u(x, p)` |
+
+### Construction
+
+```@example data
+# Open-loop, autonomous, fixed (default): u()
+u_ol = Data.OpenLoop(() -> 1.0)
+
+# Closed-loop, autonomous, fixed: u(x)
+u_cl = Data.ClosedLoop(x -> -x)
+
+# Dynamic closed-loop, autonomous, fixed: u(x, p)
+u_dcl = Data.DynClosedLoop((x, p) -> -x - p)
+
+u_ol
+```
+
+Non-autonomous and variable variants are constructed with the same keywords as
+other data types:
+
+```@example data
+u_ol_na = Data.OpenLoop((t, v) -> t * v; is_autonomous=false, is_variable=true)
+```
+
+### Calling
+
+Every `ControlLaw` is callable via its **natural** signature (matching the
+traits) and via a **uniform** signature that depends on the feedback trait:
+
+| Feedback | Natural `(Aut, Fixed)` | Uniform |
+|---|---|---|
+| `OpenLoop` | `u()` | `u(t, v)` |
+| `ClosedLoop` | `u(x)` | `u(t, x, v)` |
+| `DynClosedLoop` | `u(x, p)` | `u(t, x, p, v)` |
+
+```@example data
+u_ol()                         # natural call
+u_ol(0.0, nothing)             # uniform call
+
+u_cl(x0)                       # natural call
+u_cl(0.0, x0, nothing)         # uniform call
+
+u_dcl(x0, p0)                  # natural call
+u_dcl(0.0, x0, p0, nothing)    # uniform call
+```
+
+The feedback trait determines the dynamics trait: open-loop and closed-loop
+control laws carry [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics),
+while dynamic closed-loop control laws carry
+[`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics).
+
+---
+
 ## Querying traits
 
 Because the trait metadata lives in the type, it can be recovered from any data
@@ -251,15 +365,19 @@ Traits.time_dependence(vf_typed)
 ```
 
 The same positional form exists for [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian)
-(`Hamiltonian(f, TD, VD)`) and
+(`Hamiltonian(f, TD, VD)`),
+[`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian)
+(`PseudoHamiltonian(f, TD, VD)`),
 [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField)
-(`HamiltonianVectorField(f, TD, VD, MD)`).
+(`HamiltonianVectorField(f, TD, VD, MD)`), and
+[`Data.ControlLaw`](@ref CTBase.Data.ControlLaw)
+(`ControlLaw(f, FB, TD, VD)`).
 
 ---
 
 ## See also
 
-- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) — concrete data types.
-- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField) — abstract supertypes.
+- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) — concrete data types.
+- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw) — abstract supertypes.
 - [Traits](traits.md) — the three trait axes, the dynamics trait, and call-signature tables.
 - [Exceptions](exceptions.md) — `PreconditionError` and `IncorrectArgument`, raised by the constructors and the `variable_costate` path.

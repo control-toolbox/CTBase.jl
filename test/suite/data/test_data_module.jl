@@ -34,10 +34,15 @@ const CurrentModule = TestDataModule
 # These lists define the expected public API of the Data module.
 
 const EXPORTED_ABSTRACT_TYPES = (
-    :AbstractVectorField, :AbstractHamiltonianVectorField, :AbstractHamiltonian
+    :AbstractVectorField, :AbstractHamiltonianVectorField, :AbstractHamiltonian,
+    :AbstractControlLaw, :AbstractPseudoHamiltonian,
 )
 
-const EXPORTED_CONCRETE_TYPES = (:VectorField, :HamiltonianVectorField, :Hamiltonian)
+const EXPORTED_CONCRETE_TYPES = (
+    :VectorField, :HamiltonianVectorField, :Hamiltonian,
+    :ControlLaw, :OpenLoop, :ClosedLoop, :DynClosedLoop,
+    :PseudoHamiltonian,
+)
 
 const PRIVATE_SYMBOLS = (
     :__is_autonomous,
@@ -56,6 +61,11 @@ const PRIVATE_SYMBOLS = (
     :_uniform_sig_hvf,
     :_uniform_sig_vf,
     :_vd_label,
+    :_fb_label,
+    :_natural_sig_cl,
+    :_uniform_sig_cl,
+    :_natural_sig_ph,
+    :_uniform_sig_ph,
 )
 
 # ============================================================================

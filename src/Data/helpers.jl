@@ -256,3 +256,139 @@ See also: [`CTBase.Data._natural_sig_h`](@ref).
 function _uniform_sig_h()
     return "h(t, x, p, v)"
 end
+
+# =============================================================================
+# Feedback label helpers
+# =============================================================================
+
+"""
+    _fb_label(::Type{Traits.OpenLoopFeedback}) -> String
+    _fb_label(::Type{Traits.ClosedLoopFeedback}) -> String
+    _fb_label(::Type{Traits.DynClosedLoopFeedback}) -> String
+
+Return a user-friendly label for feedback traits.
+
+# Returns
+- `String`: "open-loop", "closed-loop", or "dyn-closed-loop".
+
+See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._vd_label`](@ref).
+"""
+function _fb_label(::Type{Traits.OpenLoopFeedback})
+    return "open-loop"
+end
+function _fb_label(::Type{Traits.ClosedLoopFeedback})
+    return "closed-loop"
+end
+function _fb_label(::Type{Traits.DynClosedLoopFeedback})
+    return "dyn-closed-loop"
+end
+
+# =============================================================================
+# ControlLaw-specific signature helpers
+# =============================================================================
+
+"""
+    _natural_sig_cl(::Type{FB}, ::Type{TD}, ::Type{VD}) where {FB, TD, VD} -> String
+
+Return the natural call signature for a `ControlLaw` based on its traits.
+
+The arguments depend on the feedback type:
+- `OpenLoop`: `u([t][, v])`
+- `ClosedLoop`: `u([t, ]x[, v])`
+- `DynClosedLoop`: `u([t, ]x, p[, v])`
+
+See also: [`CTBase.Data._uniform_sig_cl`](@ref).
+"""
+function _natural_sig_cl(
+    ::Type{FB}, ::Type{TD}, ::Type{VD}
+) where {FB<:Traits.AbstractFeedback,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
+    args = String[]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    append!(args, _natural_args_cl(FB))
+    VD === Traits.NonFixed && push!(args, "v")
+    return "u(" * join(args, ", ") * ")"
+end
+
+"""
+    _natural_args_cl(::Type{FB}) where {FB} -> Vector{String}
+
+Return the feedback-dependent argument names (excluding `t` and `v`) for the
+natural call signature of a `ControlLaw`.
+
+- `OpenLoopFeedback`: empty (no state or costate).
+- `ClosedLoopFeedback`: `["x"]`.
+- `DynClosedLoopFeedback`: `["x", "p"]`.
+
+See also: [`CTBase.Data._natural_sig_cl`](@ref).
+"""
+function _natural_args_cl(::Type{Traits.OpenLoopFeedback})
+    return String[]
+end
+
+function _natural_args_cl(::Type{Traits.ClosedLoopFeedback})
+    return ["x"]
+end
+
+function _natural_args_cl(::Type{Traits.DynClosedLoopFeedback})
+    return ["x", "p"]
+end
+
+"""
+    _uniform_sig_cl(::Type{FB}) where {FB} -> String
+
+Return the uniform call signature for a `ControlLaw` based on its feedback trait.
+
+- OpenLoop: `u(t, v)` — no state, no costate (open-loop by definition)
+- ClosedLoop: `u(t, x, v)` — state but no costate (controlled dynamics flow)
+- DynClosedLoop: `u(t, x, p, v)` — costate needed (Hamiltonian flow)
+
+See also: [`CTBase.Data._natural_sig_cl`](@ref).
+"""
+function _uniform_sig_cl(::Type{Traits.OpenLoopFeedback})
+    return "u(t, v)"
+end
+
+function _uniform_sig_cl(::Type{Traits.ClosedLoopFeedback})
+    return "u(t, x, v)"
+end
+
+function _uniform_sig_cl(::Type{Traits.DynClosedLoopFeedback})
+    return "u(t, x, p, v)"
+end
+
+# =============================================================================
+# PseudoHamiltonian-specific signature helpers
+# =============================================================================
+
+"""
+    _natural_sig_ph(::Type{TD}, ::Type{VD}) where {TD, VD} -> String
+
+Return the natural call signature for a `PseudoHamiltonian` based on its traits.
+
+The arguments always include `x, p, u`, with `t` prepended for non-autonomous
+and `v` appended for variable.
+
+See also: [`CTBase.Data._uniform_sig_ph`](@ref).
+"""
+function _natural_sig_ph(::Type{TD}, ::Type{VD}) where {TD,VD}
+    args = String[]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    push!(args, "x")
+    push!(args, "p")
+    push!(args, "u")
+    VD === Traits.NonFixed && push!(args, "v")
+    return "h̃(" * join(args, ", ") * ")"
+end
+
+"""
+    _uniform_sig_ph() -> String
+
+Return the uniform call signature for a `PseudoHamiltonian`.
+
+The uniform signature always includes all arguments `(t, x, p, u, v)` regardless of traits.
+
+See also: [`CTBase.Data._natural_sig_ph`](@ref).
+"""
+function _uniform_sig_ph()
+    return "h̃(t, x, p, u, v)"
+end

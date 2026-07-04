@@ -5,6 +5,62 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.1-beta] - 2026-07-04
+
+### ✨ New Features
+
+#### **Feedback Trait Family**
+
+- **New `AbstractFeedback` trait family** in `CTBase.Traits` for encoding how a control law closes the loop:
+  - **Tags**: `OpenLoopFeedback` (time/variable only), `ClosedLoopFeedback` (time + state), `DynClosedLoopFeedback` (time + state + costate)
+  - **Type-parameter-only contract**: the trait value is read from a type parameter of the concrete data type by the `feedback` accessor; no `has_feedback_trait` guard
+  - **Derived predicates**: `is_open_loop(obj)`, `is_closed_loop(obj)`, `is_dyn_closed_loop(obj)` dispatch on the feedback type parameter
+  - **Dynamics trait mapping**: open-loop and closed-loop → `StateDynamics`; dynamic closed-loop → `HamiltonianDynamics`
+
+#### **PseudoHamiltonian**
+
+- **New `PseudoHamiltonian` data type** in `CTBase.Data` for scalar functions `H̃(t, x, p, u[, v]) → ℝ` that extend the standard Hamiltonian with an explicit control argument `u`:
+  - **Abstract supertype**: `AbstractPseudoHamiltonian{TD,VD}` with trait accessors
+  - **Concrete struct**: `PseudoHamiltonian{F,TD,VD}` with keyword constructor `PseudoHamiltonian(f; is_autonomous, is_variable)`
+  - **Natural and uniform call signatures** matching the time/variable dependence traits
+  - **Dynamics trait**: always `HamiltonianDynamics`
+
+#### **ControlLaw**
+
+- **New `ControlLaw` data type** in `CTBase.Data` for control law functions `u(⋯) → 𝒰`:
+  - **Abstract supertype**: `AbstractControlLaw{FB,TD,VD}` with feedback, time, and variable dependence trait accessors
+  - **Concrete struct**: `ControlLaw{F,FB,TD,VD}` with typed constructor
+  - **User-facing constructors**: `OpenLoop(f; ...)`, `ClosedLoop(f; ...)`, `DynClosedLoop(f; ...)` fixing the feedback trait
+  - **Feedback-dependent call signatures**: natural and uniform signatures vary by feedback trait
+  - **Dynamics trait**: determined by feedback (open/closed-loop → `StateDynamics`; dynamic closed-loop → `HamiltonianDynamics`)
+
+#### **Pseudo-Hamiltonian Gradient Methods**
+
+- **New AD contract methods** in `CTBase.Differentiation` for pseudo-Hamiltonian gradients:
+  - `pseudo_hamiltonian_gradient(backend, h̃, t, x, p, u, v) → (∂H̃/∂x, ∂H̃/∂p)`: non-negated partial derivatives
+  - `pseudo_hamiltonian_control_gradient(backend, h̃, t, x, p, u, v) → ∂H̃/∂u`: control gradient (vanishes along optimal trajectories by PMP stationarity)
+  - **Rationale**: splitting `∂H̃/∂u` from `(∂H̃/∂x, ∂H̃/∂p)` reflects the distinct role of the stationarity condition and avoids computing the control gradient when only the state/costate gradients are needed
+  - **Extension implementation**: `CTBaseDifferentiationInterface` extension provides concrete implementations using `DifferentiationInterface.jl`
+  - **Fallback**: `NotImplemented` on `AbstractADBackend` without the extension
+
+### 📚 Documentation
+
+- **Guide pages updated**:
+  - `traits.md`: added Feedback trait family section with type-parameter-only contract note, predicates, and dynamics trait mapping; added Feedback to Other families table and accessor/predicate summary
+  - `data.md`: added PseudoHamiltonian section (construction, calling, dynamics trait) and ControlLaw section (constructors, call signatures, feedback→dynamics mapping); updated overview table, typed constructors, and See also
+  - `differentiation.md`: updated contract count to nine methods; added Pseudo-Hamiltonian gradients section with examples; updated extension note and See also
+- **Docstring compliance**: aligned all docstrings in `feedback.jl`, `abstract_control_law.jl`, `control_law.jl`, `abstract_pseudo_hamiltonian.jl`, `pseudo_hamiltonian.jl`, `abstract_ad_backend.jl`, and `CTBaseDifferentiationInterface.jl` with the Handbook conventions (`See also:` inline lines, `# Returns`/`# Arguments` sections, `# Output` for show methods)
+- **API reference**: added `feedback.jl`, `abstract_control_law.jl`, `control_law.jl`, `abstract_pseudo_hamiltonian.jl`, `pseudo_hamiltonian.jl` to auto-generated API pages
+
+### 🧪 Testing
+
+- Added tests for `pseudo_hamiltonian_gradient` (return signature `(grad_x, grad_p)`) and `pseudo_hamiltonian_control_gradient` (return `grad_u`), including `NotImplemented` error tests and `DifferentiationInterface` extension tests
+- Added `pseudo_hamiltonian_control_gradient` to export-list checks in `test_differentiation_module.jl`
+
+### ✅ Compatibility
+
+- **No breaking changes**: purely additive. Existing code unaffected. See [BREAKINGS.md](BREAKINGS.md).
+
 ## [0.26.0-beta] - 2026-06-28
 
 ### ✨ New Features
