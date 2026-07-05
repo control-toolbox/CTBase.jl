@@ -22,7 +22,9 @@ function test_pseudo_hamiltonian()
             Test.@test Traits.variable_dependence(ph1) == Traits.Fixed
 
             # NonAutonomous, Fixed
-            ph2 = PseudoHamiltonian((t, x, p, u) -> t * sum(x .* p) + u^2; is_autonomous=false)
+            ph2 = PseudoHamiltonian(
+                (t, x, p, u) -> t * sum(x .* p) + u^2; is_autonomous=false
+            )
             Test.@test ph2 isa Data.PseudoHamiltonian
             Test.@test Traits.time_dependence(ph2) == Traits.NonAutonomous
             Test.@test Traits.variable_dependence(ph2) == Traits.Fixed
@@ -36,7 +38,8 @@ function test_pseudo_hamiltonian()
             # NonAutonomous, NonFixed
             ph4 = PseudoHamiltonian(
                 (t, x, p, u, v) -> t * sum(x .* p) + u^2 + v;
-                is_autonomous=false, is_variable=true,
+                is_autonomous=false,
+                is_variable=true,
             )
             Test.@test ph4 isa Data.PseudoHamiltonian
             Test.@test Traits.time_dependence(ph4) == Traits.NonAutonomous
@@ -53,7 +56,9 @@ function test_pseudo_hamiltonian()
             Test.@test ph1([1.0, 2.0], [3.0, 4.0], 5.0) == 3.0 + 8.0 + 25.0
 
             # NonAutonomous, Fixed: h̃(t, x, p, u)
-            ph2 = PseudoHamiltonian((t, x, p, u) -> t + sum(x .* p) + u^2; is_autonomous=false)
+            ph2 = PseudoHamiltonian(
+                (t, x, p, u) -> t + sum(x .* p) + u^2; is_autonomous=false
+            )
             Test.@test ph2(1.0, [2.0, 3.0], [4.0, 5.0], 6.0) == 1.0 + 8.0 + 15.0 + 36.0
 
             # Autonomous, NonFixed: h̃(x, p, u, v)
@@ -63,9 +68,11 @@ function test_pseudo_hamiltonian()
             # NonAutonomous, NonFixed: h̃(t, x, p, u, v)
             ph4 = PseudoHamiltonian(
                 (t, x, p, u, v) -> t + sum(x .* p) + u^2 + v;
-                is_autonomous=false, is_variable=true,
+                is_autonomous=false,
+                is_variable=true,
             )
-            Test.@test ph4(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) == 1.0 + 8.0 + 15.0 + 36.0 + 7.0
+            Test.@test ph4(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) ==
+                1.0 + 8.0 + 15.0 + 36.0 + 7.0
         end
 
         # ====================================================================
@@ -78,7 +85,9 @@ function test_pseudo_hamiltonian()
             Test.@test ph1(0.0, [1.0, 2.0], [3.0, 4.0], 5.0, 6.0) == 3.0 + 8.0 + 25.0
 
             # NonAutonomous, Fixed — ignores v
-            ph2 = PseudoHamiltonian((t, x, p, u) -> t + sum(x .* p) + u^2; is_autonomous=false)
+            ph2 = PseudoHamiltonian(
+                (t, x, p, u) -> t + sum(x .* p) + u^2; is_autonomous=false
+            )
             Test.@test ph2(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) == 1.0 + 8.0 + 15.0 + 36.0
 
             # Autonomous, NonFixed — ignores t
@@ -88,9 +97,11 @@ function test_pseudo_hamiltonian()
             # NonAutonomous, NonFixed — uses all
             ph4 = PseudoHamiltonian(
                 (t, x, p, u, v) -> t + sum(x .* p) + u^2 + v;
-                is_autonomous=false, is_variable=true,
+                is_autonomous=false,
+                is_variable=true,
             )
-            Test.@test ph4(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) == 1.0 + 8.0 + 15.0 + 36.0 + 7.0
+            Test.@test ph4(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) ==
+                1.0 + 8.0 + 15.0 + 36.0 + 7.0
         end
 
         # ====================================================================
@@ -99,9 +110,7 @@ function test_pseudo_hamiltonian()
 
         Test.@testset "Unit: Typed constructor" begin
             ph = PseudoHamiltonian(
-                (x, p, u) -> sum(x .* p) + u^2,
-                Traits.Autonomous,
-                Traits.Fixed,
+                (x, p, u) -> sum(x .* p) + u^2, Traits.Autonomous, Traits.Fixed
             )
             Test.@test ph isa Data.PseudoHamiltonian
             Test.@test Traits.time_dependence(ph) === Traits.Autonomous
@@ -148,7 +157,8 @@ function test_pseudo_hamiltonian()
             Test.@testset "Show: NonAutonomous, NonFixed" begin
                 ph2 = PseudoHamiltonian(
                     (t, x, p, u, v) -> t + sum(x .* p) + u^2 + v;
-                    is_autonomous=false, is_variable=true,
+                    is_autonomous=false,
+                    is_variable=true,
                 )
                 io = IOBuffer()
                 show(io, ph2)

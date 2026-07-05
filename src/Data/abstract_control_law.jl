@@ -32,9 +32,7 @@ See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Traits.AbstractFeedback`](@
 [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
 abstract type AbstractControlLaw{
-    FB<:Traits.AbstractFeedback,
-    TD<:Traits.TimeDependence,
-    VD<:Traits.VariableDependence,
+    FB<:Traits.AbstractFeedback,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
 } end
 
 # =============================================================================
@@ -51,7 +49,9 @@ Return the feedback trait of a control law.
 
 See also: [`CTBase.Traits.feedback`](@ref), [`CTBase.Traits.AbstractFeedback`](@ref).
 """
-function Traits.feedback(::AbstractControlLaw{FB,<:Any,<:Any}) where {FB<:Traits.AbstractFeedback}
+function Traits.feedback(
+    ::AbstractControlLaw{FB,<:Any,<:Any}
+) where {FB<:Traits.AbstractFeedback}
     return FB
 end
 
@@ -138,7 +138,9 @@ associated with state dynamics.
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
 """
-Traits.dynamics_trait(::AbstractControlLaw{<:Traits.OpenLoopFeedback}) = Traits.StateDynamics
+function Traits.dynamics_trait(::AbstractControlLaw{<:Traits.OpenLoopFeedback})
+    return Traits.StateDynamics
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -150,7 +152,9 @@ Return the dynamics trait of a closed-loop control law, namely [`CTBase.Traits.S
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
 """
-Traits.dynamics_trait(::AbstractControlLaw{<:Traits.ClosedLoopFeedback}) = Traits.StateDynamics
+function Traits.dynamics_trait(::AbstractControlLaw{<:Traits.ClosedLoopFeedback})
+    return Traits.StateDynamics
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -165,7 +169,9 @@ with Hamiltonian dynamics.
 
 See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.HamiltonianDynamics`](@ref).
 """
-Traits.dynamics_trait(::AbstractControlLaw{<:Traits.DynClosedLoopFeedback}) = Traits.HamiltonianDynamics
+function Traits.dynamics_trait(::AbstractControlLaw{<:Traits.DynClosedLoopFeedback})
+    return Traits.HamiltonianDynamics
+end
 
 # =============================================================================
 # Feedback predicates — dispatch on the FB type parameter
