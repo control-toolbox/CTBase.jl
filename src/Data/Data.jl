@@ -28,6 +28,9 @@ include(joinpath(@__DIR__, "control_law.jl"))
 include(joinpath(@__DIR__, "abstract_pseudo_hamiltonian.jl"))
 include(joinpath(@__DIR__, "pseudo_hamiltonian.jl"))
 include(joinpath(@__DIR__, "composed_hamiltonian.jl"))
+include(joinpath(@__DIR__, "abstract_controlled_vector_field.jl"))
+include(joinpath(@__DIR__, "controlled_vector_field.jl"))
+include(joinpath(@__DIR__, "composed_vector_field.jl"))
 include(joinpath(@__DIR__, "abstract_hamiltonian_vector_field.jl"))
 include(joinpath(@__DIR__, "hamiltonian_vector_field.jl"))
 
@@ -51,5 +54,9 @@ export PseudoHamiltonian
 export ComposedHamiltonian
 export pseudo_hamiltonian
 export control_law
+export AbstractControlledVectorField
+export ControlledVectorField
+export ComposedVectorField
+export controlled_vector_field
 
 end # module Data
