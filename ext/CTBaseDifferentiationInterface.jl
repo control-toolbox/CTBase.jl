@@ -182,6 +182,33 @@ function Differentiation.pseudo_hamiltonian_control_gradient(
     return grad_u
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Compute the pseudo-Hamiltonian variable gradient ∂H̃/∂v via DifferentiationInterface.jl,
+with the control `u` held constant.
+
+See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@ref) on why anonymous
+closures are used, and [`CTBase.Differentiation.pseudo_variable_gradient`](@ref) on the
+partial-vs-total distinction.
+
+# Returns
+- `grad_v` = ∂H̃/∂v (with `u` fixed).
+"""
+function Differentiation.pseudo_variable_gradient(
+    backend::Differentiation.DifferentiationInterface,
+    h̃::Data.AbstractPseudoHamiltonian,
+    t,
+    x,
+    p,
+    u,
+    v,
+)
+    di_backend = Differentiation.ad_backend(backend)
+    h̃_v(v_) = h̃(t, x, p, u, v_)
+    return _derivator(typeof(v))(h̃_v, di_backend, v)
+end
+
 # =============================================================================
 # Differentiation.gradient — extension contract methods
 # =============================================================================
@@ -279,8 +306,9 @@ function Differentiation.differentiate(
     consts::Vararg{Any,N},
 ) where {Slot,N}
     di = Differentiation.ad_backend(backend)
-    f_active(active_) =
-        f(ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
+    f_active(active_) = f(
+        ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...
+    )
     return _derivator(typeof(active))(f_active, di, active)
 end
 
@@ -304,8 +332,9 @@ function Differentiation.pushforward(
     consts::Vararg{Any,N},
 ) where {Slot,N}
     di = Differentiation.ad_backend(backend)
-    f_slot(x_) =
-        f(ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
+    f_slot(x_) = f(
+        ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...
+    )
     return only(DI.pushforward(f_slot, di, x, (dx,)))
 end
 
