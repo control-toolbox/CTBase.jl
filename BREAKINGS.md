@@ -26,6 +26,18 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 - `NotStored` / `NotStoredType` are unchanged and remain extraction-internal to
   `CTBase.Options` (the defining file was renamed `not_provided.jl` → `not_stored.jl`).
 
+## Non-breaking note (0.26.2-beta)
+
+- **Data**: New `ComposedHamiltonian` data type added
+  - **ComposedHamiltonian**: Hamiltonian `H(t, x, p, v) = H̃(t, x, p, u(t, x, p, v), v)` obtained by composing a `PseudoHamiltonian` with a `DynClosedLoop` control law; subtypes `AbstractHamiltonian`
+  - **Trait joins**: composed time/variable dependences are the join of the two inputs (`NonAutonomous`/`NonFixed` win), computed at construction time
+  - **Functor**: natural and uniform `(t, x, p, v)` call signatures
+  - **Getters**: `pseudo_hamiltonian(H)` and `control_law(H)`
+  - **No breaking changes**: Purely additive. Existing data types unchanged.
+- **Differentiation**: New `pseudo_variable_gradient` method added
+  - `pseudo_variable_gradient(backend, h̃, t, x, p, u, v) → ∂H̃/∂v`: partial derivative with control `u` held constant
+  - **No breaking changes**: Purely additive. Existing gradient methods unchanged.
+
 ## Non-breaking note (0.26.1-beta)
 
 - **Traits**: New `Feedback` trait family added for encoding how a control law closes the loop
