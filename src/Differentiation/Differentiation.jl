@@ -12,6 +12,9 @@ The module defines an abstract contract `AbstractADBackend` with the following m
 - `ad_backend(backend)` → the wrapped ADTypes backend (resolved in core)
 - `hamiltonian_gradient(backend, h, t, x, p, v)` → (∂H/∂x, ∂H/∂p)
 - `variable_gradient(backend, h, t, x, p, v)` → ∂H/∂v
+- `pseudo_hamiltonian_gradient(backend, h̃, t, x, p, u, v)` → (∂H̃/∂x, ∂H̃/∂p)
+- `pseudo_hamiltonian_control_gradient(backend, h̃, t, x, p, u, v)` → ∂H̃/∂u
+- `pseudo_variable_gradient(backend, h̃, t, x, p, u, v)` → ∂H̃/∂v (control u held constant)
 - `gradient(backend, f, x)` → ∇f (extension contract)
 - `derivative(backend, g, t)` → dg/dt (extension contract)
 - `differentiate(backend, f, ::Val{Slot}, active, consts...)` → partial derivative at slot

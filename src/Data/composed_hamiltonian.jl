@@ -61,11 +61,25 @@ end
 # Trait joins — NonAutonomous / NonFixed win
 # =============================================================================
 
+"""
+Join two time-dependence trait types: `Autonomous` only if both are `Autonomous`,
+otherwise `NonAutonomous`.
+
+See also: [`CTBase.Data.ComposedHamiltonian`](@ref),
+[`CTBase.Data.ComposedVectorField`](@ref).
+"""
 _join_td(::Type{Traits.Autonomous}, ::Type{Traits.Autonomous}) = Traits.Autonomous
 function _join_td(::Type{<:Traits.TimeDependence}, ::Type{<:Traits.TimeDependence})
     Traits.NonAutonomous
 end
 
+"""
+Join two variable-dependence trait types: `Fixed` only if both are `Fixed`,
+otherwise `NonFixed`.
+
+See also: [`CTBase.Data.ComposedHamiltonian`](@ref),
+[`CTBase.Data.ComposedVectorField`](@ref).
+"""
 _join_vd(::Type{Traits.Fixed}, ::Type{Traits.Fixed}) = Traits.Fixed
 function _join_vd(::Type{<:Traits.VariableDependence}, ::Type{<:Traits.VariableDependence})
     Traits.NonFixed

@@ -58,6 +58,10 @@ function generate_api_reference(src_dir::String)
                 joinpath("Data", "control_law.jl"),
                 joinpath("Data", "abstract_pseudo_hamiltonian.jl"),
                 joinpath("Data", "pseudo_hamiltonian.jl"),
+                joinpath("Data", "composed_hamiltonian.jl"),
+                joinpath("Data", "abstract_controlled_vector_field.jl"),
+                joinpath("Data", "controlled_vector_field.jl"),
+                joinpath("Data", "composed_vector_field.jl"),
             ),
         ),
         (

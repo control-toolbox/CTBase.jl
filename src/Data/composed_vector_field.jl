@@ -94,8 +94,13 @@ control_law(g::ComposedVectorField) = g.law
 # Core computation and call signatures
 # =============================================================================
 
-# Evaluate the control from the law — the uniform call arity depends on the feedback:
-# open-loop u(t, v) ignores the state, closed-loop u(t, x, v) uses it.
+"""
+Evaluate the control from a [`CTBase.Data.ControlLaw`](@ref) with the appropriate
+call arity for its feedback trait: `u(t, v)` for open-loop, `u(t, x, v)` for
+closed-loop. The state `x` is ignored by open-loop laws.
+
+See also: [`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.ControlLaw`](@ref).
+"""
 _law_control(law::ControlLaw{<:Function,Traits.OpenLoopFeedback}, t, x, v) = law(t, v)
 _law_control(law::ControlLaw{<:Function,Traits.ClosedLoopFeedback}, t, x, v) = law(t, x, v)
 

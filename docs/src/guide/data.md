@@ -23,10 +23,13 @@ using LinearAlgebra
 | [`Data.VectorField`](@ref CTBase.Data.VectorField) | ``X : \mathcal{X} \to \mathbb{R}^n`` | `X(x)` |
 | [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H(x, p)` |
 | [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃(x, p, u)` |
+| [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H(x, p)` |
 | [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) | ``\vec{H} : T^*\mathcal{X} \to \mathbb{R}^{2n}`` | `HVF(x, p)` |
+| [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) | ``f_c : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^n`` | `fc(x, u)` |
+| [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField) | ``g : \mathcal{X} \to \mathbb{R}^n`` | `g(x)` |
 | [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) | ``u : \cdots \to \mathcal{U}`` | `u()` / `u(x)` / `u(x, p)` |
 
-All five share the same trait axes — time dependence and variable dependence.
+All eight share the same trait axes — time dependence and variable dependence.
 `VectorField` and `HamiltonianVectorField` also carry a mutability trait;
 `ControlLaw` carries a feedback trait (see [Traits](traits.md)).
 
@@ -253,6 +256,59 @@ pseudo-Hamiltonians involve both state and costate.
 
 ---
 
+## ComposedHamiltonian
+
+A `ComposedHamiltonian` is obtained by eliminating the control from a
+[`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) with a
+dynamic closed-loop [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw):
+
+```math
+H(t, x, p, v) = \tilde{H}(t, x, p, u(t, x, p, v), v).
+```
+
+It subtypes [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), so it
+*is* a Hamiltonian and can be used anywhere one is expected.
+
+### Construction
+
+```@example data
+# Pseudo-Hamiltonian H̃(x, p, u) = p⋅x + u²  (scalar state/costate/control)
+ph = Data.PseudoHamiltonian((x, p, u) -> p * x + u^2)
+
+# Dynamic closed-loop law u(x, p) = -p
+law = Data.DynClosedLoop((x, p) -> -p)
+
+# Composed Hamiltonian: H(x, p) = H̃(x, p, -p) = p⋅x + p²
+H = Data.ComposedHamiltonian(ph, law)
+
+H
+```
+
+The composed time/variable dependences are the **join** of the two inputs —
+`NonAutonomous`/`NonFixed` win. A time-varying feedback on an autonomous
+pseudo-Hamiltonian correctly yields a `NonAutonomous` composed Hamiltonian.
+
+### Calling
+
+```@example data
+x0, p0 = 1.0, 0.5
+
+H(x0, p0)                    # natural call
+H(0.0, x0, p0, nothing)      # uniform call
+```
+
+### Getters
+
+```@example data
+Data.pseudo_hamiltonian(H)   # the underlying PseudoHamiltonian
+Data.control_law(H)          # the DynClosedLoop law
+```
+
+The constructor rejects non-`DynClosedLoop` laws (`OpenLoop`, `ClosedLoop`) with a
+`MethodError` — those are the state-space path (`ComposedVectorField`).
+
+---
+
 ## ControlLaw
 
 A `ControlLaw` wraps a function ``u(\cdots)`` that provides the control input for
@@ -318,6 +374,100 @@ while dynamic closed-loop control laws carry
 
 ---
 
+## ControlledVectorField
+
+A `ControlledVectorField` wraps a function ``f_c(t, x, u[, v])`` that returns the
+state derivative with an **explicit control argument** ``u``. It is the state-space
+analogue of [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian): where a
+pseudo-Hamiltonian carries the control alongside the costate, a controlled vector
+field carries the control alongside the state.
+
+Unlike [`Data.VectorField`](@ref CTBase.Data.VectorField), it is always
+**out-of-place** (no mutability trait) and carries
+[`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics).
+
+### Construction
+
+```@example data
+# Autonomous, fixed (default): fc(x, u)
+fc1 = Data.ControlledVectorField((x, u) -> -x + u)
+
+# Non-autonomous, fixed: fc(t, x, u)
+fc2 = Data.ControlledVectorField((t, x, u) -> t * x + u; is_autonomous=false)
+
+# Autonomous, non-fixed: fc(x, u, v)
+fc3 = Data.ControlledVectorField((x, u, v) -> v * x + u; is_variable=true)
+
+# Scalar state and control
+x0, u0 = 1.0, 2.0
+
+fc1
+```
+
+### Calling
+
+```@example data
+fc1(x0, u0)                       # natural call
+fc1(0.0, x0, u0, nothing)         # uniform call
+fc2(0.5, x0, u0)                  # non-autonomous natural call
+```
+
+---
+
+## ComposedVectorField
+
+A `ComposedVectorField` is obtained by eliminating the control from a
+[`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) with an
+**open-loop** or **closed-loop** [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw):
+
+```math
+g(t, x, v) = f_c(t, x, u(\cdots), v),
+```
+
+where the control is `u(t, v)` for an open-loop law and `u(t, x, v)` for a
+closed-loop law. It is the state-space analogue of
+[`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian).
+
+It subtypes [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField) with
+`OutOfPlace` mutability, so it *is* a vector field usable anywhere one is expected.
+
+### Construction
+
+```@example data
+# Controlled vector field fc(x, u) = -x + u  (scalar state/control)
+fc = Data.ControlledVectorField((x, u) -> -x + u)
+
+# Closed-loop law u(x) = -x
+law = Data.ClosedLoop(x -> -x)
+
+# Composed vector field: g(x) = fc(x, -x) = -2x
+g = Data.ComposedVectorField(fc, law)
+
+g
+```
+
+The composed time/variable dependences are the **join** of the two inputs —
+`NonAutonomous`/`NonFixed` win.
+
+### Calling
+
+```@example data
+g(3.0)                     # natural call: g(x) = -2x
+g(0.0, 3.0, nothing)       # uniform call (t, x, v)
+```
+
+### Getters
+
+```@example data
+Data.controlled_vector_field(g)   # the underlying ControlledVectorField
+Data.control_law(g)               # the ClosedLoop law
+```
+
+The constructor rejects `DynClosedLoop` laws with a `MethodError` — that is the
+Hamiltonian path (`ComposedHamiltonian`).
+
+---
+
 ## Querying traits
 
 Because the trait metadata lives in the type, it can be recovered from any data
@@ -371,13 +521,16 @@ The same positional form exists for [`Data.Hamiltonian`](@ref CTBase.Data.Hamilt
 [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField)
 (`HamiltonianVectorField(f, TD, VD, MD)`), and
 [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw)
-(`ControlLaw(f, FB, TD, VD)`).
+(`ControlLaw(f, FB, TD, VD)`),
+[`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField)
+(`ControlledVectorField(f, TD, VD)`).
 
 ---
 
 ## See also
 
-- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) — concrete data types.
-- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw) — abstract supertypes.
+- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField), [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) — concrete data types.
+- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlledVectorField`](@ref CTBase.Data.AbstractControlledVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw) — abstract supertypes.
+- [`Data.pseudo_hamiltonian`](@ref CTBase.Data.pseudo_hamiltonian), [`Data.control_law`](@ref CTBase.Data.control_law), [`Data.controlled_vector_field`](@ref CTBase.Data.controlled_vector_field) — getters for composed types.
 - [Traits](traits.md) — the three trait axes, the dynamics trait, and call-signature tables.
 - [Exceptions](exceptions.md) — `PreconditionError` and `IncorrectArgument`, raised by the constructors and the `variable_costate` path.

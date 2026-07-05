@@ -42,15 +42,16 @@ The concrete strategy stores a single option, `:ad_backend`, holding an
 `AutoForwardDiff()`). `ADTypes` is a hard dependency of CTBase, so the default is
 always available.
 
-The contract has nine methods.
+The contract has ten methods.
 [`Differentiation.ad_backend`](@ref CTBase.Differentiation.ad_backend) — the accessor
 returning the wrapped ADTypes backend — is resolved in core and always available; the
-eight differentiation primitives below live in an extension.
+nine differentiation primitives below live in an extension.
 
 !!! note "The differentiation methods live in an extension"
     The contract methods (`gradient`, `derivative`, `differentiate`,
     `pushforward`, `hamiltonian_gradient`, `variable_gradient`,
-    `pseudo_hamiltonian_gradient`, `pseudo_hamiltonian_control_gradient`) are implemented in
+    `pseudo_hamiltonian_gradient`, `pseudo_hamiltonian_control_gradient`,
+    `pseudo_variable_gradient`) are implemented in
     the `CTBaseDifferentiationInterface` **package extension**. They become
     available only once `DifferentiationInterface` *and* a concrete AD package
     (e.g. `ForwardDiff`) are loaded. Without the extension, every contract method
@@ -196,6 +197,23 @@ For a non-fixed pseudo-Hamiltonian, the `v` argument carries the variable:
 phv = Data.PseudoHamiltonian((x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1]; is_variable=true)
 Differentiation.pseudo_hamiltonian_control_gradient(backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0])
 ```
+
+## Pseudo-Hamiltonian variable gradient
+
+For a non-fixed pseudo-Hamiltonian,
+[`Differentiation.pseudo_variable_gradient`](@ref CTBase.Differentiation.pseudo_variable_gradient)
+returns `∂H̃/∂v` with the control `u` held **constant** — a partial derivative, not
+the total derivative `∂/∂v[H̃(t, x, p, u(t,x,p,v), v)]`:
+
+```@example diff
+# H̃(x, p, u, v) = ½(‖x‖² + ‖p‖²) + u² + v[1]  →  ∂H̃/∂v = [1.0]
+phv = Data.PseudoHamiltonian((x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1]; is_variable=true)
+Differentiation.pseudo_variable_gradient(backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0])
+```
+
+This differs from [`Differentiation.variable_gradient`](@ref CTBase.Differentiation.variable_gradient)
+whenever the feedback is not stationary (`∂H̃/∂u ≠ 0`), because the total derivative
+would also account for `∂H̃/∂u · ∂u/∂v`.
 
 ## The contract without the extension
 
