@@ -5,6 +5,37 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.2-beta] - 2026-07-05
+
+### ✨ New Features
+
+#### **ComposedHamiltonian**
+
+- **New `ComposedHamiltonian` data type** in `CTBase.Data` for Hamiltonians obtained by composing a `PseudoHamiltonian` with a `DynClosedLoop` control law:
+  - **Definition**: `H(t, x, p, v) = H̃(t, x, p, u(t, x, p, v), v)` — the control is eliminated by the feedback law
+  - **Subtypes `AbstractHamiltonian`**: can be used anywhere a Hamiltonian is expected; all trait accessors inherited
+  - **Trait joins**: composed time/variable dependences are the join of the two inputs (`NonAutonomous`/`NonFixed` win), computed at construction time
+  - **Functor**: natural call signatures (one per `(TD, VD)` combination) and uniform `(t, x, p, v)` call signature
+  - **Getters**: `pseudo_hamiltonian(H)` returns the underlying `PseudoHamiltonian`, `control_law(H)` returns the `DynClosedLoop` law
+  - **Constructor rejects non-`DynClosedLoop` laws**: `OpenLoop` and `ClosedLoop` raise `MethodError`
+
+#### **pseudo_variable_gradient**
+
+- **New AD contract method** in `CTBase.Differentiation` for the pseudo-Hamiltonian variable gradient:
+  - `pseudo_variable_gradient(backend, h̃, t, x, p, u, v) → ∂H̃/∂v`: partial derivative with control `u` held **constant**
+  - **Partial vs. total**: differs from the total derivative `∂/∂v[H̃(t, x, p, u(t,x,p,v), v)]` whenever the feedback is not stationary (`∂H̃/∂u ≠ 0`)
+  - **Extension implementation**: `CTBaseDifferentiationInterface` extension provides concrete implementation using `DifferentiationInterface.jl`
+  - **Fallback**: `NotImplemented` on `AbstractADBackend` without the extension
+
+### 🧪 Testing
+
+- Added tests for `ComposedHamiltonian` (composition value, natural/uniform calls, trait joins, getters, `Base.show`, type stability, constructor rejection of non-`DynClosedLoop` laws)
+- Added tests for `pseudo_variable_gradient` (`NotImplemented` stub, correctness via DI, control held constant, export check)
+
+### ✅ Compatibility
+
+- **No breaking changes**: purely additive. Existing code unaffected. See [BREAKINGS.md](BREAKINGS.md).
+
 ## [0.26.1-beta] - 2026-07-04
 
 ### ✨ New Features
