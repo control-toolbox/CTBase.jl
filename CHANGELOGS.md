@@ -5,6 +5,35 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.3-beta] - 2026-07-05
+
+### ✨ New Features
+
+#### **ControlledVectorField**
+
+- **New `ControlledVectorField` data type** in `CTBase.Data` for controlled vector fields with an explicit control argument:
+  - **Definition**: `fc(t, x, u[, v])` returns the state derivative — the state-space analogue of `PseudoHamiltonian`
+  - **Abstract supertype**: `AbstractControlledVectorField{TD, VD}` with time-dependence and variable-dependence traits
+  - **Always out-of-place**: no mutability trait (unlike `AbstractVectorField`); `dynamics_trait = StateDynamics`
+  - **Natural + uniform call signatures**: one natural arity per `(TD, VD)` combination and uniform `(t, x, u, v)`
+  - **Trait accessors**: `time_dependence`, `variable_dependence`, `dynamics_trait`
+
+#### **ComposedVectorField**
+
+- **New `ComposedVectorField` data type** in `CTBase.Data` for vector fields obtained by composing a `ControlledVectorField` with an `OpenLoop` or `ClosedLoop` control law:
+  - **Definition**: `g(t, x, v) = fc(t, x, u(...), v)` — the control is eliminated by the feedback law; state-space analogue of `ComposedHamiltonian`
+  - **Subtypes `AbstractVectorField` with `OutOfPlace`**: can be used anywhere a vector field is expected
+  - **Trait joins**: composed time/variable dependences are the join of the two inputs (`NonAutonomous`/`NonFixed` win), computed at construction time
+  - **Functor**: natural call signatures (one per `(TD, VD)` combination) and uniform `(t, x, v)` call signature
+  - **Getters**: `controlled_vector_field(g)` returns the underlying `ControlledVectorField`, `control_law(g)` returns the law
+  - **Constructor rejects `DynClosedLoop` laws**: that is the Hamiltonian path (`ComposedHamiltonian`)
+
+### 🧪 Testing
+
+- Added `test/suite/data/test_controlled_vector_field.jl`: construction, traits, all call arities, vector state/control, `Base.show`, type stability (`@inferred`)
+- Added `test/suite/data/test_composed_vector_field.jl`: composition values (OpenLoop/ClosedLoop), getters, `Base.show`, cross-trait joins, contract (`AbstractVectorField`/`OutOfPlace`/`StateDynamics`), type stability (`@inferred`), `DynClosedLoop` rejection
+- Full suite green: **4315/4315**
+
 ## [0.26.2-beta] - 2026-07-05
 
 ### ✨ New Features

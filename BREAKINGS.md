@@ -26,6 +26,17 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
 - `NotStored` / `NotStoredType` are unchanged and remain extraction-internal to
   `CTBase.Options` (the defining file was renamed `not_provided.jl` → `not_stored.jl`).
 
+## Non-breaking note (0.26.3-beta)
+
+- **Data**: New `ControlledVectorField` and `ComposedVectorField` data types added
+  - **ControlledVectorField**: controlled vector field `fc(t, x, u[, v])` with an explicit control argument; `AbstractControlledVectorField` supertype and `ControlledVectorField` concrete struct; state-space analogue of `PseudoHamiltonian`; always out-of-place (no mutability trait); `dynamics_trait = StateDynamics`
+  - **ComposedVectorField**: vector field `g(t, x, v) = fc(t, x, u(...), v)` composing a `ControlledVectorField` with an `OpenLoop` or `ClosedLoop` control law; subtypes `AbstractVectorField` with `OutOfPlace` mutability; state-space analogue of `ComposedHamiltonian`
+  - **Trait joins**: composed time/variable dependences are the join of the two inputs (`NonAutonomous`/`NonFixed` win), computed at construction time
+  - **Functor**: natural and uniform `(t, x, v)` call signatures
+  - **Getters**: `controlled_vector_field(g)` and `control_law(g)`
+  - **Constructor rejects `DynClosedLoop` laws**: that is the Hamiltonian path (`ComposedHamiltonian`)
+  - **No breaking changes**: Purely additive. Existing data types unchanged.
+
 ## Non-breaking note (0.26.2-beta)
 
 - **Data**: New `ComposedHamiltonian` data type added
