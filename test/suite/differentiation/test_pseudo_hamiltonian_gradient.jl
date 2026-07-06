@@ -73,11 +73,15 @@ function test_pseudo_hamiltonian_gradient()
             v = 7.0
 
             try
-                Differentiation.pseudo_hamiltonian_control_gradient(backend, h̃, t, x, p, u, v)
+                Differentiation.pseudo_hamiltonian_control_gradient(
+                    backend, h̃, t, x, p, u, v
+                )
                 Test.@test false
             catch err
                 Test.@test err isa Exceptions.NotImplemented
-                Test.@test occursin("pseudo_hamiltonian_control_gradient", err.required_method)
+                Test.@test occursin(
+                    "pseudo_hamiltonian_control_gradient", err.required_method
+                )
             end
         end
 
@@ -86,7 +90,9 @@ function test_pseudo_hamiltonian_gradient()
         # ==============================================================================
 
         Test.@testset "Unit: pseudo_hamiltonian_gradient via DI (Autonomous, Fixed)" begin
-            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            backend = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
             h̃ = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + sum(u .^ 2))
             t = 0.0
             x = [1.0, 2.0]
@@ -104,10 +110,11 @@ function test_pseudo_hamiltonian_gradient()
         end
 
         Test.@testset "Unit: pseudo_hamiltonian_gradient via DI (NonAutonomous, Fixed)" begin
-            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            backend = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
             h̃ = Data.PseudoHamiltonian(
-                (t, x, p, u) -> t * sum(x .* p) + sum(u .^ 2);
-                is_autonomous=false,
+                (t, x, p, u) -> t * sum(x .* p) + sum(u .^ 2); is_autonomous=false
             )
             t = 2.0
             x = [1.0, 2.0]
@@ -125,10 +132,11 @@ function test_pseudo_hamiltonian_gradient()
         end
 
         Test.@testset "Unit: pseudo_hamiltonian_gradient via DI (Autonomous, NonFixed)" begin
-            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            backend = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
             h̃ = Data.PseudoHamiltonian(
-                (x, p, u, v) -> sum(x .* p) + sum(u .^ 2) + v^2;
-                is_variable=true,
+                (x, p, u, v) -> sum(x .* p) + sum(u .^ 2) + v^2; is_variable=true
             )
             t = 0.0
             x = [1.0, 2.0]
@@ -150,7 +158,9 @@ function test_pseudo_hamiltonian_gradient()
         # ==============================================================================
 
         Test.@testset "Unit: pseudo_hamiltonian_control_gradient via DI (Autonomous, Fixed)" begin
-            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            backend = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
             h̃ = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + sum(u .^ 2))
             t = 0.0
             x = [1.0, 2.0]
@@ -166,10 +176,11 @@ function test_pseudo_hamiltonian_gradient()
         end
 
         Test.@testset "Unit: pseudo_hamiltonian_control_gradient via DI (NonAutonomous, Fixed)" begin
-            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            backend = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
             h̃ = Data.PseudoHamiltonian(
-                (t, x, p, u) -> t * sum(x .* p) + sum(u .^ 2);
-                is_autonomous=false,
+                (t, x, p, u) -> t * sum(x .* p) + sum(u .^ 2); is_autonomous=false
             )
             t = 2.0
             x = [1.0, 2.0]
@@ -185,7 +196,9 @@ function test_pseudo_hamiltonian_gradient()
         end
 
         Test.@testset "Unit: pseudo_hamiltonian_control_gradient via DI (scalar u)" begin
-            backend = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
+            backend = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
             h̃ = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
             t = 0.0
             x = [1.0, 2.0]
@@ -216,4 +229,6 @@ end
 
 end # module
 
-test_pseudo_hamiltonian_gradient() = TestPseudoHamiltonianGradient.test_pseudo_hamiltonian_gradient()
+function test_pseudo_hamiltonian_gradient()
+    return TestPseudoHamiltonianGradient.test_pseudo_hamiltonian_gradient()
+end

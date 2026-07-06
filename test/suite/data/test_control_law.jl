@@ -79,21 +79,27 @@ function test_control_law()
             Test.@test Traits.variable_dependence(cl9) == Traits.Fixed
 
             # DynClosedLoop, NonAutonomous, Fixed
-            cl10 = DynClosedLoop((t, x, p) -> t + x + p; is_autonomous=false, is_variable=false)
+            cl10 = DynClosedLoop(
+                (t, x, p) -> t + x + p; is_autonomous=false, is_variable=false
+            )
             Test.@test cl10 isa Data.ControlLaw
             Test.@test Traits.feedback(cl10) == Traits.DynClosedLoopFeedback
             Test.@test Traits.time_dependence(cl10) == Traits.NonAutonomous
             Test.@test Traits.variable_dependence(cl10) == Traits.Fixed
 
             # DynClosedLoop, Autonomous, NonFixed
-            cl11 = DynClosedLoop((x, p, v) -> x + p + v; is_autonomous=true, is_variable=true)
+            cl11 = DynClosedLoop(
+                (x, p, v) -> x + p + v; is_autonomous=true, is_variable=true
+            )
             Test.@test cl11 isa Data.ControlLaw
             Test.@test Traits.feedback(cl11) == Traits.DynClosedLoopFeedback
             Test.@test Traits.time_dependence(cl11) == Traits.Autonomous
             Test.@test Traits.variable_dependence(cl11) == Traits.NonFixed
 
             # DynClosedLoop, NonAutonomous, NonFixed
-            cl12 = DynClosedLoop((t, x, p, v) -> t + x + p + v; is_autonomous=false, is_variable=true)
+            cl12 = DynClosedLoop(
+                (t, x, p, v) -> t + x + p + v; is_autonomous=false, is_variable=true
+            )
             Test.@test cl12 isa Data.ControlLaw
             Test.@test Traits.feedback(cl12) == Traits.DynClosedLoopFeedback
             Test.@test Traits.time_dependence(cl12) == Traits.NonAutonomous
@@ -128,7 +134,9 @@ function test_control_law()
             cl7 = ClosedLoop((x, v) -> x .+ v; is_variable=true)
             Test.@test cl7([1.0, 2.0], 3.0) == [4.0, 5.0]
 
-            cl8 = ClosedLoop((t, x, v) -> t .+ x .+ v; is_autonomous=false, is_variable=true)
+            cl8 = ClosedLoop(
+                (t, x, v) -> t .+ x .+ v; is_autonomous=false, is_variable=true
+            )
             Test.@test cl8(1.0, [2.0, 3.0], 4.0) == [7.0, 8.0]
 
             # DynClosedLoop
@@ -141,7 +149,9 @@ function test_control_law()
             cl11 = DynClosedLoop((x, p, v) -> x .+ p .+ v; is_variable=true)
             Test.@test cl11([1.0, 2.0], [3.0, 4.0], 5.0) == [9.0, 11.0]
 
-            cl12 = DynClosedLoop((t, x, p, v) -> t .+ x .+ p .+ v; is_autonomous=false, is_variable=true)
+            cl12 = DynClosedLoop(
+                (t, x, p, v) -> t .+ x .+ p .+ v; is_autonomous=false, is_variable=true
+            )
             Test.@test cl12(1.0, [2.0, 3.0], [4.0, 5.0], 6.0) == [13.0, 15.0]
         end
 
@@ -173,7 +183,9 @@ function test_control_law()
             cl7 = ClosedLoop((x, v) -> x .+ v; is_variable=true)
             Test.@test cl7(0.0, [1.0, 2.0], 4.0) == [5.0, 6.0]
 
-            cl8 = ClosedLoop((t, x, v) -> t .+ x .+ v; is_autonomous=false, is_variable=true)
+            cl8 = ClosedLoop(
+                (t, x, v) -> t .+ x .+ v; is_autonomous=false, is_variable=true
+            )
             Test.@test cl8(1.0, [2.0, 3.0], 5.0) == [8.0, 9.0]
 
             # DynClosedLoop — uniform (t, x, p, v)
@@ -186,7 +198,9 @@ function test_control_law()
             cl11 = DynClosedLoop((x, p, v) -> x .+ p .+ v; is_variable=true)
             Test.@test cl11(0.0, [1.0, 2.0], [3.0, 4.0], 5.0) == [9.0, 11.0]
 
-            cl12 = DynClosedLoop((t, x, p, v) -> t .+ x .+ p .+ v; is_autonomous=false, is_variable=true)
+            cl12 = DynClosedLoop(
+                (t, x, p, v) -> t .+ x .+ p .+ v; is_autonomous=false, is_variable=true
+            )
             Test.@test cl12(1.0, [2.0, 3.0], [4.0, 5.0], 6.0) == [13.0, 15.0]
         end
 
@@ -301,7 +315,8 @@ function test_control_law()
         # ====================================================================
 
         Test.@testset "Exports" begin
-            for sym in (:AbstractControlLaw, :ControlLaw, :OpenLoop, :ClosedLoop, :DynClosedLoop)
+            for sym in
+                (:AbstractControlLaw, :ControlLaw, :OpenLoop, :ClosedLoop, :DynClosedLoop)
                 Test.@test isdefined(Data, sym)
             end
         end

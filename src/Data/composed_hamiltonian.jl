@@ -70,7 +70,7 @@ See also: [`CTBase.Data.ComposedHamiltonian`](@ref),
 """
 _join_td(::Type{Traits.Autonomous}, ::Type{Traits.Autonomous}) = Traits.Autonomous
 function _join_td(::Type{<:Traits.TimeDependence}, ::Type{<:Traits.TimeDependence})
-    Traits.NonAutonomous
+    return Traits.NonAutonomous
 end
 
 """
@@ -82,7 +82,7 @@ See also: [`CTBase.Data.ComposedHamiltonian`](@ref),
 """
 _join_vd(::Type{Traits.Fixed}, ::Type{Traits.Fixed}) = Traits.Fixed
 function _join_vd(::Type{<:Traits.VariableDependence}, ::Type{<:Traits.VariableDependence})
-    Traits.NonFixed
+    return Traits.NonFixed
 end
 
 # =============================================================================
@@ -148,13 +148,13 @@ end
 
 # Natural call signatures — one per composed (TD, VD) combination
 function (h::ComposedHamiltonian{Traits.Autonomous,Traits.Fixed})(x, p)
-    _composed_H(h, 0.0, x, p, nothing)
+    return _composed_H(h, 0.0, x, p, nothing)
 end
 function (h::ComposedHamiltonian{Traits.NonAutonomous,Traits.Fixed})(t, x, p)
-    _composed_H(h, t, x, p, nothing)
+    return _composed_H(h, t, x, p, nothing)
 end
 function (h::ComposedHamiltonian{Traits.Autonomous,Traits.NonFixed})(x, p, v)
-    _composed_H(h, 0.0, x, p, v)
+    return _composed_H(h, 0.0, x, p, v)
 end
 function (h::ComposedHamiltonian{Traits.NonAutonomous,Traits.NonFixed})(t, x, p, v)
     return _composed_H(h, t, x, p, v)
@@ -163,13 +163,13 @@ end
 # Uniform (t, x, p, v) call — used by systems / integrators.
 # (NonAutonomous, NonFixed) is already covered by the natural signature above.
 function (h::ComposedHamiltonian{Traits.Autonomous,Traits.Fixed})(t, x, p, v)
-    _composed_H(h, t, x, p, v)
+    return _composed_H(h, t, x, p, v)
 end
 function (h::ComposedHamiltonian{Traits.NonAutonomous,Traits.Fixed})(t, x, p, v)
-    _composed_H(h, t, x, p, v)
+    return _composed_H(h, t, x, p, v)
 end
 function (h::ComposedHamiltonian{Traits.Autonomous,Traits.NonFixed})(t, x, p, v)
-    _composed_H(h, t, x, p, v)
+    return _composed_H(h, t, x, p, v)
 end
 
 # =============================================================================

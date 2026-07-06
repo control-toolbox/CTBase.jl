@@ -306,9 +306,8 @@ function Differentiation.differentiate(
     consts::Vararg{Any,N},
 ) where {Slot,N}
     di = Differentiation.ad_backend(backend)
-    f_active(active_) = f(
-        ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...
-    )
+    f_active(active_) =
+        f(ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
     return _derivator(typeof(active))(f_active, di, active)
 end
 
@@ -332,9 +331,8 @@ function Differentiation.pushforward(
     consts::Vararg{Any,N},
 ) where {Slot,N}
     di = Differentiation.ad_backend(backend)
-    f_slot(x_) = f(
-        ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...
-    )
+    f_slot(x_) =
+        f(ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
     return only(DI.pushforward(f_slot, di, x, (dx,)))
 end
 

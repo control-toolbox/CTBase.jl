@@ -120,13 +120,13 @@ end
 
 # Natural call signatures (OutOfPlace) — one per composed (TD, VD)
 function (g::ComposedVectorField{Traits.Autonomous,Traits.Fixed})(x)
-    _composed_vf(g, 0.0, x, nothing)
+    return _composed_vf(g, 0.0, x, nothing)
 end
 function (g::ComposedVectorField{Traits.NonAutonomous,Traits.Fixed})(t, x)
-    _composed_vf(g, t, x, nothing)
+    return _composed_vf(g, t, x, nothing)
 end
 function (g::ComposedVectorField{Traits.Autonomous,Traits.NonFixed})(x, v)
-    _composed_vf(g, 0.0, x, v)
+    return _composed_vf(g, 0.0, x, v)
 end
 function (g::ComposedVectorField{Traits.NonAutonomous,Traits.NonFixed})(t, x, v)
     return _composed_vf(g, t, x, v)
@@ -136,10 +136,10 @@ end
 # (NonAutonomous, NonFixed) is already covered by the natural signature above.
 (g::ComposedVectorField{Traits.Autonomous,Traits.Fixed})(t, x, v) = _composed_vf(g, t, x, v)
 function (g::ComposedVectorField{Traits.NonAutonomous,Traits.Fixed})(t, x, v)
-    _composed_vf(g, t, x, v)
+    return _composed_vf(g, t, x, v)
 end
 function (g::ComposedVectorField{Traits.Autonomous,Traits.NonFixed})(t, x, v)
-    _composed_vf(g, t, x, v)
+    return _composed_vf(g, t, x, v)
 end
 
 # =============================================================================

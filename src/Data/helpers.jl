@@ -301,7 +301,9 @@ See also: [`CTBase.Data._uniform_sig_cl`](@ref).
 """
 function _natural_sig_cl(
     ::Type{FB}, ::Type{TD}, ::Type{VD}
-) where {FB<:Traits.AbstractFeedback,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
+) where {
+    FB<:Traits.AbstractFeedback,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+}
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
     append!(args, _natural_args_cl(FB))
