@@ -74,10 +74,7 @@ See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref),
 [`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref).
 """
 function ControlLaw(
-    f,
-    ::Type{FB};
-    is_autonomous::Bool=__is_autonomous(),
-    is_variable::Bool=__is_variable(),
+    f, ::Type{FB}; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
 ) where {FB<:Traits.AbstractFeedback}
     TD = is_autonomous ? Traits.Autonomous : Traits.NonAutonomous
     VD = is_variable ? Traits.NonFixed : Traits.Fixed
@@ -105,14 +102,9 @@ Typed constructor for `ControlLaw` with explicit trait types.
 See also: [`CTBase.Data.ControlLaw`](@ref).
 """
 function ControlLaw(
-    f,
-    ::Type{FB},
-    ::Type{TD},
-    ::Type{VD},
+    f, ::Type{FB}, ::Type{TD}, ::Type{VD}
 ) where {
-    FB<:Traits.AbstractFeedback,
-    TD<:Traits.TimeDependence,
-    VD<:Traits.VariableDependence,
+    FB<:Traits.AbstractFeedback,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
 }
     return ControlLaw{typeof(f),FB,TD,VD}(f)
 end
@@ -152,8 +144,12 @@ ControlLaw: open-loop, non-autonomous, variable
 See also: [`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
 [`CTBase.Data.ControlLaw`](@ref).
 """
-function OpenLoop(f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable())
-    return ControlLaw(f, Traits.OpenLoopFeedback; is_autonomous=is_autonomous, is_variable=is_variable)
+function OpenLoop(
+    f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
+)
+    return ControlLaw(
+        f, Traits.OpenLoopFeedback; is_autonomous=is_autonomous, is_variable=is_variable
+    )
 end
 
 """
@@ -182,8 +178,12 @@ ControlLaw: closed-loop, autonomous, fixed (no variable)
 See also: [`CTBase.Data.OpenLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
 [`CTBase.Data.ControlLaw`](@ref).
 """
-function ClosedLoop(f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable())
-    return ControlLaw(f, Traits.ClosedLoopFeedback; is_autonomous=is_autonomous, is_variable=is_variable)
+function ClosedLoop(
+    f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
+)
+    return ControlLaw(
+        f, Traits.ClosedLoopFeedback; is_autonomous=is_autonomous, is_variable=is_variable
+    )
 end
 
 """
@@ -212,18 +212,45 @@ ControlLaw: dyn-closed-loop, autonomous, fixed (no variable)
 See also: [`CTBase.Data.OpenLoop`](@ref), [`CTBase.Data.ClosedLoop`](@ref),
 [`CTBase.Data.ControlLaw`](@ref).
 """
-function DynClosedLoop(f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable())
-    return ControlLaw(f, Traits.DynClosedLoopFeedback; is_autonomous=is_autonomous, is_variable=is_variable)
+function DynClosedLoop(
+    f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
+)
+    return ControlLaw(
+        f,
+        Traits.DynClosedLoopFeedback;
+        is_autonomous=is_autonomous,
+        is_variable=is_variable,
+    )
 end
 
 # =============================================================================
 # Natural call signatures — OpenLoop
 # =============================================================================
 
-(cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.Fixed})() = cl.f()
-(cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.NonAutonomous,Traits.Fixed})(t) = cl.f(t)
-(cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.NonFixed})(v) = cl.f(v)
-function (cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.NonAutonomous,Traits.NonFixed})(t, v)
+function (cl::ControlLaw{
+    <:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.Fixed
+})()
+    return cl.f()
+end
+function (cl::ControlLaw{
+    <:Function,Traits.OpenLoopFeedback,Traits.NonAutonomous,Traits.Fixed
+})(
+    t
+)
+    return cl.f(t)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.NonFixed
+})(
+    v
+)
+    return cl.f(v)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.OpenLoopFeedback,Traits.NonAutonomous,Traits.NonFixed
+})(
+    t, v
+)
     return cl.f(t, v)
 end
 
@@ -231,10 +258,32 @@ end
 # Natural call signatures — ClosedLoop
 # =============================================================================
 
-(cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.Fixed})(x) = cl.f(x)
-(cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed})(t, x) = cl.f(t, x)
-(cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed})(x, v) = cl.f(x, v)
-function (cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.NonAutonomous,Traits.NonFixed})(t, x, v)
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.Fixed
+})(
+    x
+)
+    return cl.f(x)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed
+})(
+    t, x
+)
+    return cl.f(t, x)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed
+})(
+    x, v
+)
+    return cl.f(x, v)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.NonAutonomous,Traits.NonFixed
+})(
+    t, x, v
+)
     return cl.f(t, x, v)
 end
 
@@ -242,12 +291,32 @@ end
 # Natural call signatures — DynClosedLoop
 # =============================================================================
 
-(cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.Fixed})(x, p) = cl.f(x, p)
-(cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed})(t, x, p) = cl.f(t, x, p)
-function (cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed})(x, p, v)
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.Fixed
+})(
+    x, p
+)
+    return cl.f(x, p)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed
+})(
+    t, x, p
+)
+    return cl.f(t, x, p)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed
+})(
+    x, p, v
+)
     return cl.f(x, p, v)
 end
-function (cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.NonAutonomous,Traits.NonFixed})(t, x, p, v)
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.NonAutonomous,Traits.NonFixed
+})(
+    t, x, p, v
+)
     return cl.f(t, x, p, v)
 end
 
@@ -260,21 +329,73 @@ end
 # =============================================================================
 
 # OpenLoop — uniform (t, v), no state (open-loop by definition)
-(cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.Fixed})(t, v) = cl.f()
-(cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.NonAutonomous,Traits.Fixed})(t, v) = cl.f(t)
-(cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.NonFixed})(t, v) = cl.f(v)
+function (cl::ControlLaw{<:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.Fixed})(
+    t, v
+)
+    return cl.f()
+end
+function (cl::ControlLaw{
+    <:Function,Traits.OpenLoopFeedback,Traits.NonAutonomous,Traits.Fixed
+})(
+    t, v
+)
+    return cl.f(t)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.OpenLoopFeedback,Traits.Autonomous,Traits.NonFixed
+})(
+    t, v
+)
+    return cl.f(v)
+end
 # NonAutonomous, NonFixed — already covered by natural 2-arg
 
 # ClosedLoop — uniform (t, x, v)
-(cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.Fixed})(t, x, v) = cl.f(x)
-(cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed})(t, x, v) = cl.f(t, x)
-(cl::ControlLaw{<:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed})(t, x, v) = cl.f(x, v)
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.Fixed
+})(
+    t, x, v
+)
+    return cl.f(x)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed
+})(
+    t, x, v
+)
+    return cl.f(t, x)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.ClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed
+})(
+    t, x, v
+)
+    return cl.f(x, v)
+end
 # NonAutonomous, NonFixed — already covered by natural 3-arg
 
 # DynClosedLoop — uniform (t, x, p, v)
-(cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.Fixed})(t, x, p, v) = cl.f(x, p)
-(cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed})(t, x, p, v) = cl.f(t, x, p)
-(cl::ControlLaw{<:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed})(t, x, p, v) = cl.f(x, p, v)
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.Fixed
+})(
+    t, x, p, v
+)
+    return cl.f(x, p)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.NonAutonomous,Traits.Fixed
+})(
+    t, x, p, v
+)
+    return cl.f(t, x, p)
+end
+function (cl::ControlLaw{
+    <:Function,Traits.DynClosedLoopFeedback,Traits.Autonomous,Traits.NonFixed
+})(
+    t, x, p, v
+)
+    return cl.f(x, p, v)
+end
 # NonAutonomous, NonFixed — already covered by natural 4-arg
 
 # =============================================================================
@@ -321,6 +442,8 @@ This method is called automatically when displaying a control law in the Julia R
 
 See also: [`CTBase.Data.ControlLaw`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", cl::ControlLaw{F,FB,TD,VD}) where {F,FB,TD,VD}
+function Base.show(
+    io::IO, ::MIME"text/plain", cl::ControlLaw{F,FB,TD,VD}
+) where {F,FB,TD,VD}
     return show(io, cl)
 end

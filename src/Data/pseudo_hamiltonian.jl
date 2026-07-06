@@ -120,7 +120,9 @@ end
 function (h̃::PseudoHamiltonian{<:Function,Traits.Autonomous,Traits.NonFixed})(x, p, u, v)
     return h̃.f(x, p, u, v)
 end
-function (h̃::PseudoHamiltonian{<:Function,Traits.NonAutonomous,Traits.NonFixed})(t, x, p, u, v)
+function (h̃::PseudoHamiltonian{<:Function,Traits.NonAutonomous,Traits.NonFixed})(
+    t, x, p, u, v
+)
     return h̃.f(t, x, p, u, v)
 end
 
@@ -130,7 +132,9 @@ end
 # (NonAutonomous, NonFixed) is already covered by the natural signature above.
 # =============================================================================
 
-(h̃::PseudoHamiltonian{<:Function,Traits.Autonomous,Traits.Fixed})(t, x, p, u, v) = h̃.f(x, p, u)
+function (h̃::PseudoHamiltonian{<:Function,Traits.Autonomous,Traits.Fixed})(t, x, p, u, v)
+    return h̃.f(x, p, u)
+end
 function (h̃::PseudoHamiltonian{<:Function,Traits.NonAutonomous,Traits.Fixed})(t, x, p, u, v)
     return h̃.f(t, x, p, u)
 end
@@ -183,6 +187,8 @@ This method is called automatically when displaying a pseudo-Hamiltonian in the 
 
 See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", h̃::PseudoHamiltonian{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::MIME"text/plain", h̃::PseudoHamiltonian{F,TD,VD}
+) where {F,TD,VD}
     return show(io, h̃)
 end

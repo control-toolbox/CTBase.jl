@@ -111,7 +111,7 @@ end
 # =============================================================================
 
 function (fc::ControlledVectorField{<:Function,Traits.Autonomous,Traits.Fixed})(t, x, u, v)
-    fc.f(x, u)
+    return fc.f(x, u)
 end
 function (fc::ControlledVectorField{<:Function,Traits.NonAutonomous,Traits.Fixed})(
     t, x, u, v
