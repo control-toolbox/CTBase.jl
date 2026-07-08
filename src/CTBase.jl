@@ -60,4 +60,8 @@ using .DevTools
 include(joinpath(@__DIR__, "Interpolation", "Interpolation.jl"))
 using .Interpolation
 
+# Plotting module - generic, domain-free plotting engine (IR + backend contract)
+include(joinpath(@__DIR__, "Plotting", "Plotting.jl"))
+using .Plotting
+
 end
