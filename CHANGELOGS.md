@@ -5,6 +5,35 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0-beta] - 2026-07-09
+
+### ✨ New Features
+
+#### **Plotting** — generic, domain-free plotting engine
+
+- **New `CTBase.Plotting` module**: a backend-agnostic plotting engine shared across the
+  Control Toolbox (used by CTFlows and, later, CTModels). It manipulates an intermediate
+  representation (IR) — a weighted tree of titled axes carrying time series and
+  decorations — and knows nothing about states, controls, costates or optimal control.
+  - **IR (pure data)**: `Series`, `HLine`/`VLine`, `Axes`, and a weighted layout tree
+    `Leaf`/`HBox`/`VBox`, wrapped in a `Figure`. Deterministic leaf traversal (`leaves`).
+  - **Case-layer building blocks**: `Panel` (a titled group of components carrying its own
+    time grid and optional per-component style), the level-2 combinators `Stacked` /
+    `Paired` / `Grid`, and the `lower` step turning panels into the IR.
+  - **Backend contract**: `AbstractPlottingBackend` / `PlotsBackend` with `render` /
+    `render!`. The types live in `src`; a missing backend errors with a structured
+    `ExtensionError`.
+  - **Neutral style vocabulary** (`color`, `linewidth`, `linestyle`, `alpha`, `seriestype`,
+    `z_order`) plus a `backend_kwargs` escape hatch, so the IR stays portable.
+- **New `CTBasePlots` weak-dependency extension** (loaded with `Plots`): the Plots.jl
+  renderer — weighted layout, per-series style with attribute filtering, decorations,
+  size heuristics and margins/fonts.
+
+### 🧪 Testing
+
+- Added `test/suite/plotting/`: `test_ir`, `test_combinators`, `test_lowering`,
+  `test_heuristics` (backend-free) and `test_contract` (Plots backend). 98 tests.
+
 ## [0.26.3-beta] - 2026-07-05
 
 ### ✨ New Features
