@@ -14,6 +14,7 @@ no runtime cost.
 - **variable_dependence.jl**: Variable-dependence traits and the opt-in contract
 - **control_dependence.jl**: Control-dependence traits and the opt-in contract
 - **feedback.jl**: Feedback traits (`OpenLoopFeedback`, `ClosedLoopFeedback`, `DynClosedLoopFeedback`)
+- **constraint_kind.jl**: Constraint-kind traits (`StateConstraintKind`, `ControlConstraintKind`, `MixedConstraintKind`)
 - **mutability.jl**: Mutability traits and the opt-in contract
 - **mode.jl**: Integration-mode traits (`EndPointMode`, `TrajectoryMode`)
 - **dynamics.jl**: Dynamics-type traits (`StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics`)
@@ -29,6 +30,7 @@ no runtime cost.
 - **Variable dependence**: `VariableDependence`, `Fixed`, `NonFixed`
 - **Control dependence**: `ControlDependence`, `ControlFree`, `WithControl`
 - **Feedback**: `AbstractFeedback`, `OpenLoopFeedback`, `ClosedLoopFeedback`, `DynClosedLoopFeedback`
+- **Constraint kind**: `AbstractConstraintKind`, `StateConstraintKind`, `ControlConstraintKind`, `MixedConstraintKind`
 - **Mutability**: `InPlace`, `OutOfPlace`
 - **Integration mode**: `EndPointMode`, `TrajectoryMode`
 - **Dynamics**: `StateDynamics`, `HamiltonianDynamics`, `AugmentedHamiltonianDynamics`
@@ -86,6 +88,7 @@ include(joinpath(@__DIR__, "time_dependence.jl"))
 include(joinpath(@__DIR__, "variable_dependence.jl"))
 include(joinpath(@__DIR__, "control_dependence.jl"))
 include(joinpath(@__DIR__, "feedback.jl"))
+include(joinpath(@__DIR__, "constraint_kind.jl"))
 
 # ==============================================================================
 # Module exports
@@ -105,8 +108,11 @@ export SupportsVariableCostate, NoVariableCostate
 export VariableDependence, Fixed, NonFixed
 export ControlDependence, ControlFree, WithControl
 export AbstractFeedback, OpenLoopFeedback, ClosedLoopFeedback, DynClosedLoopFeedback
-export ad_trait, variable_costate_trait, dynamics_trait, feedback
+export AbstractConstraintKind,
+    StateConstraintKind, ControlConstraintKind, MixedConstraintKind
+export ad_trait, variable_costate_trait, dynamics_trait, feedback, constraint_kind
 export is_open_loop, is_closed_loop, is_dyn_closed_loop
+export is_state_constraint, is_control_constraint, is_mixed_constraint
 export is_inplace, is_outofplace
 export is_autonomous, is_nonautonomous, is_variable, is_nonvariable, has_variable
 export is_control_free, has_control
