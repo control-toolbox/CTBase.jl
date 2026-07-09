@@ -95,11 +95,25 @@ function test_contract()
             Test.@test length(plt.subplots) == n            # no new subplots
         end
 
-        Test.@testset "user kwargs filtered to series attributes (R2)" begin
+        Test.@testset "user kwargs: series vs subplot attributes" begin
             fig = _figure()
-            # `size` and `bins` are not series attributes: dropped, no error, still valid
+            # a mix of series (`color`) and non-series (`size`, `bins`) attributes must
+            # render without error
             Test.@test Plotting.render(fig; color=3, size=(900, 600), bins=:auto) isa
                 Plots.Plot
+        end
+
+        Test.@testset "user subplot attributes reach the cells (legend override)" begin
+            # a :split figure has the legend off and empty series labels by default; a
+            # user `legend`/`label` must override that on every cell.
+            fig = _figure()
+            plt = Plotting.render(fig; label="sol", legend=:bottomright, grid=false)
+            for sp in plt.subplots
+                Test.@test sp[:legend_position] == :bottomright
+            end
+            # the data series carries the user label (decorations keep an empty label)
+            Test.@test any(s -> s[:label] == "sol", plt.subplots[1].series_list)
+            Test.@test any(s -> s[:label] == "", plt.subplots[1].series_list)
         end
     end
     return nothing

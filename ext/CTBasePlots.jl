@@ -61,11 +61,23 @@ _z_rank(z::Symbol) =
         1
     end
 
-# Keep only user kwargs that Plots accepts as series attributes (R2).
-function _keep_series_attributes(; kwargs...)
+# Split user kwargs into the ones Plots accepts as *series* attributes (applied to
+# every series, e.g. `color`, `linewidth`, `label`) and the rest, treated as
+# subplot/plot attributes (applied to every cell, e.g. `legend`, `grid`,
+# `framestyle`). The old monolith forwarded both; keeping only series attributes
+# silently dropped `legend`/`grid`/… (R2 gap).
+function _partition_user(; kwargs...)
     ok = Plots.attributes(:Series)
-    return NamedTuple(kw for kw in kwargs if kw[1] in ok)
+    series = NamedTuple(kw for kw in kwargs if kw[1] in ok)
+    other = NamedTuple(kw for kw in kwargs if !(kw[1] in ok))
+    return series, other
 end
+
+# Subplot metadata keys the renderer sets itself; a user override of these (except
+# `legend` / `ylims`, handled explicitly) is ignored to keep the computed layout.
+const _RESERVED_AXES_KEYS = (
+    :subplot, :title, :xlabel, :ylabel, :legend, :ylims, :titlefont, :guidefontsize
+)
 
 # --- ylims resolution ---------------------------------------------------------
 # `nothing` -> don't touch; tuple -> set; :auto -> auto; :auto_guarded -> widen a
@@ -104,28 +116,46 @@ function _draw_decoration!(p, d::VLine, sp::Int)
     return p
 end
 
-# Draw series (in z-order) + decorations of `ax` into subplot `sp`. When
-# `overlay` is true, only series/decorations are added (axis metadata untouched).
-function _draw_axes!(p, ax::Axes, sp::Int; overlay::Bool=false, user...)
+# Draw series (in z-order) + decorations of `ax` into subplot `sp`. `series_user` are
+# forwarded to every series; `axes_user` are the user's subplot attributes (e.g.
+# `legend`, `grid`) applied to the cell, with `legend`/`ylims` overriding the IR
+# defaults. When `overlay` is true, only series/decorations are added (axis metadata
+# untouched).
+function _draw_axes!(
+    p,
+    ax::Axes,
+    sp::Int;
+    overlay::Bool=false,
+    series_user=NamedTuple(),
+    axes_user=NamedTuple(),
+)
     order = sortperm(collect(1:length(ax.series)); by=i -> _z_rank(_z(ax.series[i].style)))
     for i in order
-        _draw_series!(p, ax.series[i], sp; user...)
+        _draw_series!(p, ax.series[i], sp; series_user...)
     end
     for d in ax.decorations
         _draw_decoration!(p, d, sp)
     end
     overlay && return p
-    yl = _resolve_ylims(ax)
+    # user `legend` / `ylims` override the IR defaults; other user subplot attributes
+    # (grid, framestyle, …) are applied as-is; reserved metadata keys are protected.
+    legend_val = get(axes_user, :legend, ax.legend ? :best : false)
+    yl = haskey(axes_user, :ylims) ? axes_user[:ylims] : _resolve_ylims(ax)
+    extra = NamedTuple(kw for kw in pairs(axes_user) if !(kw[1] in _RESERVED_AXES_KEYS))
     attrs = (;
         subplot=sp,
         title=ax.title,
         xlabel=ax.xlabel,
         ylabel=ax.ylabel,
-        legend=(ax.legend ? :best : false),
+        legend=legend_val,
         titlefont=_TITLE_FONT,
         guidefontsize=_LABEL_FONT_SIZE,
     )
-    yl === nothing ? Plots.plot!(p; attrs...) : Plots.plot!(p; attrs..., ylims=yl)
+    if yl === nothing
+        Plots.plot!(p; attrs..., extra...)
+    else
+        Plots.plot!(p; attrs..., ylims=yl, extra...)
+    end
     return p
 end
 
@@ -133,23 +163,31 @@ end
 
 _normalized(w) = collect(Float64, w) ./ sum(w)
 
-function _render_node(node::Leaf; user...)
+function _render_node(node::Leaf; series_user=NamedTuple(), axes_user=NamedTuple())
     p = Plots.plot()
-    _draw_axes!(p, node.axes, 1; user...)
+    _draw_axes!(p, node.axes, 1; series_user=series_user, axes_user=axes_user)
     return p
 end
 # A single-child box carries no geometry of its own: render the child directly
 # (Plots.grid rejects a lone height/width of 1.0, and a 1×1 wrapper is useless).
-function _render_node(node::VBox; user...)
-    length(node.children) == 1 && return _render_node(node.children[1]; user...)
-    subs = [_render_node(c; user...) for c in node.children]
+function _render_node(node::VBox; series_user=NamedTuple(), axes_user=NamedTuple())
+    if length(node.children) == 1
+        return _render_node(node.children[1]; series_user=series_user, axes_user=axes_user)
+    end
+    subs = [
+        _render_node(c; series_user=series_user, axes_user=axes_user) for c in node.children
+    ]
     return Plots.plot(
         subs...; layout=Plots.grid(length(subs), 1; heights=_normalized(node.weights))
     )
 end
-function _render_node(node::HBox; user...)
-    length(node.children) == 1 && return _render_node(node.children[1]; user...)
-    subs = [_render_node(c; user...) for c in node.children]
+function _render_node(node::HBox; series_user=NamedTuple(), axes_user=NamedTuple())
+    if length(node.children) == 1
+        return _render_node(node.children[1]; series_user=series_user, axes_user=axes_user)
+    end
+    subs = [
+        _render_node(c; series_user=series_user, axes_user=axes_user) for c in node.children
+    ]
     return Plots.plot(
         subs...; layout=Plots.grid(1, length(subs); widths=_normalized(node.weights))
     )
@@ -158,12 +196,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Render `fig` into a new `Plots.Plot` (Plots backend). User `kwargs` are filtered
-to Plots series attributes and forwarded to every series.
+Render `fig` into a new `Plots.Plot` (Plots backend). Series attributes among
+`kwargs` (`color`, `linewidth`, `label`, …) are forwarded to every series; the rest
+(`legend`, `grid`, …) are applied to every cell.
 """
 function render(::PlotsBackend, fig::Figure; kwargs...)
-    user = _keep_series_attributes(; kwargs...)
-    p = _render_node(fig.root; user...)
+    series_user, axes_user = _partition_user(; kwargs...)
+    p = _render_node(fig.root; series_user=series_user, axes_user=axes_user)
     sz = default_size(fig)
     root_attrs = (; size=sz, left_margin=_LEFT_MARGIN, bottom_margin=_BOTTOM_MARGIN)
     if fig.title === nothing
@@ -181,9 +220,11 @@ Overlay `fig` onto an existing Plots plot `target`, targeting existing subplots
 by the deterministic leaf order. Series/decorations are added; axes untouched.
 """
 function render!(::PlotsBackend, target, fig::Figure; kwargs...)
-    user = _keep_series_attributes(; kwargs...)
+    series_user, axes_user = _partition_user(; kwargs...)
     for (i, leaf) in enumerate(leaves(fig.root))
-        _draw_axes!(target, leaf.axes, i; overlay=true, user...)
+        _draw_axes!(
+            target, leaf.axes, i; overlay=true, series_user=series_user, axes_user=axes_user
+        )
     end
     return target
 end

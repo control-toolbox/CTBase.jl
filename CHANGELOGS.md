@@ -5,6 +5,18 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.2-beta] - 2026-07-09
+
+### 🐛 Fixed
+
+- **`CTBasePlots`: user subplot/plot attributes now reach the cells.** `render` /
+  `render!` split user `kwargs` into series attributes (`color`, `linewidth`, `label`,
+  … — applied to every series) and the rest (`legend`, `grid`, `framestyle`, … —
+  applied to every cell). Previously only series attributes were kept, so `legend`,
+  `grid` and similar were silently dropped. A user `legend` (and `ylims`) now overrides
+  the IR default, so e.g. `plot(sol; label="sol", legend=:bottomright)` shows the label
+  on a `:split` figure (whose legend is off by default).
+
 ## [0.27.1-beta] - 2026-07-09
 
 ### 🔧 Changed
