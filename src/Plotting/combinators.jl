@@ -4,17 +4,25 @@
 # These are pure, typed tree builders over already-lowered layout NODES (see
 # lowering.jl for Panel -> node). They add no geometry beyond weights.
 #
-# Weight policy `:auto` (decision D4): a child's weight is its number of drawable
-# cells (`n_leaves`). Stacking N panels of k components each thus gives every cell
-# the same height (proportional to the number of lines); explicit weights override.
+# Weight policy `:auto` (decision D4) is geometry-aware: a child's weight is its
+# extent along the combinator's axis — its number of rows for `Stacked` (vertical),
+# its number of columns for `Paired` (horizontal). Stacking panels of different
+# heights thus keeps every cell the same height; pairing columns keeps every column
+# the same width. This is `grid_shape(child)[dim]`, which equals `n_leaves` for flat
+# columns but stays correct when a paired block is nested inside a stack (e.g. the
+# CTModels `Stacked(Paired(state, costate), control, …)` gets row weights `n : l : …`
+# rather than leaf-count `2n : l : …`). Explicit weights always override.
 #
 # Docstrings deferred (Handbook convention).
 # =============================================================================
 
-# Resolve `:auto` weights to a concrete Float64 vector; otherwise pass through
-# (the HBox/VBox constructor validates length and positivity).
-function _resolve_weights(children::AbstractVector{<:AbstractLayoutNode}, weights)
-    weights === :auto && return Float64[n_leaves(c) for c in children]
+# Resolve `:auto` weights to a concrete Float64 vector along axis `dim` (1 = rows,
+# 2 = columns); otherwise pass through (the HBox/VBox constructor validates length
+# and positivity).
+function _resolve_weights(
+    children::AbstractVector{<:AbstractLayoutNode}, weights, dim::Integer
+)
+    weights === :auto && return Float64[grid_shape(c)[dim] for c in children]
     return collect(Float64, weights)
 end
 
@@ -22,23 +30,25 @@ end
 $(TYPEDSIGNATURES)
 
 Stack `children` vertically into a [`VBox`](@ref). With `weights=:auto` (default,
-decision D4) each child's weight is its number of cells, so stacking panels of
-different heights keeps every cell the same height; pass an explicit weight vector
-to override.
+decision D4) each child's weight is its number of **rows** (`grid_shape(child)[1]`),
+so stacking blocks of different heights keeps every cell the same height — including
+when a child is itself a paired block; pass an explicit weight vector to override.
 """
 function Stacked(children::AbstractVector{<:AbstractLayoutNode}; weights=:auto)
-    return VBox(children, _resolve_weights(children, weights))
+    return VBox(children, _resolve_weights(children, weights, 1))
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Place `children` side by side into an [`HBox`](@ref) (e.g. state | costate). Same
-`:auto` weight policy as [`Stacked`](@ref). A two-argument form
-`Paired(left, right)` is provided for the common pair.
+Place `children` side by side into an [`HBox`](@ref) (e.g. state | costate). With
+`weights=:auto` each child's weight is its number of **columns**
+(`grid_shape(child)[2]`), so equal-width columns stay equal; pass an explicit weight
+vector to override. A two-argument form `Paired(left, right)` is provided for the
+common pair.
 """
 function Paired(children::AbstractVector{<:AbstractLayoutNode}; weights=:auto)
-    return HBox(children, _resolve_weights(children, weights))
+    return HBox(children, _resolve_weights(children, weights, 2))
 end
 function Paired(left::AbstractLayoutNode, right::AbstractLayoutNode; weights=:auto)
     return Paired(AbstractLayoutNode[left, right]; weights=weights)

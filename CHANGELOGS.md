@@ -5,6 +5,18 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.1-beta] - 2026-07-09
+
+### 🔧 Changed
+
+- **`Plotting`: geometry-aware `:auto` weights.** `Stacked` / `Paired` now resolve
+  `weights=:auto` from the child's extent along the combinator axis — number of **rows**
+  for `Stacked`, number of **columns** for `Paired` (`grid_shape(child)[dim]`) — instead
+  of its leaf count. This is unchanged for flat columns (rows == leaf count) but keeps
+  cell heights uniform when a paired block is nested inside a stack, e.g.
+  `Stacked(Paired(state, costate), control, …)` now gets row weights `n : l : …` rather
+  than `2n : l : …`. Needed by the CTModels case layer (Phase 3); CTFlows is unaffected.
+
 ## [0.27.0-beta] - 2026-07-09
 
 ### ✨ New Features
