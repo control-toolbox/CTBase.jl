@@ -194,10 +194,10 @@ end
 
 # Equal-weight convenience constructors.
 function HBox(children::AbstractVector{<:AbstractLayoutNode})
-    HBox(children, ones(length(children)))
+    return HBox(children, ones(length(children)))
 end
 function VBox(children::AbstractVector{<:AbstractLayoutNode})
-    VBox(children, ones(length(children)))
+    return VBox(children, ones(length(children)))
 end
 
 function _check_box(children, weights, who::String)
@@ -258,7 +258,7 @@ existing cells by index when overlaying with [`render!`](@ref).
 """
 leaves(leaf::Leaf) = Leaf[leaf]
 function leaves(node::Union{HBox,VBox})
-    reduce(vcat, (leaves(c) for c in node.children); init=Leaf[])
+    return reduce(vcat, (leaves(c) for c in node.children); init=Leaf[])
 end
 
 # Number of drawable cells in a node/figure.
