@@ -38,7 +38,7 @@ Render `fig` into a backend figure. Fallback (no backend loaded) errors with an
 `ExtensionError`; a backend extension overrides this on its concrete type.
 """
 function render(::AbstractPlottingBackend, ::Figure; kwargs...)
-    throw(Exceptions.ExtensionError(:Plots))
+    return throw(Exceptions.ExtensionError(:Plots))
 end
 
 """
@@ -48,7 +48,7 @@ Overlay `fig` onto an existing backend `target`, targeting existing cells by the
 deterministic leaf order (see [`leaves`](@ref)).
 """
 function render!(::AbstractPlottingBackend, target, ::Figure; kwargs...)
-    throw(Exceptions.ExtensionError(:Plots))
+    return throw(Exceptions.ExtensionError(:Plots))
 end
 
 # Default-backend conveniences.

@@ -41,7 +41,7 @@ function Paired(children::AbstractVector{<:AbstractLayoutNode}; weights=:auto)
     return HBox(children, _resolve_weights(children, weights))
 end
 function Paired(left::AbstractLayoutNode, right::AbstractLayoutNode; weights=:auto)
-    Paired(AbstractLayoutNode[left, right]; weights=weights)
+    return Paired(AbstractLayoutNode[left, right]; weights=weights)
 end
 
 """
