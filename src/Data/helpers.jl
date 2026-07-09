@@ -394,3 +394,136 @@ See also: [`CTBase.Data._natural_sig_ph`](@ref).
 function _uniform_sig_ph()
     return "h̃(t, x, p, u, v)"
 end
+
+# =============================================================================
+# Constraint-kind label helpers
+# =============================================================================
+
+"""
+    _kind_label(::Type{Traits.StateConstraintKind}) -> String
+    _kind_label(::Type{Traits.ControlConstraintKind}) -> String
+    _kind_label(::Type{Traits.MixedConstraintKind}) -> String
+
+Return a user-friendly label for constraint-kind traits.
+
+# Returns
+- `String`: "state", "control", or "mixed".
+
+See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._vd_label`](@ref).
+"""
+function _kind_label(::Type{Traits.StateConstraintKind})
+    return "state"
+end
+function _kind_label(::Type{Traits.ControlConstraintKind})
+    return "control"
+end
+function _kind_label(::Type{Traits.MixedConstraintKind})
+    return "mixed"
+end
+
+# =============================================================================
+# PathConstraint-specific signature helpers
+# =============================================================================
+
+"""
+    _natural_sig_pc(::Type{K}, ::Type{TD}, ::Type{VD}) where {K, TD, VD} -> String
+
+Return the natural call signature for a `PathConstraint` based on its traits.
+
+The arguments depend on the constraint kind:
+- `StateConstraintKind`: `g([t, ]x[, v])`
+- `ControlConstraintKind`: `g([t, ]u[, v])`
+- `MixedConstraintKind`: `g([t, ]x, u[, v])`
+
+See also: [`CTBase.Data._uniform_sig_pc`](@ref).
+"""
+function _natural_sig_pc(
+    ::Type{K}, ::Type{TD}, ::Type{VD}
+) where {
+    K<:Traits.AbstractConstraintKind,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+}
+    args = String[]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    append!(args, _natural_args_pc(K))
+    VD === Traits.NonFixed && push!(args, "v")
+    return "g(" * join(args, ", ") * ")"
+end
+
+"""
+    _natural_args_pc(::Type{K}) where {K} -> Vector{String}
+
+Return the kind-dependent argument names (excluding `t` and `v`) for the natural
+call signature of a `PathConstraint`.
+
+- `StateConstraintKind`: `["x"]`.
+- `ControlConstraintKind`: `["u"]`.
+- `MixedConstraintKind`: `["x", "u"]`.
+
+See also: [`CTBase.Data._natural_sig_pc`](@ref).
+"""
+function _natural_args_pc(::Type{Traits.StateConstraintKind})
+    return ["x"]
+end
+
+function _natural_args_pc(::Type{Traits.ControlConstraintKind})
+    return ["u"]
+end
+
+function _natural_args_pc(::Type{Traits.MixedConstraintKind})
+    return ["x", "u"]
+end
+
+"""
+    _uniform_sig_pc() -> String
+
+Return the uniform call signature for a `PathConstraint`.
+
+The uniform signature always includes all arguments `(t, x, u, v)` regardless of traits.
+
+See also: [`CTBase.Data._natural_sig_pc`](@ref).
+"""
+function _uniform_sig_pc()
+    return "g(t, x, u, v)"
+end
+
+# =============================================================================
+# Multiplier-specific signature helpers
+# =============================================================================
+
+"""
+    _natural_sig_mult(::Type{TD}, ::Type{VD}) where {TD, VD} -> String
+
+Return the natural call signature for a `Multiplier` based on its traits.
+
+# Arguments
+- `TD`: Time dependence type (`Autonomous` or `NonAutonomous`)
+- `VD`: Variable dependence type (`Fixed` or `NonFixed`)
+
+# Returns
+- `String`: Natural call signature (e.g., "μ(x, p)", "μ(t, x, p)")
+
+See also: [`CTBase.Data._uniform_sig_mult`](@ref).
+"""
+function _natural_sig_mult(::Type{TD}, ::Type{VD}) where {TD,VD}
+    args = String[]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    push!(args, "x")
+    push!(args, "p")
+    VD === Traits.NonFixed && push!(args, "v")
+    return "μ(" * join(args, ", ") * ")"
+end
+
+"""
+    _uniform_sig_mult() -> String
+
+Return the uniform call signature for a `Multiplier`.
+
+The uniform signature always includes all arguments `(t, x, p, v)` regardless of traits.
+
+See also: [`CTBase.Data._natural_sig_mult`](@ref).
+"""
+function _uniform_sig_mult()
+    return "μ(t, x, p, v)"
+end

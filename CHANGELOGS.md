@@ -5,6 +5,36 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.3-beta] - 2026-07-09
+
+### ✨ New Features
+
+#### **Traits** — constraint-kind trait family
+
+- **New `AbstractConstraintKind` trait family**: distinguishes path constraints by which
+  primal variables they depend on. Three concrete traits: `StateConstraintKind` (state only),
+  `ControlConstraintKind` (control only), `MixedConstraintKind` (state and control).
+  Type-parameter-only contract (like `AbstractFeedback`). Added `constraint_kind()` accessor
+  and predicates `is_state_constraint()`, `is_control_constraint()`, `is_mixed_constraint()`.
+
+#### **Data** — path constraint and multiplier carriers
+
+- **New `AbstractPathConstraint{K,TD,VD}` and `PathConstraint{F,K,TD,VD}` types**: generic
+  carriers for path-constraint functions with constraint-kind, time-dependence, and
+  variable-dependence traits. Supports natural call signatures per kind (e.g. `g(x)` for
+  state, `g(u)` for control, `g(x,u)` for mixed) and uniform signature `g(t,x,u,v)`.
+  User-facing constructors: `StateConstraint(g)`, `ControlConstraint(g)`, `MixedConstraint(g)`.
+- **New `AbstractMultiplier{TD,VD}` and `Multiplier{F,TD,VD}` types**: carriers for
+  Lagrange multiplier functions with time and variable dependence. Call signature `μ(t,x,p,v)`
+  (uniform) or natural forms `μ(x,p)`, `μ(t,x,p)`, etc. Semantically parallel to `Hamiltonian`.
+- **Display helpers**: `_kind_label`, `_natural_sig_pc` / `_natural_args_pc` / `_uniform_sig_pc`,
+  `_natural_sig_mult` / `_uniform_sig_mult` for `show` support.
+
+### 🔧 Compatibility
+
+- No breaking changes. New types and traits expand the API surface for path constraints
+  without affecting existing code.
+
 ## [0.27.2-beta] - 2026-07-09
 
 ### 🐛 Fixed

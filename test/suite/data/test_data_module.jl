@@ -39,6 +39,8 @@ const EXPORTED_ABSTRACT_TYPES = (
     :AbstractHamiltonian,
     :AbstractControlLaw,
     :AbstractPseudoHamiltonian,
+    :AbstractPathConstraint,
+    :AbstractMultiplier,
 )
 
 const EXPORTED_CONCRETE_TYPES = (
@@ -50,6 +52,11 @@ const EXPORTED_CONCRETE_TYPES = (
     :ClosedLoop,
     :DynClosedLoop,
     :PseudoHamiltonian,
+    :PathConstraint,
+    :StateConstraint,
+    :ControlConstraint,
+    :MixedConstraint,
+    :Multiplier,
 )
 
 const PRIVATE_SYMBOLS = (
@@ -74,6 +81,12 @@ const PRIVATE_SYMBOLS = (
     :_uniform_sig_cl,
     :_natural_sig_ph,
     :_uniform_sig_ph,
+    :_kind_label,
+    :_natural_sig_pc,
+    :_natural_args_pc,
+    :_uniform_sig_pc,
+    :_natural_sig_mult,
+    :_uniform_sig_mult,
 )
 
 # ============================================================================

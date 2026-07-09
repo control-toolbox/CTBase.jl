@@ -25,6 +25,10 @@ include(joinpath(@__DIR__, "abstract_hamiltonian.jl"))
 include(joinpath(@__DIR__, "hamiltonian.jl"))
 include(joinpath(@__DIR__, "abstract_control_law.jl"))
 include(joinpath(@__DIR__, "control_law.jl"))
+include(joinpath(@__DIR__, "abstract_path_constraint.jl"))
+include(joinpath(@__DIR__, "path_constraint.jl"))
+include(joinpath(@__DIR__, "abstract_multiplier.jl"))
+include(joinpath(@__DIR__, "multiplier.jl"))
 include(joinpath(@__DIR__, "abstract_pseudo_hamiltonian.jl"))
 include(joinpath(@__DIR__, "pseudo_hamiltonian.jl"))
 include(joinpath(@__DIR__, "composed_hamiltonian.jl"))
@@ -49,6 +53,13 @@ export ControlLaw
 export OpenLoop
 export ClosedLoop
 export DynClosedLoop
+export AbstractPathConstraint
+export PathConstraint
+export StateConstraint
+export ControlConstraint
+export MixedConstraint
+export AbstractMultiplier
+export Multiplier
 export AbstractPseudoHamiltonian
 export PseudoHamiltonian
 export ComposedHamiltonian
