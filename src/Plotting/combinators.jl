@@ -12,13 +12,15 @@
 # columns but stays correct when a paired block is nested inside a stack (e.g. the
 # CTModels `Stacked(Paired(state, costate), control, …)` gets row weights `n : l : …`
 # rather than leaf-count `2n : l : …`). Explicit weights always override.
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
-# Resolve `:auto` weights to a concrete Float64 vector along axis `dim` (1 = rows,
-# 2 = columns); otherwise pass through (the HBox/VBox constructor validates length
-# and positivity).
+"""
+$(TYPEDSIGNATURES)
+
+Resolve `:auto` weights to a concrete `Float64` vector along axis `dim` (1 = rows,
+2 = columns); otherwise pass through (the `HBox`/`VBox` constructor validates length
+and positivity).
+"""
 function _resolve_weights(
     children::AbstractVector{<:AbstractLayoutNode}, weights, dim::Integer
 )

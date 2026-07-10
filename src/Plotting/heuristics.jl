@@ -4,12 +4,23 @@
 # Generalises the CTFlows engine sizes (`__size_plot`, `__size_group`): width
 # grows with the number of columns, height with the number of stacked rows. Same
 # per-row height and width formula so :split and :group stay visually consistent.
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
+"""
+Default per-row height in pixels for the figure-size heuristic.
+"""
 const _ROW_HEIGHT = 180
+
+"""
+Vertical padding in pixels added to the total figure height.
+"""
 const _HEIGHT_PAD = 60
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the figure width in pixels for `cols` columns (minimum 600).
+"""
 _width(cols::Integer) = max(600, 340 * cols)
 
 """

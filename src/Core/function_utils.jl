@@ -1,10 +1,36 @@
 """
 $(TYPEDSIGNATURES)
 
+Promote the element type of the numeric arguments (scalars and arrays) so the
+allocated buffer can hold e.g. `ForwardDiff.Dual` values during differentiation.
+
+Falls back to `Union{}` for non-numeric arguments (e.g. `nothing`), which is neutral
+under `promote_type`. Combined with the `T` floor in [`to_out_of_place`](@ref),
+non-numeric-only calls keep `T`.
+
+See also: [`CTBase.Core.to_out_of_place`](@ref).
+"""
+_promote_arg_eltype() = Union{}
+function _promote_arg_eltype(x::Number, rest...)
+    return promote_type(typeof(x), _promote_arg_eltype(rest...))
+end
+function _promote_arg_eltype(x::AbstractArray, rest...)
+    return promote_type(eltype(x), _promote_arg_eltype(rest...))
+end
+_promote_arg_eltype(_, rest...) = _promote_arg_eltype(rest...)
+
+"""
+$(TYPEDSIGNATURES)
+
 Convert an in-place function `f!` to an out-of-place function `f`.
 
 The resulting function `f` returns a vector of type `T` and length `n` by first allocating
 memory and then calling `f!` to fill it.
+
+The buffer element type is widened from the call arguments (via
+[`_promote_arg_eltype`](@ref)) so that `ForwardDiff.Dual` values are accommodated
+during automatic differentiation. The `T` keyword acts as a floor, so plain
+`Float64`/`Int` calls keep their previous behaviour.
 
 # Arguments
 - `f!`: An in-place function of the form `f!(result, args...)`.
@@ -22,19 +48,6 @@ julia> f = to_out_of_place(f!, 2)
 julia> f(π/4)  # returns approximately [0.707, 0.707]
 ```
 """
-# Promote the element type of the numeric arguments (scalars and arrays), so the
-# allocated buffer can hold e.g. ForwardDiff.Dual values during differentiation. Falls
-# back to `Union{}` for non-numeric arguments (e.g. `nothing`), which is neutral under
-# `promote_type`. Combined with the `T` floor below, non-numeric-only calls keep `T`.
-_promote_arg_eltype() = Union{}
-function _promote_arg_eltype(x::Number, rest...)
-    return promote_type(typeof(x), _promote_arg_eltype(rest...))
-end
-function _promote_arg_eltype(x::AbstractArray, rest...)
-    return promote_type(eltype(x), _promote_arg_eltype(rest...))
-end
-_promote_arg_eltype(_, rest...) = _promote_arg_eltype(rest...)
-
 function to_out_of_place(f!, n; T=Float64)
     function f(args...; kwargs...)
         # Widen the floor type `T` with the arguments' element types so the buffer can

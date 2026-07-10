@@ -8,11 +8,23 @@
 # Applies the time transform, the ylims guard, per-component style, and attaches
 # decorations (shared vertical lines to every cell; per-component horizontal
 # lines to their cell in :split, all merged into the single cell in :group).
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
-# Compute the plotted time axis from the `time` option.
+"""
+$(TYPEDSIGNATURES)
+
+Compute the plotted time axis from the `time` option.
+
+# Arguments
+- `times`: the original time grid.
+- `time::Symbol`: `:default` (real time), `:normalize` or `:normalise` (rescale to `[0, 1]`).
+
+# Returns
+- `Vector{Float64}`: the transformed time axis.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if `time` is not one of the accepted symbols.
+"""
 function _time_axis(times, time::Symbol)
     if time === :default
         return collect(float.(times))
@@ -31,16 +43,30 @@ function _time_axis(times, time::Symbol)
     end
 end
 
-# y-range guard for a (near-)constant series: widen so the axis does not collapse.
-# Returns a concrete `(lo, hi)` when constant, `:auto` otherwise.
+"""
+$(TYPEDSIGNATURES)
+
+Y-range guard for a (near-)constant series: widen the limits so the axis does not
+collapse to a line.
+
+# Returns
+- `(lo, hi)::Tuple{Float64,Float64}` when the series is (near-)constant, `:auto` otherwise.
+"""
 function _ylims_guard(y::AbstractArray)
     isempty(y) && return :auto
     lo, hi = extrema(y)
     return (hi - lo) ≤ 1e-8 ? (lo - 1.0, hi + 1.0) : :auto
 end
 
-# Decorations for component `i` in :split: its own horizontal lines then the
-# shared vertical lines.
+"""
+$(TYPEDSIGNATURES)
+
+Collect decorations for component `i` in `:split` layout: its own horizontal lines
+(`hlines[i]` if present) followed by the shared vertical lines.
+
+# Returns
+- `Vector{Decoration}`: the merged decoration list for the cell.
+"""
 function _cell_decorations(hlines, vlines, i::Integer)
     own = (i ≤ length(hlines)) ? hlines[i] : HLine[]
     return Decoration[own..., vlines...]
@@ -87,6 +113,13 @@ function lower(
     end
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Lower a [`Panel`](@ref) into a `:split` layout node: one [`Leaf`](@ref) per component,
+with ylabel = component name, xlabel on the bottom cell only, title on the top cell
+only, and no legend.
+"""
 function _lower_split(p::Panel, x, time_name, vlines, hlines)
     k = n_components(p)
     cells = AbstractLayoutNode[]
@@ -106,6 +139,12 @@ function _lower_split(p::Panel, x, time_name, vlines, hlines)
     return length(cells) == 1 ? cells[1] : VBox(cells, ones(k))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Lower a [`Panel`](@ref) into a `:group` layout node: a single [`Leaf`](@ref) with all
+components overlaid and a legend to distinguish them.
+"""
 function _lower_group(p::Panel, x, time_name, vlines, hlines)
     k = n_components(p)
     series = [

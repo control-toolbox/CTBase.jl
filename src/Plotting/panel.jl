@@ -6,8 +6,6 @@
 # Axes/Leaf nodes. Compared to the original CTFlows engine a Panel now carries:
 #   - its OWN x grid          (multi-grid support: distinct grids per group),
 #   - an optional per-component style vector (finer styling than one shared style).
-#
-# Docstrings deferred (Handbook convention). Comments document structure only.
 # =============================================================================
 
 """
@@ -70,27 +68,56 @@ function Panel(
     )
 end
 
-# Number of components (columns) of a panel.
+"""
+$(TYPEDSIGNATURES)
+
+Return the number of components (columns) of a [`Panel`](@ref).
+"""
 n_components(p::Panel) = size(p.data, 2)
 
-# The style to apply to component `i`: its own if a per-component vector is set,
-# otherwise the shared style.
+"""
+$(TYPEDSIGNATURES)
+
+Return the style to apply to component `i` of a [`Panel`](@ref): its own per-component
+style if a `styles` vector is set, otherwise the shared `style`.
+"""
 component_style(p::Panel, i::Integer) = isempty(p.styles) ? p.style : p.styles[i]
 
 # =============================================================================
 # Replaceable defaults (double-underscore = semantic default a caller may override)
 # =============================================================================
 
-# Default overall layout: :split (one subplot per component). Alt: :group.
+"""
+$(TYPEDSIGNATURES)
+
+Default overall layout for [`lower`](@ref): `:split` (one subplot per component).
+Alternative: `:group`.
+"""
 __layout() = :split
 
-# Default time-axis handling: :default (real time). Alt: :normalize / :normalise.
+"""
+$(TYPEDSIGNATURES)
+
+Default time-axis handling for [`lower`](@ref): `:default` (real time).
+Alternatives: `:normalize` / `:normalise`.
+"""
 __time() = :default
 
-# Default series style: no override.
+"""
+$(TYPEDSIGNATURES)
+
+Default series style: an empty `NamedTuple` (no override).
+"""
 __style() = NamedTuple()
 
 # Semantic font sizes (points). Kept backend-free here; the Plots renderer turns
 # them into `Plots.font`. Consistent across the engine.
+"""
+Default title font size in points, used by the Plots renderer.
+"""
 const _TITLE_FONT_SIZE = 10
+
+"""
+Default axis-label font size in points, used by the Plots renderer.
+"""
 const _LABEL_FONT_SIZE = 10

@@ -6,8 +6,6 @@
 # from a weak-dependency extension (function ownership pattern). With no backend
 # loaded, the fallback throws a structured `ExtensionError` telling the user what
 # to load. See ext/CTBasePlots.jl for the Plots methods.
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
 """
@@ -28,7 +26,12 @@ extension, loaded automatically once `Plots` is available.
 """
 struct PlotsBackend <: AbstractPlottingBackend end
 
-# Backend used when a caller does not pass one explicitly.
+"""
+$(TYPEDSIGNATURES)
+
+Return the default rendering backend used when a caller does not pass one explicitly.
+Currently returns [`PlotsBackend`](@ref).
+"""
 default_backend() = PlotsBackend()
 
 """

@@ -7,8 +7,6 @@ module CTBasePlots
 # backend-agnostic IR (weighted tree of Axes) into a laid-out, styled Plots.Plot.
 # This is the ONLY place that depends on Plots. It is a generalised port of the
 # CTFlows PlotEngine: weighted layout, per-series style, decorations, x per cell.
-#
-# Docstrings deferred (Handbook convention).
 # =============================================================================
 
 using Plots: Plots

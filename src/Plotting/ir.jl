@@ -1,8 +1,5 @@
 # =============================================================================
-# ir.jl — the intermediate representation (pure data, no backend dependency)
-#
-# Docstrings are intentionally deferred (Handbook convention: docstrings last).
-# Brief comments here document structure and invariants only.
+# ir.jl — the intermediate representation (pure data, no backend dependency).
 # =============================================================================
 
 # --- series and decorations --------------------------------------------------
@@ -200,6 +197,16 @@ function VBox(children::AbstractVector{<:AbstractLayoutNode})
     return VBox(children, ones(length(children)))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Validate that a `HBox`/`VBox` has at least one child, one weight per child, and
+strictly positive weights.
+
+# Throws
+- `CTBase.Exceptions.IncorrectArgument`: if `children` is empty, if the lengths
+  mismatch, or if any weight is non-positive.
+"""
 function _check_box(children, weights, who::String)
     isempty(children) && throw(
         Exceptions.IncorrectArgument(
@@ -261,6 +268,16 @@ function leaves(node::Union{HBox,VBox})
     return reduce(vcat, (leaves(c) for c in node.children); init=Leaf[])
 end
 
-# Number of drawable cells in a node/figure.
+"""
+$(TYPEDSIGNATURES)
+
+Return the number of drawable cells (leaves) in a layout node.
+"""
 n_leaves(node::AbstractLayoutNode) = length(leaves(node))
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the number of drawable cells (leaves) in a [`Figure`](@ref).
+"""
 n_leaves(fig::Figure) = n_leaves(fig.root)
