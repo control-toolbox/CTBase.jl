@@ -281,6 +281,7 @@ function generate_api_reference(src_dir::String)
         ),
     ]
         extmod = Base.get_extension(CTBase, sym)
+        isnothing(extmod) && @warn "Extension $sym is not loaded"
         isnothing(extmod) || push!(internals_modules, extmod => files)
     end
 

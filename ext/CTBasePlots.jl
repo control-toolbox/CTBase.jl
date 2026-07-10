@@ -31,14 +31,43 @@ import CTBase.Plotting:
     render!
 
 # --- fonts / margins (semantic sizes come from src; Plots objects made here) --
+"""
+    _TITLE_FONT
+
+Title font object built from the semantic size [`Plotting._TITLE_FONT_SIZE`](@ref).
+"""
 const _TITLE_FONT = Plots.font(Plotting._TITLE_FONT_SIZE, Plots.default(:fontfamily))
+
+"""
+    _LABEL_FONT_SIZE
+
+Label font size, forwarded from [`Plotting._LABEL_FONT_SIZE`](@ref).
+"""
 const _LABEL_FONT_SIZE = Plotting._LABEL_FONT_SIZE
+
+"""
+    _LEFT_MARGIN
+
+Left margin (5 mm) applied to every rendered figure.
+"""
 const _LEFT_MARGIN = 5 * Plots.Measures.mm
+
+"""
+    _BOTTOM_MARGIN
+
+Bottom margin (5 mm) applied to every rendered figure.
+"""
 const _BOTTOM_MARGIN = 5 * Plots.Measures.mm
 
 # --- style translation : neutral vocabulary -> Plots attributes ---------------
-# Neutral keys pass straight through (Plots understands them). `z_order` drives
-# draw order (Plots has no z attribute), `backend_kwargs` is the escape hatch.
+"""
+$(TYPEDSIGNATURES)
+
+Translate a neutral style `NamedTuple` into Plots-compatible attributes.
+
+`z_order` is dropped (Plots has no z attribute; it drives draw order instead) and
+`backend_kwargs` is merged in as the escape hatch for raw Plots options.
+"""
 function _translate_style(style::NamedTuple)
     bk = get(style, :backend_kwargs, NamedTuple())
     kept = NamedTuple()
@@ -49,7 +78,19 @@ function _translate_style(style::NamedTuple)
     return merge(kept, bk)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Extract the `z_order` from a style `NamedTuple`, defaulting to `:normal`.
+"""
 _z(style::NamedTuple) = get(style, :z_order, :normal)
+
+"""
+$(TYPEDSIGNATURES)
+
+Map a `z_order` symbol to a numeric rank for draw-order sorting: `:back` → 0,
+`:normal` → 1, `:front` → 2.
+"""
 _z_rank(z::Symbol) =
     if z === :back
         0
@@ -59,11 +100,15 @@ _z_rank(z::Symbol) =
         1
     end
 
-# Split user kwargs into the ones Plots accepts as *series* attributes (applied to
-# every series, e.g. `color`, `linewidth`, `label`) and the rest, treated as
-# subplot/plot attributes (applied to every cell, e.g. `legend`, `grid`,
-# `framestyle`). The old monolith forwarded both; keeping only series attributes
-# silently dropped `legend`/`grid`/… (R2 gap).
+"""
+$(TYPEDSIGNATURES)
+
+Split user keyword arguments into series attributes (accepted by `Plots.attributes(:Series)`)
+and the remaining subplot/plot attributes.
+
+# Returns
+- `(series, other)`: two `NamedTuple`s — series attributes and everything else.
+"""
 function _partition_user(; kwargs...)
     ok = Plots.attributes(:Series)
     series = NamedTuple(kw for kw in kwargs if kw[1] in ok)
@@ -71,15 +116,26 @@ function _partition_user(; kwargs...)
     return series, other
 end
 
-# Subplot metadata keys the renderer sets itself; a user override of these (except
-# `legend` / `ylims`, handled explicitly) is ignored to keep the computed layout.
+"""
+    _RESERVED_AXES_KEYS
+
+Subplot metadata keys that the renderer sets itself; user overrides of these
+(except `legend` and `ylims`, handled explicitly) are ignored to preserve the
+computed layout.
+"""
 const _RESERVED_AXES_KEYS = (
     :subplot, :title, :xlabel, :ylabel, :legend, :ylims, :titlefont, :guidefontsize
 )
 
 # --- ylims resolution ---------------------------------------------------------
-# `nothing` -> don't touch; tuple -> set; :auto -> auto; :auto_guarded -> widen a
-# (near-)constant series so the axis does not collapse.
+"""
+$(TYPEDSIGNATURES)
+
+Resolve the y-axis limits for `ax`.
+
+`nothing` is passed through; a tuple is used as-is; `:auto` delegates to Plots;
+`:auto_guarded` widens a (near-)constant series so the axis does not collapse.
+"""
 function _resolve_ylims(ax::Axes)
     yl = ax.ylims
     yl === :auto_guarded || return yl
@@ -92,6 +148,12 @@ end
 
 # --- drawing one Axes into subplot `sp` of plot `p` ---------------------------
 
+"""
+$(TYPEDSIGNATURES)
+
+Draw a single [`Series`](@ref) `s` into subplot `sp` of plot `p`, forwarding
+`user` keyword arguments and the translated series style.
+"""
 function _draw_series!(p, s::Series, sp::Int; user...)
     Plots.plot!(
         p,
@@ -105,6 +167,11 @@ function _draw_series!(p, s::Series, sp::Int; user...)
     return p
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Draw a decoration (`HLine` or `VLine`) into subplot `sp` of plot `p`.
+"""
 function _draw_decoration!(p, d::HLine, sp::Int)
     Plots.hline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
     return p
@@ -114,11 +181,15 @@ function _draw_decoration!(p, d::VLine, sp::Int)
     return p
 end
 
-# Draw series (in z-order) + decorations of `ax` into subplot `sp`. `series_user` are
-# forwarded to every series; `axes_user` are the user's subplot attributes (e.g.
-# `legend`, `grid`) applied to the cell, with `legend`/`ylims` overriding the IR
-# defaults. When `overlay` is true, only series/decorations are added (axis metadata
-# untouched).
+"""
+$(TYPEDSIGNATURES)
+
+Draw all series (in z-order) and decorations of `ax` into subplot `sp` of plot `p`.
+
+`series_user` are forwarded to every series; `axes_user` are subplot attributes
+applied to the cell, with `legend`/`ylims` overriding the IR defaults. When
+`overlay` is true, only series and decorations are added (axis metadata untouched).
+"""
 function _draw_axes!(
     p,
     ax::Axes,
@@ -159,8 +230,22 @@ end
 
 # --- new render : recursive composition of the weighted tree ------------------
 
+"""
+$(TYPEDSIGNATURES)
+
+Normalise weights `w` to a `Vector{Float64}` that sums to 1.
+"""
 _normalized(w) = collect(Float64, w) ./ sum(w)
 
+"""
+$(TYPEDSIGNATURES)
+
+Recursively render a layout node into a `Plots.Plot`.
+
+`Leaf` produces a single-axes plot; `VBox`/`HBox` compose child plots with a
+weighted grid layout. A single-child box is unwrapped (Plots rejects a lone
+height/width of 1.0).
+"""
 function _render_node(node::Leaf; series_user=NamedTuple(), axes_user=NamedTuple())
     p = Plots.plot()
     _draw_axes!(p, node.axes, 1; series_user=series_user, axes_user=axes_user)
