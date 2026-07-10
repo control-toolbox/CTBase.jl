@@ -5,6 +5,29 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.4-beta] - 2026-07-10
+
+### 🐛 Bug Fixes
+
+#### **Core** — `to_out_of_place` produces AD-friendly functors
+
+- **`Core.to_out_of_place` now widens the output buffer element type from the call
+  arguments** instead of always allocating a `Float64` buffer. The buffer type is
+  `promote_type(T, <arguments' element types>)`, so the resulting out-of-place function is
+  differentiable (its buffer can hold `ForwardDiff.Dual` numbers). The `T` keyword still
+  acts as a floor (default `Float64`), so plain numeric calls — including `Int` arguments —
+  keep their previous behaviour.
+- **Why**: functors produced by `to_out_of_place` (e.g. constraint-by-label functors in
+  CTModels) previously threw `MethodError: Float64(::Dual)` when differentiated through
+  (e.g. a path constraint in a constrained CTFlows `:total` flow).
+- **No breaking changes**: purely additive widening; existing behaviour on `Float64`/`Int`
+  arguments is unchanged. See [BREAKING.md](BREAKING.md).
+
+#### **Housekeeping**
+
+- Renamed `CHANGELOGS.md` → `CHANGELOG.md` and `BREAKINGS.md` → `BREAKING.md` to match the
+  singular naming used across the control-toolbox ecosystem (CTModels, CTFlows, CTSolvers).
+
 ## [0.27.3-beta] - 2026-07-09
 
 ### ✨ New Features
@@ -146,7 +169,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: purely additive. Existing code unaffected. See [BREAKINGS.md](BREAKINGS.md).
+- **No breaking changes**: purely additive. Existing code unaffected. See [BREAKING.md](BREAKING.md).
 
 ## [0.26.1-beta] - 2026-07-04
 
@@ -202,7 +225,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: purely additive. Existing code unaffected. See [BREAKINGS.md](BREAKINGS.md).
+- **No breaking changes**: purely additive. Existing code unaffected. See [BREAKING.md](BREAKING.md).
 
 ## [0.26.0-beta] - 2026-06-28
 
@@ -235,7 +258,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: purely additive. Existing predicates and trait families are unchanged. See [BREAKINGS.md](BREAKINGS.md).
+- **No breaking changes**: purely additive. Existing predicates and trait families are unchanged. See [BREAKING.md](BREAKING.md).
 
 ## [0.25.0-beta] - 2026-06-26
 
@@ -963,7 +986,7 @@ ext/
 
 ### 🎯 Breaking Changes
 
-See [BREAKINGS.md](BREAKINGS.md) for detailed migration guide.
+See [BREAKING.md](BREAKING.md) for detailed migration guide.
 
 ### 🙏 Acknowledgments
 

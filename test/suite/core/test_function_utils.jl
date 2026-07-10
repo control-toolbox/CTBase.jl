@@ -2,6 +2,7 @@ module TestCoreFunctionUtils
 
 using Test: Test
 import CTBase.Core
+import ForwardDiff
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -67,6 +68,26 @@ function test_function_utils()
             result = big(2.0)
             Test.@test length(result) == 5
             Test.@test result == [2.0, 4.0, 6.0, 8.0, 10.0]
+        end
+
+        # Regression: the allocated buffer widens its element type from the arguments so
+        # the out-of-place function is differentiable (buffer holds ForwardDiff.Dual).
+        Test.@testset "to_out_of_place - AD-friendly buffer (ForwardDiff)" begin
+            p!(r, x) = (r[1]=x[1]^2; r[2]=sin(x[1]); nothing)
+            p = Core.to_out_of_place(p!, 2)
+            J = ForwardDiff.jacobian(p, [1.3])
+            Test.@test J[1, 1] ≈ 2 * 1.3
+            Test.@test J[2, 1] ≈ cos(1.3)
+
+            # scalar (n=1) output differentiable via `derivative`
+            q!(r, x) = (r[1]=x^3; nothing)
+            q = Core.to_out_of_place(q!, 1)
+            Test.@test ForwardDiff.derivative(q, 2.0) ≈ 3 * 2.0^2
+
+            # the `T` floor is preserved: Int args keep the Float64 buffer (no narrowing)
+            s!(r, x) = (r[1]=x / 2; nothing)
+            s = Core.to_out_of_place(s!, 1)
+            Test.@test s(3) ≈ 1.5
         end
     end
     return nothing

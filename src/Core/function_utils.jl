@@ -22,9 +22,26 @@ julia> f = to_out_of_place(f!, 2)
 julia> f(π/4)  # returns approximately [0.707, 0.707]
 ```
 """
+# Promote the element type of the numeric arguments (scalars and arrays), so the
+# allocated buffer can hold e.g. ForwardDiff.Dual values during differentiation. Falls
+# back to `Union{}` for non-numeric arguments (e.g. `nothing`), which is neutral under
+# `promote_type`. Combined with the `T` floor below, non-numeric-only calls keep `T`.
+_promote_arg_eltype() = Union{}
+function _promote_arg_eltype(x::Number, rest...)
+    return promote_type(typeof(x), _promote_arg_eltype(rest...))
+end
+function _promote_arg_eltype(x::AbstractArray, rest...)
+    return promote_type(eltype(x), _promote_arg_eltype(rest...))
+end
+_promote_arg_eltype(_, rest...) = _promote_arg_eltype(rest...)
+
 function to_out_of_place(f!, n; T=Float64)
     function f(args...; kwargs...)
-        r = zeros(T, n)
+        # Widen the floor type `T` with the arguments' element types so the buffer can
+        # hold Dual numbers under AD; `promote_type(Float64, Int) == Float64` keeps the
+        # existing behaviour for plain numeric calls.
+        TT = promote_type(T, _promote_arg_eltype(args...))
+        r = zeros(TT, n)
         f!(r, args...; kwargs...)
         return n == 1 ? r[1] : r
     end
