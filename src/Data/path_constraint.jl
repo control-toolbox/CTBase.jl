@@ -104,9 +104,7 @@ See also: [`CTBase.Data.PathConstraint`](@ref).
 function PathConstraint(
     f, ::Type{K}, ::Type{TD}, ::Type{VD}
 ) where {
-    K<:Traits.AbstractConstraintKind,
-    TD<:Traits.TimeDependence,
-    VD<:Traits.VariableDependence,
+    K<:Traits.AbstractConstraintKind,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
 }
     return PathConstraint{typeof(f),K,TD,VD}(f)
 end

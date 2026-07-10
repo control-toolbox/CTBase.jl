@@ -1,7 +1,8 @@
 module TestPathConstraint
 
 using Test: Test
-import CTBase.Data: Data, PathConstraint, StateConstraint, ControlConstraint, MixedConstraint
+import CTBase.Data:
+    Data, PathConstraint, StateConstraint, ControlConstraint, MixedConstraint
 import CTBase.Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -46,8 +47,9 @@ function test_path_constraint()
 
         Test.@testset "Natural calls - StateConstraint" begin
             Test.@test StateConstraint(x -> 2x[1])([3.0]) == 6.0
-            Test.@test StateConstraint((t, x) -> t + x[1]; is_autonomous=false)(1.0, [2.0]) ==
-                3.0
+            Test.@test StateConstraint((t, x) -> t + x[1]; is_autonomous=false)(
+                1.0, [2.0]
+            ) == 3.0
             Test.@test StateConstraint((x, v) -> x[1] * v[1]; is_variable=true)(
                 [2.0], [5.0]
             ) == 10.0
@@ -70,9 +72,7 @@ function test_path_constraint()
 
         Test.@testset "Natural calls - MixedConstraint" begin
             Test.@test MixedConstraint((x, u) -> x[1] + u[1])([2.0], [3.0]) == 5.0
-            Test.@test MixedConstraint(
-                (t, x, u) -> t + x[1] + u[1]; is_autonomous=false
-            )(
+            Test.@test MixedConstraint((t, x, u) -> t + x[1] + u[1]; is_autonomous=false)(
                 1.0, [2.0], [3.0]
             ) == 6.0
             Test.@test MixedConstraint(
@@ -138,10 +138,7 @@ function test_path_constraint()
 
         Test.@testset "Typed constructor" begin
             g = PathConstraint(
-                x -> x[1],
-                Traits.StateConstraintKind,
-                Traits.Autonomous,
-                Traits.Fixed,
+                x -> x[1], Traits.StateConstraintKind, Traits.Autonomous, Traits.Fixed
             )
             Test.@test g isa Data.AbstractPathConstraint
             Test.@test Traits.constraint_kind(g) === Traits.StateConstraintKind
@@ -165,7 +162,9 @@ function test_path_constraint()
         Test.@testset "show" begin
             g = MixedConstraint((x, u) -> x[1] + u[1])
             str = repr(MIME("text/plain"), g)
-            Test.@test occursin("PathConstraint: mixed, autonomous, fixed (no variable)", str)
+            Test.@test occursin(
+                "PathConstraint: mixed, autonomous, fixed (no variable)", str
+            )
             Test.@test occursin("natural call: g(x, u)", str)
             Test.@test occursin("uniform call: g(t, x, u, v)", str)
 
