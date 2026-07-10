@@ -30,9 +30,7 @@ See also: [`CTBase.Data.PathConstraint`](@ref), [`CTBase.Traits.AbstractConstrai
 [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
 abstract type AbstractPathConstraint{
-    K<:Traits.AbstractConstraintKind,
-    TD<:Traits.TimeDependence,
-    VD<:Traits.VariableDependence,
+    K<:Traits.AbstractConstraintKind,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
 } end
 
 # =============================================================================
@@ -149,7 +147,11 @@ Return `true` if the path constraint is a pure control constraint, `false` other
 See also: [`CTBase.Traits.ControlConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
 """
 Traits.is_control_constraint(::AbstractPathConstraint) = false
-Traits.is_control_constraint(::AbstractPathConstraint{<:Traits.ControlConstraintKind}) = true
+function Traits.is_control_constraint(
+    ::AbstractPathConstraint{<:Traits.ControlConstraintKind}
+)
+    return true
+end
 
 """
 $(TYPEDSIGNATURES)

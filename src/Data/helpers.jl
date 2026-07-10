@@ -440,9 +440,7 @@ See also: [`CTBase.Data._uniform_sig_pc`](@ref).
 function _natural_sig_pc(
     ::Type{K}, ::Type{TD}, ::Type{VD}
 ) where {
-    K<:Traits.AbstractConstraintKind,
-    TD<:Traits.TimeDependence,
-    VD<:Traits.VariableDependence,
+    K<:Traits.AbstractConstraintKind,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
 }
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
