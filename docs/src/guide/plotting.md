@@ -109,7 +109,7 @@ fig = CTBase.Plotting.Figure(tree; title="Solution")
 
 A [`Panel`](@ref) is the case layer's convenient input unit: a titled group of
 components sharing one time grid. It is **not** part of the rendered IR — the
-[`lower`](@ref) step turns it into `Leaf`/`Axes` nodes.
+[`lower`](@ref CTBase.Plotting.lower) step turns it into `Leaf`/`Axes` nodes.
 
 ```@example plot
 t = collect(0.0:0.1:1.0)
@@ -124,7 +124,7 @@ panel = CTBase.Plotting.Panel(
 
 ### Lowering
 
-[`lower`](@ref) turns a `Panel` into a layout node. Two layouts are available:
+[`lower`](@ref CTBase.Plotting.lower) turns a `Panel` into a layout node. Two layouts are available:
 
 - `:split` (default) — one cell per component (ylabel = component name, xlabel on
   the bottom cell only, title on the top cell only, no legend).
@@ -202,7 +202,7 @@ index when overlaying with `render!`.
 | Category | Symbols |
 | :--- | :--- |
 | IR | [`Series`](@ref), [`HLine`](@ref), [`VLine`](@ref), [`Axes`](@ref), [`Leaf`](@ref), [`HBox`](@ref), [`VBox`](@ref), [`Figure`](@ref), [`leaves`](@ref) |
-| Building blocks | [`Panel`](@ref), [`lower`](@ref) |
+| Building blocks | [`Panel`](@ref), [`lower`](@ref CTBase.Plotting.lower) |
 | Combinators | [`Stacked`](@ref), [`Paired`](@ref), [`Grid`](@ref) |
 | Backend | [`AbstractPlottingBackend`](@ref), [`PlotsBackend`](@ref), [`render`](@ref), [`render!`](@ref) |
 
