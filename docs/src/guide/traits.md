@@ -128,6 +128,47 @@ control laws carry [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics)
 (no costate), while dynamic closed-loop control laws carry
 [`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics).
 
+### Constraint kind
+
+Which primal variables does a path constraint `g(...)` depend on? The
+constraint-kind trait encodes this at the type level.
+
+| Type | Meaning | Constraint signature |
+|---|---|---|
+| [`Traits.StateConstraintKind`](@ref CTBase.Traits.StateConstraintKind) | state only | `g(x)` |
+| [`Traits.ControlConstraintKind`](@ref CTBase.Traits.ControlConstraintKind) | control only | `g(u)` |
+| [`Traits.MixedConstraintKind`](@ref CTBase.Traits.MixedConstraintKind) | state and control | `g(x, u)` |
+
+All three are concrete subtypes of
+[`Traits.AbstractConstraintKind`](@ref CTBase.Traits.AbstractConstraintKind):
+
+```@repl traits
+Traits.StateConstraintKind <: Traits.AbstractConstraintKind
+Traits.ControlConstraintKind <: Traits.AbstractConstraintKind
+Traits.MixedConstraintKind <: Traits.AbstractConstraintKind
+```
+
+!!! note "Type-parameter-only contract"
+    Like feedback, constraint kind follows a **type-parameter-only** contract: the
+    trait value is read from a type parameter of the concrete data type (e.g.
+    `PathConstraint{F,K,TD,VD}`) by the
+    [`Traits.constraint_kind`](@ref CTBase.Traits.constraint_kind) accessor. No
+    `has_constraint_kind_trait` guard is provided; calling `constraint_kind` on a
+    type that does not implement it yields a standard `MethodError`.
+
+The boolean predicates
+[`Traits.is_state_constraint`](@ref CTBase.Traits.is_state_constraint),
+[`Traits.is_control_constraint`](@ref CTBase.Traits.is_control_constraint), and
+[`Traits.is_mixed_constraint`](@ref CTBase.Traits.is_mixed_constraint) dispatch
+on the constraint-kind type parameter:
+
+```@repl traits
+using CTBase.Data
+g = Data.StateConstraint(x -> x[1])
+Traits.constraint_kind(g)
+Traits.is_state_constraint(g)
+```
+
 ### Other families
 
 These traits encode properties that are fixed at construction time and carried
@@ -238,6 +279,7 @@ end # hide
 | [`Traits.variable_costate_trait`](@ref CTBase.Traits.variable_costate_trait) | — |
 | [`Traits.dynamics_trait`](@ref CTBase.Traits.dynamics_trait) | — |
 | [`Traits.feedback`](@ref CTBase.Traits.feedback) | `is_open_loop`, `is_closed_loop`, `is_dyn_closed_loop` |
+| [`Traits.constraint_kind`](@ref CTBase.Traits.constraint_kind) | `is_state_constraint`, `is_control_constraint`, `is_mixed_constraint` |
 
 ## See Also
 

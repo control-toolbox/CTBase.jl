@@ -28,10 +28,13 @@ using LinearAlgebra
 | [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) | ``f_c : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^n`` | `fc(x, u)` |
 | [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField) | ``g : \mathcal{X} \to \mathbb{R}^n`` | `g(x)` |
 | [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) | ``u : \cdots \to \mathcal{U}`` | `u()` / `u(x)` / `u(x, p)` |
+| [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint) | ``g : \cdots \to \mathbb{R}^{n_g}`` | `g(x)` / `g(u)` / `g(x, u)` |
+| [`Data.Multiplier`](@ref CTBase.Data.Multiplier) | ``\mu : T^*\mathcal{X} \to \mathbb{R}^{n_g}`` | `\mu(x, p)` |
 
-All eight share the same trait axes — time dependence and variable dependence.
+All ten share the same trait axes — time dependence and variable dependence.
 `VectorField` and `HamiltonianVectorField` also carry a mutability trait;
-`ControlLaw` carries a feedback trait (see [Traits](traits.md)).
+`ControlLaw` carries a feedback trait;
+`PathConstraint` carries a constraint-kind trait (see [Traits](traits.md)).
 
 ---
 
@@ -374,6 +377,96 @@ while dynamic closed-loop control laws carry
 
 ---
 
+## PathConstraint
+
+A `PathConstraint` wraps a function ``g(\cdots)`` that evaluates a path constraint
+along the trajectory. The **constraint-kind** trait (see [Traits](traits.md))
+determines which primal variables the constraint depends on.
+
+Three user-facing constructors fix the constraint kind:
+
+| Constructor | Constraint kind | Natural signature (autonomous/fixed) |
+|---|---|---|
+| [`Data.StateConstraint`](@ref CTBase.Data.StateConstraint) | `StateConstraintKind` | `g(x)` |
+| [`Data.ControlConstraint`](@ref CTBase.Data.ControlConstraint) | `ControlConstraintKind` | `g(u)` |
+| [`Data.MixedConstraint`](@ref CTBase.Data.MixedConstraint) | `MixedConstraintKind` | `g(x, u)` |
+
+### Construction
+
+```@example data
+# State constraint, autonomous, fixed (default): g(x)
+g_state = Data.StateConstraint(x -> x[1])
+
+# Control constraint, autonomous, fixed: g(u)
+g_ctrl = Data.ControlConstraint(u -> u[1])
+
+# Mixed constraint, autonomous, fixed: g(x, u)
+g_mixed = Data.MixedConstraint((x, u) -> x[1] + u[1])
+
+# Non-autonomous state constraint: g(t, x)
+g_state_na = Data.StateConstraint((t, x) -> t * x[1]; is_autonomous=false)
+
+g_state
+```
+
+### Calling
+
+Every `PathConstraint` is callable via its **natural** signature (matching the
+traits) and via a **uniform** signature `g(t, x, u, v)` that ignores unused
+arguments:
+
+```@example data
+x0, u0 = [1.0, 0.5], [2.0]
+
+g_state(x0)                    # natural call
+g_state(0.0, x0, u0, nothing)  # uniform call
+
+g_ctrl(u0)                     # natural call
+g_mixed(x0, u0)                # natural call
+```
+
+The constraint kind can be queried with the predicate functions
+[`Traits.is_state_constraint`](@ref CTBase.Traits.is_state_constraint),
+[`Traits.is_control_constraint`](@ref CTBase.Traits.is_control_constraint),
+and [`Traits.is_mixed_constraint`](@ref CTBase.Traits.is_mixed_constraint):
+
+```@example data
+Traits.is_state_constraint(g_state), Traits.is_control_constraint(g_ctrl), Traits.is_mixed_constraint(g_mixed)
+```
+
+---
+
+## Multiplier
+
+A `Multiplier` wraps a function ``\mu(t, x, p[, v])`` returning the Lagrange
+multiplier associated with a path constraint. It has the same call structure as a
+[`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) — it depends on the state and
+costate — but carries no dynamics semantics of its own.
+
+### Construction
+
+```@example data
+# Autonomous, fixed (default): μ(x, p)
+μ1 = Data.Multiplier((x, p) -> x[1])
+
+# Non-autonomous, fixed: μ(t, x, p)
+μ2 = Data.Multiplier((t, x, p) -> t * x[1]; is_autonomous=false)
+
+μ1
+```
+
+### Calling
+
+```@example data
+x0, p0 = [1.0, 0.5], [0.3, 0.7]
+
+μ1(x0, p0)                    # natural call
+μ1(0.0, x0, p0, nothing)      # uniform call
+μ2(0.5, x0, p0)               # non-autonomous natural call
+```
+
+---
+
 ## ControlledVectorField
 
 A `ControlledVectorField` wraps a function ``f_c(t, x, u[, v])`` that returns the
@@ -523,14 +616,18 @@ The same positional form exists for [`Data.Hamiltonian`](@ref CTBase.Data.Hamilt
 [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw)
 (`ControlLaw(f, FB, TD, VD)`),
 [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField)
-(`ControlledVectorField(f, TD, VD)`).
+(`ControlledVectorField(f, TD, VD)`),
+[`Data.PathConstraint`](@ref CTBase.Data.PathConstraint)
+(`PathConstraint(f, K, TD, VD)`),
+[`Data.Multiplier`](@ref CTBase.Data.Multiplier)
+(`Multiplier(f, TD, VD)`).
 
 ---
 
 ## See also
 
-- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField), [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) — concrete data types.
-- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlledVectorField`](@ref CTBase.Data.AbstractControlledVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw) — abstract supertypes.
+- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField), [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw), [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint), [`Data.Multiplier`](@ref CTBase.Data.Multiplier) — concrete data types.
+- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlledVectorField`](@ref CTBase.Data.AbstractControlledVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw), [`Data.AbstractPathConstraint`](@ref CTBase.Data.AbstractPathConstraint), [`Data.AbstractMultiplier`](@ref CTBase.Data.AbstractMultiplier) — abstract supertypes.
 - [`Data.pseudo_hamiltonian`](@ref CTBase.Data.pseudo_hamiltonian), [`Data.control_law`](@ref CTBase.Data.control_law), [`Data.controlled_vector_field`](@ref CTBase.Data.controlled_vector_field) — getters for composed types.
 - [Traits](traits.md) — the three trait axes, the dynamics trait, and call-signature tables.
 - [Exceptions](exceptions.md) — `PreconditionError` and `IncorrectArgument`, raised by the constructors and the `variable_costate` path.

@@ -144,4 +144,8 @@ For more, see the **[Data guide](guide/data.md)**.
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |
 | Coverage report generation | [Coverage](guide/coverage.md) |
 | Auto-generated API reference | [API Documentation](guide/api-documentation.md) |
+| Semantic color roles and themes | [Color System](guide/color-system.md) |
+| Linear and piecewise-constant interpolation | [Interpolation](guide/interpolation.md) |
+| Unicode subscript/superscript helpers | [Unicode Helpers](guide/unicode.md) |
+| Backend-agnostic plotting IR and render contract | [Plotting Engine](guide/plotting.md) |
 | Full API reference | API Reference (left sidebar) |
