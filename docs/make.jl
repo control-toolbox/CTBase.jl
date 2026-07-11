@@ -104,6 +104,11 @@ with_api_reference(src_dir) do api_pages
                 "API Documentation" => joinpath("guide", "api-documentation.md"),
                 "Color System" => joinpath("guide", "color-system.md"),
             ],
+            "Utilities" => [
+                "Interpolation" => joinpath("guide", "interpolation.md"),
+                "Unicode Helpers" => joinpath("guide", "unicode.md"),
+                "Plotting Engine" => joinpath("guide", "plotting.md"),
+            ],
             "API Reference" => api_pages,
         ],
     )
