@@ -4,6 +4,11 @@
 CurrentModule = CTBase
 ```
 
+```@setup plot
+using Plots
+Base.showable(::MIME"image/png", ::Plots.Plot) = false
+```
+
 The [`CTBase.Plotting`](@ref) submodule is a generic, domain-free plotting engine.
 It manipulates a backend-agnostic **intermediate representation** (IR): a weighted
 tree of titled axes carrying series and decorations. The engine knows nothing about
@@ -178,18 +183,15 @@ a `Figure` onto an existing backend target, targeting cells by the deterministic
 leaf order (see [`leaves`](@ref)).
 
 Without a backend loaded, the fallback throws an
-[`CTBase.Exceptions.ExtensionError`](@ref):
+[`CTBase.Exceptions.ExtensionError`](@ref). This cannot be demonstrated
+in these docs because `Plots` is loaded by `make.jl` to produce the
+examples below, which causes the `CTBasePlots` extension to be active.
+
+Once `Plots` is loaded, `render(fig)` produces a Plots.jl plot:
 
 ```@example plot
-fig2 = CTBase.Plotting.Figure(CTBase.Plotting.Leaf(ax))
-try # hide
-CTBase.Plotting.render(fig2)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+CTBase.Plotting.render(fig)
 ```
-
-Once `Plots` is loaded, `render(fig)` produces a Plots.jl plot.
 
 ## Leaf Traversal
 
