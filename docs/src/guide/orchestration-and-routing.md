@@ -14,39 +14,89 @@ using CTBase
 using CTBase.Options: OptionDefinition
 using CTBase.Strategies: route_to
 using CTBase.Orchestration: resolve_method, route_all_options
-using CTBase.Orchestration: extract_strategy_ids, build_strategy_to_family_map, build_option_ownership_map
+using CTBase.Orchestration: extract_strategy_ids
+using CTBase.Orchestration: build_strategy_to_family_map
+using CTBase.Orchestration: build_option_ownership_map
 ```
 
 We define three fake strategies — a discretizer, a modeler, and a solver — with a shared `backend` option to demonstrate routing and disambiguation:
 
 ```@example routing
 # --- Fake discretizer family ---
-abstract type AbstractFakeDiscretizer <: CTBase.Strategies.AbstractStrategy end
-struct FakeCollocation <: AbstractFakeDiscretizer; options::CTBase.Strategies.StrategyOptions; end
+abstract type AbstractFakeDiscretizer <:
+    CTBase.Strategies.AbstractStrategy end
+
+struct FakeCollocation <: AbstractFakeDiscretizer
+    options::CTBase.Strategies.StrategyOptions
+end
+
 CTBase.Strategies.id(::Type{<:FakeCollocation}) = :collocation
-CTBase.Strategies.metadata(::Type{<:FakeCollocation}) = CTBase.Strategies.StrategyMetadata(
-    OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid size"),
+
+CTBase.Strategies.metadata(::Type{<:FakeCollocation}) =
+    CTBase.Strategies.StrategyMetadata(
+        OptionDefinition(
+            name = :grid_size, type = Int,
+            default = 100, description = "Grid size",
+        ),
+    )
+
+FakeCollocation(; kwargs...) = FakeCollocation(
+    CTBase.Strategies.build_strategy_options(
+        FakeCollocation; kwargs...,
+    ),
 )
-FakeCollocation(; kwargs...) = FakeCollocation(CTBase.Strategies.build_strategy_options(FakeCollocation; kwargs...))
 
 # --- Fake modeler family ---
-abstract type AbstractFakeModeler <: CTBase.Strategies.AbstractStrategy end
-struct FakeADNLP <: AbstractFakeModeler; options::CTBase.Strategies.StrategyOptions; end
+abstract type AbstractFakeModeler <:
+    CTBase.Strategies.AbstractStrategy end
+
+struct FakeADNLP <: AbstractFakeModeler
+    options::CTBase.Strategies.StrategyOptions
+end
+
 CTBase.Strategies.id(::Type{<:FakeADNLP}) = :adnlp
-CTBase.Strategies.metadata(::Type{<:FakeADNLP}) = CTBase.Strategies.StrategyMetadata(
-    OptionDefinition(name = :backend, type = Symbol, default = :default, description = "AD backend"),
+
+CTBase.Strategies.metadata(::Type{<:FakeADNLP}) =
+    CTBase.Strategies.StrategyMetadata(
+        OptionDefinition(
+            name = :backend, type = Symbol,
+            default = :default, description = "AD backend",
+        ),
+    )
+
+FakeADNLP(; kwargs...) = FakeADNLP(
+    CTBase.Strategies.build_strategy_options(
+        FakeADNLP; kwargs...,
+    ),
 )
-FakeADNLP(; kwargs...) = FakeADNLP(CTBase.Strategies.build_strategy_options(FakeADNLP; kwargs...))
 
 # --- Fake solver family ---
-abstract type AbstractFakeSolver <: CTBase.Strategies.AbstractStrategy end
-struct FakeIpopt <: AbstractFakeSolver; options::CTBase.Strategies.StrategyOptions; end
+abstract type AbstractFakeSolver <:
+    CTBase.Strategies.AbstractStrategy end
+
+struct FakeIpopt <: AbstractFakeSolver
+    options::CTBase.Strategies.StrategyOptions
+end
+
 CTBase.Strategies.id(::Type{<:FakeIpopt}) = :ipopt
-CTBase.Strategies.metadata(::Type{<:FakeIpopt}) = CTBase.Strategies.StrategyMetadata(
-    OptionDefinition(name = :max_iter, type = Integer, default = 1000, description = "Max iterations"),
-    OptionDefinition(name = :backend, type = Symbol, default = :cpu, description = "Compute backend"),
+
+CTBase.Strategies.metadata(::Type{<:FakeIpopt}) =
+    CTBase.Strategies.StrategyMetadata(
+        OptionDefinition(
+            name = :max_iter, type = Integer,
+            default = 1000, description = "Max iterations",
+        ),
+        OptionDefinition(
+            name = :backend, type = Symbol,
+            default = :cpu, description = "Compute backend",
+        ),
+    )
+
+FakeIpopt(; kwargs...) = FakeIpopt(
+    CTBase.Strategies.build_strategy_options(
+        FakeIpopt; kwargs...,
+    ),
 )
-FakeIpopt(; kwargs...) = FakeIpopt(CTBase.Strategies.build_strategy_options(FakeIpopt; kwargs...))
 
 # --- Registry ---
 registry = CTBase.Strategies.create_registry(
@@ -204,7 +254,9 @@ Note that `:backend` is owned by both `:modeler` and `:solver` — it is ambiguo
 Unpacks a `RoutedOption` into a vector of `(value, strategy_id)` pairs:
 
 ```@example routing
-extract_strategy_ids(route_to(ipopt = 100, adnlp = 50), resolved)
+extract_strategy_ids(
+    route_to(ipopt = 100, adnlp = 50), resolved,
+)
 ```
 
 For plain (non-routed) values, no disambiguation is detected — the function returns `nothing`:
@@ -217,7 +269,9 @@ Passing an unknown strategy ID throws an error:
 
 ```@repl routing
 try # hide
-extract_strategy_ids(route_to(unknown = 42), resolved)
+extract_strategy_ids(
+    route_to(unknown = 42), resolved,
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -240,7 +294,10 @@ kwargs = (
     display   = false,                        # action option
 )
 
-routed = route_all_options(method, families, action_defs, kwargs, registry)
+routed = route_all_options(
+    method, families, action_defs,
+    kwargs, registry,
+)
 ```
 
 Action options:
@@ -259,7 +316,10 @@ routed.strategies
 
 ```@repl routing
 try # hide
-route_all_options(method, families, action_defs, (foo = 42,), registry)
+route_all_options(
+    method, families, action_defs,
+    (foo = 42,), registry,
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -269,7 +329,10 @@ end # hide
 
 ```@repl routing
 try # hide
-route_all_options(method, families, action_defs, (backend = :sparse,), registry)
+route_all_options(
+    method, families, action_defs,
+    (backend = :sparse,), registry,
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide

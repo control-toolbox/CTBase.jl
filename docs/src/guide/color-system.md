@@ -227,8 +227,11 @@ This ensures your display code:
 ## See Also
 
 - [`Core.Style`](@ref), [`Core.Palette`](@ref) — type definitions
-- [`Core.DEFAULT_PALETTE`](@ref), [`Core.MONOCHROME_PALETTE`](@ref), [`Core.HIGH_CONTRAST_PALETTE`](@ref) — built-in themes
-- [`Core.current_palette`](@ref), [`Core.set_palette!`](@ref), [`Core.reset_palette!`](@ref) — palette switching
+- [`Core.DEFAULT_PALETTE`](@ref), [`Core.MONOCHROME_PALETTE`](@ref),
+  [`Core.HIGH_CONTRAST_PALETTE`](@ref) — built-in themes
+- [`Core.current_palette`](@ref), [`Core.set_palette!`](@ref),
+  [`Core.reset_palette!`](@ref) — palette switching
 - [`Core.set_color!`](@ref) — single-role override
-- [`Core.get_format_codes`](@ref) — derive styled codes for custom `show` methods
+- [`Core.get_format_codes`](@ref) — derive styled codes for
+  custom `show` methods
 - [`Core.show_palette`](@ref) — interactive preview of the active palette

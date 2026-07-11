@@ -21,8 +21,8 @@ Every strategy implements a **two-level contract** that separates static metadat
 
 ```text
 Type-Level (no instantiation needed)
-├─ id(::Type{<:S})        → Symbol            (routing, registry lookup)
-└─ metadata(::Type{<:S})  → StrategyMetadata  (option specs + validation rules)
+├─ id(::Type{<:S})        → Symbol           (routing, registry lookup)
+└─ metadata(::Type{<:S})  → StrategyMetadata (option specs + validation rules)
             │
             ▼  routing, validation
    Constructor(; mode, kwargs...)
@@ -121,7 +121,9 @@ The constructor uses `build_strategy_options` to validate and merge user-provide
 
 ```@example strategy
 function Collocation(; mode::Symbol = :strict, kwargs...)
-    opts = Strategies.build_strategy_options(Collocation; mode = mode, kwargs...)
+    opts = Strategies.build_strategy_options(
+        Collocation; mode = mode, kwargs...,
+    )
     return Collocation(opts)
 end
 nothing # hide
@@ -227,7 +229,9 @@ function Strategies.metadata(::Type{<:DirectShooting})
 end
 
 function DirectShooting(; mode::Symbol = :strict, kwargs...)
-    opts = Strategies.build_strategy_options(DirectShooting; mode = mode, kwargs...)
+    opts = Strategies.build_strategy_options(
+        DirectShooting; mode = mode, kwargs...,
+    )
     return DirectShooting(opts)
 end
 
@@ -259,21 +263,34 @@ registry = Strategies.create_registry(
 Query the registry:
 
 ```@repl strategy
-Strategies.strategy_ids(AbstractOptimalControlDiscretizer, registry)
+Strategies.strategy_ids(
+    AbstractOptimalControlDiscretizer, registry,
+)
 ```
 
 ```@repl strategy
-Strategies.type_from_id(:collocation, AbstractOptimalControlDiscretizer, registry)
+Strategies.type_from_id(
+    :collocation,
+    AbstractOptimalControlDiscretizer, registry,
+)
 ```
 
 Build a strategy from the registry:
 
 ```@example strategy
-Strategies.build_strategy(:collocation, AbstractOptimalControlDiscretizer, registry; grid_size = 300)
+Strategies.build_strategy(
+    :collocation,
+    AbstractOptimalControlDiscretizer, registry;
+    grid_size = 300,
+)
 ```
 
 ```@example strategy
-Strategies.build_strategy(:direct_shooting, AbstractOptimalControlDiscretizer, registry; grid_size = 50)
+Strategies.build_strategy(
+    :direct_shooting,
+    AbstractOptimalControlDiscretizer, registry;
+    grid_size = 50,
+)
 ```
 
 ## Integration with Method Tuples
@@ -282,14 +299,21 @@ In the full CTBase pipeline, a **method tuple** like `(:collocation, :adnlp, :ip
 
 ```@repl strategy
 method = (:collocation, :adnlp, :ipopt)
-Strategies.extract_id_from_method(method, AbstractOptimalControlDiscretizer, registry)
+Strategies.extract_id_from_method(
+    method, AbstractOptimalControlDiscretizer, registry,
+)
 ```
 
 Build a strategy directly from a method tuple:
 
 ```@example strategy
-id = Strategies.extract_id_from_method(method, AbstractOptimalControlDiscretizer, registry)
-Strategies.build_strategy(id, AbstractOptimalControlDiscretizer, registry; grid_size = 500, scheme = :trapeze)
+id = Strategies.extract_id_from_method(
+    method, AbstractOptimalControlDiscretizer, registry,
+)
+Strategies.build_strategy(
+    id, AbstractOptimalControlDiscretizer, registry;
+    grid_size = 500, scheme = :trapeze,
+)
 ```
 
 See [Orchestration & Routing](@ref) for the full multi-strategy routing system.
@@ -319,7 +343,9 @@ Strategies.option_type(Collocation, :scheme)
 ```
 
 ```@repl strategy
-Strategies.option_description(Collocation, :grid_size)
+Strategies.option_description(
+    Collocation, :grid_size,
+)
 ```
 
 ## Advanced Patterns
@@ -329,7 +355,11 @@ Strategies.option_description(Collocation, :grid_size)
 Use `mode = :permissive` to accept backend-specific options that are not declared in the metadata:
 
 ```@example strategy
-Collocation(grid_size = 500, custom_backend_param = 42; mode = :permissive)
+Collocation(
+    grid_size = 500,
+    custom_backend_param = 42;
+    mode = :permissive,
+)
 ```
 
 Unknown options are stored with `:user` source but bypass type validation. Known options are still fully validated.
@@ -341,7 +371,10 @@ Use `bypass(val)` (or its alias `force(val)`) to skip validation for a **single 
 **Unknown option** — accepted silently, no warning:
 
 ```@example strategy
-Collocation(grid_size = 500, custom_backend_param = bypass(42))
+Collocation(
+    grid_size = 500,
+    custom_backend_param = bypass(42),
+)
 ```
 
 **Known option with wrong type** — normally rejected, accepted with `bypass`:
@@ -353,7 +386,7 @@ catch e; showerror(IOContext(stdout, :color => false), e) end # hide
 ```
 
 ```@example strategy
-Collocation(grid_size = bypass("oops"))   # no error: validation skipped
+Collocation(grid_size = bypass("oops"))  # no error
 ```
 
 This is more surgical than `mode = :permissive`:
@@ -366,7 +399,7 @@ This is more surgical than `mode = :permissive`:
 `force` is an alias for `bypass` — choose the name that fits your mental model:
 
 ```julia
-Collocation(grid_size = force("oops"))   # same as bypass("oops")
+Collocation(grid_size = force("oops"))  # same as bypass
 ```
 
 !!! warning "Use with care"
@@ -386,7 +419,7 @@ Options.OptionDefinition(
 )
 ```
 
-With this definition, `Collocation(N = 100)` would be equivalent to `Collocation(grid_size = 100)`.
+With this definition, `Collocation(N = 100)` is equivalent to `Collocation(grid_size = 100)`.
 
 ### Custom Validators
 
@@ -398,7 +431,9 @@ Options.OptionDefinition(
     type = Int,
     default = 250,
     description = "Number of time steps",
-    validator = x -> x > 0 || throw(ArgumentError("grid_size must be positive")),
+    validator = x -> x > 0 || throw(
+        ArgumentError("grid_size must be positive"),
+    ),
 )
 ```
 

@@ -18,21 +18,37 @@ using LinearAlgebra
 
 ## Overview
 
-| Type | Mathematical object | Natural signature (autonomous/fixed) |
-|---|---|---|
-| [`Data.VectorField`](@ref CTBase.Data.VectorField) | ``X : \mathcal{X} \to \mathbb{R}^n`` | `X(x)` |
-| [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H(x, p)` |
-| [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃(x, p, u)` |
-| [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H(x, p)` |
-| [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) | ``\vec{H} : T^*\mathcal{X} \to \mathbb{R}^{2n}`` | `HVF(x, p)` |
-| [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) | ``f_c : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^n`` | `fc(x, u)` |
-| [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField) | ``g : \mathcal{X} \to \mathbb{R}^n`` | `g(x)` |
-| [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) | ``u : \cdots \to \mathcal{U}`` | `u()` / `u(x)` / `u(x, p)` |
-| [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint) | ``g : \cdots \to \mathbb{R}^{n_g}`` | `g(x)` / `g(u)` / `g(x, u)` |
-| [`Data.Multiplier`](@ref CTBase.Data.Multiplier) | ``\mu : T^*\mathcal{X} \to \mathbb{R}^{n_g}`` | `\mu(x, p)` |
+| Type | Mathematical object | Out-of-place call | In-place |
+|---|---|---|---|
+| [`Data.VectorField`](@ref CTBase.Data.VectorField) | ``X : \mathcal{X} \to \mathbb{R}^n`` | `X([t, ]x[, v])` | ✓ |
+| [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H([t, ]x, p[, v])` | — |
+| [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃([t, ]x, p, u[, v])` | — |
+| [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H([t, ]x, p[, v])` | — |
+| [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) | ``\vec{H} : T^*\mathcal{X} \to \mathbb{R}^{2n}`` | `HVF([t, ]x, p[, v])` | ✓ |
+| [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) | ``f_c : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^n`` | `fc([t, ]x, u[, v])` | — |
+| [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField) | ``g : \mathcal{X} \to \mathbb{R}^n`` | `g([t, ]x[, v])` | — |
+| [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) | ``u : \cdots \to \mathcal{U}`` | `u([t, ]⋯[, v])`† | — |
+| [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint) | ``g : \cdots \to \mathbb{R}^{n_g}`` | `g([t, ]⋯[, v])`† | — |
+| [`Data.Multiplier`](@ref CTBase.Data.Multiplier) | ``\mu : T^*\mathcal{X} \to \mathbb{R}^{n_g}`` | `μ([t, ]x, p[, v])` | — |
 
-All ten share the same trait axes — time dependence and variable dependence.
-`VectorField` and `HamiltonianVectorField` also carry a mutability trait;
+The mathematical spaces are:
+
+- ``\mathcal{X} \subseteq \mathbb{R}^n`` — the **state space** (``n`` state dimensions).
+- ``\mathcal{U} \subseteq \mathbb{R}^m`` — the **control space** (``m`` control dimensions).
+- ``T^*\mathcal{X} = \mathcal{X} \times \mathbb{R}^n`` — the **cotangent bundle** (state + costate, ``2n`` dimensions).
+- ``\mathbb{R}^{n_v}`` — the **optimisation variable** space (``n_v`` variable dimensions; absent when fixed).
+- ``\mathbb{R}`` — scalars; ``\mathbb{R}^{n_g}`` — constraint values (``n_g`` constraint dimensions).
+- ``\cdots`` — the domain depends on an additional trait (feedback or constraint-kind).
+
+In the call patterns, brackets `[…]` denote optional arguments controlled by traits:
+
+- `t` is present when `is_autonomous=false` (non-autonomous).
+- `v` is present when `is_variable=true` (non-fixed).
+- † `⋯` depends on an additional trait: **feedback** for `ControlLaw` (see below),
+  **constraint-kind** for `PathConstraint` (see below).
+
+All ten share the same time-dependence and variable-dependence trait axes.
+`VectorField` and `HamiltonianVectorField` also carry a mutability trait (in-place / out-of-place);
 `ControlLaw` carries a feedback trait;
 `PathConstraint` carries a constraint-kind trait (see [Traits](traits.md)).
 
@@ -40,9 +56,15 @@ All ten share the same trait axes — time dependence and variable dependence.
 
 ## VectorField
 
-A `VectorField` wraps a Julia function representing ``\dot{x} = X(\cdots)``.
+A `VectorField` wraps a Julia function representing the dynamics ``\dot{x} = X(t, x, v)``.
 
-### Construction
+The **natural** out-of-place call is `X([t, ]x[, v])`, where `t` and `v` are
+optional arguments controlled by the time-dependence and variable-dependence traits.
+A **uniform** call `X(t, x, v)` always works regardless of traits (unused arguments
+are ignored). In-place is supported: the derivative buffer `dx` is prepended,
+giving `X!(dx, [t, ]x[, v])`.
+
+**Construction**
 
 ```@example data
 using CTBase.Data, CTBase.Traits
@@ -65,7 +87,7 @@ vf1
 The `show` output summarises the traits and both call signatures (natural and
 uniform).
 
-### In-place construction
+**In-place construction**
 
 Prefer out-of-place for clarity. Use in-place when avoiding allocations matters:
 
@@ -85,7 +107,7 @@ f_multi(dx, x) = (dx .= -x; nothing)
 vf_explicit = Data.VectorField(f_multi; is_inplace=true)
 ```
 
-### Calling
+**Calling**
 
 ```@example data
 x0 = [1.0, 0.5]
@@ -99,13 +121,18 @@ vf2(0.5, x0)               # non-autonomous natural call
 
 ## Hamiltonian
 
-A `Hamiltonian` wraps a scalar function ``H(x, p) \in \mathbb{R}``.
+A `Hamiltonian` wraps a scalar function ``H(t, x, p, v) \in \mathbb{R}``.
 
 ```math
-H : T^*\mathcal{X} \to \mathbb{R}, \quad (x, p) \mapsto H(x, p).
+H : \mathbb{R} \times T^*\mathcal{X} \times \mathbb{R}^{n_v} \to \mathbb{R}, \quad (t, x, p, v) \mapsto H(t, x, p, v).
 ```
 
-### Construction
+The **natural** call is `H([t, ]x, p[, v])`, where `t` and `v` are optional
+arguments controlled by the time-dependence and variable-dependence traits.
+A **uniform** call `H(t, x, p, v)` always works regardless of traits.
+In-place is not supported (scalar return value).
+
+**Construction**
 
 ```@example data
 # Autonomous, fixed (default): H(x, p)
@@ -120,7 +147,7 @@ h3 = Data.Hamiltonian((x, p, v) -> dot(p, x) * v[1]; is_variable=true)
 h1
 ```
 
-### Calling
+**Calling**
 
 ```@example data
 x0, p0 = [1.0, 0.5], [0.3, 0.7]
@@ -139,14 +166,20 @@ A `HamiltonianVectorField` wraps the map
 when the derivatives are provided **explicitly** (no automatic differentiation).
 
 ```math
-\vec{H}(x, p) = \bigl(\partial_p H(x,p),\; -\partial_x H(x,p)\bigr).
+\vec{H}(t, x, p, v) = \bigl(\partial_p H,\; -\partial_x H\bigr).
 ```
+
+The **natural** out-of-place call is `HVF([t, ]x, p[, v])`, where `t` and `v` are
+optional arguments controlled by the time-dependence and variable-dependence traits.
+A **uniform** call `HVF(t, x, p, v)` always works regardless of traits.
+In-place is supported: the derivative buffers `dx, dp` are prepended,
+giving `HVF!(dx, dp, [t, ]x, p[, v])`.
 
 Use this when the Hamiltonian equations are known analytically. When only the
 scalar Hamiltonian is available and the derivatives must be obtained by automatic
 differentiation, use [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) instead.
 
-### Construction
+**Construction**
 
 ```@example data
 # Harmonic oscillator H = (x²+p²)/2:  ẋ = p, ṗ = -x
@@ -158,14 +191,14 @@ hvf_na = Data.HamiltonianVectorField((t, x, p) -> (p, -x .* t); is_autonomous=fa
 hvf
 ```
 
-### Calling
+**Calling**
 
 ```@example data
 dx, dp = hvf(x0, p0)   # natural call: returns (ẋ, ṗ)
 (dx, dp)
 ```
 
-### The `variable_costate` keyword
+**The `variable_costate` keyword**
 
 For **non-fixed** Hamiltonian vector fields, the call accepts an optional
 `variable_costate` keyword (default `false`).
@@ -215,12 +248,17 @@ For a plain user-supplied function that does not accept `variable_costate`, pass
 
 ## PseudoHamiltonian
 
-A `PseudoHamiltonian` wraps a scalar function ``\tilde{H}(x, p, u) \in \mathbb{R}``
+A `PseudoHamiltonian` wraps a scalar function ``\tilde{H}(t, x, p, u, v) \in \mathbb{R}``
 that extends the standard Hamiltonian with an explicit control argument ``u``.
 
 ```math
-\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}, \quad (x, p, u) \mapsto \tilde{H}(x, p, u).
+\tilde{H} : \mathbb{R} \times T^*\mathcal{X} \times \mathcal{U} \times \mathbb{R}^{n_v} \to \mathbb{R}, \quad (t, x, p, u, v) \mapsto \tilde{H}(t, x, p, u, v).
 ```
+
+The **natural** call is `H̃([t, ]x, p, u[, v])`, where `t` and `v` are optional
+arguments controlled by the time-dependence and variable-dependence traits.
+A **uniform** call `H̃(t, x, p, u, v)` always works regardless of traits.
+In-place is not supported (scalar return value).
 
 Unlike [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), which encodes the
 control implicitly, a pseudo-Hamiltonian takes the control as an additional
@@ -228,7 +266,7 @@ argument. This enables dynamic closed-loop flows where the control is computed
 from the pseudo-Hamiltonian's maximisation condition (PMP stationarity:
 ``\partial \tilde{H} / \partial u = 0``).
 
-### Construction
+**Construction**
 
 ```@example data
 # Autonomous, fixed (default): H̃(x, p, u)
@@ -243,7 +281,7 @@ ph3 = Data.PseudoHamiltonian((x, p, u, v) -> dot(p, x) + u^2 + v[1]; is_variable
 ph1
 ```
 
-### Calling
+**Calling**
 
 ```@example data
 x0, p0, u0 = [1.0, 0.5], [0.3, 0.7], 2.0
@@ -269,10 +307,16 @@ dynamic closed-loop [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw):
 H(t, x, p, v) = \tilde{H}(t, x, p, u(t, x, p, v), v).
 ```
 
+The **natural** call is `H([t, ]x, p[, v])`, where the time/variable dependences
+are the **join** of the pseudo-Hamiltonian and the control law —
+`NonAutonomous`/`NonFixed` win.
+A **uniform** call `H(t, x, p, v)` always works regardless of traits.
+In-place is not supported (scalar return value).
+
 It subtypes [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), so it
 *is* a Hamiltonian and can be used anywhere one is expected.
 
-### Construction
+**Construction**
 
 ```@example data
 # Pseudo-Hamiltonian H̃(x, p, u) = p⋅x + u²  (scalar state/costate/control)
@@ -291,7 +335,7 @@ The composed time/variable dependences are the **join** of the two inputs —
 `NonAutonomous`/`NonFixed` win. A time-varying feedback on an autonomous
 pseudo-Hamiltonian correctly yields a `NonAutonomous` composed Hamiltonian.
 
-### Calling
+**Calling**
 
 ```@example data
 x0, p0 = 1.0, 0.5
@@ -300,7 +344,7 @@ H(x0, p0)                    # natural call
 H(0.0, x0, p0, nothing)      # uniform call
 ```
 
-### Getters
+**Getters**
 
 ```@example data
 Data.pseudo_hamiltonian(H)   # the underlying PseudoHamiltonian
@@ -315,18 +359,19 @@ The constructor rejects non-`DynClosedLoop` laws (`OpenLoop`, `ClosedLoop`) with
 ## ControlLaw
 
 A `ControlLaw` wraps a function ``u(\cdots)`` that provides the control input for
-an optimal control problem. The feedback trait (see [Traits](traits.md))
-determines which arguments the control law depends on.
+an optimal control problem. The **feedback** trait (see [Traits](traits.md))
+determines which primal variables the control law depends on, and the
+time/variable traits add `t` and `v` as for other data types.
 
 Three user-facing constructors fix the feedback trait:
 
-| Constructor | Feedback trait | Natural signature (autonomous/fixed) |
+| Constructor | Feedback trait | Out-of-place call |
 |---|---|---|
-| [`Data.OpenLoop`](@ref CTBase.Data.OpenLoop) | `OpenLoopFeedback` | `u()` |
-| [`Data.ClosedLoop`](@ref CTBase.Data.ClosedLoop) | `ClosedLoopFeedback` | `u(x)` |
-| [`Data.DynClosedLoop`](@ref CTBase.Data.DynClosedLoop) | `DynClosedLoopFeedback` | `u(x, p)` |
+| [`Data.OpenLoop`](@ref CTBase.Data.OpenLoop) | `OpenLoopFeedback` | `u([t][, v])` |
+| [`Data.ClosedLoop`](@ref CTBase.Data.ClosedLoop) | `ClosedLoopFeedback` | `u([t, ]x[, v])` |
+| [`Data.DynClosedLoop`](@ref CTBase.Data.DynClosedLoop) | `DynClosedLoopFeedback` | `u([t, ]x, p[, v])` |
 
-### Construction
+**Construction**
 
 ```@example data
 # Open-loop, autonomous, fixed (default): u()
@@ -348,16 +393,16 @@ other data types:
 u_ol_na = Data.OpenLoop((t, v) -> t * v; is_autonomous=false, is_variable=true)
 ```
 
-### Calling
+**Calling**
 
 Every `ControlLaw` is callable via its **natural** signature (matching the
 traits) and via a **uniform** signature that depends on the feedback trait:
 
-| Feedback | Natural `(Aut, Fixed)` | Uniform |
+| Feedback | Natural | Uniform |
 |---|---|---|
-| `OpenLoop` | `u()` | `u(t, v)` |
-| `ClosedLoop` | `u(x)` | `u(t, x, v)` |
-| `DynClosedLoop` | `u(x, p)` | `u(t, x, p, v)` |
+| `OpenLoop` | `u([t][, v])` | `u(t, v)` |
+| `ClosedLoop` | `u([t, ]x[, v])` | `u(t, x, v)` |
+| `DynClosedLoop` | `u([t, ]x, p[, v])` | `u(t, x, p, v)` |
 
 ```@example data
 u_ol()                         # natural call
@@ -381,17 +426,18 @@ while dynamic closed-loop control laws carry
 
 A `PathConstraint` wraps a function ``g(\cdots)`` that evaluates a path constraint
 along the trajectory. The **constraint-kind** trait (see [Traits](traits.md))
-determines which primal variables the constraint depends on.
+determines which primal variables the constraint depends on, and the
+time/variable traits add `t` and `v` as for other data types.
 
 Three user-facing constructors fix the constraint kind:
 
-| Constructor | Constraint kind | Natural signature (autonomous/fixed) |
+| Constructor | Constraint kind | Out-of-place call |
 |---|---|---|
-| [`Data.StateConstraint`](@ref CTBase.Data.StateConstraint) | `StateConstraintKind` | `g(x)` |
-| [`Data.ControlConstraint`](@ref CTBase.Data.ControlConstraint) | `ControlConstraintKind` | `g(u)` |
-| [`Data.MixedConstraint`](@ref CTBase.Data.MixedConstraint) | `MixedConstraintKind` | `g(x, u)` |
+| [`Data.StateConstraint`](@ref CTBase.Data.StateConstraint) | `StateConstraintKind` | `g([t, ]x[, v])` |
+| [`Data.ControlConstraint`](@ref CTBase.Data.ControlConstraint) | `ControlConstraintKind` | `g([t, ]u[, v])` |
+| [`Data.MixedConstraint`](@ref CTBase.Data.MixedConstraint) | `MixedConstraintKind` | `g([t, ]x, u[, v])` |
 
-### Construction
+**Construction**
 
 ```@example data
 # State constraint, autonomous, fixed (default): g(x)
@@ -409,7 +455,7 @@ g_state_na = Data.StateConstraint((t, x) -> t * x[1]; is_autonomous=false)
 g_state
 ```
 
-### Calling
+**Calling**
 
 Every `PathConstraint` is callable via its **natural** signature (matching the
 traits) and via a **uniform** signature `g(t, x, u, v)` that ignores unused
@@ -438,12 +484,19 @@ Traits.is_state_constraint(g_state), Traits.is_control_constraint(g_ctrl), Trait
 
 ## Multiplier
 
-A `Multiplier` wraps a function ``\mu(t, x, p[, v])`` returning the Lagrange
-multiplier associated with a path constraint. It has the same call structure as a
+A `Multiplier` wraps a function ``\mu(t, x, p, v)`` returning the Lagrange
+multiplier associated with a path constraint.
+
+The **natural** call is `μ([t, ]x, p[, v])`, where `t` and `v` are optional
+arguments controlled by the time-dependence and variable-dependence traits.
+A **uniform** call `μ(t, x, p, v)` always works regardless of traits.
+In-place is not supported.
+
+It has the same call structure as a
 [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) — it depends on the state and
 costate — but carries no dynamics semantics of its own.
 
-### Construction
+**Construction**
 
 ```@example data
 # Autonomous, fixed (default): μ(x, p)
@@ -455,7 +508,7 @@ costate — but carries no dynamics semantics of its own.
 μ1
 ```
 
-### Calling
+**Calling**
 
 ```@example data
 x0, p0 = [1.0, 0.5], [0.3, 0.7]
@@ -469,17 +522,20 @@ x0, p0 = [1.0, 0.5], [0.3, 0.7]
 
 ## ControlledVectorField
 
-A `ControlledVectorField` wraps a function ``f_c(t, x, u[, v])`` that returns the
+A `ControlledVectorField` wraps a function ``f_c(t, x, u, v)`` that returns the
 state derivative with an **explicit control argument** ``u``. It is the state-space
 analogue of [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian): where a
 pseudo-Hamiltonian carries the control alongside the costate, a controlled vector
 field carries the control alongside the state.
 
-Unlike [`Data.VectorField`](@ref CTBase.Data.VectorField), it is always
-**out-of-place** (no mutability trait) and carries
-[`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics).
+The **natural** call is `fc([t, ]x, u[, v])`, where `t` and `v` are optional
+arguments controlled by the time-dependence and variable-dependence traits.
+A **uniform** call `fc(t, x, u, v)` always works regardless of traits.
+In-place is not supported (always out-of-place).
 
-### Construction
+It carries [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics).
+
+**Construction**
 
 ```@example data
 # Autonomous, fixed (default): fc(x, u)
@@ -497,7 +553,7 @@ x0, u0 = 1.0, 2.0
 fc1
 ```
 
-### Calling
+**Calling**
 
 ```@example data
 fc1(x0, u0)                       # natural call
@@ -521,10 +577,16 @@ where the control is `u(t, v)` for an open-loop law and `u(t, x, v)` for a
 closed-loop law. It is the state-space analogue of
 [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian).
 
+The **natural** call is `g([t, ]x[, v])`, where the time/variable dependences
+are the **join** of the controlled vector field and the control law —
+`NonAutonomous`/`NonFixed` win.
+A **uniform** call `g(t, x, v)` always works regardless of traits.
+In-place is not supported (always out-of-place).
+
 It subtypes [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField) with
 `OutOfPlace` mutability, so it *is* a vector field usable anywhere one is expected.
 
-### Construction
+**Construction**
 
 ```@example data
 # Controlled vector field fc(x, u) = -x + u  (scalar state/control)
@@ -542,14 +604,14 @@ g
 The composed time/variable dependences are the **join** of the two inputs —
 `NonAutonomous`/`NonFixed` win.
 
-### Calling
+**Calling**
 
 ```@example data
 g(3.0)                     # natural call: g(x) = -2x
 g(0.0, 3.0, nothing)       # uniform call (t, x, v)
 ```
 
-### Getters
+**Getters**
 
 ```@example data
 Data.controlled_vector_field(g)   # the underlying ControlledVectorField

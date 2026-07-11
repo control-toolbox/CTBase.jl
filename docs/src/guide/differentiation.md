@@ -117,8 +117,14 @@ argument comes first, the frozen ones follow in slot order:
 H(x, p) = 0.5 * sum(p .^ 2) + sum(x .^ 2)
 x = [1.0, 2.0]; p = [3.0, 4.0]
 
-∂x = Differentiation.differentiate(backend, H, Val(1), x, p)   # active = x (slot 1), const = p
-∂p = Differentiation.differentiate(backend, H, Val(2), p, x)   # active = p (slot 2), const = x
+# active = x (slot 1), const = p
+∂x = Differentiation.differentiate(
+    backend, H, Val(1), x, p,
+)
+# active = p (slot 2), const = x
+∂p = Differentiation.differentiate(
+    backend, H, Val(2), p, x,
+)
 (∂x, ∂p)
 ```
 
@@ -152,7 +158,9 @@ Hamilton's equations (`ẋ = ∂H/∂p`, `ṗ = -∂H/∂x`):
 ```@example diff
 # H(x, p) = ½(‖x‖² + ‖p‖²)  →  ∂H/∂x = x,  ∂H/∂p = p
 h = Data.Hamiltonian((x, p) -> 0.5 * (sum(abs2, x) + sum(abs2, p)))
-∂x, ∂p = Differentiation.hamiltonian_gradient(backend, h, 0.0, [1.0, 2.0], [3.0, 4.0], nothing)
+∂x, ∂p = Differentiation.hamiltonian_gradient(
+    backend, h, 0.0, [1.0, 2.0], [3.0, 4.0], nothing,
+)
 (∂x, ∂p)
 ```
 
@@ -162,8 +170,13 @@ returns `∂H/∂v`:
 
 ```@example diff
 # H(x, p, v) = ½(‖x‖² + ‖p‖² + ‖v‖²)  →  ∂H/∂v = v
-hv = Data.Hamiltonian((x, p, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p) + sum(abs2, v)); is_variable=true)
-Differentiation.variable_gradient(backend, hv, 0.0, [1.0, 2.0], [3.0, 4.0], [5.0, 6.0])
+hv = Data.Hamiltonian(
+    (x, p, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p) + sum(abs2, v));
+    is_variable=true,
+)
+Differentiation.variable_gradient(
+    backend, hv, 0.0, [1.0, 2.0], [3.0, 4.0], [5.0, 6.0],
+)
 ```
 
 ## Pseudo-Hamiltonian gradients
@@ -177,8 +190,12 @@ Hamilton's equations:
 
 ```@example diff
 # H̃(x, p, u) = ½(‖x‖² + ‖p‖²) + u²  →  ∂H̃/∂x = x, ∂H̃/∂p = p
-ph = Data.PseudoHamiltonian((x, p, u) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2)
-∂x, ∂p = Differentiation.pseudo_hamiltonian_gradient(backend, ph, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, nothing)
+ph = Data.PseudoHamiltonian(
+    (x, p, u) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2,
+)
+∂x, ∂p = Differentiation.pseudo_hamiltonian_gradient(
+    backend, ph, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, nothing,
+)
 (∂x, ∂p)
 ```
 
@@ -188,14 +205,21 @@ Maximum Principle stationarity condition:
 
 ```@example diff
 # ∂H̃/∂u = 2u = 4.0
-Differentiation.pseudo_hamiltonian_control_gradient(backend, ph, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, nothing)
+Differentiation.pseudo_hamiltonian_control_gradient(
+    backend, ph, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, nothing,
+)
 ```
 
 For a non-fixed pseudo-Hamiltonian, the `v` argument carries the variable:
 
 ```@example diff
-phv = Data.PseudoHamiltonian((x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1]; is_variable=true)
-Differentiation.pseudo_hamiltonian_control_gradient(backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0])
+phv = Data.PseudoHamiltonian(
+    (x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1];
+    is_variable=true,
+)
+Differentiation.pseudo_hamiltonian_control_gradient(
+    backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0],
+)
 ```
 
 ## Pseudo-Hamiltonian variable gradient
@@ -207,8 +231,13 @@ the total derivative `∂/∂v[H̃(t, x, p, u(t,x,p,v), v)]`:
 
 ```@example diff
 # H̃(x, p, u, v) = ½(‖x‖² + ‖p‖²) + u² + v[1]  →  ∂H̃/∂v = [1.0]
-phv = Data.PseudoHamiltonian((x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1]; is_variable=true)
-Differentiation.pseudo_variable_gradient(backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0])
+phv = Data.PseudoHamiltonian(
+    (x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1];
+    is_variable=true,
+)
+Differentiation.pseudo_variable_gradient(
+    backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0],
+)
 ```
 
 This differs from [`Differentiation.variable_gradient`](@ref CTBase.Differentiation.variable_gradient)
@@ -227,7 +256,9 @@ struct MyBackend <: Differentiation.AbstractADBackend
     options::Strategies.StrategyOptions
 end
 try # hide
-Differentiation.gradient(MyBackend(Strategies.StrategyOptions()), x -> sum(x), [1.0])
+Differentiation.gradient(
+    MyBackend(Strategies.StrategyOptions()), x -> sum(x), [1.0],
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide

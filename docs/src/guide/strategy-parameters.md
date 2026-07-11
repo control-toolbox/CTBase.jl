@@ -120,13 +120,16 @@ nothing # hide
 The dispatch is on `::Type{FakeOptimizer{P}}` — not on a second argument:
 
 ```@example params
-function Strategies.metadata(::Type{FakeOptimizer{P}}) where {P <: Strategies.AbstractStrategyParameter}
+function Strategies.metadata(
+    ::Type{FakeOptimizer{P}},
+) where {P <: Strategies.AbstractStrategyParameter}
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(
             name        = :precision,
             type        = Symbol,
             default     = __fake_default_precision(P),
-            description = "Numerical precision (:float64 for CPU, :float32 for GPU)",
+            description = "Numerical precision
+                (:float64 for CPU, :float32 for GPU)",
             computed    = true,
         ),
         Options.OptionDefinition(
@@ -158,8 +161,12 @@ Strategies.metadata(FakeOptimizer{Strategies.GPU})
 The constructor is specialized on the parameterized type so `build_strategy_options` calls the right `metadata`:
 
 ```@example params
-function FakeOptimizer{P}(; mode::Symbol = :strict, kwargs...) where {P <: Strategies.AbstractStrategyParameter}
-    opts = Strategies.build_strategy_options(FakeOptimizer{P}; mode = mode, kwargs...)
+function FakeOptimizer{P}(;
+    mode::Symbol = :strict, kwargs...,
+) where {P <: Strategies.AbstractStrategyParameter}
+    opts = Strategies.build_strategy_options(
+        FakeOptimizer{P}; mode = mode, kwargs...,
+    )
     return FakeOptimizer{P}(opts)
 end
 nothing # hide
@@ -188,7 +195,9 @@ solver = FakeOptimizer{Strategies.GPU}(max_iter = 200)
 ```@repl params
 solver[:precision]
 solver[:max_iter]
-Strategies.source(Strategies.options(solver), :max_iter)
+Strategies.source(
+    Strategies.options(solver), :max_iter,
+)
 ```
 
 ## Registering Parameterized Strategies
@@ -210,11 +219,19 @@ Strategies.strategy_ids(AbstractFakeOptimizer, registry)
 ```
 
 ```@example params
-Strategies.type_from_id(:fake_optimizer, AbstractFakeOptimizer, registry; parameter=Strategies.CPU)
+Strategies.type_from_id(
+    :fake_optimizer,
+    AbstractFakeOptimizer, registry;
+    parameter=Strategies.CPU,
+)
 ```
 
 ```@example params
-Strategies.type_from_id(:fake_optimizer, AbstractFakeOptimizer, registry; parameter=Strategies.GPU)
+Strategies.type_from_id(
+    :fake_optimizer,
+    AbstractFakeOptimizer, registry;
+    parameter=Strategies.GPU,
+)
 ```
 
 ## Building Strategies from the Registry
@@ -222,12 +239,18 @@ Strategies.type_from_id(:fake_optimizer, AbstractFakeOptimizer, registry; parame
 `build_strategy` accepts an optional parameter type as second argument:
 
 ```@example params
-Strategies.build_strategy(:fake_optimizer, Strategies.CPU, AbstractFakeOptimizer, registry;
-    max_iter = 300)
+Strategies.build_strategy(
+    :fake_optimizer, Strategies.CPU,
+    AbstractFakeOptimizer, registry;
+    max_iter = 300,
+)
 ```
 
 ```@example params
-Strategies.build_strategy(:fake_optimizer, Strategies.GPU, AbstractFakeOptimizer, registry)
+Strategies.build_strategy(
+    :fake_optimizer, Strategies.GPU,
+    AbstractFakeOptimizer, registry,
+)
 ```
 
 ## Method Tuple Routing
@@ -240,8 +263,12 @@ param = Strategies.extract_global_parameter_from_method(method, registry)
 ```
 
 ```@example params
-id = Strategies.extract_id_from_method(method, AbstractFakeOptimizer, registry)
-Strategies.build_strategy(id, param, AbstractFakeOptimizer, registry)
+id = Strategies.extract_id_from_method(
+    method, AbstractFakeOptimizer, registry,
+)
+Strategies.build_strategy(
+    id, param, AbstractFakeOptimizer, registry,
+)
 ```
 
 ## Mixed Registries
@@ -265,7 +292,9 @@ function Strategies.metadata(::Type{<:FallbackOptimizer})
 end
 
 function FallbackOptimizer(; mode::Symbol = :strict, kwargs...)
-    opts = Strategies.build_strategy_options(FallbackOptimizer; mode = mode, kwargs...)
+    opts = Strategies.build_strategy_options(
+        FallbackOptimizer; mode = mode, kwargs...,
+    )
     return FallbackOptimizer(opts)
 end
 
@@ -278,7 +307,9 @@ mixed_registry = Strategies.create_registry(
 ```
 
 ```@example params
-Strategies.strategy_ids(AbstractFakeOptimizer, mixed_registry)
+Strategies.strategy_ids(
+    AbstractFakeOptimizer, mixed_registry,
+)
 ```
 
 ## `describe` with a Registry

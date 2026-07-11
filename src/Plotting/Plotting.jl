@@ -41,6 +41,7 @@ module Plotting
 
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES, TYPEDFIELDS
 import CTBase.Exceptions
+import CTBase.Core
 
 include(joinpath(@__DIR__, "ir.jl"))
 include(joinpath(@__DIR__, "panel.jl"))

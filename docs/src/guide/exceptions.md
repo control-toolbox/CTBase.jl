@@ -298,7 +298,11 @@ The enriched display automatically suggests:
 ```@repl
 using CTBase
 try # hide
-throw(CTBase.Exceptions.ExtensionError(:Plots, feature="result visualization", context="plot_results function"))
+throw(CTBase.Exceptions.ExtensionError(
+    :Plots,
+    feature="result visualization",
+    context="plot_results function",
+))
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -351,7 +355,12 @@ The enriched display shows the solver-specific return code:
 
 ```@repl solver-failure
 try # hide
-throw(CTBase.Exceptions.SolverFailure("ODE integration failed", retcode=":Unstable", suggestion="Reduce time step or check initial conditions", context="SciML integrator"))
+throw(CTBase.Exceptions.SolverFailure(
+    "ODE integration failed",
+    retcode=":Unstable",
+    suggestion="Reduce time step or check initial conditions",
+    context="SciML integrator",
+))
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -380,13 +389,13 @@ end # hide
 
 | Situation | Exception | Example |
 |-----------|-----------|---------|
-| Invalid argument value | [`CTBase.Exceptions.IncorrectArgument`](@ref) | `throw(IncorrectArgument("x must be > 0", got="-5", expected="> 0"))` |
-| Wrong function call order | [`CTBase.Exceptions.PreconditionError`](@ref) | `throw(PreconditionError("Must initialize before configure"))` |
-| Unimplemented interface | [`CTBase.Exceptions.NotImplemented`](@ref) | `throw(NotImplemented("run! not implemented for MyType"))` |
-| Parsing error | [`CTBase.Exceptions.ParsingError`](@ref) | `throw(ParsingError("unexpected token", location="line 10"))` |
-| Ambiguous description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) | `throw(AmbiguousDescription((:x,), candidates=["(:a,:b)", "(:c,:d)"]))` |
-| Missing optional dependency | [`CTBase.Exceptions.ExtensionError`](@ref) | `throw(ExtensionError(:Plots, feature="plotting"))` |
-| Solver/integrator failure | [`CTBase.Exceptions.SolverFailure`](@ref) | `throw(SolverFailure("ODE failed", retcode=":Unstable"))` |
+| Invalid argument value | [`CTBase.Exceptions.IncorrectArgument`](@ref) | `throw(IncorrectArgument("x must be > 0", got="-5"))` |
+| Wrong function call order | [`CTBase.Exceptions.PreconditionError`](@ref) | `throw(PreconditionError("Must init first"))` |
+| Unimplemented interface | [`CTBase.Exceptions.NotImplemented`](@ref) | `throw(NotImplemented("run! not implemented"))` |
+| Parsing error | [`CTBase.Exceptions.ParsingError`](@ref) | `throw(ParsingError("unexpected token"))` |
+| Ambiguous description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) | `throw(AmbiguousDescription((:x,)))` |
+| Missing optional dependency | [`CTBase.Exceptions.ExtensionError`](@ref) | `throw(ExtensionError(:Plots))` |
+| Solver/integrator failure | [`CTBase.Exceptions.SolverFailure`](@ref) | `throw(SolverFailure("ODE failed"))` |
 
 ## Enriched Error Display
 

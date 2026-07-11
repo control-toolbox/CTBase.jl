@@ -54,8 +54,8 @@ const TEST_DIR = @__DIR__
 CTBase.DevTools.run_tests(;
     args=String.(ARGS),                 # Pass command line arguments
     testset_name="MyPackage Tests",     # Name of the main testset
-    available_tests=[                   # List of available test groups/files
-        "suite/*"                       # Use glob pattern to include all tests in suite/
+    available_tests=[                   # Available test groups
+        "suite/*"                       # Glob: all tests in suite/
     ],
     filename_builder = name -> "test_$(name).jl",
     funcname_builder = name -> "test_$(name)",
@@ -110,7 +110,8 @@ julia --project -e 'using Pkg; Pkg.test("MyPackage")'
 
 ```bash
 julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["utils"])'
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["core", "utils"])'
+julia --project -e 'using Pkg; Pkg.test("MyPackage";
+    test_args=["core", "utils"])'
 ```
 
 ### Path prefix stripping
@@ -120,7 +121,8 @@ Selection arguments starting with `test/` are **automatically stripped**, so the
 ```bash
 # These two commands run the same tests:
 julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["suite"])'
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["test/suite"])'
+julia --project -e 'using Pkg; Pkg.test("MyPackage";
+    test_args=["test/suite"])'
 ```
 
 This is convenient when tab-completing paths from the project root.
@@ -245,12 +247,15 @@ The `on_test_start` and `on_test_done` callbacks allow custom actions during the
 struct TestRunInfo
     spec::Union{Symbol,String}           # Test identifier
     filename::String                     # Absolute path of the test file
-    func_symbol::Union{Symbol,Nothing}   # Function to call (nothing if eval_mode=false)
-    index::Int                           # 1-based index in the selected list
+    func_symbol::Union{Symbol,Nothing}   # Function to call
+                                          # (nothing if eval_mode=false)
+    index::Int                           # 1-based index
     total::Int                           # Total number of selected tests
     status::Symbol                       # See below
-    error::Union{Exception,Nothing}      # Captured exception (only when status == :error)
-    elapsed::Union{Float64,Nothing}      # Wall-clock seconds (only in on_test_done)
+    error::Union{Exception,Nothing}      # Captured exception
+                                          # (only when status == :error)
+    elapsed::Union{Float64,Nothing}      # Wall-clock seconds
+                                          # (only in on_test_done)
 end
 ```
 
@@ -401,7 +406,8 @@ The progress bar detects `@test` failures by scanning the enclosing testset resu
 Run tests with verbose output to see detailed information:
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["--verbose", "utils"])'
+julia --project -e 'using Pkg; Pkg.test("MyPackage";
+    test_args=["--verbose", "utils"])'
 ```
 
 ## Best Practices

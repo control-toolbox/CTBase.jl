@@ -121,3 +121,44 @@ const _TITLE_FONT_SIZE = 10
 Default axis-label font size in points, used by the Plots renderer.
 """
 const _LABEL_FONT_SIZE = 10
+
+# --- display -----------------------------------------------------------------
+
+"""
+$(TYPEDSIGNATURES)
+
+Compact one-line display of a [`Panel`](@ref).
+
+See also: `Base.show`
+"""
+function Base.show(io::IO, p::Panel)
+    fmt = Core.get_format_codes(io)
+    print(io, fmt.name, "Panel", fmt.reset, "(")
+    print(io, fmt.label, repr(p.title), fmt.reset, ", ")
+    print(io, fmt.value, n_components(p), fmt.reset, " components, ")
+    print(io, fmt.value, length(p.x), fmt.reset, " pts)")
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Pretty display of a [`Panel`](@ref), showing its title, labels,
+and data dimensions.
+
+See also: `Base.show`
+"""
+function Base.show(io::IO, ::MIME"text/plain", p::Panel)
+    fmt = Core.get_format_codes(io)
+    n = n_components(p)
+    np = length(p.x)
+    print(io, fmt.name, "Panel", fmt.reset, " ")
+    print(io, fmt.label, repr(p.title), fmt.reset)
+    print(io, " (", fmt.value, n, fmt.reset, n == 1 ? " component, " : " components, ")
+    print(io, fmt.value, np, fmt.reset, np == 1 ? " point)" : " points)")
+    named = findall(!isempty, p.labels)
+    for (j, i) in enumerate(named)
+        is_last = j == length(named)
+        prefix = is_last ? "└─ " : "├─ "
+        print(io, "\n", prefix, fmt.label, p.labels[i], fmt.reset)
+    end
+end
