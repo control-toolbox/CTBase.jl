@@ -275,10 +275,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("TestRunner", "types.jl"),
             ),
         ),
-        (
-            :CTBasePlots,
-            ext(joinpath("CTBasePlots.jl")),
-        ),
+        (:CTBasePlots, ext(joinpath("CTBasePlots.jl"))),
     ]
         extmod = Base.get_extension(CTBase, sym)
         isnothing(extmod) && @warn "Extension $sym is not loaded"
