@@ -21,8 +21,13 @@ using Plots
 
 # Make extension modules available in Main so that @docs blocks can resolve
 # qualified bindings like CTFlowsSciMLIntegrator.SciMLIntegrationResult.
-for _ext_sym in
-    (:TestRunner, :CoveragePostprocessing, :DocumenterReference, :CTBaseDifferentiationInterface, :CTBasePlots)
+for _ext_sym in (
+    :TestRunner,
+    :CoveragePostprocessing,
+    :DocumenterReference,
+    :CTBaseDifferentiationInterface,
+    :CTBasePlots,
+)
     _m = Base.get_extension(CTBase, _ext_sym)
     isnothing(_m) || @eval Main const $_ext_sym = $_m
 end

@@ -2,7 +2,7 @@ module TestCoreFunctionUtils
 
 using Test: Test
 import CTBase.Core
-import ForwardDiff
+using ForwardDiff: ForwardDiff
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
