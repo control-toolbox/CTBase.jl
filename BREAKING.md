@@ -2,6 +2,26 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Breaking changes (0.27.5-beta)
+
+- **`Interpolation`: `LinearInterpolant` and `ConstantInterpolant` aliases removed.**
+  The type aliases `LinearInterpolant = Interpolant{Linear}` and
+  `ConstantInterpolant = Interpolant{Constant}` have been deleted from
+  `CTBase.Interpolation` and are no longer exported.
+
+  **Migration:** replace `LinearInterpolant` → `Interpolant{Linear}` and
+  `ConstantInterpolant` → `Interpolant{Constant}`.
+
+  ```julia
+  # before
+  interp = CTBase.Interpolation.ctinterpolate(x, f)
+  interp isa CTBase.Interpolation.LinearInterpolant
+
+  # after
+  interp = CTBase.Interpolation.ctinterpolate(x, f)
+  interp isa CTBase.Interpolation.Interpolant{CTBase.Interpolation.Linear}
+  ```
+
 ## Breaking changes (0.25.0-beta)
 
 - **`NotProvided` / `NotProvidedType` removed from `CTBase.Options`.** They now live and are

@@ -46,7 +46,7 @@ the bounds of `x` (returns `f[1]` for `t < x[1]` and `f[end]` for `t >= x[end]`)
 - `f`: A vector of values to interpolate.
 
 # Returns
-A callable [`LinearInterpolant`](@ref) that can be evaluated at new points.
+A callable [`Interpolant{Linear}`](@ref) that can be evaluated at new points.
 
 # Example
 ```julia-repl
@@ -78,7 +78,7 @@ This implements the standard steppost behavior for optimal control:
 - `f`: A vector of values to interpolate.
 
 # Returns
-A callable [`ConstantInterpolant`](@ref) that can be evaluated at new points.
+A callable [`Interpolant{Constant}`](@ref) that can be evaluated at new points.
 
 # Example
 ```julia-repl

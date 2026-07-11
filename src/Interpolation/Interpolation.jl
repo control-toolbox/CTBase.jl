@@ -15,7 +15,6 @@ include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "ctinterpolate.jl"))
 include(joinpath(@__DIR__, "display.jl"))
 
-export ctinterpolate, ctinterpolate_constant
-export Interpolant, LinearInterpolant, ConstantInterpolant
+export ctinterpolate, ctinterpolate_constant, Interpolant
 
 end # module Interpolation
