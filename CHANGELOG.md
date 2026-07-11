@@ -5,6 +5,21 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.5-beta] - 2026-07-11
+
+### 💥 Breaking Changes
+
+#### **Interpolation** — `LinearInterpolant` / `ConstantInterpolant` aliases removed
+
+- **Removed the `LinearInterpolant` and `ConstantInterpolant` type aliases** from
+  `CTBase.Interpolation`. Use the parameterised form `Interpolant{Linear}` and
+  `Interpolant{Constant}` instead. The aliases are no longer exported.
+- **Why**: the aliases were redundant with the parameterised `Interpolant{M}` type and
+  added clutter to the public API. The parameterised form is already used everywhere
+  internally.
+- **Migration**: replace `LinearInterpolant` → `Interpolant{Linear}` and
+  `ConstantInterpolant` → `Interpolant{Constant}`. See [BREAKING.md](BREAKING.md).
+
 ## [0.27.4-beta] - 2026-07-10
 
 ### 🐛 Bug Fixes

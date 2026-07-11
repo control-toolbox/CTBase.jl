@@ -37,8 +37,7 @@ that selects the evaluation rule, so the call is type-stable.
 
 # Construction
 Build instances through the factories [`ctinterpolate`](@ref) (linear) and
-[`ctinterpolate_constant`](@ref) (piecewise-constant), or directly via the aliases
-[`LinearInterpolant`](@ref) / [`ConstantInterpolant`](@ref).
+[`ctinterpolate_constant`](@ref) (piecewise-constant).
 """
 struct Interpolant{M<:AbstractInterpolation,TX,TF} <: Function
     x::TX
@@ -49,16 +48,6 @@ end
 function Interpolant{M}(x::TX, f::TF) where {M<:AbstractInterpolation,TX,TF}
     return Interpolant{M,TX,TF}(x, f)
 end
-
-"""
-Alias for a linear [`Interpolant`](@ref).
-"""
-const LinearInterpolant = Interpolant{Linear}
-
-"""
-Alias for a piecewise-constant [`Interpolant`](@ref).
-"""
-const ConstantInterpolant = Interpolant{Constant}
 
 """
 $(TYPEDSIGNATURES)

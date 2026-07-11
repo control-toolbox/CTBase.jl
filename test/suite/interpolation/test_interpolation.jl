@@ -116,14 +116,14 @@ function test_interpolation()
             interp = Interpolation.ctinterpolate([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
             Test.@test interp isa Function
             Test.@test interp isa Interpolation.Interpolant
-            Test.@test interp isa Interpolation.LinearInterpolant
+            Test.@test interp isa Interpolation.Interpolant{Interpolation.Linear}
             Test.@test Interpolation.method(interp) === Interpolation.Linear
             Test.@test occursin("linear", sprint(show, interp))
             Test.@test occursin("3 nodes", sprint(show, interp))
 
             c = Interpolation.ctinterpolate_constant([0.0, 1.0, 2.0], [1.0, 2.0, 3.0])
             Test.@test c isa Function
-            Test.@test c isa Interpolation.ConstantInterpolant
+            Test.@test c isa Interpolation.Interpolant{Interpolation.Constant}
             Test.@test Interpolation.method(c) === Interpolation.Constant
             Test.@test occursin("constant", sprint(show, c))
 
