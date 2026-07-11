@@ -58,7 +58,7 @@ which makes the call type-stable:
 typeof(interp)
 ```
 
-The method can be recovered with [`method`](@ref):
+The method can be recovered with [`method`](@ref CTBase.Interpolation.method):
 
 ```@repl interp
 CTBase.Interpolation.method(interp)
@@ -78,7 +78,7 @@ const_interp
 | :--- | :--- |
 | [`ctinterpolate`](@ref) | Linear interpolation with flat extrapolation |
 | [`ctinterpolate_constant`](@ref) | Piecewise-constant (steppost) interpolation |
-| [`method`](@ref) | Return the interpolation method trait of an `Interpolant` |
+| [`method`](@ref CTBase.Interpolation.method) | Return the interpolation method trait of an `Interpolant` |
 
 ## See Also
 
