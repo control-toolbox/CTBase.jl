@@ -160,7 +160,12 @@ CTBase.automatic_reference_documentation(;
     public=true,
     private=false,
     public_title="User API",
-    public_description="This page documents the public interface for end users. All functions listed here are stable and safe to use in your applications.",
+    public_description="""
+        This page documents the public interface
+        for end users. All functions listed here
+        are stable and safe to use in your
+        applications.
+    """,
     filename="api",
 )
 ```
@@ -436,7 +441,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
       - name: Install dependencies
-        run: julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        run: |
+          julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build documentation
         run: julia --project=docs docs/make.jl
       - name: Deploy to GitHub Pages

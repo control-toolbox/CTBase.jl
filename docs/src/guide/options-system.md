@@ -38,9 +38,11 @@ def = OptionDefinition(
     default     = 1000,
     description = "Maximum number of iterations",
     aliases     = (:maxiter,),
-    validator   = x -> x >= 0 || throw(CTBase.Exceptions.IncorrectArgument(
-        "Invalid max_iter", got = "$x", expected = ">= 0",
-    )),
+    validator   = x -> x >= 0 || throw(
+        CTBase.Exceptions.IncorrectArgument(
+            "Invalid max_iter", got = "$x", expected = ">= 0",
+        ),
+    ),
 )
 ```
 
@@ -67,7 +69,10 @@ Type mismatch in the constructor:
 
 ```@repl options
 try # hide
-OptionDefinition(name = :count, type = Integer, default = "hello", description = "A count")
+OptionDefinition(
+    name = :count, type = Integer,
+    default = "hello", description = "A count",
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -80,7 +85,8 @@ Aliases allow users to use alternative names for the same option:
 ```@example options
 def_alias = OptionDefinition(
     name = :max_iter, type = Int, default = 100,
-    description = "Max iterations", aliases = (:maxiter, :max),
+    description = "Max iterations",
+    aliases = (:maxiter, :max),
 )
 all_names(def_alias)
 ```
@@ -95,11 +101,14 @@ Validators follow the pattern `x -> condition || throw(...)`. They should return
 validated_def = OptionDefinition(
     name = :tol, type = Real, default = 1e-8,
     description = "Tolerance",
-    validator = x -> x > 0 || throw(CTBase.Exceptions.IncorrectArgument(
-        "Invalid tolerance",
-        got = "tol=$x", expected = "positive real number (> 0)",
-        suggestion = "Use 1e-6 or 1e-8",
-    )),
+    validator = x -> x > 0 || throw(
+        CTBase.Exceptions.IncorrectArgument(
+            "Invalid tolerance",
+            got = "tol=$x",
+            expected = "positive real number (> 0)",
+            suggestion = "Use 1e-6 or 1e-8",
+        ),
+    ),
 )
 nothing # hide
 ```
@@ -123,9 +132,9 @@ NotProvided
 ```
 
 ```@example options
-# Option with NotProvided default — omitted if user doesn't provide it
 opt_np = OptionDefinition(
-    name = :mu_init, type = Real, default = NotProvided,
+    name = :mu_init, type = Real,
+    default = NotProvided,
     description = "Initial barrier parameter",
 )
 ```
@@ -217,9 +226,18 @@ Options.is_computed(opt2)
 
 ```@example options
 meta = CTBase.Strategies.StrategyMetadata(
-    OptionDefinition(name = :tol, type = Real, default = 1e-8, description = "Tolerance"),
-    OptionDefinition(name = :max_iter, type = Integer, default = 1000, description = "Max iterations"),
-    OptionDefinition(name = :verbose, type = Bool, default = false, description = "Verbose output"),
+    OptionDefinition(
+        name = :tol, type = Real,
+        default = 1e-8, description = "Tolerance",
+    ),
+    OptionDefinition(
+        name = :max_iter, type = Integer,
+        default = 1000, description = "Max iterations",
+    ),
+    OptionDefinition(
+        name = :verbose, type = Bool,
+        default = false, description = "Verbose output",
+    ),
 )
 ```
 
@@ -253,8 +271,8 @@ nothing # hide
 ```
 
 ```@example options
-opts = CTBase.Strategies.build_strategy_options(DemoStrategy;
-    max_iter = 500, tol = 1e-6,
+opts = CTBase.Strategies.build_strategy_options(
+    DemoStrategy; max_iter = 500, tol = 1e-6,
 )
 ```
 
@@ -347,8 +365,10 @@ end # hide
 Accepts unknown options with a warning and stores them with `:user` source:
 
 ```@example options
-opts_perm = CTBase.Strategies.build_strategy_options(DemoStrategy;
-    mode = :permissive, max_iter = 500, custom_flag = true,
+opts_perm = CTBase.Strategies.build_strategy_options(
+    DemoStrategy;
+    mode = :permissive,
+    max_iter = 500, custom_flag = true,
 )
 println("keys: ", keys(opts_perm))
 ```
@@ -364,7 +384,9 @@ def_grid = OptionDefinition(
     name = :grid_size, type = Int, default = 100,
     description = "Grid size", aliases = (:n,),
 )
-opt_value, remaining = extract_option((n = 200, tol = 1e-6), def_grid)
+opt_value, remaining = extract_option(
+    (n = 200, tol = 1e-6), def_grid,
+)
 println("Extracted: ", opt_value)
 println("Remaining: ", remaining)
 ```
@@ -393,10 +415,18 @@ Extracts multiple options at once:
 
 ```@example options
 defs = [
-    OptionDefinition(name = :grid_size, type = Int, default = 100, description = "Grid"),
-    OptionDefinition(name = :tol, type = Float64, default = 1e-6, description = "Tol"),
+    OptionDefinition(
+        name = :grid_size, type = Int,
+        default = 100, description = "Grid",
+    ),
+    OptionDefinition(
+        name = :tol, type = Float64,
+        default = 1e-6, description = "Tol",
+    ),
 ]
-extracted, remaining = extract_options((grid_size = 200, max_iter = 1000), defs)
+extracted, remaining = extract_options(
+    (grid_size = 200, max_iter = 1000), defs,
+)
 println("Extracted: ", extracted)
 println("Remaining: ", remaining)
 ```

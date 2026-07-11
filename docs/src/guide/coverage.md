@@ -27,8 +27,8 @@ To generate actionable coverage reports, we use a dedicated `coverage.jl` script
 ### Example `test/coverage.jl`
 
 ```julia
-# Add the test directory to the load path so Julia can find dependencies from
-# test/Project.toml.
+# Add the test directory to the load path so Julia
+# can find dependencies from test/Project.toml.
 pushfirst!(LOAD_PATH, @__DIR__)
 
 using Pkg

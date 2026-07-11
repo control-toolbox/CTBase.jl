@@ -24,15 +24,21 @@ string-free, and composable way.
 
 ```@repl desc
 algorithms = ()
-algorithms = CTBase.Descriptions.add(algorithms, (:descent, :bfgs, :bisection))
-algorithms = CTBase.Descriptions.add(algorithms, (:descent, :gradient, :fixedstep))
+algorithms = CTBase.Descriptions.add(
+    algorithms, (:descent, :bfgs, :bisection),
+)
+algorithms = CTBase.Descriptions.add(
+    algorithms, (:descent, :gradient, :fixedstep),
+)
 ```
 
 Attempting to add a duplicate raises [`CTBase.Exceptions.IncorrectArgument`](@ref):
 
 ```@repl desc
 try # hide
-CTBase.Descriptions.add(algorithms, (:descent, :bfgs, :bisection))
+CTBase.Descriptions.add(
+    algorithms, (:descent, :bfgs, :bisection),
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -44,8 +50,12 @@ end # hide
 all provided symbols:
 
 ```@repl desc
-CTBase.Descriptions.complete(:bisection; descriptions=algorithms)
-CTBase.Descriptions.complete(:gradient, :fixedstep; descriptions=algorithms)
+CTBase.Descriptions.complete(
+    :bisection; descriptions=algorithms,
+)
+CTBase.Descriptions.complete(
+    :gradient, :fixedstep; descriptions=algorithms,
+)
 ```
 
 Among all entries that are a superset of the requested symbols, the one with the
@@ -54,7 +64,9 @@ largest overlap is returned (first wins on tie). If no entry matches,
 
 ```@repl desc
 try # hide
-CTBase.Descriptions.complete(:euler; descriptions=algorithms)
+CTBase.Descriptions.complete(
+    :euler; descriptions=algorithms,
+)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -66,7 +78,9 @@ end # hide
 removed — useful for extracting the remainder after stripping a known prefix:
 
 ```@repl desc
-full = CTBase.Descriptions.complete(:bisection; descriptions=algorithms)
+full = CTBase.Descriptions.complete(
+    :bisection; descriptions=algorithms,
+)
 CTBase.Descriptions.remove(full, (:descent, :bfgs))
 ```
 
@@ -74,8 +88,8 @@ CTBase.Descriptions.remove(full, (:descent, :bfgs))
 
 | Function | Purpose | Throws |
 | :--- | :--- | :--- |
-| [`CTBase.Descriptions.add`](@ref) | Add a description to a catalogue | [`CTBase.Exceptions.IncorrectArgument`](@ref) on duplicate |
-| [`CTBase.Descriptions.complete`](@ref) | Complete a partial description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) on no/ambiguous match |
+| [`CTBase.Descriptions.add`](@ref) | Add a description to a catalogue | [`IncorrectArgument`](@ref CTBase.Exceptions.IncorrectArgument) on duplicate |
+| [`CTBase.Descriptions.complete`](@ref) | Complete a partial description | [`AmbiguousDescription`](@ref CTBase.Exceptions.AmbiguousDescription) on no match |
 | [`CTBase.Descriptions.remove`](@ref) | Remove symbols from a description | — |
 
 ## See Also
