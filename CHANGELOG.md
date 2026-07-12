@@ -5,6 +5,42 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.6-beta] - 2026-07-12
+
+### 🐛 Bug Fixes
+
+#### **Data** — 6 structs now correctly bound their trait parameters
+
+- **`Hamiltonian`, `PseudoHamiltonian`, `ControlLaw`, `PathConstraint`,
+  `Multiplier`, and `ControlledVectorField` now restate `TD<:TimeDependence`,
+  `VD<:VariableDependence` (and `FB<:AbstractFeedback` / `K<:AbstractConstraintKind`
+  where relevant) directly on their own type-parameter list**, matching what
+  their abstract parent (`AbstractHamiltonian{TD,VD}`, etc.) already required.
+  `VectorField` and `HamiltonianVectorField` already had the correct pattern
+  and were used as the reference.
+- **Why**: `<:` between parametric types is a structural comparison of
+  *declared* bounds — Julia does not propagate an abstract parent's bound down
+  to a concrete subtype's own type-parameter list. Before this fix,
+  `Hamiltonian <: AbstractHamiltonian` was formally `false` (verified), even
+  though constructing an instance with an invalid `TD`/`VD` already correctly
+  threw a `TypeError` at the supertype-check step. This is invisible through
+  `isa` on concrete instances, but breaks Julia's method-specificity ranking
+  the moment a competing method exists elsewhere in the type hierarchy —
+  silently mis-dispatching, or throwing `MethodError: ... is ambiguous`, in
+  code that dispatches on these types.
+- Also restated the same dropped bounds in 32 `where` clauses across
+  `Data/helpers.jl`, the `Base.show` methods for all 8 trait-parametrized
+  `Data` types, and `Interpolation.Interpolant`, and added
+  `test/suite/meta/test_data_subtyping.jl` as a standing regression guard
+  (`Struct <: AbstractParent` for all 10 affected types).
+- **No breaking changes to CTBase's own behavior**: every value that could be
+  constructed before still builds identically; this only tightens type
+  relations that were supposed to hold already. See
+  [BREAKING.md](BREAKING.md) for a note on downstream impact.
+- Full audit and reasoning: `.reports/2026-07-12_alias-where-bounds-audit.md`
+  (companion to CTFlows.jl's `.reports/2026-07-11_alias-where-bounds-audit.md`
+  and the Handbook rule in `philosophy/types-traits-interfaces.md`).
+
 ## [0.27.5-beta] - 2026-07-11
 
 ### 💥 Breaking Changes
