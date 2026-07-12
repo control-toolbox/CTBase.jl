@@ -35,6 +35,13 @@ end
 # ═══════════════════════════════════════════════════════════════════════════════
 # Configuration
 # ═══════════════════════════════════════════════════════════════════════════════
+# if draft is true, then the julia code from .md is not executed
+# to disable the draft mode in a specific markdown file, use the following:
+#=
+```@meta
+Draft = false
+```
+=#
 draft = false # Draft mode: if true, @example blocks in markdown are not executed
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -101,6 +108,7 @@ with_api_reference(src_dir) do api_pages
             "Developer Tools" => [
                 "Test Runner" => joinpath("guide", "test-runner.md"),
                 "Coverage" => joinpath("guide", "coverage.md"),
+                "Performance" => joinpath("guide", "performance.md"),
                 "API Documentation" => joinpath("guide", "api-documentation.md"),
                 "Color System" => joinpath("guide", "color-system.md"),
             ],
