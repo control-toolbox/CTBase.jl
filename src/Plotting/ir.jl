@@ -298,7 +298,7 @@ function Base.show(io::IO, s::Series)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "Series", fmt.reset, "(")
     print(io, fmt.label, repr(s.label), fmt.reset, ", ")
-    print(io, fmt.value, length(s.x), fmt.reset, " pts)")
+    return print(io, fmt.value, length(s.x), fmt.reset, " pts)")
 end
 
 """
@@ -328,7 +328,7 @@ See also: `Base.show`
 """
 function Base.show(io::IO, h::HLine)
     fmt = Core.get_format_codes(io)
-    print(io, fmt.name, "HLine", fmt.reset, "(", fmt.value, h.value, fmt.reset, ")")
+    return print(io, fmt.name, "HLine", fmt.reset, "(", fmt.value, h.value, fmt.reset, ")")
 end
 
 """
@@ -355,7 +355,7 @@ See also: `Base.show`
 """
 function Base.show(io::IO, v::VLine)
     fmt = Core.get_format_codes(io)
-    print(io, fmt.name, "VLine", fmt.reset, "(", fmt.value, v.value, fmt.reset, ")")
+    return print(io, fmt.name, "VLine", fmt.reset, "(", fmt.value, v.value, fmt.reset, ")")
 end
 
 """
@@ -384,7 +384,7 @@ function Base.show(io::IO, ax::Axes)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "Axes", fmt.reset, "(")
     print(io, fmt.label, repr(ax.title), fmt.reset, ", ")
-    print(io, fmt.value, length(ax.series), fmt.reset, " series)")
+    return print(io, fmt.value, length(ax.series), fmt.reset, " series)")
 end
 
 """
@@ -396,7 +396,7 @@ showing its series and decorations.
 See also: `Base.show`
 """
 function Base.show(io::IO, ::MIME"text/plain", ax::Axes)
-    _show_axes(io, ax, "")
+    return _show_axes(io, ax, "")
 end
 
 function _show_axes(io::IO, ax::Axes, prefix::String)
@@ -460,7 +460,7 @@ function Base.show(io::IO, leaf::Leaf)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "Leaf", fmt.reset, "(")
     show(io, leaf.axes)
-    print(io, ")")
+    return print(io, ")")
 end
 
 """
@@ -471,7 +471,7 @@ Pretty tree-style display of a [`Leaf`](@ref).
 See also: `Base.show`
 """
 function Base.show(io::IO, ::MIME"text/plain", leaf::Leaf)
-    _show_node(io, leaf, "")
+    return _show_node(io, leaf, "")
 end
 
 """
@@ -484,7 +484,7 @@ See also: `Base.show`
 function Base.show(io::IO, box::HBox)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "HBox", fmt.reset, "(")
-    print(io, fmt.value, length(box.children), fmt.reset, " children)")
+    return print(io, fmt.value, length(box.children), fmt.reset, " children)")
 end
 
 """
@@ -496,7 +496,7 @@ showing its children.
 See also: `Base.show`
 """
 function Base.show(io::IO, ::MIME"text/plain", box::HBox)
-    _show_node(io, box, "")
+    return _show_node(io, box, "")
 end
 
 """
@@ -509,7 +509,7 @@ See also: `Base.show`
 function Base.show(io::IO, box::VBox)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "VBox", fmt.reset, "(")
-    print(io, fmt.value, length(box.children), fmt.reset, " children)")
+    return print(io, fmt.value, length(box.children), fmt.reset, " children)")
 end
 
 """
@@ -521,7 +521,7 @@ showing its children.
 See also: `Base.show`
 """
 function Base.show(io::IO, ::MIME"text/plain", box::VBox)
-    _show_node(io, box, "")
+    return _show_node(io, box, "")
 end
 
 # Recursively print a layout node. The node header is printed at the current
@@ -530,7 +530,7 @@ function _show_node(io::IO, leaf::Leaf, prefix::String)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "Leaf", fmt.reset)
     print(io, "\n", prefix, "└─ ")
-    _show_axes(io, leaf.axes, prefix * "   ")
+    return _show_axes(io, leaf.axes, prefix * "   ")
 end
 
 function _show_node(io::IO, node::Union{HBox,VBox}, prefix::String)
@@ -567,7 +567,7 @@ function Base.show(io::IO, fig::Figure)
         print(io, fmt.label, repr(fig.title), fmt.reset, ", ")
     end
     show(io, fig.root)
-    print(io, ")")
+    return print(io, ")")
 end
 
 """
@@ -588,5 +588,5 @@ function Base.show(io::IO, ::MIME"text/plain", fig::Figure)
         print(io, "  size: ", fmt.value, fig.size, fmt.reset)
     end
     print(io, "\n└─ ")
-    _show_node(io, fig.root, "   ")
+    return _show_node(io, fig.root, "   ")
 end
