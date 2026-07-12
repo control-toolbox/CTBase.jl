@@ -55,7 +55,9 @@ Multiplier: autonomous, fixed (no variable)
 See also: [`CTBase.Data.AbstractMultiplier`](@ref), [`CTBase.Data.Hamiltonian`](@ref),
 [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-struct Multiplier{F<:Function,TD,VD} <: AbstractMultiplier{TD,VD}
+struct Multiplier{
+    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+} <: AbstractMultiplier{TD,VD}
     f::F
 end
 

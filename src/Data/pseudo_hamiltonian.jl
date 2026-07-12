@@ -45,7 +45,9 @@ For NonAutonomous/NonFixed: natural `h̃(t, x, p, u, v)`, uniform `h̃(t, x, p, 
 See also: [`CTBase.Data.AbstractPseudoHamiltonian`](@ref), [`CTBase.Data.Hamiltonian`](@ref),
 [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-struct PseudoHamiltonian{F<:Function,TD,VD} <: AbstractPseudoHamiltonian{TD,VD}
+struct PseudoHamiltonian{
+    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+} <: AbstractPseudoHamiltonian{TD,VD}
     f::F
 end
 

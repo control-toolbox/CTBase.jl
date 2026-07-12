@@ -48,7 +48,12 @@ See also: [`CTBase.Data.AbstractControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@re
 [`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
 [`CTBase.Traits.AbstractFeedback`](@ref).
 """
-struct ControlLaw{F<:Function,FB,TD,VD} <: AbstractControlLaw{FB,TD,VD}
+struct ControlLaw{
+    F<:Function,
+    FB<:Traits.AbstractFeedback,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+} <: AbstractControlLaw{FB,TD,VD}
     f::F
 end
 

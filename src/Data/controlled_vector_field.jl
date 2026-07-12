@@ -43,7 +43,9 @@ signature `(t, x, u, v)` that ignores unused arguments.
 See also: [`CTBase.Data.AbstractControlledVectorField`](@ref),
 [`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
-struct ControlledVectorField{F<:Function,TD,VD} <: AbstractControlledVectorField{TD,VD}
+struct ControlledVectorField{
+    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+} <: AbstractControlledVectorField{TD,VD}
     f::F
 end
 

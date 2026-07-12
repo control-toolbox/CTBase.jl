@@ -48,7 +48,12 @@ See also: [`CTBase.Data.AbstractPathConstraint`](@ref), [`CTBase.Data.StateConst
 [`CTBase.Data.ControlConstraint`](@ref), [`CTBase.Data.MixedConstraint`](@ref),
 [`CTBase.Traits.AbstractConstraintKind`](@ref).
 """
-struct PathConstraint{F<:Function,K,TD,VD} <: AbstractPathConstraint{K,TD,VD}
+struct PathConstraint{
+    F<:Function,
+    K<:Traits.AbstractConstraintKind,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+} <: AbstractPathConstraint{K,TD,VD}
     f::F
 end
 
