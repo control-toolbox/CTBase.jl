@@ -2,6 +2,27 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.27.7-beta)
+
+- **Performance tooling pass**: `JET.jl` and `BenchmarkTools.jl` added as
+  test-only dependencies (not runtime dependencies). `JET.test_package` is
+  now enabled for real in the test suite (previously commented out), and a
+  new `test/suite/meta/test_performance.jl` asserts allocation invariants
+  on the hot path. Two latent bugs the JET scan found are fixed:
+  `_strategy_type_name(::UnionAll)` (`Strategies`) no longer calls the
+  non-existent `nameof(::TypeVar)`, and `OptionValue`'s constructor no
+  longer goes through a `Val`-dispatch pattern that was both a JET
+  analysis blind spot and a genuine type instability whenever `source`
+  wasn't a literal — both are internal implementation details with
+  identical external behavior (same values constructible, same error
+  messages). New `docs/src/guide/performance.md` guide.
+  - **No breaking changes**: purely additive tooling, tests, and
+    documentation; two internal bug fixes with no observable behavior
+    change for valid usage. No migration required.
+- **Plotting**: added docstrings for previously-undocumented private show
+  helpers (`_SHOW_LIMIT`, `_show_axes`, `_show_node`). No API or behavior
+  change.
+
 ## Non-breaking note (0.27.6-beta)
 
 - **`Data`: `Hamiltonian`, `PseudoHamiltonian`, `ControlLaw`, `PathConstraint`,

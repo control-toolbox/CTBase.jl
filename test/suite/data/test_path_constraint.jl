@@ -173,6 +173,16 @@ function test_path_constraint()
             Test.@test occursin("PathConstraint: state, non-autonomous, variable", strs)
             Test.@test occursin("natural call: g(t, x, v)", strs)
         end
+
+        Test.@testset "Type stability" begin
+            g = Data.PathConstraint(
+                (x, u) -> x .- u,
+                Traits.MixedConstraintKind,
+                Traits.Autonomous,
+                Traits.Fixed,
+            )
+            Test.@inferred g([1.0, 2.0], [0.5, 0.5])
+        end
     end
 end
 

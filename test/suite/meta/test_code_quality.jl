@@ -2,6 +2,7 @@ module TestCodeQuality
 
 using Test: Test
 using Aqua: Aqua
+using JET: JET
 using CTBase: CTBase
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -21,9 +22,9 @@ function test_code_quality()
             Aqua.test_ambiguities(CTBase)
         end
 
-        # Test.@testset "JET" begin
-        #     JET.test_package(CTBase; target_defined_modules=true)
-        # end
+        Test.@testset "JET" begin
+            JET.test_package(CTBase; target_modules=(CTBase,))
+        end
 
         # Test.@testset "JuliaFormatter" begin
         #     Test.@test JuliaFormatter.format(CTBase; verbose=true, overwrite=false)

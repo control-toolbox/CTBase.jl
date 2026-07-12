@@ -11,8 +11,8 @@ Represents an option value with its source provenance.
 
 # Constructor Validation
 
-The constructor validates the source symbol using Val dispatch for compile-time
-type safety and performance optimization. Invalid sources throw `Exceptions.IncorrectArgument`.
+The constructor validates that `source` is one of `:default`, `:user`, or
+`:computed`. Invalid sources throw `Exceptions.IncorrectArgument`.
 
 # Notes
 The `source` field tracks the provenance of the option value:
@@ -44,32 +44,18 @@ struct OptionValue{T}
     source::Symbol
 
     function OptionValue(value::T, source::Symbol) where {T}
-        return _construct_option_value(value, Val(source))
-    end
-
-    # Internal constructor dispatch functions
-    function _construct_option_value(value::T, ::Val{:default}) where {T}
-        return new{T}(value, :default)
-    end
-
-    function _construct_option_value(value::T, ::Val{:user}) where {T}
-        return new{T}(value, :user)
-    end
-
-    function _construct_option_value(value::T, ::Val{:computed}) where {T}
-        return new{T}(value, :computed)
-    end
-
-    function _construct_option_value(value, source::Val)
-        return throw(
-            Exceptions.IncorrectArgument(
-                "Invalid option source";
-                got="source=$(typeof(source).parameters[1])",
-                expected=":default, :user, or :computed",
-                suggestion="Use one of the valid source symbols: :default (tool default), :user (user-provided), or :computed (derived)",
-                context="OptionValue constructor - validating source provenance",
-            ),
-        )
+        if source !== :default && source !== :user && source !== :computed
+            throw(
+                Exceptions.IncorrectArgument(
+                    "Invalid option source";
+                    got="source=$source",
+                    expected=":default, :user, or :computed",
+                    suggestion="Use one of the valid source symbols: :default (tool default), :user (user-provided), or :computed (derived)",
+                    context="OptionValue constructor - validating source provenance",
+                ),
+            )
+        end
+        return new{T}(value, source)
     end
 end
 

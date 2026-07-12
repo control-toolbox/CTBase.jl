@@ -284,7 +284,9 @@ n_leaves(fig::Figure) = n_leaves(fig.root)
 
 # --- display -----------------------------------------------------------------
 
-# Maximum number of children / series to show before truncating.
+"""
+Maximum number of children / series to show before truncating in tree-style display.
+"""
 const _SHOW_LIMIT = 5
 
 """
@@ -399,6 +401,11 @@ function Base.show(io::IO, ::MIME"text/plain", ax::Axes)
     _show_axes(io, ax, "")
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Internal helper: pretty-print an [`Axes`](@ref) as a tree, using `prefix` for indentation.
+"""
 function _show_axes(io::IO, ax::Axes, prefix::String)
     fmt = Core.get_format_codes(io)
     n = length(ax.series)
@@ -524,8 +531,12 @@ function Base.show(io::IO, ::MIME"text/plain", box::VBox)
     _show_node(io, box, "")
 end
 
-# Recursively print a layout node. The node header is printed at the current
-# cursor position; `prefix` is the indentation carried to the node's children.
+"""
+$(TYPEDSIGNATURES)
+
+Internal helper: recursively print a layout node. The node header is printed at the
+current cursor position; `prefix` is the indentation carried to the node's children.
+"""
 function _show_node(io::IO, leaf::Leaf, prefix::String)
     fmt = Core.get_format_codes(io)
     print(io, fmt.name, "Leaf", fmt.reset)

@@ -553,6 +553,20 @@ function test_vector_field()
                 )
             end
         end
+
+        Test.@testset "Type stability" begin
+            # Hot path: evaluating an already-built VectorField must be
+            # inferable (verified against JET.@report_opt in the perf pass;
+            # this locks it in as a regression test). Construction itself is
+            # not checked here — it goes through methods(f)-based mutability
+            # auto-detection, which is not inferable by design.
+            vf = Data.VectorField(x -> -x)
+            Test.@inferred vf([1.0, 2.0])
+            Test.@inferred Traits.time_dependence(vf)
+
+            vf_na = Data.VectorField((t, x) -> t .* x; is_autonomous=false)
+            Test.@inferred vf_na(0.5, [1.0, 2.0])
+        end
     end
 end
 

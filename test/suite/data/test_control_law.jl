@@ -320,6 +320,17 @@ function test_control_law()
                 Test.@test isdefined(Data, sym)
             end
         end
+
+        Test.@testset "Type stability" begin
+            cl = Data.ControlLaw(
+                (x, p) -> x .+ p,
+                Traits.DynClosedLoopFeedback,
+                Traits.Autonomous,
+                Traits.Fixed,
+            )
+            Test.@inferred cl([1.0, 2.0], [3.0, 4.0])
+            Test.@inferred Traits.feedback(cl)
+        end
     end
 end
 
