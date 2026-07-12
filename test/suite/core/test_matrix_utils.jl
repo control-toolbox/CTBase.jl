@@ -61,6 +61,12 @@ function test_matrix_utils()
             Test.@test W[1] ≈ [1.5, 3.5]
             Test.@test W[2] ≈ [2.5, 4.5]
         end
+
+        Test.@testset "matrix2vec - type stability" begin
+            A = [1.0 2.0 3.0; 4.0 5.0 6.0]
+            Test.@inferred Core.matrix2vec(A)
+            Test.@inferred Core.matrix2vec(A, 2)
+        end
     end
     return nothing
 end

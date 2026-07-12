@@ -185,6 +185,11 @@ function test_hamiltonian()
                 Test.@test isdefined(Data, :Hamiltonian)
             end
         end
+
+        Test.@testset "Type stability" begin
+            h = Data.Hamiltonian((x, p) -> sum(x .* p))
+            Test.@inferred h([1.0, 2.0], [3.0, 4.0])
+        end
     end
 end
 

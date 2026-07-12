@@ -149,6 +149,14 @@ function test_ad_backend()
                 Test.@test occursin("derivative", err.required_method)
             end
         end
+
+        Test.@testset "Type stability" begin
+            # Hot path: reading the resolved AD backend from an already-built
+            # strategy (as done once per gradient evaluation), not the
+            # one-time construction of the strategy itself.
+            di = Differentiation.DifferentiationInterface()
+            Test.@inferred Differentiation.ad_backend(di)
+        end
     end
 end
 
