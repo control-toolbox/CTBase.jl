@@ -431,7 +431,7 @@ See also: [`CTBase.Strategies._strategy_type_name(::DataType)`](@ref)
 """
 function _strategy_type_name(T::UnionAll)
     base_name = string(T.body.name.name)
-    param_name = string(nameof(T.var))
+    param_name = string(T.var.name)
     return "$base_name{$param_name}"
 end
 
