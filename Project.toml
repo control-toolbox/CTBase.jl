@@ -26,6 +26,7 @@ TestRunner = ["Test"]
 [extras]
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Coverage = "a2441757-f6aa-5fb2-8edb-039e3f45d037"
 DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
@@ -39,6 +40,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [targets]
 test = [
     "Aqua",
+    "BenchmarkTools",
     "Coverage",
     "DifferentiationInterface",
     "Documenter",
@@ -53,6 +55,7 @@ test = [
 [compat]
 ADTypes = "1"
 Aqua = "0.8"
+BenchmarkTools = "1"
 Coverage = "1"
 DifferentiationInterface = "0.7"
 DocStringExtensions = "0.9"
