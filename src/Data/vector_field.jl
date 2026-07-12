@@ -309,7 +309,14 @@ Shows the type name, time dependence, variable dependence, mutability, and funct
 
 See also: [`CTBase.Data.VectorField`](@ref).
 """
-function Base.show(io::IO, vf::VectorField{F,TD,VD,MD}) where {F,TD,VD,MD}
+function Base.show(
+    io::IO, vf::VectorField{F,TD,VD,MD}
+) where {
+    F<:Function,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+}
     header = "VectorField: $(_td_label(TD)), $(_vd_label(VD)), $(_md_label(MD))"
     natural = _natural_sig_vf(TD, VD, MD)
     uniform = _uniform_sig_vf(MD)
@@ -334,6 +341,11 @@ See also: [`CTBase.Data.VectorField`](@ref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", vf::VectorField{F,TD,VD,MD}
-) where {F,TD,VD,MD}
+) where {
+    F<:Function,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+}
     return show(io, vf)
 end

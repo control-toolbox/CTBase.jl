@@ -424,7 +424,14 @@ Displays three lines:
 
 See also: [`CTBase.Data.ControlLaw`](@ref).
 """
-function Base.show(io::IO, ::ControlLaw{F,FB,TD,VD}) where {F,FB,TD,VD}
+function Base.show(
+    io::IO, ::ControlLaw{F,FB,TD,VD}
+) where {
+    F<:Function,
+    FB<:Traits.AbstractFeedback,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+}
     header = "ControlLaw: $(_fb_label(FB)), $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_cl(FB, TD, VD)
     uniform = _uniform_sig_cl(FB)
@@ -449,6 +456,11 @@ See also: [`CTBase.Data.ControlLaw`](@ref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", cl::ControlLaw{F,FB,TD,VD}
-) where {F,FB,TD,VD}
+) where {
+    F<:Function,
+    FB<:Traits.AbstractFeedback,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+}
     return show(io, cl)
 end

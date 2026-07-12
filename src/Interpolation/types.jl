@@ -54,4 +54,4 @@ $(TYPEDSIGNATURES)
 
 Return the interpolation method (a subtype of [`AbstractInterpolation`](@ref)) of `interp`.
 """
-method(::Interpolant{M}) where {M} = M
+method(::Interpolant{M}) where {M<:AbstractInterpolation} = M

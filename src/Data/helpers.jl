@@ -99,7 +99,9 @@ _natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.InPlace)  # Returns "f(d
 
 See also: [`CTBase.Data._uniform_sig_vf`](@ref).
 """
-function _natural_sig_vf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) where {TD,VD}
+function _natural_sig_vf(
+    ::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")
@@ -107,7 +109,9 @@ function _natural_sig_vf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) wher
     return "f(" * join(args, ", ") * ")"
 end
 
-function _natural_sig_vf(::Type{TD}, ::Type{VD}, ::Type{Traits.InPlace}) where {TD,VD}
+function _natural_sig_vf(
+    ::Type{TD}, ::Type{VD}, ::Type{Traits.InPlace}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = ["dx"]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")
@@ -166,7 +170,9 @@ _natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.InPlace)  # Returns "f(
 
 See also: [`CTBase.Data._uniform_sig_hvf`](@ref).
 """
-function _natural_sig_hvf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) where {TD,VD}
+function _natural_sig_hvf(
+    ::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")
@@ -175,7 +181,9 @@ function _natural_sig_hvf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) whe
     return "f(" * join(args, ", ") * ")"
 end
 
-function _natural_sig_hvf(::Type{TD}, ::Type{VD}, ::Type{Traits.InPlace}) where {TD,VD}
+function _natural_sig_hvf(
+    ::Type{TD}, ::Type{VD}, ::Type{Traits.InPlace}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = ["dx", "dp"]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")
@@ -232,7 +240,9 @@ _natural_sig_h(NonAutonomous, Fixed)  # Returns "h(t, x, p)"
 
 See also: [`CTBase.Data._uniform_sig_h`](@ref).
 """
-function _natural_sig_h(::Type{TD}, ::Type{VD}) where {TD,VD}
+function _natural_sig_h(
+    ::Type{TD}, ::Type{VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")
@@ -372,7 +382,9 @@ and `v` appended for variable.
 
 See also: [`CTBase.Data._uniform_sig_ph`](@ref).
 """
-function _natural_sig_ph(::Type{TD}, ::Type{VD}) where {TD,VD}
+function _natural_sig_ph(
+    ::Type{TD}, ::Type{VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")
@@ -504,7 +516,9 @@ Return the natural call signature for a `Multiplier` based on its traits.
 
 See also: [`CTBase.Data._uniform_sig_mult`](@ref).
 """
-function _natural_sig_mult(::Type{TD}, ::Type{VD}) where {TD,VD}
+function _natural_sig_mult(
+    ::Type{TD}, ::Type{VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     args = String[]
     TD === Traits.NonAutonomous && push!(args, "t")
     push!(args, "x")

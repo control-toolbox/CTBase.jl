@@ -163,7 +163,9 @@ Displays three lines:
 
 See also: [`CTBase.Data.Multiplier`](@ref).
 """
-function Base.show(io::IO, ::Multiplier{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::Multiplier{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     header = "Multiplier: $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_mult(TD, VD)
     uniform = _uniform_sig_mult()
@@ -186,6 +188,8 @@ This method is called automatically when displaying a multiplier in the Julia RE
 
 See also: [`CTBase.Data.Multiplier`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", m::Multiplier{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::MIME"text/plain", m::Multiplier{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     return show(io, m)
 end

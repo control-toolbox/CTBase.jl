@@ -138,7 +138,9 @@ Display a compact representation of a `ControlledVectorField`.
 
 See also: [`CTBase.Data.ControlledVectorField`](@ref).
 """
-function Base.show(io::IO, ::ControlledVectorField{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::ControlledVectorField{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     natural = if TD === Traits.Autonomous && VD === Traits.Fixed
         "fc(x, u)"
     elseif TD === Traits.NonAutonomous && VD === Traits.Fixed
