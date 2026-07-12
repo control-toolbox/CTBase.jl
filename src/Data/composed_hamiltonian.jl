@@ -184,7 +184,9 @@ its composed traits and call signatures.
 
 See also: [`CTBase.Data.ComposedHamiltonian`](@ref).
 """
-function Base.show(io::IO, ::ComposedHamiltonian{TD,VD}) where {TD,VD}
+function Base.show(
+    io::IO, ::ComposedHamiltonian{TD,VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     header = "ComposedHamiltonian: $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_h(TD, VD)
     uniform = _uniform_sig_h()

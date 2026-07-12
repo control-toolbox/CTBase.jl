@@ -58,7 +58,9 @@ Hamiltonian: non-autonomous, fixed (no variable)
 
 See also: [`CTBase.Data.AbstractHamiltonian`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-struct Hamiltonian{F<:Function,TD,VD} <: AbstractHamiltonian{TD,VD}
+struct Hamiltonian{
+    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+} <: AbstractHamiltonian{TD,VD}
     f::F
 end
 
@@ -171,7 +173,9 @@ Hamiltonian: autonomous, fixed (no variable)
   uniform call: h(t, x, p, v)
 ```
 """
-function Base.show(io::IO, ::Hamiltonian{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::Hamiltonian{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     header = "Hamiltonian: $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_h(TD, VD)
     uniform = _uniform_sig_h()
@@ -194,6 +198,8 @@ This method is called automatically when displaying a Hamiltonian in the Julia R
 
 See also: [`CTBase.Data.Hamiltonian`](@ref).
 """
-function Base.show(io::IO, ::MIME"text/plain", h::Hamiltonian{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::MIME"text/plain", h::Hamiltonian{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     return show(io, h)
 end

@@ -2,6 +2,32 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.27.6-beta)
+
+- **`Data`: `Hamiltonian`, `PseudoHamiltonian`, `ControlLaw`, `PathConstraint`,
+  `Multiplier`, `ControlledVectorField` now formally satisfy `Struct <:
+  AbstractParent`** (e.g. `Hamiltonian <: AbstractHamiltonian`), which was
+  `false` before this release even though it should always have held. No
+  valid CTBase usage is affected — every value that could be constructed
+  before still constructs identically, since the bound was already enforced
+  dynamically via the supertype check.
+
+  **Action for downstream packages** (e.g. CTFlows.jl): if you dispatch on
+  any of these 6 types (or `VectorField`/`HamiltonianVectorField`, whose
+  bound was already correct) with your **own** `where {...}` clause that
+  leaves `TD`, `VD` (or `FB`, `K`) unbounded — e.g.
+  `f(h::Data.Hamiltonian{F,TD,VD}) where {F<:Function,TD,VD}` — that
+  `where`-clause's ground truth has changed: `TD,VD` are now genuinely
+  bounded on `Hamiltonian` itself, so leaving them unbounded downstream is no
+  longer "matching what CTBase declares", it is *wider* than what CTBase
+  declares. This can silently mis-rank method specificity or throw
+  `MethodError: ... is ambiguous` if you have a second, more generic method
+  competing on the same call — the same failure mode described in
+  `CTBase/.reports/2026-07-12_alias-where-bounds-audit.md` and
+  `CTFlows.jl/.reports/2026-07-11_alias-where-bounds-audit.md`. Re-run the two
+  greps from the Handbook (`philosophy/types-traits-interfaces.md`) against
+  your package and restate the now-correct bound in any such `where` clause.
+
 ## Breaking changes (0.27.5-beta)
 
 - **`Interpolation`: `LinearInterpolant` and `ConstantInterpolant` aliases removed.**

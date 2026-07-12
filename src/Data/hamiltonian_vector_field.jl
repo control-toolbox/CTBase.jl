@@ -389,7 +389,14 @@ Shows the type name, time dependence, variable dependence, mutability, and funct
 
 See also: [`CTBase.Data.HamiltonianVectorField`](@ref).
 """
-function Base.show(io::IO, ::HamiltonianVectorField{F,TD,VD,MD}) where {F,TD,VD,MD}
+function Base.show(
+    io::IO, ::HamiltonianVectorField{F,TD,VD,MD}
+) where {
+    F<:Function,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+}
     header = "HamiltonianVectorField: $(_td_label(TD)), $(_vd_label(VD)), $(_md_label(MD))"
     natural = _natural_sig_hvf(TD, VD, MD)
     uniform = _uniform_sig_hvf(MD)
@@ -414,6 +421,11 @@ See also: [`CTBase.Data.HamiltonianVectorField`](@ref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", hvf::HamiltonianVectorField{F,TD,VD,MD}
-) where {F,TD,VD,MD}
+) where {
+    F<:Function,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+    MD<:Traits.AbstractMutabilityTrait,
+}
     return show(io, hvf)
 end

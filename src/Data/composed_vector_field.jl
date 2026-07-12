@@ -153,7 +153,9 @@ Display a compact representation of a [`CTBase.Data.ComposedVectorField`](@ref).
 
 See also: [`CTBase.Data.ComposedVectorField`](@ref).
 """
-function Base.show(io::IO, ::ComposedVectorField{TD,VD}) where {TD,VD}
+function Base.show(
+    io::IO, ::ComposedVectorField{TD,VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     natural = _natural_sig_vf(TD, VD, Traits.OutOfPlace)
     uniform = _uniform_sig_vf(Traits.OutOfPlace)
     println(io, "ComposedVectorField: $(_td_label(TD)), $(_vd_label(VD)), out-of-place")

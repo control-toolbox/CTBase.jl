@@ -43,7 +43,9 @@ signature `(t, x, u, v)` that ignores unused arguments.
 See also: [`CTBase.Data.AbstractControlledVectorField`](@ref),
 [`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
-struct ControlledVectorField{F<:Function,TD,VD} <: AbstractControlledVectorField{TD,VD}
+struct ControlledVectorField{
+    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+} <: AbstractControlledVectorField{TD,VD}
     f::F
 end
 
@@ -136,7 +138,9 @@ Display a compact representation of a `ControlledVectorField`.
 
 See also: [`CTBase.Data.ControlledVectorField`](@ref).
 """
-function Base.show(io::IO, ::ControlledVectorField{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::ControlledVectorField{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     natural = if TD === Traits.Autonomous && VD === Traits.Fixed
         "fc(x, u)"
     elseif TD === Traits.NonAutonomous && VD === Traits.Fixed

@@ -6,6 +6,7 @@ extend-ignore-re = [
     # Common variable names in our codebase
     "strat",
     "Strat",
+    "mis-",
 ]
 
 [files]

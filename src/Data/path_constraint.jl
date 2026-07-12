@@ -48,7 +48,12 @@ See also: [`CTBase.Data.AbstractPathConstraint`](@ref), [`CTBase.Data.StateConst
 [`CTBase.Data.ControlConstraint`](@ref), [`CTBase.Data.MixedConstraint`](@ref),
 [`CTBase.Traits.AbstractConstraintKind`](@ref).
 """
-struct PathConstraint{F<:Function,K,TD,VD} <: AbstractPathConstraint{K,TD,VD}
+struct PathConstraint{
+    F<:Function,
+    K<:Traits.AbstractConstraintKind,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+} <: AbstractPathConstraint{K,TD,VD}
     f::F
 end
 
@@ -428,7 +433,14 @@ Displays three lines:
 
 See also: [`CTBase.Data.PathConstraint`](@ref).
 """
-function Base.show(io::IO, ::PathConstraint{F,K,TD,VD}) where {F,K,TD,VD}
+function Base.show(
+    io::IO, ::PathConstraint{F,K,TD,VD}
+) where {
+    F<:Function,
+    K<:Traits.AbstractConstraintKind,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+}
     header = "PathConstraint: $(_kind_label(K)), $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_pc(K, TD, VD)
     uniform = _uniform_sig_pc()
@@ -453,6 +465,11 @@ See also: [`CTBase.Data.PathConstraint`](@ref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", pc::PathConstraint{F,K,TD,VD}
-) where {F,K,TD,VD}
+) where {
+    F<:Function,
+    K<:Traits.AbstractConstraintKind,
+    TD<:Traits.TimeDependence,
+    VD<:Traits.VariableDependence,
+}
     return show(io, pc)
 end

@@ -45,7 +45,9 @@ For NonAutonomous/NonFixed: natural `h̃(t, x, p, u, v)`, uniform `h̃(t, x, p, 
 See also: [`CTBase.Data.AbstractPseudoHamiltonian`](@ref), [`CTBase.Data.Hamiltonian`](@ref),
 [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-struct PseudoHamiltonian{F<:Function,TD,VD} <: AbstractPseudoHamiltonian{TD,VD}
+struct PseudoHamiltonian{
+    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
+} <: AbstractPseudoHamiltonian{TD,VD}
     f::F
 end
 
@@ -164,7 +166,9 @@ Displays three lines:
 
 See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
-function Base.show(io::IO, ::PseudoHamiltonian{F,TD,VD}) where {F,TD,VD}
+function Base.show(
+    io::IO, ::PseudoHamiltonian{F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     header = "PseudoHamiltonian: $(_td_label(TD)), $(_vd_label(VD))"
     natural = _natural_sig_ph(TD, VD)
     uniform = _uniform_sig_ph()
@@ -189,6 +193,6 @@ See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", h̃::PseudoHamiltonian{F,TD,VD}
-) where {F,TD,VD}
+) where {F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     return show(io, h̃)
 end

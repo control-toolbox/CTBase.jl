@@ -9,7 +9,7 @@ julia> ctinterpolate([0.0, 1.0, 2.0], [0.0, 1.0, 0.0])
 Interpolant (linear): 3 nodes
 ```
 """
-function Base.show(io::IO, interp::Interpolant{M}) where {M}
+function Base.show(io::IO, interp::Interpolant{M}) where {M<:AbstractInterpolation}
     label = M === Linear ? "linear" : "piecewise-constant"
     return print(io, "Interpolant ($label): $(length(interp.x)) nodes")
 end
