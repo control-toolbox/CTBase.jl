@@ -5,6 +5,67 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.7-beta] - 2026-07-12
+
+### 🛠 Enhancements
+
+#### **Performance tooling** — JET static analysis, hot-path regression guards, and a methodology guide
+
+- **`JET.jl` added as a test-only dependency**, and `JET.test_package` is now
+  enabled for real in `test_code_quality.jl` alongside `Aqua` (it was
+  previously commented out). CI now runs a whole-package correctness scan on
+  every test run.
+- **Two real bugs found by the first `JET.report_package` scan, both fixed**:
+  - `_strategy_type_name(::UnionAll)` (`Strategies`) called `nameof(::TypeVar)`,
+    which has no method — a latent `MethodError` for any strategy parameter
+    type that is an uninstantiated generic. Fixed via `TypeVar`'s `.name`
+    field. `test/suite/strategies/test_describe_registry.jl` added; there was
+    previously zero test coverage of `_strategy_type_name`.
+  - `OptionValue`'s constructor dispatched on `Val(source::Symbol)` across 4
+    helper methods defined inside the struct body — a pattern JET's
+    signature-based analysis cannot resolve (a false positive), and which
+    also turned out to be genuinely type-unstable whenever `source` is not a
+    literal (`@code_warntype` showed `Body::ANY` before the fix). Replaced
+    with a single inline validation check in the named inner constructor:
+    same behavior, same error message, no JET blind spot, and now infers to
+    `OptionValue{T}`.
+- **New `docs/src/guide/performance.md` guide** ("Developer Tools" nav
+  group). Documents the hot-path-vs-setup-path principle the investigation
+  surfaced: code called every solve step (field/Hamiltonian/law/constraint
+  evaluation, interpolation, option reads) must stay type-stable; code
+  called once per problem (registry/strategy construction) may be dynamic
+  by design. Includes 4 `JET.@report_opt` checks that execute live at
+  documentation build time, so a hot-path regression breaks the docs build
+  rather than just going stale.
+- **`Test.@inferred` regression tests** added on every hot-path entry point
+  verified stable during the investigation: `VectorField`/`Hamiltonian`/
+  `ControlLaw`/`PathConstraint` calls, `Traits.time_dependence`/`feedback`
+  accessors, `Differentiation.ad_backend`, `Core.matrix2vec`. Also
+  re-enables a previously-commented-out `Strategies.get_parameter_type`
+  stability test, confirmed to infer cleanly.
+- **New `test/suite/meta/test_performance.jl`**: deterministic allocation
+  guards via `BenchmarkTools.@ballocated` (added as a test-only
+  dependency), complementing the type-stability tests above — a change can
+  stay type-stable yet start allocating, which `@inferred` alone would not
+  catch. Two invariant classes, both machine-independent: zero-overhead
+  wrappers (`VectorField`/`Hamiltonian`/`ControlLaw`/`PathConstraint` call
+  allocations equal the raw wrapped function's) and zero-allocation reads
+  (interpolant evaluation, trait accessors, strategy-option reads).
+- Setup-path dynamism (`Strategies`/`Options` construction — registry
+  building, option validation) is confirmed dispatch-heavy by design and
+  left as-is: it runs once per problem, before any solver call, never
+  inside a solve loop.
+
+### 📚 Documentation
+
+- **`Plotting`**: added docstrings for the previously-undocumented private
+  show helpers `_SHOW_LIMIT`, `_show_axes`, `_show_node` — no functional
+  change.
+
+### 🧪 Testing
+
+- Full suite green: **4731/4731**.
+
 ## [0.27.6-beta] - 2026-07-12
 
 ### 🐛 Bug Fixes
