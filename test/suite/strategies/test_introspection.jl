@@ -24,6 +24,7 @@ end
 # ============================================================================
 
 Strategies.id(::Type{<:IntrospectionTestStrategy}) = :introspection_test
+Strategies.parameter(::Type{<:IntrospectionTestStrategy}) = nothing
 
 function Strategies.metadata(::Type{<:IntrospectionTestStrategy})
     return Strategies.StrategyMetadata(
@@ -44,6 +45,7 @@ function Strategies.metadata(::Type{<:IntrospectionTestStrategy})
 end
 
 Strategies.id(::Type{<:EmptyOptionsStrategy}) = :empty_options
+Strategies.parameter(::Type{<:EmptyOptionsStrategy}) = nothing
 Strategies.metadata(::Type{<:EmptyOptionsStrategy}) = Strategies.StrategyMetadata()
 
 # ============================================================================

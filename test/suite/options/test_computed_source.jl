@@ -15,7 +15,8 @@ end
 
 # Implement required contract methods
 Strategies.id(::Type{<:FakeParameterizedStrategy}) = :fake_param
-Strategies._default_parameter(::Type{<:FakeParameterizedStrategy}) = Strategies.CPU
+Strategies.default_parameter(::Type{<:FakeParameterizedStrategy}) = Strategies.CPU
+Strategies.parameter(::Type{<:FakeParameterizedStrategy{P}}) where {P} = P
 
 # Define metadata with computed option
 function Strategies.metadata(::Type{<:FakeParameterizedStrategy{P}}) where {P}

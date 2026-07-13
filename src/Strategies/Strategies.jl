@@ -51,7 +51,7 @@ export RoutedOption, BypassValue
 export AbstractStrategyParameter, CPU, GPU
 
 # Type-level contract methods
-export id, metadata, description
+export id, metadata, description, parameter, default_parameter
 
 # Instance-level contract methods
 export options
@@ -60,7 +60,7 @@ export options
 export describe
 
 # Registry functions
-export create_registry, strategy_ids, type_from_id, get_parameter_type
+export create_registry, strategy_ids, type_from_id
 
 # Introspection functions
 export option_names, option_type, option_description, option_default, option_defaults

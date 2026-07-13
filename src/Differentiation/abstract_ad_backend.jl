@@ -28,6 +28,8 @@ See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref),
 """
 abstract type AbstractADBackend <: Strategies.AbstractStrategy end
 
+Strategies.parameter(::Type{<:AbstractADBackend}) = nothing
+
 # ==============================================================================
 # Contract Methods
 # ==============================================================================

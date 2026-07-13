@@ -24,21 +24,25 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 abstract type TestDiscretizerFamily <: Strategies.AbstractStrategy end
 struct MyDiscretizer <: TestDiscretizerFamily end
 Strategies.id(::Type{MyDiscretizer}) = :test_discretizer
+Strategies.parameter(::Type{<:MyDiscretizer}) = nothing
 Strategies.metadata(::Type{MyDiscretizer}) = Strategies.StrategyMetadata()
 
 abstract type TestModelerFamily <: Strategies.AbstractStrategy end
 struct MyModeler <: TestModelerFamily end
 Strategies.id(::Type{MyModeler}) = :test_modeler
+Strategies.parameter(::Type{<:MyModeler}) = nothing
 Strategies.metadata(::Type{MyModeler}) = Strategies.StrategyMetadata()
 
 abstract type TestSolverFamily <: Strategies.AbstractStrategy end
 struct MySolver <: TestSolverFamily end
 Strategies.id(::Type{MySolver}) = :test_solver
+Strategies.parameter(::Type{<:MySolver}) = nothing
 Strategies.metadata(::Type{MySolver}) = Strategies.StrategyMetadata()
 
 # Additional strategy for testing registry search
 struct MyOtherSolver <: TestSolverFamily end
 Strategies.id(::Type{MyOtherSolver}) = :test_other_solver
+Strategies.parameter(::Type{<:MyOtherSolver}) = nothing
 function Strategies.metadata(::Type{MyOtherSolver})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;

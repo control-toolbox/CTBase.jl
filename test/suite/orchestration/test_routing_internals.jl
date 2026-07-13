@@ -19,6 +19,7 @@ abstract type InternalTestSolver <: Strategies.AbstractStrategy end
 
 struct InternalCollocation <: InternalTestDiscretizer end
 Strategies.id(::Type{InternalCollocation}) = :collocation
+Strategies.parameter(::Type{<:InternalCollocation}) = nothing
 function Strategies.metadata(::Type{InternalCollocation})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -29,6 +30,7 @@ end
 
 struct InternalADNLP <: InternalTestModeler end
 Strategies.id(::Type{InternalADNLP}) = :adnlp
+Strategies.parameter(::Type{<:InternalADNLP}) = nothing
 function Strategies.metadata(::Type{InternalADNLP})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -39,6 +41,7 @@ end
 
 struct InternalIpopt <: InternalTestSolver end
 Strategies.id(::Type{InternalIpopt}) = :ipopt
+Strategies.parameter(::Type{<:InternalIpopt}) = nothing
 function Strategies.metadata(::Type{InternalIpopt})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -53,6 +56,7 @@ end
 # Additional strategy for testing registry search
 struct InternalMadNLP <: InternalTestSolver end
 Strategies.id(::Type{InternalMadNLP}) = :madnlp
+Strategies.parameter(::Type{<:InternalMadNLP}) = nothing
 function Strategies.metadata(::Type{InternalMadNLP})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;

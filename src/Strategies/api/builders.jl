@@ -218,7 +218,7 @@ present in the method tuple is compatible with all selected strategies.
 - `Vector{Type{<:AbstractStrategyParameter}}`: Supported parameter types. Returns
   an empty vector if the strategy is not parameterized.
 
-See also: [`CTBase.Strategies.extract_global_parameter_from_method`](@ref), [`CTBase.Strategies.get_parameter_type`](@ref)
+See also: [`CTBase.Strategies.extract_global_parameter_from_method`](@ref), [`CTBase.Strategies.parameter`](@ref)
 """
 function available_parameters(
     strategy_id::Symbol, family::Type{<:AbstractStrategy}, registry::StrategyRegistry
@@ -226,7 +226,7 @@ function available_parameters(
     params = Type{<:AbstractStrategyParameter}[]
     for T in registry.families[family]
         if id(T) === strategy_id
-            P = get_parameter_type(T)
+            P = parameter(T)
             if P !== nothing
                 push!(params, P::Type{<:AbstractStrategyParameter})
             end

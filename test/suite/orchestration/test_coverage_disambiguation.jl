@@ -21,6 +21,7 @@ struct CovCollocation <: CovDiscretizer
     options::Strategies.StrategyOptions
 end
 Strategies.id(::Type{CovCollocation}) = :collocation
+Strategies.parameter(::Type{<:CovCollocation}) = nothing
 function Strategies.metadata(::Type{CovCollocation})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -33,6 +34,7 @@ struct CovADNLP <: CovModeler
     options::Strategies.StrategyOptions
 end
 Strategies.id(::Type{CovADNLP}) = :adnlp
+Strategies.parameter(::Type{<:CovADNLP}) = nothing
 function Strategies.metadata(::Type{CovADNLP})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -49,6 +51,7 @@ struct CovIpopt <: CovSolver
     options::Strategies.StrategyOptions
 end
 Strategies.id(::Type{CovIpopt}) = :ipopt
+Strategies.parameter(::Type{<:CovIpopt}) = nothing
 function Strategies.metadata(::Type{CovIpopt})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;

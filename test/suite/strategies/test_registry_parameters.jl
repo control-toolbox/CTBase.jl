@@ -15,6 +15,8 @@ struct FakeStratB{P<:Strategies.AbstractStrategyParameter} <: FakeFamily end
 # Implement contracts
 Strategies.id(::Type{<:FakeStratA}) = :fakestrata
 Strategies.id(::Type{<:FakeStratB}) = :fakestratb
+Strategies.parameter(::Type{<:FakeStratA}) = nothing
+Strategies.parameter(::Type{<:FakeStratB{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
 
 # Fake parameter for testing
 struct FakeParam <: Strategies.AbstractStrategyParameter end
@@ -23,12 +25,14 @@ Strategies.id(::Type{FakeParam}) = :fakeparam
 # Additional test structs (must be at top level)
 struct FakeStratWithIdCpu <: FakeFamily end
 Strategies.id(::Type{<:FakeStratWithIdCpu}) = :cpu
+Strategies.parameter(::Type{<:FakeStratWithIdCpu}) = nothing
 
 struct FakeParam2 <: Strategies.AbstractStrategyParameter end
 Strategies.id(::Type{FakeParam2}) = :fakeparam
 
 struct FakeStratC <: FakeFamily end
 Strategies.id(::Type{<:FakeStratC}) = :fakestrata  # Same as FakeStratA
+Strategies.parameter(::Type{<:FakeStratC}) = nothing
 
 function test_registry_parameters()
     Test.@testset "Registry with Parameters" verbose=VERBOSE showtiming=SHOWTIMING begin
@@ -130,22 +134,20 @@ function test_registry_parameters()
         end
 
         # ====================================================================
-        # UNIT TESTS - get_parameter_type
+        # UNIT TESTS - parameter
         # ====================================================================
 
-        Test.@testset "get_parameter_type" begin
-            Test.@test Strategies.get_parameter_type(FakeStratB{Strategies.CPU}) ==
-                Strategies.CPU
-            Test.@test Strategies.get_parameter_type(FakeStratB{Strategies.GPU}) ==
-                Strategies.GPU
-            Test.@test Strategies.get_parameter_type(FakeStratA) === nothing
+        Test.@testset "parameter" begin
+            Test.@test Strategies.parameter(FakeStratB{Strategies.CPU}) == Strategies.CPU
+            Test.@test Strategies.parameter(FakeStratB{Strategies.GPU}) == Strategies.GPU
+            Test.@test Strategies.parameter(FakeStratA) === nothing
         end
 
-        Test.@testset "get_parameter_type type stability" begin
-            Test.@test_nowarn Test.@inferred Strategies.get_parameter_type(
+        Test.@testset "parameter type stability" begin
+            Test.@test_nowarn Test.@inferred Strategies.parameter(
                 FakeStratB{Strategies.CPU}
             )
-            Test.@test_nowarn Test.@inferred Strategies.get_parameter_type(FakeStratA)
+            Test.@test_nowarn Test.@inferred Strategies.parameter(FakeStratA)
         end
 
         # ====================================================================

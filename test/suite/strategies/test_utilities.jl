@@ -19,6 +19,7 @@ struct TestUtilStrategy <: AbstractTestUtilStrategy
 end
 
 Strategies.id(::Type{TestUtilStrategy}) = :test_util
+Strategies.parameter(::Type{<:TestUtilStrategy}) = nothing
 
 function Strategies.metadata(::Type{TestUtilStrategy})
     return Strategies.StrategyMetadata(

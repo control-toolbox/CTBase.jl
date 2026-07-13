@@ -173,6 +173,47 @@ StrategyMetadata with option definitions for max_iter, etc.
 """
 function metadata end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the strategy parameter type for a concrete strategy type, or `nothing` if the
+strategy is non-parameterized.
+
+Every concrete strategy type must implement this method:
+- Non-parameterized strategies return `nothing`.
+- Parameterized strategies return the concrete parameter type.
+
+# Arguments
+- `strategy_type::Type{<:AbstractStrategy}`: The strategy type
+
+# Returns
+- `Type{<:AbstractStrategyParameter}`: The parameter type (e.g. `CPU`, `GPU`)
+- `Nothing`: If the strategy is non-parameterized
+
+# Example
+```julia-repl
+# Non-parameterized:
+julia> parameter(Ipopt)
+nothing
+
+# Parameterized:
+julia> parameter(MadNLP{CPU})
+CPU
+```
+
+# Implementation
+```julia
+# Non-parameterized strategy:
+Strategies.parameter(::Type{<:MyStrategy}) = nothing
+
+# Parameterized strategy (bound repeated verbatim from the struct definition):
+Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:AbstractStrategyParameter} = P
+```
+
+See also: [`CTBase.Strategies.default_parameter`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
+"""
+function parameter end
+
 # ============================================================================
 # Default implementations that error if not overridden
 # ============================================================================
@@ -221,6 +262,28 @@ function metadata(::Type{T}) where {T<:AbstractStrategy}
             required_method="metadata(::Type{<:$T})",
             suggestion="Implement metadata(::Type{<:$T}) to return StrategyMetadata with OptionDefinitions",
             context="AbstractStrategy.metadata - required method implementation",
+        ),
+    )
+end
+
+"""
+Default implementation for `parameter(::Type{T})` that throws `NotImplemented`.
+
+Every concrete strategy must override this with either
+`parameter(::Type{<:S}) = nothing` (non-parameterized) or
+`parameter(::Type{<:S{P}}) where {P<:AbstractStrategyParameter} = P` (parameterized).
+
+# Throws
+
+- `Exceptions.NotImplemented`: When the concrete type doesn't override this method
+"""
+function parameter(::Type{T}) where {T<:AbstractStrategy}
+    return throw(
+        Exceptions.NotImplemented(
+            "Strategy parameter method not implemented";
+            required_method="parameter(::Type{<:$T})",
+            suggestion="Define `parameter(::Type{<:$T}) = nothing` for non-parameterized strategies, or `parameter(::Type{<:$T{P}}) where {P<:AbstractStrategyParameter} = P` for parameterized ones",
+            context="AbstractStrategy.parameter - required method implementation",
         ),
     )
 end
@@ -413,7 +476,7 @@ function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractSt
     opts = options(strategy)
 
     # Build display name: include parameter type when present (e.g. FakeOptimizer{CPU})
-    param = get_parameter_type(T)
+    param = parameter(T)
     display_name =
         param === nothing ? string(type_name) : string(type_name, "{", nameof(param), "}")
 
@@ -485,7 +548,7 @@ function Base.show(io::IO, strategy::T) where {T<:AbstractStrategy}
     type_name = nameof(T)
     opts = options(strategy)
 
-    param = get_parameter_type(T)
+    param = parameter(T)
     display_name =
         param === nothing ? string(type_name) : string(type_name, "{", nameof(param), "}")
 

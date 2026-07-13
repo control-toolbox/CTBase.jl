@@ -38,6 +38,10 @@ Strategies.id(::Type{<:TestModelerA}) = :modeler_a
 Strategies.id(::Type{<:TestModelerB}) = :modeler_b
 Strategies.id(::Type{<:TestSolverX}) = :solver_x
 Strategies.id(::Type{<:TestSolverY}) = :solver_y
+Strategies.parameter(::Type{<:TestModelerA}) = nothing
+Strategies.parameter(::Type{<:TestModelerB}) = nothing
+Strategies.parameter(::Type{<:TestSolverX}) = nothing
+Strategies.parameter(::Type{<:TestSolverY}) = nothing
 
 function Strategies.metadata(::Type{<:TestModelerA})
     return Strategies.StrategyMetadata(

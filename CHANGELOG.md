@@ -5,6 +5,43 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.0-beta] - 2026-07-13
+
+### 💥 Breaking Changes
+
+#### **Strategy parameter contract** — `parameter` replaces `get_parameter_type`; `default_parameter` replaces `_default_parameter`
+
+- **`get_parameter_type` removed** from the public API. It was a `@generated`
+  function that extracted the type parameter from a strategy type by inspecting
+  `T.parameters` — fragile, assumption-heavy, and leaky.
+- **New `parameter(::Type{<:S})` contract method** added to `AbstractStrategy`.
+  Every concrete strategy **must** implement it:
+  - Non-parameterized: `Strategies.parameter(::Type{<:MyStrategy}) = nothing`
+  - Parameterized: `Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:AbstractStrategyParameter} = P`
+  The default stub throws `Exceptions.NotImplemented` so any strategy that
+  forgets to implement it fails loudly at load time.
+- **`_default_parameter` renamed to `default_parameter`** (public API). The
+  leading underscore implied it was internal; it is part of the required
+  parameterized-strategy contract and is now consistently named.
+- **`parameter` and `default_parameter` are now exported** from `CTBase.Strategies`.
+  `get_parameter_type` is no longer exported.
+- **`AbstractADBackend`** (and all concrete AD backends) now implement
+  `parameter(::Type{<:AbstractADBackend}) = nothing` explicitly.
+
+**Migration** (downstream packages such as CTSolvers and CTDirect):
+
+```julia
+# Before
+# (no explicit parameter method required)
+Strategies._default_parameter(::Type{<:MadNLP}) = Strategies.CPU
+
+# After
+Strategies.parameter(::Type{<:MadNLP{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
+Strategies.default_parameter(::Type{<:MadNLP}) = Strategies.CPU
+```
+
+---
+
 ## [0.27.7-beta] - 2026-07-12
 
 ### 🛠 Enhancements
