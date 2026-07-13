@@ -11,7 +11,8 @@ struct FakeGenericStrat{P<:Strategies.AbstractStrategyParameter} end
 struct FakeConcreteStrat end
 
 function test_describe_registry()
-    Test.@testset "Describe registry - private helpers" verbose = VERBOSE showtiming = SHOWTIMING begin
+    Test.@testset "Describe registry - private helpers" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - _strategy_type_name

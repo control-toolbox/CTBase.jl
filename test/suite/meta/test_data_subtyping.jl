@@ -25,8 +25,8 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_data_subtyping()
-    Test.@testset "Struct <: AbstractParent (bound-dropping regression guard)" verbose = VERBOSE showtiming =
-        SHOWTIMING begin
+    Test.@testset "Struct <: AbstractParent (bound-dropping regression guard)" verbose =
+        VERBOSE showtiming = SHOWTIMING begin
         Test.@testset "Fixed in this pass" begin
             Test.@test Data.Hamiltonian <: Data.AbstractHamiltonian
             Test.@test Data.PseudoHamiltonian <: Data.AbstractPseudoHamiltonian

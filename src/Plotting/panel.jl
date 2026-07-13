@@ -136,7 +136,7 @@ function Base.show(io::IO, p::Panel)
     print(io, fmt.name, "Panel", fmt.reset, "(")
     print(io, fmt.label, repr(p.title), fmt.reset, ", ")
     print(io, fmt.value, n_components(p), fmt.reset, " components, ")
-    print(io, fmt.value, length(p.x), fmt.reset, " pts)")
+    return print(io, fmt.value, length(p.x), fmt.reset, " pts)")
 end
 
 """
