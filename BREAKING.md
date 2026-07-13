@@ -2,6 +2,51 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Breaking changes (0.28.0-beta)
+
+- **`Strategies`: `get_parameter_type` removed; `parameter` contract method added;
+  `_default_parameter` renamed to `default_parameter`.**
+
+  The `get_parameter_type` function was a `@generated` function that extracted
+  the type parameter from a strategy type by inspecting `T.parameters` —
+  fragile, assumption-heavy, and leaky. It has been replaced by an explicit
+  contract method.
+
+  **What changed:**
+
+  - `get_parameter_type(::Type{T})` is **removed** from the public API and is
+    no longer exported.
+  - A new `parameter(::Type{<:S})` contract method is added to
+    `AbstractStrategy`. Every concrete strategy **must** implement it:
+    - Non-parameterized: `Strategies.parameter(::Type{<:MyStrategy}) = nothing`
+    - Parameterized:
+      `Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:Strategies.AbstractStrategyParameter} = P`
+    - The default stub throws `Exceptions.NotImplemented` so any strategy
+      that forgets to implement it fails loudly at load time.
+  - `_default_parameter` is **renamed** to `default_parameter` (public API,
+    now exported).
+  - `parameter` and `default_parameter` are now exported from
+    `CTBase.Strategies`.
+  - `AbstractADBackend` (and all concrete AD backends) now implement
+    `parameter(::Type{<:AbstractADBackend}) = nothing` explicitly.
+
+  **Migration:**
+
+  ```julia
+  # Before — no explicit parameter method required
+  Strategies._default_parameter(::Type{<:MadNLP}) = Strategies.CPU
+
+  # After — implement parameter + rename default_parameter
+  Strategies.parameter(::Type{<:MadNLP{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
+  Strategies.default_parameter(::Type{<:MadNLP}) = Strategies.CPU
+  ```
+
+  For non-parameterized strategies, add:
+
+  ```julia
+  Strategies.parameter(::Type{<:MyStrategy}) = nothing
+  ```
+
 ## Non-breaking note (0.27.7-beta)
 
 - **Performance tooling pass**: `JET.jl` and `BenchmarkTools.jl` added as

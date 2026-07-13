@@ -19,10 +19,12 @@ abstract type TestSolver <: Strategies.AbstractStrategy end
 
 struct CollocationMock <: TestDiscretizer end
 Strategies.id(::Type{CollocationMock}) = :collocation
+Strategies.parameter(::Type{<:CollocationMock}) = nothing
 Strategies.metadata(::Type{CollocationMock}) = Strategies.StrategyMetadata()
 
 struct ADNLPMock <: TestModeler end
 Strategies.id(::Type{ADNLPMock}) = :adnlp
+Strategies.parameter(::Type{<:ADNLPMock}) = nothing
 function Strategies.metadata(::Type{ADNLPMock})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -37,6 +39,7 @@ end
 
 struct IpoptMock <: TestSolver end
 Strategies.id(::Type{IpoptMock}) = :ipopt
+Strategies.parameter(::Type{<:IpoptMock}) = nothing
 function Strategies.metadata(::Type{IpoptMock})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;

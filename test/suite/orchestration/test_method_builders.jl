@@ -20,6 +20,7 @@ struct BuilderCollocation <: BuilderTestDiscretizer
 end
 
 Strategies.id(::Type{BuilderCollocation}) = :collocation
+Strategies.parameter(::Type{<:BuilderCollocation}) = nothing
 function Strategies.metadata(::Type{BuilderCollocation})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -34,6 +35,7 @@ struct BuilderADNLP <: BuilderTestModeler
 end
 
 Strategies.id(::Type{BuilderADNLP}) = :adnlp
+Strategies.parameter(::Type{<:BuilderADNLP}) = nothing
 function Strategies.metadata(::Type{BuilderADNLP})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;

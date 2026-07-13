@@ -338,10 +338,15 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Get the default parameter type for a strategy.
+Return the default parameter type used when constructing a parameterized strategy
+without an explicit parameter token.
 
-This function returns the default parameter type that a strategy accepts.
-Strategies should override this method to specify their default parameter.
+This is a separate concern from [`CTBase.Strategies.parameter`](@ref):
+- `parameter(S)` extracts the parameter from an already-instantiated type (e.g. `S{CPU}`).
+- `default_parameter(S)` declares which parameter to use when none is specified at construction.
+
+Every parameterized strategy must implement this method.
+Non-parameterized strategies do not need to implement it.
 
 # Arguments
 - `strategy_type::Type{<:AbstractStrategy}`: The strategy type
@@ -349,28 +354,27 @@ Strategies should override this method to specify their default parameter.
 # Returns
 - `Type{<:AbstractStrategyParameter}`: Default parameter type
 
-# Default Behavior
-By default, returns `CPU` for backward compatibility. Strategies that
-have a different default parameter should override this method.
+# Throws
+- `Exceptions.NotImplemented`: If the strategy does not implement this method
 
 # Example
 ```julia
 # Strategy that defaults to CPU
-_default_parameter(::Type{<:MyStrategy}) = CPU
+Strategies.default_parameter(::Type{<:MyStrategy}) = Strategies.CPU
 
 # Strategy that defaults to GPU
-_default_parameter(::Type{<:MyOtherStrategy}) = GPU
+Strategies.default_parameter(::Type{<:MyOtherStrategy}) = Strategies.GPU
 ```
 
-See also: [`CTBase.Strategies.CPU`](@ref), [`CTBase.Strategies.GPU`](@ref)
+See also: [`CTBase.Strategies.parameter`](@ref), [`CTBase.Strategies.CPU`](@ref), [`CTBase.Strategies.GPU`](@ref)
 """
-function _default_parameter(::Type{<:AbstractStrategy})
+function default_parameter(::Type{<:AbstractStrategy})
     return throw(
         Exceptions.NotImplemented(
-            "Strategy must implement _default_parameter";
-            required_method="Strategies._default_parameter(::Type{<:YourStrategy})",
-            suggestion="Define Strategies._default_parameter(::Type{<:YourStrategy}) = CPU or GPU",
-            context="Parameter contract - all parameterized strategies must declare default parameter",
+            "Strategy must implement default_parameter";
+            required_method="Strategies.default_parameter(::Type{<:YourStrategy})",
+            suggestion="Define Strategies.default_parameter(::Type{<:YourStrategy}) = Strategies.CPU (or GPU)",
+            context="Parameter contract - parameterized strategies must declare default parameter",
         ),
     )
 end

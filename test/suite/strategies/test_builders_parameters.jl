@@ -21,6 +21,8 @@ end
 # Implement contracts
 Strategies.id(::Type{<:TestStratA}) = :teststrata
 Strategies.id(::Type{<:TestStratB}) = :teststratb
+Strategies.parameter(::Type{<:TestStratA}) = nothing
+Strategies.parameter(::Type{<:TestStratB{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
 
 # Simple metadata for testing
 function Strategies.metadata(::Type{T}) where {T<:TestStratA}

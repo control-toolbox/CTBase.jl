@@ -86,8 +86,11 @@ function _describe_strategy_registry(
     type_name = _strategy_base_name(base_type)
 
     # 3. Get available parameters
-    params = [get_parameter_type(T) for T in strategy_types]
-    params = filter(!isnothing, params)
+    params = Type{<:AbstractStrategyParameter}[]
+    for T in strategy_types
+        p = parameter(T)
+        p === nothing || push!(params, p)
+    end
     unique!(params)  # Remove duplicates
 
     # 4. Get default parameter (if parameterized)
@@ -101,7 +104,7 @@ function _describe_strategy_registry(
             else
                 base_type
             end
-            _default_parameter(wrapper_type)
+            default_parameter(wrapper_type)
         catch
             nothing
         end
@@ -301,7 +304,7 @@ function _find_strategies_using_parameter(
     for (family, types) in registry.families
         for T in types
             # Check if this strategy type uses the parameter
-            strat_param = get_parameter_type(T)
+            strat_param = parameter(T)
             if strat_param === param_type
                 strat_id = id(T)
                 push!(results, (strat_id, family, T))

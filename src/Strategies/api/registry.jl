@@ -421,7 +421,7 @@ function type_from_id(
 
     for T in registry.families[family]
         if id(T) === strategy_id
-            if parameter === nothing || get_parameter_type(T) == parameter
+            if parameter === nothing || Strategies.parameter(T) == parameter
                 return T
             end
         end
@@ -444,8 +444,8 @@ function type_from_id(
             )
         else
             available_params = [
-                get_parameter_type(T) for
-                T in param_strategies if get_parameter_type(T) !== nothing
+                Strategies.parameter(T) for
+                T in param_strategies if Strategies.parameter(T) !== nothing
             ]
             throw(
                 Exceptions.IncorrectArgument(
@@ -553,7 +553,11 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
             base_name = string(nameof(first(types)))
 
             # Collect parameter types if any
-            params = filter(!isnothing, [get_parameter_type(T) for T in types])
+            params = Type{<:AbstractStrategyParameter}[]
+            for T in types
+                p = Strategies.parameter(T)
+                p === nothing || push!(params, p)
+            end
 
             if isempty(params)
                 println(
@@ -619,44 +623,3 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
     end
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Extract the parameter type from a parameterized strategy type.
-
-For parameterized strategies like `MadNLP{CPU}`, this returns the parameter type `CPU`.
-For non-parameterized strategies, this returns `nothing`.
-
-# Arguments
-- `strategy_type::Type{<:AbstractStrategy}`: The strategy type to extract parameter from
-
-# Returns
-- `Union{Type{<:AbstractStrategyParameter}, Nothing}`: Parameter type or `nothing` if non-parameterized
-
-# Examples
-```julia-repl
-julia> get_parameter_type(MadNLP{CPU})
-CPU
-
-julia> get_parameter_type(MadNLP{GPU})
-GPU
-
-julia> get_parameter_type(Ipopt)
-nothing
-```
-"""
-function get_parameter_type(strategy_type::Type)
-    # For parameterized strategies like MadNLP{CPU}, extract the parameter type
-    # Check if this type has parameters by examining its type parameters
-    try
-        # Try to get the first type parameter
-        param_type = strategy_type.parameters[1]
-        if param_type <: AbstractStrategyParameter
-            return param_type
-        end
-    catch e
-        # No parameters or error accessing parameters
-    end
-
-    return nothing
-end

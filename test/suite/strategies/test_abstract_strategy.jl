@@ -27,6 +27,8 @@ end
 
 Strategies.id(::Type{<:FakeStrategy}) = :fake
 Strategies.id(::Type{<:IncompleteStrategy}) = :incomplete
+Strategies.parameter(::Type{<:FakeStrategy}) = nothing
+Strategies.parameter(::Type{<:IncompleteStrategy}) = nothing
 
 function Strategies.metadata(::Type{<:FakeStrategy})
     return Strategies.StrategyMetadata(
@@ -56,6 +58,7 @@ struct FakeStrategyWithDescription <: Strategies.AbstractStrategy
 end
 
 Strategies.id(::Type{<:FakeStrategyWithDescription}) = :fake_described
+Strategies.parameter(::Type{<:FakeStrategyWithDescription}) = nothing
 function Strategies.metadata(::Type{<:FakeStrategyWithDescription})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(; name=:n, type=Int, default=10, description="Grid size.")

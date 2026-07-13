@@ -23,6 +23,8 @@ end
 
 Strategies.id(::Type{TestStrategyA}) = :test_a
 Strategies.id(::Type{TestStrategyB}) = :test_b
+Strategies.parameter(::Type{<:TestStrategyA}) = nothing
+Strategies.parameter(::Type{<:TestStrategyB}) = nothing
 
 function Strategies.metadata(::Type{TestStrategyA})
     return Strategies.StrategyMetadata(

@@ -26,6 +26,8 @@ end
 
 Strategies.id(::Type{FakeDisc}) = :fake_disc
 Strategies.id(::Type{FakeMod}) = :fake_mod
+Strategies.parameter(::Type{FakeDisc}) = nothing
+Strategies.parameter(::Type{FakeMod}) = nothing
 
 # Both have a 'backend' option to create ambiguity
 function Strategies.metadata(::Type{FakeDisc})

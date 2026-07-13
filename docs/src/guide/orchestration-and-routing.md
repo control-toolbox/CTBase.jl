@@ -31,6 +31,7 @@ struct FakeCollocation <: AbstractFakeDiscretizer
 end
 
 CTBase.Strategies.id(::Type{<:FakeCollocation}) = :collocation
+CTBase.Strategies.parameter(::Type{<:FakeCollocation}) = nothing
 
 CTBase.Strategies.metadata(::Type{<:FakeCollocation}) =
     CTBase.Strategies.StrategyMetadata(
@@ -55,6 +56,7 @@ struct FakeADNLP <: AbstractFakeModeler
 end
 
 CTBase.Strategies.id(::Type{<:FakeADNLP}) = :adnlp
+CTBase.Strategies.parameter(::Type{<:FakeADNLP}) = nothing
 
 CTBase.Strategies.metadata(::Type{<:FakeADNLP}) =
     CTBase.Strategies.StrategyMetadata(
@@ -79,6 +81,7 @@ struct FakeIpopt <: AbstractFakeSolver
 end
 
 CTBase.Strategies.id(::Type{<:FakeIpopt}) = :ipopt
+CTBase.Strategies.parameter(::Type{<:FakeIpopt}) = nothing
 
 CTBase.Strategies.metadata(::Type{<:FakeIpopt}) =
     CTBase.Strategies.StrategyMetadata(

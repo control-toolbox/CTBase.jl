@@ -21,6 +21,7 @@ abstract type RoutingTestSolver <: Strategies.AbstractStrategy end
 
 struct RoutingCollocation <: RoutingTestDiscretizer end
 Strategies.id(::Type{RoutingCollocation}) = :collocation
+Strategies.parameter(::Type{<:RoutingCollocation}) = nothing
 function Strategies.metadata(::Type{RoutingCollocation})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -31,6 +32,7 @@ end
 
 struct RoutingADNLP <: RoutingTestModeler end
 Strategies.id(::Type{RoutingADNLP}) = :adnlp
+Strategies.parameter(::Type{<:RoutingADNLP}) = nothing
 function Strategies.metadata(::Type{RoutingADNLP})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -45,6 +47,7 @@ end
 
 struct RoutingIpopt <: RoutingTestSolver end
 Strategies.id(::Type{RoutingIpopt}) = :ipopt
+Strategies.parameter(::Type{<:RoutingIpopt}) = nothing
 function Strategies.metadata(::Type{RoutingIpopt})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;
@@ -62,6 +65,7 @@ end
 
 struct ShadowingSolver <: RoutingTestSolver end
 Strategies.id(::Type{ShadowingSolver}) = :shadow_solver
+Strategies.parameter(::Type{<:ShadowingSolver}) = nothing
 function Strategies.metadata(::Type{ShadowingSolver})
     return Strategies.StrategyMetadata(
         Options.OptionDefinition(;

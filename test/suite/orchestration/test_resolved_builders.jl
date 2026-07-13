@@ -22,6 +22,8 @@ end
 
 Strategies.id(::Type{RBDiscA}) = :rb_disc_a
 Strategies.id(::Type{RBModA}) = :rb_mod_a
+Strategies.parameter(::Type{<:RBDiscA}) = nothing
+Strategies.parameter(::Type{<:RBModA}) = nothing
 
 function Strategies.metadata(::Type{RBDiscA})
     return Strategies.StrategyMetadata(

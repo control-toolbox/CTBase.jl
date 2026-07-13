@@ -20,6 +20,7 @@ struct MockSolver <: BypassTestSolver
 end
 
 Strategies.id(::Type{MockSolver}) = :mock_solver
+Strategies.parameter(::Type{<:MockSolver}) = nothing
 
 function Strategies.metadata(::Type{MockSolver})
     return Strategies.StrategyMetadata(

@@ -73,7 +73,7 @@ function test_strategies()
 
             # Test exported contract functions
             Test.@testset "Exported Contract Functions" begin
-                for f in (:id, :metadata, :options)
+                for f in (:id, :metadata, :options, :parameter, :default_parameter)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
                         Test.@test isdefined(CurrentModule, f)
@@ -85,7 +85,7 @@ function test_strategies()
             # Test exported registry functions
             Test.@testset "Exported Registry Functions" begin
                 for f in
-                    (:create_registry, :strategy_ids, :type_from_id, :get_parameter_type)
+                    (:create_registry, :strategy_ids, :type_from_id)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
                         Test.@test isdefined(CurrentModule, f)
@@ -165,7 +165,6 @@ function test_strategies()
                     :_strategy_id_set,              # Internal helper function
                     :_error_unknown_options_strict,  # Internal error functions
                     :_warn_unknown_options_permissive,
-                    :_default_parameter,            # Internal contract function
                     :validate_parameter_type,        # Internal validation function
                 )
                     Test.@testset "$f" begin

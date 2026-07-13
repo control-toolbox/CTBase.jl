@@ -39,6 +39,10 @@ Strategies.id(::Type{<:TestStrategyA}) = :strategy_a
 Strategies.id(::Type{<:TestStrategyB}) = :strategy_b
 Strategies.id(::Type{<:TestStrategyC}) = :strategy_c
 Strategies.id(::Type{<:WrongTypeStrategy}) = :wrong
+Strategies.parameter(::Type{<:TestStrategyA}) = nothing
+Strategies.parameter(::Type{<:TestStrategyB}) = nothing
+Strategies.parameter(::Type{<:TestStrategyC}) = nothing
+Strategies.parameter(::Type{<:WrongTypeStrategy}) = nothing
 
 Strategies.metadata(::Type{<:TestStrategyA}) = Strategies.StrategyMetadata()
 Strategies.metadata(::Type{<:TestStrategyB}) = Strategies.StrategyMetadata()

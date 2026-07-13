@@ -20,6 +20,7 @@ struct CovOptFakeStrategy <: Strategies.AbstractStrategy
 end
 
 Strategies.id(::Type{<:CovOptFakeStrategy}) = :cov_opt_fake
+Strategies.parameter(::Type{<:CovOptFakeStrategy}) = nothing
 
 function Strategies.metadata(::Type{<:CovOptFakeStrategy})
     return Strategies.StrategyMetadata(

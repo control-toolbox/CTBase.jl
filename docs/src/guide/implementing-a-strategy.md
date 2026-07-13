@@ -22,7 +22,8 @@ Every strategy implements a **two-level contract** that separates static metadat
 ```text
 Type-Level (no instantiation needed)
 ├─ id(::Type{<:S})        → Symbol           (routing, registry lookup)
-└─ metadata(::Type{<:S})  → StrategyMetadata (option specs + validation rules)
+├─ metadata(::Type{<:S})  → StrategyMetadata (option specs + validation rules)
+└─ parameter(::Type{<:S}) → Nothing | Type   (nothing for non-parameterized; P for S{P})
             │
             ▼  routing, validation
    Constructor(; mode, kwargs...)
@@ -66,12 +67,13 @@ end
 nothing # hide
 ```
 
-### Step 2 — Implement `id`
+### Step 2 — Implement `id` and `parameter`
 
-The `id` method returns a unique `Symbol` identifier for the strategy. It is a **type-level** method.
+The `id` method returns a unique `Symbol` identifier. The `parameter` method is part of the contract: non-parameterized strategies return `nothing`.
 
 ```@example strategy
 Strategies.id(::Type{<:Collocation}) = :collocation
+Strategies.parameter(::Type{<:Collocation}) = nothing
 nothing # hide
 ```
 
@@ -214,6 +216,7 @@ struct DirectShooting <: AbstractOptimalControlDiscretizer
 end
 
 Strategies.id(::Type{<:DirectShooting}) = :direct_shooting
+Strategies.parameter(::Type{<:DirectShooting}) = nothing
 
 __shooting_grid_size()::Int = 100
 

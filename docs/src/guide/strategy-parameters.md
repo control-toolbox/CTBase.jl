@@ -98,12 +98,13 @@ end
 nothing # hide
 ```
 
-### Step 2 — Implement `id`
+### Step 2 — Implement `id` and `parameter`
 
-All parameter variants share the same ID:
+All parameter variants share the same ID. The `parameter` method extracts `P` from the instantiated type:
 
 ```@example params
 Strategies.id(::Type{<:FakeOptimizer}) = :fake_optimizer
+Strategies.parameter(::Type{<:FakeOptimizer{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
 nothing # hide
 ```
 
@@ -281,6 +282,7 @@ struct FallbackOptimizer <: AbstractFakeOptimizer
 end
 
 Strategies.id(::Type{<:FallbackOptimizer}) = :fallback
+Strategies.parameter(::Type{<:FallbackOptimizer}) = nothing
 
 function Strategies.metadata(::Type{<:FallbackOptimizer})
     return Strategies.StrategyMetadata(

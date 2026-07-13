@@ -17,6 +17,7 @@ struct CovFakeStrategy <: Strategies.AbstractStrategy
 end
 
 Strategies.id(::Type{<:CovFakeStrategy}) = :cov_fake
+Strategies.parameter(::Type{<:CovFakeStrategy}) = nothing
 
 function Strategies.metadata(::Type{<:CovFakeStrategy})
     return Strategies.StrategyMetadata(
@@ -40,6 +41,7 @@ struct CovNoOptionsStrategy <: Strategies.AbstractStrategy
 end
 
 Strategies.id(::Type{<:CovNoOptionsStrategy}) = :cov_no_opts
+Strategies.parameter(::Type{<:CovNoOptionsStrategy}) = nothing
 
 Strategies.metadata(::Type{<:CovNoOptionsStrategy}) = Strategies.StrategyMetadata()
 
@@ -48,6 +50,7 @@ struct CovNoIdStrategy <: Strategies.AbstractStrategy end
 struct CovNoMetaStrategy <: Strategies.AbstractStrategy end
 
 Strategies.id(::Type{<:CovNoMetaStrategy}) = :cov_no_meta
+Strategies.parameter(::Type{<:CovNoMetaStrategy}) = nothing
 
 # Single-option strategy for singular display
 struct CovSingleOptStrategy <: Strategies.AbstractStrategy
@@ -55,6 +58,7 @@ struct CovSingleOptStrategy <: Strategies.AbstractStrategy
 end
 
 Strategies.id(::Type{<:CovSingleOptStrategy}) = :cov_single
+Strategies.parameter(::Type{<:CovSingleOptStrategy}) = nothing
 
 function Strategies.metadata(::Type{<:CovSingleOptStrategy})
     return Strategies.StrategyMetadata(
