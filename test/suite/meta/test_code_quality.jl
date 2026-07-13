@@ -28,11 +28,15 @@ struct _SkipBenignLoweredCodeUtilsWarnings <: Logging.AbstractLogger
     logger::Logging.AbstractLogger
 end
 
-Logging.min_enabled_level(l::_SkipBenignLoweredCodeUtilsWarnings) =
-    Logging.min_enabled_level(l.logger)
+function Logging.min_enabled_level(l::_SkipBenignLoweredCodeUtilsWarnings)
+    return Logging.min_enabled_level(l.logger)
+end
 
-Logging.shouldlog(l::_SkipBenignLoweredCodeUtilsWarnings, level, _module, group, id) =
-    Logging.shouldlog(l.logger, level, _module, group, id)
+function Logging.shouldlog(
+    l::_SkipBenignLoweredCodeUtilsWarnings, level, _module, group, id
+)
+    return Logging.shouldlog(l.logger, level, _module, group, id)
+end
 
 function Logging.handle_message(
     l::_SkipBenignLoweredCodeUtilsWarnings,

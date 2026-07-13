@@ -83,7 +83,9 @@ function test_performance()
         # 2. Zero-allocation reads: interpolant eval, trait reads, option reads
         # ======================================================================
         Test.@testset "Zero-allocation reads" begin
-            interp_l = Interpolation.ctinterpolate([0.0, 1.0, 2.0, 3.0], [1.0, 2.0, 1.5, 3.0])
+            interp_l = Interpolation.ctinterpolate(
+                [0.0, 1.0, 2.0, 3.0], [1.0, 2.0, 1.5, 3.0]
+            )
             Test.@test (BenchmarkTools.@ballocated $interp_l(1.5)) == 0
 
             interp_c = Interpolation.ctinterpolate_constant(
@@ -101,7 +103,8 @@ function test_performance()
             Test.@test (BenchmarkTools.@ballocated Traits.feedback($cl)) == 0
 
             backend = Differentiation.DifferentiationInterface()
-            Test.@test (BenchmarkTools.@ballocated Differentiation.ad_backend($backend)) == 0
+            Test.@test (BenchmarkTools.@ballocated Differentiation.ad_backend($backend)) ==
+                0
         end
     end
     return nothing
