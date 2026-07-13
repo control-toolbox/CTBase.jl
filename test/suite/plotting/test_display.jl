@@ -11,13 +11,14 @@ _sprint_show(x) = sprint(show, x)
 _sprint_plain(x) = sprint(show, MIME"text/plain"(), x)
 
 # Helper builders
-_series(label="x(t)", n=3) = Plotting.Series(
-    collect(Float64, 1:n), collect(Float64, 1:n); label=label,
-)
-_axes(; title="State", xlabel="t", ylabel="x", nseries=1) = Plotting.Axes(
-    [_series("s$i") for i in 1:nseries]; title=title,
-    xlabel=xlabel, ylabel=ylabel,
-)
+function _series(label="x(t)", n=3)
+    return Plotting.Series(collect(Float64, 1:n), collect(Float64, 1:n); label=label)
+end
+function _axes(; title="State", xlabel="t", ylabel="x", nseries=1)
+    return Plotting.Axes(
+        [_series("s$i") for i in 1:nseries]; title=title, xlabel=xlabel, ylabel=ylabel
+    )
+end
 _leaf(; title="State") = Plotting.Leaf(_axes(; title=title))
 
 function test_display()
@@ -91,9 +92,7 @@ function test_display()
             end
 
             Test.@testset "Figure compact" begin
-                fig = Plotting.Figure(
-                    Plotting.VBox([_leaf()]); title="Solution",
-                )
+                fig = Plotting.Figure(Plotting.VBox([_leaf()]); title="Solution")
                 out = _sprint_show(fig)
                 Test.@test occursin("Figure", out)
                 Test.@test occursin("Solution", out)
@@ -128,8 +127,10 @@ function test_display()
         Test.@testset "Unit — pretty" begin
             Test.@testset "Series pretty" begin
                 s = Plotting.Series(
-                    [0.0, 1.0, 2.0], [0.0, 1.0, 0.0];
-                    label="x(t)", style=(color=:blue, linewidth=2),
+                    [0.0, 1.0, 2.0],
+                    [0.0, 1.0, 0.0];
+                    label="x(t)",
+                    style=(color=:blue, linewidth=2),
                 )
                 out = _sprint_plain(s)
                 Test.@test occursin("Series", out)
@@ -166,7 +167,9 @@ function test_display()
             Test.@testset "Axes pretty — series and labels" begin
                 ax = Plotting.Axes(
                     [_series("x(t)", 3), _series("y(t)", 2)];
-                    title="State", xlabel="t", ylabel="x",
+                    title="State",
+                    xlabel="t",
+                    ylabel="x",
                 )
                 out = _sprint_plain(ax)
                 Test.@test occursin("Axes", out)
@@ -223,9 +226,7 @@ function test_display()
             Test.@testset "Figure pretty — full tree" begin
                 leaf1 = _leaf(; title="State")
                 leaf2 = _leaf(; title="Control")
-                fig = Plotting.Figure(
-                    Plotting.VBox([leaf1, leaf2]); title="Solution",
-                )
+                fig = Plotting.Figure(Plotting.VBox([leaf1, leaf2]); title="Solution")
                 out = _sprint_plain(fig)
                 Test.@test occursin("Figure", out)
                 Test.@test occursin("Solution", out)
@@ -235,9 +236,7 @@ function test_display()
             end
 
             Test.@testset "Figure pretty — size shown" begin
-                fig = Plotting.Figure(
-                    _leaf(); title="Fig", size=(800, 600),
-                )
+                fig = Plotting.Figure(_leaf(); title="Fig", size=(800, 600))
                 out = _sprint_plain(fig)
                 Test.@test occursin("size", out)
                 Test.@test occursin("800", out)
@@ -270,9 +269,7 @@ function test_display()
             Test.@testset "Panel pretty — partial labels" begin
                 t = collect(0.0:0.1:1.0)
                 data = hcat(sin.(t), cos.(t), t)
-                panel = Plotting.Panel(
-                    t, data; title="Mix", labels=["a", "", "c"],
-                )
+                panel = Plotting.Panel(t, data; title="Mix", labels=["a", "", "c"])
                 out = _sprint_plain(panel)
                 Test.@test occursin("a", out)
                 Test.@test occursin("c", out)
@@ -281,10 +278,7 @@ function test_display()
             end
 
             Test.@testset "Panel pretty — singular" begin
-                panel = Plotting.Panel(
-                    [0.0], reshape([1.0], :, 1);
-                    title="S", labels=["u"],
-                )
+                panel = Plotting.Panel([0.0], reshape([1.0], :, 1); title="S", labels=["u"])
                 out = _sprint_plain(panel)
                 Test.@test occursin("1 component", out)
                 Test.@test occursin("1 point", out)
@@ -310,9 +304,7 @@ function test_display()
             end
 
             Test.@testset "Truncation beyond limit" begin
-                leaves = [
-                    _leaf(; title="C$i") for i in 1:8
-                ]
+                leaves = [_leaf(; title="C$i") for i in 1:8]
                 box = Plotting.VBox(leaves)
                 out = _sprint_plain(box)
                 Test.@test occursin("8", out)
@@ -326,10 +318,7 @@ function test_display()
                 leaf1 = _leaf(; title="State")
                 leaf2 = _leaf(; title="Costate")
                 leaf3 = _leaf(; title="Control")
-                tree = Plotting.VBox([
-                    Plotting.HBox([leaf1, leaf2]),
-                    leaf3,
-                ])
+                tree = Plotting.VBox([Plotting.HBox([leaf1, leaf2]), leaf3])
                 fig = Plotting.Figure(tree; title="Solution")
                 out = _sprint_plain(fig)
                 Test.@test occursin("Figure", out)

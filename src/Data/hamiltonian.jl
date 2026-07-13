@@ -58,9 +58,8 @@ Hamiltonian: non-autonomous, fixed (no variable)
 
 See also: [`CTBase.Data.AbstractHamiltonian`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
 """
-struct Hamiltonian{
-    F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
-} <: AbstractHamiltonian{TD,VD}
+struct Hamiltonian{F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} <:
+       AbstractHamiltonian{TD,VD}
     f::F
 end
 
