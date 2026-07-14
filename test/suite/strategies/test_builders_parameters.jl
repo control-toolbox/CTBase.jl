@@ -22,7 +22,11 @@ end
 Strategies.id(::Type{<:TestStratA}) = :teststrata
 Strategies.id(::Type{<:TestStratB}) = :teststratb
 Strategies.parameter(::Type{<:TestStratA}) = nothing
-Strategies.parameter(::Type{<:TestStratB{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
+function Strategies.parameter(
+    ::Type{<:TestStratB{P}}
+) where {P<:Strategies.AbstractStrategyParameter}
+    return P
+end
 
 # Simple metadata for testing
 function Strategies.metadata(::Type{T}) where {T<:TestStratA}

@@ -21,7 +21,11 @@ struct FakeParamStrategy{P<:Strategies.AbstractStrategyParameter} <: FakeFamily
 end
 
 Strategies.id(::Type{<:FakeParamStrategy}) = :fake_param
-Strategies.parameter(::Type{<:FakeParamStrategy{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
+function Strategies.parameter(
+    ::Type{<:FakeParamStrategy{P}}
+) where {P<:Strategies.AbstractStrategyParameter}
+    return P
+end
 
 function Strategies.metadata(
     ::Type{<:FakeParamStrategy{P}}

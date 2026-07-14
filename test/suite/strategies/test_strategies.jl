@@ -84,8 +84,7 @@ function test_strategies()
 
             # Test exported registry functions
             Test.@testset "Exported Registry Functions" begin
-                for f in
-                    (:create_registry, :strategy_ids, :type_from_id)
+                for f in (:create_registry, :strategy_ids, :type_from_id)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
                         Test.@test isdefined(CurrentModule, f)

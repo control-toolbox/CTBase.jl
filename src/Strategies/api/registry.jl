@@ -622,4 +622,3 @@ function Base.show(io::IO, ::MIME"text/plain", registry::StrategyRegistry)
         println(io, "└─ ", fmt.label, "parameters: ", fmt.reset, param_str)
     end
 end
-
