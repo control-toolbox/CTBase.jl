@@ -16,7 +16,11 @@ struct FakeStratB{P<:Strategies.AbstractStrategyParameter} <: FakeFamily end
 Strategies.id(::Type{<:FakeStratA}) = :fakestrata
 Strategies.id(::Type{<:FakeStratB}) = :fakestratb
 Strategies.parameter(::Type{<:FakeStratA}) = nothing
-Strategies.parameter(::Type{<:FakeStratB{P}}) where {P<:Strategies.AbstractStrategyParameter} = P
+function Strategies.parameter(
+    ::Type{<:FakeStratB{P}}
+) where {P<:Strategies.AbstractStrategyParameter}
+    return P
+end
 
 # Fake parameter for testing
 struct FakeParam <: Strategies.AbstractStrategyParameter end
