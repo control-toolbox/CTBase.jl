@@ -21,6 +21,11 @@ function test_di_parameter()
         # ====================================================================
 
         Test.@testset "parameter contract" begin
+            # Bare (device-unspecified) DI resolves to `nothing` via the AbstractADBackend
+            # family default — required by consumers that register DI without a parameter
+            # (e.g. CTFlows' flow registry) and query `parameter` on the bare type.
+            Test.@test Strategies.parameter(DI) === nothing
+
             Test.@test Strategies.parameter(DI{Strategies.CPU}) == Strategies.CPU
             Test.@test Strategies.parameter(DI{Strategies.GPU}) == Strategies.GPU
             Test.@test Strategies.default_parameter(DI) == Strategies.CPU
