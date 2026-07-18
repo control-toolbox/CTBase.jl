@@ -20,7 +20,7 @@ docs/       # Documentation site (DocumenterVitepress)
 
 ## Developer Resources
 
-Design philosophy, operational rules, and plan templates live in the
+Design philosophy, operational rules, plan templates, and CI/CD conventions live in the
 [control-toolbox Handbook](https://github.com/control-toolbox/Handbook):
 
 | Topic | Link |
@@ -28,6 +28,7 @@ Design philosophy, operational rules, and plan templates live in the
 | Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`PHILOSOPHY.md`](https://github.com/control-toolbox/Handbook/blob/main/PHILOSOPHY.md) |
 | Operational rules (tests, coverage, docs, git) | [`RULES.md`](https://github.com/control-toolbox/Handbook/blob/main/RULES.md) |
 | Plan template | [`PLAN.md`](https://github.com/control-toolbox/Handbook/blob/main/PLAN.md) |
+| CI/CD workflows (centralized reusable workflows, label-gated triggers) | [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md) |
 
 ---
 
