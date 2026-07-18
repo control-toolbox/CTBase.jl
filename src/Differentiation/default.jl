@@ -16,3 +16,25 @@ for differentiation unless specified otherwise.
 See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref).
 """
 __ad_backend() = ADTypes.AutoForwardDiff()
+
+"""
+$(TYPEDSIGNATURES)
+
+Default AD backend for CPU execution: `AutoForwardDiff()`.
+
+See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref), [`CTBase.Strategies.CPU`](@ref).
+"""
+__ad_backend(::Type{Strategies.CPU}) = ADTypes.AutoForwardDiff()
+
+"""
+$(TYPEDSIGNATURES)
+
+Default AD backend for GPU execution: `AutoZygote()`.
+
+`AutoZygote` is a GPU-capable AD backend (measured correct on `CuArray` inputs). The marker
+type comes from `ADTypes` (a hard dependency) and needs no Zygote loaded to construct; Zygote
+is required only when a gradient is actually evaluated.
+
+See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref), [`CTBase.Strategies.GPU`](@ref).
+"""
+__ad_backend(::Type{Strategies.GPU}) = ADTypes.AutoZygote()
