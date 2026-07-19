@@ -107,9 +107,11 @@ Extracts `P` from `DifferentiationInterface{P}` (`CPU` or `GPU`). Overrides the
 
 See also: [`CTBase.Strategies.CPU`](@ref), [`CTBase.Strategies.GPU`](@ref)
 """
-Strategies.parameter(
+function Strategies.parameter(
     ::Type{<:DifferentiationInterface{P}}
-) where {P<:Union{Strategies.CPU,Strategies.GPU}} = P
+) where {P<:Union{Strategies.CPU,Strategies.GPU}}
+    return P
+end
 
 """
 $(TYPEDSIGNATURES)
