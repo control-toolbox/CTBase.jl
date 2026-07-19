@@ -85,7 +85,8 @@ function test_di_parameter()
 
         Test.@testset "registry with device parameters" begin
             r = Strategies.create_registry(
-                Differentiation.AbstractADBackend => ((DI, [Strategies.CPU, Strategies.GPU]),),
+                Differentiation.AbstractADBackend =>
+                    ((DI, [Strategies.CPU, Strategies.GPU]),),
             )
 
             Test.@test :di in Strategies.strategy_ids(Differentiation.AbstractADBackend, r)
