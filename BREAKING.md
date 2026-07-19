@@ -2,6 +2,22 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.1-beta)
+
+- **`Differentiation`: `DifferentiationInterface` parameterized on the
+  execution device.** The struct gains a leading device parameter
+  `DifferentiationInterface{P<:Union{CPU,GPU},O}`, along the
+  `Exa`/`MadNLP`/`SciML{P}` pattern (phase 1b of the CTFlows GPU roadmap).
+  `DifferentiationInterface() ≡ DifferentiationInterface{CPU}`, so **every
+  current caller is unaffected**. `parameter` extracts `P` (overriding the
+  `AbstractADBackend` family default of `nothing`); `default_parameter = CPU`.
+  Per-device `metadata` defaults derive `:ad_backend` from `P` via
+  `__ad_backend(P)` (`CPU → AutoForwardDiff()`, `GPU → AutoZygote()`) and are
+  flagged `computed=true`. No new dependency (`ADTypes.AutoZygote()` is a
+  marker type from `ADTypes`, already a hard dep).
+  - **No breaking changes**: purely additive parameterization with a
+    default-preserving bare constructor. No migration required.
+
 ## Breaking changes (0.28.0-beta)
 
 - **`Strategies`: `get_parameter_type` removed; `parameter` contract method added;

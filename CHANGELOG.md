@@ -5,6 +5,50 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.1-beta] - 2026-07-19
+
+### 🛠 Enhancements
+
+#### **Differentiation** — `DifferentiationInterface` parameterized on the execution device (`{P<:Union{CPU,GPU}}`)
+
+- **`DifferentiationInterface` gains a leading device parameter**,
+  `DifferentiationInterface{P<:Union{CPU,GPU},O}`, along the `Exa`/`MadNLP`/
+  `SciML{P}` pattern. This is **phase 1b** of the CTFlows GPU roadmap
+  (roadmap-v4 §5, decision D2 = option a): it makes the default `ad_backend`
+  device-aware so one global `:gpu` token can resolve both the `:di` and
+  `:sciml` families in CTFlows (phase 2).
+- **`DifferentiationInterface() ≡ DifferentiationInterface{CPU}`** — zero
+  breakage for every current caller.
+- **`parameter`/`default_parameter`** now implemented for
+  `DifferentiationInterface`: `parameter` extracts `P` (overriding the
+  `AbstractADBackend` family default of `nothing`); `default_parameter = CPU`.
+  Parameterized `DifferentiationInterface{P}(...)` constructor + bare
+  `DifferentiationInterface(...)` delegating through `default_parameter`.
+- **Per-device `metadata`**: the `:ad_backend` default is `__ad_backend(P)`
+  and is flagged **`computed=true`** (the default is derived from `P`, so
+  `describe`/provenance report it as `:computed` rather than `:default`).
+  Bare `metadata(DifferentiationInterface)` back-compat delegation retained.
+- **`src/Differentiation/default.jl`**: `__ad_backend(::Type{CPU}) =
+  AutoForwardDiff()`, `__ad_backend(::Type{GPU}) = AutoZygote()`; the no-arg
+  `__ad_backend()` is kept (still `AutoForwardDiff()`).
+- **No new dependency**: `ADTypes.AutoZygote()` is a marker type from `ADTypes`
+  (already a CTBase hard dep); constructing it needs no Zygote loaded. Zygote
+  is required only when a gradient is actually evaluated (user/test side).
+- The `hamiltonian_gradient`/`variable_gradient` implementations in
+  `ext/CTBaseDifferentiationInterface.jl` are untouched — they read
+  `ad_backend(backend)` from the instance.
+
+### 🧪 Testing
+
+- **New `test/suite/differentiation/test_di_parameter.jl`**: Family-A
+  contract tests — `parameter`/`default_parameter`/`id`, per-device
+  `metadata` defaults + the `computed` flag, per-device construction (incl.
+  resolved `ad_backend` and explicit override), bare-`metadata` delegation,
+  and registry `[CPU, GPU]` + `extract_global_parameter_from_method`.
+- Full suite green: **4754/4754**.
+
+---
+
 ## [0.28.0-beta] - 2026-07-13
 
 ### 💥 Breaking Changes
