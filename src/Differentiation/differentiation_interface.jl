@@ -13,19 +13,20 @@ ecosystem.
 
 Parameterized on the execution device `P`:
 - `DifferentiationInterface{CPU}`: default backend `AutoForwardDiff()` (default device);
-- `DifferentiationInterface{GPU}`: default backend `AutoZygote()` (GPU-capable AD).
+- `DifferentiationInterface{GPU}`: default backend `AutoMooncake()` (validated end-to-end on
+  `CuArray`, including through a mutating in-place right-hand side).
 
 `DifferentiationInterface(...)` builds a `DifferentiationInterface{CPU}` — the device
 parameterization is fully backward compatible with existing call sites.
 
 # Arguments
 - `backend`: The DifferentiationInterface.jl backend to use. Defaults to the device default
-  (`AutoForwardDiff()` on CPU, `AutoZygote()` on GPU) from `ADTypes.jl` (a hard dependency).
+  (`AutoForwardDiff()` on CPU, `AutoMooncake()` on GPU) from `ADTypes.jl` (a hard dependency).
 - `kwargs...`: Additional options passed to `StrategyOptions`.
 
 # Notes
  - `ADTypes.jl` is a hard dependency, so the default backend markers are always available in core;
-   `AutoZygote()` is a marker type and needs no Zygote loaded to construct.
+   `AutoMooncake()` is a marker type and needs no Mooncake loaded to construct.
  - Gradient computation requires the `CTBaseDifferentiationInterface` extension.
  - Without the extension, the gradient methods throw `NotImplemented` with a helpful message.
 
@@ -65,7 +66,7 @@ $(TYPEDSIGNATURES)
 
 Construct a parameterized `DifferentiationInterface{P}` for the execution device `P`
 (`CPU` or `GPU`). The default `:ad_backend` is device-aware (`AutoForwardDiff()` on CPU,
-`AutoZygote()` on GPU) and can be overridden through the `:ad_backend` option.
+`AutoMooncake()` on GPU) and can be overridden through the `:ad_backend` option.
 
 # Arguments
 - `mode::Symbol=:strict`: Validation mode forwarded to `build_strategy_options`.
@@ -135,13 +136,29 @@ function Strategies.description(::Type{<:DifferentiationInterface})
 end
 
 """
+Per-device `:ad_backend` description surfaced by `Strategies.describe(:di, registry)` (each
+parameter renders its own `computed options for P` section, see
+`CTBase.Strategies._describe_multi_param_metadata`). The GPU variant is deliberately more
+detailed: it is the one place a user is warned, before hitting a device, that `AutoForwardDiff`
+does not work there and that `AutoZygote` is unreliable in some call contexts.
+"""
+_ad_backend_description(::Type{Strategies.CPU}) = "DifferentiationInterface.jl backend (e.g. AutoForwardDiff() on CPU)."
+function _ad_backend_description(::Type{Strategies.GPU})
+    return "DifferentiationInterface.jl backend for GPU execution. Default: AutoMooncake(), " *
+           "validated end-to-end on CuArray including through a mutating in-place RHS. " *
+           "AutoForwardDiff() does not work on GPU (scalar-indexes a CuArray). AutoZygote() " *
+           "can be selected explicitly; it was found unreliable in some device call contexts " *
+           "(an unexpected KernelException was observed on a non-mutating call)."
+end
+
+"""
 $(TYPEDSIGNATURES)
 
 Return metadata defining `DifferentiationInterface{P}` options and their specifications.
 
-The `:ad_backend` default is device-aware: `AutoForwardDiff()` on `CPU`, `AutoZygote()` on `GPU`
-(via [`CTBase.Differentiation.__ad_backend`](@ref)). The bare `metadata(DifferentiationInterface)`
-delegates here through `DifferentiationInterface{CPU}`.
+The `:ad_backend` default is device-aware: `AutoForwardDiff()` on `CPU`, `AutoMooncake()` on
+`GPU` (via [`CTBase.Differentiation.__ad_backend`](@ref)). The bare
+`metadata(DifferentiationInterface)` delegates here through `DifferentiationInterface{CPU}`.
 """
 function Strategies.metadata(
     ::Type{<:DifferentiationInterface{P}}
@@ -151,8 +168,8 @@ function Strategies.metadata(
             name=:ad_backend,
             type=ADTypes.AbstractADType,
             default=__ad_backend(P),
-            computed=true,  # Default is computed from parameter P (CPU→ForwardDiff, GPU→Zygote)
-            description="DifferentiationInterface.jl backend (e.g. AutoForwardDiff() on CPU, AutoZygote() on GPU).",
+            computed=true,  # Default is computed from parameter P (CPU→ForwardDiff, GPU→Mooncake)
+            description=_ad_backend_description(P),
             aliases=(:backend, :ad),
         ),
     )
