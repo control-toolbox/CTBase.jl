@@ -45,7 +45,7 @@ function test_di_parameter()
             md_gpu = Strategies.metadata(DI{Strategies.GPU})
 
             Test.@test md_cpu[:ad_backend].default === ADTypes.AutoForwardDiff()
-            Test.@test md_gpu[:ad_backend].default === ADTypes.AutoZygote()
+            Test.@test md_gpu[:ad_backend].default === ADTypes.AutoMooncake()
 
             # The default is computed from P, so it is flagged `computed` (for `describe`/provenance).
             Test.@test md_cpu[:ad_backend].computed == true
@@ -53,6 +53,12 @@ function test_di_parameter()
 
             # Bare `metadata(DI)` delegates to `metadata(DI{CPU})` (back-compat).
             Test.@test md_bare[:ad_backend].default === ADTypes.AutoForwardDiff()
+
+            # GPU description is P-specific (phase 4e): warns that ForwardDiff doesn't work on
+            # GPU and that Zygote is unreliable there, pointing users at the Mooncake default.
+            Test.@test occursin("AutoMooncake", md_gpu[:ad_backend].description)
+            Test.@test occursin("AutoForwardDiff() does not work on GPU", md_gpu[:ad_backend].description)
+            Test.@test !occursin("AutoMooncake", md_cpu[:ad_backend].description)
         end
 
         # ====================================================================
@@ -71,8 +77,8 @@ function test_di_parameter()
             di_gpu = DI{Strategies.GPU}()
             Test.@test di_gpu isa DI{Strategies.GPU}
             Test.@test Strategies.parameter(typeof(di_gpu)) == Strategies.GPU
-            # GPU default backend is AutoZygote (resolved from the per-device metadata).
-            Test.@test Differentiation.ad_backend(di_gpu) === ADTypes.AutoZygote()
+            # GPU default backend is AutoMooncake (resolved from the per-device metadata).
+            Test.@test Differentiation.ad_backend(di_gpu) === ADTypes.AutoMooncake()
 
             # Explicit override still wins on either device.
             di_gpu_fd = DI{Strategies.GPU}(; backend=ADTypes.AutoForwardDiff())

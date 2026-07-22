@@ -2,6 +2,18 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.2-beta)
+
+- **`Differentiation`: GPU default `:ad_backend` changed from `AutoZygote()`
+  to `AutoMooncake()`** (roadmap-v4 §5 phase 4e, measured on an H200 — see
+  `CHANGELOG.md`). The option name, override mechanism, and `computed=true`
+  flag are all unchanged; only the *computed default value* on the opt-in
+  `GPU` parameter changes. **No breaking change**: any caller already
+  overriding `:ad_backend` explicitly — including to `AutoZygote()` — is
+  unaffected, and the change is invisible to every CPU (default) caller. No
+  new dependency (`ADTypes.AutoMooncake()` is a marker type from `ADTypes`,
+  already a hard dep, same as `AutoZygote()` before it).
+
 ## Non-breaking note (0.28.1-beta)
 
 - **`Differentiation`: `DifferentiationInterface` parameterized on the

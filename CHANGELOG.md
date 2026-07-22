@@ -5,6 +5,40 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.2-beta] - 2026-07-22
+
+### 🛠 Enhancements
+
+#### **Differentiation** — GPU default `ad_backend` swapped from `AutoZygote()` to `AutoMooncake()`
+
+- **`__ad_backend(::Type{GPU})` now returns `ADTypes.AutoMooncake()`**, not
+  `AutoZygote()`. Driven by roadmap-v4 §5 **phase 4e** (CTFlows PR #353), an
+  H200 probe measuring every reverse-mode DI candidate end to end:
+  `AutoMooncake` cleared the entire matrix, including the real `Flow(ocp)`
+  Hamiltonian call on a `CuArray` with a numerically correct result.
+  `AutoZygote` turned out to fail *unexpectedly* on a non-mutating
+  `hamiltonian_gradient` device call (`KernelException`) — using the exact
+  same Hamiltonian formula that succeeds through a different call shape
+  elsewhere — meaning its device behaviour is call-context dependent rather
+  than a stable pass/fail. `AutoZygote` remains selectable explicitly; it is
+  simply no longer the default.
+- **`describe(:di, registry)` now shows a GPU-specific message**: the
+  `:ad_backend` option's `description` is P-dependent (new
+  `_ad_backend_description(P)` in `differentiation_interface.jl`). The `GPU`
+  variant explains that `AutoForwardDiff()` does not work there
+  (scalar-indexes a `CuArray`) and that `AutoZygote()` is unreliable in some
+  device call contexts — the `CPU` variant is unchanged.
+- **No new dependency**: `ADTypes.AutoMooncake()` is a marker type from
+  `ADTypes` (already a CTBase hard dep), same pattern as `AutoZygote()`
+  before it — constructing it needs no `Mooncake` package loaded.
+
+### 🧪 Testing
+
+- `test/suite/differentiation/test_di_parameter.jl`: the GPU default
+  assertions now check `AutoMooncake()`; new assertions pin the GPU-specific
+  description text (mentions `AutoMooncake`/the ForwardDiff-on-GPU warning)
+  and confirm the CPU description is unaffected.
+
 ## [0.28.1-beta] - 2026-07-19
 
 ### 🛠 Enhancements
