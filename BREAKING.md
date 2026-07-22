@@ -2,6 +2,20 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.3-beta)
+
+- **`Differentiation`: `build_ad_backend` removed from the public API.**
+  The function was a trivial wrapper around `DifferentiationInterface(;
+  kwargs...)` with identical semantics. **No breaking change in practice**:
+  the method was not used anywhere in the ecosystem (CTBase, CTFlows, etc.).
+  Callers replace `build_ad_backend(; kwargs...)` →
+  `DifferentiationInterface(; kwargs...)`. The internal no-arg
+  `__ad_backend()` is also removed (not exported, not used outside
+  `default.jl`); the parameterized `__ad_backend(::Type{CPU})` and
+  `__ad_backend(::Type{GPU})` variants are retained.
+  - **No migration required** for code that already uses
+    `DifferentiationInterface()` directly.
+
 ## Non-breaking note (0.28.2-beta)
 
 - **`Differentiation`: GPU default `:ad_backend` changed from `AutoZygote()`

@@ -27,7 +27,7 @@ FakeBackendAP() = FakeBackendAP(Strategies.StrategyOptions())
 # Helper — default backend (AutoForwardDiff via DI)
 # ==============================================================================
 
-_default_backend() = Differentiation.build_ad_backend()
+_default_backend() = Differentiation.DifferentiationInterface()
 
 function test_arg_placement()
     Test.@testset "differentiate/pushforward" verbose=VERBOSE showtiming=SHOWTIMING begin

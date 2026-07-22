@@ -81,15 +81,6 @@ function test_ad_backend()
             Test.@test :ad_backend in keys(metadata)
         end
 
-        Test.@testset "Unit: build_ad_backend" begin
-            backend = Differentiation.build_ad_backend()
-            Test.@test backend isa Differentiation.DifferentiationInterface
-        end
-
-        Test.@testset "Unit: __ad_backend default" begin
-            Test.@test Differentiation.__ad_backend() === ADTypes.AutoForwardDiff()
-        end
-
         # ==============================================================================
         # Error Tests
         # ==============================================================================

@@ -5,6 +5,34 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.3-beta] - 2026-07-22
+
+### 🛠 Enhancements
+
+#### **Differentiation** — `build_ad_backend` convenience factory removed
+
+- **`build_ad_backend(; kwargs...)` removed** from the public API. It was a
+  trivial one-line wrapper around `DifferentiationInterface(; kwargs...)`
+  that added no value. Users now call `DifferentiationInterface(; kwargs...)`
+  directly — same semantics, same keyword arguments.
+- **No-arg `__ad_backend()` removed** (internal, not exported). The
+  parameterized variants `__ad_backend(::Type{CPU})` and
+  `__ad_backend(::Type{GPU})` are retained; they are the ones actually used
+  by the device-aware `metadata` defaults.
+- **`src/Differentiation/building.jl` deleted** — contained only
+  `build_ad_backend`.
+- **Documentation**: the "Building a backend" guide section now shows real
+  `DifferentiationInterface()` constructions instead of the factory.
+
+### 🧪 Testing
+
+- Removed the `"Unit: build_ad_backend"` and `"Unit: __ad_backend default"`
+  testsets from `test/suite/differentiation/test_ad_backend.jl`.
+- `test_arg_placement.jl`: `_default_backend()` now calls
+  `Differentiation.DifferentiationInterface()` directly.
+- `test_differentiation_module.jl`: `:build_ad_backend` removed from
+  `EXPORTED_FUNCTIONS`.
+
 ## [0.28.2-beta] - 2026-07-22
 
 ### 🛠 Enhancements
