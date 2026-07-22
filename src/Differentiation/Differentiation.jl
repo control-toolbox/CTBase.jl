@@ -41,7 +41,6 @@ together with `CTBase`.
 
 - `AbstractADBackend`
 - `DifferentiationInterface`
-- `build_ad_backend`
 - `ad_backend`
 - `hamiltonian_gradient`
 - `variable_gradient`
@@ -69,7 +68,6 @@ import CTBase.Strategies
 include(joinpath(@__DIR__, "default.jl"))
 include(joinpath(@__DIR__, "abstract_ad_backend.jl"))
 include(joinpath(@__DIR__, "differentiation_interface.jl"))
-include(joinpath(@__DIR__, "building.jl"))
 
 # ==============================================================================
 # Exports
@@ -77,7 +75,6 @@ include(joinpath(@__DIR__, "building.jl"))
 
 export AbstractADBackend
 export DifferentiationInterface
-export build_ad_backend
 export ad_backend
 export hamiltonian_gradient
 export pseudo_hamiltonian_gradient

@@ -60,18 +60,20 @@ nine differentiation primitives below live in an extension.
 
 ## Building a backend
 
-Use [`Differentiation.build_ad_backend`](@ref CTBase.Differentiation.build_ad_backend)
-to construct a backend with the default AD type:
+Construct a [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface)
+strategy with the default AD type:
 
 ```@example diff
-backend = Differentiation.build_ad_backend()
+backend = Differentiation.DifferentiationInterface()
 ```
 
 Pass an explicit ADTypes backend through the `ad_backend` option (the aliases
 `backend` and `ad` resolve to the same option):
 
 ```@example diff
-Differentiation.build_ad_backend(; ad_backend = ADTypes.AutoForwardDiff())
+Differentiation.DifferentiationInterface(;
+    ad_backend = ADTypes.AutoForwardDiff(),
+)
 ```
 
 The wrapped AD type is recovered with

@@ -33,7 +33,6 @@ const EXPORTED_ABSTRACT_TYPES = (:AbstractADBackend,)
 const EXPORTED_CONCRETE_TYPES = (:DifferentiationInterface,)
 
 const EXPORTED_FUNCTIONS = (
-    :build_ad_backend,
     :ad_backend,
     :hamiltonian_gradient,
     :pseudo_hamiltonian_gradient,
