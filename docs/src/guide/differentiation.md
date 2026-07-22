@@ -38,9 +38,10 @@ The module is organised around a two-level strategy contract:
 | Concrete | [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface) | wraps a [DifferentiationInterface.jl](https://github.com/JuliaDiff/DifferentiationInterface.jl) backend |
 
 The concrete strategy stores a single option, `:ad_backend`, holding an
-[ADTypes.jl](https://github.com/SciML/ADTypes.jl) backend (default
-`AutoForwardDiff()`). `ADTypes` is a hard dependency of CTBase, so the default is
-always available.
+[ADTypes.jl](https://github.com/SciML/ADTypes.jl) backend. The default is
+**device-dependent**: `AutoForwardDiff()` on `CPU` and `AutoMooncake()` on `GPU`
+(see [Device parameterization](@ref) below). `ADTypes` is a hard dependency of
+CTBase, so the default backend markers are always available.
 
 The contract has ten methods.
 [`Differentiation.ad_backend`](@ref CTBase.Differentiation.ad_backend) — the accessor
@@ -84,6 +85,66 @@ Because it is a regular strategy, its metadata is introspectable at the type lev
 
 ```@example diff
 Strategies.metadata(Differentiation.DifferentiationInterface)
+```
+
+## Device parameterization
+
+`DifferentiationInterface` is parameterized on the execution device `P` via the
+[Strategy Parameters](@ref) system. Two built-in parameters are available:
+`Strategies.CPU` and `Strategies.GPU`.
+
+The `:ad_backend` default is **computed from the parameter** — each device gets a
+different default AD backend:
+
+| Parameter | Default `:ad_backend` | Notes |
+|-----------|----------------------|-------|
+| `CPU` | `AutoForwardDiff()` | General-purpose, well-tested |
+| `GPU` | `AutoMooncake()` | Validated end-to-end on `CuArray`, including through a mutating in-place RHS |
+
+`DifferentiationInterface()` (no parameter) defaults to `CPU`, so existing call
+sites are unaffected:
+
+```@example diff
+backend_cpu = Differentiation.DifferentiationInterface{Strategies.CPU}()
+```
+
+```@example diff
+backend_gpu = Differentiation.DifferentiationInterface{Strategies.GPU}()
+```
+
+The wrapped AD backend reflects the device default:
+
+```@example diff
+Differentiation.ad_backend(backend_cpu)
+```
+
+```@example diff
+Differentiation.ad_backend(backend_gpu)
+```
+
+The per-parameter metadata shows the different defaults side by side:
+
+```@example diff
+Strategies.metadata(Differentiation.DifferentiationInterface{Strategies.CPU})
+```
+
+```@example diff
+Strategies.metadata(Differentiation.DifferentiationInterface{Strategies.GPU})
+```
+
+!!! warning "GPU backend selection"
+    `AutoForwardDiff()` does not work on GPU because it scalar-indexes a `CuArray`.
+    `AutoMooncake()` is the validated default for GPU execution. `AutoZygote()` can
+    be selected explicitly but was found unreliable in some device call contexts
+    (an unexpected `KernelException` was observed on a non-mutating call).
+
+The device parameter can be overridden explicitly at construction time:
+
+```@example diff
+backend_gpu_fd = Differentiation.DifferentiationInterface{Strategies.GPU}(;
+    ad_backend = ADTypes.AutoForwardDiff(),
+)
+Differentiation.ad_backend(backend_gpu_fd)
 ```
 
 ## Differentiation primitives

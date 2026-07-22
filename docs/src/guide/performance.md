@@ -59,7 +59,7 @@ using JET
 vf = VectorField(x -> -x)                       # autonomous, out-of-place
 ham = Hamiltonian((x, p) -> sum(x .* p))        # H(x, p)
 interp = ctinterpolate([0.0, 1.0, 2.0], [1.0, 2.0, 0.0])
-backend = DifferentiationInterface()            # wraps AutoForwardDiff()
+backend = DifferentiationInterface()            # wraps AutoForwardDiff() (CPU default)
 nothing # hide
 ```
 

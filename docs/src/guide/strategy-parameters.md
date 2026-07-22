@@ -334,6 +334,14 @@ Strategies.describe(:fake_optimizer, registry)
 | **Builder** | `build_strategy(id, Param, Family, registry; kwargs...)` |
 | **Validation** | `validate_parameter_type`, `is_a_parameter`, `parameter_id` |
 
+## Real-world example: DifferentiationInterface
+
+The [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface)
+strategy is a real parameterized strategy in CTBase. It is parameterized on
+`{CPU, GPU}` with a computed `:ad_backend` option whose default differs by device
+(`AutoForwardDiff()` on CPU, `AutoMooncake()` on GPU). See the
+[Differentiation](@ref) guide for a full walkthrough.
+
 ## See Also
 
 - [Implementing a Strategy](@ref) — Strategy contract and metadata
