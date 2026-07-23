@@ -70,6 +70,25 @@ end
 
 Strategies.options(s::CovSingleOptStrategy) = s.options
 
+# Fake parameterized strategy for testing Tip display with parameter
+struct CovFakeParamStrategy{P} <: Strategies.AbstractStrategy
+    options::Strategies.StrategyOptions
+end
+
+Strategies.id(::Type{<:CovFakeParamStrategy}) = :cov_fake_param
+Strategies.default_parameter(::Type{<:CovFakeParamStrategy}) = Strategies.CPU
+Strategies.parameter(::Type{<:CovFakeParamStrategy{P}}) where {P} = P
+
+function Strategies.metadata(::Type{<:CovFakeParamStrategy{P}}) where {P}
+    return Strategies.StrategyMetadata(
+        Options.OptionDefinition(;
+            name=:max_iter, type=Int, default=100, description="Maximum iterations"
+        ),
+    )
+end
+
+Strategies.options(s::CovFakeParamStrategy) = s.options
+
 # ============================================================================
 # Test function
 # ============================================================================
@@ -132,6 +151,36 @@ function test_coverage_abstract_strategy()
 
             Test.@test occursin("└─", output)
             Test.@test occursin("value", output)
+        end
+
+        Test.@testset "show(io, MIME text/plain) - Tip shows type name without parameter" begin
+            opts = Strategies.StrategyOptions(
+                max_iter=Options.OptionValue(200, :user),
+                tol=Options.OptionValue(1e-8, :default),
+            )
+            strategy = CovFakeStrategy(opts)
+
+            buf = IOBuffer()
+            show(buf, MIME("text/plain"), strategy)
+            output = String(take!(buf))
+
+            Test.@test occursin("Tip: use describe(CovFakeStrategy)", output)
+            Test.@test !occursin("CovFakeStrategy{", output)
+        end
+
+        Test.@testset "show(io, MIME text/plain) - Tip shows parameterized type name" begin
+            opts = Strategies.StrategyOptions(
+                max_iter=Options.OptionValue(100, :default),
+            )
+            strategy = CovFakeParamStrategy{Strategies.CPU}(opts)
+
+            buf = IOBuffer()
+            show(buf, MIME("text/plain"), strategy)
+            output = String(take!(buf))
+
+            Test.@test occursin(
+                "Tip: use describe(CovFakeParamStrategy{CPU})", output
+            )
         end
 
         # ====================================================================
