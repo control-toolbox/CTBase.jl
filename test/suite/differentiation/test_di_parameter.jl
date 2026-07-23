@@ -57,7 +57,9 @@ function test_di_parameter()
             # GPU description is P-specific (phase 4e): warns that ForwardDiff doesn't work on
             # GPU and that Zygote is unreliable there, pointing users at the Mooncake default.
             Test.@test occursin("AutoMooncake", md_gpu[:ad_backend].description)
-            Test.@test occursin("AutoForwardDiff() does not work on GPU", md_gpu[:ad_backend].description)
+            Test.@test occursin(
+                "AutoForwardDiff() does not work on GPU", md_gpu[:ad_backend].description
+            )
             Test.@test !occursin("AutoMooncake", md_cpu[:ad_backend].description)
         end
 
