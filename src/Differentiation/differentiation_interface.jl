@@ -142,7 +142,9 @@ parameter renders its own `computed options for P` section, see
 detailed: it is the one place a user is warned, before hitting a device, that `AutoForwardDiff`
 does not work there and that `AutoZygote` is unreliable in some call contexts.
 """
-_ad_backend_description(::Type{Strategies.CPU}) = "DifferentiationInterface.jl backend (e.g. AutoForwardDiff() on CPU)."
+function _ad_backend_description(::Type{Strategies.CPU})
+    return "DifferentiationInterface.jl backend (e.g. AutoForwardDiff() on CPU)."
+end
 function _ad_backend_description(::Type{Strategies.GPU})
     return "DifferentiationInterface.jl backend for GPU execution. Default: AutoMooncake(), " *
            "validated end-to-end on CuArray including through a mutating in-place RHS. " *
