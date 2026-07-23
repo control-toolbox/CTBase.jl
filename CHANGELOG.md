@@ -5,6 +5,22 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.4-beta] - 2026-07-23
+
+### 🐛 Bug Fixes
+
+#### **Strategies** — Tip line in `show` now shows parameterized type name
+
+- **`Base.show(io, MIME"text/plain", strategy)`**: the Tip message now uses
+  `display_name` (which includes the parameter, e.g.
+  `DifferentiationInterface{GPU}`) instead of `type_name` (just
+  `nameof(T)`). Previously, a parameterized strategy instance like
+  `DifferentiationInterface{GPU}()` would display
+  `Tip: use describe(DifferentiationInterface)` instead of
+  `Tip: use describe(DifferentiationInterface{GPU})`.
+- Added tests with a fake parameterized strategy to verify both the
+  non-parameterized and parameterized cases.
+
 ## [0.28.3-beta] - 2026-07-22
 
 ### 🛠 Enhancements

@@ -2,6 +2,18 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.4-beta)
+
+- **`Strategies`: Tip line in `show` now displays the parameterized type
+  name.** The `Base.show(io, MIME"text/plain", strategy)` method previously
+  used `type_name` (`nameof(T)`) in the Tip message, causing parameterized
+  instances like `DifferentiationInterface{GPU}()` to show
+  `describe(DifferentiationInterface)` instead of
+  `describe(DifferentiationInterface{GPU})`. The fix replaces `type_name`
+  with `display_name`, which already includes the parameter. **No breaking
+  change**: purely a display fix with no API or behavior change beyond the
+  corrected Tip text. No migration required.
+
 ## Non-breaking note (0.28.3-beta)
 
 - **`Differentiation`: `build_ad_backend` removed from the public API.**
