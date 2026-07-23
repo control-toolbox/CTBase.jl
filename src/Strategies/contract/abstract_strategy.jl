@@ -465,6 +465,12 @@ FakeSolver (instance, id: :fake_solver)
 ├─ max_iter = 1000  [default]
 └─ tol = 1.0e-8  [default]
 Tip: use describe(FakeSolver) to see all available options.
+
+julia> FakeSolver{CPU}()
+FakeSolver{CPU} (instance, id: :fake_solver)
+├─ max_iter = 1000  [default]
+└─ tol = 1.0e-8  [default]
+Tip: use describe(FakeSolver{CPU}) to see all available options.
 ```
 
 See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.options`](@ref)
@@ -520,7 +526,7 @@ function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractSt
         io,
         fmt.label,
         "Tip: use describe(",
-        type_name,
+        display_name,
         ") to see all available options.",
         fmt.reset,
     )
