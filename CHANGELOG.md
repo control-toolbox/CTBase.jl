@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 -->
 # Changelog
 
 All notable changes to CTBase will be documented in this file.
@@ -1122,6 +1123,7 @@ Strategies.default_parameter(::Type{<:MadNLP}) = Strategies.CPU
 ### 🚀 Major Features
 
 #### **Modular Architecture Overhaul**
+
 - **Complete reorganization** of the codebase into thematic modules:
 
 ```text
@@ -1270,23 +1272,27 @@ This major release represents a significant investment in code quality, develope
 ### 🚀 TestRunner Enhancements
 
 #### **Advanced Progress Bar System**
+
 - **Adaptive bar width**: Width equals total for ≤20 tests, fixed at 20 for >20 tests
 - **Visual consistency**: Uses `█` (filled) and `░` (empty) characters without gaps
 - **Smart failure detection**: Correctly detects both exceptions and `@test` assertion failures
 - **Zero-padded indices**: Aligned test numbers for better readability
 
 #### **Robust Failure Detection**
+
 - **Before/after results scanning**: Compares testset results before and after eval
 - **Recursive failure detection**: Scans nested testsets for `Test.Fail` and `Test.Error`
 - **More reliable than `anynonpass`**: Works regardless of testset completion timing
 
 #### **Enhanced User Experience**
+
 - **Path prefix stripping**: Users can write `test/suite` or `suite` interchangeably
 - **Guard against conflicts**: Prevents `test/` subdirectory in test directory
 - **Comprehensive callbacks**: `on_test_start` and `on_test_done` with `TestRunInfo` context
 - **Configurable progress**: Built-in progress bar with option for custom callbacks
 
 #### **Professional Documentation**
+
 - **Complete docstring overhaul**: All functions follow project documentation standards
 - **Safe, runnable examples**: All examples use `julia-repl` with proper imports
 - **Cross-reference resolution**: Fully qualified `@ref` links to prevent header conflicts
@@ -1295,6 +1301,7 @@ This major release represents a significant investment in code quality, develope
 ### 📈 Documentation Improvements
 
 #### **Better Organization**
+
 - **User guides in `src/guide/`**: Clear separation from API reference
 - **API reference in `src/api/`**: Auto-generated with clean filenames
 - **Updated navigation**: Changed "Tutorials" to "User Guides" for clarity

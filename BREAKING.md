@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 -->
 # Breaking Changes
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
