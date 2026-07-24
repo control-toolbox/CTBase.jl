@@ -169,18 +169,14 @@ function test_coverage_abstract_strategy()
         end
 
         Test.@testset "show(io, MIME text/plain) - Tip shows parameterized type name" begin
-            opts = Strategies.StrategyOptions(
-                max_iter=Options.OptionValue(100, :default),
-            )
+            opts = Strategies.StrategyOptions(max_iter=Options.OptionValue(100, :default))
             strategy = CovFakeParamStrategy{Strategies.CPU}(opts)
 
             buf = IOBuffer()
             show(buf, MIME("text/plain"), strategy)
             output = String(take!(buf))
 
-            Test.@test occursin(
-                "Tip: use describe(CovFakeParamStrategy{CPU})", output
-            )
+            Test.@test occursin("Tip: use describe(CovFakeParamStrategy{CPU})", output)
         end
 
         # ====================================================================
