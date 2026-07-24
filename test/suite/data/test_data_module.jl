@@ -39,6 +39,7 @@ const EXPORTED_ABSTRACT_TYPES = (
     :AbstractHamiltonian,
     :AbstractControlLaw,
     :AbstractPseudoHamiltonian,
+    :AbstractPseudoHamiltonianVectorField,
     :AbstractPathConstraint,
     :AbstractMultiplier,
 )
@@ -52,6 +53,7 @@ const EXPORTED_CONCRETE_TYPES = (
     :ClosedLoop,
     :DynClosedLoop,
     :PseudoHamiltonian,
+    :PseudoHamiltonianVectorField,
     :PathConstraint,
     :StateConstraint,
     :ControlConstraint,
@@ -64,12 +66,14 @@ const PRIVATE_SYMBOLS = (
     :__is_inplace,
     :__is_variable,
     :_detect_mutability_hvf,
+    :_detect_mutability_phvf,
     :_detect_mutability_vf,
     :_md_label,
     :_natural_sig_h,
     :_natural_sig_hvf,
     :_natural_sig_vf,
     :_oop_arity_hvf,
+    :_oop_arity_phvf,
     :_oop_arity_vf,
     :_td_label,
     :_uniform_sig_h,
@@ -81,6 +85,8 @@ const PRIVATE_SYMBOLS = (
     :_uniform_sig_cl,
     :_natural_sig_ph,
     :_uniform_sig_ph,
+    :_natural_sig_phvf,
+    :_uniform_sig_phvf,
     :_kind_label,
     :_natural_sig_pc,
     :_natural_args_pc,
@@ -173,12 +179,15 @@ function test_data_module()
                 Test.@test isabstracttype(Data.AbstractVectorField)
                 Test.@test isabstracttype(Data.AbstractHamiltonianVectorField)
                 Test.@test isabstracttype(Data.AbstractHamiltonian)
+                Test.@test isabstracttype(Data.AbstractPseudoHamiltonianVectorField)
             end
 
             Test.@testset "Concrete types inherit from abstract types" begin
                 Test.@test Data.VectorField <: Data.AbstractVectorField
                 Test.@test Data.HamiltonianVectorField <:
                     Data.AbstractHamiltonianVectorField
+                Test.@test Data.PseudoHamiltonianVectorField <:
+                    Data.AbstractPseudoHamiltonianVectorField
                 # Note: Hamiltonian is parametric (Hamiltonian{F, TD, VD} <: AbstractHamiltonian{TD, VD})
                 # Test via instance instead of type
                 h = Data.Hamiltonian((x, p) -> 0.0)

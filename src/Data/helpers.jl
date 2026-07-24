@@ -217,6 +217,57 @@ function _uniform_sig_hvf(::Type{Traits.InPlace})
 end
 
 # =============================================================================
+# PseudoHamiltonianVectorField-specific signature helpers
+# =============================================================================
+
+"""
+    _natural_sig_phvf(::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}) where {TD, VD} -> String
+    _natural_sig_phvf(::Type{TD}, ::Type{VD}, ::Type{Traits.InPlace}) where {TD, VD} -> String
+
+Return the natural call signature for a PseudoHamiltonianVectorField based on its traits.
+
+See also: [`CTBase.Data._uniform_sig_phvf`](@ref), [`CTBase.Data._natural_sig_hvf`](@ref).
+"""
+function _natural_sig_phvf(
+    ::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
+    args = String[]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    push!(args, "x")
+    push!(args, "p")
+    push!(args, "u")
+    VD === Traits.NonFixed && push!(args, "v")
+    return "f(" * join(args, ", ") * ")"
+end
+
+function _natural_sig_phvf(
+    ::Type{TD}, ::Type{VD}, ::Type{Traits.InPlace}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
+    args = ["dx", "dp"]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    push!(args, "x")
+    push!(args, "p")
+    push!(args, "u")
+    VD === Traits.NonFixed && push!(args, "v")
+    return "f(" * join(args, ", ") * ")"
+end
+
+"""
+    _uniform_sig_phvf(::Type{Traits.OutOfPlace}) -> String
+    _uniform_sig_phvf(::Type{Traits.InPlace}) -> String
+
+Return the uniform call signature for a PseudoHamiltonianVectorField.
+
+See also: [`CTBase.Data._natural_sig_phvf`](@ref), [`CTBase.Data._uniform_sig_hvf`](@ref).
+"""
+function _uniform_sig_phvf(::Type{Traits.OutOfPlace})
+    return "f(t, x, p, u, v)"
+end
+function _uniform_sig_phvf(::Type{Traits.InPlace})
+    return "f(dx, dp, t, x, p, u, v)"
+end
+
+# =============================================================================
 # Hamiltonian-specific signature helpers
 # =============================================================================
 
