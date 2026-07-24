@@ -6,6 +6,59 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.5-beta] - 2026-07-24
+
+### ✨ New Features
+
+#### **PseudoHamiltonianVectorField**
+
+- **New `PseudoHamiltonianVectorField` data type** in `CTBase.Data` for
+  pseudo-Hamiltonian dynamics that have already been differentiated by
+  hand, with an explicit control argument:
+  - **Definition**: `h̃vf(t, x, p, u, v) = (ẋ, ṗ)` — the vector-field
+    analogue of `PseudoHamiltonian`, the same way `HamiltonianVectorField`
+    is the vector-field analogue of `Hamiltonian`
+  - **Abstract supertype**: `AbstractPseudoHamiltonianVectorField{TD, VD,
+    MD} <: AbstractVectorField{TD, VD, MD}` — a **sibling** of
+    `AbstractHamiltonianVectorField`, not a subtype, mirroring the existing
+    `AbstractPseudoHamiltonian`/`AbstractHamiltonian` sibling relationship;
+    `dynamics_trait = HamiltonianDynamics`
+  - **Both in-place and out-of-place**, mirroring `HamiltonianVectorField`
+    exactly: mutability is auto-detected from the wrapped function's
+    arity, or set explicitly via `is_inplace`
+  - **Variable-costate support** (`dpv`) from the start via the
+    `variable_costate` keyword, mirroring `HamiltonianVectorField`'s
+    `variable_costate` kwarg
+  - **Natural + uniform call signatures**: one natural arity per `(TD, VD,
+    MD)` combination (one more than `HamiltonianVectorField`'s, for the
+    extra `u`) and uniform `(t, x, p, u, v)` / in-place `(dx, dp, t, x, p,
+    u, v)` calls
+  - **No `hamiltonian(sys)` accessor** on the downstream system side
+    (CTFlows.jl) — deliberate, matching `HamiltonianVectorFieldSystem`'s
+    existing gap, since no scalar `H̃` is ever built
+
+### 🧪 Testing
+
+- Added `test/suite/data/test_abstract_pseudo_hamiltonian_vector_field.jl`:
+  abstract-type definition, sibling (not subtype) check against
+  `AbstractHamiltonianVectorField`, trait accessors, dynamics trait,
+  Liskov substitution, exports (17 tests)
+- Added `test/suite/data/test_pseudo_hamiltonian_vector_field.jl`:
+  construction (all `TD`/`VD`/`MD` combinations), natural/uniform
+  signatures, trait accessors, typed constructor, subtyping, `Base.show`,
+  explicit `is_inplace`, ambiguous-arity `PreconditionError`,
+  `variable_costate`/`dpv` behavior (92 tests)
+- Full suite green: **4882/4882**
+
+### 📚 Documentation
+
+- Added the two new `Data/` source files to `docs/api_reference.jl`
+
+### ✅ Compatibility
+
+- **No breaking changes**: purely additive. Existing code unaffected. See
+  [BREAKING.md](BREAKING.md).
+
 ## [0.28.4-beta] - 2026-07-23
 
 ### 🐛 Bug Fixes

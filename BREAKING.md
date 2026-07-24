@@ -3,6 +3,15 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.5-beta)
+
+- **`Data`: new `PseudoHamiltonianVectorField` / `AbstractPseudoHamiltonianVectorField`
+  data type.** Purely additive: two new exported symbols in `CTBase.Data`
+  (`AbstractPseudoHamiltonianVectorField`, `PseudoHamiltonianVectorField`),
+  no changes to any existing type, signature, or exported symbol. **No
+  breaking change**: existing code is entirely unaffected. No migration
+  required.
+
 ## Non-breaking note (0.28.4-beta)
 
 - **`Strategies`: Tip line in `show` now displays the parameterized type

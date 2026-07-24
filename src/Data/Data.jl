@@ -37,6 +37,8 @@ include(joinpath(@__DIR__, "controlled_vector_field.jl"))
 include(joinpath(@__DIR__, "composed_vector_field.jl"))
 include(joinpath(@__DIR__, "abstract_hamiltonian_vector_field.jl"))
 include(joinpath(@__DIR__, "hamiltonian_vector_field.jl"))
+include(joinpath(@__DIR__, "abstract_pseudo_hamiltonian_vector_field.jl"))
+include(joinpath(@__DIR__, "pseudo_hamiltonian_vector_field.jl"))
 
 # ==============================================================================
 # Module exports
@@ -62,6 +64,8 @@ export AbstractMultiplier
 export Multiplier
 export AbstractPseudoHamiltonian
 export PseudoHamiltonian
+export AbstractPseudoHamiltonianVectorField
+export PseudoHamiltonianVectorField
 export ComposedHamiltonian
 export pseudo_hamiltonian
 export control_law

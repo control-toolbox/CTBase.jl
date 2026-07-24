@@ -41,6 +41,9 @@ function test_data_subtyping()
             Test.@test Data.HamiltonianVectorField <: Data.AbstractHamiltonianVectorField
             Test.@test Data.ComposedVectorField <: Data.AbstractVectorField
             Test.@test Data.ComposedHamiltonian <: Data.AbstractHamiltonian
+            Test.@test Data.PseudoHamiltonianVectorField <:
+                Data.AbstractPseudoHamiltonianVectorField
+            Test.@test Data.AbstractPseudoHamiltonianVectorField <: Data.AbstractVectorField
         end
     end
 end
