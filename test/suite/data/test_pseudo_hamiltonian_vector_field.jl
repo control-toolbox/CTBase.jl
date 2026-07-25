@@ -46,8 +46,7 @@ function test_pseudo_hamiltonian_vector_field()
                 (x, p, u, v) -> (x .* v .+ u, -p); is_autonomous=true, is_variable=true
             )
             Test.@test phvf_autonomous_nonfixed isa Data.PseudoHamiltonianVectorField
-            Test.@test Traits.time_dependence(phvf_autonomous_nonfixed) ==
-                Traits.Autonomous
+            Test.@test Traits.time_dependence(phvf_autonomous_nonfixed) == Traits.Autonomous
             Test.@test Traits.variable_dependence(phvf_autonomous_nonfixed) ==
                 Traits.NonFixed
 
@@ -416,7 +415,16 @@ function test_pseudo_hamiltonian_vector_field()
                 # Test variable_costate kwarg
                 dx = [0.0, 0.0]
                 dp = [0.0, 0.0]
-                phvf(dx, dp, 0.0, [1.0, 2.0], [0.5, 1.0], [0.1, 0.1], 0.5; variable_costate=false)
+                phvf(
+                    dx,
+                    dp,
+                    0.0,
+                    [1.0, 2.0],
+                    [0.5, 1.0],
+                    [0.1, 0.1],
+                    0.5;
+                    variable_costate=false,
+                )
                 Test.@test dx == [1.6, 2.6]
                 Test.@test dp == [1.0, 1.5]
             end
