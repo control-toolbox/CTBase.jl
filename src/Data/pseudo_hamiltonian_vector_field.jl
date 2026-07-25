@@ -274,15 +274,14 @@ function (H::PseudoHamiltonianVectorField{
     x, p, u, v; variable_costate::Bool=false
 )
     variable_costate || return H.f(x, p, u, v)
-    hasmethod(
-        H.f, Tuple{typeof(x),typeof(p),typeof(u),typeof(v)}, (:variable_costate,)
-    ) || throw(
-        Exceptions.PreconditionError(
-            "variable_costate=true is not supported by this PseudoHamiltonianVectorField's inner function";
-            suggestion="Provide an inner function accepting a `variable_costate::Bool` keyword and returning `(dx, dp, dpv)` when true",
-            context="PseudoHamiltonianVectorField Autonomous/NonFixed call",
-        ),
-    )
+    hasmethod(H.f, Tuple{typeof(x),typeof(p),typeof(u),typeof(v)}, (:variable_costate,)) ||
+        throw(
+            Exceptions.PreconditionError(
+                "variable_costate=true is not supported by this PseudoHamiltonianVectorField's inner function";
+                suggestion="Provide an inner function accepting a `variable_costate::Bool` keyword and returning `(dx, dp, dpv)` when true",
+                context="PseudoHamiltonianVectorField Autonomous/NonFixed call",
+            ),
+        )
     return H.f(x, p, u, v; variable_costate=true)
 end
 
@@ -293,9 +292,7 @@ function (H::PseudoHamiltonianVectorField{
 )
     variable_costate || return H.f(t, x, p, u, v)
     hasmethod(
-        H.f,
-        Tuple{typeof(t),typeof(x),typeof(p),typeof(u),typeof(v)},
-        (:variable_costate,),
+        H.f, Tuple{typeof(t),typeof(x),typeof(p),typeof(u),typeof(v)}, (:variable_costate,)
     ) || throw(
         Exceptions.PreconditionError(
             "variable_costate=true is not supported by this PseudoHamiltonianVectorField's inner function";
