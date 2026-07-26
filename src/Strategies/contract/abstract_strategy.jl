@@ -512,7 +512,7 @@ function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractSt
             fmt.reset,
             " = ",
             fmt.value,
-            Options.value(opt),
+            _display_value(Options.value(opt)),
             fmt.reset,
             "  [",
             fmt.label,
@@ -568,7 +568,7 @@ function Base.show(io::IO, strategy::T) where {T<:AbstractStrategy}
                 fmt.reset *
                 "=" *
                 fmt.value *
-                "$(Options.value(v))" *
+                _display_value(Options.value(v)) *
                 fmt.reset for (k, v) in pairs(opts.options)
             ),
             ", ",

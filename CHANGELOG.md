@@ -6,6 +6,50 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.6-beta] - 2026-07-26
+
+### 🐛 Bug Fixes
+
+#### **Strategies** — display of parametric struct option values
+
+- **`_display_value`** (`Strategies/display_formatting.jl`) now shortens
+  **any** option value whose type is a parametric `struct` to just its
+  type name, instead of special-casing the `:alg` option name. Previously,
+  an option like `alg = Vern6()` (an `OrdinaryDiffEq` algorithm) displayed
+  its entire type-parameterized `repr` (e.g.
+  `Vern6{typeof(trivial_limiter!), typeof(trivial_limiter!),
+  FastBroadcast.Serial, Val{true}}(...)`) in the `show` tree output,
+  instead of just `Vern6`.
+- The new rule is based on the value's type (`isstructtype(T) &&
+  !isempty(T.parameters)`), not on the option's key name — `CTBase` has no
+  built-in knowledge of `:alg` or any downstream package's option-naming
+  convention. Standard containers (`AbstractArray`, `Tuple`, `NamedTuple`,
+  `AbstractDict`) are excluded and keep displaying their full contents,
+  since they are themselves parametric structs but their contents (not
+  their type name) are the useful display.
+- Fixes a latent bug in the previous key-based approach: an `:alg` option
+  holding a simple `Symbol`/`String` value would have displayed the type
+  name (`"Symbol"`) instead of the actual value.
+
+### 🧪 Testing
+
+- Added `_display_value` unit tests in `test_abstract_strategy.jl`
+  covering: simple values (`Int`, `Float64`, `Symbol`, `String`, `Bool`,
+  `Nothing`) unaffected, a parametric struct shortened to its type name,
+  and standard containers (`Vector`, `Tuple`, `NamedTuple`, `Dict`)
+  displayed in full.
+- Added integration tests in `test_abstract_strategy.jl` and
+  `test_strategy_options.jl` verifying that `show` (both the verbose
+  `MIME"text/plain"` form and the compact form) shortens a
+  `FakeParametricAlgorithm{A,B}` option value to its type name without
+  leaking field values or type parameters.
+- Full suite green: **4907/4907**
+
+### ✅ Compatibility
+
+- **No breaking changes**: purely a display fix; no API, type, or
+  constructor changes. See [BREAKING.md](BREAKING.md).
+
 ## [0.28.5-beta] - 2026-07-24
 
 ### ✨ New Features

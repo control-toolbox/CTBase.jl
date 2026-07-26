@@ -39,3 +39,31 @@ function _print_labeled_multiline(
         end
     end
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Format an option value for display, shortening verbose parametric struct instances.
+
+Values whose type is a parametric struct (e.g. an ODE algorithm such as
+`Tsit5{...}`) are displayed as just the type name (e.g. `"Tsit5"`) instead of the
+full `repr`, which would otherwise include type parameters and field values.
+Standard containers (`AbstractArray`, `Tuple`, `NamedTuple`, `AbstractDict`) are
+excluded from this shortening since their contents are the useful information to
+display.
+
+# Arguments
+- `value`: Option value
+
+# Returns
+- `String`: Display representation of the value
+"""
+function _display_value(value)
+    T = typeof(value)
+    if isstructtype(T) &&
+        !isempty(T.parameters) &&
+        !(value isa Union{AbstractArray,Tuple,NamedTuple,AbstractDict})
+        return string(nameof(T))
+    end
+    return string(value)
+end

@@ -8,6 +8,13 @@ import CTBase.Options
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
+# Fake parametric struct simulating a verbose algorithm type (e.g. an ODE solver
+# algorithm from OrdinaryDiffEq), used to test that display shortens such values.
+struct FakeParametricAlgorithm{A,B}
+    a::A
+    b::B
+end
+
 # ============================================================================
 # Test function
 # ============================================================================
@@ -256,6 +263,26 @@ function test_strategy_options()
                 Test.@test occursin("computed_val", output)
                 Test.@test occursin("3.14", output)
                 Test.@test occursin("computed", output)
+            end
+
+            Test.@testset "Display shortens parametric struct option values" begin
+                opts = Strategies.StrategyOptions(;
+                    alg=Options.OptionValue(FakeParametricAlgorithm(1, "x"), :user)
+                )
+
+                io = IOBuffer()
+                show(io, MIME"text/plain"(), opts)
+                verbose_output = String(take!(io))
+                Test.@test occursin("FakeParametricAlgorithm", verbose_output)
+                Test.@test !occursin("\"x\"", verbose_output)
+                Test.@test !occursin("{", verbose_output)
+
+                io = IOBuffer()
+                show(io, opts)
+                compact_output = String(take!(io))
+                Test.@test occursin("FakeParametricAlgorithm", compact_output)
+                Test.@test !occursin("\"x\"", compact_output)
+                Test.@test !occursin("{", compact_output)
             end
 
             Test.@testset "Integration with OptionDefinition" begin
