@@ -506,7 +506,9 @@ function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractSt
         prefix = is_last ? "└─ " : "├─ "
         println(
             io,
+            fmt.muted,
             prefix,
+            fmt.reset,
             fmt.name,
             key,
             fmt.reset,
