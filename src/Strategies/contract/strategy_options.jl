@@ -722,7 +722,7 @@ function Base.show(io::IO, ::MIME"text/plain", opts::StrategyOptions)
             fmt.reset,
             " = ",
             fmt.value,
-            Options.value(opt),
+            _display_value(Options.value(opt)),
             fmt.reset,
             "  [",
             fmt.label,
@@ -762,7 +762,7 @@ function Base.show(io::IO, opts::StrategyOptions)
                 fmt.reset *
                 "=" *
                 fmt.value *
-                "$(Options.value(v))" *
+                _display_value(Options.value(v)) *
                 fmt.reset for (k, v) in pairs(_raw_options(opts))
             ),
             ", ",

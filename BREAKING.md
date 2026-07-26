@@ -3,6 +3,22 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.6-beta)
+
+- **`Strategies`: option values whose type is a parametric struct are now
+  displayed by type name only, instead of their full `repr`.** In
+  `Base.show(io, MIME"text/plain", strategy)`, `Base.show(io, strategy)`,
+  and the equivalent `StrategyOptions` show methods, a value like an
+  `OrdinaryDiffEq` algorithm instance (e.g. `Vern6{typeof(trivial_limiter!),
+  ...}(...)`) previously printed its entire type-parameterized `repr`,
+  making the tree display unreadable. It now prints just the type name
+  (e.g. `Vern6`). The rule applies to **any** option value whose type is a
+  parametric `struct` — not just a specific option name — while standard
+  containers (`AbstractArray`, `Tuple`, `NamedTuple`, `AbstractDict`) are
+  excluded and keep displaying their full contents. **No breaking change**:
+  purely a display improvement; no API, type, or constructor changes. No
+  migration required.
+
 ## Non-breaking note (0.28.5-beta)
 
 - **`Data`: new `PseudoHamiltonianVectorField` / `AbstractPseudoHamiltonianVectorField`

@@ -69,6 +69,13 @@ function Strategies.description(::Type{<:FakeStrategyWithDescription})
     return "A strategy for testing description display.\nSee: https://example.com"
 end
 
+# Fake parametric struct simulating a verbose algorithm type (e.g. an ODE solver
+# algorithm from OrdinaryDiffEq), used to test `_display_value` shortening.
+struct FakeParametricAlgorithm{A,B}
+    a::A
+    b::B
+end
+
 # ============================================================================
 # Test function
 # ============================================================================
@@ -284,6 +291,32 @@ function test_abstract_strategy()
             end
         end
 
+        Test.@testset "_display_value helper" begin
+            Test.@testset "simple values are unaffected" begin
+                Test.@test Strategies._display_value(200) == "200"
+                Test.@test Strategies._display_value(1.0e-8) == "1.0e-8"
+                Test.@test Strategies._display_value(:sparse) == "sparse"
+                Test.@test Strategies._display_value("hello") == "hello"
+                Test.@test Strategies._display_value(true) == "true"
+                Test.@test Strategies._display_value(nothing) == "nothing"
+            end
+
+            Test.@testset "parametric struct is shortened to type name" begin
+                value = FakeParametricAlgorithm(1, "x")
+                Test.@test Strategies._display_value(value) == "FakeParametricAlgorithm"
+                # The shortened form must not leak field values or type parameters
+                Test.@test !occursin("\"x\"", Strategies._display_value(value))
+                Test.@test !occursin("{", Strategies._display_value(value))
+            end
+
+            Test.@testset "standard containers are displayed in full" begin
+                Test.@test Strategies._display_value([1, 2, 3]) == string([1, 2, 3])
+                Test.@test Strategies._display_value((1, 2)) == string((1, 2))
+                Test.@test Strategies._display_value((; a=1)) == string((; a=1))
+                Test.@test Strategies._display_value(Dict(:a => 1)) == string(Dict(:a => 1))
+            end
+        end
+
         # ========================================================================
         # INTEGRATION TESTS
         # ========================================================================
@@ -332,6 +365,27 @@ function test_abstract_strategy()
                     Test.@test_nowarn show(stdout, Strategies.metadata(typeof(strategy)))
                     Test.@test_nowarn show(stdout, Strategies.options(strategy))
                 end
+            end
+
+            Test.@testset "Strategy display shortens parametric struct option values" begin
+                opts = Strategies.StrategyOptions(;
+                    alg=Options.OptionValue(FakeParametricAlgorithm(1, "x"), :user)
+                )
+                strategy = FakeStrategy(opts)
+
+                io = IOBuffer()
+                show(io, MIME("text/plain"), strategy)
+                verbose_output = String(take!(io))
+                Test.@test occursin("FakeParametricAlgorithm", verbose_output)
+                Test.@test !occursin("\"x\"", verbose_output)
+                Test.@test !occursin("{", verbose_output)
+
+                io = IOBuffer()
+                show(io, strategy)
+                compact_output = String(take!(io))
+                Test.@test occursin("FakeParametricAlgorithm", compact_output)
+                Test.@test !occursin("\"x\"", compact_output)
+                Test.@test !occursin("{", compact_output)
             end
         end
     end
