@@ -51,10 +51,23 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
 
+      # Julia's own process exit code is not trustworthy here: on Windows,
+      # after a cold/fresh precompile, `Pkg.test` can print its "tests
+      # passed" success message and still return a nonzero process exit
+      # code from unrelated teardown (no exception, no stderr output).
+      # Piping through `tee` would let bash's pipefail abort the step on
+      # that spurious code before the dry-run output is even inspected, so
+      # redirect to a file instead and judge success from the *content* of
+      # the dry-run listing, not from julia's raw exit status.
       - name: Dry run - no selection (all tests)
         shell: bash
         run: |
-          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["--dryrun"])' | tee dryrun_all.log
+          set +e
+          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["--dryrun"])' > dryrun_all.log 2>&1
+          julia_exit=$?
+          set -e
+          cat dryrun_all.log
+          echo "julia exit code: $julia_exit"
           count=$(sed -n '/^Dry run:/,$p' dryrun_all.log | tail -n +2 | grep -c .)
           echo "Discovered $count test(s) with no selection"
           if [ "$count" -lt 10 ]; then
@@ -65,7 +78,12 @@ jobs:
       - name: Dry run - directory selection (suite/data)
         shell: bash
         run: |
-          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/data", "--dryrun"])' | tee dryrun_data.log
+          set +e
+          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/data", "--dryrun"])' > dryrun_data.log 2>&1
+          julia_exit=$?
+          set -e
+          cat dryrun_data.log
+          echo "julia exit code: $julia_exit"
           selected=$(sed -n '/^Dry run:/,$p' dryrun_data.log | tail -n +2 | grep .)
           count=$(echo "$selected" | grep -c .)
           echo "Discovered $count test(s) under suite/data"

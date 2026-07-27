@@ -3,6 +3,19 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.7-beta)
+
+- **`TestRunner`: fixed a Windows-only bug where test selection silently
+  discovered 0 tests.** `_collect_test_files_recursive` now normalizes
+  relative test-file paths to forward slashes on every platform; previously
+  `relpath` returned backslash-separated paths on Windows, which never
+  matched the forward-slash glob patterns used throughout the extension
+  (including the default `"suite/*/test_*"` in `test/runtests.jl`), so
+  `Pkg.test` exited 0 having run nothing. **No breaking change**: purely an
+  internal path-normalization fix; the public `run_tests` API, its
+  arguments, and behavior on non-Windows platforms are unchanged. No
+  migration required.
+
 ## Non-breaking note (0.28.6-beta)
 
 - **`Strategies`: option values whose type is a parametric struct are now
