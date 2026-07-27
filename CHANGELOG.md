@@ -6,6 +6,49 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.7-beta] - 2026-07-27
+
+### 🐛 Bug Fixes
+
+#### **TestRunner** — test selection silently discovered 0 tests on Windows
+
+- **`_collect_test_files_recursive`** (`ext/TestRunner/test_selection.jl`) now
+  normalizes relative test file paths to forward slashes (`/`) regardless of
+  platform. `relpath` returns OS-native separators, so on Windows it produced
+  backslash-separated paths (e.g. `suite\core\test_core.jl`). Every
+  glob-based selection in the extension — including the default
+  `available_tests=("suite/*/test_*",)` used by `test/runtests.jl` — is
+  written with forward slashes, so on Windows the glob never matched any
+  candidate file, and `Pkg.test` silently ran and reported **0 tests** with
+  exit code 0 instead of failing loudly.
+- Fixes a false-green Windows CI run
+  (control-toolbox/CTBase.jl#512) where "CTBase tests" reported "None" and
+  passed.
+
+### 🧪 Testing
+
+- New unit test in `test_testrunner_selection.jl`:
+  `_collect_test_files_recursive` returns forward-slash paths for nested
+  directories, verified to contain no `\` characters.
+- Fixed an existing unit test (`symbol resolution: shallowest match`) that
+  compared against `joinpath("a", "test_x.jl")` (OS-native separator) — now
+  compares against the literal `"a/test_x.jl"`, matching the normalized
+  behavior.
+- New CI-level regression guard: `.github/workflows/CI.yml` gained a
+  `test-selection-smoke` job (matrix: `ubuntu-latest`, `windows-latest`)
+  that dry-runs `Pkg.test` both with no selection and with a directory
+  selection (`suite/data`), asserting a non-zero, correctly-scoped test
+  count on both platforms.
+- Re-enabled `macos-latest` and `ubuntu-latest` in the main CI matrix
+  alongside `windows-latest` (previously commented out).
+- Full suite green: **4909/4909**.
+
+### ✅ Compatibility
+
+- **No breaking changes**: internal path-handling fix in the `TestRunner`
+  extension; no public API, type, or signature changes. See
+  [BREAKING.md](BREAKING.md).
+
 ## [0.28.6-beta] - 2026-07-26
 
 ### 🐛 Bug Fixes

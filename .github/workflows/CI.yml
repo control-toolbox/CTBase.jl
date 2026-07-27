@@ -21,7 +21,80 @@ jobs:
       (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run ci'))
     uses: control-toolbox/CTActions/.github/workflows/ci.yml@main
     with:
-      runs_on: '["ubuntu-latest", "macos-latest"]'
+      runs_on: '["ubuntu-latest", "macos-latest", "windows-latest"]'
       use_ct_registry: true
     secrets:
       SSH_KEY: ${{ secrets.SSH_KEY }}
+
+  # Smoke check for the TestRunner extension's test-selection logic (glob
+  # matching over `_collect_test_files_recursive`). This exists independently
+  # of the `call` job above because it needs to pass custom `test_args` to
+  # `Pkg.test`, which the reusable CTActions ci.yml workflow doesn't expose.
+  # It caught a regression where Windows returned backslash-separated relative
+  # paths, silently breaking forward-slash glob patterns and making every
+  # selection (including the default "run everything") resolve to zero tests.
+  test-selection-smoke:
+    if: >
+      github.event_name != 'pull_request' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'run ci') ||
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run ci'))
+    strategy:
+      fail-fast: false
+      matrix:
+        runs_on: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.runs_on }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+
+      # Julia's own process exit code is not trustworthy here: on Windows,
+      # after a cold/fresh precompile, `Pkg.test` can print its "tests
+      # passed" success message and still return a nonzero process exit
+      # code from unrelated teardown (no exception, no stderr output).
+      # Piping through `tee` would let bash's pipefail abort the step on
+      # that spurious code before the dry-run output is even inspected, so
+      # redirect to a file instead and judge success from the *content* of
+      # the dry-run listing, not from julia's raw exit status.
+      - name: Dry run - no selection (all tests)
+        shell: bash
+        run: |
+          set +e
+          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["--dryrun"])' > dryrun_all.log 2>&1
+          julia_exit=$?
+          set -e
+          cat dryrun_all.log
+          echo "julia exit code: $julia_exit"
+          # Match only printed test paths (they all live under "suite/"), not the
+          # sed-range-to-EOF approach, which also swept up Pkg's own trailing
+          # "Testing CTBase tests passed" status line printed after run_tests returns.
+          count=$(grep -c '^suite/' dryrun_all.log)
+          echo "Discovered $count test(s) with no selection"
+          if [ "$count" -lt 10 ]; then
+            echo "::error::Expected at least 10 tests with no selection, got $count"
+            exit 1
+          fi
+
+      - name: Dry run - directory selection (suite/data)
+        shell: bash
+        run: |
+          set +e
+          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/data", "--dryrun"])' > dryrun_data.log 2>&1
+          julia_exit=$?
+          set -e
+          cat dryrun_data.log
+          echo "julia exit code: $julia_exit"
+          selected=$(grep '^suite/' dryrun_data.log || true)
+          count=$(echo "$selected" | grep -c .)
+          echo "Discovered $count test(s) under suite/data"
+          if [ "$count" -lt 1 ]; then
+            echo "::error::Expected at least 1 test under suite/data, got $count"
+            exit 1
+          fi
+          if echo "$selected" | grep -qv '^suite/data/'; then
+            echo "::error::Selection 'suite/data' returned tests outside suite/data"
+            exit 1
+          fi
