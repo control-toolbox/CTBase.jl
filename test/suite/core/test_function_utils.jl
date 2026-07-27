@@ -60,8 +60,7 @@ function test_function_utils()
         Test.@testset "to_out_of_place - larger output" begin
             big!(r, x) = (
                 for i in 1:5
-                    ;
-                    r[i] = x * i;
+                    r[i] = x * i
                 end
             )
             big = Core.to_out_of_place(big!, 5)

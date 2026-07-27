@@ -359,11 +359,11 @@ function show_palette(io::IO=IOContext(stdout, :color => true))
     println(io)
     println(io, fmt.bold, "Mock describe / show", rst)
     println(io)
-    n = open(p.name);
+    n = open(p.name)
     t = open(p.type)
-    v = open(p.value);
+    v = open(p.value)
     kw = open(p.keyword)
-    c = open(p.count);
+    c = open(p.count)
     lb = open(p.label)
     mu = open(p.muted)
     println(io, "  $(n)MyStrategy$(rst) (instance, id=$(kw):gradient$(rst))")
@@ -391,9 +391,9 @@ function show_palette(io::IO=IOContext(stdout, :color => true))
     println(io)
     println(io, fmt.bold, "Mock exception", rst)
     println(io)
-    er = open(p.error);
+    er = open(p.error)
     em = open(p.emphasis)
-    wa = open(p.warning);
+    wa = open(p.warning)
     su = open(p.success)
     println(
         io,

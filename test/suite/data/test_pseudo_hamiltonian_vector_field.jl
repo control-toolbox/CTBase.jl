@@ -467,9 +467,9 @@ function test_pseudo_hamiltonian_vector_field()
                 phvf = Data.PseudoHamiltonianVectorField(
                     f; is_autonomous=true, is_variable=true
                 )
-                x = [1.0];
-                p = [0.5];
-                u = [0.2];
+                x = [1.0]
+                p = [0.5]
+                u = [0.2]
                 v = [0.1]
                 Test.@test_throws Exception phvf(x, p, u, v; variable_costate=true)
             end
@@ -479,11 +479,11 @@ function test_pseudo_hamiltonian_vector_field()
                 phvf = Data.PseudoHamiltonianVectorField(
                     f; is_autonomous=true, is_variable=true, is_inplace=true
                 )
-                x = [1.0];
-                p = [0.5];
-                u = [0.2];
+                x = [1.0]
+                p = [0.5]
+                u = [0.2]
                 v = [0.1]
-                dx = similar(x);
+                dx = similar(x)
                 dp = similar(p)
                 Test.@test_throws Exception phvf(dx, dp, x, p, u, v; variable_costate=true)
             end
@@ -493,10 +493,10 @@ function test_pseudo_hamiltonian_vector_field()
                 phvf = Data.PseudoHamiltonianVectorField(
                     f; is_autonomous=false, is_variable=true
                 )
-                t = 0.5;
-                x = [1.0];
-                p = [0.5];
-                u = [0.2];
+                t = 0.5
+                x = [1.0]
+                p = [0.5]
+                u = [0.2]
                 v = [0.1]
                 Test.@test_throws Exception phvf(t, x, p, u, v; variable_costate=true)
             end
@@ -506,12 +506,12 @@ function test_pseudo_hamiltonian_vector_field()
                 phvf = Data.PseudoHamiltonianVectorField(
                     f; is_autonomous=false, is_variable=true, is_inplace=true
                 )
-                t = 0.5;
-                x = [1.0];
-                p = [0.5];
-                u = [0.2];
+                t = 0.5
+                x = [1.0]
+                p = [0.5]
+                u = [0.2]
                 v = [0.1]
-                dx = similar(x);
+                dx = similar(x)
                 dp = similar(p)
                 Test.@test_throws Exception phvf(
                     dx, dp, t, x, p, u, v; variable_costate=true
@@ -523,9 +523,9 @@ function test_pseudo_hamiltonian_vector_field()
                 phvf = Data.PseudoHamiltonianVectorField(
                     f; is_autonomous=true, is_variable=true
                 )
-                x = [1.0];
-                p = [0.5];
-                u = [0.2];
+                x = [1.0]
+                p = [0.5]
+                u = [0.2]
                 v = [0.1]
                 result = phvf(x, p, u, v)
                 Test.@test result == (p, -x)
