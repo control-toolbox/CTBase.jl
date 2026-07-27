@@ -68,7 +68,10 @@ jobs:
           set -e
           cat dryrun_all.log
           echo "julia exit code: $julia_exit"
-          count=$(sed -n '/^Dry run:/,$p' dryrun_all.log | tail -n +2 | grep -c .)
+          # Match only printed test paths (they all live under "suite/"), not the
+          # sed-range-to-EOF approach, which also swept up Pkg's own trailing
+          # "Testing CTBase tests passed" status line printed after run_tests returns.
+          count=$(grep -c '^suite/' dryrun_all.log)
           echo "Discovered $count test(s) with no selection"
           if [ "$count" -lt 10 ]; then
             echo "::error::Expected at least 10 tests with no selection, got $count"
@@ -84,7 +87,7 @@ jobs:
           set -e
           cat dryrun_data.log
           echo "julia exit code: $julia_exit"
-          selected=$(sed -n '/^Dry run:/,$p' dryrun_data.log | tail -n +2 | grep .)
+          selected=$(grep '^suite/' dryrun_data.log || true)
           count=$(echo "$selected" | grep -c .)
           echo "Discovered $count test(s) under suite/data"
           if [ "$count" -lt 1 ]; then
