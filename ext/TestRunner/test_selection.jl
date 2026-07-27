@@ -30,7 +30,8 @@ function _collect_test_files_recursive(test_dir::AbstractString)
         for f in fs
             if endswith(f, ".jl") && f != "runtests.jl"
                 full = joinpath(root, f)
-                push!(files, relpath(full, test_dir))
+                rel = relpath(full, test_dir)
+                push!(files, replace(rel, '\\' => '/'))
             end
         end
     end

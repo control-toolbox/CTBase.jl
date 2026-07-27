@@ -21,8 +21,59 @@ jobs:
       (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run ci'))
     uses: control-toolbox/CTActions/.github/workflows/ci.yml@main
     with:
-      # runs_on: '["ubuntu-latest", "macos-latest"]'
-      runs_on: '["windows-latest"]'
+      runs_on: '["ubuntu-latest", "macos-latest", "windows-latest"]'
       use_ct_registry: true
     secrets:
       SSH_KEY: ${{ secrets.SSH_KEY }}
+
+  # Smoke check for the TestRunner extension's test-selection logic (glob
+  # matching over `_collect_test_files_recursive`). This exists independently
+  # of the `call` job above because it needs to pass custom `test_args` to
+  # `Pkg.test`, which the reusable CTActions ci.yml workflow doesn't expose.
+  # It caught a regression where Windows returned backslash-separated relative
+  # paths, silently breaking forward-slash glob patterns and making every
+  # selection (including the default "run everything") resolve to zero tests.
+  test-selection-smoke:
+    if: >
+      github.event_name != 'pull_request' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'run ci') ||
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run ci'))
+    strategy:
+      fail-fast: false
+      matrix:
+        runs_on: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.runs_on }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+
+      - name: Dry run - no selection (all tests)
+        shell: bash
+        run: |
+          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["--dryrun"])' | tee dryrun_all.log
+          count=$(sed -n '/^Dry run:/,$p' dryrun_all.log | tail -n +2 | grep -c .)
+          echo "Discovered $count test(s) with no selection"
+          if [ "$count" -lt 10 ]; then
+            echo "::error::Expected at least 10 tests with no selection, got $count"
+            exit 1
+          fi
+
+      - name: Dry run - directory selection (suite/data)
+        shell: bash
+        run: |
+          julia --project=. -e 'using Pkg; Pkg.test("CTBase"; test_args=["suite/data", "--dryrun"])' | tee dryrun_data.log
+          selected=$(sed -n '/^Dry run:/,$p' dryrun_data.log | tail -n +2 | grep .)
+          count=$(echo "$selected" | grep -c .)
+          echo "Discovered $count test(s) under suite/data"
+          if [ "$count" -lt 1 ]; then
+            echo "::error::Expected at least 1 test under suite/data, got $count"
+            exit 1
+          fi
+          if echo "$selected" | grep -qv '^suite/data/'; then
+            echo "::error::Selection 'suite/data' returned tests outside suite/data"
+            exit 1
+          fi

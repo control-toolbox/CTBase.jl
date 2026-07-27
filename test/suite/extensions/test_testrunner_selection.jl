@@ -197,8 +197,24 @@ function test_testrunner_selection()
                 touch(joinpath(temp_dir, "a", "b", "test_x.jl"))
 
                 rel = find_symbol_file(:x, n -> "test_" * String(n); test_dir=temp_dir)
-                Test.@test rel == joinpath("a", "test_x.jl")
+                Test.@test rel == "a/test_x.jl"
             end
+        end
+    end
+
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "_collect_test_files_recursive uses forward slashes" begin
+        collect_files = TestRunner._collect_test_files_recursive
+
+        # Regression: on Windows, `relpath` returns backslash-separated paths,
+        # which broke glob matching against forward-slash patterns like
+        # "suite/*/test_*" (available_tests filters always end up empty).
+        mktempdir() do temp_dir
+            mkpath(joinpath(temp_dir, "suite", "core"))
+            touch(joinpath(temp_dir, "suite", "core", "test_core.jl"))
+
+            files = collect_files(temp_dir)
+            Test.@test files == ["suite/core/test_core.jl"]
+            Test.@test all(f -> !occursin('\\', f), files)
         end
     end
 
