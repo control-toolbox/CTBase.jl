@@ -90,9 +90,9 @@ function test_arg_placement()
             b = _default_backend()
             # H(t, x, p, v) = t*v + ½‖p‖² + ‖x‖²
             H(t, x, p, v) = t * v + 0.5 * sum(p .^ 2) + sum(x .^ 2)
-            t = 1.0;
-            x = [1.0, 2.0];
-            p = [3.0, 4.0];
+            t = 1.0
+            x = [1.0, 2.0]
+            p = [3.0, 4.0]
             v = 5.0
             # ∂H/∂x = 2x (slot 2), consts in order t,p,v
             gx = Differentiation.differentiate(b, H, Val(2), x, t, p, v)
