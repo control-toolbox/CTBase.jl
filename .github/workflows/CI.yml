@@ -21,7 +21,8 @@ jobs:
       (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run ci'))
     uses: control-toolbox/CTActions/.github/workflows/ci.yml@main
     with:
-      runs_on: '["ubuntu-latest", "macos-latest"]'
+      # runs_on: '["ubuntu-latest", "macos-latest"]'
+      runs_on: '["windows-latest"]'
       use_ct_registry: true
     secrets:
       SSH_KEY: ${{ secrets.SSH_KEY }}
