@@ -226,6 +226,9 @@ Strategies.parameter(::Type{<:MyStrategy}) = nothing
 Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:AbstractStrategyParameter} = P
 ```
 
+A non-throwing 2-arg variant, `parameter(strategy_type, default)`, is also available for
+callers that cannot guarantee the type they're querying implements this contract — see below.
+
 See also: [`CTBase.Strategies.default_parameter`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
 """
 function parameter end
@@ -302,6 +305,55 @@ function parameter(::Type{T}) where {T<:AbstractStrategy}
             context="AbstractStrategy.parameter - required method implementation",
         ),
     )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the strategy parameter type for a concrete strategy type, or `default` if the
+strategy type does not implement the `parameter` contract at all.
+
+This is the non-throwing counterpart to `parameter(strategy_type)` — the same relationship
+as `get(dict, key, default)` to `dict[key]`. Use it when querying a strategy type you did
+not author and cannot guarantee has overridden the (optional) `parameter` method; use the
+1-arg form when the type is known to implement the contract and a missing implementation
+should be a loud error.
+
+Note this is different from a strategy that *does* implement `parameter` and legitimately
+returns `nothing` (the documented, established answer for "no parameter", e.g. `Ipopt`) —
+that `nothing` is returned as-is, not replaced by `default`. `default` is only substituted
+when the underlying call throws `Exceptions.NotImplemented`; any other exception still
+propagates.
+
+# Arguments
+- `strategy_type::Type{<:AbstractStrategy}`: The strategy type
+- `default`: Value to return if `strategy_type` does not implement `parameter`
+
+# Returns
+- Whatever `parameter(strategy_type)` returns, or `default` if that call throws
+  `Exceptions.NotImplemented`
+
+# Example
+```julia-repl
+julia> parameter(SomeThirdPartyStrategy, nothing)  # doesn't throw even if unimplemented
+nothing
+
+julia> parameter(Ipopt, :fallback)  # Ipopt implements parameter -> nothing, not :fallback
+nothing
+
+julia> parameter(MadNLP{CPU}, :fallback)
+CPU
+```
+
+See also: [`CTBase.Strategies.parameter`](@ref), [`CTBase.Strategies.default_parameter`](@ref)
+"""
+function parameter(strategy_type::Type{<:AbstractStrategy}, default)
+    return try
+        parameter(strategy_type)
+    catch e
+        e isa Exceptions.NotImplemented || rethrow()
+        default
+    end
 end
 
 """
