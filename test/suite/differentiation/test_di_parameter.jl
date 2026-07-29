@@ -104,6 +104,18 @@ function test_di_parameter()
             Test.@test Strategies.extract_global_parameter_from_method((:di, :gpu), r) ==
                 Strategies.GPU
         end
+
+        Test.@testset "describe(:di, registry)" begin
+            r = Strategies.create_registry(
+                Differentiation.AbstractADBackend =>
+                    ((DI, [Strategies.CPU, Strategies.GPU]),),
+            )
+
+            buf = IOBuffer()
+            Test.@test_nowarn Strategies.describe(buf, :di, r)
+            output = String(take!(buf))
+            Test.@test occursin("DifferentiationInterface", output)
+        end
     end
 end
 

@@ -243,8 +243,45 @@ function create_registry(pairs::Pair...)
                         )
                     end
 
-                    # Create parameterized strategy type
-                    push!(strategies, strategy_type{param_type})
+                    # Create parameterized strategy type. The strategy parameter must be
+                    # the FIRST declared type parameter — every `Strategies.parameter`
+                    # implementation in the ecosystem reads slot 1 via
+                    # `parameter(::Type{<:X{P}}) where {P} = P`. Round-trip through that
+                    # contract method to validate the binding actually landed there,
+                    # rather than inspecting TypeVar positions/bounds by hand.
+                    applied_type = try
+                        strategy_type{param_type}
+                    catch e
+                        e isa TypeError || rethrow()
+                        throw(
+                            Exceptions.IncorrectArgument(
+                                "Strategy parameter is not compatible with the first type parameter";
+                                got="$strategy_type applied to $param_type",
+                                expected="$param_type to satisfy the bound of $strategy_type's first type parameter",
+                                suggestion="Declare the strategy parameter as the FIRST type parameter, e.g. struct $strategy_type{P<:AbstractStrategyParameter, ...}",
+                                context="create_registry - binding strategy parameter to type",
+                            ),
+                        )
+                    end
+
+                    bound_param = try
+                        parameter(applied_type)
+                    catch
+                        nothing
+                    end
+                    if bound_param !== param_type
+                        throw(
+                            Exceptions.IncorrectArgument(
+                                "Strategy parameter must be the first type parameter";
+                                got="parameter($applied_type) returned $bound_param, expected $param_type",
+                                expected="Strategies.parameter to return $param_type for $applied_type",
+                                suggestion="Declare the strategy parameter as the FIRST type parameter, e.g. struct $strategy_type{P<:AbstractStrategyParameter, ...}",
+                                context="create_registry - validating strategy parameter is in the first type-parameter slot",
+                            ),
+                        )
+                    end
+
+                    push!(strategies, applied_type)
                 end
             else
                 # Non-parameterized strategy: Type (can be UnionAll for parameterized types with default)

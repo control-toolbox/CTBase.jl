@@ -417,14 +417,18 @@ $(TYPEDSIGNATURES)
 
 Extract a clean type name from a UnionAll type by removing module prefixes.
 
-This method handles generic types that have not been fully instantiated, preserving 
-the type parameter variable name.
+This method handles generic types that have not been fully instantiated, preserving
+the type parameter variable name(s). A `UnionAll` may wrap another `UnionAll` when
+more than one type parameter remains unbound (e.g. a 4-parameter strategy with only
+its first parameter applied), so this peels every layer rather than assuming exactly
+one.
 
 # Arguments
 - `T::UnionAll`: The UnionAll type to format
 
 # Returns
-- `String`: Clean type name with generic parameter (e.g., `"Exa{P}"` where P is the type variable)
+- `String`: Clean type name with generic parameter(s) (e.g., `"Exa{P}"` where P is the
+  type variable, or `"SciML{O, Q, R}"` when several parameters remain unbound)
 
 # Notes
 - This is a fallback for generic types that are not yet instantiated
@@ -433,9 +437,13 @@ the type parameter variable name.
 See also: [`CTBase.Strategies._strategy_type_name(::DataType)`](@ref)
 """
 function _strategy_type_name(T::UnionAll)
-    base_name = string(T.body.name.name)
-    param_name = string(T.var.name)
-    return "$base_name{$param_name}"
+    var_names = String[]
+    body = T
+    while body isa UnionAll
+        push!(var_names, string(body.var.name))
+        body = body.body
+    end
+    return "$(string(body.name.name)){$(join(var_names, ", "))}"
 end
 
 """
@@ -489,16 +497,14 @@ julia> _strategy_base_name(Collocation)
 
 # Notes
 - Used specifically for strategy headers to avoid redundancy with parameter display
-- Handles both DataType and UnionAll types
+- `UnionAll` (and any other type not covered by the `DataType` method above) falls through to
+  the `nameof`-based fallback below, which is correct regardless of how many type parameters
+  remain unbound
 
 See also: [`CTBase.Strategies._strategy_type_name`](@ref), [`CTBase.Strategies.describe`](@ref)
 """
 function _strategy_base_name(T::DataType)
     return string(T.name.name)
-end
-
-function _strategy_base_name(T::UnionAll)
-    return string(T.body.name.name)
 end
 
 function _strategy_base_name(T::Type)
