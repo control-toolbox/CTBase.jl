@@ -39,6 +39,22 @@ Every concrete strategy must provide:
 3. **Constructor** accepting keyword arguments (uses `build_strategy_options`)
 4. **Instance-level access** to configured options
 
+## Parameter Position Contract
+
+For strategies registered with a device/backend parameter via `create_registry`
+(e.g. `(MyStrategy, [CPU, GPU])`), the parameter **must be the first declared type
+parameter**:
+
+```julia-repl
+julia> struct MyStrategy{P<:AbstractStrategyParameter, O} <: AbstractStrategy end  # ✓ correct
+julia> struct MyStrategy{O, P<:AbstractStrategyParameter} <: AbstractStrategy end  # ✗ wrong slot
+```
+
+This is required because every `Strategies.parameter` implementation in the ecosystem reads
+slot 1: `parameter(::Type{<:MyStrategy{P}}) where {P} = P`. `create_registry` validates this
+by round-tripping through `parameter`, raising `Exceptions.IncorrectArgument` if the parameter
+did not bind to the first slot.
+
 ## Validation Modes
 
 The strategy system supports two validation modes for option handling:

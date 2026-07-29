@@ -38,6 +38,16 @@ struct FakeStratC <: FakeFamily end
 Strategies.id(::Type{<:FakeStratC}) = :fakestrata  # Same as FakeStratA
 Strategies.parameter(::Type{<:FakeStratC}) = nothing
 
+# Parameter-position contract (issue #516 item 3): the strategy parameter must be the
+# FIRST declared type parameter. These two fakes reproduce the issue's failure shapes.
+struct FakeTightStrat{O<:Strategies.StrategyOptions,P<:Strategies.AbstractStrategyParameter} <:
+       FakeFamily end
+Strategies.id(::Type{<:FakeTightStrat}) = :fake_tight
+
+struct FakeLooseStrat{A,P<:Strategies.AbstractStrategyParameter} <: FakeFamily end
+Strategies.id(::Type{<:FakeLooseStrat}) = :fake_loose
+Strategies.parameter(::Type{<:FakeLooseStrat{A,P}}) where {A,P} = P
+
 function test_registry_parameters()
     Test.@testset "Registry with Parameters" verbose=VERBOSE showtiming=SHOWTIMING begin
 
@@ -85,6 +95,22 @@ function test_registry_parameters()
         Test.@testset "create_registry validation - invalid parameter format" begin
             Test.@test_throws Exceptions.IncorrectArgument Strategies.create_registry(
                 FakeFamily => ((FakeStratB, "not a tuple"),),  # Not a tuple/vector
+            )
+        end
+
+        Test.@testset "create_registry validation - parameter not in first slot (TypeError case)" begin
+            # FakeTightStrat's first type parameter O<:StrategyOptions rejects CPU outright.
+            Test.@test_throws Exceptions.IncorrectArgument Strategies.create_registry(
+                FakeFamily => ((FakeTightStrat, [Strategies.CPU]),)
+            )
+        end
+
+        Test.@testset "create_registry validation - parameter not in first slot (silent mismatch case)" begin
+            # FakeLooseStrat's first type parameter A is unbounded, so CPU binds to A
+            # instead of the intended P — `parameter(applied)` then returns something
+            # other than CPU (or throws), which the new check must catch.
+            Test.@test_throws Exceptions.IncorrectArgument Strategies.create_registry(
+                FakeFamily => ((FakeLooseStrat, [Strategies.CPU]),)
             )
         end
 
