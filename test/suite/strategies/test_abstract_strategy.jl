@@ -52,6 +52,17 @@ Strategies.options(strategy::FakeStrategy) = strategy.options
 # Additional test struct for error handling
 struct UnimplementedStrategy <: Strategies.AbstractStrategy end
 
+# Parameterized fake, to prove a real value passes through the 2-arg parameter() unchanged.
+struct FakeStrategyParam{P<:Strategies.AbstractStrategyParameter} <: Strategies.AbstractStrategy end
+Strategies.parameter(::Type{<:FakeStrategyParam{P}}) where {P} = P
+
+# Overrides parameter but throws something OTHER than NotImplemented — proves the 2-arg
+# wrapper only swallows NotImplemented and rethrows everything else.
+struct FakeStrategyBadParameter <: Strategies.AbstractStrategy end
+function Strategies.parameter(::Type{<:FakeStrategyBadParameter})
+    return throw(Exceptions.IncorrectArgument("deliberately not NotImplemented"))
+end
+
 # Fake strategy with description for testing multi-line display
 struct FakeStrategyWithDescription <: Strategies.AbstractStrategy
     options::Strategies.StrategyOptions
@@ -150,6 +161,33 @@ function test_abstract_strategy()
                 incomplete_strategy = IncompleteStrategy()
                 Test.@test_throws Exceptions.NotImplemented Strategies.options(
                     incomplete_strategy
+                )
+            end
+
+            Test.@testset "parameter(T, default) - non-throwing accessor" begin
+                # Falls back to default when parameter() is not implemented at all.
+                Test.@test Strategies.parameter(UnimplementedStrategy, nothing) === nothing
+                Test.@test Strategies.parameter(UnimplementedStrategy, :fallback) ===
+                    :fallback
+
+                # A strategy that legitimately returns nothing is NOT conflated with
+                # "unimplemented": this just confirms the passthrough works when there is
+                # no exception at all.
+                Test.@test Strategies.parameter(FakeStrategy, :fallback) === nothing
+
+                # A real parameter value passes through unchanged.
+                Test.@test Strategies.parameter(FakeStrategyParam{Strategies.CPU}, :fallback) ===
+                    Strategies.CPU
+
+                # Non-NotImplemented errors still propagate — the wrapper is not a blanket
+                # catch-all.
+                Test.@test_throws Exceptions.IncorrectArgument Strategies.parameter(
+                    FakeStrategyBadParameter, nothing
+                )
+
+                # 1-arg form is unchanged: still throws for a genuinely unimplemented strategy.
+                Test.@test_throws Exceptions.NotImplemented Strategies.parameter(
+                    UnimplementedStrategy
                 )
             end
 
