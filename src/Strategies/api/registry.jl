@@ -41,7 +41,7 @@ julia> T = type_from_id(:adnlp, AbstractNLPModeler, registry)
 Modelers.ADNLP
 ```
 
-See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref)
+See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), [`Base.merge`](@ref)
 """
 struct StrategyRegistry
     families::Dict{Type{<:AbstractStrategy},Vector{Type}}
@@ -89,7 +89,7 @@ julia> strategy_ids(AbstractNLPModeler, registry)
 - `ErrorException`: If a strategy is not a subtype of its family
 - `ErrorException`: If a family appears multiple times
 
-See also: [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref)
+See also: [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), [`Base.merge`](@ref)
 """
 function create_registry(pairs::Pair...)
     families = Dict{Type{<:AbstractStrategy},Vector{Type}}()
@@ -505,6 +505,127 @@ function type_from_id(
             ),
         )
     end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Merge two or more strategy registries into one, validating cross-registry invariants
+that `create_registry` already enforces within a single call:
+
+- Every strategy `id()` must be unique across **all** input registries.
+- A parameter `id()` shared by more than one input registry must resolve to the same
+  parameter type in each.
+- No `id()` may be used as a strategy ID in one registry and a parameter ID in another.
+
+If the same family is registered in more than one input, their strategy lists are
+**unioned** (still subject to the checks above) — this is what lets a downstream package
+extend a family across two independently-built registries (e.g. a solve registry plus a
+flow registry), rather than only combining registries with disjoint families.
+
+# Arguments
+- `a::StrategyRegistry`, `bs::StrategyRegistry...`: two or more registries to merge
+
+# Returns
+- `StrategyRegistry`: a new, validated registry containing every family/strategy/parameter
+  from all inputs
+
+# Throws
+- `Exceptions.IncorrectArgument`: a strategy ID collides across inputs, a parameter ID
+  resolves to different types across inputs, or a strategy/parameter ID collide with
+  each other across inputs
+
+# Example
+```julia-repl
+julia> using CTBase.Strategies
+
+julia> solve_registry = create_registry(AbstractNLPSolver => (Ipopt,))
+julia> flow_registry  = create_registry(AbstractIntegrator => (SciML,))
+
+julia> combined = merge(solve_registry, flow_registry)
+StrategyRegistry with 2 families
+
+julia> describe(:ipopt, combined)  # works
+julia> describe(:sciml, combined)  # works, same registry
+```
+
+See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.StrategyRegistry`](@ref)
+"""
+function Base.merge(a::StrategyRegistry, bs::StrategyRegistry...)
+    registries = (a, bs...)
+    length(registries) == 1 && return a
+
+    # 1. Global strategy-ID uniqueness across ALL input registries.
+    #    Within one registry this is already guaranteed by create_registry, so a
+    #    re-assignment to the SAME source index is fine (e.g. DI{CPU}/DI{GPU} share
+    #    :di within one registry) — only a different source index is a real collision.
+    id_source = Dict{Symbol,Int}()
+    for (i, r) in enumerate(registries)
+        for (_, types) in r.families
+            for T in types
+                sid = id(T)
+                if haskey(id_source, sid) && id_source[sid] != i
+                    throw(
+                        Exceptions.IncorrectArgument(
+                            "Duplicate strategy ID across registries";
+                            got=":$sid present in more than one input registry",
+                            expected="each strategy id() present in exactly one input registry",
+                            suggestion="Rename the colliding strategy's id(), or merge only non-overlapping registries",
+                            context="merge(::StrategyRegistry...) - validating global ID uniqueness across registries",
+                        ),
+                    )
+                end
+                id_source[sid] = i
+            end
+        end
+    end
+
+    # 2. Parameter id => type agreement across all input registries.
+    merged_parameters = Dict{Symbol,Type{<:AbstractStrategyParameter}}()
+    for r in registries
+        for (pid, ptype) in r.parameters
+            if haskey(merged_parameters, pid) && merged_parameters[pid] != ptype
+                throw(
+                    Exceptions.IncorrectArgument(
+                        "Parameter ID bound to different types across registries";
+                        got="parameter :$pid resolves to $(merged_parameters[pid]) in one input and $ptype in another",
+                        expected="parameter :$pid to resolve to the same type in every input registry",
+                        suggestion="Rename one of the conflicting parameter types or its id()",
+                        context="merge(::StrategyRegistry...) - validating parameter id/type agreement across registries",
+                    ),
+                )
+            end
+            merged_parameters[pid] = ptype
+        end
+    end
+
+    # 3. Strategy IDs and parameter IDs must stay disjoint across the merged set.
+    conflicting = intersect(keys(id_source), keys(merged_parameters))
+    if !isempty(conflicting)
+        throw(
+            Exceptions.IncorrectArgument(
+                "Parameter ID conflicts with strategy ID across registries";
+                got="id(s) $(collect(conflicting)) used as both a strategy id and a parameter id across the input registries",
+                expected="disjoint strategy IDs and parameter IDs across all input registries",
+                suggestion="Rename the colliding id() on one side",
+                context="merge(::StrategyRegistry...) - validating strategy/parameter id disjointness across registries",
+            ),
+        )
+    end
+
+    # 4. Union families, concatenating strategy lists for families shared across inputs.
+    merged_families = Dict{Type{<:AbstractStrategy},Vector{Type}}()
+    for r in registries
+        for (family, types) in r.families
+            if haskey(merged_families, family)
+                append!(merged_families[family], types)
+            else
+                merged_families[family] = copy(types)
+            end
+        end
+    end
+
+    return StrategyRegistry(merged_families, merged_parameters)
 end
 
 # Display
