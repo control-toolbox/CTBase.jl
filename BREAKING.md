@@ -3,6 +3,27 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.28.8-beta)
+
+- **`Strategies`: `describe(id, registry)` fixed for strategies with 3+ type parameters.**
+  `_strategy_base_name`/`_strategy_type_name` each assumed a strategy had at most two type
+  parameters and threw `FieldError` above that (e.g. a 4-parameter `SciML` strategy, and any
+  registry containing it). **No breaking change**: strictly expands what `describe` can render
+  correctly; output for existing 1–2 parameter strategies is unchanged. `create_registry` also
+  gains a new validation — the strategy parameter must be the first declared type parameter —
+  which only changes behavior for input that was already broken (previously a bare `TypeError`
+  or a misleading `NotImplemented`; now a clear `Exceptions.IncorrectArgument`). No migration
+  required for any strategy already working correctly.
+- **`Strategies`: new `Base.merge(a::StrategyRegistry, b::StrategyRegistry...)`.** Purely
+  additive — a new method on an existing `Base` function, combining independently-built
+  registries with the same cross-registry validation `create_registry` runs within one call
+  (global strategy-ID uniqueness, parameter id/type agreement; same family in more than one
+  input is unioned rather than rejected). **No breaking change**: no existing signature or
+  behavior changes. No migration required.
+- **`Strategies`: new non-throwing `parameter(strategy_type, default)`.** Purely additive — a
+  new 2-arg method alongside the existing 1-arg `parameter(strategy_type)`, whose throwing
+  behavior is unchanged. **No breaking change**: no migration required.
+
 ## Non-breaking note (0.28.7-beta)
 
 - **`TestRunner`: fixed a Windows-only bug where test selection silently

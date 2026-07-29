@@ -6,6 +6,88 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.8-beta] - 2026-07-29
+
+### 🐛 Bug Fixes
+
+#### **Strategies** — `describe(id, registry)` threw `FieldError` for 3+ type-parameter strategies
+
+- **`_strategy_base_name`** and **`_strategy_type_name`** (`Strategies/api/describe_registry.jl`)
+  each peeled exactly one `UnionAll` layer before assuming a `DataType` sat underneath — true
+  only when a strategy has exactly two total type parameters. With three or more (the first
+  strategy in the ecosystem to cross that line is `CTSolvers.Integrators.SciML`, four
+  parameters), `describe(:sciml, registry)` threw `FieldError`, and because the
+  parameter-introspection branch walks every strategy in a registry, so did
+  `describe(:cpu, registry)` / `describe(:gpu, registry)` on any registry containing it (e.g.
+  `CTFlows`' flow registry).
+- `_strategy_base_name(::UnionAll)` is removed — the existing `nameof`-based `::Type` fallback
+  already handles any depth correctly. `_strategy_type_name(::UnionAll)` now peels every
+  `UnionAll` layer instead of exactly one.
+- **`create_registry` now validates that a strategy's parameter binds to its first declared
+  type parameter** (every `Strategies.parameter` implementation in the ecosystem reads slot
+  1), raising a clear `Exceptions.IncorrectArgument` instead of a bare `TypeError` or a
+  misleading `NotImplemented` for a strategy that declared its parameter in the wrong slot.
+- Fixes control-toolbox/CTBase.jl#516.
+
+### ✨ New Features
+
+#### **Strategies** — `Base.merge` for `StrategyRegistry`, with cross-registry validation
+
+- **`Base.merge(a::StrategyRegistry, b::StrategyRegistry...)`** combines two or more
+  independently-built registries — the case downstream packages hit when they hold both their
+  own solve registry and, say, `CTFlows.Flows.flow_registry()` and want a single introspection
+  entry point. Previously the only way to combine them was to reach into the struct and
+  raw-`merge` the internal `Dict`s directly, which skipped every validation `create_registry`
+  enforces within one call.
+- Validates, across **all** input registries: every strategy `id()` is unique; a parameter
+  `id()` shared by more than one input resolves to the same parameter type in each; no `id()`
+  is used as a strategy ID in one registry and a parameter ID in another. Any violation raises
+  `Exceptions.IncorrectArgument`.
+- When the same family is registered in more than one input, their strategy lists are
+  **unioned** (still subject to the checks above) rather than rejected — this is what lets a
+  downstream package extend a family across two independently-built registries, not just
+  combine registries with disjoint families.
+- Extends `Base.merge` rather than introducing an exported `Strategies.merge`, avoiding the
+  namespace-shadowing problem that made downstream packages move away from `@reexport`
+  (`CTSolvers.Integrators` already exports a `merge`).
+- Fixes control-toolbox/CTBase.jl#517.
+
+#### **Strategies** — non-throwing `parameter(T, default)` accessor
+
+- **`Strategies.parameter(strategy_type, default)`**, the non-throwing counterpart to
+  `parameter(strategy_type)` — the same relationship as `get(dict, key, default)` to
+  `dict[key]`. `default` is only substituted when the underlying call throws
+  `Exceptions.NotImplemented`; a strategy that legitimately implements `parameter` and returns
+  `nothing` (the established, documented answer for "no parameter") still returns `nothing`,
+  not `default`, and any other exception still propagates.
+- Lets any caller walking an `AbstractStrategy` it did not author — and cannot guarantee
+  implements the optional `parameter` contract — query it safely, instead of hand-rolling the
+  `try/catch e; e isa NotImplemented || rethrow(); nothing end` idiom that `OptimalControl`
+  currently duplicates in `helpers/print.jl`.
+- Implemented as a single `get`-style 2-arg method rather than a keyword opt-out
+  (`parameter(T; strict=false)`, the issue's other proposed shape): every currently-implemented
+  strategy overrides `parameter` with its own plain 1-arg method declaring no keyword, so the
+  keyword form would throw `MethodError: no keyword argument strict` for every strategy that
+  already implements the contract correctly, and only work for the ones that don't.
+- Fixes control-toolbox/CTBase.jl#518.
+
+### 🧪 Testing
+
+- 53 new tests across the three changes above: a parametric-arity matrix (1–4 type parameters)
+  and a `describe(:cpu, registry)` blast-radius regression for #516; unit/integration/contract/
+  error coverage for `merge`, including the boundary between "different strategies under a
+  shared family" (unioned) and "same strategy id under a shared family" (still rejected) for
+  #517; non-throwing/rethrow/passthrough coverage for `parameter(T, default)` for #518.
+- Full suite green: **4962/4962**.
+
+### ✅ Compatibility
+
+- **No breaking changes**: one bug fix (strictly expands what `describe` can render without
+  changing existing output) and two purely additive new methods (`Base.merge`, 2-arg
+  `parameter`). `create_registry`'s new parameter-position validation only changes behavior for
+  input that was already broken (a strategy parameter declared outside the first type-parameter
+  slot). See [BREAKING.md](BREAKING.md).
+
 ## [0.28.7-beta] - 2026-07-27
 
 ### 🐛 Bug Fixes
