@@ -20,15 +20,15 @@ The canonical "not provided" sentinel used across the control-toolbox ecosystem
 
 # Example
 ```julia-repl
-julia> using CTBase.Core
+julia> using CTBase: Core
 
-julia> x = NotProvided
+julia> x = Core.NotProvided
 NotProvided
 
-julia> x isa NotProvidedType
+julia> x isa Core.NotProvidedType
 true
 
-julia> x === NotProvided
+julia> x === Core.NotProvided
 true
 ```
 

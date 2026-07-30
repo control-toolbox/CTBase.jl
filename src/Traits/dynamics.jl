@@ -9,12 +9,12 @@ between state-only configurations (no costate) and Hamiltonian configurations
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> StateDynamics <: Traits.AbstractDynamicsTrait
+julia> Traits.StateDynamics <: Traits.AbstractDynamicsTrait
 true
 
-julia> HamiltonianDynamics <: Traits.AbstractDynamicsTrait
+julia> Traits.HamiltonianDynamics <: Traits.AbstractDynamicsTrait
 true
 \`\`\`
 
@@ -36,9 +36,9 @@ which contain only state variables without associated costate variables.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> st = StateDynamics()
+julia> st = Traits.StateDynamics()
 StateDynamics()
 
 julia> st isa Traits.AbstractDynamicsTrait
@@ -65,9 +65,9 @@ which contain both state variables and associated costate (adjoint) variables.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> ham = HamiltonianDynamics()
+julia> ham = Traits.HamiltonianDynamics()
 HamiltonianDynamics()
 
 julia> ham isa Traits.AbstractDynamicsTrait

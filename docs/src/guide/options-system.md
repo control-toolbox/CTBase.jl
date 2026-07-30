@@ -29,10 +29,9 @@ OptionDefinition (schema)
 An `OptionDefinition` is the schema for a single option. It specifies the name, type, default, description, aliases, and an optional validator.
 
 ```@example options
-using CTBase.Options: OptionDefinition, OptionValue # hide
-using CTBase.Core: NotProvided # hide
-using CTBase.Options: all_names, extract_option, extract_options, extract_raw_options # hide
-def = OptionDefinition(
+using CTBase: Options # hide
+using CTBase: Core # hide
+def = Options.OptionDefinition(
     name        = :max_iter,
     type        = Integer,
     default     = 1000,
@@ -69,7 +68,7 @@ Type mismatch in the constructor:
 
 ```@repl options
 try # hide
-OptionDefinition(
+Options.OptionDefinition(
     name = :count, type = Integer,
     default = "hello", description = "A count",
 )
@@ -83,12 +82,12 @@ end # hide
 Aliases allow users to use alternative names for the same option:
 
 ```@example options
-def_alias = OptionDefinition(
+def_alias = Options.OptionDefinition(
     name = :max_iter, type = Int, default = 100,
     description = "Max iterations",
     aliases = (:maxiter, :max),
 )
-all_names(def_alias)
+Options.all_names(def_alias)
 ```
 
 The extraction system searches all names when looking for a match in kwargs.
@@ -98,7 +97,7 @@ The extraction system searches all names when looking for a match in kwargs.
 Validators follow the pattern `x -> condition || throw(...)`. They should return a truthy value on success or throw on failure:
 
 ```@example options
-validated_def = OptionDefinition(
+validated_def = Options.OptionDefinition(
     name = :tol, type = Real, default = 1e-8,
     description = "Tolerance",
     validator = x -> x > 0 || throw(
@@ -117,7 +116,7 @@ Validator failure:
 
 ```@repl options
 try # hide
-extract_option((tol = -1.0,), validated_def)
+Options.extract_option((tol = -1.0,), validated_def)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -128,13 +127,13 @@ end # hide
 `NotProvided` is a sentinel value that distinguishes "no default" from "default is `nothing`":
 
 ```@example options
-NotProvided
+Core.NotProvided
 ```
 
 ```@example options
-opt_np = OptionDefinition(
+opt_np = Options.OptionDefinition(
     name = :mu_init, type = Real,
-    default = NotProvided,
+    default = Core.NotProvided,
     description = "Initial barrier parameter",
 )
 ```
@@ -142,7 +141,7 @@ opt_np = OptionDefinition(
 When `extract_option` encounters a `NotProvided` default and the user hasn't provided the option, the option is excluded from the result:
 
 ```@example options
-result, remaining = extract_option((other = 42,), opt_np)
+result, remaining = Options.extract_option((other = 42,), opt_np)
 println("Result: ", result)
 println("Remaining: ", remaining)
 ```
@@ -152,15 +151,15 @@ println("Remaining: ", remaining)
 `OptionValue` wraps a value with its **provenance** — where it came from:
 
 ```@example options
-OptionValue(1000, :user)
+Options.OptionValue(1000, :user)
 ```
 
 ```@example options
-OptionValue(1e-8, :default)
+Options.OptionValue(1e-8, :default)
 ```
 
 ```@example options
-OptionValue(42, :computed)
+Options.OptionValue(42, :computed)
 ```
 
 ### Three sources
@@ -175,7 +174,7 @@ Invalid source:
 
 ```@repl options
 try # hide
-OptionValue(42, :invalid_source)
+Options.OptionValue(42, :invalid_source)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -184,7 +183,7 @@ end # hide
 Provenance tracking enables introspection — you can tell whether a value was explicitly chosen or inherited from defaults:
 
 ```@example options
-opt = OptionValue(1000, :user)
+opt = Options.OptionValue(1000, :user)
 println("Value: ", opt.value)
 println("Source: ", opt.source)
 ```
@@ -194,15 +193,14 @@ println("Source: ", opt.source)
 Use the getters in `Options` to access `OptionDefinition` and `OptionValue` fields instead of reading struct fields directly. This keeps encapsulation intact and aligns with Strategies overrides.
 
 ```@example options
-using CTBase.Options
-def2 = OptionDefinition(
+def2 = Options.OptionDefinition(
     name = :max_iter,
     type = Int,
     default = 100,
     description = "Maximum iterations",
     aliases = (:maxiter,),
 )
-opt2 = OptionValue(200, :user)
+opt2 = Options.OptionValue(200, :user)
 nothing # hide
 ```
 
@@ -226,15 +224,15 @@ Options.is_computed(opt2)
 
 ```@example options
 meta = CTBase.Strategies.StrategyMetadata(
-    OptionDefinition(
+    Options.OptionDefinition(
         name = :tol, type = Real,
         default = 1e-8, description = "Tolerance",
     ),
-    OptionDefinition(
+    Options.OptionDefinition(
         name = :max_iter, type = Integer,
         default = 1000, description = "Max iterations",
     ),
-    OptionDefinition(
+    Options.OptionDefinition(
         name = :verbose, type = Bool,
         default = false, description = "Verbose output",
     ),
@@ -380,11 +378,11 @@ println("keys: ", keys(opts_perm))
 Extracts a single option from a `NamedTuple`:
 
 ```@example options
-def_grid = OptionDefinition(
+def_grid = Options.OptionDefinition(
     name = :grid_size, type = Int, default = 100,
     description = "Grid size", aliases = (:n,),
 )
-opt_value, remaining = extract_option(
+opt_value, remaining = Options.extract_option(
     (n = 200, tol = 1e-6), def_grid,
 )
 println("Extracted: ", opt_value)
@@ -403,7 +401,7 @@ Type mismatch in extraction:
 
 ```@repl options
 try # hide
-extract_option((grid_size = "hello",), def_grid)
+Options.extract_option((grid_size = "hello",), def_grid)
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
 end # hide
@@ -415,16 +413,16 @@ Extracts multiple options at once:
 
 ```@example options
 defs = [
-    OptionDefinition(
+    Options.OptionDefinition(
         name = :grid_size, type = Int,
         default = 100, description = "Grid",
     ),
-    OptionDefinition(
+    Options.OptionDefinition(
         name = :tol, type = Float64,
         default = 1e-6, description = "Tol",
     ),
 ]
-extracted, remaining = extract_options(
+extracted, remaining = Options.extract_options(
     (grid_size = 200, max_iter = 1000), defs,
 )
 println("Extracted: ", extracted)
@@ -437,11 +435,11 @@ Unwraps `OptionValue` wrappers and filters out `NotProvided` values:
 
 ```@example options
 raw_input = (
-    backend   = OptionValue(:optimized, :user),
-    show_time = OptionValue(false, :default),
-    optional  = OptionValue(NotProvided, :default),
+    backend   = Options.OptionValue(:optimized, :user),
+    show_time = Options.OptionValue(false, :default),
+    optional  = Options.OptionValue(Core.NotProvided, :default),
 )
-extract_raw_options(raw_input)
+Options.extract_raw_options(raw_input)
 ```
 
 ## Data Flow Summary

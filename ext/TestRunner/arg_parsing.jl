@@ -19,7 +19,7 @@ Parse command-line test arguments, filtering out coverage-related flags.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> TestRunner._parse_test_args(["utils", "-a", "--dryrun"])
 (["utils"], true, true)
@@ -63,7 +63,7 @@ the test directory is already the root for pattern matching.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> TestRunner._strip_test_prefix("test/suite/foo")
 "suite/foo"
@@ -106,7 +106,7 @@ The original selection is always kept so that exact-name matches still work.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> TestRunner._normalize_selections(
            ["suite/"], 
@@ -151,7 +151,7 @@ The returned regex is anchored (matches the full string).
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> TestRunner._glob_to_regex("test_*.jl")
 r"^test_.*\\.jl\$"

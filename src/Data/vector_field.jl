@@ -156,19 +156,19 @@ Construct a `VectorField` with trait flags.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> vf = VectorField(x -> -x)  # Uses defaults: is_autonomous=true, is_variable=false
+julia> vf = Data.VectorField(x -> -x)  # Uses defaults: is_autonomous=true, is_variable=false
 VectorField: autonomous, fixed (no variable), out-of-place
   natural call: f(x)
   uniform call: f(t, x, v)
 
-julia> vf = VectorField((t, x) -> t .* x; is_autonomous=false)
+julia> vf = Data.VectorField((t, x) -> t .* x; is_autonomous=false)
 VectorField: non-autonomous, fixed (no variable), out-of-place
   natural call: f(t, x)
   uniform call: f(t, x, v)
 
-julia> vf = VectorField(x -> -x; is_inplace=true)  # Explicit in-place
+julia> vf = Data.VectorField(x -> -x; is_inplace=true)  # Explicit in-place
 VectorField: autonomous, fixed (no variable), in-place
   natural call: f(dx, x)
   uniform call: f(dx, t, x, v)

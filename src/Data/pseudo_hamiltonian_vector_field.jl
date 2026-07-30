@@ -184,9 +184,9 @@ Construct a `PseudoHamiltonianVectorField` with trait flags.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> h̃vf = PseudoHamiltonianVectorField((x, p, u) -> (u, -p))
+julia> h̃vf = Data.PseudoHamiltonianVectorField((x, p, u) -> (u, -p))
 PseudoHamiltonianVectorField: autonomous, fixed (no variable), out-of-place
   natural call: f(x, p, u)
   uniform call: f(t, x, p, u, v)

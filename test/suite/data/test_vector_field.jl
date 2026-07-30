@@ -1,9 +1,9 @@
 module TestVectorField
 
 using Test: Test
-import CTBase.Data
-import CTBase.Traits
-import CTBase.Exceptions
+using CTBase: Data
+using CTBase: Traits
+using CTBase: Exceptions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

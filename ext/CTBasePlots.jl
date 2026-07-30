@@ -10,25 +10,9 @@ module CTBasePlots
 # =============================================================================
 
 using Plots: Plots
-import DocStringExtensions: TYPEDSIGNATURES
+using DocStringExtensions: TYPEDSIGNATURES
 
-import CTBase.Plotting:
-    Plotting,
-    PlotsBackend,
-    Figure,
-    Axes,
-    Series,
-    HLine,
-    VLine,
-    Decoration,
-    Leaf,
-    HBox,
-    VBox,
-    AbstractLayoutNode,
-    leaves,
-    default_size,
-    render,
-    render!
+using CTBase: Plotting
 
 # --- fonts / margins (semantic sizes come from src; Plots objects made here) --
 """
@@ -136,7 +120,7 @@ Resolve the y-axis limits for `ax`.
 `nothing` is passed through; a tuple is used as-is; `:auto` delegates to Plots;
 `:auto_guarded` widens a (near-)constant series so the axis does not collapse.
 """
-function _resolve_ylims(ax::Axes)
+function _resolve_ylims(ax::Plotting.Axes)
     yl = ax.ylims
     yl === :auto_guarded || return yl
     isempty(ax.series) && return :auto
@@ -154,7 +138,7 @@ $(TYPEDSIGNATURES)
 Draw a single [`Series`](@ref) `s` into subplot `sp` of plot `p`, forwarding
 `user` keyword arguments and the translated series style.
 """
-function _draw_series!(p, s::Series, sp::Int; user...)
+function _draw_series!(p, s::Plotting.Series, sp::Int; user...)
     Plots.plot!(
         p,
         s.x,
@@ -172,11 +156,11 @@ $(TYPEDSIGNATURES)
 
 Draw a decoration (`HLine` or `VLine`) into subplot `sp` of plot `p`.
 """
-function _draw_decoration!(p, d::HLine, sp::Int)
+function _draw_decoration!(p, d::Plotting.HLine, sp::Int)
     Plots.hline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
     return p
 end
-function _draw_decoration!(p, d::VLine, sp::Int)
+function _draw_decoration!(p, d::Plotting.VLine, sp::Int)
     Plots.vline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
     return p
 end
@@ -192,7 +176,7 @@ applied to the cell, with `legend`/`ylims` overriding the IR defaults. When
 """
 function _draw_axes!(
     p,
-    ax::Axes,
+    ax::Plotting.Axes,
     sp::Int;
     overlay::Bool=false,
     series_user=NamedTuple(),
@@ -246,14 +230,14 @@ Recursively render a layout node into a `Plots.Plot`.
 weighted grid layout. A single-child box is unwrapped (Plots rejects a lone
 height/width of 1.0).
 """
-function _render_node(node::Leaf; series_user=NamedTuple(), axes_user=NamedTuple())
+function _render_node(node::Plotting.Leaf; series_user=NamedTuple(), axes_user=NamedTuple())
     p = Plots.plot()
     _draw_axes!(p, node.axes, 1; series_user=series_user, axes_user=axes_user)
     return p
 end
 # A single-child box carries no geometry of its own: render the child directly
 # (Plots.grid rejects a lone height/width of 1.0, and a 1×1 wrapper is useless).
-function _render_node(node::VBox; series_user=NamedTuple(), axes_user=NamedTuple())
+function _render_node(node::Plotting.VBox; series_user=NamedTuple(), axes_user=NamedTuple())
     if length(node.children) == 1
         return _render_node(node.children[1]; series_user=series_user, axes_user=axes_user)
     end
@@ -264,7 +248,7 @@ function _render_node(node::VBox; series_user=NamedTuple(), axes_user=NamedTuple
         subs...; layout=Plots.grid(length(subs), 1; heights=_normalized(node.weights))
     )
 end
-function _render_node(node::HBox; series_user=NamedTuple(), axes_user=NamedTuple())
+function _render_node(node::Plotting.HBox; series_user=NamedTuple(), axes_user=NamedTuple())
     if length(node.children) == 1
         return _render_node(node.children[1]; series_user=series_user, axes_user=axes_user)
     end
@@ -283,10 +267,10 @@ Render `fig` into a new `Plots.Plot` (Plots backend). Series attributes among
 `kwargs` (`color`, `linewidth`, `label`, …) are forwarded to every series; the rest
 (`legend`, `grid`, …) are applied to every cell.
 """
-function render(::PlotsBackend, fig::Figure; kwargs...)
+function Plotting.render(::Plotting.PlotsBackend, fig::Plotting.Figure; kwargs...)
     series_user, axes_user = _partition_user(; kwargs...)
     p = _render_node(fig.root; series_user=series_user, axes_user=axes_user)
-    sz = default_size(fig)
+    sz = Plotting.default_size(fig)
     root_attrs = (; size=sz, left_margin=_LEFT_MARGIN, bottom_margin=_BOTTOM_MARGIN)
     if fig.title === nothing
         Plots.plot!(p; root_attrs...)
@@ -302,9 +286,9 @@ $(TYPEDSIGNATURES)
 Overlay `fig` onto an existing Plots plot `target`, targeting existing subplots
 by the deterministic leaf order. Series/decorations are added; axes untouched.
 """
-function render!(::PlotsBackend, target, fig::Figure; kwargs...)
+function Plotting.render!(::Plotting.PlotsBackend, target, fig::Plotting.Figure; kwargs...)
     series_user, axes_user = _partition_user(; kwargs...)
-    for (i, leaf) in enumerate(leaves(fig.root))
+    for (i, leaf) in enumerate(Plotting.leaves(fig.root))
         _draw_axes!(
             target, leaf.axes, i; overlay=true, series_user=series_user, axes_user=axes_user
         )

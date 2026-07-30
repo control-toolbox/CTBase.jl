@@ -19,7 +19,7 @@ instead of surfacing as a mysterious dispatch bug elsewhere.
 module TestDataSubtyping
 
 using Test: Test
-import CTBase.Data
+using CTBase: Data
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

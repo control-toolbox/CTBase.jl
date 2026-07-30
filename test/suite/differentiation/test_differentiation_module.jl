@@ -15,13 +15,10 @@ module TestDifferentiationModule
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Differentiation
-using CTBase.Differentiation  # For testing exported symbols
+using CTBase: Differentiation
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
-
-const CurrentModule = TestDifferentiationModule
 
 # ============================================================================
 # Hardcoded export lists
@@ -52,30 +49,30 @@ const EXPORTED_FUNCTIONS = (
 # ============================================================================
 
 """
-    test_exported_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+    test_exported_symbols(module_ref::Module, symbols::Tuple)
 
-Test that symbols are exported from a module and available via `using`.
+Test that symbols are defined in a module and exported by it.
 """
-function test_exported_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+function test_exported_symbols(module_ref::Module, symbols::Tuple)
     for sym in symbols
         Test.@testset "$(sym)" begin
             Test.@test isdefined(module_ref, sym)
-            Test.@test isdefined(test_module, sym)
+            Test.@test sym in names(module_ref)
         end
     end
 end
 
 """
-    test_internal_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+    test_internal_symbols(module_ref::Module, symbols::Tuple)
 
-Test that symbols are defined in a module but NOT exported (not available via `using`).
+Test that symbols are defined in a module but NOT exported by it.
 Generic helper for modules with private symbols.
 """
-function test_internal_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+function test_internal_symbols(module_ref::Module, symbols::Tuple)
     for sym in symbols
         Test.@testset "$(sym)" begin
             Test.@test isdefined(module_ref, sym)
-            Test.@test !isdefined(test_module, sym)
+            Test.@test sym ∉ names(module_ref)
         end
     end
 end
@@ -103,7 +100,7 @@ function test_differentiation_module()
         # ====================================================================
 
         Test.@testset "Exported abstract types" begin
-            test_exported_symbols(Differentiation, EXPORTED_ABSTRACT_TYPES, CurrentModule)
+            test_exported_symbols(Differentiation, EXPORTED_ABSTRACT_TYPES)
         end
 
         # ====================================================================
@@ -111,7 +108,7 @@ function test_differentiation_module()
         # ====================================================================
 
         Test.@testset "Exported concrete types" begin
-            test_exported_symbols(Differentiation, EXPORTED_CONCRETE_TYPES, CurrentModule)
+            test_exported_symbols(Differentiation, EXPORTED_CONCRETE_TYPES)
         end
 
         # ====================================================================
@@ -119,7 +116,7 @@ function test_differentiation_module()
         # ====================================================================
 
         Test.@testset "Exported functions" begin
-            test_exported_symbols(Differentiation, EXPORTED_FUNCTIONS, CurrentModule)
+            test_exported_symbols(Differentiation, EXPORTED_FUNCTIONS)
         end
 
         # ====================================================================

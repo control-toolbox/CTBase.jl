@@ -14,9 +14,9 @@ This extension provides:
 """
 module CTBaseDifferentiationInterface
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-using CTBase.Data: Data
-using CTBase.Differentiation: Differentiation
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using CTBase: Data
+using CTBase: Differentiation
 using DifferentiationInterface: DifferentiationInterface as DI
 
 # ==============================================================================
@@ -315,7 +315,7 @@ end
 $(TYPEDSIGNATURES)
 
 Compute the pushforward (Jacobian-vector product) of `f` at `x` in direction `dx`,
-using DifferentiationInterface.jl.
+via DifferentiationInterface.jl.
 
 An anonymous closure captures `consts` and reconstructs the full argument tuple via
 `ntuple`, placing `x_` at slot `Slot`. The single tangent is extracted with `only`.

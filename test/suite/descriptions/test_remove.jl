@@ -1,7 +1,7 @@
 module TestRemove
 
 using Test: Test
-import CTBase.Descriptions
+using CTBase: Descriptions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

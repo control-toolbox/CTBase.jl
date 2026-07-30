@@ -9,10 +9,10 @@ vector-field functions together with their time-dependence and variable-dependen
 module Data
 
 # 1. External-package imports (qualified, pollution-free)
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import CTBase.Core
-import CTBase.Exceptions
-import CTBase.Traits
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Core: Core
+using ..Exceptions
+using ..Traits
 
 # ==============================================================================
 # Include files

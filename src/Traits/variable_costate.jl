@@ -14,12 +14,12 @@ Common use cases include:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> SupportsVariableCostate() isa Traits.AbstractVariableCostateCapability
+julia> Traits.SupportsVariableCostate() isa Traits.AbstractVariableCostateCapability
 true
 
-julia> NoVariableCostate() isa Traits.AbstractVariableCostateCapability
+julia> Traits.NoVariableCostate() isa Traits.AbstractVariableCostateCapability
 true
 \`\`\`
 
@@ -49,9 +49,9 @@ Common use cases include:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> svc = SupportsVariableCostate()
+julia> svc = Traits.SupportsVariableCostate()
 SupportsVariableCostate()
 
 julia> svc isa Traits.AbstractVariableCostateCapability
@@ -84,9 +84,9 @@ Common use cases include:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> nvc = NoVariableCostate()
+julia> nvc = Traits.NoVariableCostate()
 NoVariableCostate()
 
 julia> nvc isa Traits.AbstractVariableCostateCapability

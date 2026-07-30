@@ -36,7 +36,7 @@ The Exceptions module is organized into thematic files:
 """
 module Exceptions
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using ..Core: Core
 
 # Type definitions

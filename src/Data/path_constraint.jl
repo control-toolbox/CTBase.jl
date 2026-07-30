@@ -133,9 +133,9 @@ not on the control.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> g = StateConstraint(x -> x[1])
+julia> g = Data.StateConstraint(x -> x[1])
 PathConstraint: state, autonomous, fixed (no variable)
   natural call: g(x)
   uniform call: g(t, x, u, v)
@@ -167,9 +167,9 @@ but not on the state.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> g = ControlConstraint(u -> u[1])
+julia> g = Data.ControlConstraint(u -> u[1])
 PathConstraint: control, autonomous, fixed (no variable)
   natural call: g(u)
   uniform call: g(t, x, u, v)
@@ -204,9 +204,9 @@ time and variable).
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> g = MixedConstraint((x, u) -> x[1] + u[1])
+julia> g = Data.MixedConstraint((x, u) -> x[1] + u[1])
 PathConstraint: mixed, autonomous, fixed (no variable)
   natural call: g(x, u)
   uniform call: g(t, x, u, v)

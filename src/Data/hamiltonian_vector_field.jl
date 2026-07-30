@@ -159,19 +159,19 @@ Construct a `HamiltonianVectorField` with trait flags.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> hvf = HamiltonianVectorField((x, p) -> (x, -p))  # Uses defaults: is_autonomous=true, is_variable=false
+julia> hvf = Data.HamiltonianVectorField((x, p) -> (x, -p))  # Uses defaults: is_autonomous=true, is_variable=false
 HamiltonianVectorField: autonomous, fixed (no variable), out-of-place
   natural call: f(x, p)
   uniform call: f(t, x, p, v)
 
-julia> hvf = HamiltonianVectorField((t, x, p) -> (t .* x, -p); is_autonomous=false)
+julia> hvf = Data.HamiltonianVectorField((t, x, p) -> (t .* x, -p); is_autonomous=false)
 HamiltonianVectorField: non-autonomous, fixed (no variable), out-of-place
   natural call: f(t, x, p)
   uniform call: f(t, x, p, v)
 
-julia> hvf = HamiltonianVectorField((x, p) -> (x, -p); is_inplace=true)  # Explicit in-place
+julia> hvf = Data.HamiltonianVectorField((x, p) -> (x, -p); is_inplace=true)  # Explicit in-place
 HamiltonianVectorField: autonomous, fixed (no variable), in-place
   natural call: f(dx, dp, x, p)
   uniform call: f(dx, dp, t, x, p, v)

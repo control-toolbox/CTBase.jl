@@ -70,8 +70,8 @@ module Traits
 # External package imports
 # ==============================================================================
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import CTBase.Exceptions
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Exceptions
 
 # ==============================================================================
 # Includes

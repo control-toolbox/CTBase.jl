@@ -16,12 +16,12 @@ Common use cases include:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> WithAD() isa Traits.AbstractADTrait
+julia> Traits.WithAD() isa Traits.AbstractADTrait
 true
 
-julia> WithoutAD() isa Traits.AbstractADTrait
+julia> Traits.WithoutAD() isa Traits.AbstractADTrait
 true
 \`\`\`
 
@@ -51,9 +51,9 @@ Common use cases include:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> with = WithAD()
+julia> with = Traits.WithAD()
 WithAD()
 
 julia> with isa Traits.AbstractADTrait
@@ -86,9 +86,9 @@ Common use cases include:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> without = WithoutAD()
+julia> without = Traits.WithoutAD()
 WithoutAD()
 
 julia> without isa Traits.AbstractADTrait

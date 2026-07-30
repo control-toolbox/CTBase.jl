@@ -32,7 +32,7 @@ Run tests with configurable file/function name builders and optional available t
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> # Run all tests with default settings
 julia> CTBase.DevTools.run_tests()

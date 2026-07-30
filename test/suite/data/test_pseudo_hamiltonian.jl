@@ -1,8 +1,8 @@
 module TestPseudoHamiltonian
 
 using Test: Test
-import CTBase.Data: Data, PseudoHamiltonian
-import CTBase.Traits
+using CTBase: Data
+using CTBase: Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -16,13 +16,13 @@ function test_pseudo_hamiltonian()
 
         Test.@testset "Unit: Construction with all trait combinations" begin
             # Autonomous, Fixed
-            ph1 = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+            ph1 = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
             Test.@test ph1 isa Data.PseudoHamiltonian
             Test.@test Traits.time_dependence(ph1) == Traits.Autonomous
             Test.@test Traits.variable_dependence(ph1) == Traits.Fixed
 
             # NonAutonomous, Fixed
-            ph2 = PseudoHamiltonian(
+            ph2 = Data.PseudoHamiltonian(
                 (t, x, p, u) -> t * sum(x .* p) + u^2; is_autonomous=false
             )
             Test.@test ph2 isa Data.PseudoHamiltonian
@@ -30,13 +30,13 @@ function test_pseudo_hamiltonian()
             Test.@test Traits.variable_dependence(ph2) == Traits.Fixed
 
             # Autonomous, NonFixed
-            ph3 = PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
+            ph3 = Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
             Test.@test ph3 isa Data.PseudoHamiltonian
             Test.@test Traits.time_dependence(ph3) == Traits.Autonomous
             Test.@test Traits.variable_dependence(ph3) == Traits.NonFixed
 
             # NonAutonomous, NonFixed
-            ph4 = PseudoHamiltonian(
+            ph4 = Data.PseudoHamiltonian(
                 (t, x, p, u, v) -> t * sum(x .* p) + u^2 + v;
                 is_autonomous=false,
                 is_variable=true,
@@ -52,21 +52,21 @@ function test_pseudo_hamiltonian()
 
         Test.@testset "Unit: Natural call signatures" begin
             # Autonomous, Fixed: h̃(x, p, u)
-            ph1 = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+            ph1 = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
             Test.@test ph1([1.0, 2.0], [3.0, 4.0], 5.0) == 3.0 + 8.0 + 25.0
 
             # NonAutonomous, Fixed: h̃(t, x, p, u)
-            ph2 = PseudoHamiltonian(
+            ph2 = Data.PseudoHamiltonian(
                 (t, x, p, u) -> t + sum(x .* p) + u^2; is_autonomous=false
             )
             Test.@test ph2(1.0, [2.0, 3.0], [4.0, 5.0], 6.0) == 1.0 + 8.0 + 15.0 + 36.0
 
             # Autonomous, NonFixed: h̃(x, p, u, v)
-            ph3 = PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
+            ph3 = Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
             Test.@test ph3([1.0, 2.0], [3.0, 4.0], 5.0, 6.0) == 3.0 + 8.0 + 25.0 + 6.0
 
             # NonAutonomous, NonFixed: h̃(t, x, p, u, v)
-            ph4 = PseudoHamiltonian(
+            ph4 = Data.PseudoHamiltonian(
                 (t, x, p, u, v) -> t + sum(x .* p) + u^2 + v;
                 is_autonomous=false,
                 is_variable=true,
@@ -81,21 +81,21 @@ function test_pseudo_hamiltonian()
 
         Test.@testset "Unit: Uniform call signature (t, x, p, u, v)" begin
             # Autonomous, Fixed — ignores t, v
-            ph1 = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+            ph1 = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
             Test.@test ph1(0.0, [1.0, 2.0], [3.0, 4.0], 5.0, 6.0) == 3.0 + 8.0 + 25.0
 
             # NonAutonomous, Fixed — ignores v
-            ph2 = PseudoHamiltonian(
+            ph2 = Data.PseudoHamiltonian(
                 (t, x, p, u) -> t + sum(x .* p) + u^2; is_autonomous=false
             )
             Test.@test ph2(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) == 1.0 + 8.0 + 15.0 + 36.0
 
             # Autonomous, NonFixed — ignores t
-            ph3 = PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
+            ph3 = Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
             Test.@test ph3(0.0, [1.0, 2.0], [3.0, 4.0], 5.0, 6.0) == 3.0 + 8.0 + 25.0 + 6.0
 
             # NonAutonomous, NonFixed — uses all
-            ph4 = PseudoHamiltonian(
+            ph4 = Data.PseudoHamiltonian(
                 (t, x, p, u, v) -> t + sum(x .* p) + u^2 + v;
                 is_autonomous=false,
                 is_variable=true,
@@ -109,7 +109,7 @@ function test_pseudo_hamiltonian()
         # ====================================================================
 
         Test.@testset "Unit: Typed constructor" begin
-            ph = PseudoHamiltonian(
+            ph = Data.PseudoHamiltonian(
                 (x, p, u) -> sum(x .* p) + u^2, Traits.Autonomous, Traits.Fixed
             )
             Test.@test ph isa Data.PseudoHamiltonian
@@ -123,7 +123,7 @@ function test_pseudo_hamiltonian()
         # ====================================================================
 
         Test.@testset "Unit: Trait accessors" begin
-            ph = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+            ph = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
             Test.@test Traits.dynamics_trait(ph) == Traits.HamiltonianDynamics
             Test.@test Traits.has_time_dependence_trait(ph)
             Test.@test Traits.has_variable_dependence_trait(ph)
@@ -134,7 +134,7 @@ function test_pseudo_hamiltonian()
         # ====================================================================
 
         Test.@testset "Show Methods" begin
-            ph = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+            ph = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
 
             Test.@testset "Base.show (compact)" begin
                 io = IOBuffer()
@@ -155,7 +155,7 @@ function test_pseudo_hamiltonian()
             end
 
             Test.@testset "Show: NonAutonomous, NonFixed" begin
-                ph2 = PseudoHamiltonian(
+                ph2 = Data.PseudoHamiltonian(
                     (t, x, p, u, v) -> t + sum(x .* p) + u^2 + v;
                     is_autonomous=false,
                     is_variable=true,
@@ -173,7 +173,7 @@ function test_pseudo_hamiltonian()
         # ====================================================================
 
         Test.@testset "Subtyping" begin
-            ph = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+            ph = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
             Test.@test ph isa Data.AbstractPseudoHamiltonian
         end
 

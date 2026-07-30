@@ -5,11 +5,11 @@ Unit and error tests for pseudo_hamiltonian_gradient and pseudo_hamiltonian_cont
 module TestPseudoHamiltonianGradient
 
 using Test: Test
-import CTBase.Differentiation
-import CTBase.Data
-import CTBase.Traits
-import CTBase.Exceptions
-import CTBase.Strategies
+using CTBase: Differentiation
+using CTBase: Data
+using CTBase: Traits
+using CTBase: Exceptions
+using CTBase: Strategies
 using ADTypes: ADTypes
 using ForwardDiff: ForwardDiff
 using DifferentiationInterface: DifferentiationInterface

@@ -20,16 +20,16 @@ This function provides registry-aware introspection that shows:
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> registry = create_registry(
+julia> registry = Strategies.create_registry(
            AbstractNLPModeler => (
-               (ADNLP, [CPU]),
-               (Exa, [CPU, GPU])
+               (ADNLP, [Strategies.CPU]),
+               (Exa, [Strategies.CPU, Strategies.GPU])
            )
        )
 
-julia> describe(:exa, registry)
+julia> Strategies.describe(:exa, registry)
 Exa (strategy)
 ├─ id: :exa
 ├─ family: AbstractNLPModeler
@@ -384,7 +384,7 @@ both the base type and parameters while preserving the parameter structure.
 
 # Examples
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> struct FakeExa{P <: CTBase.Strategies.AbstractStrategyParameter} end
 julia> _strategy_type_name(FakeExa{CTBase.Strategies.CPU})
@@ -485,7 +485,7 @@ clean base type name (e.g., "ADNLP" from "ADNLP{CPU}").
 
 # Examples
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> struct FakeADNLP{P <: CTBase.Strategies.AbstractStrategyParameter} end
 julia> _strategy_base_name(FakeADNLP{CTBase.Strategies.CPU})

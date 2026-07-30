@@ -11,7 +11,7 @@ CTBase.jl is typically installed as a dependency of another package in the ecosy
 To install it directly:
 
 ```julia
-import Pkg
+using Pkg: Pkg
 Pkg.add("CTBase")
 ```
 
@@ -33,10 +33,12 @@ Three things to keep in mind:
 2. **Submodule-first API.** The public API lives in named submodules
    (`Core`, `Exceptions`, `Traits`, `Data`, `Descriptions`, `Options`, `Strategies`,
    `Orchestration`, `Differentiation`, `Interpolation`, `DevTools`, `Unicode`, …).
-   You can bring a submodule's exports into scope explicitly:
+   Bring a submodule's name into scope and call its API qualified:
    ```julia
-   using CTBase.Exceptions # brings IncorrectArgument, NotImplemented, … into scope
-   using CTBase.Traits     # brings Autonomous, NonAutonomous, is_autonomous, … into scope
+   using CTBase: Exceptions
+   using CTBase: Traits
+   Exceptions.IncorrectArgument(...)
+   Traits.is_autonomous(...)
    ```
 3. **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
    `automatic_reference_documentation` require loading the matching weak dependency

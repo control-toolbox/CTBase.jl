@@ -1,10 +1,10 @@
 module TestCoverageMissingParameter
 
 using Test: Test
-import CTBase.Exceptions
-import CTBase.Orchestration
-import CTBase.Strategies
-import CTBase.Options
+using CTBase: Exceptions
+using CTBase: Orchestration
+using CTBase: Strategies
+using CTBase: Options
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

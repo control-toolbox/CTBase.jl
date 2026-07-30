@@ -20,13 +20,10 @@ module TestDataModule
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Data
-using CTBase.Data  # For testing exported symbols
+using CTBase: Data
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
-
-const CurrentModule = TestDataModule
 
 # ============================================================================
 # Hardcoded export lists
@@ -100,30 +97,30 @@ const PRIVATE_SYMBOLS = (
 # ============================================================================
 
 """
-    test_exported_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+    test_exported_symbols(module_ref::Module, symbols::Tuple)
 
-Test that symbols are exported from a module and available via `using`.
+Test that symbols are defined in a module and exported by it.
 """
-function test_exported_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+function test_exported_symbols(module_ref::Module, symbols::Tuple)
     for sym in symbols
         Test.@testset "$(sym)" begin
             Test.@test isdefined(module_ref, sym)
-            Test.@test isdefined(test_module, sym)
+            Test.@test sym in names(module_ref)
         end
     end
 end
 
 """
-    test_internal_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+    test_internal_symbols(module_ref::Module, symbols::Tuple)
 
-Test that symbols are defined in a module but NOT exported (not available via `using`).
+Test that symbols are defined in a module but NOT exported by it.
 Generic helper for modules with private symbols.
 """
-function test_internal_symbols(module_ref::Module, symbols::Tuple, test_module::Module)
+function test_internal_symbols(module_ref::Module, symbols::Tuple)
     for sym in symbols
         Test.@testset "$(sym)" begin
             Test.@test isdefined(module_ref, sym)
-            Test.@test !isdefined(test_module, sym)
+            Test.@test sym ∉ names(module_ref)
         end
     end
 end
@@ -151,7 +148,7 @@ function test_data_module()
         # ====================================================================
 
         Test.@testset "Exported abstract types" begin
-            test_exported_symbols(Data, EXPORTED_ABSTRACT_TYPES, CurrentModule)
+            test_exported_symbols(Data, EXPORTED_ABSTRACT_TYPES)
         end
 
         # ====================================================================
@@ -159,7 +156,7 @@ function test_data_module()
         # ====================================================================
 
         Test.@testset "Exported concrete types" begin
-            test_exported_symbols(Data, EXPORTED_CONCRETE_TYPES, CurrentModule)
+            test_exported_symbols(Data, EXPORTED_CONCRETE_TYPES)
         end
 
         # ====================================================================
@@ -167,7 +164,7 @@ function test_data_module()
         # ====================================================================
 
         Test.@testset "Private symbols (not exported)" begin
-            test_internal_symbols(Data, PRIVATE_SYMBOLS, CurrentModule)
+            test_internal_symbols(Data, PRIVATE_SYMBOLS)
         end
 
         # ====================================================================

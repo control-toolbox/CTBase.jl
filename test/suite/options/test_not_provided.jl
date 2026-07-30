@@ -1,8 +1,8 @@
 module TestOptionsNotProvided
 
 using Test: Test
-import CTBase.Options
-import CTBase.Core
+using CTBase: Options
+using CTBase: Core
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 

@@ -30,14 +30,14 @@ allowing the orchestration layer to route each value to its intended strategy.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> # Single strategy
-julia> opt = route_to(solver=100)
+julia> opt = Strategies.route_to(solver=100)
 RoutedOption((solver = 100,))
 
 julia> # Multiple strategies
-julia> opt = route_to(solver=100, modeler=50)
+julia> opt = Strategies.route_to(solver=100, modeler=50)
 RoutedOption((solver = 100, modeler = 50))
 
 julia> # Iterate over routes
@@ -111,18 +111,18 @@ should receive which value.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> # Single strategy
-julia> route_to(solver=100)
+julia> Strategies.route_to(solver=100)
 RoutedOption((solver = 100,))
 
 julia> # Multiple strategies with different values
-julia> route_to(solver=100, modeler=50)
+julia> Strategies.route_to(solver=100, modeler=50)
 RoutedOption((solver = 100, modeler = 50))
 
 julia> # Alternative positional syntax
-julia> route_to(:solver, 100, :modeler, 50)
+julia> Strategies.route_to(:solver, 100, :modeler, 50)
 RoutedOption((solver = 100, modeler = 50))
 ```
 
@@ -181,14 +181,14 @@ alternating strategy identifier (Symbol) and value pairs.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> # Single strategy
-julia> route_to(:solver, 100)
+julia> Strategies.route_to(:solver, 100)
 RoutedOption((solver = 100,))
 
 julia> # Multiple strategies
-julia> route_to(:solver, 100, :modeler, 50)
+julia> Strategies.route_to(:solver, 100, :modeler, 50)
 RoutedOption((solver = 100, modeler = 50))
 ```
 

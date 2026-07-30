@@ -321,9 +321,9 @@ the detailed section below.
   OptionDefinition(name=:x, type=Int, default=NotProvided)
 
   # after
-  import CTBase.Core
-  using CTBase.Options
-  OptionDefinition(name=:x, type=Int, default=Core.NotProvided)
+  using CTBase: Core
+  using CTBase: Options
+  Options.OptionDefinition(name=:x, type=Int, default=Core.NotProvided)
   ```
 
 - `NotStored` / `NotStoredType` are unchanged and remain extraction-internal to

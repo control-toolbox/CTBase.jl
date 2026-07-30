@@ -12,12 +12,12 @@ Subtypes must implement:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> InPlace() isa AbstractMutabilityTrait
+julia> Traits.InPlace() isa Traits.AbstractMutabilityTrait
 true
 
-julia> OutOfPlace() isa AbstractMutabilityTrait
+julia> Traits.OutOfPlace() isa Traits.AbstractMutabilityTrait
 true
 \`\`\`
 
@@ -36,12 +36,12 @@ performance-critical code where avoiding allocations is important.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> ip = InPlace()
+julia> ip = Traits.InPlace()
 InPlace()
 
-julia> ip isa AbstractMutabilityTrait
+julia> ip isa Traits.AbstractMutabilityTrait
 true
 \`\`\`
 
@@ -60,12 +60,12 @@ is suitable for most use cases.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> oop = OutOfPlace()
+julia> oop = Traits.OutOfPlace()
 OutOfPlace()
 
-julia> oop isa AbstractMutabilityTrait
+julia> oop isa Traits.AbstractMutabilityTrait
 true
 \`\`\`
 

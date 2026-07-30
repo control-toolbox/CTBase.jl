@@ -7,7 +7,7 @@ for creating disambiguated option values with strategy routing.
 module TestDisambiguation
 
 using Test: Test
-import CTBase.Strategies
+using CTBase: Strategies
 
 # Test options for verbose output
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

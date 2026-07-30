@@ -1,10 +1,10 @@
 module TestBypass
 
 using Test: Test
-import CTBase.Exceptions
-import CTBase.Strategies
-import CTBase.Orchestration
-import CTBase.Options
+using CTBase: Exceptions
+using CTBase: Strategies
+using CTBase: Orchestration
+using CTBase: Options
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

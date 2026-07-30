@@ -46,25 +46,25 @@ strategies when routing ambiguous options.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> # Pass an unknown option directly to strategy
 julia> solver = Ipopt(
-           max_iter=100, 
-           custom_backend_option=bypass(42)  # Bypasses validation
+           max_iter=100,
+           custom_backend_option=Strategies.bypass(42)  # Bypasses validation
        )
 Ipopt(options=StrategyOptions{...})
 
 julia> # Alternative syntax using force alias
 julia> solver = Ipopt(
-           max_iter=100, 
-           custom_backend_option=force(42)  # Same as bypass(42)
+           max_iter=100,
+           custom_backend_option=Strategies.force(42)  # Same as bypass(42)
        )
 Ipopt(options=StrategyOptions{...})
 
 julia> # Combine with routing for ambiguous options
-julia> solve(ocp, method; 
-           backend = route_to(ipopt=bypass(42))  # Route to ipopt AND bypass validation
+julia> solve(ocp, method;
+           backend = Strategies.route_to(ipopt=Strategies.bypass(42))  # Route to ipopt AND bypass validation
        )
 ```
 
@@ -96,17 +96,17 @@ when bypassing validation.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> # Force acceptance of unknown option
 julia> solver = Ipopt(
-           max_iter=100, 
-           custom_backend_option=force(42)  # Forces validation bypass
+           max_iter=100,
+           custom_backend_option=Strategies.force(42)  # Forces validation bypass
        )
 Ipopt(options=StrategyOptions{...})
 
 julia> # Same as bypass(42)
-julia> @test force(42) == bypass(42)
+julia> @test Strategies.force(42) == Strategies.bypass(42)
 true
 ```
 

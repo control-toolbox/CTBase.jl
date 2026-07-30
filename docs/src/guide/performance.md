@@ -52,7 +52,7 @@ ever destabilises one of these hot-path entry points, this page's build surfaces
 First, build the objects we will exercise:
 
 ```@example perf
-import CTBase: Data, Interpolation, Differentiation
+using CTBase: Data, Interpolation, Differentiation
 using JET
 
 vf = Data.VectorField(x -> -x)                       # autonomous, out-of-place
@@ -127,7 +127,7 @@ dispatch. This is expected and does not indicate a regression:
   shows dispatch:
 
   ```julia
-  import CTBase: Data
+  using CTBase: Data
   using JET
   JET.@report_opt Data.VectorField(x -> -x)   # reports dispatch — expected
   ```
@@ -146,7 +146,7 @@ dispatch. This is expected and does not indicate a regression:
 If a hot-path check above starts reporting dispatch, drill in locally:
 
 ```julia
-import CTBase: Data
+using CTBase: Data
 vf = Data.VectorField(x -> -x)
 
 # 1. Quick look

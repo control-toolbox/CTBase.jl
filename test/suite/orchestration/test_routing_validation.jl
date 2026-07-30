@@ -7,10 +7,10 @@ ensuring unknown options are handled correctly in both strict and permissive mod
 module TestRoutingValidation
 
 using Test: Test
-import CTBase.Exceptions
-import CTBase.Strategies
-import CTBase.Orchestration
-import CTBase.Options
+using CTBase: Exceptions
+using CTBase: Strategies
+using CTBase: Orchestration
+using CTBase: Options
 
 # Test options for verbose output
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

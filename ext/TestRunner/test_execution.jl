@@ -237,7 +237,9 @@ unreliable because it is only updated when a testset *finishes* (in `Test.finish
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner, Test
+julia> using CTBase: TestRunner
+
+julia> using Test: Test
 
 julia> ts = Test.DefaultTestSet("test", [])
 julia> Test.@testset "example" begin

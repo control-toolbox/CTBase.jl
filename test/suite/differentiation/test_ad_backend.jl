@@ -5,11 +5,11 @@ Unit and error tests for the AD backend contract and DifferentiationInterface st
 module TestADBackend
 
 using Test: Test
-import CTBase.Differentiation
-import CTBase.Data
-import CTBase.Traits
-import CTBase.Exceptions
-import CTBase.Strategies
+using CTBase: Differentiation
+using CTBase: Data
+using CTBase: Traits
+using CTBase: Exceptions
+using CTBase: Strategies
 using ADTypes: ADTypes
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

@@ -18,12 +18,12 @@ Concrete trait subtypes should:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> EndPointMode <: Traits.AbstractTrait
+julia> Traits.EndPointMode <: Traits.AbstractTrait
 true
 
-julia> EndPointMode <: Traits.AbstractModeTrait
+julia> Traits.EndPointMode <: Traits.AbstractModeTrait
 true
 \`\`\`
 

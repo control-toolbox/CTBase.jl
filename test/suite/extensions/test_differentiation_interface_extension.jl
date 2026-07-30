@@ -6,9 +6,9 @@ module TestDifferentiationInterfaceExtension
 
 using Test: Test
 using ForwardDiff: ForwardDiff  # ensure DI ForwardDiff extension is loaded (AutoForwardDiff backend)
-import CTBase: CTBase
-import CTBase.Data: Data
-import CTBase.Differentiation: Differentiation
+using CTBase: CTBase
+using CTBase: Data
+using CTBase: Differentiation
 using ADTypes: ADTypes
 using DifferentiationInterface: DifferentiationInterface
 

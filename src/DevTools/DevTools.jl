@@ -9,7 +9,7 @@ generation, and coverage post-processing.
 """
 module DevTools
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using ..Exceptions
 
 include("documenter_reference.jl")

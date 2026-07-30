@@ -1,8 +1,8 @@
 module TestPlottingContract
 
 using Test: Test
-import CTBase.Plotting
-import CTBase.Exceptions
+using CTBase: Plotting
+using CTBase: Exceptions
 using Plots: Plots
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

@@ -10,7 +10,7 @@ This guide walks you through implementing a complete strategy family using the `
     Read the [Options System](@ref) guide first to understand `OptionDefinition`, `StrategyMetadata`, and `StrategyOptions`.
 
 ```@setup strategy
-import CTBase: Strategies, Options
+using CTBase: Strategies, Options
 ```
 
 ## The Two-Level Contract

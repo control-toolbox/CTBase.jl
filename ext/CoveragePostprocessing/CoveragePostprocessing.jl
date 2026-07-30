@@ -11,7 +11,7 @@ module CoveragePostprocessing
 
 using CTBase: CTBase
 using Coverage: Coverage
-import DocStringExtensions: TYPEDSIGNATURES
+using DocStringExtensions: TYPEDSIGNATURES
 
 include("helpers.jl")
 include("entry_point.jl")

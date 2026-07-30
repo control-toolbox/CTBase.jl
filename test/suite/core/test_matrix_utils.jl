@@ -1,7 +1,7 @@
 module TestCoreMatrixUtils
 
 using Test: Test
-import CTBase.Core
+using CTBase: Core
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

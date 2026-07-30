@@ -28,7 +28,7 @@ Compute the progress bar character width based on the number of tests.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> TestRunner._bar_width(10)
 10
@@ -66,7 +66,7 @@ via `_bar_width(total)`. Returns an empty string when the bar is hidden.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> TestRunner._progress_bar(5, 10)
 "[█████░░░░░]"
@@ -169,7 +169,7 @@ Colour is only emitted when `get(io, :color, false)` is true.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner, IOBuffer
+julia> using CTBase: TestRunner
 
 julia> info = TestRunner.TestRunInfo(
            :test_example,
@@ -307,7 +307,7 @@ Create a stateful progress callback for `on_test_done`. Prints to `io`.
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> cb = TestRunner._make_default_on_test_done(stdout, 10)
 

@@ -1,9 +1,9 @@
 module TestStrategiesUtilities
 
 using Test: Test
-import CTBase.Strategies
-import CTBase.Options
-import CTBase.Core
+using CTBase: Strategies
+using CTBase: Options
+using CTBase: Core
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

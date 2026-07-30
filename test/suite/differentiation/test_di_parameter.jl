@@ -5,8 +5,8 @@ Contract tests for the device-parameterized `DifferentiationInterface{P}` strate
 module TestDIParameter
 
 using Test: Test
-import CTBase.Differentiation
-import CTBase.Strategies
+using CTBase: Differentiation
+using CTBase: Strategies
 using ADTypes: ADTypes
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

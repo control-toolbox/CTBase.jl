@@ -22,9 +22,9 @@ The `source` field tracks the provenance of the option value:
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> opt = OptionValue(100, :user)
+julia> opt = Options.OptionValue(100, :user)
 OptionValue{Int64}(100, :user)
 
 julia> opt.value

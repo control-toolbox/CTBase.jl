@@ -56,10 +56,10 @@ module Differentiation
 # ==============================================================================
 
 using ADTypes: ADTypes
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import CTBase.Data
-import CTBase.Exceptions
-import CTBase.Strategies
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Data
+using ..Exceptions
+using ..Strategies
 
 # ==============================================================================
 # Includes (in dependency order)

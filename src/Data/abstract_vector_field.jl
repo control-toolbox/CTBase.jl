@@ -18,11 +18,11 @@ Trait accessors are implemented at the abstract level and work for all subtypes.
 # Example
 
 \`\`\`julia
-using CTBase.Data
-using CTBase.Traits
+using CTBase: Data
+using CTBase: Traits
 
 # Define a concrete vector field
-struct MyVectorField{F, TD, VD, MD} <: AbstractVectorField{TD, VD, MD}
+struct MyVectorField{F, TD, VD, MD} <: Data.AbstractVectorField{TD, VD, MD}
     f::F
 end
 
@@ -97,8 +97,8 @@ Extract the time dependence trait from an AbstractVectorField.
 
 # Example
 \`\`\`julia
-using CTBase.Data
-using CTBase.Traits
+using CTBase: Data
+using CTBase: Traits
 
 vf = Data.VectorField(x -> -x; is_autonomous=true)
 Traits.time_dependence(vf)  # Returns Autonomous
@@ -125,8 +125,8 @@ Extract the variable dependence trait from an AbstractVectorField.
 
 # Example
 \`\`\`julia
-using CTBase.Data
-using CTBase.Traits
+using CTBase: Data
+using CTBase: Traits
 
 vf = Data.VectorField(x -> -x; is_variable=false)
 Traits.variable_dependence(vf)  # Returns Fixed
@@ -153,8 +153,8 @@ Extract the mutability trait from an AbstractVectorField.
 
 # Example
 \`\`\`julia
-using CTBase.Data
-using CTBase.Traits
+using CTBase: Data
+using CTBase: Traits
 
 vf = Data.VectorField((dx, x) -> (dx .= -x; nothing))
 Traits.mutability(vf)  # Returns InPlace

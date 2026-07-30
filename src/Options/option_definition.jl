@@ -128,10 +128,10 @@ delegates to specialized methods based on the type of `default`:
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
 julia> # Concrete default - infers Int
-julia> def1 = OptionDefinition(
+julia> def1 = Options.OptionDefinition(
            name = :max_iter,
            type = Int,
            default = 100,
@@ -140,7 +140,7 @@ julia> def1 = OptionDefinition(
 OptionDefinition{Int}(...)
 
 julia> # Nothing default - creates Any
-julia> def2 = OptionDefinition(
+julia> def2 = Options.OptionDefinition(
            name = :backend,
            type = Union{Nothing, String},
            default = nothing,
@@ -149,7 +149,7 @@ julia> def2 = OptionDefinition(
 OptionDefinition{Any}(...)
 
 julia> # No default - creates NotProvidedType
-julia> def3 = OptionDefinition(
+julia> def3 = Options.OptionDefinition(
            name = :input_file,
            type = String,
            default = CTBase.Core.NotProvided,
@@ -204,7 +204,7 @@ This method handles the special case where `default = nothing`, creating an
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
 julia> def = _construct_option_definition(
            :backend,
@@ -215,7 +215,7 @@ julia> def = _construct_option_definition(
        )
 OptionDefinition{Any}(...)
 
-julia> default(def)
+julia> Options.default(def)
 nothing
 ```
 
@@ -265,7 +265,7 @@ information for validation.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
 julia> def = _construct_option_definition(
            :input_file,
@@ -276,7 +276,7 @@ julia> def = _construct_option_definition(
        )
 OptionDefinition{NotProvidedType}(...)
 
-julia> is_required(def)
+julia> Options.is_required(def)
 true
 ```
 
@@ -328,7 +328,7 @@ the default value is compatible with the declared `type`.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
 julia> def = _construct_option_definition(
            :max_iter,
@@ -339,7 +339,7 @@ julia> def = _construct_option_definition(
        )
 OptionDefinition{Int}(...)
 
-julia> default(def)
+julia> Options.default(def)
 100
 ```
 
@@ -391,13 +391,13 @@ Get the primary name of this option definition.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations")
 OptionDefinition{Int}(...)
 
-julia> name(def)
+julia> Options.name(def)
 :max_iter
 ```
 
@@ -415,13 +415,13 @@ Get the expected type for this option definition.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations")
 OptionDefinition{Int}(...)
 
-julia> type(def)
+julia> Options.type(def)
 Int
 ```
 
@@ -439,13 +439,13 @@ Get the default value for this option definition.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations")
 OptionDefinition{Int}(...)
 
-julia> default(def)
+julia> Options.default(def)
 100
 ```
 
@@ -463,13 +463,13 @@ Get the description for this option definition.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations")
 OptionDefinition{Int}(...)
 
-julia> description(def)
+julia> Options.description(def)
 "Maximum iterations"
 ```
 
@@ -487,16 +487,16 @@ Get the validator function for this option definition.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
 julia> validator_fn = x -> x > 0
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations",
                           validator=validator_fn)
 OptionDefinition{Int}(...)
 
-julia> validator(def) === validator_fn
+julia> Options.validator(def) === validator_fn
 true
 ```
 
@@ -514,14 +514,14 @@ Get the aliases for this option definition.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations",
                           aliases=(:max, :maxiter))
 OptionDefinition{Int}(...)
 
-julia> aliases(def)
+julia> Options.aliases(def)
 (:max, :maxiter)
 ```
 
@@ -541,13 +541,13 @@ Returns `true` when the default value is `NotProvided`.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:input, type=String, default=CTBase.Core.NotProvided,
+julia> def = Options.OptionDefinition(name=:input, type=String, default=CTBase.Core.NotProvided,
                           description="Input file")
 OptionDefinition{NotProvidedType}(...)
 
-julia> is_required(def)
+julia> Options.is_required(def)
 true
 ```
 
@@ -567,13 +567,13 @@ Returns `false` when the default value is `NotProvided`.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations")
 OptionDefinition{Int}(...)
 
-julia> has_default(def)
+julia> Options.has_default(def)
 true
 ```
 
@@ -591,14 +591,14 @@ Check if this option definition has a validator function.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations",
                           validator=x -> x > 0)
 OptionDefinition{Int}(...)
 
-julia> has_validator(def)
+julia> Options.has_validator(def)
 true
 ```
 
@@ -619,22 +619,22 @@ Returns `true` when the default value is computed from strategy parameters
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
 julia> # Static default
-julia> def1 = OptionDefinition(name=:max_iter, type=Int, default=100,
+julia> def1 = Options.OptionDefinition(name=:max_iter, type=Int, default=100,
                           description="Maximum iterations")
 OptionDefinition{Int}(...)
 
-julia> is_computed(def1)
+julia> Options.is_computed(def1)
 false
 
 julia> # Computed default
-julia> def2 = OptionDefinition(name=:backend, type=Any, default=compute_backend(),
+julia> def2 = Options.OptionDefinition(name=:backend, type=Any, default=compute_backend(),
                           description="Backend", computed=true)
 OptionDefinition{...}(...)
 
-julia> is_computed(def2)
+julia> Options.is_computed(def2)
 true
 ```
 
@@ -659,9 +659,9 @@ using all possible names (primary name and all aliases).
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(
+julia> def = Options.OptionDefinition(
            name = :grid_size,
            type = Int,
            default = 100,
@@ -670,7 +670,7 @@ julia> def = OptionDefinition(
        )
 OptionDefinition{Int}(...)
 
-julia> all_names(def)
+julia> Options.all_names(def)
 (:grid_size, :n, :size)
 ```
 
@@ -693,9 +693,9 @@ they are shown in parentheses after the primary name.
 
 # Example
 ```julia-repl
-julia> using CTBase.Options
+julia> using CTBase: Options
 
-julia> def = OptionDefinition(
+julia> def = Options.OptionDefinition(
            name = :max_iter,
            type = Int,
            default = 100,

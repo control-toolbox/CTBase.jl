@@ -1,7 +1,7 @@
 module TestAbstractTraits
 
 using Test: Test
-import CTBase.Traits
+using CTBase: Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

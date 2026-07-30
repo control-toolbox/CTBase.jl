@@ -67,9 +67,9 @@ Construct a `PseudoHamiltonian` with trait flags.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> h̃ = PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
+julia> h̃ = Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + u^2)
 PseudoHamiltonian: autonomous, fixed (no variable)
   natural call: h̃(x, p, u)
   uniform call: h̃(t, x, p, u, v)

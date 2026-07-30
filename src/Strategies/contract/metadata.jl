@@ -52,10 +52,10 @@ are unique. The type parameter is inferred automatically.
 
 # Example - Standalone Usage
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> meta = StrategyMetadata(
-           OptionDefinition(
+julia> meta = Strategies.StrategyMetadata(
+           Strategies.OptionDefinition(
                name = :max_iter,
                type = Int,
                default = 100,
@@ -63,7 +63,7 @@ julia> meta = StrategyMetadata(
                aliases = (:max, :maxiter),
                validator = x -> x > 0 || throw(ArgumentError("\$x must be positive"))
            ),
-           OptionDefinition(
+           Strategies.OptionDefinition(
                name = :tol,
                type = Float64,
                default = 1e-6,

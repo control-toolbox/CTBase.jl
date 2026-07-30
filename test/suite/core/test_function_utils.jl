@@ -1,7 +1,7 @@
 module TestCoreFunctionUtils
 
 using Test: Test
-import CTBase.Core
+using CTBase: Core
 using ForwardDiff: ForwardDiff
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

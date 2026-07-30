@@ -25,9 +25,9 @@ All subtypes must implement:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> HamiltonianVectorField <: Data.AbstractHamiltonianVectorField
+julia> Data.HamiltonianVectorField <: Data.AbstractHamiltonianVectorField
 true
 \`\`\`
 
