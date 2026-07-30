@@ -41,7 +41,7 @@ julia> T = type_from_id(:adnlp, AbstractNLPModeler, registry)
 Modelers.ADNLP
 ```
 
-See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), [`Base.merge`](@ref)
+See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), `Base.merge`
 """
 struct StrategyRegistry
     families::Dict{Type{<:AbstractStrategy},Vector{Type}}
@@ -89,7 +89,7 @@ julia> strategy_ids(AbstractNLPModeler, registry)
 - `ErrorException`: If a strategy is not a subtype of its family
 - `ErrorException`: If a family appears multiple times
 
-See also: [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), [`Base.merge`](@ref)
+See also: [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), `Base.merge`
 """
 function create_registry(pairs::Pair...)
     families = Dict{Type{<:AbstractStrategy},Vector{Type}}()
