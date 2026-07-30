@@ -3,6 +3,19 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.29.1)
+
+- **Codebase-wide**: all `import` statements replaced with the qualified
+  `using` form (`using Pkg: Pkg` instead of `import Pkg`) across source,
+  extensions, and tests — enforcing Handbook tenet 2. **No breaking change**:
+  no public API, type, or signature changes. No migration required.
+- **Strategies**: docstring examples for `option_is_user`,
+  `option_is_default`, `option_is_computed` corrected to reference the right
+  function names. **No breaking change**: documentation fix only.
+- **Documentation**: `AGENTS.md` import convention wording fixed; guide pages
+  switched to `using` form for submodule examples. **No breaking change**:
+  documentation only.
+
 ## Breaking changes (0.29.0)
 
 First stable (non-beta) release since 0.18.8. The following breaking

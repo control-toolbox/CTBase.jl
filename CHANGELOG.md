@@ -6,6 +6,35 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.1] - 2026-07-30
+
+### 🛠 Internal Fixes
+
+#### **Codebase-wide** — `using`, never `import` (Handbook tenet 2)
+
+- Replaced every `import` statement with the qualified `using` form
+  (`using Pkg: Pkg` instead of `import Pkg`) across all source files,
+  extensions, and tests — 174 files touched. Enforces the control-toolbox
+  Handbook convention uniformly. No public API, type, or signature changes.
+- Fixes control-toolbox/CTBase.jl#528.
+
+#### **Strategies** — docstring example function names corrected
+
+- `option_is_user`, `option_is_default`, `option_is_computed` docstring
+  examples now reference the correct function names. No code change.
+
+### 📚 Documentation
+
+- `AGENTS.md`: fixed import convention wording and added missing Handbook
+  tenets.
+- Guide pages: switched `import` submodule examples to `using` form for
+  consistency with the new convention.
+
+### ✅ Compatibility
+
+- **No breaking changes**: internal style enforcement and documentation
+  fixes only. See [BREAKING.md](BREAKING.md).
+
 ## [0.29.0] - 2026-07-30
 
 First stable (non-beta) release since 0.18.8. Consolidates all beta
