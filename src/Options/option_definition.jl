@@ -713,7 +713,7 @@ max_iter (max, maxiter) :: Int64
 See also: [`CTBase.Options.OptionDefinition`](@ref)
 """
 function Base.show(io::IO, def::OptionDefinition)
-    fmt = Core.get_format_codes(io)
+    fmt = _Core.get_format_codes(io)
 
     # Show primary name with aliases if present
     if isempty(def.aliases)
