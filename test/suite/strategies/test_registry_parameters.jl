@@ -40,8 +40,9 @@ Strategies.parameter(::Type{<:FakeStratC}) = nothing
 
 # Parameter-position contract (issue #516 item 3): the strategy parameter must be the
 # FIRST declared type parameter. These two fakes reproduce the issue's failure shapes.
-struct FakeTightStrat{O<:Strategies.StrategyOptions,P<:Strategies.AbstractStrategyParameter} <:
-       FakeFamily end
+struct FakeTightStrat{
+    O<:Strategies.StrategyOptions,P<:Strategies.AbstractStrategyParameter
+} <: FakeFamily end
 Strategies.id(::Type{<:FakeTightStrat}) = :fake_tight
 
 struct FakeLooseStrat{A,P<:Strategies.AbstractStrategyParameter} <: FakeFamily end

@@ -53,7 +53,8 @@ Strategies.options(strategy::FakeStrategy) = strategy.options
 struct UnimplementedStrategy <: Strategies.AbstractStrategy end
 
 # Parameterized fake, to prove a real value passes through the 2-arg parameter() unchanged.
-struct FakeStrategyParam{P<:Strategies.AbstractStrategyParameter} <: Strategies.AbstractStrategy end
+struct FakeStrategyParam{P<:Strategies.AbstractStrategyParameter} <:
+       Strategies.AbstractStrategy end
 Strategies.parameter(::Type{<:FakeStrategyParam{P}}) where {P} = P
 
 # Overrides parameter but throws something OTHER than NotImplemented — proves the 2-arg
@@ -176,8 +177,9 @@ function test_abstract_strategy()
                 Test.@test Strategies.parameter(FakeStrategy, :fallback) === nothing
 
                 # A real parameter value passes through unchanged.
-                Test.@test Strategies.parameter(FakeStrategyParam{Strategies.CPU}, :fallback) ===
-                    Strategies.CPU
+                Test.@test Strategies.parameter(
+                    FakeStrategyParam{Strategies.CPU}, :fallback
+                ) === Strategies.CPU
 
                 # Non-NotImplemented errors still propagate — the wrapper is not a blanket
                 # catch-all.
