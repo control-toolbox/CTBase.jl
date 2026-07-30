@@ -10,9 +10,7 @@ This guide walks you through implementing a complete strategy family using the `
     Read the [Options System](@ref) guide first to understand `OptionDefinition`, `StrategyMetadata`, and `StrategyOptions`.
 
 ```@setup strategy
-using CTBase
-using CTBase.Strategies
-using CTBase.Options
+import CTBase: Strategies, Options
 ```
 
 ## The Two-Level Contract
@@ -151,7 +149,7 @@ c = Collocation(grid_size = 500, scheme = :trapeze)
 ```
 
 ```@example strategy
-describe(Collocation)
+Strategies.describe(Collocation)
 ```
 
 ### Step 7 — Access options
@@ -376,7 +374,7 @@ Use `bypass(val)` (or its alias `force(val)`) to skip validation for a **single 
 ```@example strategy
 Collocation(
     grid_size = 500,
-    custom_backend_param = bypass(42),
+    custom_backend_param = Strategies.bypass(42),
 )
 ```
 
@@ -389,7 +387,7 @@ catch e; showerror(IOContext(stdout, :color => false), e) end # hide
 ```
 
 ```@example strategy
-Collocation(grid_size = bypass("oops"))  # no error
+Collocation(grid_size = Strategies.bypass("oops"))  # no error
 ```
 
 This is more surgical than `mode = :permissive`:
@@ -402,7 +400,7 @@ This is more surgical than `mode = :permissive`:
 `force` is an alias for `bypass` — choose the name that fits your mental model:
 
 ```julia
-Collocation(grid_size = force("oops"))  # same as bypass
+Collocation(grid_size = Strategies.force("oops"))  # same as bypass
 ```
 
 !!! warning "Use with care"

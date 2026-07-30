@@ -17,10 +17,7 @@ AD package directly.
     first: an AD backend is a strategy with a single `:ad_backend` option.
 
 ```@setup diff
-using CTBase
-using CTBase.Differentiation
-using CTBase.Data
-using CTBase.Strategies
+import CTBase: Differentiation, Data, Strategies
 # Loading DifferentiationInterface (+ an AD package) activates the extension
 # that provides the actual differentiation methods.
 using DifferentiationInterface

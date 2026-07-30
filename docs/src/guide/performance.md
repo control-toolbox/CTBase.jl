@@ -52,14 +52,13 @@ ever destabilises one of these hot-path entry points, this page's build surfaces
 First, build the objects we will exercise:
 
 ```@example perf
-using CTBase
-using CTBase.Data, CTBase.Interpolation, CTBase.Differentiation
+import CTBase: Data, Interpolation, Differentiation
 using JET
 
-vf = VectorField(x -> -x)                       # autonomous, out-of-place
-ham = Hamiltonian((x, p) -> sum(x .* p))        # H(x, p)
-interp = ctinterpolate([0.0, 1.0, 2.0], [1.0, 2.0, 0.0])
-backend = DifferentiationInterface()            # wraps AutoForwardDiff() (CPU default)
+vf = Data.VectorField(x -> -x)                       # autonomous, out-of-place
+ham = Data.Hamiltonian((x, p) -> sum(x .* p))        # H(x, p)
+interp = Interpolation.ctinterpolate([0.0, 1.0, 2.0], [1.0, 2.0, 0.0])
+backend = Differentiation.DifferentiationInterface()  # wraps AutoForwardDiff() (CPU default)
 nothing # hide
 ```
 
@@ -85,7 +84,7 @@ JET.@report_opt interp(0.5)
 one-time *construction* of the options):
 
 ```@example perf
-JET.@report_opt ad_backend(backend)
+JET.@report_opt Differentiation.ad_backend(backend)
 ```
 
 All four report `No errors detected`: the repeated-call path is stable.
@@ -128,14 +127,15 @@ dispatch. This is expected and does not indicate a regression:
   shows dispatch:
 
   ```julia
-  using CTBase.Data, JET
-  JET.@report_opt VectorField(x -> -x)   # reports dispatch — expected
+  import CTBase: Data
+  using JET
+  JET.@report_opt Data.VectorField(x -> -x)   # reports dispatch — expected
   ```
 
   You can bypass the reflection (and the dispatch) by passing the trait explicitly:
 
   ```julia
-  VectorField(x -> -x; is_inplace = false)
+  Data.VectorField(x -> -x; is_inplace = false)
   ```
 
   Either way the resulting object's *call* is fully type-stable, as shown in the
@@ -146,8 +146,8 @@ dispatch. This is expected and does not indicate a regression:
 If a hot-path check above starts reporting dispatch, drill in locally:
 
 ```julia
-using CTBase.Data
-vf = VectorField(x -> -x)
+import CTBase: Data
+vf = Data.VectorField(x -> -x)
 
 # 1. Quick look
 using InteractiveUtils

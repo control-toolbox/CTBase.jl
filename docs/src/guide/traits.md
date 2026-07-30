@@ -10,8 +10,7 @@ used as a **type parameter** or returned by an accessor function so that
 behaviour can be selected by dispatch, with **no runtime cost**.
 
 ```@repl traits
-using CTBase
-import CTBase.Traits
+import CTBase: Traits
 ```
 
 A typical use case is encoding a property of a callable object — does it take a
@@ -117,7 +116,7 @@ The boolean predicates
 on the feedback type parameter:
 
 ```@repl traits
-using CTBase.Data
+import CTBase: Data
 u = Data.OpenLoop(t -> 1.0)
 Traits.feedback(u)
 Traits.is_open_loop(u)
@@ -163,7 +162,7 @@ The boolean predicates
 on the constraint-kind type parameter:
 
 ```@repl traits
-using CTBase.Data
+import CTBase: Data
 g = Data.StateConstraint(x -> x[1])
 Traits.constraint_kind(g)
 Traits.is_state_constraint(g)

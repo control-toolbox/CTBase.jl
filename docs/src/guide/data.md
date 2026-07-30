@@ -10,9 +10,7 @@ guide). Each wrapper knows, at the type level, whether it depends on time, wheth
 it depends on an extra variable, and whether it is evaluated in-place.
 
 ```@setup data
-using CTBase
-using CTBase.Data
-using CTBase.Traits
+import CTBase: Data, Traits
 using LinearAlgebra
 ```
 
@@ -67,7 +65,7 @@ giving `X!(dx, [t, ]x[, v])`.
 **Construction**
 
 ```@example data
-using CTBase.Data, CTBase.Traits
+import CTBase: Data, Traits
 
 # Autonomous, fixed (default): X(x)
 vf1 = Data.VectorField(x -> -x)
