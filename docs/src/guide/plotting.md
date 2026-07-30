@@ -13,7 +13,7 @@ The [`CTBase.Plotting`](@ref) submodule is a generic, domain-free plotting engin
 It manipulates a backend-agnostic **intermediate representation** (IR): a weighted
 tree of titled axes carrying series and decorations. The engine knows nothing about
 states, controls, costates, or optimal control — case layers (CTModels, CTFlows)
-build the IR and hand it to a backend via [`render`](@ref).
+build the IR and hand it to a backend via [`render`](@ref CTBase.Plotting.render).
 
 ## Architecture Overview
 
@@ -38,7 +38,7 @@ lives in a weak-dependency extension (`CTBasePlots`, loaded automatically when
 
 ### Series and Decorations
 
-A [`Series`](@ref) is one plotted curve: `(x, y)` points with an optional label and
+A [`Series`](@ref CTBase.Plotting.Series) is one plotted curve: `(x, y)` points with an optional label and
 a neutral style vocabulary (`color`, `linewidth`, `linestyle`, `alpha`, `seriestype`,
 `z_order`). A `backend_kwargs` `NamedTuple` provides an escape hatch for
 backend-specific attributes.
@@ -54,12 +54,12 @@ s = CTBase.Plotting.Series(
 )
 ```
 
-[`HLine`](@ref) and [`VLine`](@ref) are reference lines drawn on top of series
+[`HLine`](@ref CTBase.Plotting.HLine) and [`VLine`](@ref CTBase.Plotting.VLine) are reference lines drawn on top of series
 (e.g. box bounds, initial/final time markers).
 
 ### Axes
 
-An [`Axes`](@ref) is a single drawable cell: one axis system holding a list of
+An [`Axes`](@ref CTBase.Plotting.Axes) is a single drawable cell: one axis system holding a list of
 `Series`, optional decorations, labels, and y-limit settings.
 
 ```@example plot
@@ -84,9 +84,9 @@ The layout is a weighted tree with three node types:
 
 | Node | Role |
 | :--- | :--- |
-| [`Leaf`](@ref) | A single cell wrapping one `Axes` |
-| [`HBox`](@ref) | Columns side by side (weights = relative widths) |
-| [`VBox`](@ref) | Rows stacked vertically (weights = relative heights) |
+| [`Leaf`](@ref CTBase.Plotting.Leaf) | A single cell wrapping one `Axes` |
+| [`HBox`](@ref CTBase.Plotting.HBox) | Columns side by side (weights = relative widths) |
+| [`VBox`](@ref CTBase.Plotting.VBox) | Rows stacked vertically (weights = relative heights) |
 
 ```@example plot
 leaf1 = CTBase.Plotting.Leaf(ax)
@@ -101,7 +101,7 @@ tree = CTBase.Plotting.VBox([leaf1, leaf2])
 
 ### Figure
 
-A [`Figure`](@ref) bundles a layout root with optional overall `size` and `title`.
+A [`Figure`](@ref CTBase.Plotting.Figure) bundles a layout root with optional overall `size` and `title`.
 When `size === nothing`, the engine computes a default from the tree shape.
 
 ```@example plot
@@ -112,7 +112,7 @@ fig = CTBase.Plotting.Figure(tree; title="Solution")
 
 ### Panel
 
-A [`Panel`](@ref) is the case layer's convenient input unit: a titled group of
+A [`Panel`](@ref CTBase.Plotting.Panel) is the case layer's convenient input unit: a titled group of
 components sharing one time grid. It is **not** part of the rendered IR — the
 [`lower`](@ref CTBase.Plotting.lower) step turns it into `Leaf`/`Axes` nodes.
 
@@ -152,9 +152,9 @@ Level-2 declarative layout builders operate on already-lowered nodes:
 
 | Combinator | Layout |
 | :--- | :--- |
-| [`Stacked`](@ref) | Vertical stack (`VBox`) with auto row weights |
-| [`Paired`](@ref) | Side-by-side (`HBox`) with auto column weights |
-| [`Grid`](@ref) | Rectangular grid of nodes |
+| [`Stacked`](@ref CTBase.Plotting.Stacked) | Vertical stack (`VBox`) with auto row weights |
+| [`Paired`](@ref CTBase.Plotting.Paired) | Side-by-side (`HBox`) with auto column weights |
+| [`Grid`](@ref CTBase.Plotting.Grid) | Rectangular grid of nodes |
 
 With `weights=:auto` (default), each child's weight is its extent along the
 combinator's axis — so cells stay uniform in size even when children have different
@@ -174,13 +174,13 @@ full = CTBase.Plotting.Stacked([state_node, control_node])
 
 ## Backend Contract
 
-[`AbstractPlottingBackend`](@ref) is the supertype for rendering backends.
-[`PlotsBackend`](@ref) is the concrete Plots.jl backend — its `render`/`render!`
+[`AbstractPlottingBackend`](@ref CTBase.Plotting.AbstractPlottingBackend) is the supertype for rendering backends.
+[`PlotsBackend`](@ref CTBase.Plotting.PlotsBackend) is the concrete Plots.jl backend — its `render`/`render!`
 methods live in the `CTBasePlots` extension.
 
-[`render`](@ref) turns a `Figure` into a backend figure. [`render!`](@ref) overlays
+[`render`](@ref CTBase.Plotting.render) turns a `Figure` into a backend figure. [`render!`](@ref CTBase.Plotting.render!) overlays
 a `Figure` onto an existing backend target, targeting cells by the deterministic
-leaf order (see [`leaves`](@ref)).
+leaf order (see [`leaves`](@ref CTBase.Plotting.leaves)).
 
 Without a backend loaded, the fallback throws an
 [`CTBase.Exceptions.ExtensionError`](@ref). This cannot be demonstrated
@@ -195,7 +195,7 @@ CTBase.Plotting.render(fig)
 
 ## Leaf Traversal
 
-[`leaves`](@ref) returns the `Leaf` nodes of a layout tree in deterministic
+[`leaves`](@ref CTBase.Plotting.leaves) returns the `Leaf` nodes of a layout tree in deterministic
 depth-first order. This order is the contract for targeting existing cells by
 index when overlaying with `render!`.
 
@@ -203,10 +203,10 @@ index when overlaying with `render!`.
 
 | Category | Symbols |
 | :--- | :--- |
-| IR | [`Series`](@ref), [`HLine`](@ref), [`VLine`](@ref), [`Axes`](@ref), [`Leaf`](@ref), [`HBox`](@ref), [`VBox`](@ref), [`Figure`](@ref), [`leaves`](@ref) |
-| Building blocks | [`Panel`](@ref), [`lower`](@ref CTBase.Plotting.lower) |
-| Combinators | [`Stacked`](@ref), [`Paired`](@ref), [`Grid`](@ref) |
-| Backend | [`AbstractPlottingBackend`](@ref), [`PlotsBackend`](@ref), [`render`](@ref), [`render!`](@ref) |
+| IR | [`Series`](@ref CTBase.Plotting.Series), [`HLine`](@ref CTBase.Plotting.HLine), [`VLine`](@ref CTBase.Plotting.VLine), [`Axes`](@ref CTBase.Plotting.Axes), [`Leaf`](@ref CTBase.Plotting.Leaf), [`HBox`](@ref CTBase.Plotting.HBox), [`VBox`](@ref CTBase.Plotting.VBox), [`Figure`](@ref CTBase.Plotting.Figure), [`leaves`](@ref CTBase.Plotting.leaves) |
+| Building blocks | [`Panel`](@ref CTBase.Plotting.Panel), [`lower`](@ref CTBase.Plotting.lower) |
+| Combinators | [`Stacked`](@ref CTBase.Plotting.Stacked), [`Paired`](@ref CTBase.Plotting.Paired), [`Grid`](@ref CTBase.Plotting.Grid) |
+| Backend | [`AbstractPlottingBackend`](@ref CTBase.Plotting.AbstractPlottingBackend), [`PlotsBackend`](@ref CTBase.Plotting.PlotsBackend), [`render`](@ref CTBase.Plotting.render), [`render!`](@ref CTBase.Plotting.render!) |
 
 ## See Also
 
