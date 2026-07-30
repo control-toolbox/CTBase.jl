@@ -14,7 +14,7 @@ module Options
 
 # Imports
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-using ..Core: Core as _Core
+using CTBase: CTBase
 using ..Exceptions
 
 # Submodules
