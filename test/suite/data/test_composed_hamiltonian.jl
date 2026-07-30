@@ -136,7 +136,7 @@ function test_composed_hamiltonian()
         Test.@testset "Error: OpenLoop / ClosedLoop laws are rejected" begin
             h̃ = Data.PseudoHamiltonian((x, p, u) -> p * u)
             Test.@test_throws MethodError Data.ComposedHamiltonian(
-                h̃, Data.OpenLoop(() -> 1.0)
+                h̃, Data.OpenLoop(t -> 1.0)
             )
             Test.@test_throws MethodError Data.ComposedHamiltonian(
                 h̃, Data.ClosedLoop(x -> -x)

@@ -20,11 +20,14 @@ function test_composed_vector_field()
             Test.@test g(0.0, 3.0, nothing) ≈ -6.0   # uniform (t,x,v)
         end
 
-        Test.@testset "Unit: OpenLoop composition g(x) = fc(x, u())" begin
+        Test.@testset "Unit: OpenLoop composition g(t, x) = fc(x, u(t))" begin
             fc = Data.ControlledVectorField((x, u) -> -x + u)
-            g = Data.ComposedVectorField(fc, Data.OpenLoop(() -> 2.0))
-            # g(x) = fc(x, 2) = -x + 2
-            Test.@test g(3.0) ≈ -1.0
+            g = Data.ComposedVectorField(fc, Data.OpenLoop(t -> 2.0))
+            # OpenLoop is unconditionally NonAutonomous, so the join is
+            # NonAutonomous even though fc and the control value are both
+            # time-independent here — natural call is g(t, x), not g(x).
+            # g(t, x) = fc(x, 2) = -x + 2
+            Test.@test g(0.0, 3.0) ≈ -1.0
         end
 
         Test.@testset "Unit: getters" begin

@@ -118,7 +118,7 @@ on the feedback type parameter:
 
 ```@repl traits
 using CTBase.Data
-u = Data.OpenLoop(() -> 1.0)
+u = Data.OpenLoop(t -> 1.0)
 Traits.feedback(u)
 Traits.is_open_loop(u)
 ```

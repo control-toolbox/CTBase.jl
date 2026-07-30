@@ -27,6 +27,15 @@ determines which arguments the control law depends on:
   - OpenLoop: `u(t, v)` — no state, no costate.
   - ClosedLoop: `u(t, x, v)` — state but no costate.
   - DynClosedLoop: `u(t, x, p, v)` — state and costate.
+- `OpenLoop` is always `NonAutonomous`: `u(t[, v])` is unconditional — there
+  is no autonomous/zero-argument form. Autonomy is a property of the OCP, not
+  of an open-loop control (see control-toolbox/CTBase.jl#515), so the
+  `OpenLoop` constructor rejects `is_autonomous` as a meaningful choice (it
+  is accepted only as a misuse detector, see [`CTBase.Data.OpenLoop`](@ref)).
+  Once constructed, `Traits.time_dependence`/`Traits.is_autonomous` on an
+  `OpenLoop` control law answer honestly — `NonAutonomous`/`false` — the
+  trait is not hidden, it is simply fixed. `ClosedLoop`/`DynClosedLoop` are
+  unaffected.
 
 See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Traits.AbstractFeedback`](@ref),
 [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).

@@ -2,6 +2,7 @@ module TestControlLaw
 
 using Test: Test
 import CTBase.Data: Data, OpenLoop, ClosedLoop, DynClosedLoop
+import CTBase.Exceptions
 import CTBase.Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
@@ -15,33 +16,21 @@ function test_control_law()
         # ====================================================================
 
         Test.@testset "Unit: Construction with all trait combinations" begin
-            # OpenLoop, Autonomous, Fixed
-            cl1 = OpenLoop(() -> 1.0; is_autonomous=true, is_variable=false)
+            # OpenLoop is unconditionally NonAutonomous — is_autonomous is not
+            # a real axis, only Fixed/NonFixed remain.
+            # OpenLoop, Fixed
+            cl1 = OpenLoop(t -> t; is_variable=false)
             Test.@test cl1 isa Data.ControlLaw
             Test.@test Traits.feedback(cl1) == Traits.OpenLoopFeedback
-            Test.@test Traits.time_dependence(cl1) == Traits.Autonomous
+            Test.@test Traits.time_dependence(cl1) == Traits.NonAutonomous
             Test.@test Traits.variable_dependence(cl1) == Traits.Fixed
 
-            # OpenLoop, NonAutonomous, Fixed
-            cl2 = OpenLoop((t) -> t; is_autonomous=false, is_variable=false)
+            # OpenLoop, NonFixed
+            cl2 = OpenLoop((t, v) -> t + v; is_variable=true)
             Test.@test cl2 isa Data.ControlLaw
             Test.@test Traits.feedback(cl2) == Traits.OpenLoopFeedback
             Test.@test Traits.time_dependence(cl2) == Traits.NonAutonomous
-            Test.@test Traits.variable_dependence(cl2) == Traits.Fixed
-
-            # OpenLoop, Autonomous, NonFixed
-            cl3 = OpenLoop((v) -> v; is_autonomous=true, is_variable=true)
-            Test.@test cl3 isa Data.ControlLaw
-            Test.@test Traits.feedback(cl3) == Traits.OpenLoopFeedback
-            Test.@test Traits.time_dependence(cl3) == Traits.Autonomous
-            Test.@test Traits.variable_dependence(cl3) == Traits.NonFixed
-
-            # OpenLoop, NonAutonomous, NonFixed
-            cl4 = OpenLoop((t, v) -> t + v; is_autonomous=false, is_variable=true)
-            Test.@test cl4 isa Data.ControlLaw
-            Test.@test Traits.feedback(cl4) == Traits.OpenLoopFeedback
-            Test.@test Traits.time_dependence(cl4) == Traits.NonAutonomous
-            Test.@test Traits.variable_dependence(cl4) == Traits.NonFixed
+            Test.@test Traits.variable_dependence(cl2) == Traits.NonFixed
 
             # ClosedLoop, Autonomous, Fixed
             cl5 = ClosedLoop((x) -> x; is_autonomous=true, is_variable=false)
@@ -111,17 +100,17 @@ function test_control_law()
         # ====================================================================
 
         Test.@testset "Unit: Natural call signatures" begin
-            # OpenLoop
-            cl1 = OpenLoop(() -> 1.0)
-            Test.@test cl1() == 1.0
+            # OpenLoop — always u(t) or u(t, v), never zero-argument
+            cl1 = OpenLoop(t -> 1.0)
+            Test.@test cl1(0.0) == 1.0
 
-            cl2 = OpenLoop((t) -> 2t; is_autonomous=false)
+            cl2 = OpenLoop(t -> 2t)
             Test.@test cl2(3.0) == 6.0
 
-            cl3 = OpenLoop((v) -> 3v; is_variable=true)
-            Test.@test cl3(2.0) == 6.0
+            cl3 = OpenLoop((t, v) -> 3v; is_variable=true)
+            Test.@test cl3(0.0, 2.0) == 6.0
 
-            cl4 = OpenLoop((t, v) -> t + v; is_autonomous=false, is_variable=true)
+            cl4 = OpenLoop((t, v) -> t + v; is_variable=true)
             Test.@test cl4(1.0, 2.0) == 3.0
 
             # ClosedLoop
@@ -161,16 +150,16 @@ function test_control_law()
 
         Test.@testset "Unit: Uniform call signature" begin
             # OpenLoop — uniform (t, v), no state
-            cl1 = OpenLoop(() -> 1.0)
+            cl1 = OpenLoop(t -> 1.0)
             Test.@test cl1(0.0, 3.0) == 1.0
 
-            cl2 = OpenLoop((t) -> 2t; is_autonomous=false)
+            cl2 = OpenLoop(t -> 2t)
             Test.@test cl2(3.0, 4.0) == 6.0
 
-            cl3 = OpenLoop((v) -> 3v; is_variable=true)
+            cl3 = OpenLoop((t, v) -> 3v; is_variable=true)
             Test.@test cl3(0.0, 2.0) == 6.0
 
-            cl4 = OpenLoop((t, v) -> t + v; is_autonomous=false, is_variable=true)
+            cl4 = OpenLoop((t, v) -> t + v; is_variable=true)
             Test.@test cl4(1.0, 4.0) == 5.0
 
             # ClosedLoop — uniform (t, x, v)
@@ -215,12 +204,41 @@ function test_control_law()
                 Traits.Autonomous,
                 Traits.Fixed,
             )
-            # also test via the typed constructor with OpenLoopFeedback
             Test.@test cl isa Data.ControlLaw
             Test.@test Traits.feedback(cl) === Traits.DynClosedLoopFeedback
             Test.@test Traits.time_dependence(cl) === Traits.Autonomous
             Test.@test Traits.variable_dependence(cl) === Traits.Fixed
             Test.@test cl([1.0, 2.0], [3.0, 4.0]) == [4.0, 6.0]
+
+            # OpenLoopFeedback + Autonomous is rejected: the combination has
+            # no natural/uniform call methods, so construction itself fails
+            # with a clear error instead of a MethodError at call time.
+            Test.@test_throws Exceptions.IncorrectArgument Data.ControlLaw(
+                t -> 1.0, Traits.OpenLoopFeedback, Traits.Autonomous, Traits.Fixed
+            )
+        end
+
+        # ====================================================================
+        # UNIT TESTS - is_autonomous misuse warning (OpenLoop)
+        # ====================================================================
+
+        Test.@testset "Unit: is_autonomous misuse warning" begin
+            # Not provided at all: no warning, law works normally.
+            Test.@test_logs begin
+                cl = OpenLoop(t -> 1.0)
+                Test.@test cl(0.0) == 1.0
+            end
+
+            # Explicitly passed (true or false): warns, but still builds a
+            # working u(t) law — the keyword has no effect on behavior.
+            Test.@test_logs (:warn, r"is_autonomous.*no effect") begin
+                cl = OpenLoop(t -> 1.0; is_autonomous=true)
+                Test.@test cl(0.0) == 1.0
+            end
+            Test.@test_logs (:warn, r"is_autonomous.*no effect") begin
+                cl = OpenLoop(t -> 1.0; is_autonomous=false)
+                Test.@test cl(0.0) == 1.0
+            end
         end
 
         # ====================================================================
@@ -229,8 +247,10 @@ function test_control_law()
 
         Test.@testset "Unit: Trait accessors" begin
             # dynamics_trait
-            ol = OpenLoop(() -> 1.0)
+            ol = OpenLoop(t -> 1.0)
             Test.@test Traits.dynamics_trait(ol) == Traits.StateDynamics
+            Test.@test Traits.time_dependence(ol) == Traits.NonAutonomous
+            Test.@test !Traits.is_autonomous(ol)
 
             cl_ = ClosedLoop((x) -> x)
             Test.@test Traits.dynamics_trait(cl_) == Traits.StateDynamics
@@ -257,7 +277,7 @@ function test_control_law()
         # ====================================================================
 
         Test.@testset "Show Methods" begin
-            cl = OpenLoop(() -> 1.0)
+            cl = OpenLoop(t -> 1.0)
 
             Test.@testset "Base.show (compact)" begin
                 io = IOBuffer()
@@ -265,10 +285,13 @@ function test_control_law()
                 str = String(take!(io))
                 Test.@test occursin("ControlLaw", str)
                 Test.@test occursin("open-loop", str)
-                Test.@test occursin("autonomous", str)
                 Test.@test occursin("fixed", str)
                 Test.@test occursin("natural call", str)
                 Test.@test occursin("uniform call", str)
+                Test.@test occursin("u(t)", str)
+                # OpenLoop's TimeDependence is fixed, not a real choice, so
+                # the header omits the "autonomous"/"non-autonomous" label.
+                Test.@test !occursin("autonomous", str)
             end
 
             Test.@testset "Base.show (text/plain)" begin
@@ -295,7 +318,7 @@ function test_control_law()
 
         Test.@testset "Subtyping" begin
             Test.@testset "ControlLaw is an AbstractControlLaw" begin
-                cl = OpenLoop(() -> 1.0)
+                cl = OpenLoop(t -> 1.0)
                 Test.@test cl isa Data.AbstractControlLaw
             end
 
