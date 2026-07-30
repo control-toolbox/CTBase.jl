@@ -14,7 +14,7 @@ module Options
 
 # Imports
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-using ..Core: Core, NotProvided, NotProvidedType
+using ..Core: Core as _Core
 using ..Exceptions
 
 # Submodules

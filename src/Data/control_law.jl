@@ -217,10 +217,10 @@ See also: [`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
 """
 function OpenLoop(
     f;
-    is_autonomous::Union{NotProvidedType,Bool}=NotProvided,
+    is_autonomous::Union{_Core.NotProvidedType,Bool}=_Core.NotProvided,
     is_variable::Bool=__is_variable(),
 )
-    if is_autonomous !== NotProvided
+    if is_autonomous !== _Core.NotProvided
         @warn """
         `is_autonomous` has no effect on OpenLoop
 
