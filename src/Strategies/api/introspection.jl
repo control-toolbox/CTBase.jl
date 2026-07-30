@@ -334,10 +334,10 @@ Returns `true` if the option was explicitly set by the user during construction,
 julia> using CTBase.Strategies
 
 julia> strategy = MyStrategy(max_iter=200)
-julia> is_user(strategy, :max_iter)
+julia> option_is_user(strategy, :max_iter)
 true
 
-julia> is_user(strategy, :tol)
+julia> option_is_user(strategy, :tol)
 false
 ```
 
@@ -367,10 +367,10 @@ Returns `true` if the option is using the default value from metadata,
 julia> using CTBase.Strategies
 
 julia> strategy = MyStrategy(max_iter=200)
-julia> is_default(strategy, :max_iter)
+julia> option_is_default(strategy, :max_iter)
 false
 
-julia> is_default(strategy, :tol)
+julia> option_is_default(strategy, :tol)
 true
 ```
 
@@ -400,7 +400,7 @@ Returns `true` if the option was calculated based on other option values,
 julia> using CTBase.Strategies
 
 julia> strategy = MyStrategy()
-julia> is_computed(strategy, :derived_value)
+julia> option_is_computed(strategy, :derived_value)
 true
 ```
 
