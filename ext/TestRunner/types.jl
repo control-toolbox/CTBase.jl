@@ -39,7 +39,7 @@ information (`index`, `total`) and execution results (`status`, `error`, `elapse
 
 # Example
 ```julia-repl
-julia> using CTBase.TestRunner
+julia> using CTBase: TestRunner
 
 julia> info = TestRunner.TestRunInfo(
            :utils, 

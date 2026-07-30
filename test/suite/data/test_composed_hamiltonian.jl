@@ -1,8 +1,8 @@
 module TestComposedHamiltonian
 
 using Test: Test
-import CTBase.Data: Data
-import CTBase.Traits: Traits
+using CTBase: Data
+using CTBase: Traits
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

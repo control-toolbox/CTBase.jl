@@ -2,7 +2,7 @@ module TestDocumenterReference
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.DevTools: DevTools
+using CTBase: DevTools
 using Documenter: Documenter
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true

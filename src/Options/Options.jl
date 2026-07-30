@@ -13,9 +13,9 @@ CTBase modules, making it reusable across the ecosystem.
 module Options
 
 # Imports
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import CTBase.Core
-import CTBase.Exceptions
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Core: Core
+using ..Exceptions
 
 # Submodules
 include(joinpath(@__DIR__, "not_stored.jl"))

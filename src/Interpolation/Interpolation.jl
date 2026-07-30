@@ -9,7 +9,7 @@ Interpolation utilities for the Control Toolbox (CT) ecosystem.
 """
 module Interpolation
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 include(joinpath(@__DIR__, "types.jl"))
 include(joinpath(@__DIR__, "ctinterpolate.jl"))

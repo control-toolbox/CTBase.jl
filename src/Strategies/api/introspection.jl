@@ -19,12 +19,12 @@ to instantiate the strategy.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> option_names(MyStrategy)
+julia> Strategies.option_names(MyStrategy)
 (:max_iter, :tol, :backend)
 
-julia> for name in option_names(MyStrategy)
+julia> for name in Strategies.option_names(MyStrategy)
            println("Available option: ", name)
        end
 Available option: max_iter
@@ -60,12 +60,12 @@ for validation and documentation purposes.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> option_type(MyStrategy, :max_iter)
+julia> Strategies.option_type(MyStrategy, :max_iter)
 Int64
 
-julia> option_type(MyStrategy, :tol)
+julia> Strategies.option_type(MyStrategy, :tol)
 Float64
 ```
 
@@ -100,12 +100,12 @@ This is useful for generating help messages and documentation.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> option_description(MyStrategy, :max_iter)
+julia> Strategies.option_description(MyStrategy, :max_iter)
 "Maximum number of iterations"
 
-julia> option_description(MyStrategy, :tol)
+julia> Strategies.option_description(MyStrategy, :tol)
 "Convergence tolerance"
 ```
 
@@ -140,12 +140,12 @@ by the user during strategy construction.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> option_default(MyStrategy, :max_iter)
+julia> Strategies.option_default(MyStrategy, :max_iter)
 100
 
-julia> option_default(MyStrategy, :tol)
+julia> Strategies.option_default(MyStrategy, :tol)
 1.0e-6
 ```
 
@@ -180,12 +180,12 @@ understanding the baseline behavior.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> option_defaults(MyStrategy)
+julia> Strategies.option_defaults(MyStrategy)
 (max_iter = 100, tol = 1.0e-6)
 
-julia> defaults = option_defaults(MyStrategy)
+julia> defaults = Strategies.option_defaults(MyStrategy)
 julia> defaults.max_iter
 100
 ```
@@ -219,13 +219,13 @@ This may be a user-provided value or the default value.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> strategy = MyStrategy(max_iter=200)
-julia> option_value(strategy, :max_iter)
+julia> Strategies.option_value(strategy, :max_iter)
 200
 
-julia> option_value(strategy, :tol)  # Uses default
+julia> Strategies.option_value(strategy, :tol)  # Uses default
 1.0e-6
 ```
 
@@ -258,13 +258,13 @@ Returns a symbol indicating where the option value came from:
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> strategy = MyStrategy(max_iter=200)
-julia> option_source(strategy, :max_iter)
+julia> Strategies.option_source(strategy, :max_iter)
 :user
 
-julia> option_source(strategy, :tol)
+julia> Strategies.option_source(strategy, :tol)
 :default
 ```
 
@@ -295,16 +295,16 @@ were stored in permissive mode.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> strategy = MyStrategy(max_iter=200; mode=:permissive, custom_opt=123)
-julia> has_option(strategy, :max_iter)
+julia> Strategies.has_option(strategy, :max_iter)
 true
 
-julia> has_option(strategy, :custom_opt)
+julia> Strategies.has_option(strategy, :custom_opt)
 true
 
-julia> has_option(strategy, :nonexistent)
+julia> Strategies.has_option(strategy, :nonexistent)
 false
 ```
 
@@ -331,13 +331,13 @@ Returns `true` if the option was explicitly set by the user during construction,
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> strategy = MyStrategy(max_iter=200)
-julia> option_is_user(strategy, :max_iter)
+julia> Strategies.option_is_user(strategy, :max_iter)
 true
 
-julia> option_is_user(strategy, :tol)
+julia> Strategies.option_is_user(strategy, :tol)
 false
 ```
 
@@ -364,13 +364,13 @@ Returns `true` if the option is using the default value from metadata,
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> strategy = MyStrategy(max_iter=200)
-julia> option_is_default(strategy, :max_iter)
+julia> Strategies.option_is_default(strategy, :max_iter)
 false
 
-julia> option_is_default(strategy, :tol)
+julia> Strategies.option_is_default(strategy, :tol)
 true
 ```
 
@@ -397,10 +397,10 @@ Returns `true` if the option was calculated based on other option values,
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
 julia> strategy = MyStrategy()
-julia> option_is_computed(strategy, :derived_value)
+julia> Strategies.option_is_computed(strategy, :derived_value)
 true
 ```
 

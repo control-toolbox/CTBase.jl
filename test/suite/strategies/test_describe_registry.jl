@@ -1,7 +1,7 @@
 module TestDescribeRegistry
 
 using Test: Test
-import CTBase.Strategies
+using CTBase: Strategies
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

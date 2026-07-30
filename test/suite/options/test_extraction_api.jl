@@ -1,8 +1,8 @@
 module TestOptionsExtractionAPI
 
 using Test: Test
-import CTBase.Exceptions
-import CTBase.Options
+using CTBase: Exceptions
+using CTBase: Options
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 

@@ -8,7 +8,7 @@ ecosystem, including type aliases and internal utilities.
 """
 module Core
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 include("types.jl")
 include("tags.jl")

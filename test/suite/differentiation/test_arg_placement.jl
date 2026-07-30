@@ -7,9 +7,9 @@ module TestArgPlacement
 using Test: Test
 using ForwardDiff: ForwardDiff  # ensure DI ForwardDiff extension is loaded (AutoForwardDiff backend)
 using DifferentiationInterface: DifferentiationInterface   # activates CTBaseDifferentiationInterface extension
-import CTBase.Differentiation
-import CTBase.Exceptions
-import CTBase.Strategies
+using CTBase: Differentiation
+using CTBase: Exceptions
+using CTBase: Strategies
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

@@ -1,16 +1,13 @@
 module TestOptions
 
 using Test: Test
-import CTBase.Exceptions
+using CTBase: Exceptions
 using CTBase: CTBase
-import CTBase.Options
-import CTBase.Core
-using CTBase.Options  # For testing exported symbols
+using CTBase: Options
+using CTBase: Core
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
-
-const CurrentModule = TestOptions
 
 """
     test_options()
@@ -39,10 +36,10 @@ function test_options()
 
             # Test exported types
             Test.@testset "Exported Types" begin
-                for T in (OptionValue, OptionDefinition)
+                for T in (Options.OptionValue, Options.OptionDefinition)
                     Test.@testset "$(nameof(T))" begin
                         Test.@test isdefined(Options, nameof(T))
-                        Test.@test isdefined(CurrentModule, nameof(T))
+                        Test.@test nameof(T) in names(Options)
                         Test.@test T isa DataType || T isa UnionAll
                     end
                 end
@@ -80,8 +77,8 @@ function test_options()
                 )
                     Test.@testset "$f" begin
                         Test.@test isdefined(Options, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Options)
+                        Test.@test getfield(Options, f) isa Function
                     end
                 end
             end

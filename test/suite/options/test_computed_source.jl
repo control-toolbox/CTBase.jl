@@ -1,9 +1,9 @@
 module TestOptionsComputedSource
 
 using Test: Test
-import CTBase.Exceptions
-import CTBase.Options
-import CTBase.Strategies
+using CTBase: Exceptions
+using CTBase: Options
+using CTBase: Strategies
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

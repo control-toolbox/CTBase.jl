@@ -10,8 +10,8 @@ running testsets).
 module TestRunner
 
 using CTBase: CTBase
-import CTBase.DevTools
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using CTBase: DevTools
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using Test: Test, @testset
 
 include("types.jl")

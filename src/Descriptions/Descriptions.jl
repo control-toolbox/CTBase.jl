@@ -29,7 +29,7 @@ The Descriptions module is organized into thematic submodules:
 """
 module Descriptions
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 using ..Exceptions
 
 # Include submodules

@@ -6,7 +6,7 @@ packages such as OptimalControl.jl.
 """
 module CTBase
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
 
 # ============================================================================ #
 # MODULAR ORGANIZATION

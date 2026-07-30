@@ -1,16 +1,14 @@
 module TestOrchestration
 
 using Test: Test
-import CTBase.Exceptions
+using CTBase: Exceptions
 using CTBase: CTBase
-import CTBase.Orchestration
-import CTBase.Strategies
-import CTBase.Options
-using CTBase.Orchestration  # For testing exported symbols
+using CTBase: Orchestration
+using CTBase: Strategies
+using CTBase: Options
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
-const CurrentModule = TestOrchestration
 
 """
     test_orchestration()
@@ -38,10 +36,10 @@ function test_orchestration()
 
             # Test exported types
             Test.@testset "Exported Types" begin
-                for T in (ResolvedMethod,)
+                for T in (Orchestration.ResolvedMethod,)
                     Test.@testset "$(nameof(T))" begin
                         Test.@test isdefined(Orchestration, nameof(T))
-                        Test.@test isdefined(CurrentModule, nameof(T))
+                        Test.@test nameof(T) in names(Orchestration)
                         Test.@test T isa DataType || T isa UnionAll
                     end
                 end
@@ -60,8 +58,8 @@ function test_orchestration()
                 )
                     Test.@testset "$f" begin
                         Test.@test isdefined(Orchestration, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Orchestration)
+                        Test.@test getfield(Orchestration, f) isa Function
                     end
                 end
             end
@@ -71,7 +69,7 @@ function test_orchestration()
                 for T in (:RoutingContext,)
                     Test.@testset "$T" begin
                         Test.@test isdefined(Orchestration, T)
-                        Test.@test !isdefined(CurrentModule, T)
+                        Test.@test T ∉ names(Orchestration)
                     end
                 end
             end
@@ -95,7 +93,7 @@ function test_orchestration()
                 )
                     Test.@testset "$f" begin
                         Test.@test isdefined(Orchestration, f)
-                        Test.@test !isdefined(CurrentModule, f)
+                        Test.@test f ∉ names(Orchestration)
                     end
                 end
             end

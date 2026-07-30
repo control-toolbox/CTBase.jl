@@ -26,18 +26,18 @@ The registry uses an **explicit passing pattern** rather than global mutable sta
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> registry = create_registry(
+julia> registry = Strategies.create_registry(
            AbstractNLPModeler => (Modelers.ADNLP, Modelers.Exa),
            AbstractNLPSolver => (Solvers.Ipopt, Solvers.MadNLP)
        )
 StrategyRegistry with 2 families
 
-julia> strategy_ids(AbstractNLPModeler, registry)
+julia> Strategies.strategy_ids(AbstractNLPModeler, registry)
 (:adnlp, :exa)
 
-julia> T = type_from_id(:adnlp, AbstractNLPModeler, registry)
+julia> T = Strategies.type_from_id(:adnlp, AbstractNLPModeler, registry)
 Modelers.ADNLP
 ```
 
@@ -72,15 +72,15 @@ This function validates the registry structure and ensures:
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> registry = create_registry(
+julia> registry = Strategies.create_registry(
            AbstractNLPModeler => (Modelers.ADNLP, Modelers.Exa),
            AbstractNLPSolver => (Solvers.Ipopt, Solvers.MadNLP, Solvers.Knitro)
        )
 StrategyRegistry with 2 families
 
-julia> strategy_ids(AbstractNLPModeler, registry)
+julia> Strategies.strategy_ids(AbstractNLPModeler, registry)
 (:adnlp, :exa)
 ```
 
@@ -358,9 +358,9 @@ the specified family type. The order matches the registration order.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> ids = strategy_ids(AbstractNLPModeler, registry)
+julia> ids = Strategies.strategy_ids(AbstractNLPModeler, registry)
 (:adnlp, :exa)
 
 julia> for strategy_id in ids
@@ -422,12 +422,12 @@ functions to convert symbolic descriptions to concrete types.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> T = type_from_id(:adnlp, AbstractNLPModeler, registry)
+julia> T = Strategies.type_from_id(:adnlp, AbstractNLPModeler, registry)
 Modelers.ADNLP
 
-julia> id(T)
+julia> Strategies.id(T)
 :adnlp
 ```
 
@@ -537,16 +537,16 @@ flow registry), rather than only combining registries with disjoint families.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> solve_registry = create_registry(AbstractNLPSolver => (Ipopt,))
-julia> flow_registry  = create_registry(AbstractIntegrator => (SciML,))
+julia> solve_registry = Strategies.create_registry(AbstractNLPSolver => (Ipopt,))
+julia> flow_registry  = Strategies.create_registry(AbstractIntegrator => (SciML,))
 
 julia> combined = merge(solve_registry, flow_registry)
 StrategyRegistry with 2 families
 
-julia> describe(:ipopt, combined)  # works
-julia> describe(:sciml, combined)  # works, same registry
+julia> Strategies.describe(:ipopt, combined)  # works
+julia> Strategies.describe(:sciml, combined)  # works, same registry
 ```
 
 See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.StrategyRegistry`](@ref)

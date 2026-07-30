@@ -43,14 +43,14 @@ For NonAutonomous/NonFixed: natural `h(t, x, p, v)`, uniform `h(t, x, p, v)`.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> h = Hamiltonian((x, p) -> dot(x, p))  # Uses defaults: is_autonomous=true, is_variable=false
+julia> h = Data.Hamiltonian((x, p) -> dot(x, p))  # Uses defaults: is_autonomous=true, is_variable=false
 Hamiltonian: autonomous, fixed (no variable)
   natural call: h(x, p)
   uniform call: h(t, x, p, v)
 
-julia> h = Hamiltonian((t, x, p) -> t * dot(x, p); is_autonomous=false)
+julia> h = Data.Hamiltonian((t, x, p) -> t * dot(x, p); is_autonomous=false)
 Hamiltonian: non-autonomous, fixed (no variable)
   natural call: h(t, x, p)
   uniform call: h(t, x, p, v)
@@ -82,19 +82,19 @@ Construct a `Hamiltonian` with trait flags.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> h = Hamiltonian((x, p) -> dot(x, p))  # Uses defaults: is_autonomous=true, is_variable=false
+julia> h = Data.Hamiltonian((x, p) -> dot(x, p))  # Uses defaults: is_autonomous=true, is_variable=false
 Hamiltonian: autonomous, fixed (no variable)
   natural call: h(x, p)
   uniform call: h(t, x, p, v)
 
-julia> h = Hamiltonian((t, x, p) -> t * dot(x, p); is_autonomous=false)
+julia> h = Data.Hamiltonian((t, x, p) -> t * dot(x, p); is_autonomous=false)
 Hamiltonian: non-autonomous, fixed (no variable)
   natural call: h(t, x, p)
   uniform call: h(t, x, p, v)
 
-julia> h = Hamiltonian((x, p, v) -> v * dot(x, p); is_variable=true)
+julia> h = Data.Hamiltonian((x, p, v) -> v * dot(x, p); is_variable=true)
 Hamiltonian: autonomous, non-fixed (variable)
   natural call: h(x, p, v)
   uniform call: h(t, x, p, v)

@@ -2,8 +2,8 @@ module TestTestRunner
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.DevTools
-import CTBase.Exceptions
+using CTBase: DevTools
+using CTBase: Exceptions
 
 const TestRunner = Base.get_extension(CTBase, :TestRunner)
 

@@ -2,8 +2,8 @@ module TestDocumenterReferenceAPI
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.Exceptions: Exceptions
-import CTBase.DevTools: DevTools
+using CTBase: Exceptions
+using CTBase: DevTools
 using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)

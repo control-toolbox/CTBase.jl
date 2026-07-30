@@ -39,9 +39,9 @@ module Plotting
 # CTModels.jl/.reports/dev/plot_engine_ctbase_report.md.
 # =============================================================================
 
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES, TYPEDFIELDS
-import CTBase.Exceptions
-import CTBase.Core
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES, TYPEDFIELDS
+using ..Exceptions
+using ..Core: Core
 
 include(joinpath(@__DIR__, "ir.jl"))
 include(joinpath(@__DIR__, "panel.jl"))

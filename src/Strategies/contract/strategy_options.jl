@@ -27,11 +27,11 @@ Strategy options are built using `build_strategy_options()` which supports two v
 # Construction
 
 ```julia-repl
-julia> using CTBase.Strategies, CTBase.Options
+julia> using CTBase: Strategies, Options
 
-julia> opts = StrategyOptions(
-           max_iter = OptionValue(200, :user),
-           tol = OptionValue(1e-6, :default)
+julia> opts = Strategies.StrategyOptions(
+           max_iter = Options.OptionValue(200, :user),
+           tol = Options.OptionValue(1e-6, :default)
        )
 StrategyOptions with 2 options:
   max_iter = 200  [user]
@@ -639,14 +639,14 @@ and can be modified before passing to backend solvers or model builders.
 
 # Example
 ```julia-repl
-julia> using CTBase.Strategies, CTBase.Options
+julia> using CTBase: Strategies, Options
 
-julia> opts = StrategyOptions(
-           max_iter = OptionValue(500, :user),
-           tolerance = OptionValue(1e-8, :default)
+julia> opts = Strategies.StrategyOptions(
+           max_iter = Options.OptionValue(500, :user),
+           tolerance = Options.OptionValue(1e-8, :default)
        )
 
-julia> dict = options_dict(opts)
+julia> dict = Strategies.options_dict(opts)
 Dict{Symbol, Any} with 2 entries:
   :max_iter => 500
   :tolerance => 1.0e-8

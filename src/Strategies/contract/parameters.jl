@@ -236,12 +236,12 @@ a human-readable description of the parameter's purpose and behavior.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> description(CPU)
+julia> Strategies.description(Strategies.CPU)
 "CPU-based computation"
 
-julia> description(GPU)
+julia> Strategies.description(Strategies.GPU)
 "GPU-based computation"
 \`\`\`
 
@@ -291,9 +291,9 @@ This function provides type-level introspection that shows:
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Strategies
+julia> using CTBase: Strategies
 
-julia> describe(CPU)
+julia> Strategies.describe(Strategies.CPU)
 CPU (parameter)
 ├─ id: :cpu
 ├─ hierarchy: CPU → AbstractStrategyParameter

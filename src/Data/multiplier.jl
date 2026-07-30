@@ -44,9 +44,9 @@ For NonAutonomous/NonFixed: natural `μ(t, x, p, v)`, uniform `μ(t, x, p, v)`.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> μ = Multiplier((x, p) -> x[1])
+julia> μ = Data.Multiplier((x, p) -> x[1])
 Multiplier: autonomous, fixed (no variable)
   natural call: μ(x, p)
   uniform call: μ(t, x, p, v)
@@ -79,14 +79,14 @@ Construct a `Multiplier` with trait flags.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> μ = Multiplier((x, p) -> x[1])
+julia> μ = Data.Multiplier((x, p) -> x[1])
 Multiplier: autonomous, fixed (no variable)
   natural call: μ(x, p)
   uniform call: μ(t, x, p, v)
 
-julia> μ = Multiplier((t, x, p) -> t * x[1]; is_autonomous=false)
+julia> μ = Data.Multiplier((t, x, p) -> t * x[1]; is_autonomous=false)
 Multiplier: non-autonomous, fixed (no variable)
   natural call: μ(t, x, p)
   uniform call: μ(t, x, p, v)

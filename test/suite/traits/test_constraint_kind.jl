@@ -1,7 +1,7 @@
 module TestConstraintKind
 
 using Test: Test
-import CTBase.Traits
+using CTBase: Traits
 
 const VERBOSE = isdefined(Main, :TestTraits) ? Main.TestTraits.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestTraits) ? Main.TestTraits.SHOWTIMING : true

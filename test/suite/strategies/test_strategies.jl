@@ -1,15 +1,13 @@
 module TestStrategies
 
 using Test: Test
-import CTBase.Exceptions
+using CTBase: Exceptions
 using CTBase: CTBase
-import CTBase.Strategies
-import CTBase.Options
-using CTBase.Strategies  # For testing exported symbols
+using CTBase: Strategies
+using CTBase: Options
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
-const CurrentModule = TestStrategies
 
 """
     test_strategies()
@@ -43,10 +41,14 @@ function test_strategies()
 
             # Test exported abstract types
             Test.@testset "Exported Abstract Types" begin
-                for T in (AbstractStrategy, StrategyRegistry, AbstractStrategyParameter)
+                for T in (
+                    Strategies.AbstractStrategy,
+                    Strategies.StrategyRegistry,
+                    Strategies.AbstractStrategyParameter,
+                )
                     Test.@testset "$(nameof(T))" begin
                         Test.@test isdefined(Strategies, nameof(T))
-                        Test.@test isdefined(CurrentModule, nameof(T))
+                        Test.@test nameof(T) in names(Strategies)
                         Test.@test T isa DataType || T isa UnionAll
                     end
                 end
@@ -55,17 +57,17 @@ function test_strategies()
             # Test exported concrete types
             Test.@testset "Exported Concrete Types" begin
                 for T in (
-                    StrategyMetadata,
-                    StrategyOptions,
-                    OptionDefinition,
-                    RoutedOption,
-                    BypassValue,
-                    CPU,
-                    GPU,
+                    Strategies.StrategyMetadata,
+                    Strategies.StrategyOptions,
+                    Strategies.OptionDefinition,
+                    Strategies.RoutedOption,
+                    Strategies.BypassValue,
+                    Strategies.CPU,
+                    Strategies.GPU,
                 )
                     Test.@testset "$(nameof(T))" begin
                         Test.@test isdefined(Strategies, nameof(T))
-                        Test.@test isdefined(CurrentModule, nameof(T))
+                        Test.@test nameof(T) in names(Strategies)
                         Test.@test T isa DataType || T isa UnionAll
                     end
                 end
@@ -76,8 +78,8 @@ function test_strategies()
                 for f in (:id, :metadata, :options, :parameter, :default_parameter)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Strategies)
+                        Test.@test getfield(Strategies, f) isa Function
                     end
                 end
             end
@@ -87,8 +89,8 @@ function test_strategies()
                 for f in (:create_registry, :strategy_ids, :type_from_id)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Strategies)
+                        Test.@test getfield(Strategies, f) isa Function
                     end
                 end
             end
@@ -110,8 +112,8 @@ function test_strategies()
                 )
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Strategies)
+                        Test.@test getfield(Strategies, f) isa Function
                     end
                 end
             end
@@ -121,8 +123,8 @@ function test_strategies()
                 for f in (:build_strategy, :extract_id_from_method, :available_parameters)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Strategies)
+                        Test.@test getfield(Strategies, f) isa Function
                     end
                 end
             end
@@ -132,8 +134,8 @@ function test_strategies()
                 for f in (:build_strategy_options, :resolve_alias)
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Strategies)
+                        Test.@test getfield(Strategies, f) isa Function
                     end
                 end
             end
@@ -152,8 +154,8 @@ function test_strategies()
                 )
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test isdefined(CurrentModule, f)
-                        Test.@test getfield(CurrentModule, f) isa Function
+                        Test.@test f in names(Strategies)
+                        Test.@test getfield(Strategies, f) isa Function
                     end
                 end
             end
@@ -168,7 +170,7 @@ function test_strategies()
                 )
                     Test.@testset "$f" begin
                         Test.@test isdefined(Strategies, f)
-                        Test.@test !isdefined(CurrentModule, f)
+                        Test.@test f ∉ names(Strategies)
                     end
                 end
             end

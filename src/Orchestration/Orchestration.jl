@@ -17,8 +17,8 @@ See also: [`CTBase.Options`](@ref), [`CTBase.Strategies`](@ref)
 module Orchestration
 
 # Imports
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import CTBase.Exceptions
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Exceptions
 
 # CTBase modules
 using ..Options

@@ -1,8 +1,8 @@
 module TestSuperscripts
 
 using Test: Test
-import CTBase.Exceptions: Exceptions
-import CTBase.Unicode: Unicode
+using CTBase: Exceptions
+using CTBase: Unicode
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

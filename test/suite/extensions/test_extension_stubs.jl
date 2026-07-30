@@ -1,8 +1,8 @@
 module TestExtensionStubs
 
 using Test: Test
-import CTBase.DevTools
-import CTBase.Exceptions
+using CTBase: DevTools
+using CTBase: Exceptions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true

@@ -199,14 +199,14 @@ constructed law, always `NonAutonomous`/`false`.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> u = OpenLoop(t -> 1.0)
+julia> u = Data.OpenLoop(t -> 1.0)
 ControlLaw: open-loop, fixed (no variable)
   natural call: u(t)
   uniform call: u(t, v)
 
-julia> u = OpenLoop((t, v) -> t * v; is_variable=true)
+julia> u = Data.OpenLoop((t, v) -> t * v; is_variable=true)
 ControlLaw: open-loop, variable
   natural call: u(t, v)
   uniform call: u(t, v)
@@ -247,9 +247,9 @@ variable), but not on the costate.
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> u = ClosedLoop(x -> -x)
+julia> u = Data.ClosedLoop(x -> -x)
 ControlLaw: closed-loop, autonomous, fixed (no variable)
   natural call: u(x)
   uniform call: u(t, x, v)
@@ -281,9 +281,9 @@ A dynamic closed-loop control law depends on both the state and the costate
 
 # Example
 ```julia-repl
-julia> using CTBase.Data
+julia> using CTBase: Data
 
-julia> u = DynClosedLoop((x, p) -> -x - p)
+julia> u = Data.DynClosedLoop((x, p) -> -x - p)
 ControlLaw: dyn-closed-loop, autonomous, fixed (no variable)
   natural call: u(x, p)
   uniform call: u(t, x, p, v)

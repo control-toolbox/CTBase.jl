@@ -10,7 +10,7 @@ This guide explains the **Strategy Parameters** system in CTBase. Parameters are
     Read the [Implementing a Strategy](@ref) guide first. Parameters extend the strategy system with type-based specialization.
 
 ```@setup params
-import CTBase: Strategies, Options
+using CTBase: Strategies, Options
 ```
 
 ## Concept

@@ -13,9 +13,9 @@ but provides higher-level strategy management capabilities.
 module Strategies
 
 # Importing to avoid namespace pollution
-import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-import CTBase.Core
-import CTBase.Exceptions
+using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Core: Core
+using ..Exceptions
 
 # Using CTBase modules to get access to the api
 using ..Options

@@ -9,12 +9,12 @@ integration (full time evolution).
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> EndPointMode <: Traits.AbstractModeTrait
+julia> Traits.EndPointMode <: Traits.AbstractModeTrait
 true
 
-julia> TrajectoryMode <: Traits.AbstractModeTrait
+julia> Traits.TrajectoryMode <: Traits.AbstractModeTrait
 true
 
 \`\`\`
@@ -37,9 +37,9 @@ which computes the solution at a specific final time from a single initial condi
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> pt = EndPointMode()
+julia> pt = Traits.EndPointMode()
 EndPointMode()
 
 julia> pt isa Traits.AbstractModeTrait
@@ -66,9 +66,9 @@ which computes the full solution trajectory over a continuous time interval.
 
 # Example
 \`\`\`julia-repl
-julia> using CTBase.Traits
+julia> using CTBase: Traits
 
-julia> traj = TrajectoryMode()
+julia> traj = Traits.TrajectoryMode()
 TrajectoryMode()
 
 julia> traj isa Traits.AbstractModeTrait

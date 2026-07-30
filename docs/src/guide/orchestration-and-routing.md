@@ -11,12 +11,9 @@ This guide explains how the Orchestration module routes user-provided keyword ar
 
 ```@setup routing
 using CTBase
-using CTBase.Options: OptionDefinition
-using CTBase.Strategies: route_to
-using CTBase.Orchestration: resolve_method, route_all_options
-using CTBase.Orchestration: extract_strategy_ids
-using CTBase.Orchestration: build_strategy_to_family_map
-using CTBase.Orchestration: build_option_ownership_map
+using CTBase: Options
+using CTBase: Strategies
+using CTBase: Orchestration
 ```
 
 We define three fake strategies — a discretizer, a modeler, and a solver — with a shared `backend` option to demonstrate routing and disambiguation:
@@ -35,7 +32,7 @@ CTBase.Strategies.parameter(::Type{<:FakeCollocation}) = nothing
 
 CTBase.Strategies.metadata(::Type{<:FakeCollocation}) =
     CTBase.Strategies.StrategyMetadata(
-        OptionDefinition(
+        Options.OptionDefinition(
             name = :grid_size, type = Int,
             default = 100, description = "Grid size",
         ),
@@ -60,7 +57,7 @@ CTBase.Strategies.parameter(::Type{<:FakeADNLP}) = nothing
 
 CTBase.Strategies.metadata(::Type{<:FakeADNLP}) =
     CTBase.Strategies.StrategyMetadata(
-        OptionDefinition(
+        Options.OptionDefinition(
             name = :backend, type = Symbol,
             default = :default, description = "AD backend",
         ),
@@ -85,11 +82,11 @@ CTBase.Strategies.parameter(::Type{<:FakeIpopt}) = nothing
 
 CTBase.Strategies.metadata(::Type{<:FakeIpopt}) =
     CTBase.Strategies.StrategyMetadata(
-        OptionDefinition(
+        Options.OptionDefinition(
             name = :max_iter, type = Integer,
             default = 1000, description = "Max iterations",
         ),
-        OptionDefinition(
+        Options.OptionDefinition(
             name = :backend, type = Symbol,
             default = :cpu, description = "Compute backend",
         ),
@@ -218,7 +215,7 @@ solve(ocp, :collocation, :adnlp, :ipopt;
 `route_to` creates a `RoutedOption` object that carries `(strategy_id => value)` pairs:
 
 ```@example routing
-opt = route_to(ipopt = 100, adnlp = 50)
+opt = Strategies.route_to(ipopt = 100, adnlp = 50)
 ```
 
 The orchestration layer uses `extract_strategy_ids` to unpack this object during routing — see [Helper Functions](@ref) below.
@@ -230,7 +227,7 @@ The helper functions below are used internally by `route_all_options`. They oper
 To use them, first call `resolve_method`:
 
 ```@example routing
-resolved = resolve_method(method, families, registry)
+resolved = Orchestration.resolve_method(method, families, registry)
 nothing # hide
 ```
 
@@ -239,7 +236,7 @@ nothing # hide
 Maps each strategy ID in the method to its family name:
 
 ```@example routing
-build_strategy_to_family_map(resolved, families, registry)
+Orchestration.build_strategy_to_family_map(resolved, families, registry)
 ```
 
 ### `build_option_ownership_map`
@@ -247,7 +244,7 @@ build_strategy_to_family_map(resolved, families, registry)
 Scans all strategy metadata and maps each option name to the set of families that define it:
 
 ```@example routing
-build_option_ownership_map(resolved, families, registry)
+Orchestration.build_option_ownership_map(resolved, families, registry)
 ```
 
 Note that `:backend` is owned by both `:modeler` and `:solver` — it is ambiguous and requires disambiguation.
@@ -257,23 +254,23 @@ Note that `:backend` is owned by both `:modeler` and `:solver` — it is ambiguo
 Unpacks a `RoutedOption` into a vector of `(value, strategy_id)` pairs:
 
 ```@example routing
-extract_strategy_ids(
-    route_to(ipopt = 100, adnlp = 50), resolved,
+Orchestration.extract_strategy_ids(
+    Strategies.route_to(ipopt = 100, adnlp = 50), resolved,
 )
 ```
 
 For plain (non-routed) values, no disambiguation is detected — the function returns `nothing`:
 
 ```@repl routing
-extract_strategy_ids(:plain_value, resolved)
+Orchestration.extract_strategy_ids(:plain_value, resolved)
 ```
 
 Passing an unknown strategy ID throws an error:
 
 ```@repl routing
 try # hide
-extract_strategy_ids(
-    route_to(unknown = 42), resolved,
+Orchestration.extract_strategy_ids(
+    Strategies.route_to(unknown = 42), resolved,
 )
 catch e # hide
 showerror(IOContext(stdout, :color => false), e) # hide
@@ -286,18 +283,18 @@ Auto-routing with disambiguation and action option extraction:
 
 ```@example routing
 action_defs = [
-    OptionDefinition(name = :display, type = Bool, default = true,
+    Options.OptionDefinition(name = :display, type = Bool, default = true,
                      description = "Display solver progress"),
 ]
 
 kwargs = (
-    grid_size = 100,                          # auto-routed to discretizer
-    max_iter  = 500,                          # auto-routed to solver
-    backend   = route_to(adnlp = :optimized), # disambiguated to modeler
-    display   = false,                        # action option
+    grid_size = 100,                                     # auto-routed to discretizer
+    max_iter  = 500,                                     # auto-routed to solver
+    backend   = Strategies.route_to(adnlp = :optimized), # disambiguated to modeler
+    display   = false,                                   # action option
 )
 
-routed = route_all_options(
+routed = Orchestration.route_all_options(
     method, families, action_defs,
     kwargs, registry,
 )
@@ -319,7 +316,7 @@ routed.strategies
 
 ```@repl routing
 try # hide
-route_all_options(
+Orchestration.route_all_options(
     method, families, action_defs,
     (foo = 42,), registry,
 )
@@ -332,7 +329,7 @@ end # hide
 
 ```@repl routing
 try # hide
-route_all_options(
+Orchestration.route_all_options(
     method, families, action_defs,
     (backend = :sparse,), registry,
 )

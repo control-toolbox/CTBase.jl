@@ -2,7 +2,7 @@ module TestDocumenterReferencePipeline
 
 using Test: Test
 using CTBase: CTBase
-import CTBase.DevTools: DevTools
+using CTBase: DevTools
 using Documenter: Documenter
 
 const DocumenterReference = Base.get_extension(CTBase, :DocumenterReference)

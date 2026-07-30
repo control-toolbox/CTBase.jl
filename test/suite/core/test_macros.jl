@@ -1,8 +1,8 @@
 module TestCoreMacros
 
 using Test: Test
-import CTBase.Core
-import CTBase.Exceptions
+using CTBase: Core
+using CTBase: Exceptions
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
