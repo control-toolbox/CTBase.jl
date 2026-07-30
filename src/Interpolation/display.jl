@@ -1,7 +1,7 @@
 """
 $(TYPEDSIGNATURES)
 
-Display a compact representation of an [`Interpolant`](@ref).
+Display a compact representation of an [`CTBase.Interpolation.Interpolant`](@ref).
 
 # Example
 ```julia-repl
@@ -17,7 +17,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display an [`Interpolant`](@ref) in the REPL with the same format as `Base.show(io, interp)`.
+Display an [`CTBase.Interpolation.Interpolant`](@ref) in the REPL with the same format as `Base.show(io, interp)`.
 """
 function Base.show(io::IO, ::MIME"text/plain", interp::Interpolant)
     return show(io, interp)

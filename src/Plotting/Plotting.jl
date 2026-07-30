@@ -4,22 +4,22 @@
 Generic, domain-free plotting engine for the Control Toolbox.
 
 It manipulates a backend-agnostic intermediate representation (IR): a weighted
-tree ([`Leaf`](@ref)/[`HBox`](@ref)/[`VBox`](@ref)) of titled [`Axes`](@ref)
-carrying [`Series`](@ref) and [`Decoration`](@ref)s. It knows nothing about
+tree ([`CTBase.Plotting.Leaf`](@ref)/[`CTBase.Plotting.HBox`](@ref)/[`CTBase.Plotting.VBox`](@ref)) of titled [`CTBase.Plotting.Axes`](@ref)
+carrying [`CTBase.Plotting.Series`](@ref) and [`CTBase.Plotting.Decoration`](@ref)s. It knows nothing about
 states, controls, costates, trajectories or optimal control — the *case layers*
-(CTModels, CTFlows) build the IR and hand it to a backend via [`render`](@ref).
+(CTModels, CTFlows) build the IR and hand it to a backend via [`CTBase.Plotting.render`](@ref).
 
 The IR and all its transforms live here in `src` (no backend dependency); only the
 drawing lives in an extension (`CTBasePlots` for Plots.jl). See the design report
 in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
 
 # Public API
-- IR: [`Series`](@ref), [`HLine`](@ref), [`VLine`](@ref), [`Axes`](@ref),
-  [`Leaf`](@ref), [`HBox`](@ref), [`VBox`](@ref), [`Figure`](@ref), [`leaves`](@ref)
-- case-layer building blocks: [`Panel`](@ref), [`Stacked`](@ref), [`Paired`](@ref),
-  [`Grid`](@ref)
-- backend contract: [`AbstractPlottingBackend`](@ref), [`PlotsBackend`](@ref),
-  [`render`](@ref), [`render!`](@ref)
+- IR: [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Axes`](@ref),
+  [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref)
+- case-layer building blocks: [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref),
+  [`CTBase.Plotting.Grid`](@ref)
+- backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref),
+  [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref)
 """
 module Plotting
 

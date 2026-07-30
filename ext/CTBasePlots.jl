@@ -18,14 +18,14 @@ using CTBase: Plotting
 """
     _TITLE_FONT
 
-Title font object built from the semantic size [`Plotting._TITLE_FONT_SIZE`](@ref).
+Title font object built from the semantic size `Plotting._TITLE_FONT_SIZE`.
 """
 const _TITLE_FONT = Plots.font(Plotting._TITLE_FONT_SIZE, Plots.default(:fontfamily))
 
 """
     _LABEL_FONT_SIZE
 
-Label font size, forwarded from [`Plotting._LABEL_FONT_SIZE`](@ref).
+Label font size, forwarded from `Plotting._LABEL_FONT_SIZE`.
 """
 const _LABEL_FONT_SIZE = Plotting._LABEL_FONT_SIZE
 
@@ -135,7 +135,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Draw a single [`Series`](@ref) `s` into subplot `sp` of plot `p`, forwarding
+Draw a single [`CTBase.Plotting.Series`](@ref) `s` into subplot `sp` of plot `p`, forwarding
 `user` keyword arguments and the translated series style.
 """
 function _draw_series!(p, s::Plotting.Series, sp::Int; user...)

@@ -30,7 +30,7 @@ Return the scalar DI differentiation primitive for a `Number` active argument.
 
 Dispatches to `DI.derivative`, which computes `df/dx` for scalar `x`.
 
-See also: [`CTBaseDifferentiationInterface._derivator`](@ref)
+See also: `_derivator`
 """
 function _derivator(::Type{<:Number})
     return DI.derivative
@@ -43,7 +43,7 @@ Return the array DI differentiation primitive for an `AbstractArray` active argu
 
 Dispatches to `DI.gradient`, which computes `∇f` for array `x`.
 
-See also: [`CTBaseDifferentiationInterface._derivator`](@ref)
+See also: `_derivator`
 """
 function _derivator(::Type{<:AbstractArray})
     return DI.gradient

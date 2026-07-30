@@ -10,7 +10,7 @@ mathematical notation in display code (e.g. variable names like `x₁`, `p²`).
 
 ## Subscripts
 
-[`ctindice`](@ref) returns a single subscript digit (0–9) as a `Char`:
+[`CTBase.Unicode.ctindice`](@ref) returns a single subscript digit (0–9) as a `Char`:
 
 ```@repl uni
 using CTBase
@@ -18,7 +18,7 @@ using CTBase
 CTBase.Unicode.ctindice(3)
 ```
 
-[`ctindices`](@ref) converts a multi-digit non-negative integer to a `String` of
+[`CTBase.Unicode.ctindices`](@ref) converts a multi-digit non-negative integer to a `String` of
 subscript characters:
 
 ```@repl uni
@@ -27,13 +27,13 @@ CTBase.Unicode.ctindices(123)
 
 ## Superscripts
 
-[`ctupperscript`](@ref) returns a single superscript digit (0–9) as a `Char`:
+[`CTBase.Unicode.ctupperscript`](@ref) returns a single superscript digit (0–9) as a `Char`:
 
 ```@repl uni
 CTBase.Unicode.ctupperscript(2)
 ```
 
-[`ctupperscripts`](@ref) converts a multi-digit non-negative integer to a `String`
+[`CTBase.Unicode.ctupperscripts`](@ref) converts a multi-digit non-negative integer to a `String`
 of superscript characters:
 
 ```@repl uni
@@ -57,10 +57,10 @@ end # hide
 
 | Function | Returns | Range |
 | :--- | :--- | :--- |
-| [`ctindice`](@ref) | `Char` (single subscript digit) | 0–9 |
-| [`ctindices`](@ref) | `String` (multi-digit subscripts) | ≥ 0 |
-| [`ctupperscript`](@ref) | `Char` (single superscript digit) | 0–9 |
-| [`ctupperscripts`](@ref) | `String` (multi-digit superscripts) | ≥ 0 |
+| [`CTBase.Unicode.ctindice`](@ref) | `Char` (single subscript digit) | 0–9 |
+| [`CTBase.Unicode.ctindices`](@ref) | `String` (multi-digit subscripts) | ≥ 0 |
+| [`CTBase.Unicode.ctupperscript`](@ref) | `Char` (single superscript digit) | 0–9 |
+| [`CTBase.Unicode.ctupperscripts`](@ref) | `String` (multi-digit superscripts) | ≥ 0 |
 
 ## See Also
 

@@ -17,7 +17,7 @@ nothing # hide
 ## Overview
 
 Every color emitted by CTBase comes from a single *active palette* — a
-[`Core.Palette`](@ref) struct that maps **semantic roles** to ANSI codes.
+[`CTBase.Core.Palette`](@ref) struct that maps **semantic roles** to ANSI codes.
 All display paths (Strategies, Options, Exceptions, TestRunner) read from the
 same palette, so changing it in one place re-skins everything.
 
@@ -59,7 +59,7 @@ color, but they are independently configurable:
 
 ## Built-in Themes
 
-Three palettes are provided out of the box. Use [`Core.show_palette`](@ref) to
+Three palettes are provided out of the box. Use [`CTBase.Core.show_palette`](@ref) to
 preview any of them in your terminal:
 
 ```julia
@@ -129,8 +129,8 @@ nothing # hide
 
 ## Switching Themes at Runtime
 
-Use [`Core.set_palette!`](@ref) to swap the active palette, and
-[`Core.reset_palette!`](@ref) to restore the default:
+Use [`CTBase.Core.set_palette!`](@ref) to swap the active palette, and
+[`CTBase.Core.reset_palette!`](@ref) to restore the default:
 
 ```julia
 using CTBase
@@ -150,7 +150,7 @@ implementation.
 
 ## Fine-Grained Overrides
 
-[`Core.set_color!`](@ref) changes a single role without touching the rest:
+[`CTBase.Core.set_color!`](@ref) changes a single role without touching the rest:
 
 ```julia
 using CTBase
@@ -175,7 +175,7 @@ for a reference table.
 
 ## Custom Palettes
 
-Build a [`Core.Palette`](@ref) from scratch using [`Core.Style`](@ref) values:
+Build a [`CTBase.Core.Palette`](@ref) from scratch using [`CTBase.Core.Style`](@ref) values:
 
 ```julia
 using CTBase
@@ -201,12 +201,12 @@ CTBase.Core.set_palette!(my_palette)
 CTBase.Core.reset_palette!()
 ```
 
-Fields must be provided in the order shown in [`Core.Palette`](@ref).
+Fields must be provided in the order shown in [`CTBase.Core.Palette`](@ref).
 
 ## Using `get_format_codes` in Custom Display Code
 
 If you implement `Base.show` for a type that extends CTBase, use
-[`Core.get_format_codes`](@ref) to derive styled codes rather than
+[`CTBase.Core.get_format_codes`](@ref) to derive styled codes rather than
 hardcoding ANSI sequences:
 
 ```julia
@@ -226,12 +226,12 @@ This ensures your display code:
 
 ## See Also
 
-- [`Core.Style`](@ref), [`Core.Palette`](@ref) — type definitions
-- [`Core.DEFAULT_PALETTE`](@ref), [`Core.MONOCHROME_PALETTE`](@ref),
-  [`Core.HIGH_CONTRAST_PALETTE`](@ref) — built-in themes
-- [`Core.current_palette`](@ref), [`Core.set_palette!`](@ref),
-  [`Core.reset_palette!`](@ref) — palette switching
-- [`Core.set_color!`](@ref) — single-role override
-- [`Core.get_format_codes`](@ref) — derive styled codes for
+- [`CTBase.Core.Style`](@ref), [`CTBase.Core.Palette`](@ref) — type definitions
+- [`CTBase.Core.DEFAULT_PALETTE`](@ref), [`CTBase.Core.MONOCHROME_PALETTE`](@ref),
+  [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@ref) — built-in themes
+- [`CTBase.Core.current_palette`](@ref), [`CTBase.Core.set_palette!`](@ref),
+  [`CTBase.Core.reset_palette!`](@ref) — palette switching
+- [`CTBase.Core.set_color!`](@ref) — single-role override
+- [`CTBase.Core.get_format_codes`](@ref) — derive styled codes for
   custom `show` methods
-- [`Core.show_palette`](@ref) — interactive preview of the active palette
+- [`CTBase.Core.show_palette`](@ref) — interactive preview of the active palette
