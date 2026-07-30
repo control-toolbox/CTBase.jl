@@ -6,6 +6,52 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.0] - 2026-07-30
+
+First stable (non-beta) release since 0.18.8. Consolidates all beta
+releases from 0.18.9-beta through 0.28.9-beta. See the per-version
+entries below for full details; this section lists only the breaking
+changes and the compat bump.
+
+### 💥 Breaking Changes (since 0.18.8)
+
+- **`Data`: `OpenLoop` is unconditionally non-autonomous** —
+  `is_autonomous` is no longer a real construction choice for
+  `OpenLoop`; the natural call is always `u(t)`. (0.28.9-beta, #515)
+- **`Strategies`: `get_parameter_type` removed; `parameter` contract
+  method added; `_default_parameter` renamed to `default_parameter`.**
+  (0.28.0-beta)
+- **`Interpolation`: `LinearInterpolant` / `ConstantInterpolant` aliases
+  removed.** Use `Interpolant{Linear}` / `Interpolant{Constant}`. (0.27.5-beta)
+- **`Core`: `NotProvided` / `NotProvidedType` removed from
+  `CTBase.Options`.** Now only in `CTBase.Core`. (0.25.0-beta)
+
+See [BREAKING.md](BREAKING.md) for full migration notes.
+
+### 🔧 Compat
+
+- **JET**: compat bumped to `0.9, 0.11, 0.12` (in both `Project.toml`
+  and `docs/Project.toml`).
+
+### 📚 Highlights (non-breaking, since 0.18.8)
+
+- `Data` module: `VectorField`, `Hamiltonian`, `HamiltonianVectorField`,
+  `PseudoHamiltonian`, `ControlLaw`, `PathConstraint`, `Multiplier`,
+  `ControlledVectorField`, `ComposedVectorField`, `ComposedHamiltonian`,
+  `PseudoHamiltonianVectorField` (0.23.0-beta → 0.28.5-beta)
+- `Traits` module: `TimeDependence`, `VariableDependence`,
+  `Mutability`, `Mode`, `Dynamics`, `AD`, `VariableCostate`,
+  `ControlDependence`, `Feedback`, `ConstraintKind` (0.22.0-beta → 0.26.1-beta)
+- `Differentiation` module: AD backend infrastructure, `DifferentiationInterface`
+  parameterized on `CPU`/`GPU`, GPU default `AutoMooncake()` (0.24.0-beta → 0.28.2-beta)
+- `Strategies` module: `Base.merge` for `StrategyRegistry`, non-throwing
+  `parameter(T, default)`, `describe` fix for 3+ type parameters (0.28.8-beta)
+- `Plotting` module: generic, backend-agnostic plotting engine (0.27.0-beta)
+- `Interpolation` module: `ctinterpolate`, `ctinterpolate_constant` (0.19.0-beta)
+- `DevTools` (formerly `Extensions`): `TestRunner` with Windows path fix,
+  colorblind-friendly progress bar, configurable display (0.18.10-beta → 0.28.7-beta)
+- Performance tooling: JET static analysis, hot-path regression guards (0.27.7-beta)
+
 ## [0.28.9-beta] - 2026-07-30
 
 ### 💥 Breaking Changes
