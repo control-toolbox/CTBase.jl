@@ -10,6 +10,7 @@ module Data
 
 # 1. External-package imports (qualified, pollution-free)
 import DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+import CTBase.Core
 import CTBase.Exceptions
 import CTBase.Traits
 

@@ -367,15 +367,20 @@ Three user-facing constructors fix the feedback trait:
 
 | Constructor | Feedback trait | Out-of-place call |
 |---|---|---|
-| [`Data.OpenLoop`](@ref CTBase.Data.OpenLoop) | `OpenLoopFeedback` | `u([t][, v])` |
+| [`Data.OpenLoop`](@ref CTBase.Data.OpenLoop) | `OpenLoopFeedback` | `u(t[, v])` |
 | [`Data.ClosedLoop`](@ref CTBase.Data.ClosedLoop) | `ClosedLoopFeedback` | `u([t, ]x[, v])` |
 | [`Data.DynClosedLoop`](@ref CTBase.Data.DynClosedLoop) | `DynClosedLoopFeedback` | `u([t, ]x, p[, v])` |
+
+`OpenLoop` is unconditionally non-autonomous — an open-loop control always
+depends on time, since autonomy is a property of the OCP, not of the control
+(see control-toolbox/CTBase.jl#515). `ClosedLoop`/`DynClosedLoop` keep
+`is_autonomous` as a real choice.
 
 **Construction**
 
 ```@example data
-# Open-loop, autonomous, fixed (default): u()
-u_ol = Data.OpenLoop(() -> 1.0)
+# Open-loop, fixed: u(t) — always depends on time, no is_autonomous choice
+u_ol = Data.OpenLoop(t -> 1.0)
 
 # Closed-loop, autonomous, fixed: u(x)
 u_cl = Data.ClosedLoop(x -> -x)
@@ -387,10 +392,11 @@ u_ol
 ```
 
 Non-autonomous and variable variants are constructed with the same keywords as
-other data types:
+other data types — except `OpenLoop`, which only takes `is_variable`:
 
 ```@example data
-u_ol_na = Data.OpenLoop((t, v) -> t * v; is_autonomous=false, is_variable=true)
+u_ol_v = Data.OpenLoop((t, v) -> t * v; is_variable=true)
+u_cl_na = Data.ClosedLoop((t, x) -> t .* x; is_autonomous=false)
 ```
 
 **Calling**
@@ -400,12 +406,12 @@ traits) and via a **uniform** signature that depends on the feedback trait:
 
 | Feedback | Natural | Uniform |
 |---|---|---|
-| `OpenLoop` | `u([t][, v])` | `u(t, v)` |
+| `OpenLoop` | `u(t[, v])` | `u(t, v)` |
 | `ClosedLoop` | `u([t, ]x[, v])` | `u(t, x, v)` |
 | `DynClosedLoop` | `u([t, ]x, p[, v])` | `u(t, x, p, v)` |
 
 ```@example data
-u_ol()                         # natural call
+u_ol(0.0)                      # natural call
 u_ol(0.0, nothing)             # uniform call
 
 u_cl(x0)                       # natural call

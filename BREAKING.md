@@ -3,6 +3,57 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Breaking changes (0.28.9-beta)
+
+- **`Data`: `OpenLoop` is unconditionally non-autonomous — `is_autonomous` is
+  no longer a real construction choice.**
+
+  Previously, `is_autonomous` stripped the time argument uniformly across all
+  three control-law kinds. For `OpenLoop`, since `t` is the only possible
+  argument, the default (`is_autonomous=true`) built a **zero-argument**
+  natural call `u()`, so `OpenLoop(t -> 0.0)` silently constructed a law that
+  only failed with a bare `MethodError` when a flow was later integrated —
+  not at construction. Maintainer feedback on
+  [control-toolbox/CTBase.jl#515](https://github.com/control-toolbox/CTBase.jl/issues/515)
+  settled the design question: autonomy is a property of the **OCP**, not of
+  the control — an open-loop control for an autonomous OCP can still depend
+  on time.
+
+  **What changed:**
+
+  - `OpenLoop`'s natural call is now **always** `u(t)` (or `u(t, v)` with
+    `is_variable=true`). The zero-argument form no longer exists.
+  - `OpenLoop`'s `TimeDependence` is fixed to `Traits.NonAutonomous`. This is
+    **not hidden**: `Traits.time_dependence`/`Traits.is_autonomous` on an
+    `OpenLoop` control law still answer normally — always
+    `NonAutonomous`/`false`.
+  - `OpenLoop(f; is_autonomous, is_variable)` still accepts the
+    `is_autonomous` keyword (now defaulting to the `CTBase.Core.NotProvided`
+    sentinel) purely as a misuse detector: passing it explicitly (`true` or
+    `false`) emits an `@warn` and has no effect on the constructed law.
+  - `ControlLaw(f, Traits.OpenLoopFeedback, Traits.Autonomous, VD)` (the
+    low-level typed constructor) now raises `Exceptions.IncorrectArgument`
+    instead of silently building a law with no matching call method.
+  - `ClosedLoop`/`DynClosedLoop` are **unaffected** — `is_autonomous` remains
+    a real, meaningful choice for those two feedback kinds.
+
+  **Migration:**
+
+  ```julia
+  # Before — the zero-argument default was the trap; this was the only
+  # correct spelling for a genuinely time-dependent open-loop control
+  Flow(ocp, OpenLoop(t -> 0.0; is_autonomous=false))
+  Flow(ocp, OpenLoop(() -> 0.0))   # constant control, relying on the default
+
+  # After — OpenLoop always takes t
+  Flow(ocp, OpenLoop(t -> 0.0))
+  Flow(ocp, OpenLoop(t -> 0.0))    # constant control is now just a law that ignores t
+  ```
+
+  Any downstream code constructing `OpenLoop` with a zero-argument closure
+  (e.g. `OpenLoop(() -> constant)`) must switch to a one-argument closure
+  (`OpenLoop(t -> constant)`, even if `t` is unused).
+
 ## Non-breaking note (0.28.8-beta)
 
 - **`Strategies`: `describe(id, registry)` fixed for strategies with 3+ type parameters.**
