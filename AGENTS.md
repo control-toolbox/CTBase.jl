@@ -35,8 +35,11 @@ Design philosophy, operational rules, plan templates, and CI/CD conventions live
 ## Key Conventions
 
 - **No top-level exports** — use `Package.Submodule.symbol` everywhere.
-- **Qualified imports** — `import Pkg: Pkg`, never bare `using`.
+- **Qualified imports** — `using Pkg: Pkg`, never bare `using Pkg`; `import` is never used.
 - **Fake types at module top-level** — never inside test functions.
+- **Structured errors** — seven typed exceptions under `CTException`; pick by the IncorrectArgument / PreconditionError / NotImplemented rule.
+- **Type stability enforced** — hot paths must be `@inferred`-clean, verified with JET; setup-path dispatch is fine.
+- **1-D is a scalar** — a one-dimensional state/control/variable is a `Number`, never a length-1 vector.
 - **Plans before code** — write a plan and confirm with the user before touching files.
 - **Docstrings last** — written only after all implementation steps are stable.
 - **Never commit or push without explicit user approval.**
