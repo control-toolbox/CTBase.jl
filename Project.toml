@@ -1,6 +1,6 @@
 name = "CTBase"
 uuid = "54762871-cc72-4466-b8e8-f6c8b58076cd"
-version = "0.28.9-beta"
+version = "0.29.0"
 authors = ["Olivier Cots <olivier.cots@irit.fr>", "Jean-Baptiste Caillau <caillau@univ-cotedazur.fr>"]
 
 [deps]
@@ -63,7 +63,7 @@ DifferentiationInterface = "0.7"
 DocStringExtensions = "0.9"
 Documenter = "1"
 ForwardDiff = "0.10, 1"
-JET = "0.9, 0.11"
+JET = "0.9, 0.11, 0.12"
 Logging = "1"
 Markdown = "1"
 MarkdownAST = "0.1"

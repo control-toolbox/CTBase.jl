@@ -3,6 +3,32 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Breaking changes (0.29.0)
+
+First stable (non-beta) release since 0.18.8. The following breaking
+changes were introduced during the beta series (0.18.9-beta →
+0.28.9-beta) and are now part of the stable API. Each entry links to
+the detailed section below.
+
+1. **`Data`: `OpenLoop` is unconditionally non-autonomous** —
+   `is_autonomous` is no longer a real construction choice. The natural
+   call is always `u(t)` (or `u(t, v)` with `is_variable=true`).
+   Zero-argument closures must be replaced by one-argument closures.
+   See [0.28.9-beta](#breaking-changes-0289-beta) below. (#515)
+
+2. **`Strategies`: `get_parameter_type` removed; `parameter` contract
+   method added; `_default_parameter` renamed to `default_parameter`.**
+   Every concrete strategy must now implement `parameter(::Type{<:S})`.
+   See [0.28.0-beta](#breaking-changes-0280-beta) below.
+
+3. **`Interpolation`: `LinearInterpolant` / `ConstantInterpolant` aliases
+   removed.** Use `Interpolant{Linear}` / `Interpolant{Constant}`.
+   See [0.27.5-beta](#breaking-changes-0275-beta) below.
+
+4. **`Core`: `NotProvided` / `NotProvidedType` removed from
+   `CTBase.Options`.** They now live only in `CTBase.Core`.
+   See [0.25.0-beta](#breaking-changes-0250-beta) below.
+
 ## Breaking changes (0.28.9-beta)
 
 - **`Data`: `OpenLoop` is unconditionally non-autonomous — `is_autonomous` is
