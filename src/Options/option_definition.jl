@@ -85,7 +85,7 @@ struct OptionDefinition{T}
         computed::Bool=false,
     ) where {T}
         # Validate with custom validator if provided (skip for NotProvided)
-        if validator !== nothing && !(default isa Core.NotProvidedType)
+        if validator !== nothing && !(default isa NotProvidedType)
             try
                 validator(default)
             catch e
@@ -285,13 +285,13 @@ See also: [`CTBase.Options.OptionDefinition`](@ref), `CTBase.Core.NotProvided`, 
 function _construct_option_definition(
     name::Symbol,
     type::Type,
-    default::Core.NotProvidedType,
+    default::NotProvidedType,
     description::String,
     aliases::Tuple{Vararg{Symbol}},
     validator::Union{Function,Nothing},
     computed::Bool,
 )
-    return OptionDefinition{Core.NotProvidedType}(;
+    return OptionDefinition{NotProvidedType}(;
         name=name,
         type=type,
         default=default,
@@ -553,7 +553,7 @@ true
 
 See also: [`CTBase.Options.has_default`](@ref), [`CTBase.Options.default`](@ref)
 """
-is_required(def::OptionDefinition) = def.default isa Core.NotProvidedType
+is_required(def::OptionDefinition) = def.default isa NotProvidedType
 
 """
 $(TYPEDSIGNATURES)
@@ -579,7 +579,7 @@ true
 
 See also: [`CTBase.Options.is_required`](@ref), [`CTBase.Options.default`](@ref)
 """
-has_default(def::OptionDefinition) = !(def.default isa Core.NotProvidedType)
+has_default(def::OptionDefinition) = !(def.default isa NotProvidedType)
 
 """
 $(TYPEDSIGNATURES)

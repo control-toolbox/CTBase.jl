@@ -10,7 +10,7 @@ module Data
 
 # 1. External-package imports (qualified, pollution-free)
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-using ..Core: Core
+using ..Core: Core, NotProvided, NotProvidedType
 using ..Exceptions
 using ..Traits
 
