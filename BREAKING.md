@@ -9,12 +9,17 @@ This document outlines all breaking changes introduced in CTBase v0.18.0-beta co
   `using` form (`using Pkg: Pkg` instead of `import Pkg`) across source,
   extensions, and tests — enforcing Handbook tenet 2. **No breaking change**:
   no public API, type, or signature changes. No migration required.
+- **Core / Options / Data**: `NotProvided` and `NotProvidedType` now imported
+  directly from `Core` instead of accessed via `Core.` prefix, to avoid a
+  name clash with the stdlib `Core` module on Julia 1.10 JET. **No breaking
+  change**: no public API, type, or signature changes.
 - **Strategies**: docstring examples for `option_is_user`,
   `option_is_default`, `option_is_computed` corrected to reference the right
   function names. **No breaking change**: documentation fix only.
 - **Documentation**: `AGENTS.md` import convention wording fixed; guide pages
-  switched to `using` form for submodule examples. **No breaking change**:
-  documentation only.
+  switched to `using` form for submodule examples; all `@ref` cross-references
+  qualified with full `CTBase.Module.symbol` paths per Handbook convention.
+  **No breaking change**: documentation only.
 
 ## Breaking changes (0.29.0)
 

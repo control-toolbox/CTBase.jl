@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Handbook convention uniformly. No public API, type, or signature changes.
 - Fixes control-toolbox/CTBase.jl#528.
 
+#### **Core / Options / Data** — `NotProvidedType` import fix for Julia 1.10 JET
+
+- `using ..Core: Core` caused `UndefVarError: NotProvidedType not defined`
+  on Julia 1.10 JET because the name `Core` clashes with the stdlib `Core`
+  module in type annotations. Fixed by importing `NotProvided` and
+  `NotProvidedType` directly from `Core` and using them without the
+  `Core.` prefix in code. No public API change.
+- Fixes control-toolbox/CTBase.jl#530.
+
 #### **Strategies** — docstring example function names corrected
 
 - `option_is_user`, `option_is_default`, `option_is_computed` docstring
@@ -29,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tenets.
 - Guide pages: switched `import` submodule examples to `using` form for
   consistency with the new convention.
+- **Cross-references**: all `@ref` links in source docstrings, extensions,
+  and guide pages qualified with full `` [`CTBase.Module.symbol`](@ref) ``
+  form per Handbook convention (~90 references across 21 files). Resolves
+  Documenter warnings and Vitepress dead link errors.
 
 ### ✅ Compatibility
 
