@@ -15,9 +15,9 @@ The whole approach rests on one distinction.
 CTBase code falls into two categories:
 
 - **Hot path** — code called *repeatedly* during a solve: evaluating a
-  [`Data.VectorField`](@ref) or a [`Data.Hamiltonian`](@ref) at each integration
+  [`CTBase.Data.VectorField`](@ref) or a [`CTBase.Data.Hamiltonian`](@ref) at each integration
   step, reading a strategy option inside an inner loop, evaluating an
-  [`Interpolation.Interpolant`](@ref) at many time points. This code **must be
+  [`CTBase.Interpolation.Interpolant`](@ref) at many time points. This code **must be
   type-stable** — an instability here multiplies over thousands of calls.
 - **Setup path** — code called *once per problem*, before the solve: building a
   strategy registry, constructing a strategy's options, resolving a strategy ID

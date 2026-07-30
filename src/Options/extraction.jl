@@ -77,7 +77,7 @@ function extract_option(kwargs::NamedTuple, def::OptionDefinition)
     end
 
     # Not found - check if default is NotProvided
-    if def.default isa Core.NotProvidedType
+    if def.default isa CTBase.Core.NotProvidedType
         # No default and not provided by user - return NotStored to signal "don't store"
         return NotStored, kwargs
     end
@@ -236,7 +236,7 @@ function extract_raw_options(options::NamedTuple)
     for (k, v) in pairs(options)
         val = v isa OptionValue ? v.value : v
         # Filter out NotProvided values, but keep nothing values
-        if !(val isa Core.NotProvidedType)
+        if !(val isa CTBase.Core.NotProvidedType)
             raw_opts_dict[k] = val
         end
     end

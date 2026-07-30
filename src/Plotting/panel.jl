@@ -13,7 +13,7 @@ $(TYPEDEF)
 
 A titled group of components sharing one time grid — the case layer's convenient
 input unit (e.g. all state components). It is not part of the rendered IR: the
-[`lower`](@ref) step turns a `Panel` into [`Leaf`](@ref)/[`Axes`](@ref) nodes.
+[`CTBase.Plotting.lower`](@ref) step turns a `Panel` into [`CTBase.Plotting.Leaf`](@ref)/[`CTBase.Plotting.Axes`](@ref) nodes.
 
 Each panel carries **its own** time grid `x` (so different groups may live on
 different grids) and, optionally, a per-component `styles` vector (finer than the
@@ -71,14 +71,14 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the number of components (columns) of a [`Panel`](@ref).
+Return the number of components (columns) of a [`CTBase.Plotting.Panel`](@ref).
 """
 n_components(p::Panel) = size(p.data, 2)
 
 """
 $(TYPEDSIGNATURES)
 
-Return the style to apply to component `i` of a [`Panel`](@ref): its own per-component
+Return the style to apply to component `i` of a [`CTBase.Plotting.Panel`](@ref): its own per-component
 style if a `styles` vector is set, otherwise the shared `style`.
 """
 component_style(p::Panel, i::Integer) = isempty(p.styles) ? p.style : p.styles[i]
@@ -90,7 +90,7 @@ component_style(p::Panel, i::Integer) = isempty(p.styles) ? p.style : p.styles[i
 """
 $(TYPEDSIGNATURES)
 
-Default overall layout for [`lower`](@ref): `:split` (one subplot per component).
+Default overall layout for [`CTBase.Plotting.lower`](@ref): `:split` (one subplot per component).
 Alternative: `:group`.
 """
 __layout() = :split
@@ -98,7 +98,7 @@ __layout() = :split
 """
 $(TYPEDSIGNATURES)
 
-Default time-axis handling for [`lower`](@ref): `:default` (real time).
+Default time-axis handling for [`CTBase.Plotting.lower`](@ref): `:default` (real time).
 Alternatives: `:normalize` / `:normalise`.
 """
 __time() = :default
@@ -127,7 +127,7 @@ const _LABEL_FONT_SIZE = 10
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of a [`Panel`](@ref).
+Compact one-line display of a [`CTBase.Plotting.Panel`](@ref).
 
 See also: `Base.show`
 """
@@ -142,7 +142,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty display of a [`Panel`](@ref), showing its title, labels,
+Pretty display of a [`CTBase.Plotting.Panel`](@ref), showing its title, labels,
 and data dimensions.
 
 See also: `Base.show`

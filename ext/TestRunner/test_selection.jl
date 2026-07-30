@@ -63,7 +63,7 @@ different subdirectories), prefers the shallowest path.
 - Prefers shallower paths when multiple matches exist
 - Returns the exact relative path if found
 
-See also: [`TestRunner._collect_test_files_recursive`](@ref), [`TestRunner._ensure_jl`](@ref)
+See also: `_collect_test_files_recursive`, `_ensure_jl`
 """
 function _find_symbol_test_file_rel(
     name::Symbol, filename_builder::Function; test_dir::AbstractString

@@ -38,7 +38,7 @@ $(TYPEDSIGNATURES)
 
 Return a linear interpolation function for the data `f` defined at points `x`.
 
-This creates a one-dimensional linear [`Interpolant`](@ref) with flat extrapolation beyond
+This creates a one-dimensional linear [`CTBase.Interpolation.Interpolant`](@ref) with flat extrapolation beyond
 the bounds of `x` (returns `f[1]` for `t < x[1]` and `f[end]` for `t >= x[end]`).
 
 # Arguments
@@ -46,7 +46,7 @@ the bounds of `x` (returns `f[1]` for `t < x[1]` and `f[end]` for `t >= x[end]`)
 - `f`: A vector of values to interpolate.
 
 # Returns
-A callable [`Interpolant{Linear}`](@ref) that can be evaluated at new points.
+A callable [`CTBase.Interpolation.Interpolant`](@ref) that can be evaluated at new points.
 
 # Example
 ```julia-repl
@@ -65,7 +65,7 @@ $(TYPEDSIGNATURES)
 
 Return a piecewise-constant interpolation function for the data `f` defined at points `x`.
 
-This creates a right-continuous piecewise-constant [`Interpolant`](@ref): the value at knot
+This creates a right-continuous piecewise-constant [`CTBase.Interpolation.Interpolant`](@ref): the value at knot
 `x[i]` is held constant on the interval `[x[i], x[i+1})`.
 
 This implements the standard steppost behavior for optimal control:
@@ -78,7 +78,7 @@ This implements the standard steppost behavior for optimal control:
 - `f`: A vector of values to interpolate.
 
 # Returns
-A callable [`Interpolant{Constant}`](@ref) that can be evaluated at new points.
+A callable [`CTBase.Interpolation.Interpolant`](@ref) that can be evaluated at new points.
 
 # Example
 ```julia-repl

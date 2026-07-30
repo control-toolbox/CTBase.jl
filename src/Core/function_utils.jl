@@ -5,7 +5,7 @@ Promote the element type of the numeric arguments (scalars and arrays) so the
 allocated buffer can hold e.g. `ForwardDiff.Dual` values during differentiation.
 
 Falls back to `Union{}` for non-numeric arguments (e.g. `nothing`), which is neutral
-under `promote_type`. Combined with the `T` floor in [`to_out_of_place`](@ref),
+under `promote_type`. Combined with the `T` floor in [`CTBase.Core.to_out_of_place`](@ref),
 non-numeric-only calls keep `T`.
 
 See also: [`CTBase.Core.to_out_of_place`](@ref).
@@ -28,7 +28,7 @@ The resulting function `f` returns a vector of type `T` and length `n` by first 
 memory and then calling `f!` to fill it.
 
 The buffer element type is widened from the call arguments (via
-[`_promote_arg_eltype`](@ref)) so that `ForwardDiff.Dual` values are accommodated
+[`CTBase.Core._promote_arg_eltype`](@ref)) so that `ForwardDiff.Dual` values are accommodated
 during automatic differentiation. The `T` keyword acts as a floor, so plain
 `Float64`/`Int` calls keep their previous behaviour.
 

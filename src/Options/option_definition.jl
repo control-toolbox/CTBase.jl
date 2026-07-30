@@ -85,7 +85,7 @@ struct OptionDefinition{T}
         computed::Bool=false,
     ) where {T}
         # Validate with custom validator if provided (skip for NotProvided)
-        if validator !== nothing && !(default isa Core.NotProvidedType)
+        if validator !== nothing && !(default isa CTBase.Core.NotProvidedType)
             try
                 validator(default)
             catch e
@@ -285,13 +285,13 @@ See also: [`CTBase.Options.OptionDefinition`](@ref), `CTBase.Core.NotProvided`, 
 function _construct_option_definition(
     name::Symbol,
     type::Type,
-    default::Core.NotProvidedType,
+    default::CTBase.Core.NotProvidedType,
     description::String,
     aliases::Tuple{Vararg{Symbol}},
     validator::Union{Function,Nothing},
     computed::Bool,
 )
-    return OptionDefinition{Core.NotProvidedType}(;
+    return OptionDefinition{CTBase.Core.NotProvidedType}(;
         name=name,
         type=type,
         default=default,
@@ -553,7 +553,7 @@ true
 
 See also: [`CTBase.Options.has_default`](@ref), [`CTBase.Options.default`](@ref)
 """
-is_required(def::OptionDefinition) = def.default isa Core.NotProvidedType
+is_required(def::OptionDefinition) = def.default isa CTBase.Core.NotProvidedType
 
 """
 $(TYPEDSIGNATURES)
@@ -579,7 +579,7 @@ true
 
 See also: [`CTBase.Options.is_required`](@ref), [`CTBase.Options.default`](@ref)
 """
-has_default(def::OptionDefinition) = !(def.default isa Core.NotProvidedType)
+has_default(def::OptionDefinition) = !(def.default isa CTBase.Core.NotProvidedType)
 
 """
 $(TYPEDSIGNATURES)
@@ -713,7 +713,7 @@ max_iter (max, maxiter) :: Int64
 See also: [`CTBase.Options.OptionDefinition`](@ref)
 """
 function Base.show(io::IO, def::OptionDefinition)
-    fmt = Core.get_format_codes(io)
+    fmt = CTBase.Core.get_format_codes(io)
 
     # Show primary name with aliases if present
     if isempty(def.aliases)

@@ -37,7 +37,7 @@ fallback `has_<family>_trait(::Any)` method when an object does not opt into a
 strict trait family.
 
 The offending caller is detected automatically from the stacktrace via
-[`_caller_function_name`](@ref), so the message names the user-facing predicate
+[`CTBase.Traits._caller_function_name`](@ref), so the message names the user-facing predicate
 (`is_autonomous`, `is_variable`, …) rather than the internal machinery.
 
 # Arguments

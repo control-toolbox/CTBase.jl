@@ -10,12 +10,12 @@ interpolation for one-dimensional data. Two methods are available:
 - **Linear** interpolation with flat extrapolation outside the node range.
 - **Piecewise-constant** (right-continuous *steppost*) interpolation.
 
-Both produce a callable [`Interpolant`](@ref) — a `Function` subtype whose evaluation
+Both produce a callable [`CTBase.Interpolation.Interpolant`](@ref) — a `Function` subtype whose evaluation
 rule is selected at compile time via a trait parameter.
 
 ## Linear interpolation
 
-[`ctinterpolate`](@ref) builds a linear interpolant from nodes `x` and values `f`.
+[`CTBase.Interpolation.ctinterpolate`](@ref) builds a linear interpolant from nodes `x` and values `f`.
 Outside `[x[1], x[end]]` the value is held flat (clamped to the nearest endpoint):
 
 ```@repl interp
@@ -34,7 +34,7 @@ interp(5.0)   # flat extrapolation → f[end]
 
 ## Piecewise-constant interpolation
 
-[`ctinterpolate_constant`](@ref) builds a right-continuous steppost interpolant:
+[`CTBase.Interpolation.ctinterpolate_constant`](@ref) builds a right-continuous steppost interpolant:
 the value at node `x[i]` is held on `[x[i], x[i+1])`.
 
 ```@repl interp
@@ -51,7 +51,7 @@ optimal control.
 
 ## The Interpolant type
 
-An [`Interpolant`](@ref) is parametrised by its method trait (`Linear` or `Constant`),
+An [`CTBase.Interpolation.Interpolant`](@ref) is parametrised by its method trait (`Linear` or `Constant`),
 which makes the call type-stable:
 
 ```@repl interp
@@ -76,8 +76,8 @@ const_interp
 
 | Function | Purpose |
 | :--- | :--- |
-| [`ctinterpolate`](@ref) | Linear interpolation with flat extrapolation |
-| [`ctinterpolate_constant`](@ref) | Piecewise-constant (steppost) interpolation |
+| [`CTBase.Interpolation.ctinterpolate`](@ref) | Linear interpolation with flat extrapolation |
+| [`CTBase.Interpolation.ctinterpolate_constant`](@ref) | Piecewise-constant (steppost) interpolation |
 | [`method`](@ref CTBase.Interpolation.method) | Return the interpolation method trait of an `Interpolant` |
 
 ## See Also
