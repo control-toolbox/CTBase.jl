@@ -57,6 +57,9 @@ CTBase.DevTools.run_tests(;
     available_tests=[                   # Available test groups
         "suite/*"                       # Glob: all tests in suite/
     ],
+    excluded_tests=[                    # Tests removed from the available groups
+        "suite/slow/*"
+    ],
     filename_builder = name -> "test_$(name).jl",
     funcname_builder = name -> "test_$(name)",
     test_dir=TEST_DIR,                  # Directory containing test files
@@ -70,6 +73,7 @@ CTBase.DevTools.run_tests(;
 | `args::AbstractVector{<:AbstractString}` | `String[]` | Command-line arguments (typically `String.(ARGS)`) |
 | `testset_name::String` | `"Tests"` | Name of the main `@testset` |
 | `available_tests::Vector` | `Symbol[]` | Allowed tests (Symbols, Strings, or glob patterns). Empty = auto-discovery |
+| `excluded_tests::Vector` | `Symbol[]` | Tests removed from the available tests (Symbols, Strings, or glob patterns) |
 | `filename_builder::Function` | `identity` | `name → filename` mapping |
 | `funcname_builder::Function` | `identity` | `name → function_name` mapping (return `nothing` to skip eval) |
 | `eval_mode::Bool` | `true` | Whether to call the function after `include` |
@@ -113,6 +117,22 @@ julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["utils"])'
 julia --project -e 'using Pkg; Pkg.test("MyPackage";
     test_args=["core", "utils"])'
 ```
+
+### Exclude tests
+
+`excluded_tests` is applied after `available_tests` (or auto-discovery) and before
+command-line selections. It accepts symbols, paths, and glob patterns:
+
+```julia
+CTBase.DevTools.run_tests(;
+    available_tests=["suite/*"],
+    excluded_tests=["suite/slow/*"],
+    args=["--all"],
+)
+```
+
+When `available_tests` is empty, tests are auto-discovered first and then filtered
+by `excluded_tests`.
 
 ### Path prefix stripping
 

@@ -8,6 +8,7 @@ Run tests with configurable file/function name builders and optional available t
 - `args::AbstractVector{<:AbstractString}`: Command-line arguments (typically `String.(ARGS)`)
 - `testset_name::String`: Name of the main testset (default: `"Tests"`)
 - `available_tests`: Allowed tests (Symbols, Strings, or glob patterns). Empty = auto-discovery
+- `excluded_tests`: Tests to remove from the available tests (Symbols, Strings, or glob patterns)
 - `filename_builder::Function`: `name → filename` mapping (default: `identity`)
 - `funcname_builder::Function`: `name → function_name` mapping (default: `identity`)
 - `eval_mode::Bool`: Whether to call the function after include (default: `true`)
@@ -25,6 +26,7 @@ Run tests with configurable file/function name builders and optional available t
 
 # Notes
 - Test selection is driven by `args` (coverage flags are automatically filtered out)
+- `excluded_tests` is applied after `available_tests` or auto-discovery and before `args`
 - Selection arguments are interpreted as glob patterns and matched against both test names and filenames
 - Arguments starting with `test/` are automatically stripped for convenience
 - When `on_test_done` is provided, it replaces the built-in progress callback; `show_progress_line` is then ignored
@@ -52,6 +54,7 @@ function DevTools.run_tests(
     args::AbstractVector{<:AbstractString}=String[],
     testset_name::String="Tests",
     available_tests=Symbol[],
+    excluded_tests=Symbol[],
     filename_builder::Function=identity,
     funcname_builder::Function=identity,
     eval_mode::Bool=true,
@@ -80,10 +83,16 @@ function DevTools.run_tests(
     (selections, run_all, dry_run) = _parse_test_args(String.(args))
 
     available_tests_vec = _normalize_available_tests(available_tests)
+    excluded_tests_vec = _normalize_available_tests(excluded_tests)
 
     # Get selected tests
     selected = _select_tests(
-        selections, available_tests_vec, run_all, filename_builder; test_dir=test_dir
+        selections,
+        available_tests_vec,
+        excluded_tests_vec,
+        run_all,
+        filename_builder;
+        test_dir=test_dir,
     )
 
     if dry_run
