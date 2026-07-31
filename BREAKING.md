@@ -3,6 +3,14 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.29.2)
+
+- **TestRunner**: added the optional `excluded_tests` keyword to
+  `CTBase.DevTools.run_tests`. It supports symbols, paths, directories, and glob
+  patterns, and filters tests after `available_tests` or auto-discovery.
+  **No breaking change**: the keyword is additive and existing calls do not
+  require any changes.
+
 ## Non-breaking note (0.29.1)
 
 - **Codebase-wide**: all `import` statements replaced with the qualified

@@ -6,6 +6,20 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.2] - 2026-07-31
+
+### ✨ Added
+
+- **TestRunner**: added the `excluded_tests` keyword to
+  `CTBase.DevTools.run_tests`. Tests can be excluded by symbol, path, directory,
+  or glob pattern after `available_tests` or auto-discovery and before command-line
+  selections.
+
+### ✅ Compatibility
+
+- **No breaking changes**: `excluded_tests` is an additive optional keyword.
+  Existing calls keep their previous behavior.
+
 ## [0.29.1] - 2026-07-30
 
 ### 🛠 Internal Fixes
