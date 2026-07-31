@@ -86,15 +86,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Determine which tests to run based on selections, available_tests filter, and file globbing.
+Determine which tests to run based on selections, available_tests filter,
+excluded_tests filter, and file globbing.
 
 1. Identify potential test files in `test_dir` (default: `test/`).
 2. Filter by `available_tests` if provided.
-3. Filter by `selections` (interpreted as globs) if present.
+3. Remove tests matching `excluded_tests`.
+4. Filter by `selections` (interpreted as globs) if present.
 
 # Arguments
 - `selections::Vector{String}`: User-provided selection patterns
 - `available_tests::AbstractVector{<:TestSpec}`: Allowed tests (empty = auto-discovery)
+- `excluded_tests::AbstractVector{<:TestSpec}`: Tests to remove from the candidates
 - `run_all::Bool`: Whether to run all available tests
 - `filename_builder::Function`: Function to map test names to filenames
 - `test_dir::String`: Root directory containing test files
@@ -107,9 +110,44 @@ Determine which tests to run based on selections, available_tests filter, and fi
   heuristic using the filename stem as the candidate test name
 - Selection arguments are matched against multiple representations of each candidate
 """
+function _test_spec_matches(
+    candidate::TestSpec,
+    pattern::TestSpec,
+    available_tests::AbstractVector{<:TestSpec},
+    filename_builder::Function,
+)
+    candidate_str = String(candidate)
+    candidate_filename = if candidate isa String
+        _ensure_jl(candidate)
+    elseif isempty(available_tests)
+        "$(candidate).jl"
+    else
+        _ensure_jl(_builder_to_string(filename_builder(candidate)))
+    end
+
+    candidate_filename_no_ext = replace(candidate_filename, ".jl" => "")
+    candidate_basename = basename(candidate_filename)
+    candidate_basename_no_ext = replace(candidate_basename, ".jl" => "")
+    candidate_basename_no_test_prefix =
+        if startswith(candidate_basename_no_ext, "test_")
+            candidate_basename_no_ext[6:end]
+        else
+            candidate_basename_no_ext
+        end
+
+    regex = _glob_to_regex(String(pattern))
+    return !isnothing(match(regex, candidate_str)) ||
+           !isnothing(match(regex, candidate_filename)) ||
+           !isnothing(match(regex, candidate_filename_no_ext)) ||
+           !isnothing(match(regex, candidate_basename)) ||
+           !isnothing(match(regex, candidate_basename_no_ext)) ||
+           !isnothing(match(regex, candidate_basename_no_test_prefix))
+end
+
 function _select_tests(
     selections::Vector{String},
     available_tests::AbstractVector{<:TestSpec},
+    excluded_tests::AbstractVector{<:TestSpec},
     run_all::Bool,
     filename_builder::Function;
     test_dir::String=joinpath(pwd(), "test"), # Default assumption
@@ -149,6 +187,17 @@ function _select_tests(
                     end
                 end
             end
+        end
+    end
+
+    if !isempty(excluded_tests)
+        filter!(candidates) do candidate
+            !any(
+                pattern -> _test_spec_matches(
+                    candidate, pattern, available_tests, filename_builder
+                ),
+                excluded_tests,
+            )
         end
     end
 
@@ -217,4 +266,21 @@ function _select_tests(
     end
 
     return filtered
+end
+
+function _select_tests(
+    selections::Vector{String},
+    available_tests::AbstractVector{<:TestSpec},
+    run_all::Bool,
+    filename_builder::Function;
+    test_dir::String=joinpath(pwd(), "test"),
+)
+    return _select_tests(
+        selections,
+        available_tests,
+        TestSpec[],
+        run_all,
+        filename_builder;
+        test_dir=test_dir,
+    )
 end

@@ -83,6 +83,33 @@ function test_testrunner()
                 Test.@test all(info -> info.elapsed isa Float64, done_log)
             end
         end
+
+        Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "excluded_tests filters execution" begin
+            mktempdir() do temp_dir
+                write(
+                    joinpath(temp_dir, "test_int_a.jl"),
+                    "function test_int_a()\n    Test.@test true\nend\n",
+                )
+                write(
+                    joinpath(temp_dir, "test_int_b.jl"),
+                    "function test_int_b()\n    Test.@test true\nend\n",
+                )
+
+                done_log = TestRunner.TestRunInfo[]
+                DevTools.run_tests(;
+                    available_tests=(:int_a, :int_b),
+                    excluded_tests=(:int_b,),
+                    filename_builder=n -> Symbol(:test_, n),
+                    funcname_builder=n -> Symbol(:test_, n),
+                    test_dir=temp_dir,
+                    verbose=false,
+                    showtiming=false,
+                    on_test_done=info -> push!(done_log, info),
+                )
+
+                Test.@test [info.spec for info in done_log] == [:int_a]
+            end
+        end
     end
 
     return nothing
