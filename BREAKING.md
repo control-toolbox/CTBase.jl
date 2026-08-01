@@ -3,6 +3,12 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.29.3)
+
+- **Documentation**: switched extensible documentation cross-references to use
+  `InterLinks`. **No breaking change**: documentation and CI configuration only;
+  no migration is required.
+
 ## Non-breaking note (0.29.2)
 
 - **TestRunner**: added the optional `excluded_tests` keyword to
