@@ -141,7 +141,7 @@ end
 bases_file = joinpath(@__DIR__, "build", "bases.txt")
 if isfile(bases_file)
     DocumenterVitepress.deploydocs(;
-        repo=repo_url * ".git", devbranch="main", push_preview=true
+        repo=repo_url * ".git", devbranch="main", push_preview=false
     )
 else
     @info "Skipping deployment: no bases were built (prerelease with existing higher stable release)."
