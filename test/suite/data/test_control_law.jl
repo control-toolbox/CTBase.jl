@@ -54,7 +54,9 @@ function test_control_law()
             Test.@test Traits.variable_dependence(cl7) == Traits.NonFixed
 
             # ClosedLoop, NonAutonomous, NonFixed
-            cl8 = Data.ClosedLoop((t, x, v) -> t + x + v; is_autonomous=false, is_variable=true)
+            cl8 = Data.ClosedLoop(
+                (t, x, v) -> t + x + v; is_autonomous=false, is_variable=true
+            )
             Test.@test cl8 isa Data.ControlLaw
             Test.@test Traits.feedback(cl8) == Traits.ClosedLoopFeedback
             Test.@test Traits.time_dependence(cl8) == Traits.NonAutonomous

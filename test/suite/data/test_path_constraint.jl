@@ -71,7 +71,9 @@ function test_path_constraint()
 
         Test.@testset "Natural calls - MixedConstraint" begin
             Test.@test Data.MixedConstraint((x, u) -> x[1] + u[1])([2.0], [3.0]) == 5.0
-            Test.@test Data.MixedConstraint((t, x, u) -> t + x[1] + u[1]; is_autonomous=false)(
+            Test.@test Data.MixedConstraint(
+                (t, x, u) -> t + x[1] + u[1]; is_autonomous=false
+            )(
                 1.0, [2.0], [3.0]
             ) == 6.0
             Test.@test Data.MixedConstraint(
@@ -115,10 +117,14 @@ function test_path_constraint()
 
             # Mixed
             Test.@test Data.MixedConstraint((x, u) -> x[1] + u[1])(t, x, u, v) == 5.0
-            Test.@test Data.MixedConstraint((t, x, u) -> t + x[1] + u[1]; is_autonomous=false)(
+            Test.@test Data.MixedConstraint(
+                (t, x, u) -> t + x[1] + u[1]; is_autonomous=false
+            )(
                 t, x, u, v
             ) == 6.0
-            Test.@test Data.MixedConstraint((x, u, v) -> x[1] + u[1] + v[1]; is_variable=true)(
+            Test.@test Data.MixedConstraint(
+                (x, u, v) -> x[1] + u[1] + v[1]; is_variable=true
+            )(
                 t, x, u, v
             ) == 9.0
             # Mixed NonAut NonFixed: natural == uniform
@@ -167,7 +173,9 @@ function test_path_constraint()
             Test.@test occursin("natural call: g(x, u)", str)
             Test.@test occursin("uniform call: g(t, x, u, v)", str)
 
-            gs = Data.StateConstraint((t, x, v) -> x[1]; is_autonomous=false, is_variable=true)
+            gs = Data.StateConstraint(
+                (t, x, v) -> x[1]; is_autonomous=false, is_variable=true
+            )
             strs = repr(MIME("text/plain"), gs)
             Test.@test occursin("PathConstraint: state, non-autonomous, variable", strs)
             Test.@test occursin("natural call: g(t, x, v)", strs)

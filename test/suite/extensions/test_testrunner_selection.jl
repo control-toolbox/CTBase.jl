@@ -187,26 +187,42 @@ function test_testrunner_selection()
             Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "test exclusions" begin
                 available = TestRunner.TestSpec[:utils, :core]
                 sel = select_tests(
-                    String[], available, TestRunner.TestSpec[:core], false, test_builder_sym;
+                    String[],
+                    available,
+                    TestRunner.TestSpec[:core],
+                    false,
+                    test_builder_sym;
                     test_dir=temp_dir,
                 )
                 Test.@test sel == [:utils]
 
                 available = TestRunner.TestSpec["suite_norm/*"]
                 sel = select_tests(
-                    String[], available, TestRunner.TestSpec["suite_norm/test_y"], false, identity;
+                    String[],
+                    available,
+                    TestRunner.TestSpec["suite_norm/test_y"],
+                    false,
+                    identity;
                     test_dir=temp_dir,
                 )
                 Test.@test sel == ["suite_norm/test_x.jl"]
 
                 sel = select_tests(
-                    String[], available, TestRunner.TestSpec["suite_norm/test_*"], false, identity;
+                    String[],
+                    available,
+                    TestRunner.TestSpec["suite_norm/test_*"],
+                    false,
+                    identity;
                     test_dir=temp_dir,
                 )
                 Test.@test isempty(sel)
 
                 sel = select_tests(
-                    String[], Symbol[], TestRunner.TestSpec[:utils], false, identity;
+                    String[],
+                    Symbol[],
+                    TestRunner.TestSpec[:utils],
+                    false,
+                    identity;
                     test_dir=temp_dir,
                 )
                 Test.@test "test_core.jl" in sel
