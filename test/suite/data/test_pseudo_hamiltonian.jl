@@ -30,7 +30,9 @@ function test_pseudo_hamiltonian()
             Test.@test Traits.variable_dependence(ph2) == Traits.Fixed
 
             # Autonomous, NonFixed
-            ph3 = Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
+            ph3 = Data.PseudoHamiltonian(
+                (x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true
+            )
             Test.@test ph3 isa Data.PseudoHamiltonian
             Test.@test Traits.time_dependence(ph3) == Traits.Autonomous
             Test.@test Traits.variable_dependence(ph3) == Traits.NonFixed
@@ -62,7 +64,9 @@ function test_pseudo_hamiltonian()
             Test.@test ph2(1.0, [2.0, 3.0], [4.0, 5.0], 6.0) == 1.0 + 8.0 + 15.0 + 36.0
 
             # Autonomous, NonFixed: h̃(x, p, u, v)
-            ph3 = Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
+            ph3 = Data.PseudoHamiltonian(
+                (x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true
+            )
             Test.@test ph3([1.0, 2.0], [3.0, 4.0], 5.0, 6.0) == 3.0 + 8.0 + 25.0 + 6.0
 
             # NonAutonomous, NonFixed: h̃(t, x, p, u, v)
@@ -91,7 +95,9 @@ function test_pseudo_hamiltonian()
             Test.@test ph2(1.0, [2.0, 3.0], [4.0, 5.0], 6.0, 7.0) == 1.0 + 8.0 + 15.0 + 36.0
 
             # Autonomous, NonFixed — ignores t
-            ph3 = Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true)
+            ph3 = Data.PseudoHamiltonian(
+                (x, p, u, v) -> sum(x .* p) + u^2 + v; is_variable=true
+            )
             Test.@test ph3(0.0, [1.0, 2.0], [3.0, 4.0], 5.0, 6.0) == 3.0 + 8.0 + 25.0 + 6.0
 
             # NonAutonomous, NonFixed — uses all

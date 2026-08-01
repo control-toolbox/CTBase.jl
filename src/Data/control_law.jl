@@ -162,7 +162,7 @@ See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref).
 function ControlLaw(
     _f, ::Type{Traits.OpenLoopFeedback}, ::Type{Traits.Autonomous}, ::Type{VD}
 ) where {VD<:Traits.VariableDependence}
-    throw(
+    return throw(
         Exceptions.IncorrectArgument(
             "OpenLoop control laws cannot be Autonomous: an open-loop control always depends on time, u(t) (or u(t, v))";
             suggestion="Use OpenLoop(f; is_variable).",

@@ -128,12 +128,11 @@ function _test_spec_matches(
     candidate_filename_no_ext = replace(candidate_filename, ".jl" => "")
     candidate_basename = basename(candidate_filename)
     candidate_basename_no_ext = replace(candidate_basename, ".jl" => "")
-    candidate_basename_no_test_prefix =
-        if startswith(candidate_basename_no_ext, "test_")
-            candidate_basename_no_ext[6:end]
-        else
-            candidate_basename_no_ext
-        end
+    candidate_basename_no_test_prefix = if startswith(candidate_basename_no_ext, "test_")
+        candidate_basename_no_ext[6:end]
+    else
+        candidate_basename_no_ext
+    end
 
     regex = _glob_to_regex(String(pattern))
     return !isnothing(match(regex, candidate_str)) ||
@@ -192,7 +191,7 @@ function _select_tests(
 
     if !isempty(excluded_tests)
         filter!(candidates) do candidate
-            !any(
+            return !any(
                 pattern -> _test_spec_matches(
                     candidate, pattern, available_tests, filename_builder
                 ),
