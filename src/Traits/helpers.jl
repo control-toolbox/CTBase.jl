@@ -32,12 +32,12 @@ end
 """
     _throw_missing_trait(obj, has_method::Symbol, accessor::Symbol, family::AbstractString)
 
-Throw the standard [`CTBase.Exceptions.IncorrectArgument`](@ref) used by the
+Throw the standard [`CTBase.Exceptions.IncorrectArgument`](@extref) used by the
 fallback `has_<family>_trait(::Any)` method when an object does not opt into a
 strict trait family.
 
 The offending caller is detected automatically from the stacktrace via
-[`CTBase.Traits._caller_function_name`](@ref), so the message names the user-facing predicate
+[`CTBase.Traits._caller_function_name`](@extref), so the message names the user-facing predicate
 (`is_autonomous`, `is_variable`, …) rather than the internal machinery.
 
 # Arguments
@@ -47,7 +47,7 @@ The offending caller is detected automatically from the stacktrace via
 - `family::AbstractString`: Human-readable family name (e.g. `"time-dependence"`).
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always.
 """
 function _throw_missing_trait(
     obj, has_method::Symbol, accessor::Symbol, family::AbstractString
@@ -65,7 +65,7 @@ end
 """
     _throw_trait_not_implemented(obj, accessor::Symbol, family::AbstractString, valid::AbstractString)
 
-Throw the standard [`CTBase.Exceptions.NotImplemented`](@ref) used by the fallback
+Throw the standard [`CTBase.Exceptions.NotImplemented`](@extref) used by the fallback
 accessor (`time_dependence(::Any)`, …) of a strict trait family when the object
 declares the trait but does not implement the accessor.
 
@@ -77,7 +77,7 @@ declares the trait but does not implement the accessor.
   (e.g. `"Autonomous or NonAutonomous"`).
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@ref): Always.
+- [`CTBase.Exceptions.NotImplemented`](@extref): Always.
 """
 function _throw_trait_not_implemented(
     obj, accessor::Symbol, family::AbstractString, valid::AbstractString

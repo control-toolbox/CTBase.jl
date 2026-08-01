@@ -36,7 +36,7 @@ side of the ODE in a trait-agnostic way.
 For InPlace vector fields, the natural signature includes the derivative buffer
 as the first argument (e.g., `(dx, x)` for Autonomous/Fixed).
 
-See also: [`CTBase.Data.AbstractVectorField`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.AbstractMutabilityTrait`](@ref).
+See also: [`CTBase.Data.AbstractVectorField`](@extref), [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.AbstractMutabilityTrait`](@extref).
 """
 struct VectorField{
     F<:Function,
@@ -106,7 +106,7 @@ auto-detection is ambiguous and the user should specify `is_inplace` explicitly.
 - This function is called automatically by the `VectorField` constructor when `is_inplace` is `nothing`.
 - Users can bypass auto-detection by specifying `is_inplace=true` or `is_inplace=false` explicitly in the constructor.
 
-See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Data.VectorField`](@extref), [`CTBase.Traits.InPlace`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 function _detect_mutability_vf(f::Function, TD, VD)
     method_count = length(methods(f))
@@ -178,7 +178,7 @@ VectorField: autonomous, fixed (no variable), in-place
 - If `is_inplace` is `nothing` (default), the mutability is auto-detected from the function signature by checking the number of arguments.
 - If the function has multiple methods, auto-detection will fail with a `PreconditionError`. In this case, specify `is_inplace` explicitly.
 
-See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref), [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Data.VectorField`](@extref), [`CTBase.Traits.Autonomous`](@extref), [`CTBase.Traits.NonAutonomous`](@extref), [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.NonFixed`](@extref), [`CTBase.Traits.InPlace`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 function VectorField(
     f;
@@ -307,7 +307,7 @@ Shows the type name, time dependence, variable dependence, mutability, and funct
 - `io::IO`: The IO stream to write to.
 - `vf::VectorField`: The VectorField to display.
 
-See also: [`CTBase.Data.VectorField`](@ref).
+See also: [`CTBase.Data.VectorField`](@extref).
 """
 function Base.show(
     io::IO, vf::VectorField{F,TD,VD,MD}
@@ -337,7 +337,7 @@ Delegates to the compact show method.
 - `::MIME"text/plain"`: The MIME type for REPL display.
 - `vf::VectorField`: The VectorField to display.
 
-See also: [`CTBase.Data.VectorField`](@ref).
+See also: [`CTBase.Data.VectorField`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", vf::VectorField{F,TD,VD,MD}

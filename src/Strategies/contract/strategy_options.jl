@@ -92,7 +92,7 @@ julia> for (name, value) in opts
        end
 ```
 
-See also: [`CTBase.Options.OptionValue`](@ref), [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
+See also: [`CTBase.Options.OptionValue`](@extref), [`CTBase.Options.source`](@extref), [`CTBase.Options.is_user`](@extref), [`CTBase.Options.is_default`](@extref), [`CTBase.Options.is_computed`](@extref)
 """
 struct StrategyOptions{NT<:NamedTuple}
     options::NT
@@ -193,7 +193,7 @@ julia> get(opts, Val(:max_iter))  # Type-stable
 - Aliases are automatically resolved to canonical names
 - Both canonical names and aliases can be used interchangeably
 
-See also: `Base.getproperty`, [`CTBase.Options.source`](@ref), `Base.get`
+See also: `Base.getproperty`, [`CTBase.Options.source`](@extref), `Base.get`
 """
 function Base.getindex(opts::StrategyOptions, key::Symbol)
     return Options.value(option(opts, _resolve_key(opts, key)))
@@ -252,7 +252,7 @@ julia> opts.max_iter.source
 - Only canonical field names work with dot notation
 - Use bracket notation `opts[:alias]` for alias support
 
-See also: `Base.getindex`, [`CTBase.Options.source`](@ref)
+See also: `Base.getindex`, [`CTBase.Options.source`](@extref)
 """
 function Base.getproperty(opts::StrategyOptions, key::Symbol)
     # Special handling for internal fields
@@ -296,7 +296,7 @@ julia> Options.value(opt)
 # Notes
 - Aliases are automatically resolved to canonical names
 
-See also: `Base.getproperty`, [`CTBase.Options.source`](@ref)
+See also: `Base.getproperty`, [`CTBase.Options.source`](@extref)
 """
 option(opts::StrategyOptions, key::Symbol) = _raw_options(opts)[_resolve_key(opts, key)]
 
@@ -321,7 +321,7 @@ julia> Options.value(opts, :max_iter)
 200
 ```
 
-See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
+See also: [`CTBase.Options.is_user`](@extref), [`CTBase.Options.is_default`](@extref), [`CTBase.Options.is_computed`](@extref)
 """
 function Options.value(opts::StrategyOptions, key::Symbol)
     return Options.value(option(opts, key))
@@ -345,7 +345,7 @@ julia> Options.source(opts, :max_iter)
 :user
 ```
 
-See also: [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
+See also: [`CTBase.Options.is_user`](@extref), [`CTBase.Options.is_default`](@extref), [`CTBase.Options.is_computed`](@extref)
 """
 function Options.source(opts::StrategyOptions, key::Symbol)
     return Options.source(option(opts, key))
@@ -369,7 +369,7 @@ julia> Options.is_user(opts, :max_iter)
 true
 ```
 
-See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_default`](@ref), [`CTBase.Options.is_computed`](@ref)
+See also: [`CTBase.Options.source`](@extref), [`CTBase.Options.is_default`](@extref), [`CTBase.Options.is_computed`](@extref)
 """
 function Options.is_user(opts::StrategyOptions, key::Symbol)
     return Options.is_user(option(opts, key))
@@ -393,7 +393,7 @@ julia> Options.is_default(opts, :tol)
 true
 ```
 
-See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_computed`](@ref)
+See also: [`CTBase.Options.source`](@extref), [`CTBase.Options.is_user`](@extref), [`CTBase.Options.is_computed`](@extref)
 """
 function Options.is_default(opts::StrategyOptions, key::Symbol)
     return Options.is_default(option(opts, key))
@@ -417,7 +417,7 @@ julia> Options.is_computed(opts, :step)
 true
 ```
 
-See also: [`CTBase.Options.source`](@ref), [`CTBase.Options.is_user`](@ref), [`CTBase.Options.is_default`](@ref)
+See also: [`CTBase.Options.source`](@extref), [`CTBase.Options.is_user`](@extref), [`CTBase.Options.is_default`](@extref)
 """
 function Options.is_computed(opts::StrategyOptions, key::Symbol)
     return Options.is_computed(option(opts, key))
@@ -660,7 +660,7 @@ true
 - Explicit nothing values are preserved
 - The returned Dict is mutable and independent from the original StrategyOptions
 
-See also: [`CTBase.Options.extract_raw_options`](@ref), [`CTBase.Strategies._raw_options`](@ref)
+See also: [`CTBase.Options.extract_raw_options`](@extref), [`CTBase.Strategies._raw_options`](@extref)
 """
 function options_dict(opts::StrategyOptions)
     raw_opts = Options.extract_raw_options(_raw_options(opts))

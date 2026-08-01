@@ -41,7 +41,7 @@ julia> T = Strategies.type_from_id(:adnlp, AbstractNLPModeler, registry)
 Modelers.ADNLP
 ```
 
-See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), `Base.merge`
+See also: [`CTBase.Strategies.create_registry`](@extref), [`CTBase.Strategies.strategy_ids`](@extref), [`CTBase.Strategies.type_from_id`](@extref), `Base.merge`
 """
 struct StrategyRegistry
     families::Dict{Type{<:AbstractStrategy},Vector{Type}}
@@ -89,7 +89,7 @@ julia> Strategies.strategy_ids(AbstractNLPModeler, registry)
 - `ErrorException`: If a strategy is not a subtype of its family
 - `ErrorException`: If a family appears multiple times
 
-See also: [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.type_from_id`](@ref), `Base.merge`
+See also: [`CTBase.Strategies.StrategyRegistry`](@extref), [`CTBase.Strategies.strategy_ids`](@extref), [`CTBase.Strategies.type_from_id`](@extref), `Base.merge`
 """
 function create_registry(pairs::Pair...)
     families = Dict{Type{<:AbstractStrategy},Vector{Type}}()
@@ -373,7 +373,7 @@ Available: exa
 # Throws
 - `ErrorException`: If the family is not found in the registry
 
-See also: [`CTBase.Strategies.type_from_id`](@ref), [`CTBase.Strategies.create_registry`](@ref)
+See also: [`CTBase.Strategies.type_from_id`](@extref), [`CTBase.Strategies.create_registry`](@extref)
 """
 function strategy_ids(family::Type{<:AbstractStrategy}, registry::StrategyRegistry)
     if !haskey(registry.families, family)
@@ -435,7 +435,7 @@ julia> Strategies.id(T)
 - `Exceptions.IncorrectArgument`: If the family is not found in the registry
 - `Exceptions.IncorrectArgument`: If the ID is not found within the family (includes suggestions)
 
-See also: [`CTBase.Strategies.strategy_ids`](@ref), [`CTBase.Strategies.build_strategy`](@ref)
+See also: [`CTBase.Strategies.strategy_ids`](@extref), [`CTBase.Strategies.build_strategy`](@extref)
 """
 function type_from_id(
     strategy_id::Symbol,
@@ -549,7 +549,7 @@ julia> Strategies.describe(:ipopt, combined)  # works
 julia> Strategies.describe(:sciml, combined)  # works, same registry
 ```
 
-See also: [`CTBase.Strategies.create_registry`](@ref), [`CTBase.Strategies.StrategyRegistry`](@ref)
+See also: [`CTBase.Strategies.create_registry`](@extref), [`CTBase.Strategies.StrategyRegistry`](@extref)
 """
 function Base.merge(a::StrategyRegistry, bs::StrategyRegistry...)
     registries = (a, bs...)

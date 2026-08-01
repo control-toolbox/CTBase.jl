@@ -22,7 +22,7 @@ true
 - State dynamics indicates configurations with only state variables (no costate)
 - Hamiltonian dynamics indicates configurations with both state and costate variables
 
-See also: [`CTBase.Traits.StateDynamics`](@ref), [`CTBase.Traits.HamiltonianDynamics`](@ref).
+See also: [`CTBase.Traits.StateDynamics`](@extref), [`CTBase.Traits.HamiltonianDynamics`](@extref).
 """
 abstract type AbstractDynamicsTrait <: AbstractTrait end
 
@@ -51,7 +51,7 @@ true
 - The `initial_costate` accessor throws a `PreconditionError` for state configurations
 - This mode is suitable for standard ODE integration without adjoint variables
 
-See also: [`CTBase.Traits.HamiltonianDynamics`](@ref), [`CTBase.Traits.AbstractDynamicsTrait`](@ref).
+See also: [`CTBase.Traits.HamiltonianDynamics`](@extref), [`CTBase.Traits.AbstractDynamicsTrait`](@extref).
 """
 struct StateDynamics <: AbstractDynamicsTrait end
 
@@ -80,7 +80,7 @@ true
 - The `initial_condition` accessor returns `vcat(x0, p0)` for Hamiltonian configurations
 - This mode is suitable for optimal control problems with Pontryagin's maximum principle
 
-See also: [`CTBase.Traits.StateDynamics`](@ref), [`CTBase.Traits.AbstractDynamicsTrait`](@ref).
+See also: [`CTBase.Traits.StateDynamics`](@extref), [`CTBase.Traits.AbstractDynamicsTrait`](@extref).
 """
 struct HamiltonianDynamics <: AbstractDynamicsTrait end
 
@@ -90,10 +90,10 @@ $(TYPEDEF)
 Trait marker for augmented Hamiltonian dynamics, where the Hamiltonian includes an augmented variable (e.g., a parameter or control variable) in addition to state and costate variables.
 
 # Notes
-- Subtypes [`CTBase.Traits.AbstractDynamicsTrait`](@ref).
+- Subtypes [`CTBase.Traits.AbstractDynamicsTrait`](@extref).
 - Used to distinguish augmented Hamiltonian systems from standard Hamiltonian systems in trait-based dispatch.
 
-See also: [`CTBase.Traits.HamiltonianDynamics`](@ref), [`CTBase.Traits.AbstractDynamicsTrait`](@ref).
+See also: [`CTBase.Traits.HamiltonianDynamics`](@extref), [`CTBase.Traits.AbstractDynamicsTrait`](@extref).
 """
 struct AugmentedHamiltonianDynamics <: AbstractDynamicsTrait end
 
@@ -104,6 +104,6 @@ Return the dynamics trait of `x`.
 
 Methods are defined on concrete types in `Systems` and `Configs`.
 
-See also: [`CTBase.Traits.AbstractDynamicsTrait`](@ref), [`CTBase.Traits.StateDynamics`](@ref), [`CTBase.Traits.HamiltonianDynamics`](@ref).
+See also: [`CTBase.Traits.AbstractDynamicsTrait`](@extref), [`CTBase.Traits.StateDynamics`](@extref), [`CTBase.Traits.HamiltonianDynamics`](@extref).
 """
 function dynamics_trait end

@@ -10,8 +10,8 @@ time-dependence and variable-dependence traits.
 
 The function returns the state derivative `fc(t, x, u[, v])` with an explicit control
 argument `u`, out-of-place. It is the state-space analogue of
-[`CTBase.Data.PseudoHamiltonian`](@ref), and composing it with an open-loop or
-closed-loop control law gives a [`CTBase.Data.ComposedVectorField`](@ref).
+[`CTBase.Data.PseudoHamiltonian`](@extref), and composing it with an open-loop or
+closed-loop control law gives a [`CTBase.Data.ComposedVectorField`](@extref).
 
 # Type Parameters
 - `F`: concrete type of the wrapped function.
@@ -40,8 +40,8 @@ signature `(t, x, u, v)` that ignores unused arguments.
 | `(Autonomous, NonFixed)` | `fc(x, u, v)` | `fc(t, x, u, v)` |
 | `(NonAutonomous, NonFixed)` | `fc(t, x, u, v)` | `fc(t, x, u, v)` |
 
-See also: [`CTBase.Data.AbstractControlledVectorField`](@ref),
-[`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.PseudoHamiltonian`](@ref).
+See also: [`CTBase.Data.AbstractControlledVectorField`](@extref),
+[`CTBase.Data.ComposedVectorField`](@extref), [`CTBase.Data.PseudoHamiltonian`](@extref).
 """
 struct ControlledVectorField{
     F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
@@ -63,7 +63,7 @@ Construct a `ControlledVectorField` with trait flags.
 - `is_autonomous::Bool`: If true, autonomous (default: `__is_autonomous()`).
 - `is_variable::Bool`: If true, depends on the variable (default: `__is_variable()`).
 
-See also: [`CTBase.Data.ControlledVectorField`](@ref).
+See also: [`CTBase.Data.ControlledVectorField`](@extref).
 """
 function ControlledVectorField(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -82,7 +82,7 @@ $(TYPEDSIGNATURES)
 
 Typed constructor for `ControlledVectorField` with explicit trait types.
 
-See also: [`CTBase.Data.ControlledVectorField`](@ref).
+See also: [`CTBase.Data.ControlledVectorField`](@extref).
 """
 function ControlledVectorField(
     f, ::Type{TD}, ::Type{VD}
@@ -136,7 +136,7 @@ $(TYPEDSIGNATURES)
 
 Display a compact representation of a `ControlledVectorField`.
 
-See also: [`CTBase.Data.ControlledVectorField`](@ref).
+See also: [`CTBase.Data.ControlledVectorField`](@extref).
 """
 function Base.show(
     io::IO, ::ControlledVectorField{F,TD,VD}

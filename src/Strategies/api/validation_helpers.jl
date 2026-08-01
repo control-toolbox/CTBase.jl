@@ -29,7 +29,7 @@ This function generates a detailed error message that includes:
 _error_unknown_options_strict((unknown_opt=123,), Solvers.Ipopt, meta)
 ```
 
-See also: [`CTBase.Strategies.build_strategy_options`](@ref), [`CTBase.Strategies.suggest_options`](@ref)
+See also: [`CTBase.Strategies.build_strategy_options`](@extref), [`CTBase.Strategies.suggest_options`](@extref)
 """
 function _error_unknown_options_strict(
     remaining::NamedTuple, strategy_type::Type{<:AbstractStrategy}, meta::StrategyMetadata
@@ -103,7 +103,7 @@ unvalidated options will be passed directly to the backend without validation.
 _warn_unknown_options_permissive((custom_opt=123,), Solvers.Ipopt)
 ```
 
-See also: [`CTBase.Strategies.build_strategy_options`](@ref), [`CTBase.Strategies._error_unknown_options_strict`](@ref)
+See also: [`CTBase.Strategies.build_strategy_options`](@extref), [`CTBase.Strategies._error_unknown_options_strict`](@extref)
 """
 function _warn_unknown_options_permissive(
     remaining::NamedTuple, strategy_type::Type{<:AbstractStrategy}

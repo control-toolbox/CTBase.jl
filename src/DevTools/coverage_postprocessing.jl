@@ -35,7 +35,7 @@ julia> CTBase.CoveragePostprocessingTag() isa CTBase.AbstractCoveragePostprocess
 true
 ```
 
-See also: [`CTBase.DevTools.AbstractCoveragePostprocessingTag`](@ref)
+See also: [`CTBase.DevTools.AbstractCoveragePostprocessingTag`](@extref)
 """
 struct CoveragePostprocessingTag <: AbstractCoveragePostprocessingTag end
 

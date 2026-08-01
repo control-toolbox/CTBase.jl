@@ -10,7 +10,7 @@ time-dependence, and variable-dependence traits.
 
 The function provides the control input `u(...)` for an optimal control problem.
 The feedback trait determines which arguments the control law depends on (see
-[`CTBase.Data.AbstractControlLaw`](@ref)).
+[`CTBase.Data.AbstractControlLaw`](@extref)).
 
 # Type Parameters
 - `F`: concrete type of the wrapped function.
@@ -33,7 +33,7 @@ DynClosedLoop(u; is_autonomous = true, is_variable = false)   # default: u(x, p)
 
 `OpenLoop`'s `is_autonomous` is not a real choice — an open-loop control is
 unconditionally `NonAutonomous` and always depends on time (see
-[`CTBase.Data.OpenLoop`](@ref)).
+[`CTBase.Data.OpenLoop`](@extref)).
 
 # Call Signatures
 
@@ -48,9 +48,9 @@ traits), and via a **uniform** signature that depends on the feedback trait:
 
 The uniform signature is used by flow integrators. Unused arguments are ignored.
 
-See also: [`CTBase.Data.AbstractControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref),
-[`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
-[`CTBase.Traits.AbstractFeedback`](@ref).
+See also: [`CTBase.Data.AbstractControlLaw`](@extref), [`CTBase.Data.OpenLoop`](@extref),
+[`CTBase.Data.ClosedLoop`](@extref), [`CTBase.Data.DynClosedLoop`](@extref),
+[`CTBase.Traits.AbstractFeedback`](@extref).
 """
 struct ControlLaw{
     F<:Function,
@@ -79,8 +79,8 @@ Internal constructor for `ControlLaw` with a specific feedback type and trait fl
 # Returns
 - `ControlLaw`: A control law with appropriate traits.
 
-See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref),
-[`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref), [`CTBase.Data.OpenLoop`](@extref),
+[`CTBase.Data.ClosedLoop`](@extref), [`CTBase.Data.DynClosedLoop`](@extref).
 """
 function ControlLaw(
     f, ::Type{FB}; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -109,7 +109,7 @@ dispatch whenever `FB` is exactly `Traits.OpenLoopFeedback`.
 # Returns
 - `ControlLaw`: An open-loop control law.
 
-See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref), [`CTBase.Data.OpenLoop`](@extref).
 """
 function ControlLaw(f, ::Type{Traits.OpenLoopFeedback}; is_variable::Bool=__is_variable())
     VD = is_variable ? Traits.NonFixed : Traits.Fixed
@@ -134,7 +134,7 @@ Typed constructor for `ControlLaw` with explicit trait types.
 # Returns
 - `ControlLaw`: A control law with the specified traits.
 
-See also: [`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref).
 """
 function ControlLaw(
     f, ::Type{FB}, ::Type{TD}, ::Type{VD}
@@ -155,9 +155,9 @@ traits: autonomy is a property of the OCP, not of an open-loop control (see
 control-toolbox/CTBase.jl#515).
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always.
 
-See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref), [`CTBase.Data.OpenLoop`](@extref).
 """
 function ControlLaw(
     _f, ::Type{Traits.OpenLoopFeedback}, ::Type{Traits.Autonomous}, ::Type{VD}
@@ -212,8 +212,8 @@ ControlLaw: open-loop, variable
   uniform call: u(t, v)
 ```
 
-See also: [`CTBase.Data.ClosedLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
-[`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.ClosedLoop`](@extref), [`CTBase.Data.DynClosedLoop`](@extref),
+[`CTBase.Data.ControlLaw`](@extref).
 """
 function OpenLoop(
     f;
@@ -255,8 +255,8 @@ ControlLaw: closed-loop, autonomous, fixed (no variable)
   uniform call: u(t, x, v)
 ```
 
-See also: [`CTBase.Data.OpenLoop`](@ref), [`CTBase.Data.DynClosedLoop`](@ref),
-[`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.OpenLoop`](@extref), [`CTBase.Data.DynClosedLoop`](@extref),
+[`CTBase.Data.ControlLaw`](@extref).
 """
 function ClosedLoop(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -289,8 +289,8 @@ ControlLaw: dyn-closed-loop, autonomous, fixed (no variable)
   uniform call: u(t, x, p, v)
 ```
 
-See also: [`CTBase.Data.OpenLoop`](@ref), [`CTBase.Data.ClosedLoop`](@ref),
-[`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.OpenLoop`](@extref), [`CTBase.Data.ClosedLoop`](@extref),
+[`CTBase.Data.ControlLaw`](@extref).
 """
 function DynClosedLoop(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -479,7 +479,7 @@ Displays three lines:
 - Natural call signature
 - Uniform call signature
 
-See also: [`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref).
 """
 function Base.show(
     io::IO, ::ControlLaw{F,FB,TD,VD}
@@ -507,7 +507,7 @@ More specific than the generic `Base.show` above: `OpenLoop`'s
 display, so the header omits the time-dependence label (unlike
 `ClosedLoop`/`DynClosedLoop`, where it is a real choice).
 
-See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Data.OpenLoop`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref), [`CTBase.Data.OpenLoop`](@extref).
 """
 function Base.show(
     io::IO, ::ControlLaw{F,FB,TD,VD}
@@ -537,7 +537,7 @@ This method is called automatically when displaying a control law in the Julia R
 - `mime::MIME"text/plain"`: The MIME type.
 - `cl::ControlLaw`: The control law object.
 
-See also: [`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", cl::ControlLaw{F,FB,TD,VD}

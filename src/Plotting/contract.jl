@@ -11,8 +11,8 @@
 """
 $(TYPEDEF)
 
-Supertype of rendering backends. A backend adds methods to [`CTBase.Plotting.render`](@ref) /
-[`CTBase.Plotting.render!`](@ref) on its concrete type from a weak-dependency extension; the
+Supertype of rendering backends. A backend adds methods to [`CTBase.Plotting.render`](@extref) /
+[`CTBase.Plotting.render!`](@extref) on its concrete type from a weak-dependency extension; the
 fallback here errors when no backend is loaded.
 """
 abstract type AbstractPlottingBackend end
@@ -21,7 +21,7 @@ abstract type AbstractPlottingBackend end
 $(TYPEDEF)
 
 The [Plots.jl](https://docs.juliaplots.org) backend. The type lives here in `src`;
-its [`CTBase.Plotting.render`](@ref)/[`CTBase.Plotting.render!`](@ref) methods live in the `CTBasePlots`
+its [`CTBase.Plotting.render`](@extref)/[`CTBase.Plotting.render!`](@extref) methods live in the `CTBasePlots`
 extension, loaded automatically once `Plots` is available.
 """
 struct PlotsBackend <: AbstractPlottingBackend end
@@ -30,7 +30,7 @@ struct PlotsBackend <: AbstractPlottingBackend end
 $(TYPEDSIGNATURES)
 
 Return the default rendering backend used when a caller does not pass one explicitly.
-Currently returns [`CTBase.Plotting.PlotsBackend`](@ref).
+Currently returns [`CTBase.Plotting.PlotsBackend`](@extref).
 """
 default_backend() = PlotsBackend()
 
@@ -48,7 +48,7 @@ end
 $(TYPEDSIGNATURES)
 
 Overlay `fig` onto an existing backend `target`, targeting existing cells by the
-deterministic leaf order (see [`CTBase.Plotting.leaves`](@ref)).
+deterministic leaf order (see [`CTBase.Plotting.leaves`](@extref)).
 """
 function render!(::AbstractPlottingBackend, target, ::Figure; kwargs...)
     return throw(Exceptions.ExtensionError(:Plots))

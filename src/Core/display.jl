@@ -1,12 +1,12 @@
 """
 $(TYPEDSIGNATURES)
 
-Apply a [`CTBase.Core.Style`](@ref) to string `s`, respecting the IO colour capability.
+Apply a [`CTBase.Core.Style`](@extref) to string `s`, respecting the IO colour capability.
 
 Returns `s` wrapped in ANSI escape codes when `get(io, :color, false)` is `true`
 and `st.code` is non-empty; returns the plain string otherwise.
 
-See also: [`CTBase.Core._apply_ansi`](@ref), [`CTBase.Core.get_format_codes`](@ref)
+See also: [`CTBase.Core._apply_ansi`](@extref), [`CTBase.Core.get_format_codes`](@extref)
 """
 function _style(st::Style, s, io::IO)
     get(io, :color, false) && !isempty(st.code) || return string(s)
@@ -18,7 +18,7 @@ $(TYPEDSIGNATURES)
 
 Apply a raw ANSI numeric code string to `s`, respecting the IO colour capability.
 
-Prefer [`CTBase.Core._style`](@ref) with a [`CTBase.Core.Style`](@ref) from the
+Prefer [`CTBase.Core._style`](@extref) with a [`CTBase.Core.Style`](@extref) from the
 active palette over calling this function directly.
 """
 function _apply_ansi(s, code, io::IO)
@@ -34,7 +34,7 @@ $(TYPEDSIGNATURES)
 
 Apply the `muted` role style from the active palette.
 
-See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+See also: [`CTBase.Core.current_palette`](@extref), [`CTBase.Core._style`](@extref)
 """
 _dim(s, io::IO) = _style(current_palette().muted, s, io)
 
@@ -43,7 +43,7 @@ $(TYPEDSIGNATURES)
 
 Apply the `emphasis` role style from the active palette.
 
-See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+See also: [`CTBase.Core.current_palette`](@extref), [`CTBase.Core._style`](@extref)
 """
 _bold(s, io::IO) = _style(current_palette().emphasis, s, io)
 
@@ -52,7 +52,7 @@ $(TYPEDSIGNATURES)
 
 Apply the `error` role style from the active palette (defaults to red).
 
-See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+See also: [`CTBase.Core.current_palette`](@extref), [`CTBase.Core._style`](@extref)
 """
 _red(s, io::IO) = _style(current_palette().error, s, io)
 
@@ -61,7 +61,7 @@ $(TYPEDSIGNATURES)
 
 Apply the `warning` role style from the active palette (defaults to yellow).
 
-See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+See also: [`CTBase.Core.current_palette`](@extref), [`CTBase.Core._style`](@extref)
 """
 _yellow(s, io::IO) = _style(current_palette().warning, s, io)
 
@@ -70,7 +70,7 @@ $(TYPEDSIGNATURES)
 
 Apply the `success` role style from the active palette (defaults to green).
 
-See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core._style`](@ref)
+See also: [`CTBase.Core.current_palette`](@extref), [`CTBase.Core._style`](@extref)
 """
 _green(s, io::IO) = _style(current_palette().success, s, io)
 
@@ -82,12 +82,12 @@ _green(s, io::IO) = _style(current_palette().success, s, io)
 $(TYPEDSIGNATURES)
 
 Return ANSI opening codes for every semantic role in the active
-[`CTBase.Core.Palette`](@ref), respecting the colour capability of `io`.
+[`CTBase.Core.Palette`](@extref), respecting the colour capability of `io`.
 
 Each field is an *opening* escape sequence; callers must close styling with
 the `reset` field. Returns empty strings for all codes when `get(io, :color,
 false)` is `false`, or when the active palette has an empty code for that role
-(e.g. [`CTBase.Core.MONOCHROME_PALETTE`](@ref)).
+(e.g. [`CTBase.Core.MONOCHROME_PALETTE`](@extref)).
 
 # Returns
 
@@ -124,7 +124,7 @@ julia> print(io, fmt.name, "option_name", fmt.reset, "::", fmt.type, "Int", fmt.
 option_name::Int
 ```
 
-See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.Palette`](@ref)
+See also: [`CTBase.Core.set_palette!`](@extref), [`CTBase.Core.Palette`](@extref)
 """
 function get_format_codes(io::IO)
     p = current_palette()

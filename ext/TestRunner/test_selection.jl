@@ -86,29 +86,19 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Determine which tests to run based on selections, available_tests filter,
-excluded_tests filter, and file globbing.
+Check whether a test specification matches a selection pattern.
 
-1. Identify potential test files in `test_dir` (default: `test/`).
-2. Filter by `available_tests` if provided.
-3. Remove tests matching `excluded_tests`.
-4. Filter by `selections` (interpreted as globs) if present.
+The pattern is matched against the candidate specification, its filename, and
+several filename variants with or without the `.jl` extension and `test_` prefix.
 
 # Arguments
-- `selections::Vector{String}`: User-provided selection patterns
-- `available_tests::AbstractVector{<:TestSpec}`: Allowed tests (empty = auto-discovery)
-- `excluded_tests::AbstractVector{<:TestSpec}`: Tests to remove from the candidates
-- `run_all::Bool`: Whether to run all available tests
-- `filename_builder::Function`: Function to map test names to filenames
-- `test_dir::String`: Root directory containing test files
+- `candidate::TestSpec`: Test specification to check
+- `pattern::TestSpec`: Selection or exclusion pattern
+- `available_tests::AbstractVector{<:TestSpec}`: Available test specifications
+- `filename_builder::Function`: Function mapping test names to filenames
 
 # Returns
-- `Vector{TestSpec}`: Selected test specifications
-
-# Notes
-- If `available_tests` is empty, this function falls back to an auto-discovery
-  heuristic using the filename stem as the candidate test name
-- Selection arguments are matched against multiple representations of each candidate
+- `Bool`: Whether `pattern` matches one of the candidate representations
 """
 function _test_spec_matches(
     candidate::TestSpec,
@@ -143,6 +133,27 @@ function _test_spec_matches(
            !isnothing(match(regex, candidate_basename_no_test_prefix))
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Determine which tests to run based on selections, available tests, exclusions,
+and file globbing.
+
+# Arguments
+- `selections::Vector{String}`: User-provided selection patterns
+- `available_tests::AbstractVector{<:TestSpec}`: Allowed tests (empty = auto-discovery)
+- `excluded_tests::AbstractVector{<:TestSpec}`: Tests to remove from the candidates
+- `run_all::Bool`: Whether to run all available tests
+- `filename_builder::Function`: Function to map test names to filenames
+- `test_dir::String`: Root directory containing test files
+
+# Returns
+- `Vector{TestSpec}`: Selected test specifications
+
+# Notes
+- If `available_tests` is empty, this function falls back to auto-discovery.
+- Selection arguments are matched against multiple representations of each candidate.
+"""
 function _select_tests(
     selections::Vector{String},
     available_tests::AbstractVector{<:TestSpec},

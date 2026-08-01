@@ -56,7 +56,7 @@ Hamiltonian: non-autonomous, fixed (no variable)
   uniform call: h(t, x, p, v)
 ```
 
-See also: [`CTBase.Data.AbstractHamiltonian`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.AbstractHamiltonian`](@extref), [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 struct Hamiltonian{F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} <:
        AbstractHamiltonian{TD,VD}
@@ -104,7 +104,7 @@ Hamiltonian: autonomous, non-fixed (variable)
 - The default values for `is_autonomous` and `is_variable` come from `__is_autonomous()` and `__is_variable()`.
 - The function signature should match the specified traits (e.g., if `is_autonomous=true` and `is_variable=false`, the function should accept `(x, p)`).
 
-See also: [`CTBase.Data.Hamiltonian`](@ref), [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref).
+See also: [`CTBase.Data.Hamiltonian`](@extref), [`CTBase.Traits.Autonomous`](@extref), [`CTBase.Traits.NonAutonomous`](@extref), [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.NonFixed`](@extref).
 """
 function Hamiltonian(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -195,7 +195,7 @@ This method is called automatically when displaying a Hamiltonian in the Julia R
 - `mime::MIME"text/plain"`: The MIME type.
 - `h::Hamiltonian`: The Hamiltonian object.
 
-See also: [`CTBase.Data.Hamiltonian`](@ref).
+See also: [`CTBase.Data.Hamiltonian`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", h::Hamiltonian{F,TD,VD}

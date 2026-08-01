@@ -31,7 +31,7 @@ true
 - `WithoutAD` indicates the system uses pre-computed derivatives or manual implementations
 - The specific meaning depends on the system type and context
 
-See also: [`CTBase.Traits.WithAD`](@ref), [`CTBase.Traits.WithoutAD`](@ref), `CTBase.Core.AbstractCache`.
+See also: [`CTBase.Traits.WithAD`](@extref), [`CTBase.Traits.WithoutAD`](@extref), `CTBase.Core.AbstractCache`.
 """
 abstract type AbstractADTrait <: AbstractTrait end
 
@@ -66,7 +66,7 @@ true
 - The cache is passed through parameters during integration or evaluation
 - The specific operations enabled depend on the system type and AD backend
 
-See also: [`CTBase.Traits.AbstractADTrait`](@ref), [`CTBase.Traits.WithoutAD`](@ref), `CTBase.Core.AbstractCache`.
+See also: [`CTBase.Traits.AbstractADTrait`](@extref), [`CTBase.Traits.WithoutAD`](@extref), `CTBase.Core.AbstractCache`.
 """
 struct WithAD <: AbstractADTrait end  # system carries H + AD backend
 
@@ -101,7 +101,7 @@ true
 - This is the default mode for systems with pre-computed derivatives
 - The specific derivative implementations depend on the system type
 
-See also: [`CTBase.Traits.AbstractADTrait`](@ref), [`CTBase.Traits.WithAD`](@ref).
+See also: [`CTBase.Traits.AbstractADTrait`](@extref), [`CTBase.Traits.WithAD`](@extref).
 """
 struct WithoutAD <: AbstractADTrait end  # system carries HVF directly
 
@@ -122,6 +122,6 @@ Return the automatic differentiation capability trait of a system or flow.
 - Used for dispatch in cache preparation, derivative computation, and augmented integration
 - The specific operations enabled by the trait depend on the system type
 
-See also: [`CTBase.Traits.AbstractADTrait`](@ref), [`CTBase.Traits.WithAD`](@ref), [`CTBase.Traits.WithoutAD`](@ref).
+See also: [`CTBase.Traits.AbstractADTrait`](@extref), [`CTBase.Traits.WithAD`](@extref), [`CTBase.Traits.WithoutAD`](@extref).
 """
 ad_trait(::Any) = WithoutAD

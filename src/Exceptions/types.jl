@@ -23,7 +23,7 @@ julia> try
 Caught: IncorrectArgument: invalid input
 ```
 
-See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.NotImplemented`](@ref)
+See also: [`CTBase.Exceptions.IncorrectArgument`](@extref), [`CTBase.Exceptions.NotImplemented`](@extref)
 """
 abstract type CTException <: Exception end
 
@@ -63,7 +63,7 @@ throw(CTBase.Exceptions.IncorrectArgument(
 ))
 ```
 
-See also: [`CTBase.Exceptions.AmbiguousDescription`](@ref), [`CTBase.Exceptions.PreconditionError`](@ref)
+See also: [`CTBase.Exceptions.AmbiguousDescription`](@extref), [`CTBase.Exceptions.PreconditionError`](@extref)
 """
 struct IncorrectArgument <: CTException
     msg::String
@@ -92,7 +92,7 @@ current state of the system.
 
 Use when the **arguments are valid** but the call is forbidden because of when or how it
 is made (e.g., calling a method twice, missing a required prior setup step).
-Distinct from [`CTBase.Exceptions.IncorrectArgument`](@ref), which signals a problem
+Distinct from [`CTBase.Exceptions.IncorrectArgument`](@extref), which signals a problem
 with the input values themselves.
 
 # Fields
@@ -121,7 +121,7 @@ throw(CTBase.Exceptions.PreconditionError(
 ))
 ```
 
-See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.NotImplemented`](@ref)
+See also: [`CTBase.Exceptions.IncorrectArgument`](@extref), [`CTBase.Exceptions.NotImplemented`](@extref)
 """
 struct PreconditionError <: CTException
     msg::String
@@ -178,7 +178,7 @@ function run!(algo::MyAbstractAlgorithm, state)
 end
 ```
 
-See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.PreconditionError`](@ref)
+See also: [`CTBase.Exceptions.IncorrectArgument`](@extref), [`CTBase.Exceptions.PreconditionError`](@extref)
 """
 struct NotImplemented <: CTException
     msg::String
@@ -203,7 +203,7 @@ Exception thrown during parsing when a syntax error or invalid structure is dete
 
 Use when the **structure or syntax** of the input is invalid (e.g., DSL grammar
 violation). For semantic errors on a valid-syntax input, prefer
-[`CTBase.Exceptions.IncorrectArgument`](@ref) instead.
+[`CTBase.Exceptions.IncorrectArgument`](@extref) instead.
 
 # Fields
 - `msg::String`: Description of the parsing error.
@@ -229,7 +229,7 @@ throw(CTBase.Exceptions.ParsingError(
 ))
 ```
 
-See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.AmbiguousDescription`](@ref)
+See also: [`CTBase.Exceptions.IncorrectArgument`](@extref), [`CTBase.Exceptions.AmbiguousDescription`](@extref)
 """
 struct ParsingError <: CTException
     msg::String
@@ -251,7 +251,7 @@ $(TYPEDEF)
 Exception thrown when a description (a tuple of `Symbol`s) cannot be matched to any
 known valid description in a catalogue.
 
-Raised by [`CTBase.Descriptions.complete`](@ref) when the partial description provided
+Raised by [`CTBase.Descriptions.complete`](@extref) when the partial description provided
 by the user is not a subset of any catalogue entry.
 
 # Fields
@@ -283,7 +283,7 @@ throw(CTBase.Exceptions.AmbiguousDescription(
 ))
 ```
 
-See also: [`CTBase.Descriptions.complete`](@ref), [`CTBase.Descriptions.add`](@ref), [`CTBase.Exceptions.IncorrectArgument`](@ref)
+See also: [`CTBase.Descriptions.complete`](@extref), [`CTBase.Descriptions.add`](@extref), [`CTBase.Exceptions.IncorrectArgument`](@extref)
 """
 struct AmbiguousDescription <: CTException
     msg::String
@@ -312,7 +312,7 @@ Exception thrown when an optional dependency (weak dependency) is required by a 
 but has not been loaded.
 
 Calling the zero-argument constructor `ExtensionError()` is forbidden and throws a
-[`CTBase.Exceptions.PreconditionError`](@ref) instead — at least one dependency symbol
+[`CTBase.Exceptions.PreconditionError`](@extref) instead — at least one dependency symbol
 must be supplied.
 
 # Fields
@@ -322,7 +322,7 @@ must be supplied.
 - `context::Union{String, Nothing}`: Where the error occurred (optional).
 
 # Throws
-- [`CTBase.Exceptions.PreconditionError`](@ref): If called with no arguments.
+- [`CTBase.Exceptions.PreconditionError`](@extref): If called with no arguments.
 
 # Example
 
@@ -351,7 +351,7 @@ throw(CTBase.Exceptions.ExtensionError(
 ))
 ```
 
-See also: [`CTBase.Exceptions.PreconditionError`](@ref)
+See also: [`CTBase.Exceptions.PreconditionError`](@extref)
 """
 struct ExtensionError <: CTException
     msg::String
@@ -382,8 +382,8 @@ Exception thrown when a numerical solver (ODE integrator, NLP solver, linear sol
 fails to complete successfully.
 
 Use this when the **numerical computation itself** fails, not when the input is invalid
-([`CTBase.Exceptions.IncorrectArgument`](@ref)) or a precondition is violated
-([`CTBase.Exceptions.PreconditionError`](@ref)).
+([`CTBase.Exceptions.IncorrectArgument`](@extref)) or a precondition is violated
+([`CTBase.Exceptions.PreconditionError`](@extref)).
 
 # Fields
 - `msg::String`: Main error message describing the failure.
@@ -411,7 +411,7 @@ throw(CTBase.Exceptions.SolverFailure(
 ))
 ```
 
-See also: [`CTBase.Exceptions.IncorrectArgument`](@ref), [`CTBase.Exceptions.PreconditionError`](@ref)
+See also: [`CTBase.Exceptions.IncorrectArgument`](@extref), [`CTBase.Exceptions.PreconditionError`](@extref)
 """
 struct SolverFailure <: CTException
     msg::String

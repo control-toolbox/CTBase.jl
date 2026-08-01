@@ -7,7 +7,7 @@ $(TYPEDSIGNATURES)
 
 Default AD backend for CPU execution: `AutoForwardDiff()`.
 
-See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref), [`CTBase.Strategies.CPU`](@ref).
+See also: [`CTBase.Differentiation.DifferentiationInterface`](@extref), [`CTBase.Strategies.CPU`](@extref).
 """
 __ad_backend(::Type{Strategies.CPU}) = ADTypes.AutoForwardDiff()
 
@@ -24,6 +24,6 @@ others (a non-mutating `hamiltonian_gradient` call), so it is no longer the defa
 selectable explicitly). The marker type comes from `ADTypes` (a hard dependency) and needs no
 Mooncake loaded to construct; Mooncake is required only when a gradient is actually evaluated.
 
-See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref), [`CTBase.Strategies.GPU`](@ref).
+See also: [`CTBase.Differentiation.DifferentiationInterface`](@extref), [`CTBase.Strategies.GPU`](@extref).
 """
 __ad_backend(::Type{Strategies.GPU}) = ADTypes.AutoMooncake()

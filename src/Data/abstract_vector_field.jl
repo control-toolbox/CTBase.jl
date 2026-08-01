@@ -33,7 +33,7 @@ Traits.variable_dependence(vf)  # Returns Fixed
 Traits.mutability(vf)  # Returns OutOfPlace
 \`\`\`
 
-See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.mutability`](@ref).
+See also: [`CTBase.Data.VectorField`](@extref), [`CTBase.Data.HamiltonianVectorField`](@extref), [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.mutability`](@extref).
 """
 abstract type AbstractVectorField{
     TD<:Traits.TimeDependence,
@@ -53,7 +53,7 @@ Indicate that `AbstractVectorField` has the time-dependence trait.
 This implementation declares that all vector fields support time-dependence queries.
 Concrete `AbstractVectorField` instances have their time dependence encoded in the type parameter `TD`.
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractVectorField`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Data.AbstractVectorField`](@extref).
 """
 function Traits.has_time_dependence_trait(::AbstractVectorField)
     return true
@@ -67,7 +67,7 @@ Indicate that `AbstractVectorField` has the variable-dependence trait.
 This implementation declares that all vector fields support variable-dependence queries.
 Concrete `AbstractVectorField` instances have their variable dependence encoded in the type parameter `VD`.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractVectorField`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Data.AbstractVectorField`](@extref).
 """
 function Traits.has_variable_dependence_trait(::AbstractVectorField)
     return true
@@ -81,7 +81,7 @@ Indicate that `AbstractVectorField` has the mutability trait.
 This implementation declares that all vector fields support mutability queries.
 Concrete `AbstractVectorField` instances have their mutability encoded in the type parameter `MD`.
 
-See also: [`CTBase.Traits.mutability`](@ref), [`CTBase.Data.AbstractVectorField`](@ref).
+See also: [`CTBase.Traits.mutability`](@extref), [`CTBase.Data.AbstractVectorField`](@extref).
 """
 function Traits.has_mutability_trait(::AbstractVectorField)
     return true
@@ -107,7 +107,7 @@ hvf = Data.HamiltonianVectorField((t, x, p) -> (x, -p); is_autonomous=false)
 Traits.time_dependence(hvf)  # Returns NonAutonomous
 \`\`\`
 
-See also: [`CTBase.Traits.has_time_dependence_trait`](@ref), [`CTBase.Traits.is_autonomous`](@ref).
+See also: [`CTBase.Traits.has_time_dependence_trait`](@extref), [`CTBase.Traits.is_autonomous`](@extref).
 """
 function Traits.time_dependence(
     vf::AbstractVectorField{TD,<:Traits.VariableDependence,<:Traits.AbstractMutabilityTrait}
@@ -135,7 +135,7 @@ hvf = Data.HamiltonianVectorField((x, p, v) -> (x .* v, -p); is_variable=true)
 Traits.variable_dependence(hvf)  # Returns NonFixed
 \`\`\`
 
-See also: [`CTBase.Traits.has_variable_dependence_trait`](@ref), [`CTBase.Traits.is_variable`](@ref).
+See also: [`CTBase.Traits.has_variable_dependence_trait`](@extref), [`CTBase.Traits.is_variable`](@extref).
 """
 function Traits.variable_dependence(
     vf::AbstractVectorField{<:Traits.TimeDependence,VD,<:Traits.AbstractMutabilityTrait}
@@ -163,7 +163,7 @@ vf2 = Data.VectorField(x -> -x)
 Traits.mutability(vf2)  # Returns OutOfPlace
 \`\`\`
 
-See also: [`CTBase.Traits.has_mutability_trait`](@ref), [`CTBase.Traits.is_inplace`](@ref).
+See also: [`CTBase.Traits.has_mutability_trait`](@extref), [`CTBase.Traits.is_inplace`](@extref).
 """
 function Traits.mutability(
     vf::AbstractVectorField{<:Traits.TimeDependence,<:Traits.VariableDependence,MD}
@@ -174,8 +174,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of an `AbstractVectorField`, namely [`CTBase.Traits.StateDynamics`](@ref).
+Return the dynamics trait of an `AbstractVectorField`, namely [`CTBase.Traits.StateDynamics`](@extref).
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Data.AbstractVectorField`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Data.AbstractVectorField`](@extref).
 """
 Traits.dynamics_trait(::AbstractVectorField) = Traits.StateDynamics

@@ -4,22 +4,22 @@
 Generic, domain-free plotting engine for the Control Toolbox.
 
 It manipulates a backend-agnostic intermediate representation (IR): a weighted
-tree ([`CTBase.Plotting.Leaf`](@ref)/[`CTBase.Plotting.HBox`](@ref)/[`CTBase.Plotting.VBox`](@ref)) of titled [`CTBase.Plotting.Axes`](@ref)
-carrying [`CTBase.Plotting.Series`](@ref) and [`CTBase.Plotting.Decoration`](@ref)s. It knows nothing about
+tree ([`CTBase.Plotting.Leaf`](@extref)/[`CTBase.Plotting.HBox`](@extref)/[`CTBase.Plotting.VBox`](@extref)) of titled [`CTBase.Plotting.Axes`](@extref)
+carrying [`CTBase.Plotting.Series`](@extref) and [`CTBase.Plotting.Decoration`](@extref)s. It knows nothing about
 states, controls, costates, trajectories or optimal control — the *case layers*
-(CTModels, CTFlows) build the IR and hand it to a backend via [`CTBase.Plotting.render`](@ref).
+(CTModels, CTFlows) build the IR and hand it to a backend via [`CTBase.Plotting.render`](@extref).
 
 The IR and all its transforms live here in `src` (no backend dependency); only the
 drawing lives in an extension (`CTBasePlots` for Plots.jl). See the design report
 in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
 
 # Public API
-- IR: [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Axes`](@ref),
-  [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref)
-- case-layer building blocks: [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref),
-  [`CTBase.Plotting.Grid`](@ref)
-- backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref),
-  [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref)
+- IR: [`CTBase.Plotting.Series`](@extref), [`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref), [`CTBase.Plotting.Axes`](@extref),
+  [`CTBase.Plotting.Leaf`](@extref), [`CTBase.Plotting.HBox`](@extref), [`CTBase.Plotting.VBox`](@extref), [`CTBase.Plotting.Figure`](@extref), [`CTBase.Plotting.leaves`](@extref)
+- case-layer building blocks: [`CTBase.Plotting.Panel`](@extref), [`CTBase.Plotting.Stacked`](@extref), [`CTBase.Plotting.Paired`](@extref),
+  [`CTBase.Plotting.Grid`](@extref)
+- backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@extref), [`CTBase.Plotting.PlotsBackend`](@extref),
+  [`CTBase.Plotting.render`](@extref), [`CTBase.Plotting.render!`](@extref)
 """
 module Plotting
 

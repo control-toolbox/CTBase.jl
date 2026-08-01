@@ -21,7 +21,7 @@ Return a user-friendly label for time dependence traits.
 # Returns
 - `String`: User-friendly label ("autonomous" or "non-autonomous")
 
-See also: [`CTBase.Data._vd_label`](@ref), [`CTBase.Data._md_label`](@ref).
+See also: [`CTBase.Data._vd_label`](@extref), [`CTBase.Data._md_label`](@extref).
 """
 function _td_label(::Type{Traits.Autonomous})
     return "autonomous"
@@ -42,7 +42,7 @@ Return a user-friendly label for variable dependence traits.
 # Returns
 - `String`: User-friendly label ("fixed (no variable)" or "variable")
 
-See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._md_label`](@ref).
+See also: [`CTBase.Data._td_label`](@extref), [`CTBase.Data._md_label`](@extref).
 """
 function _vd_label(::Type{Traits.Fixed})
     return "fixed (no variable)"
@@ -63,7 +63,7 @@ Return a user-friendly label for mutability traits.
 # Returns
 - `String`: User-friendly label ("out-of-place" or "in-place")
 
-See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._vd_label`](@ref).
+See also: [`CTBase.Data._td_label`](@extref), [`CTBase.Data._vd_label`](@extref).
 """
 function _md_label(::Type{Traits.OutOfPlace})
     return "out-of-place"
@@ -97,7 +97,7 @@ _natural_sig_vf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace)  # Return
 _natural_sig_vf(Traits.Autonomous, Traits.Fixed, Traits.InPlace)  # Returns "f(dx, x)"
 \`\`\`
 
-See also: [`CTBase.Data._uniform_sig_vf`](@ref).
+See also: [`CTBase.Data._uniform_sig_vf`](@extref).
 """
 function _natural_sig_vf(
     ::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}
@@ -134,7 +134,7 @@ and includes the derivative buffer (dx) for in-place variants.
 # Returns
 - `String`: Uniform call signature ("f(t, x, v)" or "f(dx, t, x, v)")
 
-See also: [`CTBase.Data._natural_sig_vf`](@ref).
+See also: [`CTBase.Data._natural_sig_vf`](@extref).
 """
 function _uniform_sig_vf(::Type{Traits.OutOfPlace})
     return "f(t, x, v)"
@@ -168,7 +168,7 @@ _natural_sig_hvf(Traits.NonAutonomous, Traits.Fixed, Traits.OutOfPlace)  # Retur
 _natural_sig_hvf(Traits.Autonomous, Traits.Fixed, Traits.InPlace)  # Returns "f(dx, dp, x, p)"
 \`\`\`
 
-See also: [`CTBase.Data._uniform_sig_hvf`](@ref).
+See also: [`CTBase.Data._uniform_sig_hvf`](@extref).
 """
 function _natural_sig_hvf(
     ::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}
@@ -207,7 +207,7 @@ and includes the derivative buffers (dx, dp) for in-place variants.
 # Returns
 - `String`: Uniform call signature ("f(t, x, p, v)" or "f(dx, dp, t, x, p, v)")
 
-See also: [`CTBase.Data._natural_sig_hvf`](@ref).
+See also: [`CTBase.Data._natural_sig_hvf`](@extref).
 """
 function _uniform_sig_hvf(::Type{Traits.OutOfPlace})
     return "f(t, x, p, v)"
@@ -226,7 +226,7 @@ end
 
 Return the natural call signature for a PseudoHamiltonianVectorField based on its traits.
 
-See also: [`CTBase.Data._uniform_sig_phvf`](@ref), [`CTBase.Data._natural_sig_hvf`](@ref).
+See also: [`CTBase.Data._uniform_sig_phvf`](@extref), [`CTBase.Data._natural_sig_hvf`](@extref).
 """
 function _natural_sig_phvf(
     ::Type{TD}, ::Type{VD}, ::Type{Traits.OutOfPlace}
@@ -258,7 +258,7 @@ end
 
 Return the uniform call signature for a PseudoHamiltonianVectorField.
 
-See also: [`CTBase.Data._natural_sig_phvf`](@ref), [`CTBase.Data._uniform_sig_hvf`](@ref).
+See also: [`CTBase.Data._natural_sig_phvf`](@extref), [`CTBase.Data._uniform_sig_hvf`](@extref).
 """
 function _uniform_sig_phvf(::Type{Traits.OutOfPlace})
     return "f(t, x, p, u, v)"
@@ -289,7 +289,7 @@ _natural_sig_h(Autonomous, Fixed)  # Returns "h(x, p)"
 _natural_sig_h(NonAutonomous, Fixed)  # Returns "h(t, x, p)"
 \`\`\`
 
-See also: [`CTBase.Data._uniform_sig_h`](@ref).
+See also: [`CTBase.Data._uniform_sig_h`](@extref).
 """
 function _natural_sig_h(
     ::Type{TD}, ::Type{VD}
@@ -312,7 +312,7 @@ The uniform signature always includes all arguments (t, x, p, v) regardless of t
 # Returns
 - `String`: Uniform call signature ("h(t, x, p, v)")
 
-See also: [`CTBase.Data._natural_sig_h`](@ref).
+See also: [`CTBase.Data._natural_sig_h`](@extref).
 """
 function _uniform_sig_h()
     return "h(t, x, p, v)"
@@ -332,7 +332,7 @@ Return a user-friendly label for feedback traits.
 # Returns
 - `String`: "open-loop", "closed-loop", or "dyn-closed-loop".
 
-See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._vd_label`](@ref).
+See also: [`CTBase.Data._td_label`](@extref), [`CTBase.Data._vd_label`](@extref).
 """
 function _fb_label(::Type{Traits.OpenLoopFeedback})
     return "open-loop"
@@ -358,7 +358,7 @@ The arguments depend on the feedback type:
 - `ClosedLoop`: `u([t, ]x[, v])`
 - `DynClosedLoop`: `u([t, ]x, p[, v])`
 
-See also: [`CTBase.Data._uniform_sig_cl`](@ref).
+See also: [`CTBase.Data._uniform_sig_cl`](@extref).
 """
 function _natural_sig_cl(
     ::Type{FB}, ::Type{TD}, ::Type{VD}
@@ -382,7 +382,7 @@ natural call signature of a `ControlLaw`.
 - `ClosedLoopFeedback`: `["x"]`.
 - `DynClosedLoopFeedback`: `["x", "p"]`.
 
-See also: [`CTBase.Data._natural_sig_cl`](@ref).
+See also: [`CTBase.Data._natural_sig_cl`](@extref).
 """
 function _natural_args_cl(::Type{Traits.OpenLoopFeedback})
     return String[]
@@ -405,7 +405,7 @@ Return the uniform call signature for a `ControlLaw` based on its feedback trait
 - ClosedLoop: `u(t, x, v)` — state but no costate (controlled dynamics flow)
 - DynClosedLoop: `u(t, x, p, v)` — costate needed (Hamiltonian flow)
 
-See also: [`CTBase.Data._natural_sig_cl`](@ref).
+See also: [`CTBase.Data._natural_sig_cl`](@extref).
 """
 function _uniform_sig_cl(::Type{Traits.OpenLoopFeedback})
     return "u(t, v)"
@@ -431,7 +431,7 @@ Return the natural call signature for a `PseudoHamiltonian` based on its traits.
 The arguments always include `x, p, u`, with `t` prepended for non-autonomous
 and `v` appended for variable.
 
-See also: [`CTBase.Data._uniform_sig_ph`](@ref).
+See also: [`CTBase.Data._uniform_sig_ph`](@extref).
 """
 function _natural_sig_ph(
     ::Type{TD}, ::Type{VD}
@@ -452,7 +452,7 @@ Return the uniform call signature for a `PseudoHamiltonian`.
 
 The uniform signature always includes all arguments `(t, x, p, u, v)` regardless of traits.
 
-See also: [`CTBase.Data._natural_sig_ph`](@ref).
+See also: [`CTBase.Data._natural_sig_ph`](@extref).
 """
 function _uniform_sig_ph()
     return "h̃(t, x, p, u, v)"
@@ -472,7 +472,7 @@ Return a user-friendly label for constraint-kind traits.
 # Returns
 - `String`: "state", "control", or "mixed".
 
-See also: [`CTBase.Data._td_label`](@ref), [`CTBase.Data._vd_label`](@ref).
+See also: [`CTBase.Data._td_label`](@extref), [`CTBase.Data._vd_label`](@extref).
 """
 function _kind_label(::Type{Traits.StateConstraintKind})
     return "state"
@@ -498,7 +498,7 @@ The arguments depend on the constraint kind:
 - `ControlConstraintKind`: `g([t, ]u[, v])`
 - `MixedConstraintKind`: `g([t, ]x, u[, v])`
 
-See also: [`CTBase.Data._uniform_sig_pc`](@ref).
+See also: [`CTBase.Data._uniform_sig_pc`](@extref).
 """
 function _natural_sig_pc(
     ::Type{K}, ::Type{TD}, ::Type{VD}
@@ -522,7 +522,7 @@ call signature of a `PathConstraint`.
 - `ControlConstraintKind`: `["u"]`.
 - `MixedConstraintKind`: `["x", "u"]`.
 
-See also: [`CTBase.Data._natural_sig_pc`](@ref).
+See also: [`CTBase.Data._natural_sig_pc`](@extref).
 """
 function _natural_args_pc(::Type{Traits.StateConstraintKind})
     return ["x"]
@@ -543,7 +543,7 @@ Return the uniform call signature for a `PathConstraint`.
 
 The uniform signature always includes all arguments `(t, x, u, v)` regardless of traits.
 
-See also: [`CTBase.Data._natural_sig_pc`](@ref).
+See also: [`CTBase.Data._natural_sig_pc`](@extref).
 """
 function _uniform_sig_pc()
     return "g(t, x, u, v)"
@@ -565,7 +565,7 @@ Return the natural call signature for a `Multiplier` based on its traits.
 # Returns
 - `String`: Natural call signature (e.g., "μ(x, p)", "μ(t, x, p)")
 
-See also: [`CTBase.Data._uniform_sig_mult`](@ref).
+See also: [`CTBase.Data._uniform_sig_mult`](@extref).
 """
 function _natural_sig_mult(
     ::Type{TD}, ::Type{VD}
@@ -585,7 +585,7 @@ Return the uniform call signature for a `Multiplier`.
 
 The uniform signature always includes all arguments `(t, x, p, v)` regardless of traits.
 
-See also: [`CTBase.Data._natural_sig_mult`](@ref).
+See also: [`CTBase.Data._natural_sig_mult`](@extref).
 """
 function _uniform_sig_mult()
     return "μ(t, x, p, v)"

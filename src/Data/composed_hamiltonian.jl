@@ -7,8 +7,8 @@
 $(TYPEDEF)
 
 Hamiltonian obtained by eliminating the control from a
-[`CTBase.Data.PseudoHamiltonian`](@ref) with a dynamic closed-loop
-[`CTBase.Data.ControlLaw`](@ref):
+[`CTBase.Data.PseudoHamiltonian`](@extref) with a dynamic closed-loop
+[`CTBase.Data.ControlLaw`](@extref):
 
 ```math
 H(t, x, p, v) = H̃(t, x, p, u(t, x, p, v), v).
@@ -18,7 +18,7 @@ It is a **functor** (a struct with call methods), not a closure, so it aligns wi
 the ecosystem philosophy and can be differentiated *through* the control law by
 automatic differentiation (the total derivative, `:total` mode of the OCP flow).
 
-Since it subtypes [`CTBase.Data.AbstractHamiltonian`](@ref), it *is* a Hamiltonian:
+Since it subtypes [`CTBase.Data.AbstractHamiltonian`](@extref), it *is* a Hamiltonian:
 all trait accessors are inherited, and it can be stored anywhere an
 `AbstractHamiltonian` is expected.
 
@@ -44,8 +44,8 @@ The composed time/variable dependences are the join of the two inputs, so a
 time-varying feedback on an autonomous pseudo-Hamiltonian correctly yields a
 `NonAutonomous` composed Hamiltonian.
 
-See also: [`CTBase.Data.PseudoHamiltonian`](@ref), [`CTBase.Data.ControlLaw`](@ref),
-[`CTBase.Data.DynClosedLoop`](@ref), [`CTBase.Data.AbstractHamiltonian`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonian`](@extref), [`CTBase.Data.ControlLaw`](@extref),
+[`CTBase.Data.DynClosedLoop`](@extref), [`CTBase.Data.AbstractHamiltonian`](@extref).
 """
 struct ComposedHamiltonian{
     TD<:Traits.TimeDependence,
@@ -65,8 +65,8 @@ end
 Join two time-dependence trait types: `Autonomous` only if both are `Autonomous`,
 otherwise `NonAutonomous`.
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref),
-[`CTBase.Data.ComposedVectorField`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref),
+[`CTBase.Data.ComposedVectorField`](@extref).
 """
 _join_td(::Type{Traits.Autonomous}, ::Type{Traits.Autonomous}) = Traits.Autonomous
 function _join_td(::Type{<:Traits.TimeDependence}, ::Type{<:Traits.TimeDependence})
@@ -77,8 +77,8 @@ end
 Join two variable-dependence trait types: `Fixed` only if both are `Fixed`,
 otherwise `NonFixed`.
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref),
-[`CTBase.Data.ComposedVectorField`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref),
+[`CTBase.Data.ComposedVectorField`](@extref).
 """
 _join_vd(::Type{Traits.Fixed}, ::Type{Traits.Fixed}) = Traits.Fixed
 function _join_vd(::Type{<:Traits.VariableDependence}, ::Type{<:Traits.VariableDependence})
@@ -92,11 +92,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Construct a [`CTBase.Data.ComposedHamiltonian`](@ref) from a pseudo-Hamiltonian and a
+Construct a [`CTBase.Data.ComposedHamiltonian`](@extref) from a pseudo-Hamiltonian and a
 dynamic closed-loop control law, computing the composed time/variable dependences as
 the join of the two inputs.
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 """
 function ComposedHamiltonian(
     h̃::PseudoHamiltonian, law::ControlLaw{<:Function,Traits.DynClosedLoopFeedback}
@@ -113,18 +113,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the underlying pseudo-Hamiltonian `H̃` of a [`CTBase.Data.ComposedHamiltonian`](@ref).
+Return the underlying pseudo-Hamiltonian `H̃` of a [`CTBase.Data.ComposedHamiltonian`](@extref).
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref), [`CTBase.Data.control_law`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref), [`CTBase.Data.control_law`](@extref).
 """
 pseudo_hamiltonian(h::ComposedHamiltonian) = h.h̃
 
 """
 $(TYPEDSIGNATURES)
 
-Return the control law `u(t, x, p, v)` of a [`CTBase.Data.ComposedHamiltonian`](@ref).
+Return the control law `u(t, x, p, v)` of a [`CTBase.Data.ComposedHamiltonian`](@extref).
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref), [`CTBase.Data.pseudo_hamiltonian`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref), [`CTBase.Data.pseudo_hamiltonian`](@extref).
 """
 control_law(h::ComposedHamiltonian) = h.law
 
@@ -139,7 +139,7 @@ Core computation `H(t, x, p, v) = H̃(t, x, p, u(t, x, p, v), v)` using the unif
 signatures of the control law and the pseudo-Hamiltonian. Unused arguments (`t`, `v`)
 are ignored by the respective uniform calls.
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 """
 function _composed_H(h::ComposedHamiltonian, t, x, p, v)
     u = h.law(t, x, p, v)      # DynClosedLoop uniform call (t, x, p, v)
@@ -179,10 +179,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display a compact representation of a [`CTBase.Data.ComposedHamiltonian`](@ref) showing
+Display a compact representation of a [`CTBase.Data.ComposedHamiltonian`](@extref) showing
 its composed traits and call signatures.
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 """
 function Base.show(
     io::IO, ::ComposedHamiltonian{TD,VD}
@@ -198,10 +198,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display a [`CTBase.Data.ComposedHamiltonian`](@ref) in the REPL with the same format as
+Display a [`CTBase.Data.ComposedHamiltonian`](@extref) in the REPL with the same format as
 the compact `show`.
 
-See also: [`CTBase.Data.ComposedHamiltonian`](@ref).
+See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 """
 function Base.show(io::IO, ::MIME"text/plain", h::ComposedHamiltonian)
     return show(io, h)

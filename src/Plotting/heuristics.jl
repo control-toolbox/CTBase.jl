@@ -26,9 +26,9 @@ _width(cols::Integer) = max(600, 340 * cols)
 """
 $(TYPEDSIGNATURES)
 
-Return the `(rows, cols)` cell shape of a layout node: a [`CTBase.Plotting.Leaf`](@ref) is
-`(1, 1)`; a [`CTBase.Plotting.VBox`](@ref) sums child rows and takes the max of child columns; an
-[`CTBase.Plotting.HBox`](@ref) does the transpose. Drives [`CTBase.Plotting.default_size`](@ref).
+Return the `(rows, cols)` cell shape of a layout node: a [`CTBase.Plotting.Leaf`](@extref) is
+`(1, 1)`; a [`CTBase.Plotting.VBox`](@extref) sums child rows and takes the max of child columns; an
+[`CTBase.Plotting.HBox`](@extref) does the transpose. Drives [`CTBase.Plotting.default_size`](@extref).
 """
 grid_shape(::Leaf) = (1, 1)
 function grid_shape(node::VBox)

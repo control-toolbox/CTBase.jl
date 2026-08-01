@@ -6,7 +6,7 @@ time-dependence and variable-dependence traits.
 
 A multiplier is a function `μ(t, x, p[, v])` returning the Lagrange multiplier
 associated with a path constraint. It has the same call structure as a
-[`CTBase.Data.AbstractHamiltonian`](@ref) (it depends on the state and costate), but
+[`CTBase.Data.AbstractHamiltonian`](@extref) (it depends on the state and costate), but
 carries no dynamics semantics of its own.
 
 # Type Parameters
@@ -17,7 +17,7 @@ carries no dynamics semantics of its own.
 - All multiplier types support both natural and uniform call signatures.
 - The uniform signature `(t, x, p, v)` is used internally by flows.
 
-See also: [`CTBase.Data.Multiplier`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.Multiplier`](@extref), [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 abstract type AbstractMultiplier{TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} end
 
@@ -33,7 +33,7 @@ Indicates that all `AbstractMultiplier` types support time-dependence queries.
 # Returns
 - `true`: Always returns `true` for multiplier types.
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractMultiplier`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Data.AbstractMultiplier`](@extref).
 """
 function Traits.has_time_dependence_trait(::AbstractMultiplier)
     return true
@@ -47,7 +47,7 @@ Indicates that all `AbstractMultiplier` types support variable-dependence querie
 # Returns
 - `true`: Always returns `true` for multiplier types.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractMultiplier`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Data.AbstractMultiplier`](@extref).
 """
 function Traits.has_variable_dependence_trait(::AbstractMultiplier)
     return true
@@ -64,7 +64,7 @@ Return the time-dependence trait of a multiplier.
 # Returns
 - `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.TimeDependence`](@extref).
 """
 function Traits.time_dependence(
     ::AbstractMultiplier{TD,<:Traits.VariableDependence}
@@ -83,7 +83,7 @@ Return the variable-dependence trait of a multiplier.
 # Returns
 - `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 function Traits.variable_dependence(
     ::AbstractMultiplier{<:Traits.TimeDependence,VD}

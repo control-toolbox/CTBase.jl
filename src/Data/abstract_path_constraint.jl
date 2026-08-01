@@ -10,7 +10,7 @@ time-dependence, and variable-dependence traits.
 
 A path constraint is a function `g(...)` evaluated along the trajectory of an
 optimal control problem. The constraint-kind trait
-([`CTBase.Traits.AbstractConstraintKind`](@ref)) determines which primal variables the
+([`CTBase.Traits.AbstractConstraintKind`](@extref)) determines which primal variables the
 constraint depends on:
 
 - **State**: `g(x)` — depends on the state (and optionally time and variable).
@@ -26,8 +26,8 @@ constraint depends on:
 - All path constraint types support both natural and uniform call signatures.
 - The uniform signature is always `g(t, x, u, v)`, ignoring the unused arguments.
 
-See also: [`CTBase.Data.PathConstraint`](@ref), [`CTBase.Traits.AbstractConstraintKind`](@ref),
-[`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.PathConstraint`](@extref), [`CTBase.Traits.AbstractConstraintKind`](@extref),
+[`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 abstract type AbstractPathConstraint{
     K<:Traits.AbstractConstraintKind,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
@@ -45,7 +45,7 @@ Return the constraint-kind trait of a path constraint.
 # Returns
 - `K`: The constraint-kind type (`StateConstraintKind`, `ControlConstraintKind`, or `MixedConstraintKind`).
 
-See also: [`CTBase.Traits.constraint_kind`](@ref), [`CTBase.Traits.AbstractConstraintKind`](@ref).
+See also: [`CTBase.Traits.constraint_kind`](@extref), [`CTBase.Traits.AbstractConstraintKind`](@extref).
 """
 function Traits.constraint_kind(
     ::AbstractPathConstraint{K,<:Any,<:Any}
@@ -61,7 +61,7 @@ Indicates that all `AbstractPathConstraint` types support time-dependence querie
 # Returns
 - `true`: Always returns `true` for path constraint types.
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractPathConstraint`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Data.AbstractPathConstraint`](@extref).
 """
 function Traits.has_time_dependence_trait(::AbstractPathConstraint)
     return true
@@ -75,7 +75,7 @@ Indicates that all `AbstractPathConstraint` types support variable-dependence qu
 # Returns
 - `true`: Always returns `true` for path constraint types.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractPathConstraint`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Data.AbstractPathConstraint`](@extref).
 """
 function Traits.has_variable_dependence_trait(::AbstractPathConstraint)
     return true
@@ -92,7 +92,7 @@ Return the time-dependence trait of a path constraint.
 # Returns
 - `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.TimeDependence`](@extref).
 """
 function Traits.time_dependence(
     ::AbstractPathConstraint{<:Any,TD,<:Traits.VariableDependence}
@@ -111,7 +111,7 @@ Return the variable-dependence trait of a path constraint.
 # Returns
 - `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 function Traits.variable_dependence(
     ::AbstractPathConstraint{<:Any,<:Traits.TimeDependence,VD}
@@ -131,7 +131,7 @@ Return `true` if the path constraint is a pure state constraint, `false` otherwi
 # Returns
 - `Bool`: `true` if the constraint-kind trait is `StateConstraintKind`, `false` otherwise.
 
-See also: [`CTBase.Traits.StateConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.StateConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 Traits.is_state_constraint(::AbstractPathConstraint) = false
 Traits.is_state_constraint(::AbstractPathConstraint{<:Traits.StateConstraintKind}) = true
@@ -144,7 +144,7 @@ Return `true` if the path constraint is a pure control constraint, `false` other
 # Returns
 - `Bool`: `true` if the constraint-kind trait is `ControlConstraintKind`, `false` otherwise.
 
-See also: [`CTBase.Traits.ControlConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.ControlConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 Traits.is_control_constraint(::AbstractPathConstraint) = false
 function Traits.is_control_constraint(
@@ -161,7 +161,7 @@ Return `true` if the path constraint is a mixed state–control constraint, `fal
 # Returns
 - `Bool`: `true` if the constraint-kind trait is `MixedConstraintKind`, `false` otherwise.
 
-See also: [`CTBase.Traits.MixedConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.MixedConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 Traits.is_mixed_constraint(::AbstractPathConstraint) = false
 Traits.is_mixed_constraint(::AbstractPathConstraint{<:Traits.MixedConstraintKind}) = true

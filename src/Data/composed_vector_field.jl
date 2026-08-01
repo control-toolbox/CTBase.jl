@@ -7,18 +7,18 @@
 $(TYPEDEF)
 
 Vector field obtained by eliminating the control from a
-[`CTBase.Data.ControlledVectorField`](@ref) with an **open-loop** or **closed-loop**
-[`CTBase.Data.ControlLaw`](@ref):
+[`CTBase.Data.ControlledVectorField`](@extref) with an **open-loop** or **closed-loop**
+[`CTBase.Data.ControlLaw`](@extref):
 
 ```math
 g(t, x, v) = fc(t, x, u(...), v),
 ```
 
 where the control is `u(t, v)` for an open-loop law and `u(t, x, v)` for a closed-loop
-law. It is the state-space analogue of [`CTBase.Data.ComposedHamiltonian`](@ref).
+law. It is the state-space analogue of [`CTBase.Data.ComposedHamiltonian`](@extref).
 
 It is a **functor** (not a closure), out-of-place, and subtypes
-[`CTBase.Data.AbstractVectorField`](@ref) with `OutOfPlace` mutability — so it *is* a
+[`CTBase.Data.AbstractVectorField`](@extref) with `OutOfPlace` mutability — so it *is* a
 vector field usable anywhere one is expected.
 
 # Type Parameters
@@ -32,9 +32,9 @@ vector field usable anywhere one is expected.
 - `fc::CVF`: the controlled vector field `fc(t, x, u, v)`.
 - `law::L`: the open-loop or closed-loop control law.
 
-See also: [`CTBase.Data.ControlledVectorField`](@ref), [`CTBase.Data.ControlLaw`](@ref),
-[`CTBase.Data.OpenLoop`](@ref), [`CTBase.Data.ClosedLoop`](@ref),
-[`CTBase.Data.ComposedHamiltonian`](@ref).
+See also: [`CTBase.Data.ControlledVectorField`](@extref), [`CTBase.Data.ControlLaw`](@extref),
+[`CTBase.Data.OpenLoop`](@extref), [`CTBase.Data.ClosedLoop`](@extref),
+[`CTBase.Data.ComposedHamiltonian`](@extref).
 """
 struct ComposedVectorField{
     TD<:Traits.TimeDependence,
@@ -53,11 +53,11 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Construct a [`CTBase.Data.ComposedVectorField`](@ref) from a controlled vector field and
+Construct a [`CTBase.Data.ComposedVectorField`](@extref) from a controlled vector field and
 an open-loop or closed-loop control law, computing the composed time/variable
 dependences as the join of the two inputs.
 
-See also: [`CTBase.Data.ComposedVectorField`](@ref).
+See also: [`CTBase.Data.ComposedVectorField`](@extref).
 """
 function ComposedVectorField(
     fc::ControlledVectorField,
@@ -75,18 +75,18 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the underlying controlled vector field of a [`CTBase.Data.ComposedVectorField`](@ref).
+Return the underlying controlled vector field of a [`CTBase.Data.ComposedVectorField`](@extref).
 
-See also: [`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.control_law`](@ref).
+See also: [`CTBase.Data.ComposedVectorField`](@extref), [`CTBase.Data.control_law`](@extref).
 """
 controlled_vector_field(g::ComposedVectorField) = g.fc
 
 """
 $(TYPEDSIGNATURES)
 
-Return the control law of a [`CTBase.Data.ComposedVectorField`](@ref).
+Return the control law of a [`CTBase.Data.ComposedVectorField`](@extref).
 
-See also: [`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.controlled_vector_field`](@ref).
+See also: [`CTBase.Data.ComposedVectorField`](@extref), [`CTBase.Data.controlled_vector_field`](@extref).
 """
 control_law(g::ComposedVectorField) = g.law
 
@@ -95,11 +95,11 @@ control_law(g::ComposedVectorField) = g.law
 # =============================================================================
 
 """
-Evaluate the control from a [`CTBase.Data.ControlLaw`](@ref) with the appropriate
+Evaluate the control from a [`CTBase.Data.ControlLaw`](@extref) with the appropriate
 call arity for its feedback trait: `u(t, v)` for open-loop, `u(t, x, v)` for
 closed-loop. The state `x` is ignored by open-loop laws.
 
-See also: [`CTBase.Data.ComposedVectorField`](@ref), [`CTBase.Data.ControlLaw`](@ref).
+See also: [`CTBase.Data.ComposedVectorField`](@extref), [`CTBase.Data.ControlLaw`](@extref).
 """
 _law_control(law::ControlLaw{<:Function,Traits.OpenLoopFeedback}, t, x, v) = law(t, v)
 _law_control(law::ControlLaw{<:Function,Traits.ClosedLoopFeedback}, t, x, v) = law(t, x, v)
@@ -111,7 +111,7 @@ Core computation `g(t, x, v) = fc(t, x, u(...), v)` using the uniform call signa
 the controlled vector field and the control law (open-loop `u(t,v)` or closed-loop
 `u(t,x,v)`).
 
-See also: [`CTBase.Data.ComposedVectorField`](@ref).
+See also: [`CTBase.Data.ComposedVectorField`](@extref).
 """
 function _composed_vf(g::ComposedVectorField, t, x, v)
     u = _law_control(g.law, t, x, v)
@@ -149,9 +149,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Display a compact representation of a [`CTBase.Data.ComposedVectorField`](@ref).
+Display a compact representation of a [`CTBase.Data.ComposedVectorField`](@extref).
 
-See also: [`CTBase.Data.ComposedVectorField`](@ref).
+See also: [`CTBase.Data.ComposedVectorField`](@extref).
 """
 function Base.show(
     io::IO, ::ComposedVectorField{TD,VD}

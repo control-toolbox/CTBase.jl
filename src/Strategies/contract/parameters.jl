@@ -85,7 +85,7 @@ julia> Strategies.is_a_parameter(Int)
 false
 ```
 
-See also: [`CTBase.Strategies.AbstractStrategyParameter`](@ref), [`CTBase.Strategies.validate_parameter_type`](@ref)
+See also: [`CTBase.Strategies.AbstractStrategyParameter`](@extref), [`CTBase.Strategies.validate_parameter_type`](@extref)
 """
 is_a_parameter(::Type{T}) where {T} = T <: AbstractStrategyParameter
 
@@ -123,7 +123,7 @@ julia> Strategies.parameter_id(Strategies.CPU)
 :cpu
 ```
 
-See also: [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
+See also: [`CTBase.Strategies.id`](@extref), [`CTBase.Strategies.AbstractStrategyParameter`](@extref)
 """
 parameter_id(parameter_type::Type{<:AbstractStrategyParameter}) = id(parameter_type)
 
@@ -158,7 +158,7 @@ Strategies.validate_parameter_type(MyParam)  # returns nothing
 # Notes
 - This function does not validate global ID uniqueness; that is handled by registry construction.
 
-See also: [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.parameter_id`](@ref), [`CTBase.Strategies.is_a_parameter`](@ref)
+See also: [`CTBase.Strategies.id`](@extref), [`CTBase.Strategies.parameter_id`](@extref), [`CTBase.Strategies.is_a_parameter`](@extref)
 """
 function validate_parameter_type(parameter_type::Type{<:AbstractStrategyParameter})
     if !isconcretetype(parameter_type)
@@ -245,7 +245,7 @@ julia> Strategies.description(Strategies.GPU)
 "GPU-based computation"
 \`\`\`
 
-See also: [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
+See also: [`CTBase.Strategies.id`](@extref), [`CTBase.Strategies.AbstractStrategyParameter`](@extref)
 """
 function description(parameter_type::Type{<:AbstractStrategyParameter})
     return throw(
@@ -300,7 +300,7 @@ CPU (parameter)
 └─ description: CPU-based computation
 \`\`\`
 
-See also: [`CTBase.Strategies.describe(::Symbol, ::StrategyRegistry)`](@ref), [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.description`](@ref)
+See also: [`CTBase.Strategies.describe(::Symbol, ::StrategyRegistry)`](@extref), [`CTBase.Strategies.id`](@extref), [`CTBase.Strategies.description`](@extref)
 """
 function describe(parameter_type::Type{T}) where {T<:AbstractStrategyParameter}
     return describe(stdout, parameter_type)
@@ -311,7 +311,7 @@ $(TYPEDSIGNATURES)
 
 Display parameter information to a specific IO stream.
 
-See [`CTBase.Strategies.describe(::Type{<:AbstractStrategyParameter})`](@ref) for details.
+See [`CTBase.Strategies.describe(::Type{<:AbstractStrategyParameter})`](@extref) for details.
 """
 function describe(io::IO, parameter_type::Type{T}) where {T<:AbstractStrategyParameter}
     fmt = Core.get_format_codes(io)
@@ -341,7 +341,7 @@ $(TYPEDSIGNATURES)
 Return the default parameter type used when constructing a parameterized strategy
 without an explicit parameter token.
 
-This is a separate concern from [`CTBase.Strategies.parameter`](@ref):
+This is a separate concern from [`CTBase.Strategies.parameter`](@extref):
 - `parameter(S)` extracts the parameter from an already-instantiated type (e.g. `S{CPU}`).
 - `default_parameter(S)` declares which parameter to use when none is specified at construction.
 
@@ -366,7 +366,7 @@ Strategies.default_parameter(::Type{<:MyStrategy}) = Strategies.CPU
 Strategies.default_parameter(::Type{<:MyOtherStrategy}) = Strategies.GPU
 ```
 
-See also: [`CTBase.Strategies.parameter`](@ref), [`CTBase.Strategies.CPU`](@ref), [`CTBase.Strategies.GPU`](@ref)
+See also: [`CTBase.Strategies.parameter`](@extref), [`CTBase.Strategies.CPU`](@extref), [`CTBase.Strategies.GPU`](@extref)
 """
 function default_parameter(::Type{<:AbstractStrategy})
     return throw(

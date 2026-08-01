@@ -10,13 +10,13 @@ pure control constraints, and mixed state–control constraints.
 # Trait Pattern
 
 This trait follows the **type-parameter-only** contract (like
-[`CTBase.Traits.AbstractFeedback`](@ref)): the trait value is read from a type parameter
+[`CTBase.Traits.AbstractFeedback`](@extref)): the trait value is read from a type parameter
 of the concrete data type (e.g. `PathConstraint{F,K,TD,VD}`) by the `constraint_kind`
 accessor. No `has_constraint_kind_trait` guard is provided; calling `constraint_kind`
 on a type that does not implement it yields a standard `MethodError`.
 
-See also: [`CTBase.Traits.StateConstraintKind`](@ref), [`CTBase.Traits.ControlConstraintKind`](@ref),
-[`CTBase.Traits.MixedConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.StateConstraintKind`](@extref), [`CTBase.Traits.ControlConstraintKind`](@extref),
+[`CTBase.Traits.MixedConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 abstract type AbstractConstraintKind <: AbstractTrait end
 
@@ -28,8 +28,8 @@ optionally time and variable), but not on the control.
 
 A state constraint has the form `g(x)` (or `g(t, x)`, `g(x, v)`, `g(t, x, v)`).
 
-See also: [`CTBase.Traits.ControlConstraintKind`](@ref), [`CTBase.Traits.MixedConstraintKind`](@ref),
-[`CTBase.Traits.AbstractConstraintKind`](@ref).
+See also: [`CTBase.Traits.ControlConstraintKind`](@extref), [`CTBase.Traits.MixedConstraintKind`](@extref),
+[`CTBase.Traits.AbstractConstraintKind`](@extref).
 """
 struct StateConstraintKind <: AbstractConstraintKind end
 
@@ -41,8 +41,8 @@ optionally time and variable), but not on the state.
 
 A control constraint has the form `g(u)` (or `g(t, u)`, `g(u, v)`, `g(t, u, v)`).
 
-See also: [`CTBase.Traits.StateConstraintKind`](@ref), [`CTBase.Traits.MixedConstraintKind`](@ref),
-[`CTBase.Traits.AbstractConstraintKind`](@ref).
+See also: [`CTBase.Traits.StateConstraintKind`](@extref), [`CTBase.Traits.MixedConstraintKind`](@extref),
+[`CTBase.Traits.AbstractConstraintKind`](@extref).
 """
 struct ControlConstraintKind <: AbstractConstraintKind end
 
@@ -55,8 +55,8 @@ state and the control (and optionally time and variable).
 A mixed constraint has the form `g(x, u)` (or `g(t, x, u)`, `g(x, u, v)`,
 `g(t, x, u, v)`).
 
-See also: [`CTBase.Traits.StateConstraintKind`](@ref), [`CTBase.Traits.ControlConstraintKind`](@ref),
-[`CTBase.Traits.AbstractConstraintKind`](@ref).
+See also: [`CTBase.Traits.StateConstraintKind`](@extref), [`CTBase.Traits.ControlConstraintKind`](@extref),
+[`CTBase.Traits.AbstractConstraintKind`](@extref).
 """
 struct MixedConstraintKind <: AbstractConstraintKind end
 
@@ -66,11 +66,11 @@ $(TYPEDSIGNATURES)
 Return the constraint-kind trait of `x`.
 
 Methods are defined on concrete types in `Data` (e.g. `AbstractPathConstraint`).
-The trait value is one of [`CTBase.Traits.StateConstraintKind`](@ref),
-[`CTBase.Traits.ControlConstraintKind`](@ref), or [`CTBase.Traits.MixedConstraintKind`](@ref).
+The trait value is one of [`CTBase.Traits.StateConstraintKind`](@extref),
+[`CTBase.Traits.ControlConstraintKind`](@extref), or [`CTBase.Traits.MixedConstraintKind`](@extref).
 
-See also: [`CTBase.Traits.AbstractConstraintKind`](@ref), [`CTBase.Traits.StateConstraintKind`](@ref),
-[`CTBase.Traits.ControlConstraintKind`](@ref), [`CTBase.Traits.MixedConstraintKind`](@ref).
+See also: [`CTBase.Traits.AbstractConstraintKind`](@extref), [`CTBase.Traits.StateConstraintKind`](@extref),
+[`CTBase.Traits.ControlConstraintKind`](@extref), [`CTBase.Traits.MixedConstraintKind`](@extref).
 """
 function constraint_kind end
 
@@ -84,7 +84,7 @@ Methods are defined on concrete types in `Data` (e.g. `AbstractPathConstraint`).
 # Returns
 - `Bool`: `true` if the constraint-kind trait is `StateConstraintKind`, `false` otherwise.
 
-See also: [`CTBase.Traits.StateConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.StateConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 function is_state_constraint end
 
@@ -98,7 +98,7 @@ Methods are defined on concrete types in `Data` (e.g. `AbstractPathConstraint`).
 # Returns
 - `Bool`: `true` if the constraint-kind trait is `ControlConstraintKind`, `false` otherwise.
 
-See also: [`CTBase.Traits.ControlConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.ControlConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 function is_control_constraint end
 
@@ -112,6 +112,6 @@ Methods are defined on concrete types in `Data` (e.g. `AbstractPathConstraint`).
 # Returns
 - `Bool`: `true` if the constraint-kind trait is `MixedConstraintKind`, `false` otherwise.
 
-See also: [`CTBase.Traits.MixedConstraintKind`](@ref), [`CTBase.Traits.constraint_kind`](@ref).
+See also: [`CTBase.Traits.MixedConstraintKind`](@extref), [`CTBase.Traits.constraint_kind`](@extref).
 """
 function is_mixed_constraint end

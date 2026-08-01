@@ -10,9 +10,9 @@ time-dependence, variable-dependence, and mutability traits.
 
 The function returns a tuple `(dx, dp)` representing the already-differentiated
 derivatives of state `x` and costate `p`, with an explicit control argument `u` — the
-vector-field analogue of [`CTBase.Data.PseudoHamiltonian`](@ref), just as
-[`CTBase.Data.HamiltonianVectorField`](@ref) is the vector-field analogue of
-[`CTBase.Data.Hamiltonian`](@ref).
+vector-field analogue of [`CTBase.Data.PseudoHamiltonian`](@extref), just as
+[`CTBase.Data.HamiltonianVectorField`](@extref) is the vector-field analogue of
+[`CTBase.Data.Hamiltonian`](@extref).
 
 # Type Parameters
 - `F`: concrete type of the wrapped function.
@@ -46,9 +46,9 @@ For InPlace pseudo-Hamiltonian vector fields, the natural signature includes the
 derivative buffers as the first two arguments (e.g., `(dx, dp, x, p, u)` for
 Autonomous/Fixed).
 
-See also: [`CTBase.Data.AbstractPseudoHamiltonianVectorField`](@ref),
-[`CTBase.Data.PseudoHamiltonian`](@ref), [`CTBase.Data.HamiltonianVectorField`](@ref),
-[`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.AbstractPseudoHamiltonianVectorField`](@extref),
+[`CTBase.Data.PseudoHamiltonian`](@extref), [`CTBase.Data.HamiltonianVectorField`](@extref),
+[`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 struct PseudoHamiltonianVectorField{
     F<:Function,
@@ -128,8 +128,8 @@ auto-detection is ambiguous and the user should specify `is_inplace` explicitly.
 - Users can bypass auto-detection by specifying `is_inplace=true` or `is_inplace=false`
   explicitly in the constructor.
 
-See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@ref), [`CTBase.Traits.InPlace`](@ref),
-[`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@extref), [`CTBase.Traits.InPlace`](@extref),
+[`CTBase.Traits.OutOfPlace`](@extref).
 """
 function _detect_mutability_phvf(f::Function, TD, VD)
     method_count = length(methods(f))
@@ -198,9 +198,9 @@ PseudoHamiltonianVectorField: autonomous, fixed (no variable), out-of-place
 - If the function has multiple methods, auto-detection will fail with a
   `PreconditionError`. In this case, specify `is_inplace` explicitly.
 
-See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@ref), [`CTBase.Traits.Autonomous`](@ref),
-[`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref),
-[`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@extref), [`CTBase.Traits.Autonomous`](@extref),
+[`CTBase.Traits.NonAutonomous`](@extref), [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.NonFixed`](@extref),
+[`CTBase.Traits.InPlace`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 function PseudoHamiltonianVectorField(
     f;
@@ -237,7 +237,7 @@ Typed constructor for `PseudoHamiltonianVectorField` with explicit trait types.
 - `PseudoHamiltonianVectorField`: A pseudo-Hamiltonian vector field with the specified
   traits.
 
-See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@extref).
 """
 function PseudoHamiltonianVectorField(
     f, ::Type{TD}, ::Type{VD}, ::Type{MD}
@@ -426,7 +426,7 @@ natural/uniform call signatures.
 - `io::IO`: The IO stream to write to.
 - `h̃vf::PseudoHamiltonianVectorField`: The pseudo-Hamiltonian vector field to display.
 
-See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@extref).
 """
 function Base.show(
     io::IO, ::PseudoHamiltonianVectorField{F,TD,VD,MD}
@@ -456,7 +456,7 @@ Delegates to the compact `show` method.
 - `::MIME"text/plain"`: The MIME type for REPL display.
 - `h̃vf::PseudoHamiltonianVectorField`: The pseudo-Hamiltonian vector field to display.
 
-See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonianVectorField`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", hvf::PseudoHamiltonianVectorField{F,TD,VD,MD}

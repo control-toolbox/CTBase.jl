@@ -135,7 +135,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Draw a single [`CTBase.Plotting.Series`](@ref) `s` into subplot `sp` of plot `p`, forwarding
+Draw a single [`CTBase.Plotting.Series`](@extref) `s` into subplot `sp` of plot `p`, forwarding
 `user` keyword arguments and the translated series style.
 """
 function _draw_series!(p, s::Plotting.Series, sp::Int; user...)

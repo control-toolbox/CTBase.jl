@@ -31,7 +31,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Stack `children` vertically into a [`CTBase.Plotting.VBox`](@ref). With `weights=:auto` (default,
+Stack `children` vertically into a [`CTBase.Plotting.VBox`](@extref). With `weights=:auto` (default,
 decision D4) each child's weight is its number of **rows** (`grid_shape(child)[1]`),
 so stacking blocks of different heights keeps every cell the same height — including
 when a child is itself a paired block; pass an explicit weight vector to override.
@@ -43,7 +43,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Place `children` side by side into an [`CTBase.Plotting.HBox`](@ref) (e.g. state | costate). With
+Place `children` side by side into an [`CTBase.Plotting.HBox`](@extref) (e.g. state | costate). With
 `weights=:auto` each child's weight is its number of **columns**
 (`grid_shape(child)[2]`), so equal-width columns stay equal; pass an explicit weight
 vector to override. A two-argument form `Paired(left, right)` is provided for the
@@ -60,8 +60,8 @@ end
 $(TYPEDSIGNATURES)
 
 Arrange a rectangular matrix of nodes into a grid: `cells[i, j]` is row `i`,
-column `j` (e.g. the `:group` n×m layout). Each row becomes an [`CTBase.Plotting.HBox`](@ref) and
-the rows are stacked in a [`CTBase.Plotting.VBox`](@ref). Row and column weights default to equal;
+column `j` (e.g. the `:group` n×m layout). Each row becomes an [`CTBase.Plotting.HBox`](@extref) and
+the rows are stacked in a [`CTBase.Plotting.VBox`](@extref). Row and column weights default to equal;
 pass `row_weights` / `col_weights` to override.
 """
 function Grid(

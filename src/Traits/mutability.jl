@@ -21,7 +21,7 @@ julia> Traits.OutOfPlace() isa Traits.AbstractMutabilityTrait
 true
 \`\`\`
 
-See also: [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Traits.InPlace`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 abstract type AbstractMutabilityTrait <: AbstractTrait end
 
@@ -45,7 +45,7 @@ julia> ip isa Traits.AbstractMutabilityTrait
 true
 \`\`\`
 
-See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Traits.AbstractMutabilityTrait`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 struct InPlace <: AbstractMutabilityTrait end
 
@@ -69,7 +69,7 @@ julia> oop isa Traits.AbstractMutabilityTrait
 true
 \`\`\`
 
-See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.InPlace`](@ref).
+See also: [`CTBase.Traits.AbstractMutabilityTrait`](@extref), [`CTBase.Traits.InPlace`](@extref).
 """
 struct OutOfPlace <: AbstractMutabilityTrait end
 
@@ -89,9 +89,9 @@ for better error messages.
 - `obj::Any`: The object to check.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always, indicating the object does not have the trait.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always, indicating the object does not have the trait.
 
-See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
+See also: [`CTBase.Traits.AbstractMutabilityTrait`](@extref), [`CTBase.Traits.mutability`](@extref).
 """
 function has_mutability_trait(obj::Any)
     return _throw_missing_trait(obj, :has_mutability_trait, :mutability, "mutability")
@@ -110,9 +110,9 @@ to return the specific trait value (`InPlace` or `OutOfPlace`).
 - `obj::Any`: The object to query.
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@ref): Always, indicating the method must be implemented.
+- [`CTBase.Exceptions.NotImplemented`](@extref): Always, indicating the method must be implemented.
 
-See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.has_mutability_trait`](@ref).
+See also: [`CTBase.Traits.AbstractMutabilityTrait`](@extref), [`CTBase.Traits.has_mutability_trait`](@extref).
 """
 function mutability(obj::Any)
     has_mutability_trait(obj)
@@ -136,10 +136,10 @@ if `mutability(obj)` is `InPlace`.
 - `Bool`: true if the object uses in-place evaluation.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support mutability queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `mutability` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support mutability queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `mutability` is not implemented for the object type.
 
-See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
+See also: [`CTBase.Traits.AbstractMutabilityTrait`](@extref), [`CTBase.Traits.mutability`](@extref).
 """
 function is_inplace(obj::Any)
     has_mutability_trait(obj)
@@ -161,10 +161,10 @@ if `mutability(obj)` is `OutOfPlace`.
 - `Bool`: true if the object uses out-of-place evaluation.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support mutability queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `mutability` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support mutability queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `mutability` is not implemented for the object type.
 
-See also: [`CTBase.Traits.AbstractMutabilityTrait`](@ref), [`CTBase.Traits.mutability`](@ref).
+See also: [`CTBase.Traits.AbstractMutabilityTrait`](@extref), [`CTBase.Traits.mutability`](@extref).
 """
 function is_outofplace(obj::Any)
     has_mutability_trait(obj)

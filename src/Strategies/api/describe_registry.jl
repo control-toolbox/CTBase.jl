@@ -52,7 +52,7 @@ Exa (strategy)
 # Throws
 - `Exceptions.IncorrectArgument`: If the strategy ID is not found in the registry
 
-See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.StrategyRegistry`](@ref), [`CTBase.Strategies.create_registry`](@ref)
+See also: [`CTBase.Strategies.describe`](@extref), [`CTBase.Strategies.StrategyRegistry`](@extref), [`CTBase.Strategies.create_registry`](@extref)
 """
 function describe(id_symbol::Symbol, registry::StrategyRegistry)
     return describe(stdout, id_symbol, registry)
@@ -398,7 +398,7 @@ julia> _strategy_type_name(Collocation)
 - This is the most common case, handling concrete instantiated types
 - For parameterized types, each parameter is formatted recursively
 
-See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies._describe_parameter_registry`](@ref)
+See also: [`CTBase.Strategies.describe`](@extref), [`CTBase.Strategies._describe_parameter_registry`](@extref)
 """
 function _strategy_type_name(T::DataType)
     base_name = string(T.name.name)
@@ -434,7 +434,7 @@ one.
 - This is a fallback for generic types that are not yet instantiated
 - Less common than the DataType method in typical usage
 
-See also: [`CTBase.Strategies._strategy_type_name(::DataType)`](@ref)
+See also: [`CTBase.Strategies._strategy_type_name`](@extref)
 """
 function _strategy_type_name(T::UnionAll)
     var_names = String[]
@@ -463,7 +463,7 @@ This is the most general fallback method for types that don't match more specifi
 - This is the ultimate fallback for edge cases
 - Simply converts the type to a string representation
 
-See also: [`CTBase.Strategies._strategy_type_name(::DataType)`](@ref), [`CTBase.Strategies._strategy_type_name(::UnionAll)`](@ref)
+See also: [`CTBase.Strategies._strategy_type_name`](@extref), [`CTBase.Strategies._strategy_type_name`](@extref)
 """
 function _strategy_type_name(T::Type)
     return string(T)
@@ -501,7 +501,7 @@ julia> _strategy_base_name(Collocation)
   the `nameof`-based fallback below, which is correct regardless of how many type parameters
   remain unbound
 
-See also: [`CTBase.Strategies._strategy_type_name`](@ref), [`CTBase.Strategies.describe`](@ref)
+See also: [`CTBase.Strategies._strategy_type_name`](@extref), [`CTBase.Strategies.describe`](@extref)
 """
 function _strategy_base_name(T::DataType)
     return string(T.name.name)

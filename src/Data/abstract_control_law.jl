@@ -9,7 +9,7 @@ Abstract supertype for control laws together with their feedback,
 time-dependence, and variable-dependence traits.
 
 A control law is a function `u(...)` that provides the control input for an
-optimal control problem. The feedback trait ([`CTBase.Traits.AbstractFeedback`](@ref))
+optimal control problem. The feedback trait ([`CTBase.Traits.AbstractFeedback`](@extref))
 determines which arguments the control law depends on:
 
 - **Open-loop**: `u(t[, v])` — depends on time (and variable) only.
@@ -31,14 +31,14 @@ determines which arguments the control law depends on:
   is no autonomous/zero-argument form. Autonomy is a property of the OCP, not
   of an open-loop control (see control-toolbox/CTBase.jl#515), so the
   `OpenLoop` constructor rejects `is_autonomous` as a meaningful choice (it
-  is accepted only as a misuse detector, see [`CTBase.Data.OpenLoop`](@ref)).
+  is accepted only as a misuse detector, see [`CTBase.Data.OpenLoop`](@extref)).
   Once constructed, `Traits.time_dependence`/`Traits.is_autonomous` on an
   `OpenLoop` control law answer honestly — `NonAutonomous`/`false` — the
   trait is not hidden, it is simply fixed. `ClosedLoop`/`DynClosedLoop` are
   unaffected.
 
-See also: [`CTBase.Data.ControlLaw`](@ref), [`CTBase.Traits.AbstractFeedback`](@ref),
-[`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.ControlLaw`](@extref), [`CTBase.Traits.AbstractFeedback`](@extref),
+[`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 abstract type AbstractControlLaw{
     FB<:Traits.AbstractFeedback,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
@@ -56,7 +56,7 @@ Return the feedback trait of a control law.
 # Returns
 - `FB`: The feedback type (`OpenLoopFeedback`, `ClosedLoopFeedback`, or `DynClosedLoopFeedback`).
 
-See also: [`CTBase.Traits.feedback`](@ref), [`CTBase.Traits.AbstractFeedback`](@ref).
+See also: [`CTBase.Traits.feedback`](@extref), [`CTBase.Traits.AbstractFeedback`](@extref).
 """
 function Traits.feedback(
     ::AbstractControlLaw{FB,<:Any,<:Any}
@@ -72,7 +72,7 @@ Indicates that all `AbstractControlLaw` types support time-dependence queries.
 # Returns
 - `true`: Always returns `true` for control law types.
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractControlLaw`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Data.AbstractControlLaw`](@extref).
 """
 function Traits.has_time_dependence_trait(::AbstractControlLaw)
     return true
@@ -86,7 +86,7 @@ Indicates that all `AbstractControlLaw` types support variable-dependence querie
 # Returns
 - `true`: Always returns `true` for control law types.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractControlLaw`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Data.AbstractControlLaw`](@extref).
 """
 function Traits.has_variable_dependence_trait(::AbstractControlLaw)
     return true
@@ -103,7 +103,7 @@ Return the time-dependence trait of a control law.
 # Returns
 - `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.TimeDependence`](@extref).
 """
 function Traits.time_dependence(
     ::AbstractControlLaw{<:Any,TD,<:Traits.VariableDependence}
@@ -122,7 +122,7 @@ Return the variable-dependence trait of a control law.
 # Returns
 - `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 function Traits.variable_dependence(
     ::AbstractControlLaw{<:Any,<:Traits.TimeDependence,VD}
@@ -137,7 +137,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of an open-loop control law, namely [`CTBase.Traits.StateDynamics`](@ref).
+Return the dynamics trait of an open-loop control law, namely [`CTBase.Traits.StateDynamics`](@extref).
 
 Open-loop and closed-loop control laws do not involve the costate, so they are
 associated with state dynamics.
@@ -145,7 +145,7 @@ associated with state dynamics.
 # Returns
 - `CTBase.Traits.StateDynamics`: The dynamics trait.
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Traits.StateDynamics`](@extref).
 """
 function Traits.dynamics_trait(::AbstractControlLaw{<:Traits.OpenLoopFeedback})
     return Traits.StateDynamics
@@ -154,12 +154,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of a closed-loop control law, namely [`CTBase.Traits.StateDynamics`](@ref).
+Return the dynamics trait of a closed-loop control law, namely [`CTBase.Traits.StateDynamics`](@extref).
 
 # Returns
 - `CTBase.Traits.StateDynamics`: The dynamics trait.
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.StateDynamics`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Traits.StateDynamics`](@extref).
 """
 function Traits.dynamics_trait(::AbstractControlLaw{<:Traits.ClosedLoopFeedback})
     return Traits.StateDynamics
@@ -168,7 +168,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of a dynamic closed-loop control law, namely [`CTBase.Traits.HamiltonianDynamics`](@ref).
+Return the dynamics trait of a dynamic closed-loop control law, namely [`CTBase.Traits.HamiltonianDynamics`](@extref).
 
 Dynamic closed-loop control laws depend on the costate, so they are associated
 with Hamiltonian dynamics.
@@ -176,7 +176,7 @@ with Hamiltonian dynamics.
 # Returns
 - `CTBase.Traits.HamiltonianDynamics`: The dynamics trait.
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Traits.HamiltonianDynamics`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Traits.HamiltonianDynamics`](@extref).
 """
 function Traits.dynamics_trait(::AbstractControlLaw{<:Traits.DynClosedLoopFeedback})
     return Traits.HamiltonianDynamics
@@ -194,7 +194,7 @@ Return `true` if the control law is open-loop, `false` otherwise.
 # Returns
 - `Bool`: `true` if the feedback trait is `OpenLoopFeedback`, `false` otherwise.
 
-See also: [`CTBase.Traits.OpenLoopFeedback`](@ref), [`CTBase.Traits.feedback`](@ref).
+See also: [`CTBase.Traits.OpenLoopFeedback`](@extref), [`CTBase.Traits.feedback`](@extref).
 """
 Traits.is_open_loop(::AbstractControlLaw) = false
 Traits.is_open_loop(::AbstractControlLaw{<:Traits.OpenLoopFeedback}) = true
@@ -207,7 +207,7 @@ Return `true` if the control law is closed-loop, `false` otherwise.
 # Returns
 - `Bool`: `true` if the feedback trait is `ClosedLoopFeedback`, `false` otherwise.
 
-See also: [`CTBase.Traits.ClosedLoopFeedback`](@ref), [`CTBase.Traits.feedback`](@ref).
+See also: [`CTBase.Traits.ClosedLoopFeedback`](@extref), [`CTBase.Traits.feedback`](@extref).
 """
 Traits.is_closed_loop(::AbstractControlLaw) = false
 Traits.is_closed_loop(::AbstractControlLaw{<:Traits.ClosedLoopFeedback}) = true
@@ -220,7 +220,7 @@ Return `true` if the control law is dynamic closed-loop, `false` otherwise.
 # Returns
 - `Bool`: `true` if the feedback trait is `DynClosedLoopFeedback`, `false` otherwise.
 
-See also: [`CTBase.Traits.DynClosedLoopFeedback`](@ref), [`CTBase.Traits.feedback`](@ref).
+See also: [`CTBase.Traits.DynClosedLoopFeedback`](@extref), [`CTBase.Traits.feedback`](@extref).
 """
 Traits.is_dyn_closed_loop(::AbstractControlLaw) = false
 Traits.is_dyn_closed_loop(::AbstractControlLaw{<:Traits.DynClosedLoopFeedback}) = true

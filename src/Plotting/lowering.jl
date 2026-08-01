@@ -75,7 +75,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Lower a [`CTBase.Plotting.Panel`](@ref) into a layout node.
+Lower a [`CTBase.Plotting.Panel`](@extref) into a layout node.
 
 # Keyword arguments
 - `layout`: `:split` (one cell per component) or `:group` (one cell, components
@@ -116,7 +116,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Lower a [`CTBase.Plotting.Panel`](@ref) into a `:split` layout node: one [`CTBase.Plotting.Leaf`](@ref) per component,
+Lower a [`CTBase.Plotting.Panel`](@extref) into a `:split` layout node: one [`CTBase.Plotting.Leaf`](@extref) per component,
 with ylabel = component name, xlabel on the bottom cell only, title on the top cell
 only, and no legend.
 """
@@ -142,7 +142,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Lower a [`CTBase.Plotting.Panel`](@ref) into a `:group` layout node: a single [`CTBase.Plotting.Leaf`](@ref) with all
+Lower a [`CTBase.Plotting.Panel`](@extref) into a `:group` layout node: a single [`CTBase.Plotting.Leaf`](@extref) with all
 components overlaid and a legend to distinguish them.
 """
 function _lower_group(p::Panel, x, time_name, vlines, hlines)

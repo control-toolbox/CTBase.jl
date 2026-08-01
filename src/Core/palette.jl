@@ -19,7 +19,7 @@ julia> CTBase.Core.Style("")     # no styling
 Style("")
 ```
 
-See also: [`CTBase.Core.Palette`](@ref), [`CTBase.Core.set_color!`](@ref)
+See also: [`CTBase.Core.Palette`](@extref), [`CTBase.Core.set_color!`](@extref)
 """
 struct Style
     code::String
@@ -30,10 +30,10 @@ $(TYPEDEF)
 
 A complete set of display styles, one per semantic role.
 
-Each field is a [`CTBase.Core.Style`](@ref) that governs how a particular category of
+Each field is a [`CTBase.Core.Style`](@extref) that governs how a particular category of
 information is rendered. The active palette is read at every call to
-[`CTBase.Core.get_format_codes`](@ref), so swapping it with
-[`CTBase.Core.set_palette!`](@ref) takes effect immediately for subsequent `show` calls.
+[`CTBase.Core.get_format_codes`](@extref), so swapping it with
+[`CTBase.Core.set_palette!`](@extref) takes effect immediately for subsequent `show` calls.
 
 # Fields
 
@@ -49,7 +49,7 @@ information is rendered. The active palette is read at every call to
 - `warning`: notable values (`Got`, `Retcode`, skipped test) (default: yellow)
 - `success`: positive hints, `Expected`, passing test (default: green)
 
-See also: [`CTBase.Core.DEFAULT_PALETTE`](@ref), [`CTBase.Core.MONOCHROME_PALETTE`](@ref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@ref), [`CTBase.Core.set_palette!`](@ref)
+See also: [`CTBase.Core.DEFAULT_PALETTE`](@extref), [`CTBase.Core.MONOCHROME_PALETTE`](@extref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@extref), [`CTBase.Core.set_palette!`](@extref)
 """
 struct Palette
     name::Style
@@ -71,7 +71,7 @@ The standard colour palette used out of the box.
 Maps each semantic role to a colour that mirrors Julia's REPL conventions
 (green for values, cyan for types, etc.).
 
-See also: [`CTBase.Core.Palette`](@ref), [`CTBase.Core.MONOCHROME_PALETTE`](@ref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@ref), [`CTBase.Core.set_palette!`](@ref)
+See also: [`CTBase.Core.Palette`](@extref), [`CTBase.Core.MONOCHROME_PALETTE`](@extref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@extref), [`CTBase.Core.set_palette!`](@extref)
 """
 const DEFAULT_PALETTE = Palette(
     Style("1;34"),   # name     — bold blue
@@ -102,7 +102,7 @@ julia> using CTBase
 julia> CTBase.Core.set_palette!(CTBase.Core.MONOCHROME_PALETTE)
 ```
 
-See also: [`CTBase.Core.DEFAULT_PALETTE`](@ref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@ref), [`CTBase.Core.reset_palette!`](@ref)
+See also: [`CTBase.Core.DEFAULT_PALETTE`](@extref), [`CTBase.Core.HIGH_CONTRAST_PALETTE`](@extref), [`CTBase.Core.reset_palette!`](@extref)
 """
 const MONOCHROME_PALETTE = Palette(
     Style(""),
@@ -132,7 +132,7 @@ julia> using CTBase
 julia> CTBase.Core.set_palette!(CTBase.Core.HIGH_CONTRAST_PALETTE)
 ```
 
-See also: [`CTBase.Core.DEFAULT_PALETTE`](@ref), [`CTBase.Core.MONOCHROME_PALETTE`](@ref), [`CTBase.Core.reset_palette!`](@ref)
+See also: [`CTBase.Core.DEFAULT_PALETTE`](@extref), [`CTBase.Core.MONOCHROME_PALETTE`](@extref), [`CTBase.Core.reset_palette!`](@extref)
 """
 const HIGH_CONTRAST_PALETTE = Palette(
     Style("1;94"),   # name     — bright bold blue
@@ -155,19 +155,19 @@ const HIGH_CONTRAST_PALETTE = Palette(
 """
 Runtime reference to the currently active palette.
 
-Initialised to [`CTBase.Core.DEFAULT_PALETTE`](@ref). All display paths read
-from this reference; mutate it via [`CTBase.Core.set_palette!`](@ref) and
-[`CTBase.Core.reset_palette!`](@ref).
+Initialised to [`CTBase.Core.DEFAULT_PALETTE`](@extref). All display paths read
+from this reference; mutate it via [`CTBase.Core.set_palette!`](@extref) and
+[`CTBase.Core.reset_palette!`](@extref).
 """
 const _ACTIVE_PALETTE = Ref{Palette}(DEFAULT_PALETTE)
 
 """
 $(TYPEDSIGNATURES)
 
-Return the currently active [`CTBase.Core.Palette`](@ref).
+Return the currently active [`CTBase.Core.Palette`](@extref).
 
 The active palette is used by every `show` and `describe` call in CTBase to
-derive ANSI codes. Change it with [`CTBase.Core.set_palette!`](@ref).
+derive ANSI codes. Change it with [`CTBase.Core.set_palette!`](@extref).
 
 # Example
 
@@ -178,17 +178,17 @@ julia> CTBase.Core.current_palette() === CTBase.Core.DEFAULT_PALETTE
 true
 ```
 
-See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.reset_palette!`](@ref)
+See also: [`CTBase.Core.set_palette!`](@extref), [`CTBase.Core.reset_palette!`](@extref)
 """
 current_palette() = _ACTIVE_PALETTE[]
 
 """
 $(TYPEDSIGNATURES)
 
-Replace the active [`CTBase.Core.Palette`](@ref) with `p` and return `p`.
+Replace the active [`CTBase.Core.Palette`](@extref) with `p` and return `p`.
 
 The change is global and immediate: the next `show` or `describe` call uses
-the new palette. Use [`CTBase.Core.reset_palette!`](@ref) to restore the default.
+the new palette. Use [`CTBase.Core.reset_palette!`](@extref) to restore the default.
 
 # Example
 
@@ -203,7 +203,7 @@ true
 julia> CTBase.Core.reset_palette!()
 ```
 
-See also: [`CTBase.Core.current_palette`](@ref), [`CTBase.Core.reset_palette!`](@ref)
+See also: [`CTBase.Core.current_palette`](@extref), [`CTBase.Core.reset_palette!`](@extref)
 """
 function set_palette!(p::Palette)
     _ACTIVE_PALETTE[] = p
@@ -214,7 +214,7 @@ end
 $(TYPEDSIGNATURES)
 
 Override a single semantic role in the active palette and return the updated
-[`CTBase.Core.Palette`](@ref).
+[`CTBase.Core.Palette`](@extref).
 
 `role` must be one of `:name`, `:type`, `:value`, `:keyword`, `:count`,
 `:label`, `:emphasis`, `:muted`, `:error`, `:warning`, `:success`.
@@ -231,7 +231,7 @@ julia> CTBase.Core.set_color!(:error, "35")   # make errors magenta
 julia> CTBase.Core.reset_palette!()
 ```
 
-See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.reset_palette!`](@ref)
+See also: [`CTBase.Core.set_palette!`](@extref), [`CTBase.Core.reset_palette!`](@extref)
 """
 function set_color!(role::Symbol, code::AbstractString)
     p = _ACTIVE_PALETTE[]
@@ -256,7 +256,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Restore the active palette to [`CTBase.Core.DEFAULT_PALETTE`](@ref) and return it.
+Restore the active palette to [`CTBase.Core.DEFAULT_PALETTE`](@extref) and return it.
 
 # Example
 
@@ -271,7 +271,7 @@ julia> CTBase.Core.current_palette() === CTBase.Core.DEFAULT_PALETTE
 true
 ```
 
-See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.current_palette`](@ref)
+See also: [`CTBase.Core.set_palette!`](@extref), [`CTBase.Core.current_palette`](@extref)
 """
 reset_palette!() = set_palette!(DEFAULT_PALETTE)
 
@@ -282,7 +282,7 @@ reset_palette!() = set_palette!(DEFAULT_PALETTE)
 """
 $(TYPEDSIGNATURES)
 
-Print a visual preview of the active [`CTBase.Core.Palette`](@ref) to `io`.
+Print a visual preview of the active [`CTBase.Core.Palette`](@extref) to `io`.
 
 The preview has three sections:
 - **Role swatches**: every semantic role with a colored swatch block (`████`), a
@@ -307,7 +307,7 @@ julia> CTBase.Core.show_palette()
 julia> CTBase.Core.reset_palette!()
 ```
 
-See also: [`CTBase.Core.set_palette!`](@ref), [`CTBase.Core.current_palette`](@ref), [`CTBase.Core.DEFAULT_PALETTE`](@ref)
+See also: [`CTBase.Core.set_palette!`](@extref), [`CTBase.Core.current_palette`](@extref), [`CTBase.Core.DEFAULT_PALETTE`](@extref)
 """
 function show_palette(io::IO=IOContext(stdout, :color => true))
     p = current_palette()

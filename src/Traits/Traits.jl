@@ -48,8 +48,8 @@ correctness bug (an object is *either* autonomous or not), so there is no defaul
 a type must opt in by implementing two methods — `has_<family>_trait` returning
 `true`, and an accessor (`time_dependence`, `variable_dependence`,
 `control_dependence`, `mutability`) returning the trait type. The fallbacks throw
-loudly ([`CTBase.Exceptions.IncorrectArgument`](@ref) /
-[`CTBase.Exceptions.NotImplemented`](@ref)) via the shared helpers
+loudly ([`CTBase.Exceptions.IncorrectArgument`](@extref) /
+[`CTBase.Exceptions.NotImplemented`](@extref)) via the shared helpers
 `_throw_missing_trait` / `_throw_trait_not_implemented`. Boolean predicates
 (`is_autonomous`, `is_variable`, `is_control_free`, `is_inplace`, …) are derived
 generically.

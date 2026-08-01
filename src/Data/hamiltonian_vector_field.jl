@@ -38,7 +38,7 @@ unused arguments.
 For InPlace Hamiltonian vector fields, the natural signature includes the derivative
 buffers as the first two arguments (e.g., `(dx, dp, x, p)` for Autonomous/Fixed).
 
-See also: [`CTBase.Data.AbstractVectorField`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.AbstractMutabilityTrait`](@ref).
+See also: [`CTBase.Data.AbstractVectorField`](@extref), [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.AbstractMutabilityTrait`](@extref).
 """
 struct HamiltonianVectorField{
     F<:Function,
@@ -109,7 +109,7 @@ auto-detection is ambiguous and the user should specify `is_inplace` explicitly.
 - Users can bypass auto-detection by specifying `is_inplace=true` or `is_inplace=false` explicitly in the constructor.
 - HamiltonianVectorField has two output buffers (dx, dp), so the in-place arity is `oop_arity + 2`.
 
-See also: [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Data.HamiltonianVectorField`](@extref), [`CTBase.Traits.InPlace`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 function _detect_mutability_hvf(f::Function, TD, VD)
     method_count = length(methods(f))
@@ -181,7 +181,7 @@ HamiltonianVectorField: autonomous, fixed (no variable), in-place
 - If `is_inplace` is `nothing` (default), the mutability is auto-detected from the function signature by checking the number of arguments.
 - If the function has multiple methods, auto-detection will fail with a `PreconditionError`. In this case, specify `is_inplace` explicitly.
 
-See also: [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref), [`CTBase.Traits.InPlace`](@ref), [`CTBase.Traits.OutOfPlace`](@ref).
+See also: [`CTBase.Data.HamiltonianVectorField`](@extref), [`CTBase.Traits.Autonomous`](@extref), [`CTBase.Traits.NonAutonomous`](@extref), [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.NonFixed`](@extref), [`CTBase.Traits.InPlace`](@extref), [`CTBase.Traits.OutOfPlace`](@extref).
 """
 function HamiltonianVectorField(
     f;
@@ -387,7 +387,7 @@ Shows the type name, time dependence, variable dependence, mutability, and funct
 - `io::IO`: The IO stream to write to.
 - `hvf::HamiltonianVectorField`: The HamiltonianVectorField to display.
 
-See also: [`CTBase.Data.HamiltonianVectorField`](@ref).
+See also: [`CTBase.Data.HamiltonianVectorField`](@extref).
 """
 function Base.show(
     io::IO, ::HamiltonianVectorField{F,TD,VD,MD}
@@ -417,7 +417,7 @@ Delegates to the compact show method.
 - `::MIME"text/plain"`: The MIME type for REPL display.
 - `hvf::HamiltonianVectorField`: The HamiltonianVectorField to display.
 
-See also: [`CTBase.Data.HamiltonianVectorField`](@ref).
+See also: [`CTBase.Data.HamiltonianVectorField`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", hvf::HamiltonianVectorField{F,TD,VD,MD}

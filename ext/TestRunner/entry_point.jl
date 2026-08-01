@@ -47,7 +47,7 @@ julia> CTBase.DevTools.run_tests(;
        )
 ```
 
-See also: [`CTBase.DevTools.run_tests`](@ref)
+See also: [`CTBase.DevTools.run_tests`](@extref)
 """
 function DevTools.run_tests(
     ::CTBase.DevTools.TestRunnerTag;

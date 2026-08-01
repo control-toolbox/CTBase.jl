@@ -35,6 +35,6 @@ function signature unless specified otherwise.
 # Returns
 - `Nothing`: The default value for the `is_inplace` parameter.
 
-See also: [`CTBase.Data.VectorField`](@ref), [`CTBase.Data.HamiltonianVectorField`](@ref).
+See also: [`CTBase.Data.VectorField`](@extref), [`CTBase.Data.HamiltonianVectorField`](@extref).
 """
 __is_inplace() = nothing

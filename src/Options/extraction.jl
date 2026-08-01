@@ -113,7 +113,7 @@ options from the kwargs.
 # Throws
 - Any exception raised by validators in the definitions
 
-See also: [`CTBase.Options.extract_option`](@ref), [`CTBase.Options.OptionDefinition`](@ref), [`CTBase.Options.OptionValue`](@ref)
+See also: [`CTBase.Options.extract_option`](@extref), [`CTBase.Options.OptionDefinition`](@extref), [`CTBase.Options.OptionValue`](@extref)
 
 # Example
 ```julia
@@ -168,7 +168,7 @@ of a Dict for convenience when the definition structure is known at compile time
 # Throws
 - Any exception raised by validators in the definitions
 
-See also: [`CTBase.Options.extract_option`](@ref), [`CTBase.Options.OptionDefinition`](@ref), [`CTBase.Options.OptionValue`](@ref)
+See also: [`CTBase.Options.extract_option`](@extref), [`CTBase.Options.OptionDefinition`](@extref), [`CTBase.Options.OptionValue`](@extref)
 
 # Example
 ```julia
@@ -229,7 +229,7 @@ extract_raw_options(opts)
 # (backend = :optimized, show_time = false, minimize = nothing)
 ```
 
-See also: [`CTBase.Options.OptionValue`](@ref), [`CTBase.Options.extract_options`](@ref), `CTBase.Core.NotProvided`
+See also: [`CTBase.Options.OptionValue`](@extref), [`CTBase.Options.extract_options`](@extref), `CTBase.Core.NotProvided`
 """
 function extract_raw_options(options::NamedTuple)
     raw_opts_dict = Dict{Symbol,Any}()

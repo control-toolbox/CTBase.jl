@@ -26,7 +26,7 @@ julia> descriptions[1]
 (:a,)
 ```
 
-See also: [`CTBase.Descriptions.Description`](@ref), [`CTBase.Descriptions.complete`](@ref), [`CTBase.Descriptions.remove`](@ref)
+See also: [`CTBase.Descriptions.Description`](@extref), [`CTBase.Descriptions.complete`](@extref), [`CTBase.Descriptions.remove`](@extref)
 """
 add(::Tuple{}, y::Description)::Tuple{Vararg{Description}} = (y,)
 
@@ -63,7 +63,7 @@ ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
        Context: description catalog management
 ```
 
-See also: [`CTBase.Descriptions.complete`](@ref), [`CTBase.Descriptions.remove`](@ref)
+See also: [`CTBase.Descriptions.complete`](@extref), [`CTBase.Descriptions.remove`](@extref)
 """
 function add(x::Tuple{Vararg{Description}}, y::Description)::Tuple{Vararg{Description}}
     if y ∈ x

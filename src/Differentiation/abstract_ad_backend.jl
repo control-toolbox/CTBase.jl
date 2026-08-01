@@ -22,9 +22,9 @@ implement the contract methods to provide actual gradient computation.
  - Gradient methods return **non-negated** partial derivatives; the RHS closures
    apply the signs (ṗ = -∂H/∂x, ṽ = -∂H/∂v).
 
-See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref),
-[`CTBase.Differentiation.hamiltonian_gradient`](@ref),
-[`CTBase.Differentiation.variable_gradient`](@ref).
+See also: [`CTBase.Differentiation.DifferentiationInterface`](@extref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@extref),
+[`CTBase.Differentiation.variable_gradient`](@extref).
 """
 abstract type AbstractADBackend <: Strategies.AbstractStrategy end
 
@@ -54,7 +54,7 @@ Compute the Hamiltonian gradient (∂H/∂x, ∂H/∂p) using the backend.
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.variable_gradient`](@ref).
+See also: [`CTBase.Differentiation.variable_gradient`](@extref).
 """
 function hamiltonian_gradient(
     backend::AbstractADBackend, h::Data.AbstractHamiltonian, t, x, p, v
@@ -89,7 +89,7 @@ Compute the variable gradient ∂H/∂v using the backend.
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.hamiltonian_gradient`](@ref).
+See also: [`CTBase.Differentiation.hamiltonian_gradient`](@extref).
 """
 function variable_gradient(
     backend::AbstractADBackend, h::Data.AbstractHamiltonian, t, x, p, v
@@ -111,7 +111,7 @@ Compute the pseudo-Hamiltonian gradient (∂H̃/∂x, ∂H̃/∂p) using the bac
 
 Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
 Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
-[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref) to compute ∂H̃/∂u separately
+[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@extref) to compute ∂H̃/∂u separately
 (e.g. for checking the stationarity condition).
 
 # Arguments
@@ -130,9 +130,9 @@ Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref),
-[`CTBase.Differentiation.hamiltonian_gradient`](@ref),
-[`CTBase.Differentiation.variable_gradient`](@ref).
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@extref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@extref),
+[`CTBase.Differentiation.variable_gradient`](@extref).
 """
 function pseudo_hamiltonian_gradient(
     backend::AbstractADBackend, h̃::Data.AbstractPseudoHamiltonian, t, x, p, u, v
@@ -154,7 +154,7 @@ Compute the pseudo-Hamiltonian control gradient ∂H̃/∂u using the backend.
 
 This is typically used to check the PMP stationarity condition ∂H̃/∂u = 0,
 not for the Hamiltonian flow itself (which only needs ∂H̃/∂x and ∂H̃/∂p;
-see [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref)).
+see [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@extref)).
 
 # Arguments
 - `backend::AbstractADBackend`: The AD backend.
@@ -171,8 +171,8 @@ see [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref)).
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref),
-[`CTBase.Differentiation.variable_gradient`](@ref).
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@extref),
+[`CTBase.Differentiation.variable_gradient`](@extref).
 """
 function pseudo_hamiltonian_control_gradient(
     backend::AbstractADBackend, h̃::Data.AbstractPseudoHamiltonian, t, x, p, u, v
@@ -193,7 +193,7 @@ $(TYPEDSIGNATURES)
 Compute the pseudo-Hamiltonian variable gradient ∂H̃/∂v using the backend, with the
 control `u` held **constant**.
 
-This is the pseudo-Hamiltonian analogue of [`CTBase.Differentiation.variable_gradient`](@ref),
+This is the pseudo-Hamiltonian analogue of [`CTBase.Differentiation.variable_gradient`](@extref),
 used by the augmented (variable-costate) right-hand side of a `PseudoHamiltonianSystem`
 where the control is fixed at the feedback value `u = u(t, x, p, v)`. Because `u` is
 held constant, this is a **partial** derivative; it differs from the total derivative
@@ -215,8 +215,8 @@ held constant, this is a **partial** derivative; it differs from the total deriv
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.variable_gradient`](@ref),
-[`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref).
+See also: [`CTBase.Differentiation.variable_gradient`](@extref),
+[`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@extref).
 """
 function pseudo_variable_gradient(
     backend::AbstractADBackend, h̃::Data.AbstractPseudoHamiltonian, t, x, p, u, v
@@ -251,7 +251,7 @@ Extract the AD backend from a backend strategy.
    from a Hamiltonian system's backend.
  - For `DifferentiationInterface`, this extracts the `:ad_backend` option.
 
-See also: [`CTBase.Differentiation.DifferentiationInterface`](@ref).
+See also: [`CTBase.Differentiation.DifferentiationInterface`](@extref).
 """
 function ad_backend(backend::AbstractADBackend)
     return throw(
@@ -289,8 +289,8 @@ Compute the gradient of a scalar function using the backend.
  - This method is provided for extensions that implement gradient computation
    via DifferentiationInterface.jl.
 
-See also: [`CTBase.Differentiation.derivative`](@ref),
-[`CTBase.Differentiation.hamiltonian_gradient`](@ref).
+See also: [`CTBase.Differentiation.derivative`](@extref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@extref).
 """
 function gradient(backend::AbstractADBackend, f::Function, x)
     return throw(
@@ -324,8 +324,8 @@ Compute the derivative of a scalar function using the backend.
  - This method is provided for extensions that implement derivative computation
    via DifferentiationInterface.jl.
 
-See also: [`CTBase.Differentiation.gradient`](@ref),
-[`CTBase.Differentiation.variable_gradient`](@ref).
+See also: [`CTBase.Differentiation.gradient`](@extref),
+[`CTBase.Differentiation.variable_gradient`](@extref).
 """
 function derivative(backend::AbstractADBackend, g::Function, t::Real)
     return throw(
@@ -365,7 +365,7 @@ slot order (skipping `Slot`).
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.pushforward`](@ref).
+See also: [`CTBase.Differentiation.pushforward`](@extref).
 """
 function differentiate(
     backend::AbstractADBackend, f, ::Val{Slot}, active, consts...
@@ -403,7 +403,7 @@ at `x` along `dx`, with all other arguments frozen.
 # Throws
 - `CTBase.Exceptions.NotImplemented`: If the concrete backend does not implement this method.
 
-See also: [`CTBase.Differentiation.differentiate`](@ref).
+See also: [`CTBase.Differentiation.differentiate`](@extref).
 """
 function pushforward(
     backend::AbstractADBackend, f, ::Val{Slot}, x, dx, consts...
