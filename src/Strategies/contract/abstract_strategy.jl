@@ -229,7 +229,7 @@ Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:AbstractStrategyParamete
 A non-throwing 2-arg variant, `parameter(strategy_type, default)`, is also available for
 callers that cannot guarantee the type they're querying implements this contract — see below.
 
-See also: [`CTBase.Strategies.default_parameter`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
+See also: [`CTBase.Strategies.default_parameter`](@extref), [`CTBase.Strategies.AbstractStrategyParameter`](@extref)
 """
 function parameter end
 
@@ -345,7 +345,7 @@ julia> parameter(MadNLP{CPU}, :fallback)
 CPU
 ```
 
-See also: [`CTBase.Strategies.parameter`](@ref), [`CTBase.Strategies.default_parameter`](@ref)
+See also: [`CTBase.Strategies.parameter`](@extref), [`CTBase.Strategies.default_parameter`](@extref)
 """
 function parameter(strategy_type::Type{<:AbstractStrategy}, default)
     return try
@@ -432,7 +432,7 @@ julia> modeler[:maxiter]   # Alias - automatically resolved
 - All functionality (alias resolution, provenance tracking) is handled by StrategyOptions
 - Use `options(strategy)` for full access to OptionValue objects with source information
 
-See also: [`CTBase.Strategies.options`](@ref), `Base.haskey`, `Base.keys`, [`CTBase.Strategies.StrategyOptions`](@ref)
+See also: [`CTBase.Strategies.options`](@extref), `Base.haskey`, `Base.keys`, [`CTBase.Strategies.StrategyOptions`](@extref)
 """
 function Base.getindex(strategy::AbstractStrategy, key::Symbol)
     return options(strategy)[key]
@@ -471,7 +471,7 @@ false
 - This is syntactic sugar for `haskey(options(strategy), key)`
 - Aliases are automatically resolved to canonical names
 
-See also: [`CTBase.Strategies.options`](@ref), `Base.getindex`, `Base.keys`, [`CTBase.Strategies.StrategyOptions`](@ref)
+See also: [`CTBase.Strategies.options`](@extref), `Base.getindex`, `Base.keys`, [`CTBase.Strategies.StrategyOptions`](@extref)
 """
 function Base.haskey(strategy::AbstractStrategy, key::Symbol)
     return haskey(options(strategy), key)
@@ -503,7 +503,7 @@ julia> collect(keys(modeler))
 - This is syntactic sugar for `keys(options(strategy))`
 - Returns canonical names only (not aliases)
 
-See also: [`CTBase.Strategies.options`](@ref), `Base.getindex`, `Base.haskey`, [`CTBase.Strategies.StrategyOptions`](@ref)
+See also: [`CTBase.Strategies.options`](@extref), `Base.getindex`, `Base.haskey`, [`CTBase.Strategies.StrategyOptions`](@extref)
 """
 function Base.keys(strategy::AbstractStrategy)
     return keys(options(strategy))
@@ -541,7 +541,7 @@ FakeSolver{CPU} (instance, id: :fake_solver)
 Tip: use describe(FakeSolver{CPU}) to see all available options.
 ```
 
-See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.options`](@ref)
+See also: [`CTBase.Strategies.describe`](@extref), [`CTBase.Strategies.options`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", strategy::T) where {T<:AbstractStrategy}
     fmt = Core.get_format_codes(io)
@@ -678,7 +678,7 @@ Modelers.ADNLP (strategy type)
       description: Enable matrix-free mode
 ```
 
-See also: [`CTBase.Strategies.metadata`](@ref), [`CTBase.Strategies.id`](@ref), [`CTBase.Strategies.options`](@ref)
+See also: [`CTBase.Strategies.metadata`](@extref), [`CTBase.Strategies.id`](@extref), [`CTBase.Strategies.options`](@extref)
 """
 function describe end
 
@@ -705,7 +705,7 @@ description(::Type{<:Modelers.ADNLP}) =
     "NLP modeler using ADNLPModels.\\nSee: https://jso.dev/ADNLPModels.jl"
 ```
 
-See also: [`CTBase.Strategies.describe`](@ref), [`CTBase.Strategies.AbstractStrategy`](@ref)
+See also: [`CTBase.Strategies.describe`](@extref), [`CTBase.Strategies.AbstractStrategy`](@extref)
 """
 description(::Type{<:AbstractStrategy}) = nothing
 

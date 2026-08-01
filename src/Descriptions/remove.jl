@@ -19,7 +19,7 @@ julia> CTBase.remove((:a, :b, :c), (:a,))
 (:b, :c)
 ```
 
-See also: [`CTBase.Descriptions.add`](@ref), [`CTBase.Descriptions.complete`](@ref)
+See also: [`CTBase.Descriptions.add`](@extref), [`CTBase.Descriptions.complete`](@extref)
 """
 function remove(x::Description, y::Description)::Tuple{Vararg{Symbol}}
     return tuple(setdiff(x, y)...)

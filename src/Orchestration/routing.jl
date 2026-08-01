@@ -73,7 +73,7 @@ kwargs = (grid_size=100, backend=Strategies.route_to(adnlp=:sparse))
 routed = route_all_options(method, families, action_defs, kwargs, registry)
 ```
 
-See also: [`CTBase.Orchestration.extract_strategy_ids`](@ref), [`CTBase.Orchestration.build_strategy_to_family_map`](@ref), [`CTBase.Orchestration.build_option_ownership_map`](@ref)
+See also: [`CTBase.Orchestration.extract_strategy_ids`](@extref), [`CTBase.Orchestration.build_strategy_to_family_map`](@extref), [`CTBase.Orchestration.build_option_ownership_map`](@extref)
 """
 function route_all_options(
     method::Tuple{Vararg{Symbol}},

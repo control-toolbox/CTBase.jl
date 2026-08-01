@@ -20,7 +20,7 @@ julia> display(((:a, :b), (:b, :c)))
 (:b, :c)
 ```
 
-See also: [`CTBase.Descriptions.Description`](@ref)
+See also: [`CTBase.Descriptions.Description`](@extref)
 """
 function Base.show(io::IO, ::MIME"text/plain", descriptions::Tuple{Vararg{Description}})
     N = length(descriptions)  # use length instead of size for 1D tuple

@@ -45,7 +45,7 @@ ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
        Context: description completion
 ```
 
-See also: [`CTBase.Descriptions._compute_similarity`](@ref), [`CTBase.Descriptions._find_similar_descriptions`](@ref), [`CTBase.Descriptions._format_description_candidates`](@ref), [`CTBase.Exceptions.AmbiguousDescription`](@ref)
+See also: [`CTBase.Descriptions._compute_similarity`](@extref), [`CTBase.Descriptions._find_similar_descriptions`](@extref), [`CTBase.Descriptions._format_description_candidates`](@extref), [`CTBase.Exceptions.AmbiguousDescription`](@extref)
 """
 function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::Description
     n = length(descriptions)
@@ -126,10 +126,10 @@ This method is equivalent to `complete(list...; descriptions=descriptions)`.
 
 # Throws
 
-- [`CTBase.Exceptions.AmbiguousDescription`](@ref): If `descriptions` is empty, or if `list` is not contained
+- [`CTBase.Exceptions.AmbiguousDescription`](@extref): If `descriptions` is empty, or if `list` is not contained
   in any candidate description.
 
-See also: [`CTBase.Descriptions.complete`](@ref), [`CTBase.Exceptions.AmbiguousDescription`](@ref)
+See also: [`CTBase.Descriptions.complete`](@extref), [`CTBase.Exceptions.AmbiguousDescription`](@extref)
 """
 function complete(
     list::Tuple{DescVarArg}; descriptions::Tuple{Vararg{Description}}

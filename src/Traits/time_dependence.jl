@@ -15,7 +15,7 @@ control problem, a vector field, a Hamiltonian).
 Used as a type parameter to distinguish between autonomous and non-autonomous
 objects at the type level, enabling dispatch and compile-time optimisations.
 
-See also: [`CTBase.Traits.Autonomous`](@ref), [`CTBase.Traits.NonAutonomous`](@ref).
+See also: [`CTBase.Traits.Autonomous`](@extref), [`CTBase.Traits.NonAutonomous`](@extref).
 """
 abstract type TimeDependence end
 
@@ -26,7 +26,7 @@ Type tag indicating that the dynamics and other functions do not explicitly
 depend on time. For autonomous systems, the dynamics have the form `ẋ = f(x, u)`
 rather than `ẋ = f(t, x, u)`.
 
-See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.NonAutonomous`](@ref).
+See also: [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.NonAutonomous`](@extref).
 """
 abstract type Autonomous <: TimeDependence end
 
@@ -36,7 +36,7 @@ $(TYPEDEF)
 Type tag indicating that the dynamics and other functions explicitly depend on
 time. For non-autonomous systems, the dynamics have the form `ẋ = f(t, x, u)`.
 
-See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.Autonomous`](@ref).
+See also: [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.Autonomous`](@extref).
 """
 abstract type NonAutonomous <: TimeDependence end
 
@@ -60,9 +60,9 @@ for better error messages.
 - `obj::Any`: The object to check.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always, indicating the object does not have the trait.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always, indicating the object does not have the trait.
 
-See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.time_dependence`](@ref).
+See also: [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.time_dependence`](@extref).
 """
 function has_time_dependence_trait(obj::Any)
     return _throw_missing_trait(
@@ -83,9 +83,9 @@ to return the specific trait value (`Autonomous` or `NonAutonomous`).
 - `obj::Any`: The object to query.
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@ref): Always, indicating the method must be implemented.
+- [`CTBase.Exceptions.NotImplemented`](@extref): Always, indicating the method must be implemented.
 
-See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.has_time_dependence_trait`](@ref).
+See also: [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.has_time_dependence_trait`](@extref).
 """
 function time_dependence(obj::Any)
     has_time_dependence_trait(obj)
@@ -109,10 +109,10 @@ if `time_dependence(obj)` is `Autonomous`.
 - `Bool`: true if the object is autonomous.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support time-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `time_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support time-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `time_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.time_dependence`](@ref).
+See also: [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.time_dependence`](@extref).
 """
 function is_autonomous(obj::Any)
     has_time_dependence_trait(obj)
@@ -134,10 +134,10 @@ if `time_dependence(obj)` is `NonAutonomous`.
 - `Bool`: true if the object is non-autonomous.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support time-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `time_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support time-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `time_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.time_dependence`](@ref).
+See also: [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.time_dependence`](@extref).
 """
 function is_nonautonomous(obj::Any)
     has_time_dependence_trait(obj)

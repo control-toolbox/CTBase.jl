@@ -22,6 +22,6 @@ struct MyCache <: AbstractCache
 end
 ```
 
-See also: [`CTBase.Core.AbstractTag`](@ref).
+See also: [`CTBase.Core.AbstractTag`](@extref).
 """
 abstract type AbstractCache end

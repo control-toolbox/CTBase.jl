@@ -4,7 +4,7 @@ $(TYPEDEF)
 Abstract interpolation method (trait).
 
 Concrete subtypes (`Linear`, `Constant`) are singleton trait values carried as a type
-parameter of [`CTBase.Interpolation.Interpolant`](@ref), so the call method is resolved statically.
+parameter of [`CTBase.Interpolation.Interpolant`](@extref), so the call method is resolved statically.
 """
 abstract type AbstractInterpolation end
 
@@ -28,7 +28,7 @@ $(TYPEDEF)
 Callable interpolant of method `M` over nodes `x` with values `f`.
 
 `Interpolant` subtypes `Function`: an instance `interp` is evaluated as `interp(t)`. The
-method `M` (a subtype of [`CTBase.Interpolation.AbstractInterpolation`](@ref)) is a compile-time trait parameter
+method `M` (a subtype of [`CTBase.Interpolation.AbstractInterpolation`](@extref)) is a compile-time trait parameter
 that selects the evaluation rule, so the call is type-stable.
 
 # Fields
@@ -36,8 +36,8 @@ that selects the evaluation rule, so the call is type-stable.
 - `f::TF`: values to interpolate.
 
 # Construction
-Build instances through the factories [`CTBase.Interpolation.ctinterpolate`](@ref) (linear) and
-[`CTBase.Interpolation.ctinterpolate_constant`](@ref) (piecewise-constant).
+Build instances through the factories [`CTBase.Interpolation.ctinterpolate`](@extref) (linear) and
+[`CTBase.Interpolation.ctinterpolate_constant`](@extref) (piecewise-constant).
 """
 struct Interpolant{M<:AbstractInterpolation,TX,TF} <: Function
     x::TX
@@ -52,6 +52,6 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the interpolation method (a subtype of [`CTBase.Interpolation.AbstractInterpolation`](@ref)) of `interp`.
+Return the interpolation method (a subtype of [`CTBase.Interpolation.AbstractInterpolation`](@extref)) of `interp`.
 """
 method(::Interpolant{M}) where {M<:AbstractInterpolation} = M

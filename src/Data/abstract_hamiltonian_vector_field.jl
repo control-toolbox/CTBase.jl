@@ -31,7 +31,7 @@ julia> Data.HamiltonianVectorField <: Data.AbstractHamiltonianVectorField
 true
 \`\`\`
 
-See also: [`CTBase.Data.AbstractVectorField`](@ref), [`CTBase.Data.HamiltonianVectorField`](@ref), [`CTBase.Data.Hamiltonian`](@ref).
+See also: [`CTBase.Data.AbstractVectorField`](@extref), [`CTBase.Data.HamiltonianVectorField`](@extref), [`CTBase.Data.Hamiltonian`](@extref).
 """
 abstract type AbstractHamiltonianVectorField{
     TD<:Traits.TimeDependence,
@@ -42,8 +42,8 @@ abstract type AbstractHamiltonianVectorField{
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of an `AbstractHamiltonianVectorField`, namely [`CTBase.Traits.HamiltonianDynamics`](@ref).
+Return the dynamics trait of an `AbstractHamiltonianVectorField`, namely [`CTBase.Traits.HamiltonianDynamics`](@extref).
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Data.AbstractHamiltonianVectorField`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Data.AbstractHamiltonianVectorField`](@extref).
 """
 Traits.dynamics_trait(::AbstractHamiltonianVectorField) = Traits.HamiltonianDynamics

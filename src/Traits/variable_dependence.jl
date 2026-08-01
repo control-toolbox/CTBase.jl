@@ -33,7 +33,7 @@ Common use cases include:
 - Systems with constant parameters that are not integrated
 - Configurations where all parameters are known at compile time
 
-See also: [`CTBase.Traits.NonFixed`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.NonFixed`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 struct Fixed <: VariableDependence end
 
@@ -52,7 +52,7 @@ Common use cases include:
 - Configurations where parameters are treated as control variables
 - Sensitivity analysis and parameter estimation
 
-See also: [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 struct NonFixed <: VariableDependence end
 
@@ -76,9 +76,9 @@ for better error messages.
 - `obj::Any`: The object to check.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always, indicating the object does not have the trait.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always, indicating the object does not have the trait.
 
-See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref).
+See also: [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.variable_dependence`](@extref).
 """
 function has_variable_dependence_trait(obj::Any)
     return _throw_missing_trait(
@@ -99,9 +99,9 @@ to return the specific trait value (`Fixed` or `NonFixed`).
 - `obj::Any`: The object to query.
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@ref): Always, indicating the method must be implemented.
+- [`CTBase.Exceptions.NotImplemented`](@extref): Always, indicating the method must be implemented.
 
-See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.has_variable_dependence_trait`](@ref).
+See also: [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.has_variable_dependence_trait`](@extref).
 """
 function variable_dependence(obj::Any)
     has_variable_dependence_trait(obj)
@@ -129,10 +129,10 @@ if `variable_dependence(obj)` is `NonFixed`.
 - `Bool`: true if the object depends on variable parameters.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support variable-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `variable_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref).
+See also: [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.variable_dependence`](@extref).
 """
 function is_variable(obj::Any)
     has_variable_dependence_trait(obj)
@@ -154,10 +154,10 @@ if `variable_dependence(obj)` is `Fixed`.
 - `Bool`: true if the object does not depend on variable parameters.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support variable-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `variable_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.variable_dependence`](@ref).
+See also: [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.variable_dependence`](@extref).
 """
 function is_nonvariable(obj::Any)
     has_variable_dependence_trait(obj)
@@ -179,9 +179,9 @@ if `variable_dependence(obj)` is `NonFixed`.
 - `Bool`: true if the object depends on variable parameters.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support variable-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `variable_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support variable-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `variable_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.is_variable`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.is_variable`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 has_variable(obj::Any) = is_variable(obj)

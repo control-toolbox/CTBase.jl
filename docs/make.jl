@@ -9,6 +9,7 @@ pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
 using Documenter
 using DocumenterVitepress
+using DocumenterInterLinks
 using CTBase
 using Markdown
 using MarkdownAST: MarkdownAST
@@ -43,6 +44,17 @@ Draft = false
 ```
 =#
 draft = false # Draft mode: if true, @example blocks in markdown are not executed
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Cross-package links (InterLinks)
+# ═══════════════════════════════════════════════════════════════════════════════
+links = InterLinks(
+    "CTBase" => (
+        "https://control-toolbox.org/CTBase.jl/stable/",
+        joinpath(@__DIR__, "build", "1", "objects.inv"),
+        "https://control-toolbox.org/CTBase.jl/stable/objects.inv",
+    ),
+)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Docstrings from external packages
@@ -83,6 +95,7 @@ with_api_reference(src_dir) do api_pages
     return makedocs(;
         draft=draft,
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
+        plugins=[links],
         warnonly=[:cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
@@ -128,7 +141,7 @@ end
 bases_file = joinpath(@__DIR__, "build", "bases.txt")
 if isfile(bases_file)
     DocumenterVitepress.deploydocs(;
-        repo=repo_url * ".git", devbranch="main", push_preview=true
+        repo=repo_url * ".git", devbranch="main", push_preview=false
     )
 else
     @info "Skipping deployment: no bases were built (prerelease with existing higher stable release)."

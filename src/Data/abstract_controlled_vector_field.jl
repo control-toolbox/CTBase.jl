@@ -10,13 +10,13 @@ time-dependence and variable-dependence traits.
 
 A controlled vector field is a function `fc(t, x, u[, v])` returning the state
 derivative, with an **explicit control argument** `u`. It is the state-space analogue
-of [`CTBase.Data.AbstractPseudoHamiltonian`](@ref): where a pseudo-Hamiltonian carries
+of [`CTBase.Data.AbstractPseudoHamiltonian`](@extref): where a pseudo-Hamiltonian carries
 the control alongside the costate, a controlled vector field carries the control
 alongside the state. It is always **out-of-place** (returns the derivative), so unlike
-[`CTBase.Data.AbstractVectorField`](@ref) it has no mutability trait.
+[`CTBase.Data.AbstractVectorField`](@extref) it has no mutability trait.
 
 Composing a controlled vector field with an open-loop or closed-loop control law
-eliminates the control and yields a plain [`CTBase.Data.ComposedVectorField`](@ref).
+eliminates the control and yields a plain [`CTBase.Data.ComposedVectorField`](@extref).
 
 # Type Parameters
 - `TD <: TimeDependence`: `Autonomous` or `NonAutonomous`.
@@ -27,8 +27,8 @@ eliminates the control and yields a plain [`CTBase.Data.ComposedVectorField`](@r
 - The uniform signature `(t, x, u, v)` is used internally by composition.
 - The dynamics trait is always `StateDynamics`.
 
-See also: [`CTBase.Data.ControlledVectorField`](@ref), [`CTBase.Data.ComposedVectorField`](@ref),
-[`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
+See also: [`CTBase.Data.ControlledVectorField`](@extref), [`CTBase.Data.ComposedVectorField`](@extref),
+[`CTBase.Data.AbstractPseudoHamiltonian`](@extref).
 """
 abstract type AbstractControlledVectorField{
     TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
@@ -43,7 +43,7 @@ $(TYPEDSIGNATURES)
 
 Indicate that all `AbstractControlledVectorField` types support time-dependence queries.
 
-See also: [`CTBase.Traits.time_dependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref).
 """
 Traits.has_time_dependence_trait(::AbstractControlledVectorField) = true
 
@@ -52,7 +52,7 @@ $(TYPEDSIGNATURES)
 
 Indicate that all `AbstractControlledVectorField` types support variable-dependence queries.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref).
 """
 Traits.has_variable_dependence_trait(::AbstractControlledVectorField) = true
 
@@ -61,7 +61,7 @@ $(TYPEDSIGNATURES)
 
 Return the time-dependence trait of a controlled vector field.
 
-See also: [`CTBase.Traits.time_dependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref).
 """
 function Traits.time_dependence(
     ::AbstractControlledVectorField{TD,<:Traits.VariableDependence}
@@ -74,7 +74,7 @@ $(TYPEDSIGNATURES)
 
 Return the variable-dependence trait of a controlled vector field.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref).
 """
 function Traits.variable_dependence(
     ::AbstractControlledVectorField{<:Traits.TimeDependence,VD}
@@ -86,8 +86,8 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dynamics trait of an `AbstractControlledVectorField`, namely
-[`CTBase.Traits.StateDynamics`](@ref).
+[`CTBase.Traits.StateDynamics`](@extref).
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref).
 """
 Traits.dynamics_trait(::AbstractControlledVectorField) = Traits.StateDynamics

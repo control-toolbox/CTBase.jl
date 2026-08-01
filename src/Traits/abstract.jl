@@ -33,6 +33,6 @@ true
 - All trait types have zero runtime overhead (empty structs)
 - The trait pattern enables static dispatch on configuration properties
 
-See also: [`CTBase.Traits.VariableDependence`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref), [`CTBase.Traits.AbstractDynamicsTrait`](@ref), [`CTBase.Traits.AbstractMutabilityTrait`](@ref).
+See also: [`CTBase.Traits.VariableDependence`](@extref), [`CTBase.Traits.AbstractModeTrait`](@extref), [`CTBase.Traits.AbstractDynamicsTrait`](@extref), [`CTBase.Traits.AbstractMutabilityTrait`](@extref).
 """
 abstract type AbstractTrait end

@@ -11,19 +11,19 @@ as its default and was not provided by the user.
 This type is internal to the Options module and should not be used directly by users.
 Use `CTBase.Core.NotProvided` instead.
 
-See also: `CTBase.Core.NotProvided`, [`CTBase.Options.extract_option`](@ref).
+See also: `CTBase.Core.NotProvided`, [`CTBase.Options.extract_option`](@extref).
 """
 struct NotStoredType end
 
 """
     NotStored
 
-Internal singleton instance of [`CTBase.Options.NotStoredType`](@ref).
+Internal singleton instance of [`CTBase.Options.NotStoredType`](@extref).
 
 Used internally by the option extraction system to signal that an option should not
 be stored. This is distinct from `nothing` which is a valid option value.
 
-See also: `CTBase.Core.NotProvided`, [`CTBase.Options.extract_option`](@ref).
+See also: `CTBase.Core.NotProvided`, [`CTBase.Options.extract_option`](@extref).
 """
 const NotStored = NotStoredType()
 

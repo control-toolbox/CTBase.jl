@@ -11,7 +11,7 @@ constraint-kind, time-dependence, and variable-dependence traits.
 The function returns the value `g(...)` of a path constraint evaluated along the
 trajectory of an optimal control problem. The constraint-kind trait determines
 which primal variables the constraint depends on (see
-[`CTBase.Data.AbstractPathConstraint`](@ref)).
+[`CTBase.Data.AbstractPathConstraint`](@extref)).
 
 # Type Parameters
 - `F`: concrete type of the wrapped function.
@@ -44,9 +44,9 @@ arguments), used by flow integrators:
 | `ControlConstraint` | `g(u)` | `g(t, x, u, v)` |
 | `MixedConstraint` | `g(x, u)` | `g(t, x, u, v)` |
 
-See also: [`CTBase.Data.AbstractPathConstraint`](@ref), [`CTBase.Data.StateConstraint`](@ref),
-[`CTBase.Data.ControlConstraint`](@ref), [`CTBase.Data.MixedConstraint`](@ref),
-[`CTBase.Traits.AbstractConstraintKind`](@ref).
+See also: [`CTBase.Data.AbstractPathConstraint`](@extref), [`CTBase.Data.StateConstraint`](@extref),
+[`CTBase.Data.ControlConstraint`](@extref), [`CTBase.Data.MixedConstraint`](@extref),
+[`CTBase.Traits.AbstractConstraintKind`](@extref).
 """
 struct PathConstraint{
     F<:Function,
@@ -75,8 +75,8 @@ Internal constructor for `PathConstraint` with a specific constraint-kind type a
 # Returns
 - `PathConstraint`: A path constraint with appropriate traits.
 
-See also: [`CTBase.Data.PathConstraint`](@ref), [`CTBase.Data.StateConstraint`](@ref),
-[`CTBase.Data.ControlConstraint`](@ref), [`CTBase.Data.MixedConstraint`](@ref).
+See also: [`CTBase.Data.PathConstraint`](@extref), [`CTBase.Data.StateConstraint`](@extref),
+[`CTBase.Data.ControlConstraint`](@extref), [`CTBase.Data.MixedConstraint`](@extref).
 """
 function PathConstraint(
     f, ::Type{K}; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -104,7 +104,7 @@ Typed constructor for `PathConstraint` with explicit trait types.
 # Returns
 - `PathConstraint`: A path constraint with the specified traits.
 
-See also: [`CTBase.Data.PathConstraint`](@ref).
+See also: [`CTBase.Data.PathConstraint`](@extref).
 """
 function PathConstraint(
     f, ::Type{K}, ::Type{TD}, ::Type{VD}
@@ -141,8 +141,8 @@ PathConstraint: state, autonomous, fixed (no variable)
   uniform call: g(t, x, u, v)
 ```
 
-See also: [`CTBase.Data.ControlConstraint`](@ref), [`CTBase.Data.MixedConstraint`](@ref),
-[`CTBase.Data.PathConstraint`](@ref).
+See also: [`CTBase.Data.ControlConstraint`](@extref), [`CTBase.Data.MixedConstraint`](@extref),
+[`CTBase.Data.PathConstraint`](@extref).
 """
 function StateConstraint(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -175,8 +175,8 @@ PathConstraint: control, autonomous, fixed (no variable)
   uniform call: g(t, x, u, v)
 ```
 
-See also: [`CTBase.Data.StateConstraint`](@ref), [`CTBase.Data.MixedConstraint`](@ref),
-[`CTBase.Data.PathConstraint`](@ref).
+See also: [`CTBase.Data.StateConstraint`](@extref), [`CTBase.Data.MixedConstraint`](@extref),
+[`CTBase.Data.PathConstraint`](@extref).
 """
 function ControlConstraint(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -212,8 +212,8 @@ PathConstraint: mixed, autonomous, fixed (no variable)
   uniform call: g(t, x, u, v)
 ```
 
-See also: [`CTBase.Data.StateConstraint`](@ref), [`CTBase.Data.ControlConstraint`](@ref),
-[`CTBase.Data.PathConstraint`](@ref).
+See also: [`CTBase.Data.StateConstraint`](@extref), [`CTBase.Data.ControlConstraint`](@extref),
+[`CTBase.Data.PathConstraint`](@extref).
 """
 function MixedConstraint(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -431,7 +431,7 @@ Displays three lines:
 - Natural call signature
 - Uniform call signature
 
-See also: [`CTBase.Data.PathConstraint`](@ref).
+See also: [`CTBase.Data.PathConstraint`](@extref).
 """
 function Base.show(
     io::IO, ::PathConstraint{F,K,TD,VD}
@@ -461,7 +461,7 @@ This method is called automatically when displaying a path constraint in the Jul
 - `mime::MIME"text/plain"`: The MIME type.
 - `pc::PathConstraint`: The path constraint object.
 
-See also: [`CTBase.Data.PathConstraint`](@ref).
+See also: [`CTBase.Data.PathConstraint`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", pc::PathConstraint{F,K,TD,VD}

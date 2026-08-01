@@ -10,7 +10,7 @@ time-dependence and variable-dependence traits.
 
 The function returns the Lagrange multiplier `μ(t, x, p[, v])` associated with a
 path constraint. It has the same call structure as a
-[`CTBase.Data.Hamiltonian`](@ref).
+[`CTBase.Data.Hamiltonian`](@extref).
 
 # Type Parameters
 - `F`: concrete type of the wrapped function.
@@ -52,8 +52,8 @@ Multiplier: autonomous, fixed (no variable)
   uniform call: μ(t, x, p, v)
 ```
 
-See also: [`CTBase.Data.AbstractMultiplier`](@ref), [`CTBase.Data.Hamiltonian`](@ref),
-[`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.AbstractMultiplier`](@extref), [`CTBase.Data.Hamiltonian`](@extref),
+[`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 struct Multiplier{F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} <:
        AbstractMultiplier{TD,VD}
@@ -92,8 +92,8 @@ Multiplier: non-autonomous, fixed (no variable)
   uniform call: μ(t, x, p, v)
 ```
 
-See also: [`CTBase.Data.Multiplier`](@ref), [`CTBase.Traits.Autonomous`](@ref),
-[`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref).
+See also: [`CTBase.Data.Multiplier`](@extref), [`CTBase.Traits.Autonomous`](@extref),
+[`CTBase.Traits.NonAutonomous`](@extref), [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.NonFixed`](@extref).
 """
 function Multiplier(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -112,7 +112,7 @@ $(TYPEDSIGNATURES)
 
 Typed constructor for `Multiplier` with explicit trait types.
 
-See also: [`CTBase.Data.Multiplier`](@ref).
+See also: [`CTBase.Data.Multiplier`](@extref).
 """
 function Multiplier(
     f, ::Type{TD}, ::Type{VD}
@@ -160,7 +160,7 @@ Displays three lines:
 - Natural call signature
 - Uniform call signature
 
-See also: [`CTBase.Data.Multiplier`](@ref).
+See also: [`CTBase.Data.Multiplier`](@extref).
 """
 function Base.show(
     io::IO, ::Multiplier{F,TD,VD}
@@ -185,7 +185,7 @@ This method is called automatically when displaying a multiplier in the Julia RE
 - `mime::MIME"text/plain"`: The MIME type.
 - `m::Multiplier`: The multiplier object.
 
-See also: [`CTBase.Data.Multiplier`](@ref).
+See also: [`CTBase.Data.Multiplier`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", m::Multiplier{F,TD,VD}

@@ -17,7 +17,7 @@ out-of-place) because a scalar return has no meaningful in-place form.
 - All Hamiltonian types support both natural and uniform call signatures.
 - The uniform signature `(t, x, p, v)` is used internally by systems.
 
-See also: [`CTBase.Data.Hamiltonian`](@ref), [`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.Hamiltonian`](@extref), [`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 abstract type AbstractHamiltonian{TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} end
 
@@ -33,7 +33,7 @@ Indicates that all `AbstractHamiltonian` types support time-dependence queries.
 # Returns
 - `true`: Always returns `true` for Hamiltonian types.
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractHamiltonian`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Data.AbstractHamiltonian`](@extref).
 """
 function Traits.has_time_dependence_trait(::AbstractHamiltonian)
     return true
@@ -47,7 +47,7 @@ Indicates that all `AbstractHamiltonian` types support variable-dependence queri
 # Returns
 - `true`: Always returns `true` for Hamiltonian types.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractHamiltonian`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Data.AbstractHamiltonian`](@extref).
 """
 function Traits.has_variable_dependence_trait(::AbstractHamiltonian)
     return true
@@ -64,7 +64,7 @@ Return the time-dependence trait of a Hamiltonian.
 # Returns
 - `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.TimeDependence`](@extref).
 """
 function Traits.time_dependence(
     ::AbstractHamiltonian{TD,<:Traits.VariableDependence}
@@ -83,7 +83,7 @@ Return the variable-dependence trait of a Hamiltonian.
 # Returns
 - `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 function Traits.variable_dependence(
     ::AbstractHamiltonian{<:Traits.TimeDependence,VD}
@@ -94,8 +94,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the dynamics trait of an `AbstractHamiltonian`, namely [`CTBase.Traits.HamiltonianDynamics`](@ref).
+Return the dynamics trait of an `AbstractHamiltonian`, namely [`CTBase.Traits.HamiltonianDynamics`](@extref).
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Data.AbstractHamiltonian`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Data.AbstractHamiltonian`](@extref).
 """
 Traits.dynamics_trait(::AbstractHamiltonian) = Traits.HamiltonianDynamics

@@ -64,7 +64,7 @@ all_names(def) # (:max_iter, :max, :maxiter)
 - `CTBase.Exceptions.IncorrectArgument`: If the default value does not match the declared type
 - `Exception`: If the validator function fails when applied to the default value
 
-See also: [`CTBase.Options.all_names`](@ref), [`CTBase.Options.extract_option`](@ref), [`CTBase.Options.extract_options`](@ref), `CTBase.Core.NotProvided`
+See also: [`CTBase.Options.all_names`](@extref), [`CTBase.Options.extract_option`](@extref), [`CTBase.Options.extract_options`](@extref), `CTBase.Core.NotProvided`
 """
 struct OptionDefinition{T}
     name::Symbol
@@ -164,7 +164,7 @@ OptionDefinition{NotProvidedType}(...)
 - For concrete defaults, type compatibility between `default` and `type` is enforced
 - The validator function is applied to the default value (except for `NotProvided`)
 
-See also: [`CTBase.Options.OptionDefinition`](@ref), [`CTBase.Options._construct_option_definition`](@ref), `CTBase.Core.NotProvided`
+See also: [`CTBase.Options.OptionDefinition`](@extref), [`CTBase.Options._construct_option_definition`](@extref), `CTBase.Core.NotProvided`
 """
 function OptionDefinition(;
     name::Symbol,
@@ -219,7 +219,7 @@ julia> Options.default(def)
 nothing
 ```
 
-See also: [`CTBase.Options.OptionDefinition`](@ref), `CTBase.Core.NotProvided`
+See also: [`CTBase.Options.OptionDefinition`](@extref), `CTBase.Core.NotProvided`
 """
 function _construct_option_definition(
     name::Symbol,
@@ -280,7 +280,7 @@ julia> Options.is_required(def)
 true
 ```
 
-See also: [`CTBase.Options.OptionDefinition`](@ref), `CTBase.Core.NotProvided`, [`CTBase.Options.is_required`](@ref)
+See also: [`CTBase.Options.OptionDefinition`](@extref), `CTBase.Core.NotProvided`, [`CTBase.Options.is_required`](@extref)
 """
 function _construct_option_definition(
     name::Symbol,
@@ -343,7 +343,7 @@ julia> Options.default(def)
 100
 ```
 
-See also: [`CTBase.Options.OptionDefinition`](@ref), [`CTBase.Exceptions.IncorrectArgument`](@ref)
+See also: [`CTBase.Options.OptionDefinition`](@extref), [`CTBase.Exceptions.IncorrectArgument`](@extref)
 """
 function _construct_option_definition(
     name::Symbol,
@@ -401,7 +401,7 @@ julia> Options.name(def)
 :max_iter
 ```
 
-See also: [`CTBase.Options.type`](@ref), [`CTBase.Options.default`](@ref), [`CTBase.Options.aliases`](@ref)
+See also: [`CTBase.Options.type`](@extref), [`CTBase.Options.default`](@extref), [`CTBase.Options.aliases`](@extref)
 """
 name(def::OptionDefinition) = def.name
 
@@ -425,7 +425,7 @@ julia> Options.type(def)
 Int
 ```
 
-See also: [`CTBase.Options.name`](@ref), [`CTBase.Options.default`](@ref)
+See also: [`CTBase.Options.name`](@extref), [`CTBase.Options.default`](@extref)
 """
 type(def::OptionDefinition) = def.type
 
@@ -449,7 +449,7 @@ julia> Options.default(def)
 100
 ```
 
-See also: [`CTBase.Options.name`](@ref), [`CTBase.Options.type`](@ref), [`CTBase.Options.is_required`](@ref)
+See also: [`CTBase.Options.name`](@extref), [`CTBase.Options.type`](@extref), [`CTBase.Options.is_required`](@extref)
 """
 default(def::OptionDefinition) = def.default
 
@@ -473,7 +473,7 @@ julia> Options.description(def)
 "Maximum iterations"
 ```
 
-See also: [`CTBase.Options.name`](@ref), [`CTBase.Options.type`](@ref)
+See also: [`CTBase.Options.name`](@extref), [`CTBase.Options.type`](@extref)
 """
 description(def::OptionDefinition) = def.description
 
@@ -500,7 +500,7 @@ julia> Options.validator(def) === validator_fn
 true
 ```
 
-See also: [`CTBase.Options.has_validator`](@ref), [`CTBase.Options.name`](@ref)
+See also: [`CTBase.Options.has_validator`](@extref), [`CTBase.Options.name`](@extref)
 """
 validator(def::OptionDefinition) = def.validator
 
@@ -525,7 +525,7 @@ julia> Options.aliases(def)
 (:max, :maxiter)
 ```
 
-See also: [`CTBase.Options.all_names`](@ref), [`CTBase.Options.name`](@ref)
+See also: [`CTBase.Options.all_names`](@extref), [`CTBase.Options.name`](@extref)
 """
 aliases(def::OptionDefinition) = def.aliases
 
@@ -551,7 +551,7 @@ julia> Options.is_required(def)
 true
 ```
 
-See also: [`CTBase.Options.has_default`](@ref), [`CTBase.Options.default`](@ref)
+See also: [`CTBase.Options.has_default`](@extref), [`CTBase.Options.default`](@extref)
 """
 is_required(def::OptionDefinition) = def.default isa CTBase.Core.NotProvidedType
 
@@ -577,7 +577,7 @@ julia> Options.has_default(def)
 true
 ```
 
-See also: [`CTBase.Options.is_required`](@ref), [`CTBase.Options.default`](@ref)
+See also: [`CTBase.Options.is_required`](@extref), [`CTBase.Options.default`](@extref)
 """
 has_default(def::OptionDefinition) = !(def.default isa CTBase.Core.NotProvidedType)
 
@@ -602,7 +602,7 @@ julia> Options.has_validator(def)
 true
 ```
 
-See also: [`CTBase.Options.validator`](@ref), [`CTBase.Options.name`](@ref)
+See also: [`CTBase.Options.validator`](@extref), [`CTBase.Options.name`](@extref)
 """
 has_validator(def::OptionDefinition) = def.validator !== nothing
 
@@ -638,7 +638,7 @@ julia> Options.is_computed(def2)
 true
 ```
 
-See also: [`CTBase.Options.has_default`](@ref), [`CTBase.Options.is_required`](@ref), [`CTBase.Options.OptionDefinition`](@ref)
+See also: [`CTBase.Options.has_default`](@extref), [`CTBase.Options.is_required`](@extref), [`CTBase.Options.OptionDefinition`](@extref)
 """
 is_computed(def::OptionDefinition) = def.computed
 
@@ -674,7 +674,7 @@ julia> Options.all_names(def)
 (:grid_size, :n, :size)
 ```
 
-See also: [`CTBase.Options.OptionDefinition`](@ref), [`CTBase.Options.extract_option`](@ref)
+See also: [`CTBase.Options.OptionDefinition`](@extref), [`CTBase.Options.extract_option`](@extref)
 """
 all_names(def::OptionDefinition) = (def.name, def.aliases...)
 
@@ -710,7 +710,7 @@ max_iter (max, maxiter) :: Int64
   Maximum iterations
 ```
 
-See also: [`CTBase.Options.OptionDefinition`](@ref)
+See also: [`CTBase.Options.OptionDefinition`](@extref)
 """
 function Base.show(io::IO, def::OptionDefinition)
     fmt = CTBase.Core.get_format_codes(io)

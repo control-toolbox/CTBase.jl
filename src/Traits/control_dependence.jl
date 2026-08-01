@@ -20,7 +20,7 @@ If `has_control_dependence_trait` is not implemented or returns `false`,
 calling `is_control_free`, `has_control`, or `control_dependence` will throw an error
 indicating the object does not support control-dependence queries.
 
-See also: [`CTBase.Traits.ControlFree`](@ref), [`CTBase.Traits.WithControl`](@ref).
+See also: [`CTBase.Traits.ControlFree`](@extref), [`CTBase.Traits.WithControl`](@extref).
 """
 abstract type ControlDependence <: AbstractTrait end
 
@@ -33,7 +33,7 @@ A control-free optimal control problem has dynamics `ẋ = f(t, x, v)` with no
 control argument; the trajectory is determined by the state (and costate)
 equations alone, without a control law.
 
-See also: [`CTBase.Traits.WithControl`](@ref), [`CTBase.Traits.ControlDependence`](@ref).
+See also: [`CTBase.Traits.WithControl`](@extref), [`CTBase.Traits.ControlDependence`](@extref).
 """
 struct ControlFree <: ControlDependence end
 
@@ -45,7 +45,7 @@ Trait indicating the problem has a control input.
 A problem with control has dynamics `ẋ = f(t, x, u, v)` depending on a control
 `u`; closing the loop (e.g. for a flow) requires a control law `u(t, x, p)`.
 
-See also: [`CTBase.Traits.ControlFree`](@ref), [`CTBase.Traits.ControlDependence`](@ref).
+See also: [`CTBase.Traits.ControlFree`](@extref), [`CTBase.Traits.ControlDependence`](@extref).
 """
 struct WithControl <: ControlDependence end
 
@@ -69,9 +69,9 @@ for better error messages.
 - `obj::Any`: The object to check.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): Always, indicating the object does not have the trait.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): Always, indicating the object does not have the trait.
 
-See also: [`CTBase.Traits.ControlDependence`](@ref), [`CTBase.Traits.control_dependence`](@ref).
+See also: [`CTBase.Traits.ControlDependence`](@extref), [`CTBase.Traits.control_dependence`](@extref).
 """
 function has_control_dependence_trait(obj::Any)
     return _throw_missing_trait(
@@ -92,9 +92,9 @@ to return the specific trait value (`ControlFree` or `WithControl`).
 - `obj::Any`: The object to query.
 
 # Throws
-- [`CTBase.Exceptions.NotImplemented`](@ref): Always, indicating the method must be implemented.
+- [`CTBase.Exceptions.NotImplemented`](@extref): Always, indicating the method must be implemented.
 
-See also: [`CTBase.Traits.ControlDependence`](@ref), [`CTBase.Traits.has_control_dependence_trait`](@ref).
+See also: [`CTBase.Traits.ControlDependence`](@extref), [`CTBase.Traits.has_control_dependence_trait`](@extref).
 """
 function control_dependence(obj::Any)
     has_control_dependence_trait(obj)
@@ -122,10 +122,10 @@ if `control_dependence(obj)` is `ControlFree`.
 - `Bool`: true if the object has no control input.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support control-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `control_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support control-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `control_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.ControlDependence`](@ref), [`CTBase.Traits.has_control`](@ref).
+See also: [`CTBase.Traits.ControlDependence`](@extref), [`CTBase.Traits.has_control`](@extref).
 """
 function is_control_free(obj::Any)
     has_control_dependence_trait(obj)
@@ -147,10 +147,10 @@ if `control_dependence(obj)` is `WithControl`.
 - `Bool`: true if the object has a control input.
 
 # Throws
-- [`CTBase.Exceptions.IncorrectArgument`](@ref): If the object does not support control-dependence queries.
-- [`CTBase.Exceptions.NotImplemented`](@ref): If `control_dependence` is not implemented for the object type.
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): If the object does not support control-dependence queries.
+- [`CTBase.Exceptions.NotImplemented`](@extref): If `control_dependence` is not implemented for the object type.
 
-See also: [`CTBase.Traits.ControlDependence`](@ref), [`CTBase.Traits.is_control_free`](@ref).
+See also: [`CTBase.Traits.ControlDependence`](@extref), [`CTBase.Traits.is_control_free`](@extref).
 """
 function has_control(obj::Any)
     has_control_dependence_trait(obj)

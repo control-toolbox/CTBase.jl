@@ -42,8 +42,8 @@ For NonAutonomous/Fixed: natural `h̃(t, x, p, u)`, uniform `h̃(t, x, p, u, v)`
 For Autonomous/NonFixed: natural `h̃(x, p, u, v)`, uniform `h̃(t, x, p, u, v)`.
 For NonAutonomous/NonFixed: natural `h̃(t, x, p, u, v)`, uniform `h̃(t, x, p, u, v)`.
 
-See also: [`CTBase.Data.AbstractPseudoHamiltonian`](@ref), [`CTBase.Data.Hamiltonian`](@ref),
-[`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.AbstractPseudoHamiltonian`](@extref), [`CTBase.Data.Hamiltonian`](@extref),
+[`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 struct PseudoHamiltonian{
     F<:Function,TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
@@ -75,8 +75,8 @@ PseudoHamiltonian: autonomous, fixed (no variable)
   uniform call: h̃(t, x, p, u, v)
 ```
 
-See also: [`CTBase.Data.PseudoHamiltonian`](@ref), [`CTBase.Traits.Autonomous`](@ref),
-[`CTBase.Traits.NonAutonomous`](@ref), [`CTBase.Traits.Fixed`](@ref), [`CTBase.Traits.NonFixed`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonian`](@extref), [`CTBase.Traits.Autonomous`](@extref),
+[`CTBase.Traits.NonAutonomous`](@extref), [`CTBase.Traits.Fixed`](@extref), [`CTBase.Traits.NonFixed`](@extref).
 """
 function PseudoHamiltonian(
     f; is_autonomous::Bool=__is_autonomous(), is_variable::Bool=__is_variable()
@@ -103,7 +103,7 @@ Typed constructor for `PseudoHamiltonian` with explicit trait types.
 # Returns
 - `PseudoHamiltonian`: A pseudo-Hamiltonian with the specified traits.
 
-See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonian`](@extref).
 """
 function PseudoHamiltonian(
     f, ::Type{TD}, ::Type{VD}
@@ -164,7 +164,7 @@ Displays three lines:
 - Natural call signature
 - Uniform call signature
 
-See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonian`](@extref).
 """
 function Base.show(
     io::IO, ::PseudoHamiltonian{F,TD,VD}
@@ -189,7 +189,7 @@ This method is called automatically when displaying a pseudo-Hamiltonian in the 
 - `mime::MIME"text/plain"`: The MIME type.
 - `h̃::PseudoHamiltonian`: The pseudo-Hamiltonian object.
 
-See also: [`CTBase.Data.PseudoHamiltonian`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonian`](@extref).
 """
 function Base.show(
     io::IO, ::MIME"text/plain", h̃::PseudoHamiltonian{F,TD,VD}

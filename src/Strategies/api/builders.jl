@@ -38,7 +38,7 @@ julia> modeler = build_strategy(:adnlp, AbstractNLPModeler, registry;
 Modelers.ADNLP(options=StrategyOptions{...})
 ```
 
-See also: [`CTBase.Strategies.type_from_id`](@ref)
+See also: [`CTBase.Strategies.type_from_id`](@extref)
 """
 function build_strategy(
     id::Symbol,
@@ -84,7 +84,7 @@ julia> solver = build_strategy(:madnlp, GPU, AbstractNLPSolver, registry; max_it
 MadNLP{GPU}(options=StrategyOptions{...})
 ```
 
-See also: [`CTBase.Strategies.build_strategy`](@ref)
+See also: [`CTBase.Strategies.build_strategy`](@extref)
 """
 function build_strategy(
     id::Symbol,
@@ -128,7 +128,7 @@ julia> extract_id_from_method(method, AbstractNLPSolver, registry)
 :ipopt
 ```
 
-See also: [`CTBase.Strategies.strategy_ids`](@ref)
+See also: [`CTBase.Strategies.strategy_ids`](@extref)
 """
 function extract_id_from_method(
     method::Tuple{Vararg{Symbol}},
@@ -218,7 +218,7 @@ present in the method tuple is compatible with all selected strategies.
 - `Vector{Type{<:AbstractStrategyParameter}}`: Supported parameter types. Returns
   an empty vector if the strategy is not parameterized.
 
-See also: [`CTBase.Strategies.extract_global_parameter_from_method`](@ref), [`CTBase.Strategies.parameter`](@ref)
+See also: [`CTBase.Strategies.extract_global_parameter_from_method`](@extref), [`CTBase.Strategies.parameter`](@extref)
 """
 function available_parameters(
     strategy_id::Symbol, family::Type{<:AbstractStrategy}, registry::StrategyRegistry
@@ -260,7 +260,7 @@ parameter token is required and must be supported by each parameterized strategy
   if a parameter is missing but required, if a parameter is unsupported, or if a
   parameter token is provided but no selected strategy is parameterized.
 
-See also: [`CTBase.Strategies.available_parameters`](@ref), [`CTBase.Strategies.AbstractStrategyParameter`](@ref)
+See also: [`CTBase.Strategies.available_parameters`](@extref), [`CTBase.Strategies.AbstractStrategyParameter`](@extref)
 """
 function extract_global_parameter_from_method(
     method::Tuple{Vararg{Symbol}}, registry::StrategyRegistry

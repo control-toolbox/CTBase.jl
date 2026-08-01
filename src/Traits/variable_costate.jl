@@ -29,7 +29,7 @@ true
 - This trait is used for dispatch to determine whether augmented integration is possible
 - The specific operations enabled depend on the system type and context
 
-See also: [`CTBase.Traits.SupportsVariableCostate`](@ref), [`CTBase.Traits.NoVariableCostate`](@ref).
+See also: [`CTBase.Traits.SupportsVariableCostate`](@extref), [`CTBase.Traits.NoVariableCostate`](@extref).
 """
 abstract type AbstractVariableCostateCapability <: AbstractTrait end
 
@@ -64,7 +64,7 @@ true
 - This trait enables augmented integration operations in flow calls
 - The specific implementation depends on the system type and AD backend
 
-See also: [`CTBase.Traits.AbstractVariableCostateCapability`](@ref), [`CTBase.Traits.NoVariableCostate`](@ref), [`CTBase.Traits.variable_costate_trait`](@ref).
+See also: [`CTBase.Traits.AbstractVariableCostateCapability`](@extref), [`CTBase.Traits.NoVariableCostate`](@extref), [`CTBase.Traits.variable_costate_trait`](@extref).
 """
 struct SupportsVariableCostate <: AbstractVariableCostateCapability end
 
@@ -99,7 +99,7 @@ true
 - Attempting augmented integration operations on such systems will throw an error
 - The specific constraints depend on the system type
 
-See also: [`CTBase.Traits.AbstractVariableCostateCapability`](@ref), [`CTBase.Traits.SupportsVariableCostate`](@ref), [`CTBase.Traits.variable_costate_trait`](@ref).
+See also: [`CTBase.Traits.AbstractVariableCostateCapability`](@extref), [`CTBase.Traits.SupportsVariableCostate`](@extref), [`CTBase.Traits.variable_costate_trait`](@extref).
 """
 struct NoVariableCostate <: AbstractVariableCostateCapability end
 
@@ -121,6 +121,6 @@ Return the augmented variable integration capability trait of a system or flow.
 - Used for dispatch to determine if augmented integration operations are possible
 - The specific operations enabled depend on the system type
 
-See also: [`CTBase.Traits.SupportsVariableCostate`](@ref), [`CTBase.Traits.NoVariableCostate`](@ref).
+See also: [`CTBase.Traits.SupportsVariableCostate`](@extref), [`CTBase.Traits.NoVariableCostate`](@extref).
 """
 variable_costate_trait(::Any) = NoVariableCostate

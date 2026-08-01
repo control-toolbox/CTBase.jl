@@ -30,9 +30,9 @@ parameterization is fully backward compatible with existing call sites.
  - Gradient computation requires the `CTBaseDifferentiationInterface` extension.
  - Without the extension, the gradient methods throw `NotImplemented` with a helpful message.
 
-See also: [`CTBase.Differentiation.AbstractADBackend`](@ref),
-[`CTBase.Differentiation.hamiltonian_gradient`](@ref),
-[`CTBase.Differentiation.variable_gradient`](@ref).
+See also: [`CTBase.Differentiation.AbstractADBackend`](@extref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@extref),
+[`CTBase.Differentiation.variable_gradient`](@extref).
 """
 struct DifferentiationInterface{
     P<:Union{Strategies.CPU,Strategies.GPU},O<:Strategies.StrategyOptions
@@ -45,7 +45,7 @@ $(TYPEDSIGNATURES)
 
 Construct a `DifferentiationInterface{CPU}` (the default device). Equivalent to
 `DifferentiationInterface{CPU}(...)`; delegates through
-[`CTBase.Strategies.default_parameter`](@ref).
+[`CTBase.Strategies.default_parameter`](@extref).
 
 # Arguments
 - `mode::Symbol=:strict`: Validation mode forwarded to `build_strategy_options`.
@@ -106,7 +106,7 @@ Extracts `P` from `DifferentiationInterface{P}` (`CPU` or `GPU`). Overrides the
 # Returns
 - `Type{<:Union{CPU,GPU}}`: the execution parameter type.
 
-See also: [`CTBase.Strategies.CPU`](@ref), [`CTBase.Strategies.GPU`](@ref)
+See also: [`CTBase.Strategies.CPU`](@extref), [`CTBase.Strategies.GPU`](@extref)
 """
 function Strategies.parameter(
     ::Type{<:DifferentiationInterface{P}}
@@ -122,7 +122,7 @@ Return the default execution parameter for `DifferentiationInterface` when none 
 Returns `CPU`, so `DifferentiationInterface(...)` builds a `DifferentiationInterface{CPU}` and
 every existing call site is unaffected by the device parameterization.
 
-See also: [`CTBase.Strategies.CPU`](@ref)
+See also: [`CTBase.Strategies.CPU`](@extref)
 """
 Strategies.default_parameter(::Type{<:DifferentiationInterface}) = Strategies.CPU
 
@@ -159,7 +159,7 @@ $(TYPEDSIGNATURES)
 Return metadata defining `DifferentiationInterface{P}` options and their specifications.
 
 The `:ad_backend` default is device-aware: `AutoForwardDiff()` on `CPU`, `AutoMooncake()` on
-`GPU` (via [`CTBase.Differentiation.__ad_backend`](@ref)). The bare
+`GPU` (via [`CTBase.Differentiation.__ad_backend`](@extref)). The bare
 `metadata(DifferentiationInterface)` delegates here through `DifferentiationInterface{CPU}`.
 """
 function Strategies.metadata(
@@ -205,7 +205,7 @@ Extract the AD backend from a `DifferentiationInterface` strategy.
  - This extracts the `:ad_backend` option from the strategy's options.
  - Used by Hamiltonian vector-field getters to delegate to the AD-backed getter.
 
-See also: [`CTBase.Differentiation.ad_backend`](@ref).
+See also: [`CTBase.Differentiation.ad_backend`](@extref).
 """
 function ad_backend(backend::DifferentiationInterface)
     return Base.get(Strategies.options(backend), Val(:ad_backend))

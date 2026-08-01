@@ -23,7 +23,7 @@ true
 - Point mode indicates integration from a single initial condition to a specific final time
 - Trajectory mode indicates integration over a continuous time interval
 
-See also: [`CTBase.Traits.EndPointMode`](@ref), [`CTBase.Traits.TrajectoryMode`](@ref).
+See also: [`CTBase.Traits.EndPointMode`](@extref), [`CTBase.Traits.TrajectoryMode`](@extref).
 """
 abstract type AbstractModeTrait <: AbstractTrait end
 
@@ -52,7 +52,7 @@ true
 - This mode is suitable for boundary value problems and shooting methods
 - The `tspan` accessor returns `(c.t0, c.tf)` for point configurations
 
-See also: [`CTBase.Traits.TrajectoryMode`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref).
+See also: [`CTBase.Traits.TrajectoryMode`](@extref), [`CTBase.Traits.AbstractModeTrait`](@extref).
 """
 struct EndPointMode <: AbstractModeTrait end
 
@@ -81,6 +81,6 @@ true
 - This mode is suitable for generating full time evolution and visualization
 - The `tspan` accessor returns `c.tspan` directly for trajectory configurations
 
-See also: [`CTBase.Traits.EndPointMode`](@ref), [`CTBase.Traits.AbstractModeTrait`](@ref).
+See also: [`CTBase.Traits.EndPointMode`](@extref), [`CTBase.Traits.AbstractModeTrait`](@extref).
 """
 struct TrajectoryMode <: AbstractModeTrait end

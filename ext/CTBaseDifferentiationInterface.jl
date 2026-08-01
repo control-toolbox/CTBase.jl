@@ -82,7 +82,7 @@ $(TYPEDSIGNATURES)
 
 Compute variable gradient ∂H/∂v via DifferentiationInterface.jl.
 
-See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@ref) on why anonymous closures are used.
+See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@extref) on why anonymous closures are used.
 
 # Returns
 - `grad_v` = ∂H/∂v.
@@ -107,7 +107,7 @@ Compute pseudo-Hamiltonian gradients (∂H̃/∂x, ∂H̃/∂p) via Differentiat
 
 Along a PMP solution, the stationarity condition ∂H̃/∂u = 0 holds, so the
 Hamiltonian flow only requires ∂H̃/∂x and ∂H̃/∂p. Use
-[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref) for ∂H̃/∂u.
+[`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@extref) for ∂H̃/∂u.
 
 Anonymous closures are used deliberately so that ForwardDiff `tagcount` values
 are assigned at runtime in the correct left-to-right order inside `ForwardDiff.≺`,
@@ -125,8 +125,8 @@ avoiding silent zero-gradient bugs in nested-AD contexts (e.g. inside NonlinearS
 # Returns
 - Tuple `(grad_x, grad_p)` where `grad_x` = ∂H̃/∂x, `grad_p` = ∂H̃/∂p.
 
-See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@ref),
-[`CTBase.Differentiation.hamiltonian_gradient`](@ref).
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_control_gradient`](@extref),
+[`CTBase.Differentiation.hamiltonian_gradient`](@extref).
 """
 function Differentiation.pseudo_hamiltonian_gradient(
     backend::Differentiation.DifferentiationInterface,
@@ -165,7 +165,7 @@ not for the Hamiltonian flow itself.
 # Returns
 - `grad_u`: ∂H̃/∂u.
 
-See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@ref).
+See also: [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@extref).
 """
 function Differentiation.pseudo_hamiltonian_control_gradient(
     backend::Differentiation.DifferentiationInterface,
@@ -188,8 +188,8 @@ $(TYPEDSIGNATURES)
 Compute the pseudo-Hamiltonian variable gradient ∂H̃/∂v via DifferentiationInterface.jl,
 with the control `u` held constant.
 
-See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@ref) on why anonymous
-closures are used, and [`CTBase.Differentiation.pseudo_variable_gradient`](@ref) on the
+See the note in [`CTBase.Differentiation.hamiltonian_gradient`](@extref) on why anonymous
+closures are used, and [`CTBase.Differentiation.pseudo_variable_gradient`](@extref) on the
 partial-vs-total distinction.
 
 # Returns
@@ -227,7 +227,7 @@ Compute the gradient of a scalar function using DifferentiationInterface.jl.
 - `∇f`: The gradient of `f` at `x`.
 
 # See also
-- [`CTBase.Differentiation.derivative`](@ref)
+- [`CTBase.Differentiation.derivative`](@extref)
 """
 function Differentiation.gradient(
     backend::Differentiation.DifferentiationInterface, f::Function, x::AbstractArray
@@ -250,7 +250,7 @@ Compute the gradient of a scalar function using DifferentiationInterface.jl (sca
 - `df/dx`: The derivative of `f` at `x`.
 
 # See also
-- [`CTBase.Differentiation.derivative`](@ref)
+- [`CTBase.Differentiation.derivative`](@extref)
 """
 function Differentiation.gradient(
     backend::Differentiation.DifferentiationInterface, f::Function, x::Real
@@ -273,7 +273,7 @@ Compute the derivative of a scalar function using DifferentiationInterface.jl.
 - `dg/dt`: The derivative of `g` at `t`.
 
 # See also
-- [`CTBase.Differentiation.gradient`](@ref)
+- [`CTBase.Differentiation.gradient`](@extref)
 """
 function Differentiation.derivative(
     backend::Differentiation.DifferentiationInterface, g::Function, t::Real
@@ -293,10 +293,10 @@ Compute the partial derivative or gradient of `f` with respect to the argument a
 slot `Slot`, using DifferentiationInterface.jl.
 
 An anonymous closure captures the constant arguments and places `active_` at `Slot`
-via `ntuple` — same rationale as [`CTBase.Differentiation.hamiltonian_gradient`](@ref) (ForwardDiff tag ordering).
+via `ntuple` — same rationale as [`CTBase.Differentiation.hamiltonian_gradient`](@extref) (ForwardDiff tag ordering).
 `_derivator` dispatches to `DI.gradient` for array `active` and `DI.derivative` for scalar.
 
-See also: [`CTBase.Differentiation.pushforward`](@ref).
+See also: [`CTBase.Differentiation.pushforward`](@extref).
 """
 function Differentiation.differentiate(
     backend::Differentiation.DifferentiationInterface,
@@ -320,7 +320,7 @@ via DifferentiationInterface.jl.
 An anonymous closure captures `consts` and reconstructs the full argument tuple via
 `ntuple`, placing `x_` at slot `Slot`. The single tangent is extracted with `only`.
 
-See also: [`CTBase.Differentiation.differentiate`](@ref).
+See also: [`CTBase.Differentiation.differentiate`](@extref).
 """
 function Differentiation.pushforward(
     backend::Differentiation.DifferentiationInterface,

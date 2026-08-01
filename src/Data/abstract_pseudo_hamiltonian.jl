@@ -10,7 +10,7 @@ time-dependence and variable-dependence traits.
 
 A pseudo-Hamiltonian is a scalar function `H̃(t, x, p, u[, v]) → ℝ` that extends
 the standard Hamiltonian with an explicit control argument `u`. Unlike
-[`CTBase.Data.AbstractHamiltonian`](@ref), which encodes the control implicitly, a
+[`CTBase.Data.AbstractHamiltonian`](@extref), which encodes the control implicitly, a
 pseudo-Hamiltonian takes the control as an additional argument, enabling
 dynamic closed-loop flows where the control is computed from the
 pseudo-Hamiltonian's maximisation condition.
@@ -25,8 +25,8 @@ pseudo-Hamiltonian's maximisation condition.
 - The dynamics trait is always `HamiltonianDynamics`, as pseudo-Hamiltonians
   involve both state and costate.
 
-See also: [`CTBase.Data.PseudoHamiltonian`](@ref), [`CTBase.Data.AbstractHamiltonian`](@ref),
-[`CTBase.Traits.TimeDependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Data.PseudoHamiltonian`](@extref), [`CTBase.Data.AbstractHamiltonian`](@extref),
+[`CTBase.Traits.TimeDependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 abstract type AbstractPseudoHamiltonian{
     TD<:Traits.TimeDependence,VD<:Traits.VariableDependence
@@ -44,7 +44,7 @@ Indicates that all `AbstractPseudoHamiltonian` types support time-dependence que
 # Returns
 - `true`: Always returns `true` for pseudo-Hamiltonian types.
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Data.AbstractPseudoHamiltonian`](@extref).
 """
 function Traits.has_time_dependence_trait(::AbstractPseudoHamiltonian)
     return true
@@ -58,7 +58,7 @@ Indicates that all `AbstractPseudoHamiltonian` types support variable-dependence
 # Returns
 - `true`: Always returns `true` for pseudo-Hamiltonian types.
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Data.AbstractPseudoHamiltonian`](@extref).
 """
 function Traits.has_variable_dependence_trait(::AbstractPseudoHamiltonian)
     return true
@@ -75,7 +75,7 @@ Return the time-dependence trait of a pseudo-Hamiltonian.
 # Returns
 - `TD`: The time-dependence type (`Autonomous` or `NonAutonomous`).
 
-See also: [`CTBase.Traits.time_dependence`](@ref), [`CTBase.Traits.TimeDependence`](@ref).
+See also: [`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.TimeDependence`](@extref).
 """
 function Traits.time_dependence(
     ::AbstractPseudoHamiltonian{TD,<:Traits.VariableDependence}
@@ -94,7 +94,7 @@ Return the variable-dependence trait of a pseudo-Hamiltonian.
 # Returns
 - `VD`: The variable-dependence type (`Fixed` or `NonFixed`).
 
-See also: [`CTBase.Traits.variable_dependence`](@ref), [`CTBase.Traits.VariableDependence`](@ref).
+See also: [`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 function Traits.variable_dependence(
     ::AbstractPseudoHamiltonian{<:Traits.TimeDependence,VD}
@@ -106,11 +106,11 @@ end
 $(TYPEDSIGNATURES)
 
 Return the dynamics trait of an `AbstractPseudoHamiltonian`, namely
-[`CTBase.Traits.HamiltonianDynamics`](@ref).
+[`CTBase.Traits.HamiltonianDynamics`](@extref).
 
 # Returns
 - `CTBase.Traits.HamiltonianDynamics`: The dynamics trait.
 
-See also: [`CTBase.Traits.dynamics_trait`](@ref), [`CTBase.Data.AbstractPseudoHamiltonian`](@ref).
+See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Data.AbstractPseudoHamiltonian`](@extref).
 """
 Traits.dynamics_trait(::AbstractPseudoHamiltonian) = Traits.HamiltonianDynamics

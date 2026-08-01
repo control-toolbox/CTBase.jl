@@ -46,7 +46,7 @@ end
 $(TYPEDEF)
 
 A horizontal reference line at height `value` (e.g. a box bound). `style` follows
-the same neutral vocabulary as [`CTBase.Plotting.Series`](@ref).
+the same neutral vocabulary as [`CTBase.Plotting.Series`](@extref).
 
 # Fields
 $(TYPEDFIELDS)
@@ -61,7 +61,7 @@ HLine(value::Real; style::NamedTuple=NamedTuple()) = HLine(Float64(value), style
 $(TYPEDEF)
 
 A vertical reference line at abscissa `value` (e.g. initial/final time). `style`
-follows the same neutral vocabulary as [`CTBase.Plotting.Series`](@ref).
+follows the same neutral vocabulary as [`CTBase.Plotting.Series`](@extref).
 
 # Fields
 $(TYPEDFIELDS)
@@ -73,8 +73,8 @@ end
 VLine(value::Real; style::NamedTuple=NamedTuple()) = VLine(Float64(value), style)
 
 """
-Either an [`CTBase.Plotting.HLine`](@ref) or a [`CTBase.Plotting.VLine`](@ref) — a reference line drawn on an
-[`CTBase.Plotting.Axes`](@ref) on top of its series.
+Either an [`CTBase.Plotting.HLine`](@extref) or a [`CTBase.Plotting.VLine`](@extref) — a reference line drawn on an
+[`CTBase.Plotting.Axes`](@extref) on top of its series.
 """
 const Decoration = Union{HLine,VLine}
 
@@ -83,8 +83,8 @@ const Decoration = Union{HLine,VLine}
 """
 $(TYPEDEF)
 
-One drawable cell: a single axis system holding a list of [`CTBase.Plotting.Series`](@ref),
-optional [`CTBase.Plotting.Decoration`](@ref)s drawn on top, and its labels/limits. Domain-free —
+One drawable cell: a single axis system holding a list of [`CTBase.Plotting.Series`](@extref),
+optional [`CTBase.Plotting.Decoration`](@extref)s drawn on top, and its labels/limits. Domain-free —
 the case layer decides what a cell *means*.
 
 `ylims` is one of:
@@ -133,8 +133,8 @@ end
 """
 $(TYPEDEF)
 
-Supertype of the weighted layout tree: [`CTBase.Plotting.Leaf`](@ref) (a cell), [`CTBase.Plotting.HBox`](@ref)
-(columns side by side) and [`CTBase.Plotting.VBox`](@ref) (rows stacked). This is the
+Supertype of the weighted layout tree: [`CTBase.Plotting.Leaf`](@extref) (a cell), [`CTBase.Plotting.HBox`](@extref)
+(columns side by side) and [`CTBase.Plotting.VBox`](@extref) (rows stacked). This is the
 backend-agnostic geometry a renderer turns into subplots.
 """
 abstract type AbstractLayoutNode end
@@ -142,7 +142,7 @@ abstract type AbstractLayoutNode end
 """
 $(TYPEDEF)
 
-A leaf of the layout tree: a single drawable cell wrapping one [`CTBase.Plotting.Axes`](@ref).
+A leaf of the layout tree: a single drawable cell wrapping one [`CTBase.Plotting.Axes`](@extref).
 """
 struct Leaf <: AbstractLayoutNode
     axes::Axes
@@ -153,7 +153,7 @@ $(TYPEDEF)
 
 Horizontal juxtaposition of child nodes (columns placed side by side). `weights`
 are relative column widths, one per child (strictly positive). See also
-[`CTBase.Plotting.VBox`](@ref).
+[`CTBase.Plotting.VBox`](@extref).
 
 # Fields
 $(TYPEDFIELDS)
@@ -173,7 +173,7 @@ end
 $(TYPEDEF)
 
 Vertical stacking of child nodes (rows one under another). `weights` are relative
-row heights, one per child (strictly positive). See also [`CTBase.Plotting.HBox`](@ref).
+row heights, one per child (strictly positive). See also [`CTBase.Plotting.HBox`](@extref).
 
 # Fields
 $(TYPEDFIELDS)
@@ -236,7 +236,7 @@ end
 $(TYPEDEF)
 
 A complete figure: a layout `root` plus optional overall `size` and `title`.
-`size === nothing` defers to the engine size heuristic ([`CTBase.Plotting.default_size`](@ref));
+`size === nothing` defers to the engine size heuristic ([`CTBase.Plotting.default_size`](@extref));
 `title === nothing` draws no overall title.
 
 # Fields
@@ -259,9 +259,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return the [`CTBase.Plotting.Leaf`](@ref)s of a node in **deterministic** order: depth-first,
+Return the [`CTBase.Plotting.Leaf`](@extref)s of a node in **deterministic** order: depth-first,
 children visited in stored order. This order is the contract used to target
-existing cells by index when overlaying with [`CTBase.Plotting.render!`](@ref).
+existing cells by index when overlaying with [`CTBase.Plotting.render!`](@extref).
 """
 leaves(leaf::Leaf) = Leaf[leaf]
 function leaves(node::Union{HBox,VBox})
@@ -278,7 +278,7 @@ n_leaves(node::AbstractLayoutNode) = length(leaves(node))
 """
 $(TYPEDSIGNATURES)
 
-Return the number of drawable cells (leaves) in a [`CTBase.Plotting.Figure`](@ref).
+Return the number of drawable cells (leaves) in a [`CTBase.Plotting.Figure`](@extref).
 """
 n_leaves(fig::Figure) = n_leaves(fig.root)
 
@@ -292,7 +292,7 @@ const _SHOW_LIMIT = 5
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of a [`CTBase.Plotting.Series`](@ref).
+Compact one-line display of a [`CTBase.Plotting.Series`](@extref).
 
 See also: `Base.show`
 """
@@ -306,7 +306,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty tree-style display of a [`CTBase.Plotting.Series`](@ref).
+Pretty tree-style display of a [`CTBase.Plotting.Series`](@extref).
 
 See also: `Base.show`
 """
@@ -324,7 +324,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of an [`CTBase.Plotting.HLine`](@ref).
+Compact one-line display of an [`CTBase.Plotting.HLine`](@extref).
 
 See also: `Base.show`
 """
@@ -336,7 +336,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty display of an [`CTBase.Plotting.HLine`](@ref).
+Pretty display of an [`CTBase.Plotting.HLine`](@extref).
 
 See also: `Base.show`
 """
@@ -351,7 +351,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of a [`CTBase.Plotting.VLine`](@ref).
+Compact one-line display of a [`CTBase.Plotting.VLine`](@extref).
 
 See also: `Base.show`
 """
@@ -363,7 +363,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty display of a [`CTBase.Plotting.VLine`](@ref).
+Pretty display of a [`CTBase.Plotting.VLine`](@extref).
 
 See also: `Base.show`
 """
@@ -378,7 +378,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of an [`CTBase.Plotting.Axes`](@ref).
+Compact one-line display of an [`CTBase.Plotting.Axes`](@extref).
 
 See also: `Base.show`
 """
@@ -392,7 +392,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty tree-style display of an [`CTBase.Plotting.Axes`](@ref), recursively
+Pretty tree-style display of an [`CTBase.Plotting.Axes`](@extref), recursively
 showing its series and decorations.
 
 See also: `Base.show`
@@ -404,7 +404,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Internal helper: pretty-print an [`CTBase.Plotting.Axes`](@ref) as a tree, using `prefix` for indentation.
+Internal helper: pretty-print an [`CTBase.Plotting.Axes`](@extref) as a tree, using `prefix` for indentation.
 """
 function _show_axes(io::IO, ax::Axes, prefix::String)
     fmt = Core.get_format_codes(io)
@@ -459,7 +459,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of a [`CTBase.Plotting.Leaf`](@ref).
+Compact one-line display of a [`CTBase.Plotting.Leaf`](@extref).
 
 See also: `Base.show`
 """
@@ -473,7 +473,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty tree-style display of a [`CTBase.Plotting.Leaf`](@ref).
+Pretty tree-style display of a [`CTBase.Plotting.Leaf`](@extref).
 
 See also: `Base.show`
 """
@@ -484,7 +484,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of an [`CTBase.Plotting.HBox`](@ref).
+Compact one-line display of an [`CTBase.Plotting.HBox`](@extref).
 
 See also: `Base.show`
 """
@@ -497,7 +497,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty tree-style display of an [`CTBase.Plotting.HBox`](@ref), recursively
+Pretty tree-style display of an [`CTBase.Plotting.HBox`](@extref), recursively
 showing its children.
 
 See also: `Base.show`
@@ -509,7 +509,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of a [`CTBase.Plotting.VBox`](@ref).
+Compact one-line display of a [`CTBase.Plotting.VBox`](@extref).
 
 See also: `Base.show`
 """
@@ -522,7 +522,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty tree-style display of a [`CTBase.Plotting.VBox`](@ref), recursively
+Pretty tree-style display of a [`CTBase.Plotting.VBox`](@extref), recursively
 showing its children.
 
 See also: `Base.show`
@@ -567,7 +567,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Compact one-line display of a [`CTBase.Plotting.Figure`](@ref).
+Compact one-line display of a [`CTBase.Plotting.Figure`](@extref).
 
 See also: `Base.show`
 """
@@ -584,7 +584,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Pretty tree-style display of a [`CTBase.Plotting.Figure`](@ref), recursively
+Pretty tree-style display of a [`CTBase.Plotting.Figure`](@extref), recursively
 showing its layout tree.
 
 See also: `Base.show`
