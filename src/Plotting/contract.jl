@@ -27,6 +27,19 @@ extension, loaded automatically once `Plots` is available.
 struct PlotsBackend <: AbstractPlottingBackend end
 
 """
+$(TYPEDEF)
+
+The [Makie.jl](https://docs.makie.org) backend. The type lives here in `src`; its
+[`CTBase.Plotting.render`](@extref) method lives in the `CTBaseMakie` extension, loaded
+automatically once `Makie` is available (e.g. via `CairoMakie` / `GLMakie`).
+
+Added for issue CTModels#366 as a proof-of-concept: `render` only — `render!`
+(overlay), reference-line decorations, `:steppost`/`:scatter` series types and
+`z_order` are not handled yet.
+"""
+struct MakieBackend <: AbstractPlottingBackend end
+
+"""
 $(TYPEDSIGNATURES)
 
 Return the default rendering backend used when a caller does not pass one explicitly.
@@ -37,11 +50,21 @@ default_backend() = PlotsBackend()
 """
 $(TYPEDSIGNATURES)
 
-Render `fig` into a backend figure. Fallback (no backend loaded) errors with an
-`ExtensionError`; a backend extension overrides this on its concrete type.
+Return the weak-dependency symbol a backend needs loaded, used to build the
+`ExtensionError` thrown by the no-backend fallback.
 """
-function render(::AbstractPlottingBackend, ::Figure; kwargs...)
-    return throw(Exceptions.ExtensionError(:Plots))
+_weakdep(::AbstractPlottingBackend) = :Plots
+_weakdep(::PlotsBackend) = :Plots
+_weakdep(::MakieBackend) = :Makie
+
+"""
+$(TYPEDSIGNATURES)
+
+Render `fig` into a backend figure. Fallback (backend extension not loaded) errors
+with an `ExtensionError`; a backend extension overrides this on its concrete type.
+"""
+function render(b::AbstractPlottingBackend, ::Figure; kwargs...)
+    return throw(Exceptions.ExtensionError(_weakdep(b)))
 end
 
 """
@@ -50,8 +73,8 @@ $(TYPEDSIGNATURES)
 Overlay `fig` onto an existing backend `target`, targeting existing cells by the
 deterministic leaf order (see [`CTBase.Plotting.leaves`](@extref)).
 """
-function render!(::AbstractPlottingBackend, target, ::Figure; kwargs...)
-    return throw(Exceptions.ExtensionError(:Plots))
+function render!(b::AbstractPlottingBackend, target, ::Figure; kwargs...)
+    return throw(Exceptions.ExtensionError(_weakdep(b)))
 end
 
 # Default-backend conveniences.

@@ -6,6 +6,28 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.0-beta] - unreleased
+
+### ✨ Added
+
+- **Makie plotting backend (proof of concept)**: new `CTBase.Plotting.MakieBackend`
+  type and `CTBaseMakie` weak-dependency extension (trigger: `Makie`). It renders
+  the backend-agnostic plotting IR into a `Makie.Figure`, mapping the weighted
+  `HBox`/`VBox` layout tree onto nested `Makie.GridLayout`s. Part of the plot-engine
+  roadmap ([CTModels#366](https://github.com/control-toolbox/CTModels.jl/issues/366)).
+  - Scope: `render` only, for the common figure shapes. Not yet handled (tracked in
+    a parity follow-up): `render!` (overlay, throws `NotImplemented`), reference-line
+    decorations (`HLine`/`VLine`), `:steppost`/`:scatter` series types (every series
+    is drawn with `lines!`), and `z_order`.
+  - The no-backend fallback of `render`/`render!` now reports the backend-specific
+    weak dependency (`:Makie` for `MakieBackend`, `:Plots` otherwise).
+
+### ✅ Compatibility
+
+- **No breaking changes**: `PlotsBackend` rendering, `default_backend()` and all
+  public signatures are unchanged. `MakieBackend` and the `CTBaseMakie` extension
+  are purely additive.
+
 ## [0.29.3] - 2026-08-01
 
 ### 📚 Documentation
