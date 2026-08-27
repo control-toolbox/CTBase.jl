@@ -178,6 +178,14 @@ full = CTBase.Plotting.Stacked([state_node, control_node])
 [`CTBase.Plotting.PlotsBackend`](@ref) is the concrete Plots.jl backend — its `render`/`render!`
 methods live in the `CTBasePlots` extension.
 
+[`CTBase.Plotting.MakieBackend`](@ref) is a proof-of-concept
+[Makie.jl](https://docs.makie.org) backend (issue `CTModels#366`); its `render`
+method lives in the `CTBaseMakie` extension, loaded automatically when `Makie` is
+available (for example via `CairoMakie` or `GLMakie`). It implements `render` only
+for the common figure shapes — `render!` (overlay), reference-line decorations,
+`:steppost`/`:scatter` series types and `z_order` are not handled yet and are
+tracked in a parity follow-up.
+
 [`CTBase.Plotting.render`](@ref) turns a `Figure` into a backend figure. [`CTBase.Plotting.render!`](@ref) overlays
 a `Figure` onto an existing backend target, targeting cells by the deterministic
 leaf order (see [`CTBase.Plotting.leaves`](@ref)).
@@ -206,7 +214,7 @@ index when overlaying with `render!`.
 | IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
 | Building blocks | [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.lower`](@ref) |
 | Combinators | [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref), [`CTBase.Plotting.Grid`](@ref) |
-| Backend | [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref), [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref) |
+| Backend | [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref), [`CTBase.Plotting.MakieBackend`](@ref), [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref) |
 
 ## See Also
 

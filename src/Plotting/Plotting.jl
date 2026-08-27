@@ -19,7 +19,7 @@ in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
 - case-layer building blocks: [`CTBase.Plotting.Panel`](@extref), [`CTBase.Plotting.Stacked`](@extref), [`CTBase.Plotting.Paired`](@extref),
   [`CTBase.Plotting.Grid`](@extref)
 - backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@extref), [`CTBase.Plotting.PlotsBackend`](@extref),
-  [`CTBase.Plotting.render`](@extref), [`CTBase.Plotting.render!`](@extref)
+  [`CTBase.Plotting.MakieBackend`](@extref), [`CTBase.Plotting.render`](@extref), [`CTBase.Plotting.render!`](@extref)
 """
 module Plotting
 
@@ -60,7 +60,7 @@ export Panel
 export Stacked, Paired, Grid
 
 # --- backend contract --------------------------------------------------------
-export AbstractPlottingBackend, PlotsBackend
+export AbstractPlottingBackend, PlotsBackend, MakieBackend
 export render, render!
 
 end # module Plotting
