@@ -29,13 +29,11 @@ struct PlotsBackend <: AbstractPlottingBackend end
 """
 $(TYPEDEF)
 
-The [Makie.jl](https://docs.makie.org) backend. The type lives here in `src`; its
-[`CTBase.Plotting.render`](@extref) method lives in the `CTBaseMakie` extension, loaded
-automatically once `Makie` is available (e.g. via `CairoMakie` / `GLMakie`).
-
-Added for issue CTModels#366 as a proof-of-concept: `render` only — `render!`
-(overlay), reference-line decorations, `:steppost`/`:scatter` series types and
-`z_order` are not handled yet.
+The [Makie.jl](https://docs.makie.org) backend, at feature parity with
+[`CTBase.Plotting.PlotsBackend`](@extref). The type lives here in `src`; its
+[`CTBase.Plotting.render`](@extref) / [`CTBase.Plotting.render!`](@extref) methods live in the
+`CTBaseMakie` extension, loaded automatically once `Makie` is available (e.g. via
+`CairoMakie` / `GLMakie`).
 """
 struct MakieBackend <: AbstractPlottingBackend end
 

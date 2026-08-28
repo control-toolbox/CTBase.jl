@@ -192,7 +192,12 @@ function _draw_axes!(
     overlay && return p
     # user `legend` / `ylims` override the IR defaults; other user subplot attributes
     # (grid, framestyle, …) are applied as-is; reserved metadata keys are protected.
-    legend_val = get(axes_user, :legend, ax.legend ? :best : false)
+    # The legend shows when the IR asks for it (`:group`) or when a series carries a
+    # non-empty label — from the IR or from a user `label=` on an otherwise
+    # legend-less `:split` cell.
+    _labeled =
+        !isempty(get(series_user, :label, "")) || any(s -> !isempty(s.label), ax.series)
+    legend_val = get(axes_user, :legend, (ax.legend || _labeled) ? :best : false)
     yl = haskey(axes_user, :ylims) ? axes_user[:ylims] : _resolve_ylims(ax)
     extra = NamedTuple(kw for kw in pairs(axes_user) if !(kw[1] in _RESERVED_AXES_KEYS))
     attrs = (;

@@ -1,27 +1,22 @@
 module CTBaseMakie
 
 # =============================================================================
-# CTBaseMakie — the Makie.jl backend for CTBase.Plotting (proof of concept).
+# CTBaseMakie — the Makie.jl backend for CTBase.Plotting.
 #
-# It adds a method to `Plotting.render` on `MakieBackend`, turning the
-# backend-agnostic IR (weighted tree of Axes) into a laid-out Makie.Figure: the
-# weighted `HBox`/`VBox` tree maps directly onto nested `Makie.GridLayout`s with
-# `rowsize!`/`colsize!` set to `Makie.Auto(weight)`.
-#
-# Scope (issue CTModels#366): `render` only, for the common `plot(sol)` shapes.
-# NOT handled yet (tracked in the parity follow-up):
-#   - `render!` (overlay) — throws `NotImplemented`;
-#   - `Decoration`s (`HLine`/`VLine`);
-#   - `:steppost` / `:scatter` series types — every series is drawn with `lines!`;
-#   - `z_order`.
-# This is the ONLY place that depends on Makie.
+# It adds methods to `Plotting.render`/`render!` on `MakieBackend`, turning the
+# backend-agnostic IR (weighted tree of Axes) into a laid-out, styled
+# `Makie.Figure`: the weighted `HBox`/`VBox` tree maps onto nested
+# `Makie.GridLayout`s with `rowsize!`/`colsize!` set to `Makie.Auto(weight)`.
+# This is the ONLY place that depends on Makie. It mirrors the `CTBasePlots`
+# backend feature for feature: weighted layout, per-series style, `seriestype`
+# dispatch, `z_order` draw ordering, `HLine`/`VLine` decorations, user-kwarg
+# partition and `render!` overlay.
 # =============================================================================
 
 using Makie: Makie
 using DocStringExtensions: TYPEDSIGNATURES
 
 using CTBase: Plotting
-using CTBase: Exceptions
 
 # --- style translation : neutral vocabulary -> Makie attributes ---------------
 
@@ -38,16 +33,46 @@ _makie_color(c) = c
 """
 $(TYPEDSIGNATURES)
 
-Translate a neutral series `style` `NamedTuple` into Makie `lines!` attributes.
+Return the neutral `seriestype` of a style `NamedTuple` (`:path` when absent).
+"""
+_seriestype(style::NamedTuple) = get(style, :seriestype, :path)
 
-Keeps `color` (via [`_makie_color`](@ref)), `linewidth`, `linestyle` and `alpha`;
-drops `seriestype` and `z_order` (not handled by this POC); merges
-`backend_kwargs` as the escape hatch for raw Makie options.
+"""
+$(TYPEDSIGNATURES)
+
+Return the `z_order` of a style `NamedTuple`, defaulting to `:normal`.
+"""
+_z(style::NamedTuple) = get(style, :z_order, :normal)
+
+"""
+$(TYPEDSIGNATURES)
+
+Map a `z_order` symbol to a numeric rank for draw-order sorting: `:back` → 0,
+`:normal` → 1, `:front` → 2 (same ranking as the Plots backend).
+"""
+_z_rank(z::Symbol) = z === :back ? 0 : z === :front ? 2 : 1
+
+"""
+    _STYLE_DROP
+
+Style keys consumed by the renderer itself (not forwarded as plot attributes):
+`backend_kwargs` is the raw-Makie escape hatch, `z_order` drives draw order,
+`seriestype` selects the plotting function, `label` is set explicitly per series.
+"""
+const _STYLE_DROP = (:backend_kwargs, :z_order, :seriestype, :label)
+
+"""
+$(TYPEDSIGNATURES)
+
+Translate a neutral series/decoration `style` `NamedTuple` into Makie attributes:
+keep `color` (via [`_makie_color`](@ref)), `linewidth`, `linestyle`, `alpha`, …;
+drop the [`_STYLE_DROP`](@ref) keys; merge `backend_kwargs` last as the escape
+hatch for raw Makie options.
 """
 function _translate_style(style::NamedTuple)
     kept = NamedTuple()
     for k in keys(style)
-        (k === :backend_kwargs || k === :z_order || k === :seriestype) && continue
+        k in _STYLE_DROP && continue
         v = k === :color ? _makie_color(style[k]) : style[k]
         kept = merge(kept, NamedTuple{(k,)}((v,)))
     end
@@ -55,27 +80,77 @@ function _translate_style(style::NamedTuple)
 end
 
 """
+$(TYPEDSIGNATURES)
+
+Drop line-only attributes (`linewidth`, `linestyle`) that `Makie.scatter!` rejects.
+"""
+_drop_line_attrs(nt::NamedTuple) =
+    NamedTuple(p for p in pairs(nt) if p[1] !== :linewidth && p[1] !== :linestyle)
+
+# --- user keyword-argument partition -----------------------------------------
+
+"""
     _SERIES_USER_KEYS
 
-User keyword arguments forwarded to every `lines!` call by [`Plotting.render`](@extref);
-all other user kwargs are ignored by this POC backend.
+User keyword arguments forwarded to every series plot (`lines!` / `stairs!` /
+`scatter!`).
 """
-const _SERIES_USER_KEYS = (:color, :linewidth, :linestyle, :alpha)
+const _SERIES_USER_KEYS =
+    (:color, :linewidth, :linestyle, :alpha, :marker, :markersize, :label)
+
+"""
+    _AXIS_USER_KEYS
+
+User keyword arguments forwarded to every `Makie.Axis` constructor. `legend` and
+`ylims` are handled explicitly and are not in this list; any other unknown key is
+silently ignored (the Plots backend warns; `Makie.Axis` cannot accept it).
+"""
+const _AXIS_USER_KEYS = (
+    :xscale,
+    :yscale,
+    :xgridvisible,
+    :ygridvisible,
+    :xticksvisible,
+    :yticksvisible,
+    :xticklabelsvisible,
+    :yticklabelsvisible,
+    :xreversed,
+    :yreversed,
+    :xautolimitmargin,
+    :yautolimitmargin,
+    :xticks,
+    :yticks,
+    :aspect,
+)
+
+"""
+    _RESERVED_AXES_KEYS
+
+Axis keys the renderer sets itself; a user override of these (except `legend` /
+`ylims`, handled explicitly) is ignored to preserve the computed layout.
+"""
+const _RESERVED_AXES_KEYS = (:title, :xlabel, :ylabel, :legend, :ylims)
 
 """
 $(TYPEDSIGNATURES)
 
-Keep only the series-relevant user keyword arguments (`_SERIES_USER_KEYS`),
-translating `color` the same way series styles are translated.
+Split user keyword arguments into `(series_user, axes_user)`: series attributes
+([`_SERIES_USER_KEYS`](@ref)) forwarded to every series, and axis attributes
+([`_AXIS_USER_KEYS`](@ref) plus `legend` / `ylims`) forwarded to every cell.
+Unrecognised keys are dropped.
 """
-function _series_user(kwargs)
-    nt = NamedTuple()
+function _partition_user(; kwargs...)
+    series = NamedTuple()
+    axs = NamedTuple()
     for (k, v) in kwargs
-        k in _SERIES_USER_KEYS || continue
-        v = k === :color ? _makie_color(v) : v
-        nt = merge(nt, NamedTuple{(k,)}((v,)))
+        if k in _SERIES_USER_KEYS
+            vv = k === :color ? _makie_color(v) : v
+            series = merge(series, NamedTuple{(k,)}((vv,)))
+        elseif k === :legend || k === :ylims || k in _AXIS_USER_KEYS
+            axs = merge(axs, NamedTuple{(k,)}((v,)))
+        end
     end
-    return nt
+    return series, axs
 end
 
 # --- ylims resolution (ported from CTBasePlots._resolve_ylims) ----------------
@@ -103,17 +178,77 @@ function _resolve_ylims(ax::Plotting.Axes)
     return (hi - lo) ≤ 1e-8 ? (lo - 1.0, hi + 1.0) : nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Map a Plots-style legend position symbol (`:bottomright`, `:topleft`, …) to the
+closest `Makie.axislegend` position; unknown symbols fall back to `:rt`.
+"""
+function _legend_position(s::Symbol)
+    m = (
+        topright=:rt,
+        topleft=:lt,
+        bottomright=:rb,
+        bottomleft=:lb,
+        top=:ct,
+        bottom=:cb,
+        left=:lc,
+        right=:rc,
+        best=:rt,
+    )
+    return get(m, s, :rt)
+end
+
+# --- drawing one series / one decoration -------------------------------------
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw one [`CTBase.Plotting.Series`](@extref) into `axis`, dispatching on its neutral
+`seriestype`: `:path` → `Makie.lines!`, `:steppost` → `Makie.stairs!(…; step=:post)`,
+`:scatter` → `Makie.scatter!`. `user` keyword arguments and the translated style
+are forwarded.
+"""
+function _draw_one!(axis, s::Plotting.Series; user...)
+    attrs = _translate_style(s.style)
+    lbl = isempty(s.label) ? nothing : s.label
+    st = _seriestype(s.style)
+    if st === :steppost
+        Makie.stairs!(axis, s.x, s.y; step=:post, label=lbl, attrs..., user...)
+    elseif st === :scatter
+        Makie.scatter!(axis, s.x, s.y; label=lbl, _drop_line_attrs(attrs)..., user...)
+    else
+        Makie.lines!(axis, s.x, s.y; label=lbl, attrs..., user...)
+    end
+    return axis
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw a decoration (`HLine` or `VLine`) into `axis` via `Makie.hlines!` / `vlines!`,
+with style translation. Decorations carry no legend entry.
+"""
+function _draw_decoration!(axis, d::Plotting.HLine)
+    Makie.hlines!(axis, d.value; _translate_style(d.style)...)
+    return axis
+end
+function _draw_decoration!(axis, d::Plotting.VLine)
+    Makie.vlines!(axis, d.value; _translate_style(d.style)...)
+    return axis
+end
+
 # --- drawing one Axes -------------------------------------------------------
 
 """
 $(TYPEDSIGNATURES)
 
-Create a `Makie.Axis` at grid position `gp` and draw every [`CTBase.Plotting.Series`](@extref)
-of `ax` into it with `Makie.lines!` (POC: all series types are drawn as lines).
-`series_user` attributes are forwarded to every series. `ax.decorations` are
-ignored by this POC backend.
+Create a `Makie.Axis` at grid position `gp` for `ax`: title / labels / semantic
+font sizes, the resolved y-limits (`ylims` in `axes_user` overrides the IR
+default), and any forwarded [`_AXIS_USER_KEYS`](@ref) attribute.
 """
-function _draw_axes!(gp, ax::Plotting.Axes; series_user=NamedTuple())
+function _new_axis!(gp, ax::Plotting.Axes; axes_user=NamedTuple())
+    extra = NamedTuple(p for p in pairs(axes_user) if !(p[1] in _RESERVED_AXES_KEYS))
     axis = Makie.Axis(
         gp;
         title=ax.title,
@@ -122,21 +257,47 @@ function _draw_axes!(gp, ax::Plotting.Axes; series_user=NamedTuple())
         titlesize=Plotting._TITLE_FONT_SIZE,
         xlabelsize=Plotting._LABEL_FONT_SIZE,
         ylabelsize=Plotting._LABEL_FONT_SIZE,
+        extra...,
     )
-    for s in ax.series
-        Makie.lines!(
-            axis,
-            s.x,
-            s.y;
-            label=(isempty(s.label) ? nothing : s.label),
-            _translate_style(s.style)...,
-            series_user...,
-        )
-    end
-    yl = _resolve_ylims(ax)
+    yl = haskey(axes_user, :ylims) ? axes_user[:ylims] : _resolve_ylims(ax)
     yl === nothing || Makie.ylims!(axis, yl[1], yl[2])
-    if ax.legend && any(!isempty(s.label) for s in ax.series)
-        Makie.axislegend(axis)
+    return axis
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw every series of `ax` into `axis` in `z_order`, then its decorations.
+`series_user` is forwarded to every series. When `overlay` is `false`, a legend is
+added if the IR asks for one (`:group`), if `legend` forces it, or if a series
+carries a non-empty label — from the IR or from a user `label=`; `overlay=true`
+skips the legend (the target axis keeps its own).
+"""
+function _draw_into_axis!(
+    axis,
+    ax::Plotting.Axes;
+    series_user=NamedTuple(),
+    legend::Union{Bool,Symbol,Nothing}=nothing,
+    overlay::Bool=false,
+)
+    order = sortperm(collect(1:length(ax.series)); by=i -> _z_rank(_z(ax.series[i].style)))
+    for i in order
+        _draw_one!(axis, ax.series[i]; series_user...)
+    end
+    for d in ax.decorations
+        _draw_decoration!(axis, d)
+    end
+    overlay && return axis
+    _labeled =
+        !isempty(get(series_user, :label, "")) ||
+        any(!isempty(s.label) for s in ax.series)
+    want_legend = legend === nothing ? (ax.legend || _labeled) : (legend !== false)
+    if want_legend && _labeled
+        if legend isa Symbol
+            Makie.axislegend(axis; position=_legend_position(legend))
+        else
+            Makie.axislegend(axis)
+        end
     end
     return axis
 end
@@ -162,73 +323,92 @@ Recursively render a layout `node` into the `Makie.GridLayout` `gl`.
 
 A single-child box is rendered directly into `gl` (it carries no geometry).
 """
-function _render_node!(gl, node::Plotting.Leaf; series_user=NamedTuple())
-    _draw_axes!(gl[1, 1], node.axes; series_user=series_user)
+function _render_node!(gl, node::Plotting.Leaf; series_user=NamedTuple(), axes_user=NamedTuple())
+    axis = _new_axis!(gl[1, 1], node.axes; axes_user=axes_user)
+    _draw_into_axis!(
+        axis, node.axes; series_user=series_user, legend=get(axes_user, :legend, nothing)
+    )
     return gl
 end
-function _render_node!(gl, node::Plotting.VBox; series_user=NamedTuple())
+function _render_node!(gl, node::Plotting.VBox; series_user=NamedTuple(), axes_user=NamedTuple())
     if length(node.children) == 1
-        return _render_node!(gl, node.children[1]; series_user=series_user)
+        return _render_node!(
+            gl, node.children[1]; series_user=series_user, axes_user=axes_user
+        )
     end
     w = _normalized(node.weights)
     for (i, c) in enumerate(node.children)
         sub = gl[i, 1] = Makie.GridLayout()
-        _render_node!(sub, c; series_user=series_user)
+        _render_node!(sub, c; series_user=series_user, axes_user=axes_user)
         Makie.rowsize!(gl, i, Makie.Auto(w[i]))
     end
     return gl
 end
-function _render_node!(gl, node::Plotting.HBox; series_user=NamedTuple())
+function _render_node!(gl, node::Plotting.HBox; series_user=NamedTuple(), axes_user=NamedTuple())
     if length(node.children) == 1
-        return _render_node!(gl, node.children[1]; series_user=series_user)
+        return _render_node!(
+            gl, node.children[1]; series_user=series_user, axes_user=axes_user
+        )
     end
     w = _normalized(node.weights)
     for (j, c) in enumerate(node.children)
         sub = gl[1, j] = Makie.GridLayout()
-        _render_node!(sub, c; series_user=series_user)
+        _render_node!(sub, c; series_user=series_user, axes_user=axes_user)
         Makie.colsize!(gl, j, Makie.Auto(w[j]))
     end
     return gl
 end
 
+# --- render / render! -------------------------------------------------------
+
 """
 $(TYPEDSIGNATURES)
 
-Render `fig` into a new `Makie.Figure` (Makie backend, POC).
-
-Series attributes among `kwargs` (`color`, `linewidth`, `linestyle`, `alpha`) are
-forwarded to every series; other user kwargs are ignored. The figure size comes
-from [`CTBase.Plotting.default_size`](@extref); a non-`nothing` `fig.title` is added as a
-spanning `Makie.Label`.
+Populate the `Makie.Figure` `f` with `fig`: the weighted tree becomes nested
+`GridLayout`s, `kwargs` are partitioned by [`_partition_user`](@ref), and a
+non-`nothing` `fig.title` is added as a spanning `Makie.Label`. Returns `f`.
 """
-function Plotting.render(::Plotting.MakieBackend, fig::Plotting.Figure; kwargs...)
-    su = _series_user(kwargs)
-    f = Makie.Figure(; size=Plotting.default_size(fig))
+function _render_into!(f::Makie.Figure, fig::Plotting.Figure; kwargs...)
+    series_user, axes_user = _partition_user(; kwargs...)
     root = f[1, 1] = Makie.GridLayout()
-    _render_node!(root, fig.root; series_user=su)
-    if fig.title !== nothing
+    _render_node!(root, fig.root; series_user=series_user, axes_user=axes_user)
+    fig.title === nothing ||
         Makie.Label(f[0, :], fig.title; fontsize=16, font=:bold)
-    end
     return f
 end
 
 """
 $(TYPEDSIGNATURES)
 
-Overlay is not implemented by the Makie POC backend.
-
-# Throws
-- `CTBase.Exceptions.NotImplemented`: always — Makie overlay is tracked in the
-  parity follow-up of CTModels#366.
+Render `fig` into a new `Makie.Figure` (Makie backend). Series attributes among
+`kwargs` (`color`, `linewidth`, `linestyle`, `alpha`, …) are forwarded to every
+series; axis attributes (`legend`, `ylims`, grid/scale/ticks) to every cell. The
+figure size comes from [`CTBase.Plotting.default_size`](@extref).
 """
-function Plotting.render!(::Plotting.MakieBackend, target, ::Plotting.Figure; kwargs...)
-    return throw(
-        Exceptions.NotImplemented(
-            "Makie overlay (render!) is not implemented";
-            suggestion="use the Plots backend for overlays, or wait for the parity follow-up of CTModels#366",
-            context="CTBaseMakie",
-        ),
-    )
+function Plotting.render(::Plotting.MakieBackend, fig::Plotting.Figure; kwargs...)
+    return _render_into!(Makie.Figure(; size=Plotting.default_size(fig)), fig; kwargs...)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Overlay `fig` onto an existing `Makie.Figure` `target`, pairing each leaf of the
+layout tree with the target's `Makie.Axis` blocks in deterministic
+[`CTBase.Plotting.leaves`](@extref) order; only series and decorations are added, the
+axes are left untouched. An empty `target` (no axes yet) is filled as if by
+[`CTBase.Plotting.render`](@extref).
+"""
+function Plotting.render!(
+    ::Plotting.MakieBackend, target::Makie.Figure, fig::Plotting.Figure; kwargs...
+)
+    axs = [c for c in target.content if c isa Makie.Axis]
+    isempty(axs) && return _render_into!(target, fig; kwargs...)
+    series_user, _ = _partition_user(; kwargs...)
+    for (i, leaf) in enumerate(Plotting.leaves(fig.root))
+        i <= length(axs) || break
+        _draw_into_axis!(axs[i], leaf.axes; series_user=series_user, overlay=true)
+    end
+    return target
 end
 
 end # module CTBaseMakie
