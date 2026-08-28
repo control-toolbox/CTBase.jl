@@ -6,7 +6,53 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.30.0-beta] - unreleased
+## [0.30.1-beta] - unreleased
+
+### ✨ Added
+
+- **Makie plotting backend — parity with the Plots backend**:
+  `CTBase.Plotting.MakieBackend` is now at feature parity with
+  `CTBase.Plotting.PlotsBackend`
+  ([CTModels#408](https://github.com/control-toolbox/CTModels.jl/issues/408)). The
+  `CTBaseMakie` extension now handles:
+  - **`Plotting.render!`** — overlay onto an existing `Makie.Figure`, targeting axes
+    by deterministic leaf order; an empty target figure is filled as if by `render`
+    (shared `_render_into!` helper). Previously threw `NotImplemented`.
+  - **`HLine` / `VLine` decorations** — drawn via `Makie.hlines!` / `Makie.vlines!`
+    with style translation (box bounds, initial/final-time markers).
+  - **`seriestype` dispatch** — `:steppost` → `Makie.stairs!(…; step=:post)`,
+    `:scatter` → `Makie.scatter!`, `:path` → `Makie.lines!`. Constant-interpolation
+    controls now render as steps instead of lines.
+  - **`z_order`** — series drawn back-to-front with the same ranking as the Plots
+    backend.
+  - **User keyword arguments** — `render` / `render!` now forward axis attributes
+    (`legend`, `ylims`, grid / scale / ticks) to every cell, not only series
+    attributes. Makie exposes no `Plots.attributes(:Series)` analogue, so the
+    series-vs-axis split uses curated whitelists and drops unrecognised keys.
+
+### 🔧 Fixed
+
+- **`:split` layout: a user `label=` now shows the legend** (both the Plots and
+  Makie backends). A `:split` cell keeps its legend off by default; passing a
+  `label=` keyword — or an IR series label — now turns it back on so overlaid
+  solutions can be told apart. Previously the label was accepted but never visible.
+
+### 📚 Documentation
+
+- The plotting guide names both backends in the architecture overview and the
+  "no backend loaded" note, and gains a **"User Attributes: Series vs Axis"**
+  section describing the per-backend keyword-argument split. `CairoMakie` is added
+  to the docs build and the guide renders an executed Makie example.
+
+### ✅ Compatibility
+
+- **No breaking changes**: `MakieBackend` methods that previously threw
+  `NotImplemented` now succeed; nothing is removed or renamed. The `:split` +
+  `label=` legend change is a bug fix — rendered output differs only for a call
+  that already passed `label=`. See
+  [`BREAKING.md`](BREAKING.md) → *Non-breaking note (0.30.1-beta)*.
+
+## [0.30.0-beta] - 2026-08-27
 
 ### ✨ Added
 
