@@ -188,13 +188,19 @@ function test_contract_makie()
             Test.@test Plotting.render(
                 Plotting.MakieBackend(), fig; color=3, bins=:auto
             ) isa Makie.Figure
-            # a series color reaches the Lines plot
-            g = Plotting.render(Plotting.MakieBackend(), fig; color=:red)
+            # series color and label reach the Lines plot
+            g = Plotting.render(Plotting.MakieBackend(), fig; color=:red, label="sol")
             line = first(p for p in _axes(g)[1].scene.plots if p isa Makie.Lines)
             Test.@test line.color[] == Makie.to_color(:red)
+            Test.@test line.label[] == "sol"
             # an axis attribute reaches every cell
             h = Plotting.render(Plotting.MakieBackend(), fig; ygridvisible=false)
             Test.@test all(ax -> ax.ygridvisible[] == false, _axes(h))
+            # a user `label` on a legend-less :split figure turns the legend on
+            Test.@test _n_legends(Plotting.render(Plotting.MakieBackend(), _figure())) == 0
+            Test.@test _n_legends(
+                Plotting.render(Plotting.MakieBackend(), _figure(); label="sol")
+            ) >= 1
         end
 
         Test.@testset "render! overlay keeps axis count and targets by leaf order" begin

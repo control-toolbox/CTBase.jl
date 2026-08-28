@@ -115,6 +115,16 @@ function test_contract()
             Test.@test any(s -> s[:label] == "sol", plt.subplots[1].series_list)
             Test.@test any(s -> s[:label] == "", plt.subplots[1].series_list)
         end
+
+        Test.@testset "a user label turns the legend on for a :split cell" begin
+            # :split cells have the legend off by default; a user `label` makes it
+            # visible so overlaid solutions can be told apart.
+            fig = _figure()
+            plain = Plotting.render(fig)
+            Test.@test all(sp -> sp[:legend_position] === :none, plain.subplots)
+            labelled = Plotting.render(fig; label="sol")
+            Test.@test all(sp -> sp[:legend_position] !== :none, labelled.subplots)
+        end
     end
     return nothing
 end

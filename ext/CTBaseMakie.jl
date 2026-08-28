@@ -95,7 +95,8 @@ _drop_line_attrs(nt::NamedTuple) =
 User keyword arguments forwarded to every series plot (`lines!` / `stairs!` /
 `scatter!`).
 """
-const _SERIES_USER_KEYS = (:color, :linewidth, :linestyle, :alpha, :marker, :markersize)
+const _SERIES_USER_KEYS =
+    (:color, :linewidth, :linestyle, :alpha, :marker, :markersize, :label)
 
 """
     _AXIS_USER_KEYS
@@ -268,8 +269,9 @@ $(TYPEDSIGNATURES)
 
 Draw every series of `ax` into `axis` in `z_order`, then its decorations.
 `series_user` is forwarded to every series. When `overlay` is `false`, a legend is
-added if the IR asks for one (or `legend` forces it) and any series is labelled;
-`overlay=true` skips the legend (the target axis keeps its own).
+added if the IR asks for one (`:group`), if `legend` forces it, or if a series
+carries a non-empty label — from the IR or from a user `label=`; `overlay=true`
+skips the legend (the target axis keeps its own).
 """
 function _draw_into_axis!(
     axis,
@@ -286,8 +288,11 @@ function _draw_into_axis!(
         _draw_decoration!(axis, d)
     end
     overlay && return axis
-    want_legend = legend === nothing ? ax.legend : (legend !== false)
-    if want_legend && any(!isempty(s.label) for s in ax.series)
+    _labeled =
+        !isempty(get(series_user, :label, "")) ||
+        any(!isempty(s.label) for s in ax.series)
+    want_legend = legend === nothing ? (ax.legend || _labeled) : (legend !== false)
+    if want_legend && _labeled
         if legend isa Symbol
             Makie.axislegend(axis; position=_legend_position(legend))
         else
