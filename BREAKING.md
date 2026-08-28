@@ -3,6 +3,29 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.1-beta)
+
+- **Plotting — Makie backend parity**: `CTBase.Plotting.MakieBackend` reached
+  feature parity with `PlotsBackend`. `Plotting.render!` on a `Makie.Figure`
+  (overlay), `HLine` / `VLine` decorations, `:steppost` / `:scatter` series types
+  and `z_order` are now honoured, and `render` / `render!` forward axis attributes
+  as well as series attributes. **No breaking change**: methods that previously
+  threw `NotImplemented` now succeed; no signature, type, or public name changed.
+  No migration required.
+- **Plotting — `:split` legend with a user `label=`**: a `:split` cell now shows
+  its legend when a `label=` keyword — or an IR series label — is given, on both
+  the Plots and Makie backends. **No breaking change**: a bug fix; rendered output
+  changes only for a call that explicitly passed `label=` and previously saw no
+  legend. No migration required.
+
+## Non-breaking note (0.30.0-beta)
+
+- **Plotting — Makie backend (proof of concept)**: added
+  `CTBase.Plotting.MakieBackend` and the `CTBaseMakie` weak-dependency extension
+  (trigger: `Makie`), `render` only. **No breaking change**: purely additive;
+  `PlotsBackend` rendering, `default_backend()` and all public signatures are
+  unchanged. No migration required.
+
 ## Non-breaking note (0.29.3)
 
 - **Documentation**: switched extensible documentation cross-references to use
