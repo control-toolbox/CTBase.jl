@@ -26,13 +26,15 @@ Panel  ──lower──►  IR (Series, Axes, Leaf/HBox/VBox, Figure)
     │                           │
     │                           │  render / render!
     ▼                           ▼
-Combinators                   Backend (Plots.jl via CTBasePlots extension)
-(Stacked / Paired / Grid)
+Combinators                   Backend
+(Stacked / Paired / Grid)     ├─ Plots.jl  →  CTBasePlots extension
+                              └─ Makie.jl  →  CTBaseMakie extension
 ```
 
 All IR types and transforms live in `src` (no backend dependency). Only the drawing
-lives in a weak-dependency extension (`CTBasePlots`, loaded automatically when
-`Plots` is available).
+lives in weak-dependency extensions — `CTBasePlots` for [Plots.jl](https://docs.juliaplots.org)
+and `CTBaseMakie` for [Makie.jl](https://docs.makie.org) — each loaded automatically
+when its backend package (`Plots`, or `CairoMakie` / `GLMakie`) is available.
 
 ## Intermediate Representation
 
@@ -189,8 +191,9 @@ leaf order (see [`CTBase.Plotting.leaves`](@ref)).
 
 Without a backend loaded, the fallback throws an
 [`CTBase.Exceptions.ExtensionError`](@ref). This cannot be demonstrated
-in these docs because `Plots` is loaded by `make.jl` to produce the
-examples below, which causes the `CTBasePlots` extension to be active.
+in these docs because `make.jl` loads both `Plots` and `CairoMakie` to
+produce the examples below, so the `CTBasePlots` and `CTBaseMakie`
+extensions are both active.
 
 Once `Plots` is loaded, `render(fig)` produces a Plots.jl plot:
 
@@ -204,6 +207,40 @@ The same `fig` rendered through the Makie backend:
 using CairoMakie: CairoMakie
 CTBase.Plotting.render(CTBase.Plotting.MakieBackend(), fig)
 ```
+
+## User Attributes: Series vs Axis
+
+`render(fig; kwargs...)` and `render!` accept extra keyword arguments and split them
+into **series attributes** — forwarded to every curve — and **axis attributes** —
+applied to every cell. `legend` and `ylims` are special-cased: a user value
+overrides the IR default. The two backends make that split differently.
+
+The **Plots backend** (`CTBasePlots._partition_user`) asks Plots itself:
+`Plots.attributes(:Series)` is the authoritative set of series-attribute names, so
+any kwarg in it goes to the series and everything else to the subplot. A key Plots
+does not recognise still reaches Plots, which emits its own warning. Layout keys the
+renderer owns (`CTBasePlots._RESERVED_AXES_KEYS`: `subplot`, `title`, `xlabel`,
+`ylabel`, `legend`, `ylims`, `titlefont`, `guidefontsize`) are dropped so the
+computed layout survives.
+
+The **Makie backend** (`CTBaseMakie._partition_user`) has nothing to introspect —
+Makie exposes no `attributes(:Series)` analogue — so it carries curated whitelists:
+`CTBaseMakie._SERIES_USER_KEYS` (`color`, `linewidth`, `linestyle`, `alpha`,
+`marker`, `markersize`, `label`) for series, `CTBaseMakie._AXIS_USER_KEYS` (a fixed
+list of `Makie.Axis` constructor keys) plus `legend` / `ylims` for cells, with
+`CTBaseMakie._RESERVED_AXES_KEYS` protected. **A kwarg in neither whitelist is
+silently dropped** — a bare `Makie.Axis` throws on an unknown keyword, so unknown
+keys cannot be forwarded the way Plots tolerates.
+
+For a case layer or a caller this means:
+
+- The portable surface is the neutral style vocabulary (`color`, `linewidth`,
+  `linestyle`, `alpha`, `seriestype`, `z_order`) plus `legend` and `ylims` — these
+  behave identically on both backends.
+- A genuinely backend-specific option belongs in a [`CTBase.Plotting.Series`](@ref)
+  style's `backend_kwargs` escape hatch, not in a `render` kwarg: only the matching
+  backend honours it, and the Makie whitelist would drop it from a `render` call
+  anyway.
 
 ## Leaf Traversal
 

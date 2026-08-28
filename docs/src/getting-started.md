@@ -149,5 +149,5 @@ For more, see the **[Data guide](guide/data.md)**.
 | Semantic color roles and themes | [Color System](guide/color-system.md) |
 | Linear and piecewise-constant interpolation | [Interpolation](guide/interpolation.md) |
 | Unicode subscript/superscript helpers | [Unicode Helpers](guide/unicode.md) |
-| Backend-agnostic plotting IR and render contract | [Plotting Engine](guide/plotting.md) |
+| Backend-agnostic plotting IR and render contract (Plots.jl and Makie.jl backends) | [Plotting Engine](guide/plotting.md) |
 | Full API reference | API Reference (left sidebar) |

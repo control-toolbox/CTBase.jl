@@ -36,7 +36,7 @@ It provides the **base layer** shared by all packages: common types, structured 
 | [`CTBase.Interpolation`](@ref) | Linear and piecewise-constant interpolation with flat extrapolation |
 | [`CTBase.DevTools`](@ref) | Developer tools with tag-based dispatch for `run_tests`, `postprocess_coverage`, and `automatic_reference_documentation` |
 | [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
-| [`CTBase.Plotting`](@ref) | Backend-agnostic plotting IR: series, axes, layout tree, and render contract |
+| [`CTBase.Plotting`](@ref) | Backend-agnostic plotting IR: series, axes, layout tree, and a render contract with Plots.jl and Makie.jl backends |
 
 ## User Guides
 
@@ -56,6 +56,6 @@ It provides the **base layer** shared by all packages: common types, structured 
 - **[Color System](guide/color-system.md)** — semantic color roles, built-in themes, and runtime customization.
 - **[Interpolation](guide/interpolation.md)** — linear and piecewise-constant interpolation with flat extrapolation.
 - **[Unicode Helpers](guide/unicode.md)** — subscript and superscript character generation for display.
-- **[Plotting Engine](guide/plotting.md)** — backend-agnostic plotting IR, panels, combinators, and render contract.
+- **[Plotting Engine](guide/plotting.md)** — backend-agnostic plotting IR, panels, combinators, and a render contract with Plots.jl and Makie.jl backends.
 
 To browse the complete API, see the **API Reference** section in the left sidebar.
