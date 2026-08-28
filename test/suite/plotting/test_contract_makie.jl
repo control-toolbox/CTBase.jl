@@ -1,13 +1,15 @@
 module TestPlottingContractMakie
 
 # =============================================================================
-# Contract tests for the Makie backend (CTBaseMakie extension, POC).
+# Contract tests for the Makie backend (CTBaseMakie extension).
 #
 # Loaded with CairoMakie so `Makie` is present and the extension is active.
-# The IR itself is tested in test_ir / test_lowering; here we only check that
+# The IR itself is tested in test_ir / test_lowering; here we check that
 # `Plotting.render(MakieBackend(), fig)` turns the weighted tree into a laid-out
-# `Makie.Figure` with the right number of axes, weights, size and title, and that
-# the unsupported paths (overlay, unknown backend) error as specified.
+# `Makie.Figure` with the right axes, weights, size, title, series types,
+# decorations and forwarded attributes, that `render!` overlays onto an existing
+# figure, and that an unknown backend errors as specified. Parity target:
+# test_contract.jl (the Plots backend) on the same `_figure()` IR.
 # =============================================================================
 
 using Test: Test
@@ -44,9 +46,11 @@ function _figure(; title=nothing)
     return Plotting.Figure(root; title=title)
 end
 
-_n_axes(f) = count(x -> x isa Makie.Axis, f.content)
+_axes(f) = [x for x in f.content if x isa Makie.Axis]
+_n_axes(f) = length(_axes(f))
 _n_legends(f) = count(x -> x isa Makie.Legend, f.content)
 _n_labels(f) = count(x -> x isa Makie.Label, f.content)
+_count_plots(axis, ::Type{T}) where {T} = count(p -> p isa T, axis.scene.plots)
 
 function test_contract_makie()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Plotting Makie backend contract" begin
@@ -152,20 +156,64 @@ function test_contract_makie()
             Test.@test line.linestyle[] !== nothing        # :dash expands to a dash pattern
         end
 
-        Test.@testset "user kwargs render without error" begin
+        Test.@testset "steppost and scatter series map to Stairs / Scatter" begin
+            # the control panel of `_figure()` is `seriestype=:steppost`
+            f = Plotting.render(Plotting.MakieBackend(), _figure())
+            ctrl = _axes(f)[3]                              # 2 state cells, then control
+            Test.@test _count_plots(ctrl, Makie.Stairs) == 1
+            Test.@test _count_plots(ctrl, Makie.Lines) == 0
+            t = collect(range(0.0, 1.0, 11))
+            sc = Plotting.Series(t, t; style=(seriestype=:scatter,))
+            g = Plotting.render(
+                Plotting.MakieBackend(), Plotting.Figure(Plotting.Leaf(Plotting.Axes([sc])))
+            )
+            Test.@test _count_plots(_axes(g)[1], Makie.Scatter) == 1
+        end
+
+        Test.@testset "decorations are drawn as hlines / vlines" begin
+            f = Plotting.render(Plotting.MakieBackend(), _figure())
+            axs = _axes(f)
+            # each state cell carries the two shared VLines
+            Test.@test _count_plots(axs[1], Makie.VLines) == 2
+            Test.@test _count_plots(axs[2], Makie.VLines) == 2
+            # the control cell carries the two HLines
+            Test.@test _count_plots(axs[3], Makie.HLines) == 2
+        end
+
+        Test.@testset "user kwargs: series vs axis attributes" begin
             fig = _figure()
             Test.@test Plotting.render(Plotting.MakieBackend(), fig; color=:green) isa
                 Makie.Figure
-            # a non-series kwarg is ignored, not an error
+            # an unknown kwarg is dropped, not an error
             Test.@test Plotting.render(
                 Plotting.MakieBackend(), fig; color=3, bins=:auto
             ) isa Makie.Figure
+            # a series color reaches the Lines plot
+            g = Plotting.render(Plotting.MakieBackend(), fig; color=:red)
+            line = first(p for p in _axes(g)[1].scene.plots if p isa Makie.Lines)
+            Test.@test line.color[] == Makie.to_color(:red)
+            # an axis attribute reaches every cell
+            h = Plotting.render(Plotting.MakieBackend(), fig; ygridvisible=false)
+            Test.@test all(ax -> ax.ygridvisible[] == false, _axes(h))
         end
 
-        Test.@testset "overlay is not implemented" begin
-            Test.@test_throws Exceptions.NotImplemented Plotting.render!(
-                Plotting.MakieBackend(), nothing, _figure()
+        Test.@testset "render! overlay keeps axis count and targets by leaf order" begin
+            fig = _figure()
+            f = Plotting.render(Plotting.MakieBackend(), fig)
+            n = _n_axes(f)
+            nlines = _count_plots(_axes(f)[1], Makie.Lines)
+            out = Plotting.render!(
+                Plotting.MakieBackend(), f, _figure(); color=1, linestyle=:dash
             )
+            Test.@test out === f
+            Test.@test _n_axes(f) == n                       # no new axes
+            Test.@test _count_plots(_axes(f)[1], Makie.Lines) == nlines + 1
+        end
+
+        Test.@testset "render! fills an empty figure as if by render" begin
+            f = Makie.Figure()
+            Plotting.render!(Plotting.MakieBackend(), f, _figure())
+            Test.@test _n_axes(f) == Plotting.n_leaves(_figure())
         end
 
         Test.@testset "unknown backend still errors (guards the fallback refactor)" begin

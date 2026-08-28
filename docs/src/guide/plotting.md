@@ -178,13 +178,10 @@ full = CTBase.Plotting.Stacked([state_node, control_node])
 [`CTBase.Plotting.PlotsBackend`](@ref) is the concrete Plots.jl backend — its `render`/`render!`
 methods live in the `CTBasePlots` extension.
 
-[`CTBase.Plotting.MakieBackend`](@ref) is a proof-of-concept
-[Makie.jl](https://docs.makie.org) backend (issue `CTModels#366`); its `render`
-method lives in the `CTBaseMakie` extension, loaded automatically when `Makie` is
-available (for example via `CairoMakie` or `GLMakie`). It implements `render` only
-for the common figure shapes — `render!` (overlay), reference-line decorations,
-`:steppost`/`:scatter` series types and `z_order` are not handled yet and are
-tracked in a parity follow-up.
+[`CTBase.Plotting.MakieBackend`](@ref) is the [Makie.jl](https://docs.makie.org)
+backend, at feature parity with the Plots backend; its `render` / `render!` methods
+live in the `CTBaseMakie` extension, loaded automatically when `Makie` is available
+(for example via `CairoMakie` or `GLMakie`).
 
 [`CTBase.Plotting.render`](@ref) turns a `Figure` into a backend figure. [`CTBase.Plotting.render!`](@ref) overlays
 a `Figure` onto an existing backend target, targeting cells by the deterministic
@@ -199,6 +196,13 @@ Once `Plots` is loaded, `render(fig)` produces a Plots.jl plot:
 
 ```@example plot
 CTBase.Plotting.render(fig)
+```
+
+The same `fig` rendered through the Makie backend:
+
+```@example plot
+using CairoMakie: CairoMakie
+CTBase.Plotting.render(CTBase.Plotting.MakieBackend(), fig)
 ```
 
 ## Leaf Traversal

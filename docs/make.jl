@@ -19,6 +19,7 @@ using Test
 using Coverage
 using DifferentiationInterface
 using Plots
+using CairoMakie
 
 # Make extension modules available in Main so that @docs blocks can resolve
 # qualified bindings like CTFlowsSciMLIntegrator.SciMLIntegrationResult.
@@ -28,6 +29,7 @@ for _ext_sym in (
     :DocumenterReference,
     :CTBaseDifferentiationInterface,
     :CTBasePlots,
+    :CTBaseMakie,
 )
     _m = Base.get_extension(CTBase, _ext_sym)
     isnothing(_m) || @eval Main const $_ext_sym = $_m
@@ -96,7 +98,12 @@ with_api_reference(src_dir) do api_pages
         draft=draft,
         remotes=nothing, # Disable remote links. Needed for DocumenterReference
         plugins=[links],
-        warnonly=[:cross_references],
+        # `:external_cross_references` — the self-referencing `InterLinks` "CTBase"
+        # entry only resolves against `build/1/objects.inv`, absent on the very first
+        # build of a fresh checkout; that first build then completes with @errors and
+        # produces the inventory, and a second build is clean (see Handbook
+        # documentation.md). Matches CTModels.jl.
+        warnonly=[:cross_references, :external_cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;
             repo=repo_url, devbranch="main", devurl="dev", sidebar_drawer=true
