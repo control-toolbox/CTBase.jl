@@ -50,7 +50,14 @@ $(TYPEDSIGNATURES)
 Map a `z_order` symbol to a numeric rank for draw-order sorting: `:back` → 0,
 `:normal` → 1, `:front` → 2 (same ranking as the Plots backend).
 """
-_z_rank(z::Symbol) = z === :back ? 0 : z === :front ? 2 : 1
+_z_rank(z::Symbol) =
+    if z === :back
+        0
+    elseif z === :front
+        2
+    else
+        1
+    end
 
 """
     _STYLE_DROP
@@ -84,8 +91,9 @@ $(TYPEDSIGNATURES)
 
 Drop line-only attributes (`linewidth`, `linestyle`) that `Makie.scatter!` rejects.
 """
-_drop_line_attrs(nt::NamedTuple) =
-    NamedTuple(p for p in pairs(nt) if p[1] !== :linewidth && p[1] !== :linestyle)
+function _drop_line_attrs(nt::NamedTuple)
+    return NamedTuple(p for p in pairs(nt) if p[1] !== :linewidth && p[1] !== :linestyle)
+end
 
 # --- user keyword-argument partition -----------------------------------------
 
@@ -95,8 +103,9 @@ _drop_line_attrs(nt::NamedTuple) =
 User keyword arguments forwarded to every series plot (`lines!` / `stairs!` /
 `scatter!`).
 """
-const _SERIES_USER_KEYS =
-    (:color, :linewidth, :linestyle, :alpha, :marker, :markersize, :label)
+const _SERIES_USER_KEYS = (
+    :color, :linewidth, :linestyle, :alpha, :marker, :markersize, :label
+)
 
 """
     _AXIS_USER_KEYS
@@ -289,8 +298,7 @@ function _draw_into_axis!(
     end
     overlay && return axis
     _labeled =
-        !isempty(get(series_user, :label, "")) ||
-        any(!isempty(s.label) for s in ax.series)
+        !isempty(get(series_user, :label, "")) || any(!isempty(s.label) for s in ax.series)
     want_legend = legend === nothing ? (ax.legend || _labeled) : (legend !== false)
     if want_legend && _labeled
         if legend isa Symbol
@@ -323,14 +331,18 @@ Recursively render a layout `node` into the `Makie.GridLayout` `gl`.
 
 A single-child box is rendered directly into `gl` (it carries no geometry).
 """
-function _render_node!(gl, node::Plotting.Leaf; series_user=NamedTuple(), axes_user=NamedTuple())
+function _render_node!(
+    gl, node::Plotting.Leaf; series_user=NamedTuple(), axes_user=NamedTuple()
+)
     axis = _new_axis!(gl[1, 1], node.axes; axes_user=axes_user)
     _draw_into_axis!(
         axis, node.axes; series_user=series_user, legend=get(axes_user, :legend, nothing)
     )
     return gl
 end
-function _render_node!(gl, node::Plotting.VBox; series_user=NamedTuple(), axes_user=NamedTuple())
+function _render_node!(
+    gl, node::Plotting.VBox; series_user=NamedTuple(), axes_user=NamedTuple()
+)
     if length(node.children) == 1
         return _render_node!(
             gl, node.children[1]; series_user=series_user, axes_user=axes_user
@@ -344,7 +356,9 @@ function _render_node!(gl, node::Plotting.VBox; series_user=NamedTuple(), axes_u
     end
     return gl
 end
-function _render_node!(gl, node::Plotting.HBox; series_user=NamedTuple(), axes_user=NamedTuple())
+function _render_node!(
+    gl, node::Plotting.HBox; series_user=NamedTuple(), axes_user=NamedTuple()
+)
     if length(node.children) == 1
         return _render_node!(
             gl, node.children[1]; series_user=series_user, axes_user=axes_user
@@ -372,8 +386,7 @@ function _render_into!(f::Makie.Figure, fig::Plotting.Figure; kwargs...)
     series_user, axes_user = _partition_user(; kwargs...)
     root = f[1, 1] = Makie.GridLayout()
     _render_node!(root, fig.root; series_user=series_user, axes_user=axes_user)
-    fig.title === nothing ||
-        Makie.Label(f[0, :], fig.title; fontsize=16, font=:bold)
+    fig.title === nothing || Makie.Label(f[0, :], fig.title; fontsize=16, font=:bold)
     return f
 end
 
