@@ -189,48 +189,6 @@ StrategyMetadata with option definitions for max_iter, etc.
 """
 function metadata end
 
-"""
-$(TYPEDSIGNATURES)
-
-Return the strategy parameter type for a concrete strategy type, or `nothing` if the
-strategy is non-parameterized.
-
-Every concrete strategy type must implement this method:
-- Non-parameterized strategies return `nothing`.
-- Parameterized strategies return the concrete parameter type.
-
-# Arguments
-- `strategy_type::Type{<:AbstractStrategy}`: The strategy type
-
-# Returns
-- `Type{<:AbstractStrategyParameter}`: The parameter type (e.g. `CPU`, `GPU`)
-- `Nothing`: If the strategy is non-parameterized
-
-# Example
-```julia-repl
-# Non-parameterized:
-julia> parameter(Ipopt)
-nothing
-
-# Parameterized:
-julia> parameter(MadNLP{CPU})
-CPU
-```
-
-# Implementation
-```julia
-# Non-parameterized strategy:
-Strategies.parameter(::Type{<:MyStrategy}) = nothing
-
-# Parameterized strategy (bound repeated verbatim from the struct definition):
-Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:AbstractStrategyParameter} = P
-```
-
-A non-throwing 2-arg variant, `parameter(strategy_type, default)`, is also available for
-callers that cannot guarantee the type they're querying implements this contract — see below.
-
-See also: [`CTBase.Strategies.default_parameter`](@extref), [`CTBase.Strategies.AbstractStrategyParameter`](@extref)
-"""
 function parameter end
 
 # ============================================================================
@@ -286,15 +244,46 @@ function metadata(::Type{T}) where {T<:AbstractStrategy}
 end
 
 """
-Default implementation for `parameter(::Type{T})` that throws `NotImplemented`.
+$(TYPEDSIGNATURES)
 
-Every concrete strategy must override this with either
-`parameter(::Type{<:S}) = nothing` (non-parameterized) or
-`parameter(::Type{<:S{P}}) where {P<:AbstractStrategyParameter} = P` (parameterized).
+Return the strategy parameter type for a concrete strategy type, or `nothing` if the
+strategy is non-parameterized.
+
+Every concrete strategy type must implement this method:
+- Non-parameterized strategies return `nothing`.
+- Parameterized strategies return the concrete parameter type.
+
+# Arguments
+- `strategy_type::Type{<:AbstractStrategy}`: The strategy type
+
+# Returns
+- `Type{<:AbstractStrategyParameter}`: The parameter type (e.g. `CPU`, `GPU`)
+- `Nothing`: If the strategy is non-parameterized
 
 # Throws
+- `Exceptions.NotImplemented`: When the concrete type doesn't override this method.
 
-- `Exceptions.NotImplemented`: When the concrete type doesn't override this method
+# Example
+```julia-repl
+# Non-parameterized:
+julia> parameter(Ipopt)
+nothing
+
+# Parameterized:
+julia> parameter(MadNLP{CPU})
+CPU
+```
+
+# Implementation
+```julia
+# Non-parameterized strategy:
+Strategies.parameter(::Type{<:MyStrategy}) = nothing
+
+# Parameterized strategy (bound repeated verbatim from the struct definition):
+Strategies.parameter(::Type{<:MyStrategy{P}}) where {P<:AbstractStrategyParameter} = P
+```
+
+See also: [`CTBase.Strategies.default_parameter`](@extref), [`CTBase.Strategies.AbstractStrategyParameter`](@extref)
 """
 function parameter(::Type{T}) where {T<:AbstractStrategy}
     return throw(

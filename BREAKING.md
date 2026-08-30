@@ -3,6 +3,14 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.2-beta)
+
+- **Strategies — `parameter` documentation anchors**: split the docstrings for
+  the one-argument and two-argument `Strategies.parameter` methods so their API
+  anchors can be resolved independently by downstream documentation. **No
+  breaking change**: runtime behavior, public signatures, types, and names are
+  unchanged. No migration required.
+
 ## Non-breaking note (0.30.1-beta)
 
 - **Plotting — Makie backend parity**: `CTBase.Plotting.MakieBackend` reached
