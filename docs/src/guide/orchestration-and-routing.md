@@ -268,13 +268,10 @@ Orchestration.extract_strategy_ids(:plain_value, resolved)
 Passing an unknown strategy ID throws an error:
 
 ```@repl routing
-try # hide
 Orchestration.extract_strategy_ids(
     Strategies.route_to(unknown = 42), resolved,
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ## Complete Example
@@ -315,25 +312,19 @@ routed.strategies
 ### Error: unknown option
 
 ```@repl routing
-try # hide
 Orchestration.route_all_options(
     method, families, action_defs,
     (foo = 42,), registry,
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ### Error: ambiguous option without disambiguation
 
 ```@repl routing
-try # hide
 Orchestration.route_all_options(
     method, families, action_defs,
     (backend = :sparse,), registry,
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```

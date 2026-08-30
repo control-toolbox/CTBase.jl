@@ -35,13 +35,10 @@ algorithms = CTBase.Descriptions.add(
 Attempting to add a duplicate raises [`CTBase.Exceptions.IncorrectArgument`](@ref):
 
 ```@repl desc
-try # hide
 CTBase.Descriptions.add(
     algorithms, (:descent, :bfgs, :bisection),
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ## Completing a partial description
@@ -63,13 +60,10 @@ largest overlap is returned (first wins on tie). If no entry matches,
 [`CTBase.Exceptions.AmbiguousDescription`](@ref) is raised:
 
 ```@repl desc
-try # hide
 CTBase.Descriptions.complete(
     :euler; descriptions=algorithms,
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ## Removing symbols from a description

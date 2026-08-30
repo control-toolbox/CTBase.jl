@@ -197,11 +197,7 @@ Strategies.is_default(Strategies.options(c), :scheme)
 A typo in an option name triggers a helpful error with Levenshtein suggestion:
 
 ```@repl strategy
-try # hide
 Collocation(grdi_size = 500)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 ## Adding a Second Strategy: DirectShooting
@@ -381,9 +377,7 @@ Collocation(
 **Known option with wrong type** — normally rejected, accepted with `bypass`:
 
 ```@repl strategy
-try # hide
 Collocation(grid_size = "oops")   # type error: grid_size expects Int
-catch e; showerror(IOContext(stdout, :color => false), e) end # hide
 ```
 
 ```@example strategy

@@ -67,14 +67,11 @@ The constructor automatically:
 Type mismatch in the constructor:
 
 ```@repl options
-try # hide
 Options.OptionDefinition(
     name = :count, type = Integer,
     default = "hello", description = "A count",
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ### Aliases
@@ -115,11 +112,8 @@ nothing # hide
 Validator failure:
 
 ```@repl options
-try # hide
 Options.extract_option((tol = -1.0,), validated_def)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ## NotProvided
@@ -173,11 +167,8 @@ Options.OptionValue(42, :computed)
 Invalid source:
 
 ```@repl options
-try # hide
 Options.OptionValue(42, :invalid_source)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 Provenance tracking enables introspection — you can tell whether a value was explicitly chosen or inherited from defaults:
@@ -351,11 +342,8 @@ Options.is_default(opts, :verbose)
 Rejects unknown options with a helpful error message:
 
 ```@repl options
-try # hide
 CTBase.Strategies.build_strategy_options(DemoStrategy; max_itr = 500)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ### Permissive mode
@@ -400,11 +388,8 @@ The function:
 Type mismatch in extraction:
 
 ```@repl options
-try # hide
 Options.extract_option((grid_size = "hello",), def_grid)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ### `extract_options`

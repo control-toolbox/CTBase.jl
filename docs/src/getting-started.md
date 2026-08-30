@@ -69,11 +69,8 @@ CTBase.Descriptions.complete(:implicit; descriptions=descs)
 CTBase.Descriptions.complete(:euler; descriptions=descs)
 
 # No entry contains both :runge_kutta and :implicit → raises AmbiguousDescription
-try # hide
 CTBase.Descriptions.complete(:runge_kutta, :implicit; descriptions=descs)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 For more, see the **[Descriptions guide](guide/descriptions.md)**.
@@ -86,27 +83,21 @@ Each type carries structured context fields for actionable error messages.
 
 ```@repl walkthrough
 # IncorrectArgument — invalid input value
-try # hide
 throw(CTBase.Exceptions.IncorrectArgument(
     "state dimension must be positive";
     got="0",
     expected="n > 0",
     suggestion="Pass a positive integer for the state dimension",
 ))
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 
 # NotImplemented — interface stub
-try # hide
 throw(CTBase.Exceptions.NotImplemented(
     "solve! is not implemented";
     required_method="solve!(::MyStrategy, ocp)",
     suggestion="Import the package that provides this strategy",
 ))
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 For more, see the **[Exceptions guide](guide/exceptions.md)**.

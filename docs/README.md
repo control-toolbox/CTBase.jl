@@ -16,19 +16,19 @@ Documentation conventions and build workflow:
 
 ## `@repl` vs `@example` — ANSI color rule
 
-DocumenterVitepress processes code block output differently depending on how it is produced:
+Before `DocumenterVitepress` **v0.3.5**, ANSI-colored output from `@repl` could be rendered as raw
+escape sequences. This was fixed in v0.3.5 ([#373](https://github.com/LuxDL/DocumenterVitepress.jl/pull/373)):
+colored `@repl` output is now rendered correctly while the input remains Julia syntax-highlighted.
 
-| Block type | Output fence | ANSI codes | Result |
-| --- | --- | --- | --- |
-| `@example` | ` ```ansi ` | processed by Shiki | **colors render correctly** |
-| `@repl` | ` ```julia ` | parsed as Julia syntax | **raw escape sequences — ugly** |
+**Rules for v0.3.5 and later:**
 
-**Rules:**
+- Use **`@repl`** for interactive examples, including output from custom ANSI-colored `show`
+  methods (strategy instances, `StrategyOptions`, `StrategyMetadata`, `StrategyRegistry`, …).
+- Use **`@example`** for regular evaluated examples when REPL formatting is not needed; keep existing
+  blocks whose output already renders correctly.
+- Use **`@ansi`** when explicitly demonstrating terminal styling or raw ANSI output.
+- Use **`@repl`** with a direct expression that raises an exception when demonstrating native REPL
+  error handling; `@repl` captures the exception as output instead of failing the documentation build.
 
-- Use **`@example`** when the output comes from a `show` method that uses ANSI colors
-  (strategy instances, `StrategyOptions`, `StrategyMetadata`, `StrategyRegistry`, …).
-- Use **`@repl`** only when the output is a plain scalar value with no custom colored `show`
-  (integers, booleans, symbols, plain strings, tuples of symbols, types).
-- Use **`@repl` + `try/catch # hide` + `showerror(IOContext(stdout, :color => false), e) # hide`**
-  to display exceptions — the `showerror` call produces plain text that renders cleanly inside a
-  `julia`-fenced block.
+For versions before v0.3.5, use `@example` or `@ansi` for colored output, or use an explicit
+`try/catch` and `showerror(IOContext(stdout, :color => false), e)` when a colorless output is required.

@@ -315,13 +315,10 @@ backends must override:
 struct MyBackend <: Differentiation.AbstractADBackend
     options::Strategies.StrategyOptions
 end
-try # hide
 Differentiation.gradient(
     MyBackend(Strategies.StrategyOptions()), x -> sum(x), [1.0],
 )
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 ## See also
