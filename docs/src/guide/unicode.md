@@ -46,11 +46,7 @@ Passing a negative integer or a value outside 0–9 to the single-digit function
 raises [`CTBase.Exceptions.IncorrectArgument`](@ref):
 
 ```@repl uni
-try # hide
 CTBase.Unicode.ctindice(12)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
 ```
 
 ## Function Reference

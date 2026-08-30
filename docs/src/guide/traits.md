@@ -253,11 +253,8 @@ If a type does not declare a trait, the predicates throw an informative error
 rather than returning a wrong default:
 
 ```@repl traits
-try # hide
 Traits.is_autonomous(3.14)
-catch e # hide
-showerror(IOContext(stdout, :color => false), e) # hide
-end # hide
+
 ```
 
 !!! note "Trait types are shared"
