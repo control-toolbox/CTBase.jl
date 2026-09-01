@@ -19,7 +19,11 @@ using Test
 using Coverage
 using DifferentiationInterface
 using Plots
-using CairoMakie
+import CairoMakie
+
+Base.showable(::MIME"image/png", ::Plots.Plot) = false
+CairoMakie.activate!(; type="svg")
+Base.showable(::MIME"image/png", ::CairoMakie.Makie.Figure) = false
 
 # Make extension modules available in Main so that @docs blocks can resolve
 # qualified bindings like CTFlowsSciMLIntegrator.SciMLIntegrationResult.
