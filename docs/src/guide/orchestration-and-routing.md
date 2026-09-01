@@ -166,10 +166,10 @@ Build option ownership map
 
 ### How it works internally
 
-1. **Extract action options** — options like `display` are matched against `action_defs` and removed from the pool
-2. **Build strategy-to-family map** — maps each strategy ID to its family name (e.g., `:ipopt → :solver`)
-3. **Build option ownership map** — scans all strategy metadata to determine which family defines each option name
-4. **Route each remaining option** — auto-route if unambiguous, require disambiguation if ambiguous, error if unknown
+- **Extract action options** — options like `display` are matched against `action_defs` and removed from the pool
+- **Build strategy-to-family map** — maps each strategy ID to its family name (e.g., `:ipopt → :solver`)
+- **Build option ownership map** — scans all strategy metadata to determine which family defines each option name
+- **Route each remaining option** — auto-route if unambiguous, require disambiguation if ambiguous, error if unknown
 
 ## Disambiguation
 

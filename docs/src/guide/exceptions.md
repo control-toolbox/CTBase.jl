@@ -406,12 +406,12 @@ This makes debugging faster by providing all the information needed to understan
 
 ## Best Practices
 
-1. **Choose the right exception type**: Use the decision table above
-2. **Provide context**: Always fill in optional fields when available
-3. **Be specific**: Include actual values in error messages
-4. **Suggest solutions**: Help users fix the problem
-5. **Catch specifically**: Use `e isa SpecificException` rather than catching all exceptions
-6. **Don't hide errors**: Only catch exceptions you can handle
+- **Choose the right exception type**: Use the decision table above
+- **Provide context**: Always fill in optional fields when available
+- **Be specific**: Include actual values in error messages
+- **Suggest solutions**: Help users fix the problem
+- **Catch specifically**: Use `e isa SpecificException` rather than catching all exceptions
+- **Don't hide errors**: Only catch exceptions you can handle
 
 ## See Also
 

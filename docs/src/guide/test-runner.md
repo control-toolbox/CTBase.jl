@@ -11,8 +11,8 @@ The entry point is [`CTBase.DevTools.run_tests`](@ref), activated by loading the
 
 A robust testing architecture typically involves:
 
-1. **Test Runner**: A `runtests.jl` file that allows running specific test groups via command-line arguments.
-2. **Test Suite Structure**: Modular test files, each containing a main entry point function.
+- **Test Runner**: A `runtests.jl` file that allows running specific test groups via command-line arguments.
+- **Test Suite Structure**: Modular test files, each containing a main entry point function.
 
 ### Recommended Directory Structure
 
@@ -432,14 +432,14 @@ julia --project -e 'using Pkg; Pkg.test("MyPackage";
 
 ## Best Practices
 
-1. **One test function per file**: Keep test files focused and easy to navigate
-2. **Use descriptive names**: Name test files and functions clearly (e.g., `test_optimization.jl`, `test_optimization()`)
-3. **Organize by feature**: Group related tests in subdirectories
-4. **Fast tests first**: Place quick unit tests before slow integration tests
-5. **Isolate test state**: Each test should be independent and not rely on execution order
-6. **Use test fixtures**: Create helper functions for common test setup
-7. **Document test requirements**: Note any special dependencies or setup needed
-8. **No `test/` subdirectory in `test/`**: Avoid naming a subdirectory `test` inside your test directory
+- **One test function per file**: Keep test files focused and easy to navigate
+- **Use descriptive names**: Name test files and functions clearly (e.g., `test_optimization.jl`, `test_optimization()`)
+- **Organize by feature**: Group related tests in subdirectories
+- **Fast tests first**: Place quick unit tests before slow integration tests
+- **Isolate test state**: Each test should be independent and not rely on execution order
+- **Use test fixtures**: Create helper functions for common test setup
+- **Document test requirements**: Note any special dependencies or setup needed
+- **No `test/` subdirectory in `test/`**: Avoid naming a subdirectory `test` inside your test directory
 
 ## Integration with CI/CD
 

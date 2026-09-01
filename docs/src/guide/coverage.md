@@ -181,19 +181,19 @@ src/MyModule.jl:42
 - **Low coverage (<70%)**: Needs more tests, many code paths untested
 
 Focus on:
-1. **Critical paths**: Ensure core functionality is well-tested
-2. **Error handling**: Test exception paths
-3. **Edge cases**: Test boundary conditions
+- **Critical paths**: Ensure core functionality is well-tested
+- **Error handling**: Test exception paths
+- **Edge cases**: Test boundary conditions
 
 ## Best Practices
 
-1. **Run coverage regularly**: Include in your development workflow
-2. **Focus on quality, not just quantity**: 100% coverage doesn't mean bug-free code
-3. **Test meaningful paths**: Cover important logic, not just trivial getters
-4. **Use coverage to find gaps**: Identify untested code paths
-5. **Integrate with CI**: Automate coverage reporting in your CI pipeline
-6. **Set coverage thresholds**: Maintain or improve coverage over time
-7. **Review uncovered lines**: Understand why code isn't covered
+- **Run coverage regularly**: Include in your development workflow
+- **Focus on quality, not just quantity**: 100% coverage doesn't mean bug-free code
+- **Test meaningful paths**: Cover important logic, not just trivial getters
+- **Use coverage to find gaps**: Identify untested code paths
+- **Integrate with CI**: Automate coverage reporting in your CI pipeline
+- **Set coverage thresholds**: Maintain or improve coverage over time
+- **Review uncovered lines**: Understand why code isn't covered
 
 ## CI/CD Integration
 

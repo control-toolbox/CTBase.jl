@@ -34,10 +34,10 @@ Methods defined on **instances** that provide the actual configuration:
 
 Every concrete strategy must provide:
 
-1. **Type definition** with an `options::StrategyOptions` field (recommended)
-2. **Type-level methods** for `id` and `metadata`
-3. **Constructor** accepting keyword arguments (uses `build_strategy_options`)
-4. **Instance-level access** to configured options
+- **Type definition** with an `options::StrategyOptions` field (recommended)
+- **Type-level methods** for `id` and `metadata`
+- **Constructor** accepting keyword arguments (uses `build_strategy_options`)
+- **Instance-level access** to configured options
 
 ## Parameter Position Contract
 
@@ -350,8 +350,8 @@ Default implementation for `options(strategy::T)` with flexible field access.
 
 This implementation supports two common patterns for strategy types:
 
-1. **Field-based (recommended)**: Strategy has an `options::StrategyOptions` field
-2. **Custom getter**: Strategy implements its own `options()` method
+- **Field-based (recommended)**: Strategy has an `options::StrategyOptions` field
+- **Custom getter**: Strategy implements its own `options()` method
 
 If the strategy type has an `options` field, this implementation returns it.
 Otherwise, it throws a `NotImplemented` error to indicate that the concrete

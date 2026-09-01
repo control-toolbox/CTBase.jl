@@ -8,8 +8,8 @@ $(TYPEDSIGNATURES)
 Build a strategy instance from its ID and options.
 
 This function creates a concrete strategy instance by:
-1. Looking up the strategy type from its ID in the registry
-2. Constructing the instance with the provided options
+- Looking up the strategy type from its ID in the registry
+- Constructing the instance with the provided options
 
 # Arguments
 - `id::Symbol`: Strategy identifier (e.g., `:adnlp`, `:ipopt`)
@@ -57,8 +57,8 @@ $(TYPEDSIGNATURES)
 Build a parameterized strategy instance from ID, parameter, and options.
 
 This function creates a concrete parameterized strategy instance by:
-1. Looking up the parameterized strategy type from its ID and parameter
-2. Constructing the instance with the provided options
+- Looking up the parameterized strategy type from its ID and parameter
+- Constructing the instance with the provided options
 
 # Arguments
 - `id::Symbol`: Strategy identifier (e.g., `:madnlp`)
