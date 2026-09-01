@@ -60,9 +60,9 @@ def = Options.OptionDefinition(
 
 The constructor automatically:
 
-1. Checks that `default` matches the declared `type`
-2. Runs the `validator` on the `default` value (if both are provided)
-3. Skips validation when `default` is `NotProvided`
+- Checks that `default` matches the declared `type`
+- Runs the `validator` on the `default` value (if both are provided)
+- Skips validation when `default` is `NotProvided`
 
 Type mismatch in the constructor:
 
@@ -379,11 +379,11 @@ println("Remaining: ", remaining)
 
 The function:
 
-1. Searches all names (primary + aliases)
-2. Validates the type
-3. Runs the validator
-4. Returns `OptionValue` with `:user` source
-5. Removes the matched key from remaining kwargs
+- Searches all names (primary + aliases)
+- Validates the type
+- Runs the validator
+- Returns `OptionValue` with `:user` source
+- Removes the matched key from remaining kwargs
 
 Type mismatch in extraction:
 

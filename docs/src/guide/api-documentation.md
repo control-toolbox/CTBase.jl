@@ -33,8 +33,8 @@ docs/
 
 The documentation generation happens in two stages:
 
-1. **`api_reference.jl`**: Defines `generate_api_reference()` which calls `CTBase.automatic_reference_documentation()` for each module.
-2. **`make.jl`**: Calls `with_api_reference()` which executes the generation and passes the pages to `Documenter.makedocs()`.
+- **`api_reference.jl`**: Defines `generate_api_reference()` which calls `CTBase.automatic_reference_documentation()` for each module.
+- **`make.jl`**: Calls `with_api_reference()` which executes the generation and passes the pages to `Documenter.makedocs()`.
 
 ## Setting Up API Documentation
 
@@ -254,9 +254,9 @@ end
 
 `with_api_reference()` is a project-level wrapper (not part of CTBase) that:
 
-1. Calls `generate_api_reference()` to register configurations.
-2. Passes the resulting pages to your `makedocs()` call.
-3. Cleans up temporary generated files after the build.
+- Calls `generate_api_reference()` to register configurations.
+- Passes the resulting pages to your `makedocs()` call.
+- Cleans up temporary generated files after the build.
 
 ## DocType System
 
@@ -373,9 +373,9 @@ const MyExt = Base.get_extension(MyPackage, :MyExt)
 
 **Solution**: Check that:
 
-1. Docstrings are properly formatted with `"""`
-2. Source files are correctly specified in `primary_modules`
-3. The module is properly loaded
+- Docstrings are properly formatted with `"""`
+- Source files are correctly specified in `primary_modules`
+- The module is properly loaded
 
 ### Issue: Too many symbols documented
 
@@ -413,14 +413,14 @@ MarkdownAST = "..."
 
 ## Best Practices
 
-1. **Exclude internal symbols**: Use the `exclude` parameter to hide implementation details or compiler-generated symbols
-2. **Separate public and private**: Create separate pages for public and private APIs to keep the end-user documentation focused
-3. **Document external modules**: Use `external_modules_to_document` to include methods from other packages that your package extends (e.g., `Base` or `Plots`)
-4. **Check extensions before documenting**: Always use `Base.get_extension()` to safely check for optional dependencies before calling `automatic_reference_documentation` on them
-5. **Use meaningful titles**: Choose clear, descriptive titles for each documentation page
-6. **Organize by module**: Group related functionality together
-7. **Keep it up-to-date**: Regenerate documentation with each release
-8. **Test documentation builds**: Include documentation building in your CI pipeline
+- **Exclude internal symbols**: Use the `exclude` parameter to hide implementation details or compiler-generated symbols
+- **Separate public and private**: Create separate pages for public and private APIs to keep the end-user documentation focused
+- **Document external modules**: Use `external_modules_to_document` to include methods from other packages that your package extends (e.g., `Base` or `Plots`)
+- **Check extensions before documenting**: Always use `Base.get_extension()` to safely check for optional dependencies before calling `automatic_reference_documentation` on them
+- **Use meaningful titles**: Choose clear, descriptive titles for each documentation page
+- **Organize by module**: Group related functionality together
+- **Keep it up-to-date**: Regenerate documentation with each release
+- **Test documentation builds**: Include documentation building in your CI pipeline
 
 ## CI/CD Integration
 

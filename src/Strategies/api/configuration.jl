@@ -10,11 +10,11 @@ $(TYPEDSIGNATURES)
 Build StrategyOptions from user kwargs and strategy metadata.
 
 This function creates a StrategyOptions instance by:
-1. Validating the mode parameter (`:strict` or `:permissive`)
-2. Extracting known options from kwargs using the Options API
-3. Handling unknown options based on the mode
-4. Converting the extracted Dict to NamedTuple
-5. Wrapping in StrategyOptions
+- Validating the mode parameter (`:strict` or `:permissive`)
+- Extracting known options from kwargs using the Options API
+- Handling unknown options based on the mode
+- Converting the extracted Dict to NamedTuple
+- Wrapping in StrategyOptions
 
 The Options.extract_options function handles:
 - Alias resolution to primary names
@@ -145,8 +145,8 @@ $(TYPEDSIGNATURES)
 Resolve an alias to its primary key name.
 
 Searches through strategy metadata to find if a given key is either:
-1. A primary option name
-2. An alias for a primary option name
+- A primary option name
+- An alias for a primary option name
 
 # Arguments
 - `meta::StrategyMetadata`: Strategy metadata to search in

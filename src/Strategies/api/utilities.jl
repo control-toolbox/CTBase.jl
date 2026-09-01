@@ -62,8 +62,8 @@ $(TYPEDSIGNATURES)
 Extract strategy options as a mutable Dict, ready for modification.
 
 This is a convenience method that combines two steps into one:
-1. Getting `StrategyOptions` from the strategy
-2. Converting to `Dict` via `options_dict(StrategyOptions)`
+- Getting `StrategyOptions` from the strategy
+- Converting to `Dict` via `options_dict(StrategyOptions)`
 
 # Arguments
 - `strategy::AbstractStrategy`: Strategy instance (solver, modeler, etc.)

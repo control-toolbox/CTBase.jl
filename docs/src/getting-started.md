@@ -24,13 +24,13 @@ It provides infrastructure shared by every package above it.
 
 Three things to keep in mind:
 
-1. **No top-level exports.** `using CTBase` loads the package but brings no symbols
+- **No top-level exports.** `using CTBase` loads the package but brings no symbols
    into scope. Every symbol is accessed via its qualified path:
    ```julia
    CTBase.Descriptions.add # ✓ always works
    CTBase.Exceptions.NotImplemented
    ```
-2. **Submodule-first API.** The public API lives in named submodules
+- **Submodule-first API.** The public API lives in named submodules
    (`Core`, `Exceptions`, `Traits`, `Data`, `Descriptions`, `Options`, `Strategies`,
    `Orchestration`, `Differentiation`, `Interpolation`, `DevTools`, `Unicode`, …).
    Bring a submodule's name into scope and call its API qualified:
@@ -40,7 +40,7 @@ Three things to keep in mind:
    Exceptions.IncorrectArgument(...)
    Traits.is_autonomous(...)
    ```
-3. **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
+- **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
    `automatic_reference_documentation` require loading the matching weak dependency
    (`Test`, `Coverage`, `Documenter` respectively) before they become active.
    Likewise, the differentiation primitives of `CTBase.Differentiation` become active

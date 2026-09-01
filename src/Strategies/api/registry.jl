@@ -66,9 +66,9 @@ This function validates the registry structure and ensures:
 
 # Validation Rules
 
-1. **ID Uniqueness**: Within each family, all strategy `id()` values must be unique
-2. **Type Hierarchy**: Each strategy must be a subtype of its family
-3. **No Duplicates**: Each family can only appear once in the registry
+- **ID Uniqueness**: Within each family, all strategy `id()` values must be unique
+- **Type Hierarchy**: Each strategy must be a subtype of its family
+- **No Duplicates**: Each family can only appear once in the registry
 
 # Example
 ```julia-repl

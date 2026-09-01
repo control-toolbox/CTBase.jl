@@ -41,8 +41,8 @@ The validator should:
 # Constructor Validation
 
 The constructor performs the following validations:
-1. Checks that `default` matches the specified `type` (unless `default` is `nothing` or `NotProvided`)
-2. Runs the `validator` on the `default` value (if both are provided and `default` is not `NotProvided`)
+- Checks that `default` matches the specified `type` (unless `default` is `nothing` or `NotProvided`)
+- Runs the `validator` on the `default` value (if both are provided and `default` is not `NotProvided`)
 
 # Example
 ```julia

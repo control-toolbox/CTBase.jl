@@ -8,9 +8,9 @@ fields for better error reporting, suggestions, and context.
 
 # Main Features
 
-1. **Enriched Exceptions**: `IncorrectArgument`, `PreconditionError`, etc. with optional fields
-2. **User-Friendly Display**: Clear, formatted error messages with emojis and sections
-3. **Rich Context**: Detailed information for debugging and problem resolution
+- **Enriched Exceptions**: `IncorrectArgument`, `PreconditionError`, etc. with optional fields
+- **User-Friendly Display**: Clear, formatted error messages with emojis and sections
+- **Rich Context**: Detailed information for debugging and problem resolution
 
 # Usage
 

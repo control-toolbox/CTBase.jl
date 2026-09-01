@@ -49,10 +49,10 @@ Strategies.describe(Strategies.CPU)
 
 Every parameter type must:
 
-1. **Subtype `AbstractStrategyParameter`**
-2. **Be a singleton** (no fields)
-3. **Implement `id(::Type{<:YourParameter})`** returning a `Symbol`
-4. **Implement `description(::Type{<:YourParameter})`** returning a `String`
+- **Subtype `AbstractStrategyParameter`**
+- **Be a singleton** (no fields)
+- **Implement `id(::Type{<:YourParameter})`** returning a `Symbol`
+- **Implement `description(::Type{<:YourParameter})`** returning a `String`
 
 ```@example params
 struct Distributed <: Strategies.AbstractStrategyParameter end
