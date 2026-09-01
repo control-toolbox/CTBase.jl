@@ -6,7 +6,6 @@ CurrentModule = CTBase
 
 ```@setup plot
 using Plots
-Base.showable(::MIME"image/png", ::Plots.Plot) = false
 ```
 
 The [`CTBase.Plotting`](@ref) submodule is a generic, domain-free plotting engine.
