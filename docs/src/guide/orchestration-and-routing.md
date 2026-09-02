@@ -1,4 +1,4 @@
-# Orchestration and Routing
+# [Orchestration and Routing](@id guide-orchestration-and-routing)
 
 ```@meta
 CurrentModule = CTBase
@@ -7,7 +7,7 @@ CurrentModule = CTBase
 This guide explains how the Orchestration module routes user-provided keyword arguments to the correct strategy in a multi-strategy pipeline. It covers the method tuple concept, automatic routing, disambiguation syntax, and the helper functions that power the system.
 
 !!! tip "Prerequisites"
-    Read [Implementing a Strategy](@ref) first. Orchestration builds on top of the strategy metadata system.
+    Read [Implementing a Strategy](@ref guide-implementing-a-strategy) first. Orchestration builds on top of the strategy metadata system.
 
 ```@setup routing
 using CTBase

@@ -1,4 +1,4 @@
-# Interpolation
+# [Interpolation](@id guide-interpolation)
 
 ```@meta
 CurrentModule = CTBase
@@ -82,4 +82,4 @@ const_interp
 
 ## See Also
 
-- [Traits guide](traits.md) — the trait-parameter pattern used by `Interpolant`.
+- [Traits guide](@ref guide-traits) — the trait-parameter pattern used by `Interpolant`.

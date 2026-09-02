@@ -1,9 +1,9 @@
+# [Performance & Type Stability](@id guide-performance)
+
 ```@meta
 CurrentModule = CTBase
 Draft = false
 ```
-
-# Performance & Type Stability
 
 This guide explains **how CTBase keeps its runtime-critical code fast**, and how a
 contributor can check that a change has not introduced a regression.
@@ -167,7 +167,7 @@ using Test
 
 ## See Also
 
-- [Test Runner Guide](test-runner.md): running the test suite, including the
+- [Test Runner Guide](@ref guide-test-runner): running the test suite, including the
   automatic `JET.test_package` check.
-- [Coverage Post-processing Guide](coverage.md): the complementary "is this code
+- [Coverage Post-processing Guide](@ref guide-coverage): the complementary "is this code
   exercised at all?" question.

@@ -1,13 +1,13 @@
+# [Strategy Parameters](@id guide-strategy-parameters)
+
 ```@meta
 CurrentModule = CTBase
 ```
 
-# Strategy Parameters
-
 This guide explains the **Strategy Parameters** system in CTBase. Parameters are singleton types that allow a strategy to specialize its metadata and default options depending on the execution context (e.g., CPU vs GPU).
 
 !!! tip "Prerequisites"
-    Read the [Implementing a Strategy](@ref) guide first. Parameters extend the strategy system with type-based specialization.
+    Read the [Implementing a Strategy](@ref guide-implementing-a-strategy) guide first. Parameters extend the strategy system with type-based specialization.
 
 ```@setup params
 using CTBase: Strategies, Options
@@ -338,10 +338,10 @@ The [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.Dif
 strategy is a real parameterized strategy in CTBase. It is parameterized on
 `{CPU, GPU}` with a computed `:ad_backend` option whose default differs by device
 (`AutoForwardDiff()` on CPU, `AutoMooncake()` on GPU). See the
-[Differentiation](@ref) guide for a full walkthrough.
+[Differentiation](@ref guide-differentiation) guide for a full walkthrough.
 
 ## See Also
 
-- [Implementing a Strategy](@ref) — Strategy contract and metadata
-- [Options System](@ref) — `OptionDefinition`, `StrategyOptions`
+- [Implementing a Strategy](@ref guide-implementing-a-strategy) — Strategy contract and metadata
+- [Options System](@ref guide-options-system) — `OptionDefinition`, `StrategyOptions`
 - `Strategies.AbstractStrategyParameter` — API reference

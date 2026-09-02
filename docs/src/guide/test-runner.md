@@ -1,8 +1,8 @@
+# [Test Runner Guide](@id guide-test-runner)
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Test Runner Guide
 
 This guide explains how to set up a modular testing infrastructure for Julia packages using the **TestRunner** extension of `CTBase.jl`.
 The entry point is [`CTBase.DevTools.run_tests`](@ref), activated by loading the `Test` weak dependency. This setup enables granular test execution and is friendly both for human developers and AI agents.
@@ -462,5 +462,5 @@ jobs:
 
 ## See Also
 
-- [Exceptions guide](exceptions.md) — understanding test failures and exceptions.
-- [Coverage guide](coverage.md) — measuring test coverage.
+- [Exceptions guide](@ref guide-exceptions) — understanding test failures and exceptions.
+- [Coverage guide](@ref guide-coverage) — measuring test coverage.

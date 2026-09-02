@@ -1,8 +1,8 @@
+# [API Documentation Guide](@id guide-api-documentation)
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# API Documentation Guide
 
 This guide explains how to set up automated API reference documentation generation using the **DocumenterReference** extension of `CTBase.jl`. This is particularly useful for maintaining comprehensive and up-to-date API documentation as your codebase evolves.
 
@@ -459,6 +459,6 @@ The `DocumenterReference` extension provides a powerful, flexible system for aut
 
 ## See Also
 
-- [Exception Handling](exceptions.md): Documenting exception types
-- [Test Runner Guide](test-runner.md): Testing documentation examples
-- [Coverage Guide](coverage.md): Ensuring documentation coverage
+- [Exception Handling](@ref guide-exceptions): Documenting exception types
+- [Test Runner Guide](@ref guide-test-runner): Testing documentation examples
+- [Coverage Guide](@ref guide-coverage): Ensuring documentation coverage

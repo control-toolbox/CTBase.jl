@@ -1,4 +1,4 @@
-# Implementing a Strategy
+# [Implementing a Strategy](@id guide-implementing-a-strategy)
 
 ```@meta
 CurrentModule = CTBase
@@ -7,7 +7,7 @@ CurrentModule = CTBase
 This guide walks you through implementing a complete strategy family using the `AbstractStrategy` contract. We use **Collocation** and **DirectShooting** discretizers as concrete examples.
 
 !!! tip "Prerequisites"
-    Read the [Options System](@ref) guide first to understand `OptionDefinition`, `StrategyMetadata`, and `StrategyOptions`.
+    Read the [Options System](@ref guide-options-system) guide first to understand `OptionDefinition`, `StrategyMetadata`, and `StrategyOptions`.
 
 ```@setup strategy
 using CTBase: Strategies, Options
@@ -313,7 +313,7 @@ Strategies.build_strategy(
 )
 ```
 
-See [Orchestration & Routing](@ref) for the full multi-strategy routing system.
+See [Orchestration & Routing](@ref guide-orchestration-and-routing) for the full multi-strategy routing system.
 
 ## Introspection
 

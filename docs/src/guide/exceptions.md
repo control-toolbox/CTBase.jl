@@ -1,8 +1,8 @@
+# [Error Handling and CTBase Exceptions](@id guide-exceptions)
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Error Handling and CTBase Exceptions
 
 CTBase defines a small hierarchy of domain-specific exceptions to make error
 handling explicit and consistent across the control-toolbox ecosystem.
@@ -415,5 +415,5 @@ This makes debugging faster by providing all the information needed to understan
 
 ## See Also
 
-- [Descriptions Tutorial](descriptions.md): Understanding the description system
-- [Test Runner Guide](test-runner.md): Testing exception handling
+- [Descriptions Tutorial](@ref guide-descriptions): Understanding the description system
+- [Test Runner Guide](@ref guide-test-runner): Testing exception handling

@@ -1,4 +1,4 @@
-# Color System
+# [Color System](@id guide-color-system)
 
 ```@meta
 CurrentModule = CTBase

@@ -1,4 +1,4 @@
-# Traits: compile-time properties
+# [Traits: compile-time properties](@id guide-traits)
 
 ```@meta
 CurrentModule = CTBase
@@ -279,4 +279,4 @@ Traits.is_autonomous(3.14)
 
 ## See Also
 
-- [Exceptions guide](exceptions.md) — understanding `IncorrectArgument` and `NotImplemented`.
+- [Exceptions guide](@ref guide-exceptions) — understanding `IncorrectArgument` and `NotImplemented`.

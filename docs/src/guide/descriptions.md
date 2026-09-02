@@ -1,4 +1,4 @@
-# Descriptions: encoding algorithms
+# [Descriptions: encoding algorithms](@id guide-descriptions)
 
 ```@meta
 CurrentModule = CTBase
@@ -88,4 +88,4 @@ CTBase.Descriptions.remove(full, (:descent, :bfgs))
 
 ## See Also
 
-- [Exceptions guide](exceptions.md) — understanding `IncorrectArgument` and `AmbiguousDescription`.
+- [Exceptions guide](@ref guide-exceptions) — understanding `IncorrectArgument` and `AmbiguousDescription`.
