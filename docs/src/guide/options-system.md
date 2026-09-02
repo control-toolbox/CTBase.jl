@@ -1,8 +1,8 @@
+# [Options System](@id guide-options-system)
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Options System
 
 This guide explains the Options module — the foundational layer for defining, validating, extracting, and tracking configuration values throughout CTBase. The Options module is generic and has no dependencies on other CTBase modules.
 
@@ -331,7 +331,7 @@ Options.is_default(opts, :verbose)
 !!! tip "Direct access shortcut on strategy instances"
     When working with a concrete strategy, `strategy[:key]` is syntactic sugar for
     `Strategies.options(strategy)[:key]` — both return the raw value. See
-    [Implementing a Strategy](@ref) for a complete example.
+    [Implementing a Strategy](@ref guide-implementing-a-strategy) for a complete example.
 
 ## Validation Modes
 

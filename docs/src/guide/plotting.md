@@ -1,4 +1,4 @@
-# Plotting Engine
+# [Plotting Engine](@id guide-plotting)
 
 ```@meta
 CurrentModule = CTBase
@@ -258,5 +258,5 @@ index when overlaying with `render!`.
 
 ## See Also
 
-- [Exceptions guide](exceptions.md) — `ExtensionError` when no backend is loaded.
-- [Traits guide](traits.md) — the trait-parameter pattern used by `Interpolant`.
+- [Exceptions guide](@ref guide-exceptions) — `ExtensionError` when no backend is loaded.
+- [Traits guide](@ref guide-traits) — the trait-parameter pattern used by `Interpolant`.

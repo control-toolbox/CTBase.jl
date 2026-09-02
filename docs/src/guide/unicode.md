@@ -1,4 +1,4 @@
-# Unicode Helpers
+# [Unicode Helpers](@id guide-unicode)
 
 ```@meta
 CurrentModule = CTBase
@@ -60,4 +60,4 @@ CTBase.Unicode.ctindice(12)
 
 ## See Also
 
-- [Exceptions guide](exceptions.md) — understanding `IncorrectArgument`.
+- [Exceptions guide](@ref guide-exceptions) — understanding `IncorrectArgument`.

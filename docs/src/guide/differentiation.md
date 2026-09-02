@@ -1,4 +1,4 @@
-# Differentiation: AD backend strategies
+# [Differentiation: AD backend strategies](@id guide-differentiation)
 
 ```@meta
 CurrentModule = CTBase
@@ -6,14 +6,14 @@ CurrentModule = CTBase
 
 The [`CTBase.Differentiation`](@ref CTBase.Differentiation) submodule provides an
 **automatic differentiation (AD) backend** abstraction built on the
-[Strategies](implementing-a-strategy.md) contract. It exposes a small set of
+[Strategies](@ref guide-implementing-a-strategy) contract. It exposes a small set of
 differentiation primitives — gradients, derivatives, partial derivatives and
 Jacobian–vector products — behind a single strategy type, so that consumers
 (Hamiltonian systems, flows, differential geometry) never depend on a concrete
 AD package directly.
 
 !!! tip "Prerequisites"
-    Read the [Implementing a Strategy](@ref) and [Options System](@ref) guides
+    Read the [Implementing a Strategy](@ref guide-implementing-a-strategy) and [Options System](@ref guide-options-system) guides
     first: an AD backend is a strategy with a single `:ad_backend` option.
 
 ```@setup diff
@@ -89,7 +89,7 @@ Strategies.metadata(Differentiation.DifferentiationInterface)
 ## Device parameterization
 
 `DifferentiationInterface` is parameterized on the execution device `P` via the
-[Strategy Parameters](@ref) system. Two built-in parameters are available:
+[Strategy Parameters](@ref guide-strategy-parameters) system. Two built-in parameters are available:
 `Strategies.CPU` and `Strategies.GPU`.
 
 The `:ad_backend` default is **computed from the parameter** — each device gets a
@@ -210,7 +210,7 @@ Differentiation.pushforward(backend, X, Val(1), [1.0, 2.0], [5.0, 6.0])
 ## Hamiltonian gradients
 
 The two domain-specific methods operate directly on a
-[`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) (see the [Data](data.md) guide).
+[`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) (see the [Data](@ref guide-data) guide).
 [`Differentiation.hamiltonian_gradient`](@ref CTBase.Differentiation.hamiltonian_gradient)
 returns `(∂H/∂x, ∂H/∂p)`, **non-negated** — the caller applies the signs of
 Hamilton's equations (`ẋ = ∂H/∂p`, `ṗ = -∂H/∂x`):
@@ -242,7 +242,7 @@ Differentiation.variable_gradient(
 ## Pseudo-Hamiltonian gradients
 
 The two pseudo-Hamiltonian methods operate directly on a
-[`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) (see the [Data](data.md)
+[`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) (see the [Data](@ref guide-data)
 guide).
 [`Differentiation.pseudo_hamiltonian_gradient`](@ref CTBase.Differentiation.pseudo_hamiltonian_gradient)
 returns `(∂H̃/∂x, ∂H̃/∂p)`, **non-negated** — the caller applies the signs of
@@ -307,7 +307,7 @@ would also account for `∂H̃/∂u · ∂u/∂v`.
 ## The contract without the extension
 
 Every contract method has a fallback on `AbstractADBackend` that throws
-[`CTBase.Exceptions.NotImplemented`](@ref) (see the [Exceptions](exceptions.md)
+[`CTBase.Exceptions.NotImplemented`](@ref) (see the [Exceptions](@ref guide-exceptions)
 guide). This is what users hit when the AD package is not loaded, and what custom
 backends must override:
 
@@ -324,6 +324,6 @@ Differentiation.gradient(
 ## See also
 
 - [`Differentiation.AbstractADBackend`](@ref CTBase.Differentiation.AbstractADBackend), [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface) — the strategy types.
-- [Implementing a Strategy](@ref), [Options System](@ref) — the contract these build on.
-- [Data](data.md) — `Hamiltonian` and `PseudoHamiltonian` wrappers consumed by the gradient methods.
-- [Exceptions](exceptions.md) — `NotImplemented`, raised by the contract fallbacks.
+- [Implementing a Strategy](@ref guide-implementing-a-strategy), [Options System](@ref guide-options-system) — the contract these build on.
+- [Data](@ref guide-data) — `Hamiltonian` and `PseudoHamiltonian` wrappers consumed by the gradient methods.
+- [Exceptions](@ref guide-exceptions) — `NotImplemented`, raised by the contract fallbacks.

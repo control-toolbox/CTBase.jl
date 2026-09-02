@@ -1,8 +1,8 @@
+# [Coverage Post-processing Guide](@id guide-coverage)
+
 ```@meta
 CurrentModule = CTBase
 ```
-
-# Coverage Post-processing Guide
 
 This guide explains how to generate human-readable and machine-parseable coverage reports using the **CoveragePostprocessing** extension of `CTBase.jl`.
 
@@ -222,5 +222,5 @@ jobs:
 
 ## See Also
 
-- [Test Runner Guide](test-runner.md): Setting up modular tests
-- [Exception Handling](exceptions.md): Testing exception paths
+- [Test Runner Guide](@ref guide-test-runner): Setting up modular tests
+- [Exception Handling](@ref guide-exceptions): Testing exception paths

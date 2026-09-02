@@ -1,11 +1,11 @@
-# Data: typed function wrappers
+# [Data: typed function wrappers](@id guide-data)
 
 ```@meta
 CurrentModule = CTBase
 ```
 
 The [`CTBase.Data`](@ref CTBase.Data) submodule provides typed wrappers that carry
-a Julia function together with its **trait metadata** (see the [Traits](traits.md)
+a Julia function together with its **trait metadata** (see the [Traits](@ref guide-traits)
 guide). Each wrapper knows, at the type level, whether it depends on time, whether
 it depends on an extra variable, and whether it is evaluated in-place.
 
@@ -48,7 +48,7 @@ In the call patterns, brackets `[…]` denote optional arguments controlled by t
 All ten share the same time-dependence and variable-dependence trait axes.
 `VectorField` and `HamiltonianVectorField` also carry a mutability trait (in-place / out-of-place);
 `ControlLaw` carries a feedback trait;
-`PathConstraint` carries a constraint-kind trait (see [Traits](traits.md)).
+`PathConstraint` carries a constraint-kind trait (see [Traits](@ref guide-traits)).
 
 ---
 
@@ -240,7 +240,7 @@ keyword path — typically those **derived from a
 [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian)** by automatic differentiation.
 For a plain user-supplied function that does not accept `variable_costate`, passing
 `true` raises a [`CTBase.Exceptions.PreconditionError`](@ref) (see the
-[Exceptions](exceptions.md) guide).
+[Exceptions](@ref guide-exceptions) guide).
 
 ---
 
@@ -357,7 +357,7 @@ The constructor rejects non-`DynClosedLoop` laws (`OpenLoop`, `ClosedLoop`) with
 ## ControlLaw
 
 A `ControlLaw` wraps a function ``u(\cdots)`` that provides the control input for
-an optimal control problem. The **feedback** trait (see [Traits](traits.md))
+an optimal control problem. The **feedback** trait (see [Traits](@ref guide-traits))
 determines which primal variables the control law depends on, and the
 time/variable traits add `t` and `v` as for other data types.
 
@@ -429,7 +429,7 @@ while dynamic closed-loop control laws carry
 ## PathConstraint
 
 A `PathConstraint` wraps a function ``g(\cdots)`` that evaluates a path constraint
-along the trajectory. The **constraint-kind** trait (see [Traits](traits.md))
+along the trajectory. The **constraint-kind** trait (see [Traits](@ref guide-traits))
 determines which primal variables the constraint depends on, and the
 time/variable traits add `t` and `v` as for other data types.
 
@@ -630,7 +630,7 @@ Hamiltonian path (`ComposedHamiltonian`).
 ## Querying traits
 
 Because the trait metadata lives in the type, it can be recovered from any data
-object through the [Traits](traits.md) accessors — with no runtime cost:
+object through the [Traits](@ref guide-traits) accessors — with no runtime cost:
 
 ```@example data
 Traits.time_dependence(vf2)      # NonAutonomous
@@ -695,5 +695,5 @@ The same positional form exists for [`Data.Hamiltonian`](@ref CTBase.Data.Hamilt
 - [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField), [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw), [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint), [`Data.Multiplier`](@ref CTBase.Data.Multiplier) — concrete data types.
 - [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlledVectorField`](@ref CTBase.Data.AbstractControlledVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw), [`Data.AbstractPathConstraint`](@ref CTBase.Data.AbstractPathConstraint), [`Data.AbstractMultiplier`](@ref CTBase.Data.AbstractMultiplier) — abstract supertypes.
 - [`Data.pseudo_hamiltonian`](@ref CTBase.Data.pseudo_hamiltonian), [`Data.control_law`](@ref CTBase.Data.control_law), [`Data.controlled_vector_field`](@ref CTBase.Data.controlled_vector_field) — getters for composed types.
-- [Traits](traits.md) — the three trait axes, the dynamics trait, and call-signature tables.
-- [Exceptions](exceptions.md) — `PreconditionError` and `IncorrectArgument`, raised by the constructors and the `variable_costate` path.
+- [Traits](@ref guide-traits) — the three trait axes, the dynamics trait, and call-signature tables.
+- [Exceptions](@ref guide-exceptions) — `PreconditionError` and `IncorrectArgument`, raised by the constructors and the `variable_costate` path.
