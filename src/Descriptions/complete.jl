@@ -71,7 +71,7 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
     if maximum(table[:, 2]) == 0
         # Find similar descriptions for helpful suggestions
         similar_descs = _find_similar_descriptions(list, descriptions; max_results=5)
-        all_candidates = _format_description_candidates(descriptions; max_show=10)
+        all_candidates = _format_description_candidates(descriptions; max_show=20)
 
         # Build contextual suggestion
         suggestion = if !isempty(similar_descs)
@@ -93,7 +93,7 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
         throw(
             Exceptions.AmbiguousDescription(
                 list;
-                candidates=all_candidates,
+                candidates=isempty(similar_descs) ? all_candidates : similar_descs,
                 suggestion=suggestion,
                 context="description completion",
                 diagnostic=diagnostic,
