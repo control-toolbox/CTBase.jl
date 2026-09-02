@@ -6,6 +6,48 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.4-beta] - unreleased
+
+### 🐛 Bug Fixes
+
+**`Descriptions.complete` — `Available` stays exhaustive, the hint carries its own list**
+([#557](https://github.com/control-toolbox/CTBase.jl/issues/557), follow-up to
+[#553](https://github.com/control-toolbox/CTBase.jl/issues/553)).
+
+- `candidates` is again always the **catalog** — every entry, or the first `max_show`
+  followed by the `… and N more` marker. 0.30.3-beta routed the similarity-filtered
+  matches into that field, which the display layer labels `Available`, so a 12-entry
+  catalog was reported as holding 5 descriptions with nothing saying so.
+- The `"Try one of the closest matches:"` hint now **lists those matches** on its own
+  lines instead of ending on a colon. The exception renderer already supported
+  multi-line values, so no display change was needed.
+- Side effect worth noting: the truncation marker added in 0.30.3-beta was until now
+  unreachable in practice. It is produced from `all_candidates`, which was discarded
+  whenever similar descriptions existed — and `_find_similar_descriptions` returns
+  empty only when the request shares no symbol with any description. The marker could
+  therefore only appear for a catalog above `max_show` *and* a wholly unknown request.
+  It now renders on every path.
+
+Also updated the `complete` docstring, whose example still showed a message format
+several releases old.
+
+### 🧪 Tests
+
+- New non-regression testset for #557: `candidates` exhaustive on the small-catalog
+  path, marker present on the branch 0.30.3-beta could not reach (catalog > `max_show`
+  *with* similar matches), hint self-contained, and an end-to-end check that the
+  rendered message shows the matches after the `Hint` label.
+- Corrected the #553 testset, which asserted the behaviour this release fixes
+  (`candidates` equal to the closest matches).
+
+### ✅ Compatibility
+
+- **No breaking changes**: error-message content only. `complete`'s resolution
+  behaviour, signatures, return values and the `AmbiguousDescription` fields are
+  unchanged. Code that reads `e.candidates` expecting the catalog gets the catalog
+  again; code that reads `e.suggestion` gets a multi-line string where it previously
+  got one line. No migration required.
+
 ## [0.30.3-beta] - unreleased
 
 ### 🐛 Bug Fixes

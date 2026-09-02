@@ -23,27 +23,40 @@ the first one in the catalog wins (priority is top-to-bottom).
 ```julia-repl
 julia> using CTBase
 
-julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c))
-(:a, :b)
-(:b, :c)
-(:a, :c)
+julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c));
+
 julia> CTBase.complete(:a; descriptions=D)
 (:a, :b)
+
 julia> CTBase.complete(:a, :c; descriptions=D)
 (:a, :b, :c)
+
 julia> CTBase.complete((:a, :c); descriptions=D)
 (:a, :b, :c)
-julia> CTBase.complete(:f; descriptions=D)
-ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
-       Description: (:f,)
-       Valid candidates:
-       - (:a, :b)
-       - (:a, :b, :c)
-       - (:b, :c)
-       - (:a, :c)
-       Suggestion: Available descriptions: (:a, :b), (:a, :b, :c), (:b, :c), (:a, :c)
-       Context: description completion
+
+julia> CTBase.complete(:a, :z; descriptions=D)
+ERROR: AmbiguousDescription → #complete#15, complete.jl:97
+│
+│  cannot find matching description
+│
+│  Diagnostic  No complete match — no description contains all symbols
+│  Requested   (:a, :z)
+│  Available   (:a, :b)
+│              (:a, :b, :c)
+│              (:b, :c)
+│              (:a, :c)
+│
+│  Context     description completion
+│  Hint        Try one of the closest matches:
+│              (:a, :c)
+│              (:a, :b)
+│              (:a, :b, :c)
+└─
 ```
+
+`Available` always describes the catalog — every entry, or the first `max_show`
+followed by a `… and N more` marker. The closest matches, when any description
+shares a symbol with the request, are listed by the `Hint` itself.
 
 See also: [`CTBase.Descriptions._compute_similarity`](@extref), [`CTBase.Descriptions._find_similar_descriptions`](@extref), [`CTBase.Descriptions._format_description_candidates`](@extref), [`CTBase.Exceptions.AmbiguousDescription`](@extref)
 """
@@ -73,9 +86,13 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
         similar_descs = _find_similar_descriptions(list, descriptions; max_results=5)
         all_candidates = _format_description_candidates(descriptions; max_show=20)
 
-        # Build contextual suggestion
+        # Build contextual suggestion. The closest matches are carried *by the
+        # hint itself*, not by `candidates`: the display layer labels
+        # `candidates` "Available", so putting a similarity-filtered subset
+        # there would claim the catalog is smaller than it is, and leave the
+        # hint announcing a list it never prints (issue #557).
         suggestion = if !isempty(similar_descs)
-            "Try one of the closest matches:"
+            string("Try one of the closest matches:\n", join(similar_descs, "\n"))
         elseif !isempty(all_candidates)
             "Choose from the available descriptions listed above"
         else
@@ -93,7 +110,7 @@ function complete(list::Symbol...; descriptions::Tuple{Vararg{Description}})::De
         throw(
             Exceptions.AmbiguousDescription(
                 list;
-                candidates=isempty(similar_descs) ? all_candidates : similar_descs,
+                candidates=all_candidates,
                 suggestion=suggestion,
                 context="description completion",
                 diagnostic=diagnostic,

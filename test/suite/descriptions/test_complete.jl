@@ -207,8 +207,10 @@ function test_complete()
                 Test.@test e isa Exceptions.AmbiguousDescription
                 Test.@test !isempty(e.candidates)
                 Test.@test occursin("closest matches", e.suggestion)
-                # Should suggest descriptions containing :b (which is (:a, :b, :c))
-                Test.@test any(occursin("(:a,", candidate) for candidate in e.candidates)
+                # The similar descriptions are listed by the hint itself; the
+                # candidate list stays the full catalog (issue #557).
+                Test.@test occursin("(:a, :b, :c)", e.suggestion)
+                Test.@test length(e.candidates) == 3
             end
         end
 
@@ -250,8 +252,9 @@ function test_complete()
             Test.@test length(err22.candidates) == 21       # 20 shown + marker
             Test.@test err22.candidates[end] == "… and 2 more"
 
-            # 2. Closest matches are not discarded: candidates == the nearest
-            #    descriptions once similar_descs is non-empty.
+            # 2. Closest matches are not discarded. They are carried by the
+            #    *hint*, not by `candidates` -- see the issue 557 testset below
+            #    for why that distinction matters.
             err = try
                 Descriptions.complete(:adnlp, :gpu; descriptions=descs)
             catch e
@@ -259,8 +262,95 @@ function test_complete()
             end
             Test.@test err isa Exceptions.AmbiguousDescription
             Test.@test occursin("closest matches", err.suggestion)
+            Test.@test occursin("(:gpu, :exact)", err.suggestion)
+            Test.@test occursin("(:gpu, :krylov)", err.suggestion)
             Test.@test !isempty(err.candidates)
-            Test.@test Set(err.candidates) == Set(["(:gpu, :exact)", "(:gpu, :krylov)"])
+        end
+
+        Test.@testset "issue 557 - Available stays exhaustive, hint carries its list" begin
+            # ================================================================
+            # NON-REGRESSION: issue #557, follow-up to #553.
+            #
+            # #553's fix put the similarity-filtered matches into `candidates`.
+            # The display layer labels that field "Available", so the message
+            # claimed a 12-entry catalog held 5 descriptions, while the hint
+            # ("Try one of the closest matches:") printed nothing after its
+            # colon. Two invariants, one per field:
+            #
+            # 1) `candidates` describes the CATALOG -- exhaustive, or truncated
+            #    with a marker -- on every path, similar matches or not. The
+            #    marker added by #553 was unreachable in practice: it lived on
+            #    the branch taken only when nothing resembles the request.
+            # 2) `suggestion` carries the closest matches itself, so the hint
+            #    is readable on its own line block.
+            # ================================================================
+
+            # --- 1. The branch #553 could not reach: > max_show AND a request
+            #        that DOES resemble the catalog, so similar_descs != [].
+            big = ()
+            for i in 1:22
+                big = Descriptions.add(big, (:ipopt, Symbol(:cpu_, i)))
+            end
+            err_big = try
+                Descriptions.complete(:ipopt, :nowhere; descriptions=big)
+            catch e
+                e
+            end
+            Test.@test err_big isa Exceptions.AmbiguousDescription
+            # similar matches exist (every entry shares :ipopt) ...
+            Test.@test occursin("closest matches", err_big.suggestion)
+            # ... and `candidates` is still the catalog, marker included.
+            Test.@test length(err_big.candidates) == 21      # 20 shown + marker
+            Test.@test err_big.candidates[end] == "… and 2 more"
+
+            # --- 2. Small catalog: `candidates` is exhaustive, not filtered.
+            descs = ()
+            for i in 1:10
+                descs = Descriptions.add(descs, (:ipopt, Symbol(:cpu_, i)))
+            end
+            descs = Descriptions.add(descs, (:gpu, :exact))
+            descs = Descriptions.add(descs, (:gpu, :krylov))
+
+            err = try
+                Descriptions.complete(:adnlp, :gpu; descriptions=descs)
+            catch e
+                e
+            end
+            Test.@test err isa Exceptions.AmbiguousDescription
+            Test.@test length(err.candidates) == 12
+            Test.@test "(:gpu, :exact)" in err.candidates
+            # the entries that do NOT resemble the request are listed too --
+            # that is what "Available" means
+            Test.@test "(:ipopt, :cpu_1)" in err.candidates
+            Test.@test !any(occursin("more", c) for c in err.candidates)
+
+            # --- 3. The hint is self-contained: header line, then one line per
+            #        closest match.
+            lines = split(err.suggestion, '\n')
+            Test.@test length(lines) > 1
+            Test.@test lines[1] == "Try one of the closest matches:"
+            Test.@test Set(lines[2:end]) == Set(["(:gpu, :exact)", "(:gpu, :krylov)"])
+
+            # --- 4. End to end: the rendered message shows them under Hint,
+            #        not only in the struct.
+            msg = sprint(showerror, err)
+            hint_at = findfirst("Hint", msg)
+            Test.@test !isnothing(hint_at)
+            tail = msg[last(hint_at):end]
+            Test.@test occursin("(:gpu, :exact)", tail)
+            Test.@test occursin("(:gpu, :krylov)", tail)
+
+            # --- 5. The no-similarity path is untouched: nothing resembles the
+            #        request, so the hint stays a single sentence.
+            err_none = try
+                Descriptions.complete(:zzz; descriptions=descs)
+            catch e
+                e
+            end
+            Test.@test err_none isa Exceptions.AmbiguousDescription
+            Test.@test !occursin("closest matches", err_none.suggestion)
+            Test.@test !occursin('\n', err_none.suggestion)
+            Test.@test length(err_none.candidates) == 12
         end
 
         Test.@testset "Diagnostic field verification" begin

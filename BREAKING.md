@@ -3,6 +3,28 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.4-beta)
+
+- **Descriptions — `AmbiguousDescription` message fields**: `candidates` again
+  always carries the catalog (exhaustive, or truncated with a `… and N more`
+  marker), and the `"Try one of the closest matches:"` hint lists those matches
+  itself instead of ending on a colon. Fixes
+  [#557](https://github.com/control-toolbox/CTBase.jl/issues/557), a follow-up to
+  [#553](https://github.com/control-toolbox/CTBase.jl/issues/553). **No breaking
+  change**: error-message content only; `complete`'s resolution behaviour, its
+  signatures and return values, and the `AmbiguousDescription` field names and
+  types are all unchanged. The one observable difference for a caller inspecting
+  the exception is that `suggestion` is now a multi-line string on the
+  closest-matches path, and `candidates` is the catalog rather than a filtered
+  subset — which is what it was before 0.30.3-beta. No migration required.
+
+## Non-breaking note (0.30.3-beta)
+
+- **Descriptions — truncation marker and closest-matches hint**: raised the
+  shown-candidate ceiling from 10 to 20 and added a `… and N more` marker. **No
+  breaking change**: display only. See the 0.30.4-beta note above for the
+  correction to how the two fields are filled.
+
 ## Non-breaking note (0.30.2-beta)
 
 - **Strategies — `parameter` documentation anchors**: split the docstrings for
