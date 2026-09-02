@@ -20,8 +20,8 @@ using Coverage
 using DifferentiationInterface
 using Plots
 using CairoMakie: CairoMakie, Makie   # qualified `using`: loads CairoMakie and exposes
-                                      # CairoMakie/Makie without importing Makie's `plot`/`plot!`
-                                      # into Main (avoids clashing with Plots in `@docs` blocks).
+# CairoMakie/Makie without importing Makie's `plot`/`plot!`
+# into Main (avoids clashing with Plots in `@docs` blocks).
 
 # DocumenterVitepress picks the highest-priority MIME type a plot object responds to
 # (image/png: 4.0 over image/svg+xml: 3.0) — the opposite of Documenter.HTML, which
