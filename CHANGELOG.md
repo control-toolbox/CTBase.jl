@@ -6,6 +6,26 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.3-beta] - unreleased
+
+### 🐛 Bug Fixes
+
+**`Descriptions.complete` — truncation marker and closest-matches hint** ([#553](https://github.com/control-toolbox/CTBase.jl/issues/553)).
+- The candidate list is no longer silently head-truncated: when the catalog has more
+  descriptions than `max_show`, a `… and N more` line is appended so the `Available`
+  list is not mistaken for exhaustive.
+- The `"Try one of the closest matches:"` hint now actually lists the closest matching
+  descriptions — previously the computed matches were discarded and the hint was empty.
+- The number of candidates shown in error output was raised from 10 to 20.
+
+Both are display-only corrections; the resolution logic of `complete` is unchanged.
+
+### ✅ Compatibility
+
+- **No breaking changes**: only error-message display and the shown-candidate ceiling
+  changed; `complete`'s resolution behaviour, signatures, and return values are
+  unchanged. No migration required.
+
 ## [0.30.2-beta] - unreleased
 
 ### 📚 Documentation

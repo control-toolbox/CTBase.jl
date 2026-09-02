@@ -212,6 +212,57 @@ function test_complete()
             end
         end
 
+        Test.@testset "issue 553 - truncation marker and closest matches" begin
+            # ================================================================
+            # NON-REGRESSION: issue #553
+            # 1) candidate list must not be silently truncated - a
+            #    "… and N more" marker is appended when > max_show.
+            # 2) the "closest matches" hint must actually list the similar
+            #    descriptions (previously discarded, leaving the hint empty).
+            # ================================================================
+
+            # --- Build a catalog of 12, the last two GPU ones (issue scenario) ---
+            descs = ()
+            for i in 1:10
+                descs = Descriptions.add(descs, (:ipopt, Symbol(:cpu_, i)))
+            end
+            descs = Descriptions.add(descs, (:gpu, :exact))
+            descs = Descriptions.add(descs, (:gpu, :krylov))
+            Test.@test length(descs) == 12
+
+            # 1a. Marker appended by the formatter when > max_show
+            formatted = Descriptions._format_description_candidates(descs; max_show=10)
+            Test.@test length(formatted) == 11            # 10 shown + marker
+            Test.@test formatted[end] == "… and 2 more"
+
+            # 1b. max_show raised to 20 in complete: catalog of 22 must still
+            #     surface the marker line in the raised exception.
+            descs22 = ()
+            for i in 1:22
+                descs22 = Descriptions.add(descs22, (:ipopt, Symbol(:cpu_, i)))
+            end
+            err22 = try
+                Descriptions.complete(:zzz; descriptions=descs22)
+            catch e
+                e
+            end
+            Test.@test err22 isa Exceptions.AmbiguousDescription
+            Test.@test length(err22.candidates) == 21       # 20 shown + marker
+            Test.@test err22.candidates[end] == "… and 2 more"
+
+            # 2. Closest matches are not discarded: candidates == the nearest
+            #    descriptions once similar_descs is non-empty.
+            err = try
+                Descriptions.complete(:adnlp, :gpu; descriptions=descs)
+            catch e
+                e
+            end
+            Test.@test err isa Exceptions.AmbiguousDescription
+            Test.@test occursin("closest matches", err.suggestion)
+            Test.@test !isempty(err.candidates)
+            Test.@test Set(err.candidates) == Set(["(:gpu, :exact)", "(:gpu, :krylov)"])
+        end
+
         Test.@testset "Diagnostic field verification" begin
             # Empty catalog - should have diagnostic
             try

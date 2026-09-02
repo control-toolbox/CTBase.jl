@@ -103,7 +103,9 @@ Format description candidates from a catalog for display in error messages.
 - `max_show::Int=5`: Maximum number of descriptions to include in the output
 
 # Returns
-- `Vector{String}`: A vector of formatted description strings
+- `Vector{String}`: A vector of formatted description strings. If the catalog has more
+  than `max_show` descriptions, an extra `"… and N more"` marker line is appended so the
+  list is not mistaken for exhaustive.
 
 # Example
 
@@ -116,17 +118,26 @@ julia> CTBase.Descriptions.format_description_candidates(descriptions; max_show=
  "(:a, :b)"
  "(:a, :c)"
  "(:x, :y)"
+
+julia> descriptions = ((:a, :b), (:a, :c), (:x, :y), (:p, :q), (:r, :s), (:t, :u))
+julia> CTBase.Descriptions.format_description_candidates(descriptions; max_show=2)
+3-element Vector{String}:
+ "(:a, :b)"
+ "(:a, :c)"
+ "… and 4 more"
 ```
 """
 function _format_description_candidates(
     descriptions::Tuple{Vararg{Description}}; max_show::Int=5
 )::Vector{String}
-    if isempty(descriptions)
-        return String[]
+    isempty(descriptions) && return String[]
+
+    n = length(descriptions)
+    formatted = Vector{String}([string(desc) for desc in descriptions[1:min(max_show, n)]])
+
+    if n > max_show
+        push!(formatted, "… and $(n - max_show) more")
     end
 
-    # Take up to max_show descriptions
-    to_show = descriptions[1:min(max_show, length(descriptions))]
-
-    return Vector{String}([string(desc) for desc in to_show])
+    return formatted
 end

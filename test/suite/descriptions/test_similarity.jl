@@ -164,47 +164,54 @@ function test_similarity()
         Test.@testset "format_description_candidates - basic" begin
             descriptions = ((:a, :b), (:a, :c), (:x, :y), (:p, :q), (:r, :s), (:t, :u))
             formatted = Descriptions._format_description_candidates(descriptions)
-            Test.@test length(formatted) == 5 # default max_show=5
+            Test.@test length(formatted) == 6 # default max_show=5 + "… and 1 more" marker
             Test.@test formatted[1] == "(:a, :b)"
             Test.@test formatted[5] == "(:r, :s)"
+            Test.@test formatted[end] == "… and 1 more"
 
             # Custom max_show
             formatted3 = Descriptions._format_description_candidates(
                 descriptions; max_show=3
             )
-            Test.@test length(formatted3) == 3
+            Test.@test length(formatted3) == 4 # 3 shown + "… and 3 more" marker
             Test.@test formatted3[1] == "(:a, :b)"
             Test.@test formatted3[3] == "(:x, :y)"
+            Test.@test formatted3[end] == "… and 3 more"
         end
 
         Test.@testset "format_description_candidates - boundaries" begin
-            # Exactly max_show descriptions
+            # Exactly max_show descriptions - no marker
             descriptions = ((:a, :b), (:c, :d), (:e, :f), (:g, :h), (:i, :j))
             formatted = Descriptions._format_description_candidates(
                 descriptions; max_show=5
             )
             Test.@test length(formatted) == 5
+            Test.@test !(occursin("more", formatted[end]))
 
-            # Less than max_show
+            # Less than max_show - no marker
             descriptions2 = ((:a, :b), (:c, :d))
             formatted2 = Descriptions._format_description_candidates(
                 descriptions2; max_show=5
             )
             Test.@test length(formatted2) == 2
 
-            # More than max_show
+            # More than max_show - marker appended
             descriptions3 = ((:a, :b), (:c, :d), (:e, :f), (:g, :h), (:i, :j), (:k, :l))
             formatted3 = Descriptions._format_description_candidates(
                 descriptions3; max_show=3
             )
-            Test.@test length(formatted3) == 3
+            Test.@test length(formatted3) == 4 # 3 shown + "… and 3 more" marker
+            Test.@test formatted3[1] == "(:a, :b)"
+            Test.@test formatted3[3] == "(:e, :f)"
+            Test.@test formatted3[end] == "… and 3 more"
 
             # max_show=1
             formatted4 = Descriptions._format_description_candidates(
                 descriptions3; max_show=1
             )
-            Test.@test length(formatted4) == 1
+            Test.@test length(formatted4) == 2 # 1 shown + "… and 5 more" marker
             Test.@test formatted4[1] == "(:a, :b)"
+            Test.@test formatted4[end] == "… and 5 more"
         end
 
         Test.@testset "format_description_candidates - edge cases" begin
