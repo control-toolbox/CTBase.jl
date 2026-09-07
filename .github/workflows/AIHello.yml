@@ -21,10 +21,10 @@ on:
 
 jobs:
   call:
-    uses: control-toolbox/CTActions/.github/workflows/ai-agent.yml@feat/albert-hello-workflow
+    uses: control-toolbox/CTActions/.github/workflows/ai-agent.yml@main
     with:
       provider: ${{ inputs.provider }}
-      handbook_ref: feat/albert-hello
+      handbook_ref: main
       agent_name: hello
       model: ${{ inputs.model }}
       prompt: ${{ inputs.prompt }}
