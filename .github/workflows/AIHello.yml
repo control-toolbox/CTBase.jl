@@ -13,8 +13,8 @@ on:
         required: true
         type: string
         default: deepseek
-      prompt:
-        description: "Prompt sent to the AI agent"
+      task:
+        description: "Task sent to the AI agent"
         required: true
         type: string
         default: "Present the current project briefly."
@@ -27,7 +27,7 @@ jobs:
       handbook_ref: main
       agent_name: hello
       model: ${{ inputs.model }}
-      prompt: ${{ inputs.prompt }}
+      task: ${{ inputs.task }}
     secrets:
       ALBERT_API_KEY: ${{ secrets.ALBERT_API_KEY }}
       HANDBOOK_READ_TOKEN: ${{ secrets.HANDBOOK_READ_TOKEN }}
