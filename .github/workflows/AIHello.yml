@@ -1,0 +1,33 @@
+name: AI Hello
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "AI provider to use"
+        required: true
+        type: string
+        default: albert
+      model:
+        description: "Provider model alias or model identifier"
+        required: true
+        type: string
+        default: deepseek
+      prompt:
+        description: "Prompt sent to the AI agent"
+        required: true
+        type: string
+        default: "Present the CTBase project briefly."
+
+jobs:
+  call:
+    uses: control-toolbox/CTActions/.github/workflows/ai-agent.yml@feat/albert-hello-workflow
+    with:
+      provider: ${{ inputs.provider }}
+      handbook_ref: feat/albert-hello
+      agent_name: hello
+      model: ${{ inputs.model }}
+      prompt: ${{ inputs.prompt }}
+    secrets:
+      ALBERT_API_KEY: ${{ secrets.ALBERT_API_KEY }}
+      HANDBOOK_READ_TOKEN: ${{ secrets.HANDBOOK_READ_TOKEN }}
