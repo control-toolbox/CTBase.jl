@@ -17,7 +17,7 @@ on:
         description: "Prompt sent to the AI agent"
         required: true
         type: string
-        default: "Present the CTBase project briefly."
+        default: "Present the current project briefly."
 
 jobs:
   call:
