@@ -3,6 +3,13 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.5)
+
+- **CI and development workflows**: added and updated GitHub Actions workflows for
+  the generic AI agent workflow. **No breaking change**: the Julia API, runtime
+  behaviour, public signatures, types, and names are unchanged. No migration
+  required.
+
 ## Non-breaking note (0.30.4-beta)
 
 - **Descriptions — `AmbiguousDescription` message fields**: `candidates` again
