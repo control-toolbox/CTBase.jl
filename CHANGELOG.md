@@ -6,6 +6,20 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.5] - 2026-09-08
+
+### ⚙️ Internal / CI
+
+- Added the `AIHello` workflow to exercise the generic AI agent workflow and its
+  task-input handling.
+- Updated the AI agent workflows to use the merged generic project prompt and
+  workflow configuration.
+
+### ✅ Compatibility
+
+- **No breaking changes**: this release only updates CI and development workflows;
+  the Julia API and runtime behaviour are unchanged.
+
 ## [0.30.4-beta] - unreleased
 
 ### 🐛 Bug Fixes
