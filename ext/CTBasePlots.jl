@@ -105,11 +105,10 @@ end
 
 Subplot metadata keys that the renderer sets itself; user overrides of these
 (except `legend` and `ylims`, handled explicitly) are ignored to preserve the
-computed layout.
+computed layout, with a warning. `title`, `xlabel` and `ylabel` are resolved earlier
+on the IR by `Plotting._resolve_labels`.
 """
-const _RESERVED_AXES_KEYS = (
-    :subplot, :title, :xlabel, :ylabel, :legend, :ylims, :titlefont, :guidefontsize
-)
+const _RESERVED_AXES_KEYS = (:subplot, :legend, :ylims, :titlefont, :guidefontsize)
 
 # --- ylims resolution ---------------------------------------------------------
 """
@@ -271,9 +270,19 @@ $(TYPEDSIGNATURES)
 Render `fig` into a new `Plots.Plot` (Plots backend). Series attributes among
 `kwargs` (`color`, `linewidth`, `label`, …) are forwarded to every series; the rest
 (`legend`, `grid`, …) are applied to every cell.
+
+Label keywords are resolved on the IR: `xlabel` replaces the x label of the cells
+that carry one, `title` replaces the overall figure title, and `ylabel` is ignored
+with a warning (each cell has its own y label). The renderer-owned keys `subplot`,
+`titlefont` and `guidefontsize` are ignored with a warning.
 """
 function Plotting.render(::Plotting.PlotsBackend, fig::Plotting.Figure; kwargs...)
-    series_user, axes_user = _partition_user(; kwargs...)
+    fig, rest = Plotting._resolve_labels(fig; kwargs...)
+    series_user, axes_user = _partition_user(; rest...)
+    ignored = [k for k in (:subplot, :titlefont, :guidefontsize) if haskey(axes_user, k)]
+    isempty(ignored) || @warn(
+        "Keyword(s) $(join(map(k -> "`$k`", ignored), ", ")) are set by the renderer and ignored."
+    )
     p = _render_node(fig.root; series_user=series_user, axes_user=axes_user)
     sz = Plotting.default_size(fig)
     root_attrs = (; size=sz, left_margin=_LEFT_MARGIN, bottom_margin=_BOTTOM_MARGIN)

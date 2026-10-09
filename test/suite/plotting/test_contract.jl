@@ -116,6 +116,32 @@ function test_contract()
             Test.@test any(s -> s[:label] == "", plt.subplots[1].series_list)
         end
 
+        Test.@testset "user xlabel / title are honoured, ylabel warns (#569)" begin
+            fig = _figure()
+            guide(sp) = sp[:xaxis][:guide]
+            plain = Plotting.render(fig)
+            # the x label of the cells carrying one is replaced, the others stay empty
+            plt = Plotting.render(fig; xlabel="s")
+            for (sp0, sp) in zip(plain.subplots, plt.subplots)
+                Test.@test guide(sp) == (isempty(guide(sp0)) ? "" : "s")
+            end
+            Test.@test any(sp -> guide(sp) == "s", plt.subplots)
+            # a user title becomes the overall title (extra title subplot)
+            ptitle = Plotting.render(fig; title="T")
+            Test.@test length(ptitle.subplots) == 4
+            Test.@test ptitle.attr[:plot_title] == "T"
+            # ylabel is ignored with a warning
+            plt_y = Test.@test_logs (:warn, r"`ylabel` is ignored") Plotting.render(
+                fig; ylabel="y"
+            )
+            Test.@test [sp[:yaxis][:guide] for sp in plt_y.subplots] ==
+                [sp[:yaxis][:guide] for sp in plain.subplots]
+            # renderer-owned keys warn too
+            Test.@test_logs (:warn, r"`titlefont`") Plotting.render(fig; titlefont=10)
+            # no warning when nothing is ignored
+            Test.@test_logs Plotting.render(fig; xlabel="s", title="T")
+        end
+
         Test.@testset "a user label turns the legend on for a :split cell" begin
             # :split cells have the legend off by default; a user `label` makes it
             # visible so overlaid solutions can be told apart.

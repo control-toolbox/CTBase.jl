@@ -135,10 +135,11 @@ const _AXIS_USER_KEYS = (
 """
     _RESERVED_AXES_KEYS
 
-Axis keys the renderer sets itself; a user override of these (except `legend` /
-`ylims`, handled explicitly) is ignored to preserve the computed layout.
+Axis keys the renderer sets itself; `legend` / `ylims` are handled explicitly and
+not forwarded to the `Makie.Axis` constructor. `title`, `xlabel` and `ylabel` are
+resolved earlier on the IR by `Plotting._resolve_labels`.
 """
-const _RESERVED_AXES_KEYS = (:title, :xlabel, :ylabel, :legend, :ylims)
+const _RESERVED_AXES_KEYS = (:legend, :ylims)
 
 """
 $(TYPEDSIGNATURES)
@@ -383,7 +384,8 @@ Populate the `Makie.Figure` `f` with `fig`: the weighted tree becomes nested
 non-`nothing` `fig.title` is added as a spanning `Makie.Label`. Returns `f`.
 """
 function _render_into!(f::Makie.Figure, fig::Plotting.Figure; kwargs...)
-    series_user, axes_user = _partition_user(; kwargs...)
+    fig, rest = Plotting._resolve_labels(fig; kwargs...)
+    series_user, axes_user = _partition_user(; rest...)
     root = f[1, 1] = Makie.GridLayout()
     _render_node!(root, fig.root; series_user=series_user, axes_user=axes_user)
     fig.title === nothing || Makie.Label(f[0, :], fig.title; fontsize=16, font=:bold)
@@ -397,6 +399,10 @@ Render `fig` into a new `Makie.Figure` (Makie backend). Series attributes among
 `kwargs` (`color`, `linewidth`, `linestyle`, `alpha`, …) are forwarded to every
 series; axis attributes (`legend`, `ylims`, grid/scale/ticks) to every cell. The
 figure size comes from [`CTBase.Plotting.default_size`](@extref).
+
+Label keywords are resolved on the IR: `xlabel` replaces the x label of the cells
+that carry one, `title` replaces the overall figure title, and `ylabel` is ignored
+with a warning (each cell has its own y label).
 """
 function Plotting.render(::Plotting.MakieBackend, fig::Plotting.Figure; kwargs...)
     return _render_into!(Makie.Figure(; size=Plotting.default_size(fig)), fig; kwargs...)

@@ -32,6 +32,7 @@ module Plotting
 #   - combinators.jl : level-2 declarative layout: Stacked / Paired / Grid.
 #   - lowering.jl    : Panel/combinator -> Axes/tree (weights, ylims guard, time).
 #   - heuristics.jl  : figure-size heuristics driven by the weighted tree.
+#   - labels.jl      : user `title`/`xlabel`/`ylabel` keywords resolved on the IR.
 #   - contract.jl    : AbstractPlottingBackend, PlotsBackend, render/render! (stubs here;
 #                      the Plots methods live in ext/CTBasePlots.jl).
 #
@@ -48,6 +49,7 @@ include(joinpath(@__DIR__, "panel.jl"))
 include(joinpath(@__DIR__, "combinators.jl"))
 include(joinpath(@__DIR__, "lowering.jl"))
 include(joinpath(@__DIR__, "heuristics.jl"))
+include(joinpath(@__DIR__, "labels.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
 
 # --- IR ----------------------------------------------------------------------
