@@ -237,6 +237,16 @@ function test_contract_makie()
             Test.@test _count_plots(_axes(f)[1], Makie.Lines) == nlines + 1
         end
 
+        Test.@testset "render! warns that label keywords are ignored (#569)" begin
+            f = Plotting.render(Plotting.MakieBackend(), _figure())
+            before = [a.xlabel[] for a in _axes(f)]
+            Test.@test_logs (:warn, r"`xlabel`, `ylabel` are ignored by `render!`") Plotting.render!(
+                Plotting.MakieBackend(), f, _figure(); xlabel="s", ylabel="y"
+            )
+            Test.@test [a.xlabel[] for a in _axes(f)] == before
+            Test.@test_logs Plotting.render!(Plotting.MakieBackend(), f, _figure(); color=1)
+        end
+
         Test.@testset "render! fills an empty figure as if by render" begin
             f = Makie.Figure()
             Plotting.render!(Plotting.MakieBackend(), f, _figure())

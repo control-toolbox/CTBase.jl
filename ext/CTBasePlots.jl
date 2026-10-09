@@ -299,8 +299,12 @@ $(TYPEDSIGNATURES)
 
 Overlay `fig` onto an existing Plots plot `target`, targeting existing subplots
 by the deterministic leaf order. Series/decorations are added; axes untouched.
+
+The label keywords `title`, `xlabel` and `ylabel` have no effect here, since the axes are
+untouched: they are ignored with a warning.
 """
 function Plotting.render!(::Plotting.PlotsBackend, target, fig::Plotting.Figure; kwargs...)
+    Plotting._warn_overlay_labels(; kwargs...)
     series_user, axes_user = _partition_user(; kwargs...)
     for (i, leaf) in enumerate(Plotting.leaves(fig.root))
         _draw_axes!(

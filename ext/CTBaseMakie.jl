@@ -416,12 +416,16 @@ layout tree with the target's `Makie.Axis` blocks in deterministic
 [`CTBase.Plotting.leaves`](@extref) order; only series and decorations are added, the
 axes are left untouched. An empty `target` (no axes yet) is filled as if by
 [`CTBase.Plotting.render`](@extref).
+
+The label keywords `title`, `xlabel` and `ylabel` have no effect on an existing axis: they are
+ignored with a warning (they apply when `target` is empty).
 """
 function Plotting.render!(
     ::Plotting.MakieBackend, target::Makie.Figure, fig::Plotting.Figure; kwargs...
 )
     axs = [c for c in target.content if c isa Makie.Axis]
     isempty(axs) && return _render_into!(target, fig; kwargs...)
+    Plotting._warn_overlay_labels(; kwargs...)
     series_user, _ = _partition_user(; kwargs...)
     for (i, leaf) in enumerate(Plotting.leaves(fig.root))
         i <= length(axs) || break

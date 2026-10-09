@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   one, `title` replaces the overall figure title, and `ylabel` (one name per
   component) is ignored with a warning. The Plots renderer also warns about the
   renderer-owned `subplot`, `titlefont` and `guidefontsize` keywords.
+  `render!` (the overlay behind `plot!`) leaves the axes untouched, so it warns that
+  `title`, `xlabel` and `ylabel` are ignored.
 
 ### ✅ Compatibility
 

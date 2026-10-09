@@ -83,3 +83,22 @@ function _resolve_labels(fig::Figure; kwargs...)
     end
     return Figure(root, fig.size, ti), rest
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Warn when `kwargs` holds label keywords (`title`, `xlabel`, `ylabel`) that an overlay
+cannot apply. [`render!`](@ref) adds series to the axes of an existing plot and leaves
+these axes untouched, so the label keywords have no effect there.
+
+Returns `nothing`.
+"""
+function _warn_overlay_labels(; kwargs...)
+    ignored = [k for k in _LABEL_KEYS if haskey(kwargs, k)]
+    isempty(ignored) || @warn(
+        "Keyword(s) $(join(map(k -> "`$k`", ignored), ", ")) are ignored by `render!`: " *
+        "the axes of the existing plot are left untouched. " *
+        "Change the labels with the backend API, or use `render` to build a new figure."
+    )
+    return nothing
+end

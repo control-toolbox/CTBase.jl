@@ -70,6 +70,14 @@ function test_labels()
             # no warning without ylabel
             Test.@test_logs Plotting._resolve_labels(fig; xlabel="s", title="T")
         end
+
+        Test.@testset "overlay: label keywords warn, others do not" begin
+            Test.@test_logs (:warn, r"`title`, `xlabel`, `ylabel` are ignored by `render!`") Plotting._warn_overlay_labels(;
+                title="T", xlabel="s", ylabel="y"
+            )
+            Test.@test_logs Plotting._warn_overlay_labels(; color=:red)
+            Test.@test Plotting._warn_overlay_labels() === nothing
+        end
     end
     return nothing
 end

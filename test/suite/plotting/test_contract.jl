@@ -95,6 +95,17 @@ function test_contract()
             Test.@test length(plt.subplots) == n            # no new subplots
         end
 
+        Test.@testset "render! warns that label keywords are ignored (#569)" begin
+            plt = Plotting.render(_figure())
+            before = [sp[:xaxis][:guide] for sp in plt.subplots]
+            Test.@test_logs (:warn, r"`title`, `xlabel` are ignored by `render!`") Plotting.render!(
+                plt, _figure(); xlabel="s", title="T"
+            )
+            Test.@test [sp[:xaxis][:guide] for sp in plt.subplots] == before
+            # no warning without a label keyword
+            Test.@test_logs Plotting.render!(plt, _figure(); color=1)
+        end
+
         Test.@testset "user kwargs: series vs subplot attributes" begin
             fig = _figure()
             # a mix of series (`color`) and non-series (`size`, `bins`) attributes must
