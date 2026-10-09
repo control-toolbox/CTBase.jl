@@ -30,6 +30,25 @@ struct ResolvedMethod{T<:Tuple,I<:NamedTuple}
     parameter::Union{Nothing,Type{<:Strategies.AbstractStrategyParameter}}
 end
 
+function _type_from_resolved_id(
+    id::Symbol,
+    family_type::Type{<:Strategies.AbstractStrategy},
+    registry::Strategies.StrategyRegistry,
+    resolved::ResolvedMethod,
+)
+    available = Strategies.available_parameters(id, family_type, registry)
+    parameter = resolved.parameter
+    if isempty(available) || parameter === nothing
+        return Strategies.type_from_id(id, family_type, registry)
+    end
+    return Strategies.type_from_id(
+        id,
+        family_type,
+        registry;
+        parameter=(parameter::Type{<:Strategies.AbstractStrategyParameter}),
+    )
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -209,7 +228,7 @@ function build_option_ownership_map(
 
     for (family_name, family_type) in pairs(families)
         id = getfield(resolved.ids_by_family, family_name)
-        strategy_type = Strategies.type_from_id(id, family_type, registry)
+        strategy_type = _type_from_resolved_id(id, family_type, registry, resolved)
         meta = Strategies.metadata(strategy_type)
 
         for (primary_name, def) in pairs(meta)
@@ -286,7 +305,7 @@ function build_alias_to_primary_map(
 
     for (family_name, family_type) in pairs(families)
         id = getfield(resolved.ids_by_family, family_name)
-        strategy_type = Strategies.type_from_id(id, family_type, registry)
+        strategy_type = _type_from_resolved_id(id, family_type, registry, resolved)
         meta = Strategies.metadata(strategy_type)
 
         for (primary_name, def) in pairs(meta)
