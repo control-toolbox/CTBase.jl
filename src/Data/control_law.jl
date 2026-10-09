@@ -197,6 +197,12 @@ constructed law, always `NonAutonomous`/`false`.
   `OpenLoop` always depends on time.
 - `is_variable::Bool`: If true, control law depends on variable (default: `__is_variable()`).
 
+# Expected signature
+`f(t)` by default, `f(t, v)` with `is_variable=true`. A zero-argument function
+(the pre-#515 "autonomous open loop", `() -> c`) is no longer valid. The
+signature is **not** checked at construction: a mismatch surfaces as a
+`MethodError` at the first call.
+
 # Example
 ```julia-repl
 julia> using CTBase: Data
@@ -245,6 +251,11 @@ variable), but not on the costate.
 - `is_autonomous::Bool`: If true, control law is autonomous (default: `__is_autonomous()`).
 - `is_variable::Bool`: If true, control law depends on variable (default: `__is_variable()`).
 
+# Expected signature
+`f(x)` by default; `f(t, x)` if `is_autonomous=false`; `f(x, v)` if
+`is_variable=true`; `f(t, x, v)` if both. The signature is **not** checked at
+construction: a mismatch surfaces as a `MethodError` at the first call.
+
 # Example
 ```julia-repl
 julia> using CTBase: Data
@@ -278,6 +289,11 @@ A dynamic closed-loop control law depends on both the state and the costate
 - `f::Function`: The control law function.
 - `is_autonomous::Bool`: If true, control law is autonomous (default: `__is_autonomous()`).
 - `is_variable::Bool`: If true, control law depends on variable (default: `__is_variable()`).
+
+# Expected signature
+`f(x, p)` by default; `f(t, x, p)` if `is_autonomous=false`; `f(x, p, v)` if
+`is_variable=true`; `f(t, x, p, v)` if both. The signature is **not** checked
+at construction: a mismatch surfaces as a `MethodError` at the first call.
 
 # Example
 ```julia-repl
