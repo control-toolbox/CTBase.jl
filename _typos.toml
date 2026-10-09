@@ -7,6 +7,7 @@ extend-ignore-re = [
     "strat",
     "Strat",
     "mis-",
+    "gpu_optio",
 ]
 
 [files]
