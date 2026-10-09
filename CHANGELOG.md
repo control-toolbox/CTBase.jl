@@ -6,6 +6,26 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.6] - 2026-10-09
+
+### 🐛 Bug Fixes
+
+- Fixed parameter-aware option routing for parameterized strategies such as
+  `MadNLP{GPU}` ([#565](https://github.com/control-toolbox/CTBase.jl/issues/565)).
+  Routing metadata, aliases, suggestions, and ambiguous-option errors now use the
+  parameter selected in the method tuple.
+
+### 🧪 Tests
+
+- Added CPU/GPU non-regression coverage for parameterized option routing,
+  including mixed parameterized and non-parameterized strategy families.
+- Corrected the coverage post-processing fixture to use Julia's raw `.cov` format.
+
+### ✅ Compatibility
+
+- **No breaking changes**: this release corrects option metadata routing and
+  improves diagnostics without changing public method signatures.
+
 ## [0.30.5] - 2026-09-08
 
 ### ⚙️ Internal / CI
