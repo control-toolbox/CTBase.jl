@@ -3,6 +3,14 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.6)
+
+- **Parameterized option routing**: option metadata, aliases, suggestions, and
+  ambiguous-option diagnostics now respect the parameter selected in the method
+  tuple, including GPU strategies. **No breaking change**: this fixes incorrect
+  metadata selection without changing public method signatures, types, or names.
+  No migration required.
+
 ## Non-breaking note (0.30.5)
 
 - **CI and development workflows**: added and updated GitHub Actions workflows for
