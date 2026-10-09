@@ -139,9 +139,9 @@ function test_coverage_post_process()
                 write(
                     joinpath("src", "foo.jl.1234.cov"),
                     """
-        -:    1:function foo(x)
-        1:    2:    return x * 2
-        -:    3:end
+        -     1:function foo(x)
+        1     2:    return x * 2
+        -     3:end
 """,
                 )
 

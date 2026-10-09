@@ -671,7 +671,7 @@ function _collect_suggestions_across_strategies(
     }()
     for (family_name, family_type) in pairs(families)
         id = getfield(resolved.ids_by_family, family_name)
-        strategy_type = Strategies.type_from_id(id, family_type, registry)
+        strategy_type = _type_from_resolved_id(id, family_type, registry, resolved)
         suggestions = Strategies.suggest_options(
             key, strategy_type; max_suggestions=typemax(Int)
         )
@@ -713,7 +713,7 @@ function _error_ambiguous_option(
         if family_name in owners
             try
                 sid = getfield(resolved.ids_by_family, family_name)
-                strategy_type = Strategies.type_from_id(sid, family_type, registry)
+                strategy_type = _type_from_resolved_id(sid, family_type, registry, resolved)
                 meta = Strategies.metadata(strategy_type)
                 if haskey(meta, key)
                     def = meta[key]
