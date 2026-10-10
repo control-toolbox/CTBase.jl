@@ -245,7 +245,7 @@ Build secondary field `(label, value, color)` tuples for `ExtensionError` displa
 function _build_secondary_pairs(e::ExtensionError)
     pairs = []
     !isnothing(e.context) && push!(pairs, ("Context", e.context, :default))
-    hint = "Run: using " * join(string.(e.weakdeps), ", ")
+    hint = string("Run: using ", join(string.(e.weakdeps), ", "))
     push!(pairs, ("Hint", hint, :green))
     return pairs
 end
