@@ -3,6 +3,13 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.7)
+
+- **Plot label keywords and CI**: `plot`/`render` now honour `xlabel` and `title`
+  (previously ignored silently) and warn on ignored `ylabel`. The CI workflow
+  trigger label is now `run ci github-runner`. **No breaking change**: the Julia
+  API, public signatures, types, and names are unchanged. No migration required.
+
 ## Non-breaking note (0.30.6)
 
 - **Parameterized option routing**: option metadata, aliases, suggestions, and
