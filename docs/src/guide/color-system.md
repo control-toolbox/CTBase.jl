@@ -224,6 +224,22 @@ This ensures your display code:
 - is automatically silenced when the IO does not support color,
 - stays consistent with every other CTBase display.
 
+## Documenting Colored Output
+
+With `DocumenterVitepress` **v0.3.5** or later, ANSI-colored output is rendered correctly by
+`@repl` blocks while the input stays Julia syntax-highlighted. Choose the block type as follows:
+
+- **`@repl`** — interactive examples, including colored `show` output (strategies, options,
+  metadata, registries) and exceptions. Write the failing expression directly: `@repl` captures
+  the exception as output instead of failing the documentation build, so no `try/catch` or
+  `showerror` workaround is needed.
+- **`@example`** — regular evaluated examples when REPL-style formatting is not needed.
+- **`@ansi`** — only to demonstrate terminal styling or raw ANSI output explicitly. It is still
+  supported but is no longer required to render colored `@repl` output.
+
+For versions before v0.3.5, use `@example` or `@ansi` for colored output, or wrap the call in
+`try/catch` with `showerror(IOContext(stdout, :color => false), e)` to get colorless output.
+
 ## See Also
 
 - [`CTBase.Core.Style`](@ref), [`CTBase.Core.Palette`](@ref) — type definitions
