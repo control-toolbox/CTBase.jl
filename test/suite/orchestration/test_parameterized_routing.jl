@@ -17,7 +17,7 @@ Strategies.id(::Type{ParameterizedRoutingModel}) = :routing_model
 Strategies.parameter(::Type{<:ParameterizedRoutingModel}) = nothing
 function Strategies.metadata(::Type{ParameterizedRoutingModel})
     return Strategies.StrategyMetadata(
-        Options.OptionDefinition(
+        Options.OptionDefinition(;
             name=:shared_option,
             type=Int,
             default=1,
@@ -27,8 +27,8 @@ function Strategies.metadata(::Type{ParameterizedRoutingModel})
     )
 end
 
-struct ParameterizedRoutingSolver{P<:Strategies.AbstractStrategyParameter} <: ParameterizedRoutingSolverFamily
-end
+struct ParameterizedRoutingSolver{P<:Strategies.AbstractStrategyParameter} <:
+       ParameterizedRoutingSolverFamily end
 Strategies.id(::Type{<:ParameterizedRoutingSolver}) = :routing_solver
 function Strategies.parameter(
     ::Type{<:ParameterizedRoutingSolver{P}}
@@ -38,14 +38,14 @@ end
 
 function Strategies.metadata(::Type{ParameterizedRoutingSolver{Strategies.CPU}})
     return Strategies.StrategyMetadata(
-        Options.OptionDefinition(
+        Options.OptionDefinition(;
             name=:cpu_option,
             type=Int,
             default=1,
             description="CPU-only option",
             aliases=(:cpu_alias,),
         ),
-        Options.OptionDefinition(
+        Options.OptionDefinition(;
             name=:shared_option,
             type=Int,
             default=2,
@@ -57,14 +57,14 @@ end
 
 function Strategies.metadata(::Type{ParameterizedRoutingSolver{Strategies.GPU}})
     return Strategies.StrategyMetadata(
-        Options.OptionDefinition(
+        Options.OptionDefinition(;
             name=:gpu_option,
             type=Int,
             default=1,
             description="GPU-only option",
             aliases=(:gpu_alias,),
         ),
-        Options.OptionDefinition(
+        Options.OptionDefinition(;
             name=:shared_option,
             type=Int,
             default=2,
@@ -81,8 +81,7 @@ const PARAMETERIZED_ROUTING_REGISTRY = Strategies.create_registry(
 )
 
 const PARAMETERIZED_ROUTING_FAMILIES = (
-    modeler=ParameterizedRoutingModeler,
-    solver=ParameterizedRoutingSolverFamily,
+    modeler=ParameterizedRoutingModeler, solver=ParameterizedRoutingSolverFamily
 )
 const PARAMETERIZED_ROUTING_ACTION_DEFS = Options.OptionDefinition[]
 const CPU_METHOD = (:routing_model, :routing_solver, :cpu)
@@ -104,14 +103,10 @@ function test_parameterized_routing()
 
         Test.@testset "Ownership map uses the active parameter" begin
             cpu_owners = Orchestration.build_option_ownership_map(
-                resolved_cpu,
-                PARAMETERIZED_ROUTING_FAMILIES,
-                PARAMETERIZED_ROUTING_REGISTRY,
+                resolved_cpu, PARAMETERIZED_ROUTING_FAMILIES, PARAMETERIZED_ROUTING_REGISTRY
             )
             gpu_owners = Orchestration.build_option_ownership_map(
-                resolved_gpu,
-                PARAMETERIZED_ROUTING_FAMILIES,
-                PARAMETERIZED_ROUTING_REGISTRY,
+                resolved_gpu, PARAMETERIZED_ROUTING_FAMILIES, PARAMETERIZED_ROUTING_REGISTRY
             )
 
             Test.@test cpu_owners[:cpu_option] == Set([:solver])
@@ -123,14 +118,10 @@ function test_parameterized_routing()
 
         Test.@testset "Alias map uses the active parameter" begin
             cpu_aliases = Orchestration.build_alias_to_primary_map(
-                resolved_cpu,
-                PARAMETERIZED_ROUTING_FAMILIES,
-                PARAMETERIZED_ROUTING_REGISTRY,
+                resolved_cpu, PARAMETERIZED_ROUTING_FAMILIES, PARAMETERIZED_ROUTING_REGISTRY
             )
             gpu_aliases = Orchestration.build_alias_to_primary_map(
-                resolved_gpu,
-                PARAMETERIZED_ROUTING_FAMILIES,
-                PARAMETERIZED_ROUTING_REGISTRY,
+                resolved_gpu, PARAMETERIZED_ROUTING_FAMILIES, PARAMETERIZED_ROUTING_REGISTRY
             )
 
             Test.@test cpu_aliases[:cpu_alias] === :cpu_option
