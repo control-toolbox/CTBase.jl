@@ -203,6 +203,27 @@ function test_contract_makie()
             ) >= 1
         end
 
+        Test.@testset "user xlabel / title are honoured, ylabel warns (#569)" begin
+            fig = _figure()
+            plain = Plotting.render(Plotting.MakieBackend(), fig)
+            f = Plotting.render(Plotting.MakieBackend(), fig; xlabel="s")
+            for (a0, a) in zip(_axes(plain), _axes(f))
+                Test.@test a.xlabel[] == (isempty(a0.xlabel[]) ? "" : "s")
+            end
+            Test.@test any(a -> a.xlabel[] == "s", _axes(f))
+            # a user title becomes the overall title (one spanning Label)
+            Test.@test _n_labels(Plotting.render(Plotting.MakieBackend(), fig; title="T")) ==
+                1
+            # ylabel is ignored with a warning
+            g = Test.@test_logs (:warn, r"`ylabel` is ignored") Plotting.render(
+                Plotting.MakieBackend(), fig; ylabel="y"
+            )
+            Test.@test [a.ylabel[] for a in _axes(g)] == [a.ylabel[] for a in _axes(plain)]
+            Test.@test_logs Plotting.render(
+                Plotting.MakieBackend(), fig; xlabel="s", title="T"
+            )
+        end
+
         Test.@testset "render! overlay keeps axis count and targets by leaf order" begin
             fig = _figure()
             f = Plotting.render(Plotting.MakieBackend(), fig)
@@ -214,6 +235,16 @@ function test_contract_makie()
             Test.@test out === f
             Test.@test _n_axes(f) == n                       # no new axes
             Test.@test _count_plots(_axes(f)[1], Makie.Lines) == nlines + 1
+        end
+
+        Test.@testset "render! warns that label keywords are ignored (#569)" begin
+            f = Plotting.render(Plotting.MakieBackend(), _figure())
+            before = [a.xlabel[] for a in _axes(f)]
+            Test.@test_logs (:warn, r"`xlabel`, `ylabel` are ignored by `render!`") Plotting.render!(
+                Plotting.MakieBackend(), f, _figure(); xlabel="s", ylabel="y"
+            )
+            Test.@test [a.xlabel[] for a in _axes(f)] == before
+            Test.@test_logs Plotting.render!(Plotting.MakieBackend(), f, _figure(); color=1)
         end
 
         Test.@testset "render! fills an empty figure as if by render" begin

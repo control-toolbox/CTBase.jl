@@ -95,6 +95,17 @@ function test_contract()
             Test.@test length(plt.subplots) == n            # no new subplots
         end
 
+        Test.@testset "render! warns that label keywords are ignored (#569)" begin
+            plt = Plotting.render(_figure())
+            before = [sp[:xaxis][:guide] for sp in plt.subplots]
+            Test.@test_logs (:warn, r"`title`, `xlabel` are ignored by `render!`") Plotting.render!(
+                plt, _figure(); xlabel="s", title="T"
+            )
+            Test.@test [sp[:xaxis][:guide] for sp in plt.subplots] == before
+            # no warning without a label keyword
+            Test.@test_logs Plotting.render!(plt, _figure(); color=1)
+        end
+
         Test.@testset "user kwargs: series vs subplot attributes" begin
             fig = _figure()
             # a mix of series (`color`) and non-series (`size`, `bins`) attributes must
@@ -114,6 +125,32 @@ function test_contract()
             # the data series carries the user label (decorations keep an empty label)
             Test.@test any(s -> s[:label] == "sol", plt.subplots[1].series_list)
             Test.@test any(s -> s[:label] == "", plt.subplots[1].series_list)
+        end
+
+        Test.@testset "user xlabel / title are honoured, ylabel warns (#569)" begin
+            fig = _figure()
+            guide(sp) = sp[:xaxis][:guide]
+            plain = Plotting.render(fig)
+            # the x label of the cells carrying one is replaced, the others stay empty
+            plt = Plotting.render(fig; xlabel="s")
+            for (sp0, sp) in zip(plain.subplots, plt.subplots)
+                Test.@test guide(sp) == (isempty(guide(sp0)) ? "" : "s")
+            end
+            Test.@test any(sp -> guide(sp) == "s", plt.subplots)
+            # a user title becomes the overall title (extra title subplot)
+            ptitle = Plotting.render(fig; title="T")
+            Test.@test length(ptitle.subplots) == 4
+            Test.@test ptitle.attr[:plot_title] == "T"
+            # ylabel is ignored with a warning
+            plt_y = Test.@test_logs (:warn, r"`ylabel` is ignored") Plotting.render(
+                fig; ylabel="y"
+            )
+            Test.@test [sp[:yaxis][:guide] for sp in plt_y.subplots] ==
+                [sp[:yaxis][:guide] for sp in plain.subplots]
+            # renderer-owned keys warn too
+            Test.@test_logs (:warn, r"`titlefont`") Plotting.render(fig; titlefont=10)
+            # no warning when nothing is ignored
+            Test.@test_logs Plotting.render(fig; xlabel="s", title="T")
         end
 
         Test.@testset "a user label turns the legend on for a :split cell" begin

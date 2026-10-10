@@ -6,6 +6,23 @@ All notable changes to CTBase will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🐛 Bug Fixes
+
+- `plot`/`render` no longer drop `title`, `xlabel` and `ylabel` silently
+  ([#569](https://github.com/control-toolbox/CTBase.jl/issues/569)), in both the
+  Plots and Makie backends: `xlabel` replaces the x label of the cells that carry
+  one, `title` replaces the overall figure title, and `ylabel` (one name per
+  component) is ignored with a warning. The Plots renderer also warns about the
+  renderer-owned `subplot`, `titlefont` and `guidefontsize` keywords.
+  `render!` (the overlay behind `plot!`) leaves the axes untouched, so it warns that
+  `title`, `xlabel` and `ylabel` are ignored.
+
+### ✅ Compatibility
+
+- `xlabel` and `title` keywords that were previously ignored now take effect.
+
 ## [0.30.6] - 2026-10-09
 
 ### 🐛 Bug Fixes
