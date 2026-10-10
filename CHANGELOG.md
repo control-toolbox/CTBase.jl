@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.7] - 2026-10-10
+
 ### 🐛 Bug Fixes
 
 - `plot`/`render` no longer drop `title`, `xlabel` and `ylabel` silently
@@ -22,6 +24,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✅ Compatibility
 
 - `xlabel` and `title` keywords that were previously ignored now take effect.
+  **No breaking changes**: no public signature, type, or name changes.
+
+### 📚 Documentation
+
+- Require DocumenterVitepress 0.3.5 for ANSI `@repl` support and document the
+  `@repl`, `@example` and `@ansi` roles in the color-system guide
+  ([#576](https://github.com/control-toolbox/CTBase.jl/pull/576)).
+
+### ⚙️ Internal / CI
+
+- Aligned the CI workflow with OptimalControl.jl: job renamed `test-cpu-github`,
+  explicit `runner_type: 'github'`, and trigger label renamed from `run ci` to
+  `run ci github-runner`. The CTBase-specific `test-selection-smoke` job is kept
+  ([#575](https://github.com/control-toolbox/CTBase.jl/pull/575)).
 
 ## [0.30.6] - 2026-10-09
 
