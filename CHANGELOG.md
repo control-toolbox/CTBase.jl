@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ Features
+
+- **Structured error when the package of an AD backend is not loaded**
+  ([CTFlows#436](https://github.com/control-toolbox/CTFlows.jl/issues/436)): the
+  gradient methods of the `CTBaseDifferentiationInterface` extension (and the new
+  `Differentiation.check_backend(backend)`, callable to fail early) throw a
+  `CTBase.Exceptions.ExtensionError` naming the package (`Missing Mooncake`,
+  `Hint: using Mooncake`) instead of a raw `MethodError` from
+  DifferentiationInterface.jl (`_prepare_pullback_aux`, `_prepare_pushforward_aux`),
+  e.g. `AutoMooncake()` without `using Mooncake`, or the default `AutoForwardDiff()`
+  without `using ForwardDiff`. Sparse and second-order backends are checked through
+  their inner backends. The check is a compile-time constant for a concrete backend:
+  no allocation on the hot path (guarded in `test_performance.jl`).
+
+### ✅ Compatibility
+
+- **No breaking changes**: one new exported function, `Differentiation.check_backend`;
+  a call that used to fail with a `MethodError` now fails with an `ExtensionError`.
+
 ## [0.30.7] - 2026-10-10
 
 ### 🐛 Bug Fixes

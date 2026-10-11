@@ -37,6 +37,9 @@ using CTBase: Data
 using CTBase: Traits
 using CTBase: Interpolation
 using CTBase: Differentiation
+using ADTypes: ADTypes
+using ForwardDiff: ForwardDiff
+using DifferentiationInterface: DifferentiationInterface  # loads the CTBase DI extension
 
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
@@ -105,6 +108,12 @@ function test_performance()
             backend = Differentiation.DifferentiationInterface()
             Test.@test (BenchmarkTools.@ballocated Differentiation.ad_backend($backend)) ==
                 0
+
+            # the availability check of a gradient call is free for a concrete backend
+            di = Differentiation.DifferentiationInterface(;
+                ad_backend=ADTypes.AutoForwardDiff()
+            )
+            Test.@test (BenchmarkTools.@ballocated Differentiation.check_backend($di)) == 0
         end
     end
     return nothing
