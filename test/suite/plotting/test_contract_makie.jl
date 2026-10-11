@@ -212,8 +212,9 @@ function test_contract_makie()
             end
             Test.@test any(a -> a.xlabel[] == "s", _axes(f))
             # a user title becomes the overall title (one spanning Label)
-            Test.@test _n_labels(Plotting.render(Plotting.MakieBackend(), fig; title="T")) ==
-                1
+            Test.@test _n_labels(
+                Plotting.render(Plotting.MakieBackend(), fig; title="T")
+            ) == 1
             # ylabel is ignored with a warning
             g = Test.@test_logs (:warn, r"`ylabel` is ignored") Plotting.render(
                 Plotting.MakieBackend(), fig; ylabel="y"
