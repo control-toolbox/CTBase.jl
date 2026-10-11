@@ -264,6 +264,34 @@ function ad_backend(backend::AbstractADBackend)
     )
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Check that the package behind the AD backend of `backend` is loaded, so that a missing
+backend package is reported by a structured error instead of a raw `MethodError` from deep
+inside DifferentiationInterface.jl at the first gradient call.
+
+The default method does nothing. The `CTBaseDifferentiationInterface` extension adds the
+method for [`CTBase.Differentiation.DifferentiationInterface`](@extref), which is also called
+by every gradient method of the extension: the check is a compile-time constant for a
+concrete backend, hence free on a hot path. Call it explicitly to fail early, before a long
+computation (e.g. before an integration).
+
+# Arguments
+- `backend::AbstractADBackend`: The AD backend strategy.
+
+# Returns
+- `nothing`.
+
+# Throws
+- `CTBase.Exceptions.ExtensionError`: If the package of the wrapped backend is not loaded
+  (e.g. `AutoMooncake()` without `using Mooncake`, `AutoForwardDiff()` without
+  `using ForwardDiff`). The error names the package.
+
+See also: [`CTBase.Differentiation.ad_backend`](@extref).
+"""
+check_backend(::AbstractADBackend) = nothing
+
 # =============================================================================
 # Extension contract — gradient and derivative methods
 # =============================================================================

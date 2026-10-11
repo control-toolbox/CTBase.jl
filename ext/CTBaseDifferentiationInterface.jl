@@ -15,9 +15,75 @@ This extension provides:
 module CTBaseDifferentiationInterface
 
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ADTypes: ADTypes
 using CTBase: Data
 using CTBase: Differentiation
+using CTBase: Exceptions
 using DifferentiationInterface: DifferentiationInterface as DI
+
+# ==============================================================================
+# Availability of the AD backend package
+# ==============================================================================
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the first leaf backend of `ad` whose package is not loaded, or `nothing` if all are.
+
+`DI.check_available` is `false` until the extension of DifferentiationInterface.jl for the
+backend package is loaded (e.g. `AutoMooncake()` without `using Mooncake`); the call
+`DI.gradient(f, ad, x)` then fails with a raw `MethodError`. A `SecondOrder` backend is
+checked on its outer then inner backends, a sparse backend on its dense one.
+
+See also: [`CTBase.Differentiation.check_backend`](@extref).
+"""
+_unavailable(ad::DI.SecondOrder) = something(
+    _unavailable(DI.outer(ad)), _unavailable(DI.inner(ad)), Some(nothing)
+)
+_unavailable(ad::ADTypes.AbstractADType) =
+    DI.check_available(ad) ? nothing : ADTypes.dense_ad(ad)
+
+"""
+$(TYPEDSIGNATURES)
+
+Name of the package providing the ADTypes backend `ad`: the name of its type without the
+`Auto` prefix (`AutoMooncake` → `:Mooncake`, `AutoPolyesterForwardDiff` →
+`:PolyesterForwardDiff`).
+"""
+function _backend_package(ad::ADTypes.AbstractADType)
+    name = String(nameof(typeof(ad)))
+    return Symbol(startswith(name, "Auto") ? name[5:end] : name)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Throw an [`CTBase.Exceptions.ExtensionError`](@extref) if the package of the AD backend of
+`backend` is not loaded (see [`CTBase.Differentiation.check_backend`](@extref)).
+"""
+function Differentiation.check_backend(backend::Differentiation.DifferentiationInterface)
+    missing_ad = _unavailable(Differentiation.ad_backend(backend))
+    missing_ad === nothing && return nothing
+    throw(
+        Exceptions.ExtensionError(
+            _backend_package(missing_ad);
+            message="to use the $(nameof(typeof(missing_ad))) AD backend",
+            feature="automatic differentiation with $(missing_ad)",
+            context="CTBase.Differentiation",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+The ADTypes backend of `backend`, after checking that its package is loaded. The check is a
+compile-time constant for a concrete backend type.
+"""
+function _checked_backend(backend::Differentiation.DifferentiationInterface)
+    Differentiation.check_backend(backend)
+    return Differentiation.ad_backend(backend)
+end
 
 # ==============================================================================
 # Differentiation.hamiltonian_gradient / variable_gradient
@@ -69,7 +135,7 @@ function Differentiation.hamiltonian_gradient(
     p,
     v,
 )
-    di_backend = Differentiation.ad_backend(backend)
+    di_backend = _checked_backend(backend)
     h_x(x_) = h(t, x_, p, v)
     h_p(p_) = h(t, x, p_, v)
     grad_x = _derivator(typeof(x))(h_x, di_backend, x)
@@ -95,7 +161,7 @@ function Differentiation.variable_gradient(
     p,
     v,
 )
-    di_backend = Differentiation.ad_backend(backend)
+    di_backend = _checked_backend(backend)
     h_v(v_) = h(t, x, p, v_)
     return _derivator(typeof(v))(h_v, di_backend, v)
 end
@@ -137,7 +203,7 @@ function Differentiation.pseudo_hamiltonian_gradient(
     u,
     v,
 )
-    di_backend = Differentiation.ad_backend(backend)
+    di_backend = _checked_backend(backend)
     h̃_x(x_) = h̃(t, x_, p, u, v)
     h̃_p(p_) = h̃(t, x, p_, u, v)
     grad_x = _derivator(typeof(x))(h̃_x, di_backend, x)
@@ -176,7 +242,7 @@ function Differentiation.pseudo_hamiltonian_control_gradient(
     u,
     v,
 )
-    di_backend = Differentiation.ad_backend(backend)
+    di_backend = _checked_backend(backend)
     h̃_u(u_) = h̃(t, x, p, u_, v)
     grad_u = _derivator(typeof(u))(h̃_u, di_backend, u)
     return grad_u
@@ -204,7 +270,7 @@ function Differentiation.pseudo_variable_gradient(
     u,
     v,
 )
-    di_backend = Differentiation.ad_backend(backend)
+    di_backend = _checked_backend(backend)
     h̃_v(v_) = h̃(t, x, p, u, v_)
     return _derivator(typeof(v))(h̃_v, di_backend, v)
 end
@@ -232,7 +298,7 @@ Compute the gradient of a scalar function using DifferentiationInterface.jl.
 function Differentiation.gradient(
     backend::Differentiation.DifferentiationInterface, f::Function, x::AbstractArray
 )
-    ad = Differentiation.ad_backend(backend)
+    ad = _checked_backend(backend)
     return DI.gradient(f, ad, x)
 end
 
@@ -255,7 +321,7 @@ Compute the gradient of a scalar function using DifferentiationInterface.jl (sca
 function Differentiation.gradient(
     backend::Differentiation.DifferentiationInterface, f::Function, x::Real
 )
-    ad = Differentiation.ad_backend(backend)
+    ad = _checked_backend(backend)
     return DI.derivative(f, ad, x)
 end
 
@@ -278,7 +344,7 @@ Compute the derivative of a scalar function using DifferentiationInterface.jl.
 function Differentiation.derivative(
     backend::Differentiation.DifferentiationInterface, g::Function, t::Real
 )
-    ad = Differentiation.ad_backend(backend)
+    ad = _checked_backend(backend)
     return DI.derivative(g, ad, t)
 end
 
@@ -305,7 +371,7 @@ function Differentiation.differentiate(
     active,
     consts::Vararg{Any,N},
 ) where {Slot,N}
-    di = Differentiation.ad_backend(backend)
+    di = _checked_backend(backend)
     f_active(active_) =
         f(ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
     return _derivator(typeof(active))(f_active, di, active)
@@ -330,7 +396,7 @@ function Differentiation.pushforward(
     dx,
     consts::Vararg{Any,N},
 ) where {Slot,N}
-    di = Differentiation.ad_backend(backend)
+    di = _checked_backend(backend)
     f_slot(x_) =
         f(ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
     return only(DI.pushforward(f_slot, di, x, (dx,)))

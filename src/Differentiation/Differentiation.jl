@@ -10,6 +10,8 @@ for computing gradients of scalar Hamiltonian functions.
 
 The module defines an abstract contract `AbstractADBackend` with the following methods:
 - `ad_backend(backend)` → the wrapped ADTypes backend (resolved in core)
+- `check_backend(backend)` → throws an `ExtensionError` if the package of the wrapped
+  backend is not loaded (no-op in core, implemented by the extension)
 - `hamiltonian_gradient(backend, h, t, x, p, v)` → (∂H/∂x, ∂H/∂p)
 - `variable_gradient(backend, h, t, x, p, v)` → ∂H/∂v
 - `pseudo_hamiltonian_gradient(backend, h̃, t, x, p, u, v)` → (∂H̃/∂x, ∂H̃/∂p)
@@ -42,6 +44,7 @@ together with `CTBase`.
 - `AbstractADBackend`
 - `DifferentiationInterface`
 - `ad_backend`
+- `check_backend`
 - `hamiltonian_gradient`
 - `variable_gradient`
 - `gradient`
@@ -76,6 +79,7 @@ include(joinpath(@__DIR__, "differentiation_interface.jl"))
 export AbstractADBackend
 export DifferentiationInterface
 export ad_backend
+export check_backend
 export hamiltonian_gradient
 export pseudo_hamiltonian_gradient
 export pseudo_hamiltonian_control_gradient
