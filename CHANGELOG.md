@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.8] - 2026-10-11
+
 ### ✨ Features
 
 - **Structured error when the package of an AD backend is not loaded**
