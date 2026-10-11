@@ -29,22 +29,18 @@ function _with_xlabel(node::Leaf, xlabel::String)
     ax = node.axes
     isempty(ax.xlabel) && return node
     return Leaf(
-        Axes(
-            ax.title,
-            xlabel,
-            ax.ylabel,
-            ax.series,
-            ax.decorations,
-            ax.legend,
-            ax.ylims,
-        ),
+        Axes(ax.title, xlabel, ax.ylabel, ax.series, ax.decorations, ax.legend, ax.ylims)
     )
 end
 function _with_xlabel(node::HBox, xlabel::String)
-    return HBox(AbstractLayoutNode[_with_xlabel(c, xlabel) for c in node.children], node.weights)
+    return HBox(
+        AbstractLayoutNode[_with_xlabel(c, xlabel) for c in node.children], node.weights
+    )
 end
 function _with_xlabel(node::VBox, xlabel::String)
-    return VBox(AbstractLayoutNode[_with_xlabel(c, xlabel) for c in node.children], node.weights)
+    return VBox(
+        AbstractLayoutNode[_with_xlabel(c, xlabel) for c in node.children], node.weights
+    )
 end
 
 """
@@ -71,7 +67,7 @@ function _resolve_labels(fig::Figure; kwargs...)
     title = get(kwargs, :title, nothing)
     haskey(kwargs, :ylabel) && @warn(
         "`ylabel` is ignored: each cell carries its own y label (one per component). " *
-        "Change it after rendering with the backend API (e.g. `ylabel!(p[i], \"…\")` in Plots).",
+            "Change it after rendering with the backend API (e.g. `ylabel!(p[i], \"…\")` in Plots).",
         ylabel = kwargs[:ylabel],
     )
     root = xlabel === nothing ? fig.root : _with_xlabel(fig.root, string(xlabel))
@@ -97,8 +93,8 @@ function _warn_overlay_labels(; kwargs...)
     ignored = [k for k in _LABEL_KEYS if haskey(kwargs, k)]
     isempty(ignored) || @warn(
         "Keyword(s) $(join(map(k -> "`$k`", ignored), ", ")) are ignored by `render!`: " *
-        "the axes of the existing plot are left untouched. " *
-        "Change the labels with the backend API, or use `render` to build a new figure."
+            "the axes of the existing plot are left untouched. " *
+            "Change the labels with the backend API, or use `render` to build a new figure."
     )
     return nothing
 end

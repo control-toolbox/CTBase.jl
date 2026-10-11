@@ -145,8 +145,7 @@ function test_contract()
             plt_y = Test.@test_logs (:warn, r"`ylabel` is ignored") Plotting.render(
                 fig; ylabel="y"
             )
-            Test.@test [sp[:yaxis][:guide] for sp in plt_y.subplots] ==
-                [sp[:yaxis][:guide] for sp in plain.subplots]
+            Test.@test [sp[:yaxis][:guide] for sp in plt_y.subplots] == [sp[:yaxis][:guide] for sp in plain.subplots]
             # renderer-owned keys warn too
             Test.@test_logs (:warn, r"`titlefont`") Plotting.render(fig; titlefont=10)
             # no warning when nothing is ignored
