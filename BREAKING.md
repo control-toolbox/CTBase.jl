@@ -3,6 +3,13 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.8)
+
+- **Differentiation backend validation**: added `Differentiation.check_backend` and
+  structured `ExtensionError` failures when an AD backend package is not loaded.
+  **No breaking change**: this adds a public helper and replaces a raw `MethodError`
+  with a clearer typed exception. No migration required.
+
 ## Non-breaking note (0.30.7)
 
 - **Plot label keywords and CI**: `plot`/`render` now honour `xlabel` and `title`
