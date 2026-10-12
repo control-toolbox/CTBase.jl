@@ -76,9 +76,12 @@ function test_backend_available()
             Test.@test EXT._unavailable(ADTypes.AutoSparse(fd)) === nothing
             Test.@test EXT._unavailable(ADTypes.AutoSparse(fake)) === fake
             # a second-order backend: outer first, then inner
-            Test.@test EXT._unavailable(DifferentiationInterface.SecondOrder(fd, fd)) === nothing
-            Test.@test EXT._unavailable(DifferentiationInterface.SecondOrder(fake, fd)) === fake
-            Test.@test EXT._unavailable(DifferentiationInterface.SecondOrder(fd, fake)) === fake
+            Test.@test EXT._unavailable(DifferentiationInterface.SecondOrder(fd, fd)) ===
+                nothing
+            Test.@test EXT._unavailable(DifferentiationInterface.SecondOrder(fake, fd)) ===
+                fake
+            Test.@test EXT._unavailable(DifferentiationInterface.SecondOrder(fd, fake)) ===
+                fake
         end
 
         # ======================================================================
@@ -93,7 +96,12 @@ function test_backend_available()
             Test.@test Differentiation.check_backend(b) === nothing
             Test.@test EXT._checked_backend(b) === ADTypes.AutoForwardDiff()
             Test.@test Differentiation.hamiltonian_gradient(
-                b, Data.Hamiltonian((x, p) -> sum(x .* p)), 0.0, [1.0, 2.0], [3.0, 4.0], nothing
+                b,
+                Data.Hamiltonian((x, p) -> sum(x .* p)),
+                0.0,
+                [1.0, 2.0],
+                [3.0, 4.0],
+                nothing,
             )[1] ≈ [3.0, 4.0]
         end
 
@@ -109,7 +117,11 @@ function test_backend_available()
         end
 
         Test.@testset "Error: the leaf backend of a composite is the one reported" begin
-            b = _di(DifferentiationInterface.SecondOrder(ADTypes.AutoForwardDiff(), AutoFakeBackend()))
+            b = _di(
+                DifferentiationInterface.SecondOrder(
+                    ADTypes.AutoForwardDiff(), AutoFakeBackend()
+                ),
+            )
             err = _error_of(() -> Differentiation.check_backend(b))
             Test.@test err isa Exceptions.ExtensionError
             Test.@test err.weakdeps == (:FakeBackend,)
@@ -118,11 +130,18 @@ function test_backend_available()
         # ======================================================================
         # ERROR — every gradient method of the extension checks the backend
         # ======================================================================
-        Test.@testset "Error: $name throws ExtensionError, not MethodError" for (name, call) in (
+        Test.@testset "Error: $name throws ExtensionError, not MethodError" for (
+            name, call
+        ) in (
             (
                 "hamiltonian_gradient",
                 b -> Differentiation.hamiltonian_gradient(
-                    b, Data.Hamiltonian((x, p) -> sum(x .* p)), 0.0, [1.0], [2.0], nothing
+                    b,
+                    Data.Hamiltonian((x, p) -> sum(x .* p)),
+                    0.0,
+                    [1.0],
+                    [2.0],
+                    nothing,
                 ),
             ),
             (
@@ -130,32 +149,54 @@ function test_backend_available()
                 b -> Differentiation.variable_gradient(
                     b,
                     Data.Hamiltonian((x, p, v) -> sum(x .* p) * v; is_variable=true),
-                    0.0, [1.0], [2.0], 3.0,
+                    0.0,
+                    [1.0],
+                    [2.0],
+                    3.0,
                 ),
             ),
             (
                 "pseudo_hamiltonian_gradient",
                 b -> Differentiation.pseudo_hamiltonian_gradient(
-                    b, Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + sum(u .^ 2)),
-                    0.0, [1.0], [2.0], [3.0], nothing,
+                    b,
+                    Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + sum(u .^ 2)),
+                    0.0,
+                    [1.0],
+                    [2.0],
+                    [3.0],
+                    nothing,
                 ),
             ),
             (
                 "pseudo_hamiltonian_control_gradient",
                 b -> Differentiation.pseudo_hamiltonian_control_gradient(
-                    b, Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + sum(u .^ 2)),
-                    0.0, [1.0], [2.0], [3.0], nothing,
+                    b,
+                    Data.PseudoHamiltonian((x, p, u) -> sum(x .* p) + sum(u .^ 2)),
+                    0.0,
+                    [1.0],
+                    [2.0],
+                    [3.0],
+                    nothing,
                 ),
             ),
             (
                 "pseudo_variable_gradient",
                 b -> Differentiation.pseudo_variable_gradient(
                     b,
-                    Data.PseudoHamiltonian((x, p, u, v) -> sum(x .* p) * v; is_variable=true),
-                    0.0, [1.0], [2.0], [3.0], 4.0,
+                    Data.PseudoHamiltonian(
+                        (x, p, u, v) -> sum(x .* p) * v; is_variable=true
+                    ),
+                    0.0,
+                    [1.0],
+                    [2.0],
+                    [3.0],
+                    4.0,
                 ),
             ),
-            ("gradient (array)", b -> Differentiation.gradient(b, x -> sum(abs2, x), [1.0, 2.0])),
+            (
+                "gradient (array)",
+                b -> Differentiation.gradient(b, x -> sum(abs2, x), [1.0, 2.0]),
+            ),
             ("gradient (scalar)", b -> Differentiation.gradient(b, x -> x^2, 2.0)),
             ("derivative", b -> Differentiation.derivative(b, t -> t^2, 2.0)),
             (

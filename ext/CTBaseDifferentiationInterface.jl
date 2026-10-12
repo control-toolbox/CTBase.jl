@@ -37,11 +37,12 @@ checked on its outer then inner backends, a sparse backend on its dense one.
 
 See also: [`CTBase.Differentiation.check_backend`](@extref).
 """
-_unavailable(ad::DI.SecondOrder) = something(
-    _unavailable(DI.outer(ad)), _unavailable(DI.inner(ad)), Some(nothing)
-)
-_unavailable(ad::ADTypes.AbstractADType) =
-    DI.check_available(ad) ? nothing : ADTypes.dense_ad(ad)
+function _unavailable(ad::DI.SecondOrder)
+    return something(_unavailable(DI.outer(ad)), _unavailable(DI.inner(ad)), Some(nothing))
+end
+function _unavailable(ad::ADTypes.AbstractADType)
+    return DI.check_available(ad) ? nothing : ADTypes.dense_ad(ad)
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -64,7 +65,7 @@ Throw an [`CTBase.Exceptions.ExtensionError`](@extref) if the package of the AD 
 function Differentiation.check_backend(backend::Differentiation.DifferentiationInterface)
     missing_ad = _unavailable(Differentiation.ad_backend(backend))
     missing_ad === nothing && return nothing
-    throw(
+    return throw(
         Exceptions.ExtensionError(
             _backend_package(missing_ad);
             message="to use the $(nameof(typeof(missing_ad))) AD backend",
