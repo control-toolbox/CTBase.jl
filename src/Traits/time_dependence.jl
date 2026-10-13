@@ -17,7 +17,7 @@ objects at the type level, enabling dispatch and compile-time optimisations.
 
 See also: [`CTBase.Traits.Autonomous`](@extref), [`CTBase.Traits.NonAutonomous`](@extref).
 """
-abstract type TimeDependence end
+abstract type TimeDependence <: AbstractTrait end
 
 """
 $(TYPEDEF)

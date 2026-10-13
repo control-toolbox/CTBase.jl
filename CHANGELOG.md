@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Fixed
+
+- `Traits.TimeDependence` now subtypes `Traits.AbstractTrait`, like every other trait
+  family (#586). Only a supertype is added; no existing `<:` relation changes.
+
 ### 📚 Documentation
 
 - Documentation audit and refresh: the Differentiation guide documents `check_backend`
