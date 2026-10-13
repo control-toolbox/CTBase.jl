@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Fixed
+
+- `Traits.TimeDependence` now subtypes `Traits.AbstractTrait`, like every other trait
+  family (#586). Only a supertype is added; no existing `<:` relation changes.
+
+### 📚 Documentation
+
+- Color System guide: the "Documenting Colored Output" section is replaced by a pointer to
+  `docs/README.md` and the Handbook, which hold the single copy of the `@repl`/`@ansi` rule (#588).
+
+### ✅ Compatibility
+
+- **No breaking changes**: the pending trait and documentation updates do not change the
+  public API incompatibly.
+
 ## [0.30.9] - 2026-10-13
 
 ### 📚 Documentation

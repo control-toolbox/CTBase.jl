@@ -186,7 +186,7 @@ mode and dynamics are fixed by the concrete type.
     — never instantiated. All other tags (`Fixed`/`NonFixed`, `ControlFree`/`WithControl`,
     `InPlace`/`OutOfPlace`, …) are **concrete** empty singletons. In practice every tag
     is compared as a type (`control_dependence(obj) === Traits.ControlFree`), so the
-    two forms are used interchangeably; the distinction is historical, not semantic.
+    two forms are used interchangeably.
 
 ## The trait contract — two templates
 
