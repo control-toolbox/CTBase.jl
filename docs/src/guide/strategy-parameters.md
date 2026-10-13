@@ -127,8 +127,7 @@ function Strategies.metadata(
             name        = :precision,
             type        = Symbol,
             default     = __fake_default_precision(P),
-            description = "Numerical precision
-                (:float64 for CPU, :float32 for GPU)",
+            description = "Numerical precision (:float64 on CPU, :float32 on GPU)",
             computed    = true,
         ),
         Options.OptionDefinition(
@@ -171,7 +170,34 @@ end
 nothing # hide
 ```
 
-### Step 6 — Instantiate and inspect
+### Step 6 — Declare a default parameter
+
+A parameterized strategy declares which parameter applies when none is given, with
+[`Strategies.default_parameter`](@ref CTBase.Strategies.default_parameter). The
+fallback throws [`CTBase.Exceptions.NotImplemented`](@ref), so every parameterized
+strategy must implement it. The usual idiom then adds a parameter-free constructor and
+a parameter-free `metadata`, both delegating to the default:
+
+```@example params
+Strategies.default_parameter(::Type{<:FakeOptimizer}) = Strategies.CPU
+
+function FakeOptimizer(; mode::Symbol = :strict, kwargs...)
+    P = Strategies.default_parameter(FakeOptimizer)
+    return FakeOptimizer{P}(; mode = mode, kwargs...)
+end
+
+Strategies.metadata(::Type{FakeOptimizer}) =
+    Strategies.metadata(FakeOptimizer{Strategies.default_parameter(FakeOptimizer)})
+nothing # hide
+```
+
+```@example params
+FakeOptimizer()   # FakeOptimizer{CPU}
+```
+
+`describe` also uses `default_parameter` to mark the default in its parameter list.
+
+### Step 7 — Instantiate and inspect
 
 ```@example params
 FakeOptimizer{Strategies.CPU}()
@@ -215,6 +241,14 @@ The registry expands this into one concrete type per parameter. `strategy_ids` d
 
 ```@example params
 Strategies.strategy_ids(AbstractFakeOptimizer, registry)
+```
+
+[`Strategies.available_parameters`](@ref CTBase.Strategies.available_parameters) lists
+the parameters registered for a strategy (an empty vector for a non-parameterized one);
+orchestration uses it to check that the parameter token of a method tuple is supported:
+
+```@example params
+Strategies.available_parameters(:fake_optimizer, AbstractFakeOptimizer, registry)
 ```
 
 ```@example params
@@ -325,12 +359,13 @@ Strategies.describe(:fake_optimizer, registry)
 | Aspect | Description |
 |--------|-------------|
 | **Purpose** | Compile-time specialization of strategy defaults and metadata |
-| **Contract** | Singleton struct + `id` + `description` implementations |
+| **Parameter contract** | Singleton struct + `id` + `description` implementations |
+| **Strategy contract** | `parameter(::Type{<:S{P}}) = P` + `default_parameter(::Type{<:S})` |
 | **Built-in** | `CPU`, `GPU` |
 | **Metadata dispatch** | `metadata(::Type{MyStrategy{P}}) where {P}` |
 | **Registry syntax** | `(MyStrategy, [CPU, GPU])` tuple inside the family tuple |
 | **Builder** | `build_strategy(id, Param, Family, registry; kwargs...)` |
-| **Validation** | `validate_parameter_type`, `is_a_parameter`, `parameter_id` |
+| **Validation** | `validate_parameter_type`, `is_a_parameter`, `parameter_id`, `available_parameters` |
 
 ## Real-world example: DifferentiationInterface
 
@@ -344,4 +379,5 @@ strategy is a real parameterized strategy in CTBase. It is parameterized on
 
 - [Implementing a Strategy](@ref guide-implementing-a-strategy) — Strategy contract and metadata
 - [Options System](@ref guide-options-system) — `OptionDefinition`, `StrategyOptions`
-- `Strategies.AbstractStrategyParameter` — API reference
+- [Orchestration & Routing](@ref guide-orchestration-and-routing) — routing options with a parameter token in the method tuple
+- [`Strategies.AbstractStrategyParameter`](@ref CTBase.Strategies.AbstractStrategyParameter) — API reference
