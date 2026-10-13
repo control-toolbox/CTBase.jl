@@ -55,9 +55,11 @@ CTBase.Descriptions.complete(
 )
 ```
 
-Among all entries that are a superset of the requested symbols, the one with the
-largest overlap is returned (first wins on tie). If no entry matches,
-[`CTBase.Exceptions.AmbiguousDescription`](@ref) is raised:
+When several entries contain all the requested symbols, the **first one in the
+catalogue** wins — the order of the catalogue is a priority order. If no entry
+contains them all, [`CTBase.Exceptions.AmbiguousDescription`](@ref) is raised; the
+error lists the whole catalogue (`Available`) and, when some entries share a symbol
+with the request, the closest matches in its `Hint`:
 
 ```@repl desc
 CTBase.Descriptions.complete(
