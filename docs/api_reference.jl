@@ -136,7 +136,7 @@ function generate_api_reference(src_dir::String)
             filename="options",
             files=src(
                 joinpath("Options", "Options.jl"),
-                joinpath("Options", "not_provided.jl"),
+                joinpath("Options", "not_stored.jl"),
                 joinpath("Options", "option_value.jl"),
                 joinpath("Options", "option_definition.jl"),
                 joinpath("Options", "extraction.jl"),
@@ -214,6 +214,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Plotting", "ir.jl"),
                 joinpath("Plotting", "panel.jl"),
                 joinpath("Plotting", "combinators.jl"),
+                joinpath("Plotting", "labels.jl"),
                 joinpath("Plotting", "lowering.jl"),
                 joinpath("Plotting", "heuristics.jl"),
                 joinpath("Plotting", "contract.jl"),
