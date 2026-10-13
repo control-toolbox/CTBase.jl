@@ -4,7 +4,7 @@
 CurrentModule = CTBase
 ```
 
-This guide explains the Options module — the foundational layer for defining, validating, extracting, and tracking configuration values throughout CTBase. The Options module is generic and has no dependencies on other CTBase modules.
+This guide explains the Options module — the foundational layer for defining, validating, extracting, and tracking configuration values throughout CTBase. The Options module is generic: it knows nothing about strategies and only relies on `Core` (for the `NotProvided` sentinel) and `Exceptions`.
 
 ```@example options
 using CTBase
@@ -132,7 +132,7 @@ opt_np = Options.OptionDefinition(
 )
 ```
 
-When `extract_option` encounters a `NotProvided` default and the user hasn't provided the option, the option is excluded from the result:
+When the user hasn't provided an option whose default is `NotProvided`, `extract_option` returns the internal `NotStored` sentinel instead of an `OptionValue`, and `extract_options` / `build_strategy_options` leave the option out of the result:
 
 ```@example options
 result, remaining = Options.extract_option((other = 42,), opt_np)
@@ -441,7 +441,7 @@ User kwargs                    StrategyMetadata
                        ▼
                  StrategyOptions
         (max_iter=500 :user, tol=1e-6 :user,
-         print_level=5 :default)
+         verbose=false :default)
                        │
                        ▼
                  options_dict
