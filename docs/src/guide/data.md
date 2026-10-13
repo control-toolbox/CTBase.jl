@@ -23,6 +23,7 @@ using LinearAlgebra
 | [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃([t, ]x, p, u[, v])` | — |
 | [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H([t, ]x, p[, v])` | — |
 | [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) | ``\vec{H} : T^*\mathcal{X} \to \mathbb{R}^{2n}`` | `HVF([t, ]x, p[, v])` | ✓ |
+| [`Data.PseudoHamiltonianVectorField`](@ref CTBase.Data.PseudoHamiltonianVectorField) | ``\vec{\tilde{H}} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}^{2n}`` | `H̃VF([t, ]x, p, u[, v])` | ✓ |
 | [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) | ``f_c : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^n`` | `fc([t, ]x, u[, v])` | — |
 | [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField) | ``g : \mathcal{X} \to \mathbb{R}^n`` | `g([t, ]x[, v])` | — |
 | [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) | ``u : \cdots \to \mathcal{U}`` | `u([t, ]⋯[, v])`† | — |
@@ -45,8 +46,9 @@ In the call patterns, brackets `[…]` denote optional arguments controlled by t
 - † `⋯` depends on an additional trait: **feedback** for `ControlLaw` (see below),
   **constraint-kind** for `PathConstraint` (see below).
 
-All ten share the same time-dependence and variable-dependence trait axes.
-`VectorField` and `HamiltonianVectorField` also carry a mutability trait (in-place / out-of-place);
+All eleven share the same time-dependence and variable-dependence trait axes.
+`VectorField`, `HamiltonianVectorField` and `PseudoHamiltonianVectorField` also carry a
+mutability trait (in-place / out-of-place);
 `ControlLaw` carries a feedback trait;
 `PathConstraint` carries a constraint-kind trait (see [Traits](@ref guide-traits)).
 
@@ -140,7 +142,7 @@ h1 = Data.Hamiltonian((x, p) -> dot(p, x))
 h2 = Data.Hamiltonian((t, x, p) -> t * dot(p, x); is_autonomous=false)
 
 # Autonomous, non-fixed: H(x, p, v)
-h3 = Data.Hamiltonian((x, p, v) -> dot(p, x) * v[1]; is_variable=true)
+h3 = Data.Hamiltonian((x, p, v) -> dot(p, x) * v; is_variable=true)  # scalar variable
 
 h1
 ```
@@ -209,15 +211,15 @@ in-place fields, `dpv` is passed as an optional pre-allocated buffer
 
 ```@example data
 # Inner function that implements the variable_costate path.
-# H(x, p, v) = v[1] * dot(p, x)  →  ẋ = v[1]*x,  ṗ = -v[1]*p,  ∂ṗ/∂v[1] = -p
+# H(x, p, v) = v * dot(p, x), scalar variable v  →  ẋ = v*x,  ṗ = -v*p,  ∂ṗ/∂v = -p
 function f_vc(x, p, v; variable_costate=false)
-    dx = v[1] .* x
-    dp = -v[1] .* p
+    dx = v .* x
+    dp = -v .* p
     variable_costate ? (dx, dp, -p) : (dx, dp)
 end
 
 hvf_nf = Data.HamiltonianVectorField(f_vc; is_variable=true)
-v0 = [2.0]
+v0 = 2.0
 
 dx, dp = hvf_nf(x0, p0, v0)                            # returns (ẋ, ṗ)
 (dx, dp)
@@ -274,7 +276,7 @@ ph1 = Data.PseudoHamiltonian((x, p, u) -> dot(p, x) + u^2)
 ph2 = Data.PseudoHamiltonian((t, x, p, u) -> t * dot(p, x) + u^2; is_autonomous=false)
 
 # Autonomous, non-fixed: H̃(x, p, u, v)
-ph3 = Data.PseudoHamiltonian((x, p, u, v) -> dot(p, x) + u^2 + v[1]; is_variable=true)
+ph3 = Data.PseudoHamiltonian((x, p, u, v) -> dot(p, x) + u^2 + v; is_variable=true)
 
 ph1
 ```
@@ -292,6 +294,45 @@ ph2(0.5, x0, p0, u0)               # non-autonomous
 The dynamics trait of a `PseudoHamiltonian` is always
 [`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics), since
 pseudo-Hamiltonians involve both state and costate.
+
+---
+
+## PseudoHamiltonianVectorField
+
+A `PseudoHamiltonianVectorField` is to a
+[`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) what a
+[`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) is to a
+[`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian): it wraps the **already
+differentiated** map, with the control as an explicit argument,
+
+```math
+\vec{\tilde{H}}(t, x, p, u, v) = \bigl(\partial_p \tilde{H},\; -\partial_x \tilde{H}\bigr).
+```
+
+The **natural** out-of-place call is `H̃VF([t, ]x, p, u[, v])` and returns `(ẋ, ṗ)`;
+the **uniform** call is `H̃VF(t, x, p, u, v)`. In-place is supported: the buffers
+`dx, dp` are prepended, giving `H̃VF!(dx, dp, [t, ]x, p, u[, v])`; the mutability is
+auto-detected from the arity, or set with `is_inplace`. As for
+`HamiltonianVectorField`, a non-fixed field accepts the `variable_costate` keyword.
+
+**Construction and call**
+
+```@example data
+# H̃(x, p, u) = p⋅x + u⋅p₁  →  ẋ = x + u e₁,  ṗ = -p
+h̃vf = Data.PseudoHamiltonianVectorField(
+    (x, p, u) -> (x .+ [u, 0.0], -p),
+)
+
+x0, p0, u0 = [1.0, 0.5], [0.3, 0.7], 2.0
+h̃vf(x0, p0, u0)                    # natural call: (ẋ, ṗ)
+```
+
+```@example data
+h̃vf(0.0, x0, p0, u0, nothing)      # uniform call
+```
+
+Its dynamics trait is
+[`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics).
 
 ---
 
@@ -371,7 +412,7 @@ Three user-facing constructors fix the feedback trait:
 
 `OpenLoop` is unconditionally non-autonomous — an open-loop control always
 depends on time, since autonomy is a property of the OCP, not of the control
-(see control-toolbox/CTBase.jl#515). `ClosedLoop`/`DynClosedLoop` keep
+(see [CTBase.jl#515](https://github.com/control-toolbox/CTBase.jl/issues/515)). `ClosedLoop`/`DynClosedLoop` keep
 `is_autonomous` as a real choice.
 
 **Construction**
@@ -447,11 +488,11 @@ Three user-facing constructors fix the constraint kind:
 # State constraint, autonomous, fixed (default): g(x)
 g_state = Data.StateConstraint(x -> x[1])
 
-# Control constraint, autonomous, fixed: g(u)
-g_ctrl = Data.ControlConstraint(u -> u[1])
+# Control constraint (scalar control), autonomous, fixed: g(u)
+g_ctrl = Data.ControlConstraint(u -> u^2)
 
 # Mixed constraint, autonomous, fixed: g(x, u)
-g_mixed = Data.MixedConstraint((x, u) -> x[1] + u[1])
+g_mixed = Data.MixedConstraint((x, u) -> x[1] + u)
 
 # Non-autonomous state constraint: g(t, x)
 g_state_na = Data.StateConstraint((t, x) -> t * x[1]; is_autonomous=false)
@@ -466,7 +507,7 @@ traits) and via a **uniform** signature `g(t, x, u, v)` that ignores unused
 arguments:
 
 ```@example data
-x0, u0 = [1.0, 0.5], [2.0]
+x0, u0 = [1.0, 0.5], 2.0   # one-dimensional control: a scalar
 
 g_state(x0)                    # natural call
 g_state(0.0, x0, u0, nothing)  # uniform call
@@ -678,13 +719,15 @@ The same positional form exists for [`Data.Hamiltonian`](@ref CTBase.Data.Hamilt
 [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian)
 (`PseudoHamiltonian(f, TD, VD)`),
 [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField)
-(`HamiltonianVectorField(f, TD, VD, MD)`), and
+(`HamiltonianVectorField(f, TD, VD, MD)`),
+[`Data.PseudoHamiltonianVectorField`](@ref CTBase.Data.PseudoHamiltonianVectorField)
+(`PseudoHamiltonianVectorField(f, TD, VD, MD)`),
 [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw)
 (`ControlLaw(f, FB, TD, VD)`),
 [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField)
 (`ControlledVectorField(f, TD, VD)`),
 [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint)
-(`PathConstraint(f, K, TD, VD)`),
+(`PathConstraint(f, K, TD, VD)`), and
 [`Data.Multiplier`](@ref CTBase.Data.Multiplier)
 (`Multiplier(f, TD, VD)`).
 
@@ -692,8 +735,8 @@ The same positional form exists for [`Data.Hamiltonian`](@ref CTBase.Data.Hamilt
 
 ## See also
 
-- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField), [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw), [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint), [`Data.Multiplier`](@ref CTBase.Data.Multiplier) — concrete data types.
-- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractControlledVectorField`](@ref CTBase.Data.AbstractControlledVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw), [`Data.AbstractPathConstraint`](@ref CTBase.Data.AbstractPathConstraint), [`Data.AbstractMultiplier`](@ref CTBase.Data.AbstractMultiplier) — abstract supertypes.
+- [`Data.VectorField`](@ref CTBase.Data.VectorField), [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian), [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian), [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField), [`Data.PseudoHamiltonianVectorField`](@ref CTBase.Data.PseudoHamiltonianVectorField), [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField), [`Data.ComposedVectorField`](@ref CTBase.Data.ComposedVectorField), [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw), [`Data.PathConstraint`](@ref CTBase.Data.PathConstraint), [`Data.Multiplier`](@ref CTBase.Data.Multiplier) — concrete data types.
+- [`Data.AbstractVectorField`](@ref CTBase.Data.AbstractVectorField), [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian), [`Data.AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian), [`Data.AbstractHamiltonianVectorField`](@ref CTBase.Data.AbstractHamiltonianVectorField), [`Data.AbstractPseudoHamiltonianVectorField`](@ref CTBase.Data.AbstractPseudoHamiltonianVectorField), [`Data.AbstractControlledVectorField`](@ref CTBase.Data.AbstractControlledVectorField), [`Data.AbstractControlLaw`](@ref CTBase.Data.AbstractControlLaw), [`Data.AbstractPathConstraint`](@ref CTBase.Data.AbstractPathConstraint), [`Data.AbstractMultiplier`](@ref CTBase.Data.AbstractMultiplier) — abstract supertypes.
 - [`Data.pseudo_hamiltonian`](@ref CTBase.Data.pseudo_hamiltonian), [`Data.control_law`](@ref CTBase.Data.control_law), [`Data.controlled_vector_field`](@ref CTBase.Data.controlled_vector_field) — getters for composed types.
-- [Traits](@ref guide-traits) — the three trait axes, the dynamics trait, and call-signature tables.
+- [Traits](@ref guide-traits) — the trait families (time, variable, mutability, feedback, constraint kind, dynamics) carried by these types.
 - [Exceptions](@ref guide-exceptions) — `PreconditionError` and `IncorrectArgument`, raised by the constructors and the `variable_costate` path.
