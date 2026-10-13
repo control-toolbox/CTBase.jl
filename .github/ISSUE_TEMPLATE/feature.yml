@@ -1,0 +1,58 @@
+name: Feature request
+description: Suggest an idea for this project
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of CTBase is concerned?
+      options:
+        - Core
+        - Data
+        - Descriptions
+        - DevTools
+        - Differentiation
+        - Exceptions
+        - Interpolation
+        - Options
+        - Orchestration
+        - Plotting
+        - Strategies
+        - Traits
+        - Unicode
+        - Other / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this solve? Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Breaking change?
+      options:
+        - "No"
+        - "Yes"
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
