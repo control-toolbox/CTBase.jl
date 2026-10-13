@@ -23,7 +23,7 @@ docs/       # Documentation site (DocumenterVitepress)
 
 Design philosophy, operational rules, plan templates, and CI/CD conventions live in the
 [control-toolbox Handbook](https://github.com/control-toolbox/Handbook), vendored as a git
-submodule in `.handbook/` and pinned to a dated tag (`vYYYY.MM.DD`). Read the local files;
+submodule in `.handbook/` and pinned to a SemVer release tag (`vX.Y.Z`). Read the local files;
 if `.handbook/` is empty, run `git submodule update --init`.
 
 | Topic | Link |

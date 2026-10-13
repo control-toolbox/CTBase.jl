@@ -17,6 +17,6 @@ If you want to ask a question, feel free to start a discussion [here](https://gi
 
 ## Developer Resources
 
-The [control-toolbox Handbook](https://github.com/control-toolbox/Handbook) (philosophy, rules, plan template, CI/CD conventions) is a git submodule in `.handbook/`, pinned to a dated tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` in an existing clone.
+The [control-toolbox Handbook](https://github.com/control-toolbox/Handbook) (philosophy, rules, plan template, CI/CD conventions) is a git submodule in `.handbook/`, pinned to a SemVer release tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` in an existing clone.
 
 To bump it, run `git -C .handbook fetch --tags && git -C .handbook checkout <tag>`, then commit the updated pointer.
