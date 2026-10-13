@@ -7,7 +7,7 @@ CurrentModule = CTBase
 This guide explains the Options module — the foundational layer for defining, validating, extracting, and tracking configuration values throughout CTBase. The Options module is generic: it knows nothing about strategies and only relies on `Core` (for the `NotProvided` sentinel) and `Exceptions`.
 
 ```@example options
-using CTBase
+using CTBase: CTBase
 nothing # hide
 ```
 

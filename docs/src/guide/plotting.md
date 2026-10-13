@@ -5,7 +5,7 @@ CurrentModule = CTBase
 ```
 
 ```@setup plot
-using Plots
+using Plots: Plots
 ```
 
 The [`CTBase.Plotting`](@ref) submodule is a generic, domain-free plotting engine.
@@ -45,7 +45,7 @@ a neutral style vocabulary (`color`, `linewidth`, `linestyle`, `alpha`, `seriest
 backend-specific attributes.
 
 ```@example plot
-using CTBase
+using CTBase: CTBase
 
 s = CTBase.Plotting.Series(
     [0.0, 1.0, 2.0],

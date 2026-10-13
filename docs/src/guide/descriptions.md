@@ -8,7 +8,7 @@ A *description* is a [`CTBase.Descriptions.Description`](@ref) — a `Tuple` of 
 that declaratively encodes an algorithm or configuration.
 
 ```@repl desc
-using CTBase
+using CTBase: CTBase
 
 d = (:descent, :bfgs, :bisection)
 typeof(d) <: CTBase.Descriptions.Description

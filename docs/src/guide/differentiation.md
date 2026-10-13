@@ -20,8 +20,8 @@ AD package directly.
 using CTBase: Differentiation, Data, Strategies
 # Loading DifferentiationInterface (+ an AD package) activates the extension
 # that provides the actual differentiation methods.
-using DifferentiationInterface
-using ForwardDiff
+using DifferentiationInterface: DifferentiationInterface
+using ForwardDiff: ForwardDiff
 using ADTypes: ADTypes
 ```
 

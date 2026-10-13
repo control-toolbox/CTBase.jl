@@ -55,7 +55,7 @@ or configuration. Catalogues collect known descriptions; `complete` resolves a p
 description to an exact one.
 
 ```@repl walkthrough
-using CTBase
+using CTBase: CTBase
 
 # Build a catalogue
 descs = CTBase.Descriptions.add((), (:euler, :explicit))

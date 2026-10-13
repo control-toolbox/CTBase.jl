@@ -12,7 +12,7 @@ The Unicode subscript digits start at codepoint U+2080 for '0' and continue sequ
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.ctindice(3)
+julia> CTBase.Unicode.ctindice(3)
 '₃': Unicode U+2083 (category No: Number, other)
 ```
 """
@@ -53,7 +53,7 @@ Throws an `CTBase.Exceptions.IncorrectArgument` if `i` is negative.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.ctindices(123)
+julia> CTBase.Unicode.ctindices(123)
 "₁₂₃"
 ```
 """

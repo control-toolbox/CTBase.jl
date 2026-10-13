@@ -15,7 +15,7 @@ execution.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.__display()
+julia> CTBase.Core.__display()
 true
 ```
 """

@@ -223,7 +223,7 @@ function generate_api_reference(src_dir::String)
     ]
 
     pages = [
-        CTBase.automatic_reference_documentation(;
+        CTBase.DevTools.automatic_reference_documentation(;
             subdirectory="api",
             primary_modules=[cfg.mod => cfg.files],
             exclude=EXCLUDE_SYMBOLS,
@@ -287,7 +287,7 @@ function generate_api_reference(src_dir::String)
 
     push!(
         pages,
-        CTBase.automatic_reference_documentation(;
+        CTBase.DevTools.automatic_reference_documentation(;
             subdirectory="api",
             primary_modules=internals_modules,
             external_modules_to_document=[CTBase],

@@ -51,7 +51,7 @@ It provides the **base layer** shared by all packages: common types, structured 
 - **[Orchestration & Routing](guide/orchestration-and-routing.md)** — routing options to strategies with disambiguation.
 - **[Differentiation](guide/differentiation.md)** — AD-backend strategies and differentiation primitives (extension-backed).
 - **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.DevTools.run_tests`.
-- **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.postprocess_coverage`.
+- **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.DevTools.postprocess_coverage`.
 - **[API Documentation](guide/api-documentation.md)** — auto-generating per-module API pages.
 - **[Color System](guide/color-system.md)** — semantic color roles, built-in themes, and runtime customization.
 - **[Interpolation](guide/interpolation.md)** — linear and piecewise-constant interpolation with flat extrapolation.

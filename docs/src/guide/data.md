@@ -11,7 +11,7 @@ it depends on an extra variable, and whether it is evaluated in-place.
 
 ```@setup data
 using CTBase: Data, Traits
-using LinearAlgebra
+using LinearAlgebra: dot
 ```
 
 ## Overview

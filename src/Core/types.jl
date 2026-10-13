@@ -9,7 +9,7 @@ that accept real-valued quantities.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.ctNumber === Real
+julia> CTBase.Core.ctNumber === Real
 true
 ```
 """

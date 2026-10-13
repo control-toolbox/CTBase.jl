@@ -15,7 +15,7 @@ Remove symbols from a description tuple.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.remove((:a, :b, :c), (:a,))
+julia> CTBase.Descriptions.remove((:a, :b, :c), (:a,))
 (:b, :c)
 ```
 

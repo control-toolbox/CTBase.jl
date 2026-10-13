@@ -70,7 +70,7 @@ CTBase.Exceptions.IncorrectArgument <: CTBase.Exceptions.CTException
 Adding a duplicate description:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 algorithms = CTBase.Descriptions.add((), (:a, :b))
 CTBase.Descriptions.add(algorithms, (:a, :b))  # Error: duplicate
 
@@ -79,7 +79,7 @@ CTBase.Descriptions.add(algorithms, (:a, :b))  # Error: duplicate
 Using invalid indices for the Unicode helpers:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 CTBase.Unicode.ctindice(-1)  # Error: must be between 0 and 9
 ```
 
@@ -105,7 +105,7 @@ valid description.
 **Example**:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 D = ((:a, :b), (:a, :b, :c), (:b, :c))
 CTBase.Descriptions.complete(:f; descriptions=D)  # Error: no match found
 
@@ -242,7 +242,7 @@ CTBase.Exceptions.ParsingError <: CTBase.Exceptions.CTException
 **Example**:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 throw(CTBase.Exceptions.ParsingError(
     "unexpected token 'end'",
     location="line 42, column 10",
@@ -283,7 +283,7 @@ end
 The enriched display automatically suggests:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 throw(CTBase.Exceptions.ExtensionError(
     :Plots,
     feature="result visualization",
@@ -319,7 +319,7 @@ fails to complete successfully or returns an error code.
 **Example**:
 
 ```@example solver-failure
-using CTBase
+using CTBase: CTBase
 function integrate_ode(system, integrator)
     result = solve(system, integrator)
     if result.retcode != :Success

@@ -8,7 +8,7 @@ This guide explains how to set up automated API reference documentation generati
 
 ## Overview
 
-The `DocumenterReference` extension provides the [`CTBase.automatic_reference_documentation`](@ref) function, which automatically generates API reference pages from your Julia source code. It:
+The `DocumenterReference` extension provides the [`CTBase.DevTools.automatic_reference_documentation`](@ref) function, which automatically generates API reference pages from your Julia source code. It:
 
 - Extracts docstrings from your modules
 - Separates public and private APIs
@@ -33,20 +33,20 @@ docs/
 
 The documentation generation happens in two stages:
 
-- **`api_reference.jl`**: Defines `generate_api_reference()` which calls `CTBase.automatic_reference_documentation()` for each module.
+- **`api_reference.jl`**: Defines `generate_api_reference()` which calls `CTBase.DevTools.automatic_reference_documentation()` for each module.
 - **`make.jl`**: Calls `with_api_reference()` which executes the generation and passes the pages to `Documenter.makedocs()`.
 
 ## Setting Up API Documentation
 
 ### Basic Configuration
 
-The core function is `CTBase.automatic_reference_documentation()`. Here's a minimal example:
+The core function is `CTBase.DevTools.automatic_reference_documentation()`. Here's a minimal example:
 
 ```julia
-using CTBase
-using Documenter
+using CTBase: CTBase
+using Documenter: Documenter
 
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     subdirectory=".",
     primary_modules=[MyModule => ["src/MyModule.jl"]],
     title="MyModule API",
@@ -83,7 +83,7 @@ The `public` and `private` flags control which symbols are documented:
 #### Option 1: Public API Only (`public=true, private=false`)
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public=true,
     private=false,
@@ -97,7 +97,7 @@ CTBase.automatic_reference_documentation(;
 #### Option 2: Private API Only (`public=false, private=true`)
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public=false,
     private=true,
@@ -111,7 +111,7 @@ CTBase.automatic_reference_documentation(;
 #### Option 3: Both Public and Private (`public=true, private=true`)
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public=true,
     private=true,
@@ -139,7 +139,7 @@ By default, the system automatically generates appropriate titles based on the p
 Override the default titles with custom text:
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public=false,
     private=true,
@@ -155,7 +155,7 @@ CTBase.automatic_reference_documentation(;
 Customize the introductory text that appears below the title:
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public=true,
     private=false,
@@ -177,7 +177,7 @@ CTBase.automatic_reference_documentation(;
 When generating split pages, you can customize both public and private titles:
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public=true,
     private=true,
@@ -196,7 +196,7 @@ CTBase.automatic_reference_documentation(;
 If you pass empty strings (the default), the system uses the standard titles and descriptions:
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     # ...
     public_title="",        # Uses default: "Public API"
     private_title="",       # Uses default: "Private API"
@@ -218,7 +218,7 @@ MyExtension = Base.get_extension(MyPackage, :MyExtension)
 if !isnothing(MyExtension)
     push!(
         pages,
-        CTBase.automatic_reference_documentation(;
+        CTBase.DevTools.automatic_reference_documentation(;
             subdirectory=".",
             primary_modules=[MyExtension => ["ext/MyExtension.jl"]],
             external_modules_to_document=[MyPackage],
@@ -235,8 +235,8 @@ end
 In `docs/make.jl`, use `with_api_reference()` (a helper defined in your own `docs/api_reference.jl`) to integrate the generated pages:
 
 ```julia
-using Documenter
-using CTBase
+using Documenter: Documenter
+using CTBase: CTBase
 
 include("api_reference.jl")
 
@@ -281,7 +281,7 @@ function generate_api_reference(src_dir)
     pages = []
     
     # Main module
-    push!(pages, CTBase.automatic_reference_documentation(;
+    push!(pages, CTBase.DevTools.automatic_reference_documentation(;
         subdirectory=".",
         primary_modules=[MyPackage => [joinpath(src_dir, "MyPackage.jl")]],
         title="MyPackage API",
@@ -295,7 +295,7 @@ function generate_api_reference(src_dir)
     ]
         ext = Base.get_extension(MyPackage, ext_name)
         if !isnothing(ext)
-            push!(pages, CTBase.automatic_reference_documentation(;
+            push!(pages, CTBase.DevTools.automatic_reference_documentation(;
                 subdirectory=".",
                 primary_modules=[ext => ext_files],
                 external_modules_to_document=[MyPackage],
@@ -313,7 +313,7 @@ end
 
 ```julia
 # Public API for users
-push!(pages, CTBase.automatic_reference_documentation(;
+push!(pages, CTBase.DevTools.automatic_reference_documentation(;
     subdirectory=".",
     primary_modules=[MyPackage],
     public=true,
@@ -323,7 +323,7 @@ push!(pages, CTBase.automatic_reference_documentation(;
 ))
 
 # Private API for developers
-push!(pages, CTBase.automatic_reference_documentation(;
+push!(pages, CTBase.DevTools.automatic_reference_documentation(;
     subdirectory=".",
     primary_modules=[MyPackage],
     public=false,
@@ -336,7 +336,7 @@ push!(pages, CTBase.automatic_reference_documentation(;
 ### Pattern 3: Filtering Unwanted Symbols
 
 ```julia
-CTBase.automatic_reference_documentation(;
+CTBase.DevTools.automatic_reference_documentation(;
     subdirectory=".",
     primary_modules=[MyPackage],
     exclude=Symbol[
@@ -360,8 +360,8 @@ CTBase.automatic_reference_documentation(;
 
 ```julia
 # In docs/make.jl
-using MyPackage
-using OptionalDependency  # Load the extension
+using MyPackage: MyPackage
+using OptionalDependency: OptionalDependency  # Load the extension
 
 # Now the extension will be available
 const MyExt = Base.get_extension(MyPackage, :MyExt)
@@ -442,7 +442,7 @@ jobs:
       - uses: julia-actions/setup-julia@v1
       - name: Install dependencies
         run: |
-          julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+          julia --project=docs -e 'using Pkg: Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build documentation
         run: julia --project=docs docs/make.jl
       - name: Deploy to GitHub Pages

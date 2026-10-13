@@ -13,7 +13,7 @@ The other digits ⁰ (U+2070) and ⁴ to ⁹ (U+2074 to U+2079) are mostly conti
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.ctupperscript(2)
+julia> CTBase.Unicode.ctupperscript(2)
 '²': Unicode U+00B2 (category No: Number, other)
 ```
 """
@@ -63,7 +63,7 @@ Throws an `CTBase.Exceptions.IncorrectArgument` if `i` is negative.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.ctupperscripts(123)
+julia> CTBase.Unicode.ctupperscripts(123)
 "¹²³"
 ```
 """

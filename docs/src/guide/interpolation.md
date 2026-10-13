@@ -19,7 +19,7 @@ rule is selected at compile time via a trait parameter.
 Outside `[x[1], x[end]]` the value is held flat (clamped to the nearest endpoint):
 
 ```@repl interp
-using CTBase
+using CTBase: CTBase
 
 x = [0.0, 1.0, 2.0, 3.0]
 f = [0.0, 1.0, 0.0, -1.0]

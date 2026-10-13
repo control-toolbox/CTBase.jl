@@ -10,7 +10,7 @@ This guide explains how the Orchestration module routes user-provided keyword ar
     Read [Implementing a Strategy](@ref guide-implementing-a-strategy) first. Orchestration builds on top of the strategy metadata system.
 
 ```@setup routing
-using CTBase
+using CTBase: CTBase
 using CTBase: Options
 using CTBase: Strategies
 using CTBase: Orchestration

@@ -25,16 +25,16 @@ julia> using CTBase
 
 julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c));
 
-julia> CTBase.complete(:a; descriptions=D)
+julia> CTBase.Descriptions.complete(:a; descriptions=D)
 (:a, :b)
 
-julia> CTBase.complete(:a, :c; descriptions=D)
+julia> CTBase.Descriptions.complete(:a, :c; descriptions=D)
 (:a, :b, :c)
 
-julia> CTBase.complete((:a, :c); descriptions=D)
+julia> CTBase.Descriptions.complete((:a, :c); descriptions=D)
 (:a, :b, :c)
 
-julia> CTBase.complete(:a, :z; descriptions=D)
+julia> CTBase.Descriptions.complete(:a, :z; descriptions=D)
 ERROR: AmbiguousDescription → #complete#15, complete.jl:97
 │
 │  cannot find matching description
