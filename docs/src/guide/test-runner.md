@@ -43,9 +43,9 @@ The `runtests.jl` file is the entry point for your test suite. By using [`CTBase
 
 ```julia
 # Load dependencies
-using Test
-using CTBase # Provides run_tests
-using MyPackage # Your package
+using Test: Test
+using CTBase: CTBase # Provides run_tests
+using MyPackage: MyPackage # Your package
 
 # Define where your tests are located
 const TEST_DIR = @__DIR__
@@ -88,33 +88,48 @@ CTBase.DevTools.run_tests(;
 
 ## Writing Test Files
 
-To support the modular execution model, each test file should define a function (typically matching the filename) that contains the tests. This avoids scope pollution and makes the tests easy to invoke programmatically.
+To support the modular execution model, each test file wraps its tests in a **module**
+(so that helpers and fake types never leak between files) and exposes one entry-point
+**function** at the top level, named as `funcname_builder` expects. `run_tests`
+`include`s the file and then calls that function.
 
 ### Example `test/suite/test_utils.jl`
 
 ```julia
-# The function name matches the `funcname_builder` logic in runtests.jl
+module TestUtils
+
+using Test: Test
+using MyPackage: MyPackage
+
 function test_utils()
-    @testset "Utilities" begin
-        @test MyPackage.add(1, 1) == 2
-        @test MyPackage.sub(2, 1) == 1
+    Test.@testset "Utilities" begin
+        Test.@test MyPackage.add(1, 1) == 2
+        Test.@test MyPackage.sub(2, 1) == 1
     end
 end
+
+end # module
+
+# Entry point called by run_tests (matches `funcname_builder` in runtests.jl)
+test_utils() = TestUtils.test_utils()
 ```
+
+Use a unique module name per file (e.g. derived from the file name): including two
+files that define the same module triggers `WARNING: replacing module`.
 
 ## Running Tests
 
 ### Default (all available tests)
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("MyPackage")'
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage")'
 ```
 
 ### Run a specific test group
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["utils"])'
-julia --project -e 'using Pkg; Pkg.test("MyPackage";
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; test_args=["utils"])'
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage";
     test_args=["core", "utils"])'
 ```
 
@@ -140,8 +155,8 @@ Selection arguments starting with `test/` are **automatically stripped**, so the
 
 ```bash
 # These two commands run the same tests:
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; test_args=["suite"])'
-julia --project -e 'using Pkg; Pkg.test("MyPackage";
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; test_args=["suite"])'
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage";
     test_args=["test/suite"])'
 ```
 
@@ -349,22 +364,31 @@ Selection arguments are matched against multiple representations of each candida
 - The basename without extension
 - The basename without `test_` prefix (e.g. `utils`)
 
-### Custom Test Options
+### Shared Test Settings
 
-Pass custom options to your test suite:
+To share settings such as `verbose`/`showtiming` with every test file, define them in a
+small module of `runtests.jl` and read them from the test modules — this is what
+CTBase's own test suite does:
 
 ```julia
 # In runtests.jl
-const VERBOSE = "--verbose" in ARGS
-const SHOWTIMING = "--timing" in ARGS
+module TestData
+const VERBOSE = true
+const SHOWTIMING = true
+end
 
-# In test files
+# In a test module
+const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
+const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
+
 function test_utils()
-    @testset "Utilities" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Utilities" begin
         # tests here
     end
 end
 ```
+
+The fallback values keep a test file runnable on its own, outside `run_tests`.
 
 ## Debugging Test Failures
 
@@ -374,34 +398,19 @@ end
 
 **Error**: `UndefVarError: test_utils not defined`
 
-**Solution**: Ensure your test file exports the test function to the outer scope:
+**Solution**: Ensure your test file exposes the entry point outside its module:
 
 ```julia
 # At the end of test/suite/test_utils.jl
-test_utils() = TestUtils.test_utils()  # Export to outer scope
+test_utils() = TestUtils.test_utils()
 ```
 
 #### Issue: Module conflicts
 
 **Error**: `WARNING: replacing module TestUtils`
 
-**Solution**: Use unique module names for each test file:
-
-```julia
-module TestUtilsModule  # Unique name
-using Test
-using MyPackage
-
-function test_utils()
-    @testset "Utilities" begin
-        # tests
-    end
-end
-
-end # module
-
-test_utils() = TestUtilsModule.test_utils()
-```
+**Solution**: Two test files define the same module name — give each file its own
+(see [Writing Test Files](@ref)).
 
 #### Issue: Tests not discovered
 
@@ -421,13 +430,12 @@ funcname_builder = name -> "run_$(name)_tests"
 
 The progress bar detects `@test` failures by scanning the enclosing testset results before and after eval. If you see a `✓` for a test that should have failed, make sure the test function is wrapped in a `@testset` block so that failures are recorded in the results.
 
-### Debugging with Verbose Output
+### Listing the selected tests
 
-Run tests with verbose output to see detailed information:
+To check which files a selection resolves to without running them, use the dry-run flag:
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("MyPackage";
-    test_args=["--verbose", "utils"])'
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; test_args=["utils", "--dryrun"])'
 ```
 
 ## Best Practices
@@ -443,22 +451,9 @@ julia --project -e 'using Pkg; Pkg.test("MyPackage";
 
 ## Integration with CI/CD
 
-### GitHub Actions Example
-
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
-      - name: Run all tests
-        run: julia --project -e 'using Pkg; Pkg.test()'
-      - name: Run specific test group
-        run: julia --project -e 'using Pkg; Pkg.test(test_args=["core"])'
-```
+CI simply calls `Pkg.test()`: `runtests.jl` receives no arguments and runs every
+available test. In the control-toolbox ecosystem this is done by the centralized
+reusable workflows — see the Handbook's [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md).
 
 ## See Also
 

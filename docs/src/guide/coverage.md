@@ -6,18 +6,18 @@ CurrentModule = CTBase
 
 This guide explains how to generate human-readable and machine-parseable coverage reports using the **CoveragePostprocessing** extension of `CTBase.jl`.
 
-## ⚠️ Prerequisites
+## Prerequisites
 
 **Important**: The `Coverage` package must be available when running `coverage.jl`. The simplest approach is to add it to your test environment:
 
 ```bash
-julia --project=test -e 'using Pkg; Pkg.add("Coverage")'
+julia --project=test -e 'using Pkg: Pkg; Pkg.add("Coverage")'
 ```
 
 Alternatively, install it globally so it is always accessible:
 
 ```bash
-julia -e 'using Pkg; Pkg.add("Coverage")'
+julia -e 'using Pkg: Pkg; Pkg.add("Coverage")'
 ```
 
 ## Setting up Coverage
@@ -31,9 +31,8 @@ To generate actionable coverage reports, we use a dedicated `coverage.jl` script
 # can find dependencies from test/Project.toml.
 pushfirst!(LOAD_PATH, @__DIR__)
 
-using Pkg
-using CTBase # Provides CTBase.postprocess_coverage
-using Coverage
+using CTBase: CTBase
+using Coverage: Coverage  # activates CTBase.DevTools.postprocess_coverage
 
 # This function:
 # 1. Resets the coverage/ directory.
@@ -41,8 +40,9 @@ using Coverage
 # 3. Generates an LCOV file (coverage/lcov.info).
 # 4. Generates a markdown summary (coverage/cov_report.md).
 # 5. Moves .cov files into coverage/cov/.
-CTBase.postprocess_coverage(;
+CTBase.DevTools.postprocess_coverage(;
     root_dir=dirname(@__DIR__),  # Point to the package root
+    # generate_report=true,      # Write lcov.info and cov_report.md (default: true)
     # dest_dir="coverage",       # Output directory (default: "coverage")
     # worst_n_files=20,          # Number of lowest-covered files to list
     # max_uncovered_lines=200,   # Max uncovered lines to show
@@ -55,7 +55,7 @@ To run tests and generate the report:
 
 ```bash
 julia --project -e '
-    using Pkg; 
+    using Pkg: Pkg;
     Pkg.test("MyPackage"; coverage=true); 
     include("test/coverage.jl")
 '
@@ -77,7 +77,7 @@ Here's a complete workflow from running tests to analyzing coverage:
 
 ```bash
 # 1. Run tests with coverage enabled
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; coverage=true)'
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; coverage=true)'
 
 # 2. Generate coverage report (resets coverage/ automatically)
 julia --project -e 'include("test/coverage.jl")'
@@ -92,10 +92,11 @@ cat coverage/cov_report.md
 
 **Error**: `ArgumentError: Package Coverage not found in current path`
 
-**Solution**: Install Coverage in your base Julia environment:
+**Solution**: Install Coverage in your default Julia environment (or in the test
+environment, see [Prerequisites](@ref)):
 
 ```bash
-julia --project=@v1.12 -e 'using Pkg; Pkg.add("Coverage")'
+julia -e 'using Pkg: Pkg; Pkg.add("Coverage")'
 ```
 
 ### Issue: No .cov files generated
@@ -105,7 +106,7 @@ julia --project=@v1.12 -e 'using Pkg; Pkg.add("Coverage")'
 **Solution**: Ensure you're running tests with `coverage=true`:
 
 ```bash
-julia --project -e 'using Pkg; Pkg.test("MyPackage"; coverage=true)'
+julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; coverage=true)'
 ```
 
 ### Issue: Coverage report shows zero percent for all files
@@ -121,7 +122,7 @@ julia --project -e 'using Pkg; Pkg.test("MyPackage"; coverage=true)'
 **Solution**: The Coverage package must be available. Install it globally:
 
 ```bash
-julia -e 'using Pkg; Pkg.add("Coverage")'
+julia -e 'using Pkg: Pkg; Pkg.add("Coverage")'
 ```
 
 ## Understanding Coverage Reports
@@ -197,28 +198,9 @@ Focus on:
 
 ## CI/CD Integration
 
-### GitHub Actions with Codecov
-
-```yaml
-name: Coverage
-on: [push, pull_request]
-jobs:
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
-      - name: Install Coverage
-        run: julia -e 'using Pkg; Pkg.add("Coverage")'
-      - name: Run tests with coverage
-        run: julia --project -e 'using Pkg; Pkg.test(coverage=true)'
-      - name: Process coverage
-        run: julia --project -e 'include("test/coverage.jl")'
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: coverage/lcov.info
-```
+On CI, upload `coverage/lcov.info` to your coverage service (e.g. Codecov). In the
+control-toolbox ecosystem this is handled by the centralized reusable workflows — see
+the Handbook's [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md).
 
 ## See Also
 

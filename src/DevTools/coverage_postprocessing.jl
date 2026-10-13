@@ -12,7 +12,7 @@ post-processing logic.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.CoveragePostprocessingTag() isa CTBase.AbstractCoveragePostprocessingTag
+julia> CTBase.DevTools.CoveragePostprocessingTag() isa CTBase.DevTools.AbstractCoveragePostprocessingTag
 true
 ```
 """
@@ -31,7 +31,7 @@ coverage post-processing when the extension is available.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.CoveragePostprocessingTag() isa CTBase.AbstractCoveragePostprocessingTag
+julia> CTBase.DevTools.CoveragePostprocessingTag() isa CTBase.DevTools.AbstractCoveragePostprocessingTag
 true
 ```
 

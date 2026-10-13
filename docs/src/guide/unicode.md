@@ -13,7 +13,7 @@ mathematical notation in display code (e.g. variable names like `x₁`, `p²`).
 [`CTBase.Unicode.ctindice`](@ref) returns a single subscript digit (0–9) as a `Char`:
 
 ```@repl uni
-using CTBase
+using CTBase: CTBase
 
 CTBase.Unicode.ctindice(3)
 ```

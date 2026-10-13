@@ -18,7 +18,7 @@ Initialize a new description catalog with a single description `y`.
 julia> using CTBase
 
 julia> descriptions = ()
-julia> descriptions = CTBase.add(descriptions, (:a,))
+julia> descriptions = CTBase.Descriptions.add(descriptions, (:a,))
 (:a,)
 julia> print(descriptions)
 ((:a,),)
@@ -50,12 +50,12 @@ Add the description `y` to the catalog `x` if it is not already present.
 julia> using CTBase
 
 julia> descriptions = ()
-julia> descriptions = CTBase.add(descriptions, (:a,))
+julia> descriptions = CTBase.Descriptions.add(descriptions, (:a,))
 (:a,)
-julia> descriptions = CTBase.add(descriptions, (:b,))
+julia> descriptions = CTBase.Descriptions.add(descriptions, (:b,))
 (:a,)
 (:b,)
-julia> descriptions = CTBase.add(descriptions, (:b,))
+julia> descriptions = CTBase.Descriptions.add(descriptions, (:b,))
 ERROR: IncorrectArgument: the description (:b,) is already in ((:a,), (:b,))
        Got: (:b,)
        Expected: a unique description not in the catalog

@@ -24,10 +24,10 @@ It provides the **base layer** shared by all packages: common types, structured 
 
 | Submodule | Role |
 | :--- | :--- |
-| [`CTBase.Core`](@ref) | Fundamental numeric type alias (`ctNumber`) and internal display helpers |
+| [`CTBase.Core`](@ref) | Shared foundations: `ctNumber`, the `NotProvided` sentinel, extension tags and caches, the `@ensure` macro, matrix/function helpers, and the color palette |
 | [`CTBase.Exceptions`](@ref) | Typed exception hierarchy with rich context fields |
-| [`CTBase.Traits`](@ref) | Compile-time trait types for time dependence, variable dependence, mutability, and dynamics dispatch |
-| [`CTBase.Data`](@ref) | Trait-carrying function wrappers: `VectorField`, `Hamiltonian`, `HamiltonianVectorField` |
+| [`CTBase.Traits`](@ref) | Compile-time trait types: time, variable and control dependence, mutability, feedback, constraint kind, dynamics, AD and variable-costate capabilities |
+| [`CTBase.Data`](@ref) | Trait-carrying function wrappers: vector fields, Hamiltonians, pseudo-Hamiltonians, control laws, path constraints, multipliers, and their compositions |
 | [`CTBase.Descriptions`](@ref) | Symbolic description tuples: catalogue management, pattern completion, similarity search |
 | [`CTBase.Options`](@ref) | Generic option handling: provenance tracking, schema definition, validation, and aliases |
 | [`CTBase.Strategies`](@ref) | Strategy contract, registry, building/validation, and metadata for pluggable algorithmic components |
@@ -38,7 +38,7 @@ It provides the **base layer** shared by all packages: common types, structured 
 | [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
 | [`CTBase.Plotting`](@ref) | Backend-agnostic plotting IR: series, axes, layout tree, and a render contract with Plots.jl and Makie.jl backends |
 
-## User Guides
+## Guides
 
 - **[Getting Started](getting-started.md)** — installation, mental model, 5-minute walkthrough.
 - **[Exceptions](guide/exceptions.md)** — exception hierarchy, choosing the right type, best practices.
@@ -47,11 +47,12 @@ It provides the **base layer** shared by all packages: common types, structured 
 - **[Descriptions](guide/descriptions.md)** — catalogue API, pattern matching, error handling.
 - **[Options System](guide/options-system.md)** — option schema, validation, aliases, and provenance.
 - **[Implementing a Strategy](guide/implementing-a-strategy.md)** — the strategy contract and how to add one.
-- **[Strategy Parameters](guide/strategy-parameters.md)** — declaring and resolving strategy options.
 - **[Orchestration & Routing](guide/orchestration-and-routing.md)** — routing options to strategies with disambiguation.
+- **[Strategy Parameters](guide/strategy-parameters.md)** — CPU/GPU specialization of strategies.
 - **[Differentiation](guide/differentiation.md)** — AD-backend strategies and differentiation primitives (extension-backed).
 - **[Test Runner](guide/test-runner.md)** — modular test infrastructure with `CTBase.DevTools.run_tests`.
-- **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.postprocess_coverage`.
+- **[Coverage](guide/coverage.md)** — post-processing coverage artifacts with `CTBase.DevTools.postprocess_coverage`.
+- **[Performance](guide/performance.md)** — hot path vs setup path, type-stability checks with JET.
 - **[API Documentation](guide/api-documentation.md)** — auto-generating per-module API pages.
 - **[Color System](guide/color-system.md)** — semantic color roles, built-in themes, and runtime customization.
 - **[Interpolation](guide/interpolation.md)** — linear and piecewise-constant interpolation with flat extrapolation.

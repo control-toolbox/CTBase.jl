@@ -20,8 +20,8 @@ AD package directly.
 using CTBase: Differentiation, Data, Strategies
 # Loading DifferentiationInterface (+ an AD package) activates the extension
 # that provides the actual differentiation methods.
-using DifferentiationInterface
-using ForwardDiff
+using DifferentiationInterface: DifferentiationInterface
+using ForwardDiff: ForwardDiff
 using ADTypes: ADTypes
 ```
 
@@ -40,10 +40,13 @@ The concrete strategy stores a single option, `:ad_backend`, holding an
 (see [Device parameterization](@ref) below). `ADTypes` is a hard dependency of
 CTBase, so the default backend markers are always available.
 
-The contract has ten methods.
-[`Differentiation.ad_backend`](@ref CTBase.Differentiation.ad_backend) — the accessor
-returning the wrapped ADTypes backend — is resolved in core and always available; the
-nine differentiation primitives below live in an extension.
+The contract has eleven methods. Two are resolved in core and always available:
+[`Differentiation.ad_backend`](@ref CTBase.Differentiation.ad_backend), the accessor
+returning the wrapped ADTypes backend, and
+[`Differentiation.check_backend`](@ref CTBase.Differentiation.check_backend), which checks
+that the package behind that backend is loaded (see
+[Checking that the AD package is loaded](@ref)). The nine differentiation primitives
+below live in an extension.
 
 !!! note "The differentiation methods live in an extension"
     The contract methods (`gradient`, `derivative`, `differentiate`,
@@ -53,7 +56,9 @@ nine differentiation primitives below live in an extension.
     the `CTBaseDifferentiationInterface` **package extension**. They become
     available only once `DifferentiationInterface` *and* a concrete AD package
     (e.g. `ForwardDiff`) are loaded. Without the extension, every contract method
-    throws a [`CTBase.Exceptions.NotImplemented`](@ref) with a helpful message.
+    throws a [`CTBase.Exceptions.NotImplemented`](@ref) with a helpful message; with
+    the extension but without the package of the selected AD backend, it throws a
+    [`CTBase.Exceptions.ExtensionError`](@ref) naming that package.
 
 ## Building a backend
 
@@ -145,6 +150,34 @@ backend_gpu_fd = Differentiation.DifferentiationInterface{Strategies.GPU}(;
 )
 Differentiation.ad_backend(backend_gpu_fd)
 ```
+
+## Checking that the AD package is loaded
+
+Selecting an ADTypes backend does not load the package that implements it:
+`AutoMooncake()` needs `using Mooncake`, and even the default `AutoForwardDiff()` needs
+`using ForwardDiff`. Every differentiation primitive checks this before differentiating
+and throws a [`CTBase.Exceptions.ExtensionError`](@ref) naming the missing package. The
+check is a compile-time constant for a concrete backend, so it costs nothing on the hot
+path.
+
+[`Differentiation.check_backend`](@ref CTBase.Differentiation.check_backend) runs the same
+check explicitly — call it to fail early, before a long computation such as an
+integration. It returns `nothing` when the package is loaded:
+
+```@example diff
+Differentiation.check_backend(backend)   # ForwardDiff is loaded
+```
+
+`Mooncake` is not loaded in this session, so the GPU default fails with an actionable
+message:
+
+```@repl diff
+Differentiation.check_backend(backend_gpu)
+
+```
+
+Sparse backends are checked through their dense backend, and `SecondOrder` backends
+through both their outer and inner backends.
 
 ## Differentiation primitives
 
@@ -270,15 +303,16 @@ Differentiation.pseudo_hamiltonian_control_gradient(
 )
 ```
 
-For a non-fixed pseudo-Hamiltonian, the `v` argument carries the variable:
+For a non-fixed pseudo-Hamiltonian, the `v` argument carries the variable (here
+one-dimensional, hence a scalar):
 
 ```@example diff
 phv = Data.PseudoHamiltonian(
-    (x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1];
+    (x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v;
     is_variable=true,
 )
 Differentiation.pseudo_hamiltonian_control_gradient(
-    backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0],
+    backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, 5.0,
 )
 ```
 
@@ -290,13 +324,13 @@ returns `∂H̃/∂v` with the control `u` held **constant** — a partial deriv
 the total derivative `∂/∂v[H̃(t, x, p, u(t,x,p,v), v)]`:
 
 ```@example diff
-# H̃(x, p, u, v) = ½(‖x‖² + ‖p‖²) + u² + v[1]  →  ∂H̃/∂v = [1.0]
+# H̃(x, p, u, v) = ½(‖x‖² + ‖p‖²) + u² + v  →  ∂H̃/∂v = 1.0
 phv = Data.PseudoHamiltonian(
-    (x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v[1];
+    (x, p, u, v) -> 0.5 * (sum(abs2, x) + sum(abs2, p)) + u^2 + v;
     is_variable=true,
 )
 Differentiation.pseudo_variable_gradient(
-    backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, [5.0],
+    backend, phv, 0.0, [1.0, 2.0], [3.0, 4.0], 2.0, 5.0,
 )
 ```
 
@@ -306,10 +340,11 @@ would also account for `∂H̃/∂u · ∂u/∂v`.
 
 ## The contract without the extension
 
-Every contract method has a fallback on `AbstractADBackend` that throws
+Every differentiation primitive has a fallback on `AbstractADBackend` that throws
 [`CTBase.Exceptions.NotImplemented`](@ref) (see the [Exceptions](@ref guide-exceptions)
-guide). This is what users hit when the AD package is not loaded, and what custom
-backends must override:
+guide). This is what users hit when `DifferentiationInterface` is not loaded, and what
+custom backends must override (`check_backend` defaults to a no-op, so a custom backend
+overrides it only if it can detect a missing package):
 
 ```@repl diff
 struct MyBackend <: Differentiation.AbstractADBackend
@@ -324,6 +359,7 @@ Differentiation.gradient(
 ## See also
 
 - [`Differentiation.AbstractADBackend`](@ref CTBase.Differentiation.AbstractADBackend), [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface) — the strategy types.
+- [`Differentiation.check_backend`](@ref CTBase.Differentiation.check_backend) — fail early when the package of the AD backend is not loaded.
 - [Implementing a Strategy](@ref guide-implementing-a-strategy), [Options System](@ref guide-options-system) — the contract these build on.
 - [Data](@ref guide-data) — `Hamiltonian` and `PseudoHamiltonian` wrappers consumed by the gradient methods.
-- [Exceptions](@ref guide-exceptions) — `NotImplemented`, raised by the contract fallbacks.
+- [Exceptions](@ref guide-exceptions) — `NotImplemented`, raised by the contract fallbacks, and `ExtensionError`, raised when the AD package is not loaded.

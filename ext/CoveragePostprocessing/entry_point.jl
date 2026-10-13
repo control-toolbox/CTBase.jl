@@ -32,10 +32,10 @@ This function **creates/removes/moves files and directories** under `root_dir`.
 ```julia
 using CTBase
 
-# CTBase.postprocess_coverage(; generate_report=true, root_dir=pwd())
+# CTBase.DevTools.postprocess_coverage(; generate_report=true, root_dir=pwd())
 ```
 """
-function CTBase.postprocess_coverage(
+function CTBase.DevTools.postprocess_coverage(
     ::CTBase.DevTools.CoveragePostprocessingTag;
     generate_report::Bool=true,
     root_dir::String=pwd(),

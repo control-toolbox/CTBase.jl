@@ -32,7 +32,7 @@ Three things to keep in mind:
    ```
 - **Submodule-first API.** The public API lives in named submodules
    (`Core`, `Exceptions`, `Traits`, `Data`, `Descriptions`, `Options`, `Strategies`,
-   `Orchestration`, `Differentiation`, `Interpolation`, `DevTools`, `Unicode`, …).
+   `Orchestration`, `Differentiation`, `Interpolation`, `DevTools`, `Unicode`, `Plotting`).
    Bring a submodule's name into scope and call its API qualified:
    ```julia
    using CTBase: Exceptions
@@ -41,8 +41,9 @@ Three things to keep in mind:
    Traits.is_autonomous(...)
    ```
 - **Extension-backed features.** `run_tests`, `postprocess_coverage`, and
-   `automatic_reference_documentation` require loading the matching weak dependency
-   (`Test`, `Coverage`, `Documenter` respectively) before they become active.
+   `automatic_reference_documentation` (in `CTBase.DevTools`) require loading the
+   matching weak dependency (`Test`, `Coverage`, `Documenter` respectively) before they
+   become active; `CTBase.Plotting.render` requires `Plots` or a Makie backend.
    Likewise, the differentiation primitives of `CTBase.Differentiation` become active
    only once `DifferentiationInterface` and an AD package (e.g. `ForwardDiff`) are loaded.
 
@@ -55,7 +56,7 @@ or configuration. Catalogues collect known descriptions; `complete` resolves a p
 description to an exact one.
 
 ```@repl walkthrough
-using CTBase
+using CTBase: CTBase
 
 # Build a catalogue
 descs = CTBase.Descriptions.add((), (:euler, :explicit))
@@ -65,7 +66,7 @@ descs = CTBase.Descriptions.add(descs, (:runge_kutta, :explicit))
 # Partial completion: find the unique entry containing :implicit
 CTBase.Descriptions.complete(:implicit; descriptions=descs)
 
-# :euler matches two entries; priority (first in catalog) resolves the tie
+# :euler matches two entries; the first one in the catalog wins
 CTBase.Descriptions.complete(:euler; descriptions=descs)
 
 # No entry contains both :runge_kutta and :implicit → raises AmbiguousDescription
@@ -132,10 +133,12 @@ For more, see the **[Data guide](guide/data.md)**.
 | Descriptions catalogue and completion | [Descriptions](guide/descriptions.md) |
 | Option schema, validation, and aliases | [Options System](guide/options-system.md) |
 | Strategy contract and registration | [Implementing a Strategy](guide/implementing-a-strategy.md) |
+| CPU/GPU specialization of strategies | [Strategy Parameters](guide/strategy-parameters.md) |
 | Routing options to strategies | [Orchestration & Routing](guide/orchestration-and-routing.md) |
 | AD backends and differentiation primitives | [Differentiation](guide/differentiation.md) |
 | Modular test runner setup | [Test Runner](guide/test-runner.md) |
 | Coverage report generation | [Coverage](guide/coverage.md) |
+| Hot path vs setup path, type stability | [Performance](guide/performance.md) |
 | Auto-generated API reference | [API Documentation](guide/api-documentation.md) |
 | Semantic color roles and themes | [Color System](guide/color-system.md) |
 | Linear and piecewise-constant interpolation | [Interpolation](guide/interpolation.md) |

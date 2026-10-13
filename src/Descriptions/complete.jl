@@ -3,9 +3,8 @@ $(TYPEDSIGNATURES)
 
 Select the most matching description from a catalog based on a partial list of symbols.
 
-If multiple descriptions contain all the symbols in `list`, the one with the largest 
-intersection is selected. If multiple descriptions have the same intersection size, 
-the first one in the catalog wins (priority is top-to-bottom).
+If several descriptions contain all the symbols in `list`, the first one in the catalog
+wins (priority is top-to-bottom).
 
 # Arguments
 - `list::Symbol...`: A variable number of symbols representing a partial description
@@ -25,16 +24,16 @@ julia> using CTBase
 
 julia> D = ((:a, :b), (:a, :b, :c), (:b, :c), (:a, :c));
 
-julia> CTBase.complete(:a; descriptions=D)
+julia> CTBase.Descriptions.complete(:a; descriptions=D)
 (:a, :b)
 
-julia> CTBase.complete(:a, :c; descriptions=D)
+julia> CTBase.Descriptions.complete(:a, :c; descriptions=D)
 (:a, :b, :c)
 
-julia> CTBase.complete((:a, :c); descriptions=D)
+julia> CTBase.Descriptions.complete((:a, :c); descriptions=D)
 (:a, :b, :c)
 
-julia> CTBase.complete(:a, :z; descriptions=D)
+julia> CTBase.Descriptions.complete(:a, :z; descriptions=D)
 ERROR: AmbiguousDescription → #complete#15, complete.jl:97
 │
 │  cannot find matching description

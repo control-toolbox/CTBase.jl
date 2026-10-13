@@ -30,7 +30,7 @@ macro test_inferred(expr)
 end
 
 # Run tests using the TestRunner extension
-CTBase.run_tests(;
+CTBase.DevTools.run_tests(;
     args=String.(ARGS),
     testset_name="CTBase tests",
     available_tests=("suite/*/test_*",),

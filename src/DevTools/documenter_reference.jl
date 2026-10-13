@@ -12,7 +12,7 @@ documentation generation logic.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.DocumenterReferenceTag() isa CTBase.AbstractDocumenterReferenceTag
+julia> CTBase.DevTools.DocumenterReferenceTag() isa CTBase.DevTools.AbstractDocumenterReferenceTag
 true
 ```
 """
@@ -32,8 +32,8 @@ extension is available.
 ```julia-repl
 julia> using CTBase
 
-julia> tag = CTBase.DocumenterReferenceTag()
-CTBase.DocumenterReferenceTag()
+julia> tag = CTBase.DevTools.DocumenterReferenceTag()
+CTBase.DevTools.DocumenterReferenceTag()
 ```
 """
 struct DocumenterReferenceTag <: AbstractDocumenterReferenceTag end

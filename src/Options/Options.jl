@@ -7,8 +7,8 @@ This module provides the foundational types and functions for:
 - Option extraction with alias support
 - Type validation and helpful error messages
 
-The Options module is deliberately generic and has no dependencies on other
-CTBase modules, making it reusable across the ecosystem.
+The Options module is deliberately generic: it knows nothing about strategies and
+only relies on `Core` and `Exceptions`, making it reusable across the ecosystem.
 """
 module Options
 

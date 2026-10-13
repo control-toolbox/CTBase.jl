@@ -170,17 +170,15 @@ Traits.is_state_constraint(g)
 
 ### Other families
 
-These traits encode properties that are fixed at construction time and carried
-as type parameters. They are not opted into via the two-method contract described
-below — they are passed directly as type arguments.
+| Family | Values | How it is read |
+|---|---|---|
+| Integration mode | [`Traits.EndPointMode`](@ref CTBase.Traits.EndPointMode), [`Traits.TrajectoryMode`](@ref CTBase.Traits.TrajectoryMode) | type parameter of the consuming type |
+| Dynamics | [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics), [`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics), [`Traits.AugmentedHamiltonianDynamics`](@ref CTBase.Traits.AugmentedHamiltonianDynamics) | [`Traits.dynamics_trait`](@ref CTBase.Traits.dynamics_trait), defined per data family |
+| Automatic differentiation | [`Traits.WithAD`](@ref CTBase.Traits.WithAD), [`Traits.WithoutAD`](@ref CTBase.Traits.WithoutAD) | [`Traits.ad_trait`](@ref CTBase.Traits.ad_trait), default `WithoutAD` |
+| Variable costate | [`Traits.SupportsVariableCostate`](@ref CTBase.Traits.SupportsVariableCostate), [`Traits.NoVariableCostate`](@ref CTBase.Traits.NoVariableCostate) | [`Traits.variable_costate_trait`](@ref CTBase.Traits.variable_costate_trait), default `NoVariableCostate` |
 
-| Family | Values |
-|---|---|
-| Integration mode | [`Traits.EndPointMode`](@ref CTBase.Traits.EndPointMode), [`Traits.TrajectoryMode`](@ref CTBase.Traits.TrajectoryMode) |
-| Dynamics | [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics), [`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics), [`Traits.AugmentedHamiltonianDynamics`](@ref CTBase.Traits.AugmentedHamiltonianDynamics) |
-| Automatic differentiation | [`Traits.WithAD`](@ref CTBase.Traits.WithAD), [`Traits.WithoutAD`](@ref CTBase.Traits.WithoutAD) |
-| Variable costate | [`Traits.SupportsVariableCostate`](@ref CTBase.Traits.SupportsVariableCostate), [`Traits.NoVariableCostate`](@ref CTBase.Traits.NoVariableCostate) |
-| Feedback | [`Traits.OpenLoopFeedback`](@ref CTBase.Traits.OpenLoopFeedback), [`Traits.ClosedLoopFeedback`](@ref CTBase.Traits.ClosedLoopFeedback), [`Traits.DynClosedLoopFeedback`](@ref CTBase.Traits.DynClosedLoopFeedback) |
+The last two are *default-valued capabilities* (see the contracts below); integration
+mode and dynamics are fixed by the concrete type.
 
 !!! note "Abstract tags vs. concrete tags"
     Time-dependence tags (`Autonomous`, `NonAutonomous`) are **abstract** types
@@ -211,8 +209,8 @@ single question: **does a safe default value exist?**
   `NoVariableCostate`) and concrete types override it — no `has_*` method, no
   predicates.
 
-The "Other families" above (integration mode, dynamics) use neither contract: they
-are read directly from a concrete type's parameters.
+Integration mode, dynamics, feedback and constraint kind use neither contract: they are
+fixed by the concrete type (a type parameter, or a method defined for the data family).
 
 For the strict opt-in families — time, variable and control dependence:
 

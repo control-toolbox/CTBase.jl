@@ -9,7 +9,7 @@ A type alias representing a variable number of `Symbol`s.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.DescVarArg
+julia> CTBase.Descriptions.DescVarArg
 Vararg{Symbol}
 ```
 

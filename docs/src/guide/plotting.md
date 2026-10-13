@@ -5,7 +5,7 @@ CurrentModule = CTBase
 ```
 
 ```@setup plot
-using Plots
+using Plots: Plots
 ```
 
 The [`CTBase.Plotting`](@ref) submodule is a generic, domain-free plotting engine.
@@ -45,7 +45,7 @@ a neutral style vocabulary (`color`, `linewidth`, `linestyle`, `alpha`, `seriest
 backend-specific attributes.
 
 ```@example plot
-using CTBase
+using CTBase: CTBase
 
 s = CTBase.Plotting.Series(
     [0.0, 1.0, 2.0],
@@ -207,20 +207,43 @@ using CairoMakie: CairoMakie
 CTBase.Plotting.render(CTBase.Plotting.MakieBackend(), fig)
 ```
 
-## User Attributes: Series vs Axis
+## User Attributes
 
-`render(fig; kwargs...)` and `render!` accept extra keyword arguments and split them
-into **series attributes** — forwarded to every curve — and **axis attributes** —
-applied to every cell. `legend` and `ylims` are special-cased: a user value
-overrides the IR default. The two backends make that split differently.
+`render(fig; kwargs...)` and `render!` accept extra keyword arguments. The label
+keywords are resolved first, on the IR; the rest are split into **series attributes**
+— forwarded to every curve — and **axis attributes** — applied to every cell.
+
+### Labels: `title`, `xlabel`, `ylabel`
+
+The cell labels are computed from the IR, so a label keyword cannot simply be
+forwarded to the backend — it would hit every cell. `render` resolves them once on
+the backend-agnostic IR (`Plotting._resolve_labels`), so both backends agree:
+
+- `xlabel` replaces the x label of the cells that already carry one (the bottom cell
+  of a split panel, the time label of a group cell);
+- `title` replaces the overall figure title (an empty string removes it);
+- `ylabel` is **not** applied — each cell carries one name per component — and a
+  warning suggests changing it after rendering with the backend's own API.
+
+```@example plot
+CTBase.Plotting.render(fig; title="Relabelled", xlabel="time")
+```
+
+`render!` overlays onto existing axes and leaves them untouched: it warns that
+`title`, `xlabel` and `ylabel` are ignored.
+
+### Series vs axis attributes
+
+`legend` and `ylims` are special-cased: a user value overrides the IR default. The
+two backends split the remaining keywords differently.
 
 The **Plots backend** (`CTBasePlots._partition_user`) asks Plots itself:
 `Plots.attributes(:Series)` is the authoritative set of series-attribute names, so
 any kwarg in it goes to the series and everything else to the subplot. A key Plots
 does not recognise still reaches Plots, which emits its own warning. Layout keys the
-renderer owns (`CTBasePlots._RESERVED_AXES_KEYS`: `subplot`, `title`, `xlabel`,
-`ylabel`, `legend`, `ylims`, `titlefont`, `guidefontsize`) are dropped so the
-computed layout survives.
+renderer owns (`CTBasePlots._RESERVED_AXES_KEYS`: `subplot`, `legend`, `ylims`,
+`titlefont`, `guidefontsize`) are protected so the computed layout survives;
+`subplot`, `titlefont` and `guidefontsize` are ignored with a warning.
 
 The **Makie backend** (`CTBaseMakie._partition_user`) has nothing to introspect —
 Makie exposes no `attributes(:Series)` analogue — so it carries curated whitelists:
@@ -234,8 +257,8 @@ keys cannot be forwarded the way Plots tolerates.
 For a case layer or a caller this means:
 
 - The portable surface is the neutral style vocabulary (`color`, `linewidth`,
-  `linestyle`, `alpha`, `seriestype`, `z_order`) plus `legend` and `ylims` — these
-  behave identically on both backends.
+  `linestyle`, `alpha`, `seriestype`, `z_order`) plus `legend`, `ylims`, `title` and
+  `xlabel` — these behave identically on both backends.
 - A genuinely backend-specific option belongs in a [`CTBase.Plotting.Series`](@ref)
   style's `backend_kwargs` escape hatch, not in a `render` kwarg: only the matching
   backend honours it, and the Makie whitelist would drop it from a `render` call
@@ -259,4 +282,4 @@ index when overlaying with `render!`.
 ## See Also
 
 - [Exceptions guide](@ref guide-exceptions) — `ExtensionError` when no backend is loaded.
-- [Traits guide](@ref guide-traits) — the trait-parameter pattern used by `Interpolant`.
+- [Color System](@ref guide-color-system) — the palette used by the text display of the IR types.

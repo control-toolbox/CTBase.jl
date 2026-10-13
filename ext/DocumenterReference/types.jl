@@ -106,7 +106,7 @@ end
 
 Global configuration storage for API reference generation.
 
-Each call to `CTBase.automatic_reference_documentation` appends a new `_Config`
+Each call to `CTBase.DevTools.automatic_reference_documentation` appends a new `_Config`
 entry to this vector. Use `reset_config!` to clear it between builds.
 
 """

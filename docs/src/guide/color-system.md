@@ -10,7 +10,7 @@ semantic color roles, the built-in themes, and how to customize the color scheme
 at runtime.
 
 ```@example color
-using CTBase
+using CTBase: CTBase
 nothing # hide
 ```
 
@@ -63,7 +63,7 @@ Three palettes are provided out of the box. Use [`CTBase.Core.show_palette`](@re
 preview any of them in your terminal:
 
 ```julia
-using CTBase
+using CTBase: CTBase
 
 # Preview the default palette
 CTBase.Core.show_palette()
@@ -133,7 +133,7 @@ Use [`CTBase.Core.set_palette!`](@ref) to swap the active palette, and
 [`CTBase.Core.reset_palette!`](@ref) to restore the default:
 
 ```julia
-using CTBase
+using CTBase: CTBase
 
 # Switch to monochrome (e.g. for automated output)
 CTBase.Core.set_palette!(CTBase.Core.MONOCHROME_PALETTE)
@@ -153,7 +153,7 @@ implementation.
 [`CTBase.Core.set_color!`](@ref) changes a single role without touching the rest:
 
 ```julia
-using CTBase
+using CTBase: CTBase
 
 # Make errors magenta instead of red
 CTBase.Core.set_color!(:error, "35")
@@ -178,7 +178,7 @@ for a reference table.
 Build a [`CTBase.Core.Palette`](@ref) from scratch using [`CTBase.Core.Style`](@ref) values:
 
 ```julia
-using CTBase
+using CTBase: CTBase
 
 my_palette = CTBase.Core.Palette(
     CTBase.Core.Style("1;35"),  # name     — bold magenta

@@ -12,7 +12,7 @@ runner logic.
 ```julia-repl
 julia> using CTBase
 
-julia> CTBase.TestRunnerTag() isa CTBase.AbstractTestRunnerTag
+julia> CTBase.DevTools.TestRunnerTag() isa CTBase.DevTools.AbstractTestRunnerTag
 true
 ```
 
@@ -33,8 +33,8 @@ extension-based test runner when the extension is available.
 ```julia-repl
 julia> using CTBase
 
-julia> tag = CTBase.TestRunnerTag()
-CTBase.TestRunnerTag()
+julia> tag = CTBase.DevTools.TestRunnerTag()
+CTBase.DevTools.TestRunnerTag()
 ```
 
 See also: [`CTBase.DevTools.AbstractTestRunnerTag`](@extref)

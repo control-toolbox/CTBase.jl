@@ -268,7 +268,7 @@ by the user is not a subset of any catalogue entry.
 julia> using CTBase
 
 julia> D = ((:a, :b), (:a, :b, :c), (:b, :c))
-julia> CTBase.complete(:f; descriptions=D)
+julia> CTBase.Descriptions.complete(:f; descriptions=D)
 ERROR: AmbiguousDescription: the description (:f,) is ambiguous / incorrect
 ```
 

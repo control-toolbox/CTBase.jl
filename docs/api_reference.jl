@@ -136,7 +136,7 @@ function generate_api_reference(src_dir::String)
             filename="options",
             files=src(
                 joinpath("Options", "Options.jl"),
-                joinpath("Options", "not_provided.jl"),
+                joinpath("Options", "not_stored.jl"),
                 joinpath("Options", "option_value.jl"),
                 joinpath("Options", "option_definition.jl"),
                 joinpath("Options", "extraction.jl"),
@@ -214,6 +214,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Plotting", "ir.jl"),
                 joinpath("Plotting", "panel.jl"),
                 joinpath("Plotting", "combinators.jl"),
+                joinpath("Plotting", "labels.jl"),
                 joinpath("Plotting", "lowering.jl"),
                 joinpath("Plotting", "heuristics.jl"),
                 joinpath("Plotting", "contract.jl"),
@@ -222,7 +223,7 @@ function generate_api_reference(src_dir::String)
     ]
 
     pages = [
-        CTBase.automatic_reference_documentation(;
+        CTBase.DevTools.automatic_reference_documentation(;
             subdirectory="api",
             primary_modules=[cfg.mod => cfg.files],
             exclude=EXCLUDE_SYMBOLS,
@@ -286,7 +287,7 @@ function generate_api_reference(src_dir::String)
 
     push!(
         pages,
-        CTBase.automatic_reference_documentation(;
+        CTBase.DevTools.automatic_reference_documentation(;
             subdirectory="api",
             primary_modules=internals_modules,
             external_modules_to_document=[CTBase],

@@ -34,7 +34,7 @@ Instance-Level (configured object)
    Strategy computation
 ```
 
-- **Type-level** methods (`id`, `metadata`) can be called on the **type itself** — no object needed. This enables registry lookup, option routing, and validation before any resource allocation.
+- **Type-level** methods (`id`, `metadata`, `parameter`) can be called on the **type itself** — no object needed. This enables registry lookup, option routing, and validation before any resource allocation.
 - **Instance-level** methods (`options`) are called on **instances** — they carry the actual configuration with provenance tracking (user vs default).
 
 ## Defining a Strategy Family
@@ -74,6 +74,11 @@ Strategies.id(::Type{<:Collocation}) = :collocation
 Strategies.parameter(::Type{<:Collocation}) = nothing
 nothing # hide
 ```
+
+!!! tip "Optional: `description`"
+    [`Strategies.description`](@ref CTBase.Strategies.description) may also be
+    implemented on the type to return a one-line `String` (e.g. the backend package and
+    its URL). It defaults to `nothing` and is shown by `describe`.
 
 ### Step 3 — Define default values
 
@@ -410,7 +415,7 @@ Options.OptionDefinition(
     type = Int,
     default = 250,
     description = "Number of time steps",
-    aliases = [:N, :num_steps],
+    aliases = (:N, :num_steps),   # a Tuple of Symbols
 )
 ```
 
@@ -427,9 +432,14 @@ Options.OptionDefinition(
     default = 250,
     description = "Number of time steps",
     validator = x -> x > 0 || throw(
-        ArgumentError("grid_size must be positive"),
+        CTBase.Exceptions.IncorrectArgument(
+            "Invalid grid_size"; got = "$x", expected = "a positive integer",
+        ),
     ),
 )
 ```
+
+Throw a [`CTBase.Exceptions.IncorrectArgument`](@ref) rather than a generic
+`ArgumentError`, so that the error is rendered like every other CTBase error.
 
 The validator is called during construction in both strict and permissive modes.

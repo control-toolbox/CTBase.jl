@@ -70,7 +70,7 @@ CTBase.Exceptions.IncorrectArgument <: CTBase.Exceptions.CTException
 Adding a duplicate description:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 algorithms = CTBase.Descriptions.add((), (:a, :b))
 CTBase.Descriptions.add(algorithms, (:a, :b))  # Error: duplicate
 
@@ -79,7 +79,7 @@ CTBase.Descriptions.add(algorithms, (:a, :b))  # Error: duplicate
 Using invalid indices for the Unicode helpers:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 CTBase.Unicode.ctindice(-1)  # Error: must be between 0 and 9
 ```
 
@@ -97,15 +97,17 @@ valid description.
 
 **Fields**:
 
-- `description::Description`: The ambiguous description
-- `candidates::Union{Vector{String},Nothing}`: Suggested alternatives (optional)
-- `suggestion::Union{String,Nothing}`: How to fix the problem (optional)
+- `msg::String`: Error message (keyword `msg`, default `"cannot find matching description"`)
+- `description::Tuple{Vararg{Symbol}}`: The requested description (positional argument)
+- `candidates::Union{Vector{String},Nothing}`: The catalog, displayed as `Available` (optional)
+- `suggestion::Union{String,Nothing}`: How to fix the problem, e.g. the closest matches (optional)
 - `context::Union{String,Nothing}`: Where the error occurred (optional)
+- `diagnostic::Union{String,Nothing}`: Why matching failed, e.g. `"unknown symbols"` (optional)
 
 **Example**:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 D = ((:a, :b), (:a, :b, :c), (:b, :c))
 CTBase.Descriptions.complete(:f; descriptions=D)  # Error: no match found
 
@@ -242,7 +244,7 @@ CTBase.Exceptions.ParsingError <: CTBase.Exceptions.CTException
 **Example**:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 throw(CTBase.Exceptions.ParsingError(
     "unexpected token 'end'",
     location="line 42, column 10",
@@ -263,8 +265,8 @@ CTBase.Exceptions.ExtensionError <: CTBase.Exceptions.CTException
 
 **Fields**:
 
-- `msg::String`: Error message
-- `weakdeps::Tuple{Vararg{Symbol}}`: Names of missing packages
+- `msg::String`: Error message (keyword `message`)
+- `weakdeps::Tuple{Vararg{Symbol}}`: Names of missing packages (positional arguments)
 - `feature::Union{String,Nothing}`: What feature needs the dependencies (optional)
 - `context::Union{String,Nothing}`: Where the error occurred (optional)
 
@@ -283,7 +285,7 @@ end
 The enriched display automatically suggests:
 
 ```@repl
-using CTBase
+using CTBase: CTBase
 throw(CTBase.Exceptions.ExtensionError(
     :Plots,
     feature="result visualization",
@@ -319,7 +321,7 @@ fails to complete successfully or returns an error code.
 **Example**:
 
 ```@example solver-failure
-using CTBase
+using CTBase: CTBase
 function integrate_ode(system, integrator)
     result = solve(system, integrator)
     if result.retcode != :Success
@@ -368,15 +370,17 @@ throw(CTBase.Exceptions.SolverFailure(
 
 ## Quick Reference: Which Exception to Use?
 
+Constructors below are written relative to `CTBase.Exceptions` (e.g. `using CTBase: Exceptions`, then `throw(Exceptions.IncorrectArgument(...))`).
+
 | Situation | Exception | Example |
 |-----------|-----------|---------|
-| Invalid argument value | [`CTBase.Exceptions.IncorrectArgument`](@ref) | `throw(IncorrectArgument("x must be > 0", got="-5"))` |
-| Wrong function call order | [`CTBase.Exceptions.PreconditionError`](@ref) | `throw(PreconditionError("Must init first"))` |
-| Unimplemented interface | [`CTBase.Exceptions.NotImplemented`](@ref) | `throw(NotImplemented("run! not implemented"))` |
-| Parsing error | [`CTBase.Exceptions.ParsingError`](@ref) | `throw(ParsingError("unexpected token"))` |
-| Ambiguous description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) | `throw(AmbiguousDescription((:x,)))` |
-| Missing optional dependency | [`CTBase.Exceptions.ExtensionError`](@ref) | `throw(ExtensionError(:Plots))` |
-| Solver/integrator failure | [`CTBase.Exceptions.SolverFailure`](@ref) | `throw(SolverFailure("ODE failed"))` |
+| Invalid argument value | [`CTBase.Exceptions.IncorrectArgument`](@ref) | `IncorrectArgument("x must be > 0"; got="-5")` |
+| Wrong function call order | [`CTBase.Exceptions.PreconditionError`](@ref) | `PreconditionError("Must init first")` |
+| Unimplemented interface | [`CTBase.Exceptions.NotImplemented`](@ref) | `NotImplemented("run! not implemented")` |
+| Parsing error | [`CTBase.Exceptions.ParsingError`](@ref) | `ParsingError("unexpected token")` |
+| Ambiguous description | [`CTBase.Exceptions.AmbiguousDescription`](@ref) | `AmbiguousDescription((:x,))` |
+| Missing optional dependency | [`CTBase.Exceptions.ExtensionError`](@ref) | `ExtensionError(:Plots)` |
+| Solver/integrator failure | [`CTBase.Exceptions.SolverFailure`](@ref) | `SolverFailure("ODE failed")` |
 
 ## Enriched Error Display
 

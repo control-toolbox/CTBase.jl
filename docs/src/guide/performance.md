@@ -53,7 +53,7 @@ First, build the objects we will exercise:
 
 ```@example perf
 using CTBase: Data, Interpolation, Differentiation
-using JET
+using JET: JET
 
 vf = Data.VectorField(x -> -x)                       # autonomous, out-of-place
 ham = Data.Hamiltonian((x, p) -> sum(x .* p))        # H(x, p)
@@ -102,7 +102,8 @@ JET.test_package(CTBase; target_modules=(CTBase,))
 To run the same scan interactively on a fresh checkout:
 
 ```julia
-using CTBase, JET
+using CTBase: CTBase
+using JET: JET
 JET.report_package(CTBase; target_modules=(CTBase,))
 ```
 
@@ -128,7 +129,7 @@ dispatch. This is expected and does not indicate a regression:
 
   ```julia
   using CTBase: Data
-  using JET
+  using JET: JET
   JET.@report_opt Data.VectorField(x -> -x)   # reports dispatch — expected
   ```
 
@@ -150,19 +151,19 @@ using CTBase: Data
 vf = Data.VectorField(x -> -x)
 
 # 1. Quick look
-using InteractiveUtils
-@code_warntype vf([1.0, 2.0])
+using InteractiveUtils: InteractiveUtils
+InteractiveUtils.@code_warntype vf([1.0, 2.0])
 
 # 2. Navigate the call chain to the root cause
-using Cthulhu
-@descend vf([1.0, 2.0])
+using Cthulhu: Cthulhu
+Cthulhu.@descend vf([1.0, 2.0])
 ```
 
 Once fixed, lock the result with a stability test so it cannot silently regress:
 
 ```julia
-using Test
-@inferred vf([1.0, 2.0])
+using Test: Test
+Test.@inferred vf([1.0, 2.0])
 ```
 
 ## See Also

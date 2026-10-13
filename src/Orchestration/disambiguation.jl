@@ -30,6 +30,32 @@ struct ResolvedMethod{T<:Tuple,I<:NamedTuple}
     parameter::Union{Nothing,Type{<:Strategies.AbstractStrategyParameter}}
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+Return the concrete strategy type registered under `id` in `family_type`, taking the
+global parameter of `resolved` into account.
+
+When the strategy is parameterized (it has available parameters in `registry`) and
+`resolved` carries a parameter (e.g. `:gpu` in the method tuple), the type for that
+parameter is returned (e.g. `MadNLP{GPU}`); otherwise the parameter-free lookup of
+[`CTBase.Strategies.type_from_id`](@extref) is used.
+
+# Arguments
+- `id::Symbol`: Strategy ID, as found in the method tuple.
+- `family_type::Type{<:Strategies.AbstractStrategy}`: Abstract family of the strategy.
+- `registry::Strategies.StrategyRegistry`: Registry holding the family.
+- `resolved::ResolvedMethod`: Resolved method tuple, carrying the optional parameter.
+
+# Returns
+- `Type{<:Strategies.AbstractStrategy}`: The concrete strategy type.
+
+# Notes
+- This function is internal to `CTBase.Orchestration`; routing and disambiguation use
+  it so that option metadata follows the parameter selected in the method tuple.
+
+See also: [`CTBase.Orchestration.resolve_method`](@extref), [`CTBase.Strategies.available_parameters`](@extref)
+"""
 function _type_from_resolved_id(
     id::Symbol,
     family_type::Type{<:Strategies.AbstractStrategy},
