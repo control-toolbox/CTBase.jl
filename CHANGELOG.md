@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📚 Documentation
+
+- Documentation audit and refresh: the Differentiation guide documents `check_backend`
+  and the missing-AD-package `ExtensionError` (0.30.8); the Plotting guide documents the
+  `title`/`xlabel`/`ylabel` resolution on the IR (0.30.7); the Orchestration guide covers
+  parameter-aware routing (0.30.6); `PseudoHamiltonianVectorField` and
+  `Strategies.default_parameter` / `available_parameters` are documented.
+- Wrong examples fixed (`aliases` as a `Vector`, `ArgumentError` validator), one-dimensional
+  variables and controls shown as scalars, every path qualified (`CTBase.Submodule.symbol`,
+  `using X: X`), outdated CI snippets replaced by a pointer to the centralized workflows.
+- API reference: `Options/not_stored.jl` and `Plotting/labels.jl` now included; missing
+  docstring of `Orchestration._type_from_resolved_id` added.
+
+### ✅ Compatibility
+
+- **No breaking changes**: documentation, docstrings and doc-only scripts; no code
+  behaviour change.
+
 ## [0.30.8] - 2026-10-11
 
 ### ✨ Features
