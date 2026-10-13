@@ -14,6 +14,7 @@ src/        # Source code: one submodule per responsibility, no top-level export
 ext/        # Weak-dependency extensions (loaded on demand by Julia)
 test/suite/ # Test suite: organised by functionality, not by src/ layout
 docs/       # Documentation site (DocumenterVitepress)
+.handbook/  # control-toolbox Handbook (git submodule, pinned to a tag)
 ```
 
 ---
@@ -21,14 +22,16 @@ docs/       # Documentation site (DocumenterVitepress)
 ## Developer Resources
 
 Design philosophy, operational rules, plan templates, and CI/CD conventions live in the
-[control-toolbox Handbook](https://github.com/control-toolbox/Handbook):
+[control-toolbox Handbook](https://github.com/control-toolbox/Handbook), vendored as a git
+submodule in `.handbook/` and pinned to a dated tag (`vYYYY.MM.DD`). Read the local files;
+if `.handbook/` is empty, run `git submodule update --init`.
 
 | Topic | Link |
 | --- | --- |
-| Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`PHILOSOPHY.md`](https://raw.githubusercontent.com/control-toolbox/Handbook/refs/heads/main/PHILOSOPHY.md) |
-| Operational rules (tests, coverage, docs, git) | [`RULES.md`](https://raw.githubusercontent.com/control-toolbox/Handbook/refs/heads/main/RULES.md) |
-| Plan template | [`PLAN.md`](https://raw.githubusercontent.com/control-toolbox/Handbook/refs/heads/main/PLAN.md) |
-| CI/CD workflows (centralized reusable workflows, label-gated triggers) | [`WORKFLOWS.md`](https://raw.githubusercontent.com/control-toolbox/Handbook/refs/heads/main/WORKFLOWS.md) |
+| Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`PHILOSOPHY.md`](.handbook/PHILOSOPHY.md) |
+| Operational rules (tests, coverage, docs, git) | [`RULES.md`](.handbook/RULES.md) |
+| Plan template | [`PLAN.md`](.handbook/PLAN.md) |
+| CI/CD workflows (centralized reusable workflows, label-gated triggers) | [`WORKFLOWS.md`](.handbook/WORKFLOWS.md) |
 
 ---
 

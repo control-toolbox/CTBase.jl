@@ -1,0 +1,3 @@
+[submodule ".handbook"]
+	path = .handbook
+	url = https://github.com/control-toolbox/Handbook.git
