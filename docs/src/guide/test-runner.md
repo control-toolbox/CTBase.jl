@@ -451,22 +451,9 @@ julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; test_args=["utils", "-
 
 ## Integration with CI/CD
 
-### GitHub Actions Example
-
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
-      - name: Run all tests
-        run: julia --project -e 'using Pkg: Pkg; Pkg.test()'
-      - name: Run specific test group
-        run: julia --project -e 'using Pkg: Pkg; Pkg.test(test_args=["core"])'
-```
+CI simply calls `Pkg.test()`: `runtests.jl` receives no arguments and runs every
+available test. In the control-toolbox ecosystem this is done by the centralized
+reusable workflows — see the Handbook's [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md).
 
 ## See Also
 

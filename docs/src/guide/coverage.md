@@ -198,28 +198,9 @@ Focus on:
 
 ## CI/CD Integration
 
-### GitHub Actions with Codecov
-
-```yaml
-name: Coverage
-on: [push, pull_request]
-jobs:
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
-      - name: Install Coverage
-        run: julia -e 'using Pkg: Pkg; Pkg.add("Coverage")'
-      - name: Run tests with coverage
-        run: julia --project -e 'using Pkg: Pkg; Pkg.test(coverage=true)'
-      - name: Process coverage
-        run: julia --project -e 'include("test/coverage.jl")'
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: coverage/lcov.info
-```
+On CI, upload `coverage/lcov.info` to your coverage service (e.g. Codecov). In the
+control-toolbox ecosystem this is handled by the centralized reusable workflows — see
+the Handbook's [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md).
 
 ## See Also
 

@@ -424,34 +424,11 @@ MarkdownAST = "..."
 
 ## CI/CD Integration
 
-### GitHub Actions Example
-
-```yaml
-name: Documentation
-on:
-  push:
-    branches: [main]
-    tags: ['*']
-  pull_request:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
-      - name: Install dependencies
-        run: |
-          julia --project=docs -e 'using Pkg: Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-      - name: Build documentation
-        run: julia --project=docs docs/make.jl
-      - name: Deploy to GitHub Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
-```
+In the control-toolbox ecosystem, documentation is built and deployed by the centralized
+reusable workflows, which run `docs/make.jl` and deploy with
+`DocumenterVitepress.deploydocs` — see the Handbook's
+[`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md). A package only needs a `docs/Project.toml` that includes the weak
+dependencies whose extensions it documents.
 
 ## Summary
 
