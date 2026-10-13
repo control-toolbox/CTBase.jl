@@ -3,6 +3,12 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.9)
+
+- **Documentation refresh**: updated guides, examples, API references, and project
+  conventions. **No breaking change**: documentation and doc-only scripts only; no
+  migration required.
+
 ## Non-breaking note (0.30.8)
 
 - **Differentiation backend validation**: added `Differentiation.check_backend` and

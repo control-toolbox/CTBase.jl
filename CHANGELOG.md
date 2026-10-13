@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.9] - 2026-10-13
+
 ### 📚 Documentation
 
 - Documentation audit and refresh: the Differentiation guide documents `check_backend`
