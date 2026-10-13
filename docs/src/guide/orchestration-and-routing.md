@@ -328,3 +328,77 @@ Orchestration.route_all_options(
 )
 
 ```
+
+## Parameterized Strategies
+
+A method tuple may end with a **parameter token** (e.g. `:cpu`, `:gpu`) selecting the
+execution device of the parameterized strategies it contains (see
+[Strategy Parameters](@ref guide-strategy-parameters)). Routing then uses the metadata
+of the **selected** variant: option ownership, aliases, suggestions and ambiguity errors
+all follow the parameter.
+
+Here the solver family gains a parameterized `FakeMadNLP{P}` whose GPU variant declares an
+extra `cuda_stream` option:
+
+```@example routing
+struct FakeMadNLP{P<:Strategies.AbstractStrategyParameter} <: AbstractFakeSolver
+    options::Strategies.StrategyOptions
+end
+
+Strategies.id(::Type{<:FakeMadNLP}) = :madnlp
+Strategies.parameter(::Type{<:FakeMadNLP{P}}) where {P} = P
+Strategies.default_parameter(::Type{<:FakeMadNLP}) = Strategies.CPU
+
+_linear_solver_def(default) = Options.OptionDefinition(
+    name = :linear_solver, type = Symbol,
+    default = default, description = "Linear solver", computed = true,
+)
+Strategies.metadata(::Type{FakeMadNLP{Strategies.CPU}}) =
+    Strategies.StrategyMetadata(_linear_solver_def(:mumps))
+Strategies.metadata(::Type{FakeMadNLP{Strategies.GPU}}) =
+    Strategies.StrategyMetadata(
+        _linear_solver_def(:cudss),
+        Options.OptionDefinition(
+            name = :cuda_stream, type = Int,
+            default = 0, description = "CUDA stream",
+        ),
+    )
+
+FakeMadNLP{P}(; kwargs...) where {P} = FakeMadNLP{P}(
+    Strategies.build_strategy_options(FakeMadNLP{P}; kwargs...),
+)
+
+registry_p = Strategies.create_registry(
+    AbstractFakeDiscretizer => (FakeCollocation,),
+    AbstractFakeModeler     => (FakeADNLP,),
+    AbstractFakeSolver      => (FakeIpopt, (FakeMadNLP, [Strategies.CPU, Strategies.GPU])),
+)
+nothing # hide
+```
+
+The parameter is extracted once by `resolve_method`:
+
+```@example routing
+method_gpu = (:collocation, :adnlp, :madnlp, :gpu)
+Orchestration.resolve_method(method_gpu, families, registry_p).parameter
+```
+
+With `:gpu`, `cuda_stream` is owned by the solver and routed to it:
+
+```@example routing
+routed_gpu = Orchestration.route_all_options(
+    method_gpu, families, action_defs,
+    (grid_size = 50, cuda_stream = 2), registry_p,
+)
+routed_gpu.strategies
+```
+
+With `:cpu`, the same option is unknown — the CPU variant does not declare it:
+
+```@repl routing
+Orchestration.route_all_options(
+    (:collocation, :adnlp, :madnlp, :cpu), families, action_defs,
+    (cuda_stream = 2,), registry_p,
+)
+
+```
