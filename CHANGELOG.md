@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📚 Documentation
+
+- ct-conventions is pinned in `.conventions/` at v0.3.0, which adds `SITE14` (exact
+  versions in `docs/package.json`, already followed since #598).
+
 ## [0.30.9] - 2026-10-13
 
 ### 🐛 Fixed

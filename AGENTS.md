@@ -26,7 +26,7 @@ The coding conventions live in
 submodule in `.conventions/` and pinned to a SemVer release tag (`vX.Y.Z`). Read the
 local files; if `.conventions/` is empty, run `git submodule update --init`.
 
-**Pinned version: ct-conventions v0.2.0.** Cite rules by identifier (`MOD3`, `TST1`), and
+**Pinned version: ct-conventions v0.3.0.** Cite rules by identifier (`MOD3`, `TST1`), and
 state the version you applied in plans and reports.
 
 Read in this order:
