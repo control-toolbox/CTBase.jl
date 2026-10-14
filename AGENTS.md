@@ -10,39 +10,48 @@ Standard control-toolbox package structure. Each directory may contain a `README
 with package-specific details — read it before working in that directory.
 
 ```text
-src/        # Source code: one submodule per responsibility, no top-level exports
-ext/        # Weak-dependency extensions (loaded on demand by Julia)
-test/suite/ # Test suite: organised by functionality, not by src/ layout
-docs/       # Documentation site (DocumenterVitepress)
-.handbook/  # control-toolbox Handbook (git submodule, pinned to a tag)
+src/           # Source code: one submodule per responsibility, no top-level exports
+ext/           # Weak-dependency extensions (loaded on demand by Julia)
+test/suite/    # Test suite: organised by functionality, not by src/ layout
+docs/          # Documentation site (DocumenterVitepress)
+.conventions/  # ct-conventions (git submodule, pinned to a tag)
 ```
 
 ---
 
-## Developer Resources
+## Conventions
 
-Design philosophy, operational rules, plan templates, and CI/CD conventions live in the
-[control-toolbox Handbook](https://github.com/control-toolbox/Handbook), vendored as a git
-submodule in `.handbook/` and pinned to a SemVer release tag (`vX.Y.Z`). Read the local files;
-if `.handbook/` is empty, run `git submodule update --init`.
+The coding conventions live in
+[ct-conventions](https://github.com/control-toolbox/ct-conventions), vendored as a git
+submodule in `.conventions/` and pinned to a SemVer release tag (`vX.Y.Z`). Read the
+local files; if `.conventions/` is empty, run `git submodule update --init`.
 
-| Topic | Link |
+**Pinned version: ct-conventions v0.2.0.** Cite rules by identifier (`MOD3`, `TST1`), and
+state the version you applied in plans and reports.
+
+Read in this order:
+
+| File | Content |
 | --- | --- |
-| Code philosophy (modules, types/traits, exceptions, docstrings, testing, docs) | [`PHILOSOPHY.md`](.handbook/PHILOSOPHY.md) |
-| Operational rules (tests, coverage, docs, git) | [`RULES.md`](.handbook/RULES.md) |
-| Plan template | [`PLAN.md`](.handbook/PLAN.md) |
-| CI/CD workflows (centralized reusable workflows, label-gated triggers) | [`WORKFLOWS.md`](.handbook/WORKFLOWS.md) |
+| [`rules/general.md`](.conventions/rules/general.md) | Rules that hold everywhere — **always read** |
+| [`README.md`](.conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`) |
+| [`method.md`](.conventions/method.md) | How to work: tests, coverage, docs build, output capture |
+| [`plan-template.md`](.conventions/plan-template.md) | Template for a substantial piece of work |
+
+How agents behave on these repositories is described in
+[ct-agents](https://github.com/control-toolbox/ct-agents).
 
 ---
 
 ## Key Conventions
 
-- **No top-level exports** — use `Package.Submodule.symbol` everywhere.
-- **Qualified imports** — `using Pkg: Pkg`, never bare `using Pkg`; `import` is never used.
-- **Fake types at module top-level** — never inside test functions.
-- **Structured errors** — seven typed exceptions under `CTException`; pick by the IncorrectArgument / PreconditionError / NotImplemented rule.
-- **Type stability enforced** — hot paths must be `@inferred`-clean, verified with JET; setup-path dispatch is fine.
-- **1-D is a scalar** — a one-dimensional state/control/variable is a `Number`, never a length-1 vector.
-- **Plans before code** — write a plan and confirm with the user before touching files.
-- **Docstrings last** — written only after all implementation steps are stable.
-- **Never commit or push without explicit user approval.**
+- **English everywhere** — code, docs, commits, issues, PRs (`GEN1`).
+- **No top-level exports** — use `Package.Submodule.symbol` everywhere (`MOD8`).
+- **Qualified imports** — `using Pkg: Pkg`, never bare `using Pkg`; `import` is never used (`MOD3`, `MOD4`).
+- **Fake types at module top-level** — never inside test functions (`TST3`).
+- **Structured errors** — seven typed exceptions; pick by the choice rule (`EXC1`).
+- **Type stability enforced** — hot paths `@inferred`-clean, verified with JET (`TYP8`, `PERF1`–`PERF5`).
+- **1-D is a scalar** — a one-dimensional state/control/variable is a `Number` (`DIM1`).
+- **Plan before code** — a local agent proposes a plan ([`plan-template.md`](.conventions/plan-template.md)) and waits for confirmation before working on code. The process for remote agents is still to be defined.
+- **Docstrings last** — written once the implementation is stable (`DOC1`–`DOC8`).
+- **The human merges** — an agent never merges a pull request.
