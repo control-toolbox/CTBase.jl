@@ -426,8 +426,8 @@ MarkdownAST = "..."
 
 In the control-toolbox ecosystem, documentation is built and deployed by the centralized
 reusable workflows, which run `docs/make.jl` and deploy with
-`DocumenterVitepress.deploydocs` — see the Handbook's
-[`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md). A package only needs a `docs/Project.toml` that includes the weak
+`DocumenterVitepress.deploydocs` — see the CTActions
+[workflows guide](https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md). A package only needs a `docs/Project.toml` that includes the weak
 dependencies whose extensions it documents.
 
 ## Summary

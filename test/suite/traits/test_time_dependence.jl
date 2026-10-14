@@ -41,6 +41,12 @@ function test_time_dependence()
                 Test.@test Traits.Autonomous <: Traits.TimeDependence
                 Test.@test Traits.NonAutonomous <: Traits.TimeDependence
             end
+
+            Test.@testset "All time-dependence traits subtype AbstractTrait" begin
+                Test.@test Traits.TimeDependence <: Traits.AbstractTrait
+                Test.@test Traits.Autonomous <: Traits.AbstractTrait
+                Test.@test Traits.NonAutonomous <: Traits.AbstractTrait
+            end
         end
 
         # ====================================================================

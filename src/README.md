@@ -5,4 +5,4 @@ subdirectory contains a manifest file (`SubModule.jl`) and its implementation fi
 The package top-level (`CTBase.jl`) exports **nothing** — all symbols are accessed via
 qualified paths (`CTBase.SubModule.symbol`).
 
-Conventions: [control-toolbox Handbook](https://github.com/control-toolbox/Handbook).
+Conventions: [ct-conventions](https://github.com/control-toolbox/ct-conventions).

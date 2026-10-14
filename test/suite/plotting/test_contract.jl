@@ -8,7 +8,7 @@ using Plots: Plots
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
-# Fake backend at module top level (Handbook: fake types never inside functions).
+# Fake backend at module top level (TST3: fake types never inside functions).
 # Having no specific render method, it hits the abstract fallback -> ExtensionError,
 # which is exactly the "no backend loaded" behaviour, testable with Plots present.
 struct DummyBackend <: Plotting.AbstractPlottingBackend end
