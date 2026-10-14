@@ -200,7 +200,7 @@ Focus on:
 
 On CI, upload `coverage/lcov.info` to your coverage service (e.g. Codecov). In the
 control-toolbox ecosystem this is handled by the centralized reusable workflows — see
-the Handbook's [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md).
+the CTActions [workflows guide](https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md).
 
 ## See Also
 

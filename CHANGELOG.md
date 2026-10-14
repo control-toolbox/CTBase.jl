@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation
 
+- The Handbook is now [ct-conventions](https://github.com/control-toolbox/ct-conventions),
+  pinned in `.conventions/` at v0.2.0; `AGENTS.md` cites rules by identifier and no longer
+  summarizes them. References in `docs/make.jl` and the Color System guide follow.
 - Color System guide: the "Documenting Colored Output" section is replaced by a pointer to
   `docs/README.md` and the Handbook, which hold the single copy of the `@repl`/`@ansi` rule (#588).
 - Documentation audit and refresh: the Differentiation guide documents `check_backend`

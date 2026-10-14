@@ -453,7 +453,7 @@ julia --project -e 'using Pkg: Pkg; Pkg.test("MyPackage"; test_args=["utils", "-
 
 CI simply calls `Pkg.test()`: `runtests.jl` receives no arguments and runs every
 available test. In the control-toolbox ecosystem this is done by the centralized
-reusable workflows — see the Handbook's [`WORKFLOWS.md`](https://github.com/control-toolbox/Handbook/blob/main/WORKFLOWS.md).
+reusable workflows — see the CTActions [workflows guide](https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md).
 
 ## See Also
 

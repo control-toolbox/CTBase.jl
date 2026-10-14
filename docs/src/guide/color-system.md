@@ -227,7 +227,7 @@ This ensures your display code:
 ## Documenting Colored Output
 
 To document colored output (`@repl` vs `@example` vs `@ansi`), see `docs/README.md` or the
-Handbook's [`VITEPRESS-DOC.md`](https://github.com/control-toolbox/Handbook/blob/main/VITEPRESS-DOC.md).
+the [notes on the VitePress backend](https://github.com/control-toolbox/ct-conventions/blob/main/rules/site.md#notes-on-the-vitepress-backend-no-identifier) in ct-conventions.
 
 ## See Also
 

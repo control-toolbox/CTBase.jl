@@ -27,7 +27,7 @@ using CairoMakie: CairoMakie, Makie   # qualified `using`: loads CairoMakie and 
 # (image/png: 4.0 over image/svg+xml: 3.0) — the opposite of Documenter.HTML, which
 # prefers SVG. Both Plots.jl and CairoMakie respond to `image/png`, so PNG wins for
 # every figure unless it is disabled. Set once here so it covers every page, present
-# or future. See Handbook/VITEPRESS-DOC.md "Plot image format — SVG vs PNG".
+# or future. See ct-conventions SITE12 (plots are rendered as SVG).
 Base.showable(::MIME"image/png", ::Plots.Plot) = false
 CairoMakie.activate!(; type="svg")
 Base.showable(::MIME"image/png", ::CairoMakie.Makie.Figure) = false
@@ -112,8 +112,8 @@ with_api_reference(src_dir) do api_pages
         # `:external_cross_references` — the self-referencing `InterLinks` "CTBase"
         # entry only resolves against `build/1/objects.inv`, absent on the very first
         # build of a fresh checkout; that first build then completes with @errors and
-        # produces the inventory, and a second build is clean (see Handbook
-        # documentation.md). Matches CTModels.jl.
+        # produces the inventory, and a second build is clean (see ct-conventions
+        # SITE5). Matches CTModels.jl.
         warnonly=[:cross_references, :external_cross_references],
         sitename="CTBase.jl",
         format=DocumenterVitepress.MarkdownVitepress(;

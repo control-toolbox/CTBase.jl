@@ -1,6 +1,6 @@
 """
-Regression guard for the Handbook rule "using, never import" (tenet 2,
-`philosophy/modules.md#using-never-import`): flags any tracked `.jl` or `.md`
+Regression guard for the ct-conventions rule "using, never import"
+(`MOD3`): flags any tracked `.jl` or `.md`
 file that still uses the `import` keyword, or the forbidden dotted
 `using Pkg.Sub` form (the canonical spelling is `using Pkg: Sub`).
 """
@@ -21,7 +21,7 @@ const DOTTED_USING_RE = r"^\s*using\s+[A-Za-z_]\w*\.[A-Za-z_]"
 const DOTTED_USING_EXEMPT = ("BREAKING.md",)
 
 function test_no_import()
-    Test.@testset "No `import` / no dotted `using Pkg.Sub` (Handbook tenet 2)" verbose =
+    Test.@testset "No `import` / no dotted `using Pkg.Sub` (MOD3)" verbose =
         VERBOSE showtiming = SHOWTIMING begin
         repo_root = joinpath(@__DIR__, "..", "..", "..")
         tracked = filter(

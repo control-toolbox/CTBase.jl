@@ -12,7 +12,7 @@ julia --project=. docs/make.jl
 Preview after build: `npx serve docs/build/1 --listen 5173`
 
 Documentation conventions and build workflow:
-[control-toolbox Handbook](https://github.com/control-toolbox/Handbook).
+[ct-conventions](https://github.com/control-toolbox/ct-conventions) (rules `SITE1`–`SITE13`, `method.md`).
 
 ## `@repl` vs `@example` — ANSI color rule
 

@@ -1,7 +1,7 @@
 """
 Regression guard for the struct-vs-abstract-parent bound-dropping pitfall (see
-`.reports/2026-07-12_alias-where-bounds-audit.md` and the Handbook rule in
-`philosophy/types-traits-interfaces.md#aliases-and-where`).
+`.reports/2026-07-12_alias-where-bounds-audit.md` and the ct-conventions rule
+`TYP3`).
 
 A `struct Child{T} <: Parent{T}` where `Parent{T<:Bound}` does not
 automatically bound `T` on `Child` itself — Julia only enforces the bound
