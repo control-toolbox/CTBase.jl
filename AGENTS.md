@@ -52,5 +52,6 @@ How agents behave on these repositories is described in
 - **Structured errors** — seven typed exceptions; pick by the choice rule (`EXC1`).
 - **Type stability enforced** — hot paths `@inferred`-clean, verified with JET (`TYP8`, `PERF1`–`PERF5`).
 - **1-D is a scalar** — a one-dimensional state/control/variable is a `Number` (`DIM1`).
+- **Plan before code** — a local agent proposes a plan ([`plan-template.md`](.conventions/plan-template.md)) and waits for confirmation before working on code. The process for remote agents is still to be defined.
 - **Docstrings last** — written once the implementation is stable (`DOC1`–`DOC8`).
 - **The human merges** — an agent never merges a pull request.
