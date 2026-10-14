@@ -34,6 +34,9 @@ Manifest*.toml
 \#*
 .*.swp
 
+# ct-conventions, cloned at the tag pinned in AGENTS.md
+.conventions/
+
 #
 .agent/
 .reports/

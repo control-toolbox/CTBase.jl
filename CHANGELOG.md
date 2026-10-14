@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Fixed
+
+- `Pkg.add("CTBase")` failed on Julia 1.10 (`GitError: cannot get submodules without a
+  working tree`): the package tree contained a git submodule, `.conventions/`. It is now a
+  git-ignored local clone of ct-conventions at the tag pinned in `AGENTS.md`; nothing
+  changes for users of the package.
+
 ### 📚 Documentation
 
 - ct-conventions is pinned in `.conventions/` at v0.3.0, which adds `SITE14` (exact

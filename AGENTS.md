@@ -14,7 +14,7 @@ src/           # Source code: one submodule per responsibility, no top-level exp
 ext/           # Weak-dependency extensions (loaded on demand by Julia)
 test/suite/    # Test suite: organised by functionality, not by src/ layout
 docs/          # Documentation site (DocumenterVitepress)
-.conventions/  # ct-conventions (git submodule, pinned to a tag)
+.conventions/  # ct-conventions, cloned at the pinned tag (git-ignored)
 ```
 
 ---
@@ -22,9 +22,15 @@ docs/          # Documentation site (DocumenterVitepress)
 ## Conventions
 
 The coding conventions live in
-[ct-conventions](https://github.com/control-toolbox/ct-conventions), vendored as a git
-submodule in `.conventions/` and pinned to a SemVer release tag (`vX.Y.Z`). Read the
-local files; if `.conventions/` is empty, run `git submodule update --init`.
+[ct-conventions](https://github.com/control-toolbox/ct-conventions), pinned below to a
+SemVer release tag (`vX.Y.Z`). Read them from a local clone in `.conventions/`
+(git-ignored, not a submodule). If it is missing, or `git -C .conventions describe --tags`
+is not the pinned tag, (re)create it:
+
+```bash
+rm -rf .conventions
+git -c advice.detachedHead=false clone --quiet --depth 1 --branch v0.3.0 https://github.com/control-toolbox/ct-conventions.git .conventions
+```
 
 **Pinned version: ct-conventions v0.3.0.** Cite rules by identifier (`MOD3`, `TST1`), and
 state the version you applied in plans and reports.
