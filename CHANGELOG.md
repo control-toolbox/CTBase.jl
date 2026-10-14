@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   summarizes them. References in `docs/make.jl` and the Color System guide follow.
 - Color System guide: the "Documenting Colored Output" section is replaced by a pointer to
   `docs/README.md` and the Handbook, which hold the single copy of the `@repl`/`@ansi` rule (#588).
+
+### ✅ Compatibility
+
+- **No breaking changes**: the pending trait and documentation updates do not change the
+  public API incompatibly.
+
+### 📚 Documentation
+
 - Documentation audit and refresh: the Differentiation guide documents `check_backend`
   and the missing-AD-package `ExtensionError` (0.30.8); the Plotting guide documents the
   `title`/`xlabel`/`ylabel` resolution on the IR (0.30.7); the Orchestration guide covers
