@@ -1,3 +1,0 @@
-[submodule ".conventions"]
-	path = .conventions
-	url = https://github.com/control-toolbox/ct-conventions.git
