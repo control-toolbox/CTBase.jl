@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- Documentation helpers in `DevTools`, implemented by the `DocumenterReference` extension
+  (ct-conventions `SITE15`, `SITE16`), moved from CTSolvers' `docs/noext.jl` and
+  `docs/doclogs.jl` so that every package can use them:
+  - `repl_without_extensions(package, codes...)` renders, like an `@repl` block, the
+    error raised in a fresh Julia process where only `package` is loaded. An `@repl` block
+    cannot show it, because `make.jl` loads every extension. The build fails if the last
+    snippet no longer throws.
+  - `warnings_without_paths(f; show=false)` prints the warnings of `f()` without the
+    source path of the build machine.
+
 ### 🐛 Fixed
 
 - `Pkg.add("CTBase")` failed on Julia 1.10 (`GitError: cannot get submodules without a

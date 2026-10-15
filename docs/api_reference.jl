@@ -106,6 +106,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("DevTools", "DevTools.jl"),
                 joinpath("DevTools", "coverage_postprocessing.jl"),
                 joinpath("DevTools", "documenter_reference.jl"),
+                joinpath("DevTools", "documentation_helpers.jl"),
                 joinpath("DevTools", "test_runner.jl"),
             ),
         ),
@@ -248,6 +249,7 @@ function generate_api_reference(src_dir::String)
             ext(
                 joinpath("DocumenterReference", "DocumenterReference.jl"),
                 joinpath("DocumenterReference", "config_helpers.jl"),
+                joinpath("DocumenterReference", "documentation_helpers.jl"),
                 joinpath("DocumenterReference", "entry_point.jl"),
                 joinpath("DocumenterReference", "page_building.jl"),
                 joinpath("DocumenterReference", "source_file_detection.jl"),

@@ -30,6 +30,7 @@ include("symbol_iteration.jl")
 include("type_formatting.jl")
 include("page_building.jl")
 include("entry_point.jl")
+include("documentation_helpers.jl")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Documenter Pipeline Integration

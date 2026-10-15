@@ -34,7 +34,7 @@ It provides the **base layer** shared by all packages: common types, structured 
 | [`CTBase.Orchestration`](@ref) | Option routing and disambiguation between problem-level actions and strategies |
 | [`CTBase.Differentiation`](@ref) | AD-backend strategies for gradients, derivatives, partial derivatives, and Jacobian–vector products |
 | [`CTBase.Interpolation`](@ref) | Linear and piecewise-constant interpolation with flat extrapolation |
-| [`CTBase.DevTools`](@ref) | Developer tools with tag-based dispatch for `run_tests`, `postprocess_coverage`, and `automatic_reference_documentation` |
+| [`CTBase.DevTools`](@ref) | Developer tools with tag-based dispatch for `run_tests`, `postprocess_coverage`, `automatic_reference_documentation`, and the documentation helpers `repl_without_extensions` and `warnings_without_paths` |
 | [`CTBase.Unicode`](@ref) | Unicode subscript/superscript helpers for display |
 | [`CTBase.Plotting`](@ref) | Backend-agnostic plotting IR: series, axes, layout tree, and a render contract with Plots.jl and Makie.jl backends |
 

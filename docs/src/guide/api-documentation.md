@@ -430,6 +430,46 @@ reusable workflows, which run `docs/make.jl` and deploy with
 [workflows guide](https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md). A package only needs a `docs/Project.toml` that includes the weak
 dependencies whose extensions it documents.
 
+## Documentation helpers
+
+The extension also provides two helpers for the pages of a package's documentation
+(ct-conventions `SITE15`, `SITE16`).
+
+**Errors raised when an extension is not loaded.** `make.jl` loads every weak dependency so
+that the reference documents the extensions, and extension methods are global to the
+process: an `@repl` block would show a working instance instead of the error.
+[`CTBase.DevTools.repl_without_extensions`](@ref) evaluates the snippets in a fresh Julia
+process where only the package is loaded, and renders the transcript like an `@repl`
+block:
+
+````markdown
+```@eval
+using CTBase: CTBase
+CTBase.DevTools.repl_without_extensions(:MyPackage, "MyPackage.Solver()")
+```
+````
+
+Snippets before the last one are shown as inputs and must succeed (for example
+`"using SomeBackend"`). The last one must throw: the build fails if it no longer does, so
+the example cannot go stale silently.
+
+**Warnings without build-machine paths.** In an `@example` block, Documenter prints a log
+record with its source location (`└ @ Module /path/on/the/build/machine/file.jl:line`).
+[`CTBase.DevTools.warnings_without_paths`](@ref) prints the warnings as
+`┌ Warning: …` / `└ @ Module` instead. Put it on hidden lines around the visible ones:
+
+````markdown
+```@example page
+CTBase.DevTools.warnings_without_paths(; show = true) do # hide
+MyPackage.Solver(unknown_option = 1; mode = :permissive)
+end # hide
+```
+````
+
+With `show = true` the value is printed after the warnings (Documenter does not show what
+a block printed when the block returns a value). Variables assigned inside the block must
+be declared `global` on a hidden line.
+
 ## Summary
 
 The `DocumenterReference` extension provides a powerful, flexible system for automatically generating API documentation. By following the patterns shown in this guide, you can maintain comprehensive, up-to-date documentation with minimal manual effort.
