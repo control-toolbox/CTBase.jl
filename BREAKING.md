@@ -2,6 +2,16 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.10)
+
+- **`DevTools` documentation helpers**: added `DevTools.repl_without_extensions` and
+  `DevTools.warnings_without_paths`, implemented by the `DocumenterReference` extension
+  (`SITE15`, `SITE16`, #607). **No breaking change**: purely additive helpers; no existing
+  public signature, type, or name changed. No migration required.
+- **Dependencies and conventions**: extended `DocStringExtensions` compatibility to `0.10`
+  (#603), replaced the `.conventions/` submodule with a git-ignored clone (#601), and pinned
+  `ct-conventions` `v0.4.0` (#605). **No breaking change**: no migration required.
+
 ## Non-breaking note (0.30.9)
 
 - **`Traits.TimeDependence` hierarchy**: `Traits.TimeDependence` now subtypes
