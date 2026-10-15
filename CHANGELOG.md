@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.10] - 2026-10-15
+
 ### ✨ New Features
 
 - Documentation helpers in `DevTools`, implemented by the `DocumenterReference` extension
-  (ct-conventions `SITE15`, `SITE16`), moved from CTSolvers' `docs/noext.jl` and
-  `docs/doclogs.jl` so that every package can use them:
+  (ct-conventions `SITE15`, `SITE16`, [#607](https://github.com/control-toolbox/CTBase.jl/pull/607)),
+  moved from CTSolvers' `docs/noext.jl` and `docs/doclogs.jl` so that every package can use
+  them:
   - `repl_without_extensions(package, codes...)` renders, like an `@repl` block, the
     error raised in a fresh Julia process where only `package` is loaded. An `@repl` block
     cannot show it, because `make.jl` loads every extension. The build fails if the last
@@ -19,21 +22,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `warnings_without_paths(f; show=false)` prints the warnings of `f()` without the
     source path of the build machine.
 
-### 🐛 Fixed
+### 🐛 Bug Fixes
 
 - `Pkg.add("CTBase")` failed on Julia 1.10 (`GitError: cannot get submodules without a
   working tree`): the package tree contained a git submodule, `.conventions/`. It is now a
   git-ignored local clone of ct-conventions at the tag pinned in `AGENTS.md`; nothing
-  changes for users of the package.
+  changes for users of the package ([#601](https://github.com/control-toolbox/CTBase.jl/pull/601)).
 
 ### 📚 Documentation
 
-- ct-conventions is pinned in `.conventions/` at v0.3.0, which adds `SITE14` (exact
-  versions in `docs/package.json`, already followed since #598).
+- Documented `DevTools.repl_without_extensions` and `DevTools.warnings_without_paths` in the
+  API documentation guide ([#607](https://github.com/control-toolbox/CTBase.jl/pull/607)).
+- ct-conventions is pinned in `.conventions/` at `v0.4.0`
+  ([#599](https://github.com/control-toolbox/CTBase.jl/pull/599),
+  [#605](https://github.com/control-toolbox/CTBase.jl/pull/605)), adding `GEN2` (unified
+  `.markdownlint.json` configuration), `SITE14` (exact versions in `docs/package.json`,
+  [#598](https://github.com/control-toolbox/CTBase.jl/pull/598)), and `SITE15`–`SITE16`
+  (documentation helpers).
+- Documentation preview CI workflows: gated PR preview pushes behind a label
+  ([#604](https://github.com/control-toolbox/CTBase.jl/pull/604)) and added cleanup of
+  closed PR previews from `gh-pages`
+  ([#606](https://github.com/control-toolbox/CTBase.jl/pull/606)).
+
+### 📦 Dependencies
+
+- Extended `DocStringExtensions` compatibility to `0.9, 0.10`
+  ([#603](https://github.com/control-toolbox/CTBase.jl/pull/603)).
+
+### ✅ Compatibility
+
+- **No breaking changes**: additive `DevTools` documentation helpers and
+  `DocStringExtensions` `0.10` compatibility only. See [BREAKING.md](BREAKING.md).
 
 ## [0.30.9] - 2026-10-13
 
-### 🐛 Fixed
+### 🐛 Bug Fixes
 
 - `Traits.TimeDependence` now subtypes `Traits.AbstractTrait`, like every other trait
   family (#586). Only a supertype is added; no existing `<:` relation changes.
@@ -45,14 +68,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   summarizes them. References in `docs/make.jl` and the Color System guide follow.
 - Color System guide: the "Documenting Colored Output" section is replaced by a pointer to
   `docs/README.md` and the Handbook, which hold the single copy of the `@repl`/`@ansi` rule (#588).
-
-### ✅ Compatibility
-
-- **No breaking changes**: the pending trait and documentation updates do not change the
-  public API incompatibly.
-
-### 📚 Documentation
-
 - Documentation audit and refresh: the Differentiation guide documents `check_backend`
   and the missing-AD-package `ExtensionError` (0.30.8); the Plotting guide documents the
   `title`/`xlabel`/`ylabel` resolution on the IR (0.30.7); the Orchestration guide covers
@@ -203,6 +218,7 @@ several releases old.
 ### 🐛 Bug Fixes
 
 **`Descriptions.complete` — truncation marker and closest-matches hint** ([#553](https://github.com/control-toolbox/CTBase.jl/issues/553)).
+
 - The candidate list is no longer silently head-truncated: when the catalog has more
   descriptions than `max_show`, a `… and N more` line is appended so the `Available`
   list is not mistaken for exhaustive.
