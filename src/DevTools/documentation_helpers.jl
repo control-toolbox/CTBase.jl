@@ -45,10 +45,7 @@ unless the `DocumenterReference` extension is loaded.
 See also: [`CTBase.DevTools.warnings_without_paths`](@ref).
 """
 function repl_without_extensions(
-    ::AbstractDocumenterReferenceTag,
-    package::Symbol,
-    codes::AbstractString...;
-    kwargs...,
+    ::AbstractDocumenterReferenceTag, package::Symbol, codes::AbstractString...; kwargs...
 )
     return throw(
         Exceptions.ExtensionError(

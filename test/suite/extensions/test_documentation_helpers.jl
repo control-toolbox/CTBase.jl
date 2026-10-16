@@ -64,8 +64,7 @@ function test_documentation_helpers()
                 end
             end
             Test.@test value == 42
-            Test.@test out ==
-                "┌ Warning: first line\n│ second line\n└ @ $(@__MODULE__)\n"
+            Test.@test out == "┌ Warning: first line\n│ second line\n└ @ $(@__MODULE__)\n"
             Test.@test !occursin(@__FILE__, out)
         end
 
