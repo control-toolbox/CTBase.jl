@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.11] - 2026-10-18
+
 ### ✨ New Features
 
 - `DevTools.test_extensions_quality(pkg; allowed_piracies=Dict())`, provided by the new
@@ -50,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: additive plotting API; `Plotting.Decoration` stays available as
+- **No breaking changes**: additive plotting API and developer helper
+  (`DevTools.test_extensions_quality`); `Plotting.Decoration` stays available as
   an alias of `Plotting.AbstractDecoration`, and `lower` gains optional keywords only. See
   [BREAKING.md](BREAKING.md).
 

@@ -2,6 +2,17 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.11)
+
+- **Plotting decorations**: added `Plotting.AbstractDecoration`, `Plotting.Annotation`,
+  `Plotting.splice_jumps`, `Plotting.switching_vlines` and `Plotting.phase_annotations`
+  (#612); `Plotting.Decoration` is kept as an alias of `Plotting.AbstractDecoration`, and
+  `Plotting.lower` gains optional keywords only. **No breaking change**: no migration
+  required.
+- **`DevTools.test_extensions_quality`**: new developer helper provided by the `CTBaseAqua`
+  extension (triggers `Aqua` and `Test`; `TST8`, #615). **No breaking change**: purely
+  additive; no migration required.
+
 ## Non-breaking note (0.30.10)
 
 - **`DevTools` documentation helpers**: added `DevTools.repl_without_extensions` and
