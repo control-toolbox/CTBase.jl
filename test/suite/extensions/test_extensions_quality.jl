@@ -12,6 +12,8 @@ const CTBaseAqua = Base.get_extension(CTBase, :CTBaseAqua)
 # Fakes: a package, one clean extension and one pirating, ambiguous extension.
 module FakePkg
 struct Owned end
+const OwnedOrInt = Union{Owned,Int}
+const ForeignUnion = Union{Int,AbstractVector{<:Real}}
 f(::Int) = 1
 end
 
@@ -40,6 +42,8 @@ function test_extensions_quality()
             Test.@test FakePkg.f in owned
             Test.@test FakePkg.Owned in owned
             Test.@test !(sin in owned)
+            Test.@test !(FakePkg.OwnedOrInt in owned)
+            Test.@test !(FakePkg.ForeignUnion in owned)
         end
 
         Test.@testset "Piracy detection" begin
