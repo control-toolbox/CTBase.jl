@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New Features
 
+- `DevTools.test_extensions_quality(pkg; allowed_piracies=Dict())`, provided by the new
+  `CTBaseAqua` extension (triggers `Aqua` and `Test`)
+  ([#615](https://github.com/control-toolbox/CTBase.jl/issues/615),
+  ct-conventions `TST8`). `Aqua.test_all` never inspects an extension, so for each entry of
+  the `[extensions]` table of `pkg` the helper asserts that the extension is loaded, fails
+  on any pirated method (every function and type of `pkg` being treated as owned) and on
+  any ambiguity. Piracy needed by design is listed per extension as
+  `signature => reason`; an entry that is no longer pirated fails too. CTBase calls it
+  from `test/suite/meta/test_code_quality.jl`; its six extensions are clean.
 - `Plotting.Annotation`, a text drawn in a cell, e.g. the label of a phase
   ([#612](https://github.com/control-toolbox/CTBase.jl/issues/612)). Its abscissa is a
   data coordinate and its ordinate is relative to the y-axis range (`0` bottom, `1` top,
@@ -31,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   another package can add a decoration with a subtype and a drawing method per backend (a
   backend without one throws `NotImplemented`). `Plotting.Decoration`, formerly the union
   of the decoration types, is kept as an alias.
+
+### 🐛 Bug Fixes
+
+- `Interpolation`: `searchsortedlast(x, t)` is asserted `::Int` in the `Linear` and
+  `Constant` call methods, so that JET no longer reports `+(::IntSemiToken, ::Int)` as soon
+  as `DataStructures` is loaded (its `SortedDict` method of `searchsortedlast`). The
+  code-quality test no longer depends on which extensions are loaded.
 
 ### ✅ Compatibility
 
