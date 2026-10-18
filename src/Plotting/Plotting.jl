@@ -14,7 +14,7 @@ drawing lives in an extension (`CTBasePlots` for Plots.jl). See the design repor
 in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
 
 # Public API
-- IR: [`CTBase.Plotting.Series`](@extref), [`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref), [`CTBase.Plotting.Axes`](@extref),
+- IR: [`CTBase.Plotting.Series`](@extref), [`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref), [`CTBase.Plotting.Annotation`](@extref), [`CTBase.Plotting.Axes`](@extref),
   [`CTBase.Plotting.Leaf`](@extref), [`CTBase.Plotting.HBox`](@extref), [`CTBase.Plotting.VBox`](@extref), [`CTBase.Plotting.Figure`](@extref), [`CTBase.Plotting.leaves`](@extref)
 - case-layer building blocks: [`CTBase.Plotting.Panel`](@extref), [`CTBase.Plotting.Stacked`](@extref), [`CTBase.Plotting.Paired`](@extref),
   [`CTBase.Plotting.Grid`](@extref)
@@ -25,7 +25,7 @@ module Plotting
 
 # =============================================================================
 # Files (all backend-free, live in `src`):
-#   - ir.jl          : the IR itself (pure data): Series, HLine/VLine, Axes,
+#   - ir.jl          : the IR itself (pure data): Series, HLine/VLine, Annotation, Axes,
 #                      Leaf/HBox/VBox, Figure — plus deterministic leaf traversal.
 #   - panel.jl       : Panel (a titled group of components, with its own x grid
 #                      and optional per-component style) + replaceable defaults.
@@ -53,7 +53,7 @@ include(joinpath(@__DIR__, "labels.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
 
 # --- IR ----------------------------------------------------------------------
-export Series, HLine, VLine, Axes
+export Series, HLine, VLine, Annotation, Axes
 export AbstractLayoutNode, Leaf, HBox, VBox, Figure
 export leaves
 

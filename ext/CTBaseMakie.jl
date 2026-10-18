@@ -236,7 +236,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Draw a decoration (`HLine` or `VLine`) into `axis` via `Makie.hlines!` / `vlines!`,
+Draw a reference line (`HLine` or `VLine`) into `axis` via `Makie.hlines!` / `vlines!`,
 with style translation. Decorations carry no legend entry.
 """
 function _draw_decoration!(axis, d::Plotting.HLine)
@@ -245,6 +245,34 @@ function _draw_decoration!(axis, d::Plotting.HLine)
 end
 function _draw_decoration!(axis, d::Plotting.VLine)
     Makie.vlines!(axis, d.value; _translate_style(d.style)...)
+    return axis
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw an [`CTBase.Plotting.Annotation`](@extref) into `axis` via `Makie.text!`. Its position
+follows the axis limits: the relative ordinate is mapped onto `axis.finallimits`, and the
+text is excluded from auto-limits, so it stays at the same height when the data change.
+The neutral style gives `fontsize` (default 12), `color` (default `:black`) and
+`halign` / `valign` (both centred by default); `backend_kwargs` are forwarded.
+"""
+function _draw_decoration!(axis, a::Plotting.Annotation)
+    pos = Makie.lift(axis.finallimits) do r
+        Makie.Point2f(a.x, r.origin[2] + a.y * r.widths[2])
+    end
+    bk = get(a.style, :backend_kwargs, NamedTuple())
+    Makie.text!(
+        axis,
+        pos;
+        text=a.text,
+        fontsize=get(a.style, :fontsize, 12),
+        color=get(a.style, :color, :black),
+        align=(get(a.style, :halign, :center), get(a.style, :valign, :center)),
+        xautolimits=false,
+        yautolimits=false,
+        bk...,
+    )
     return axis
 end
 

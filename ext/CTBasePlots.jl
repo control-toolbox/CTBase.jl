@@ -153,7 +153,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Draw a decoration (`HLine` or `VLine`) into subplot `sp` of plot `p`.
+Draw a reference line (`HLine` or `VLine`) into subplot `sp` of plot `p`.
 """
 function _draw_decoration!(p, d::Plotting.HLine, sp::Int)
     Plots.hline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
@@ -161,6 +161,39 @@ function _draw_decoration!(p, d::Plotting.HLine, sp::Int)
 end
 function _draw_decoration!(p, d::Plotting.VLine, sp::Int)
     Plots.vline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
+    return p
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Translate the neutral text style of an [`CTBase.Plotting.Annotation`](@extref) into a
+`Plots.Font`: `fontsize` (default 9), `color` (default `:black`), `halign` (`:left`,
+`:center`, `:right`) and `valign` (`:bottom`, `:center`, `:top`), both centred by default.
+"""
+function _annotation_font(style::NamedTuple)
+    h = get(style, :halign, :center)
+    v = get(style, :valign, :center)
+    return Plots.font(;
+        pointsize=get(style, :fontsize, 9),
+        color=get(style, :color, :black),
+        halign=(h === :center ? :hcenter : h),
+        valign=(v === :center ? :vcenter : v),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw an [`CTBase.Plotting.Annotation`](@extref) into subplot `sp` of plot `p`. Its relative
+ordinate is converted with the y-range of the subplot, so call it once the series and the
+axis limits are set. `backend_kwargs` of the style are forwarded to `Plots.annotate!`.
+"""
+function _draw_decoration!(p, a::Plotting.Annotation, sp::Int)
+    lo, hi = Plots.ylims(p[sp])
+    txt = Plots.text(a.text, _annotation_font(a.style))
+    bk = get(a.style, :backend_kwargs, NamedTuple())
+    Plots.annotate!(p, a.x, lo + a.y * (hi - lo), txt; subplot=sp, bk...)
     return p
 end
 
@@ -186,9 +219,9 @@ function _draw_axes!(
         _draw_series!(p, ax.series[i], sp; series_user...)
     end
     for d in ax.decorations
-        _draw_decoration!(p, d, sp)
+        d isa Plotting.Annotation || _draw_decoration!(p, d, sp)
     end
-    overlay && return p
+    overlay && return _draw_annotations!(p, ax, sp)
     # user `legend` / `ylims` override the IR defaults; other user subplot attributes
     # (grid, framestyle, …) are applied as-is; reserved metadata keys are protected.
     # The legend shows when the IR asks for it (`:group`) or when a series carries a
@@ -212,6 +245,19 @@ function _draw_axes!(
         Plots.plot!(p; attrs..., extra...)
     else
         Plots.plot!(p; attrs..., ylims=yl, extra...)
+    end
+    return _draw_annotations!(p, ax, sp)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw the [`CTBase.Plotting.Annotation`](@extref)s of `ax` into subplot `sp` of plot `p`, last:
+their relative ordinates need the final y-range of the subplot.
+"""
+function _draw_annotations!(p, ax::Plotting.Axes, sp::Int)
+    for d in ax.decorations
+        d isa Plotting.Annotation && _draw_decoration!(p, d, sp)
     end
     return p
 end

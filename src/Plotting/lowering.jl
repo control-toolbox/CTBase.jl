@@ -62,14 +62,16 @@ end
 $(TYPEDSIGNATURES)
 
 Collect decorations for component `i` in `:split` layout: its own horizontal lines
-(`hlines[i]` if present) followed by the shared vertical lines.
+(`hlines[i]` if present), the shared vertical lines, then the annotations when `i` is
+the top cell.
 
 # Returns
 - `Vector{Decoration}`: the merged decoration list for the cell.
 """
-function _cell_decorations(hlines, vlines, i::Integer)
+function _cell_decorations(hlines, vlines, i::Integer, annotations=Annotation[])
     own = (i ≤ length(hlines)) ? hlines[i] : HLine[]
-    return Decoration[own..., vlines...]
+    texts = i == 1 ? annotations : Annotation[]
+    return Decoration[own..., vlines..., texts...]
 end
 
 """
@@ -87,6 +89,10 @@ Lower a [`CTBase.Plotting.Panel`](@extref) into a layout node.
   initial/final time markers).
 - `hlines`: per-component horizontal reference lines; `hlines[i]` is attached to
   component `i` in `:split`, and all are merged into the single cell in `:group`.
+- `annotations`: texts (e.g. phase labels) attached to the **top** cell in `:split`
+  (the one that carries the title) and to the single cell in `:group`. Like `vlines`,
+  their abscissae are given in the plotted time (already normalised under
+  `time=:normalize`).
 """
 function lower(
     p::Panel;
@@ -95,12 +101,13 @@ function lower(
     time_name::String="t",
     vlines::AbstractVector{VLine}=VLine[],
     hlines::AbstractVector=Vector{HLine}[],
+    annotations::AbstractVector{Annotation}=Annotation[],
 )
     x = _time_axis(p.x, time)
     if layout === :split
-        return _lower_split(p, x, time_name, vlines, hlines)
+        return _lower_split(p, x, time_name, vlines, hlines, annotations)
     elseif layout === :group
-        return _lower_group(p, x, time_name, vlines, hlines)
+        return _lower_group(p, x, time_name, vlines, hlines, annotations)
     else
         throw(
             Exceptions.IncorrectArgument(
@@ -118,9 +125,9 @@ $(TYPEDSIGNATURES)
 
 Lower a [`CTBase.Plotting.Panel`](@extref) into a `:split` layout node: one [`CTBase.Plotting.Leaf`](@extref) per component,
 with ylabel = component name, xlabel on the bottom cell only, title on the top cell
-only, and no legend.
+only, and no legend. The annotations go to the top cell.
 """
-function _lower_split(p::Panel, x, time_name, vlines, hlines)
+function _lower_split(p::Panel, x, time_name, vlines, hlines, annotations=Annotation[])
     k = n_components(p)
     cells = AbstractLayoutNode[]
     for i in 1:k
@@ -130,7 +137,7 @@ function _lower_split(p::Panel, x, time_name, vlines, hlines)
             title=(i == 1 ? p.title : ""),
             ylabel=p.labels[i],
             xlabel=(i == k ? time_name : ""),
-            decorations=_cell_decorations(hlines, vlines, i),
+            decorations=_cell_decorations(hlines, vlines, i, annotations),
             legend=false,
             ylims=_ylims_guard(y),
         )
@@ -143,9 +150,9 @@ end
 $(TYPEDSIGNATURES)
 
 Lower a [`CTBase.Plotting.Panel`](@extref) into a `:group` layout node: a single [`CTBase.Plotting.Leaf`](@extref) with all
-components overlaid and a legend to distinguish them.
+components overlaid and a legend to distinguish them, carrying every decoration.
 """
-function _lower_group(p::Panel, x, time_name, vlines, hlines)
+function _lower_group(p::Panel, x, time_name, vlines, hlines, annotations=Annotation[])
     k = n_components(p)
     series = [
         Series(x, p.data[:, i]; label=p.labels[i], style=component_style(p, i)) for i in 1:k
@@ -155,6 +162,7 @@ function _lower_group(p::Panel, x, time_name, vlines, hlines)
         append!(merged, hl)
     end
     append!(merged, vlines)
+    append!(merged, annotations)
     ax = Axes(
         series;
         title=p.title,

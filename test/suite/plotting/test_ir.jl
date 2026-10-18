@@ -32,6 +32,35 @@ function test_ir()
             Test.@test Plotting.VLine(0) isa Plotting.Decoration
         end
 
+        Test.@testset "Annotation" begin
+            # defaults: near the top, no style
+            a = Plotting.Annotation(1, "bang")
+            Test.@test a isa Plotting.Decoration
+            Test.@test a.x === 1.0
+            Test.@test a.y === 0.92
+            Test.@test a.text == "bang"
+            Test.@test a.style == NamedTuple()
+            # explicit ordinate, style, and conversions (Int abscissa, SubString text)
+            b = Plotting.Annotation(2, SubString("singular", 1, 4); y=0, style=(color=:red,))
+            Test.@test b.x === 2.0 && b.y === 0.0
+            Test.@test b.text === "sing"
+            Test.@test b.style == (color=:red,)
+            Test.@test Plotting.Annotation(0.0, "top"; y=1).y === 1.0
+            # the ordinate is relative to the y-axis range
+            Test.@test_throws Exceptions.IncorrectArgument Plotting.Annotation(
+                0.0, "low"; y=-0.1
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Plotting.Annotation(
+                0.0, "high"; y=1.5
+            )
+            # accepted as an Axes decoration, next to reference lines
+            ax = Plotting.Axes(
+                [Plotting.Series([0.0, 1.0], [0.0, 1.0])];
+                decorations=[Plotting.VLine(0.5), a],
+            )
+            Test.@test ax.decorations == Plotting.Decoration[Plotting.VLine(0.5), a]
+        end
+
         Test.@testset "Axes defaults" begin
             ax = Plotting.Axes([Plotting.Series([0.0], [0.0])])
             Test.@test ax.title == "" && ax.xlabel == "" && ax.ylabel == ""

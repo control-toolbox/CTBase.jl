@@ -73,10 +73,65 @@ end
 VLine(value::Real; style::NamedTuple=NamedTuple()) = VLine(Float64(value), style)
 
 """
-Either an [`CTBase.Plotting.HLine`](@extref) or a [`CTBase.Plotting.VLine`](@extref) — a reference line drawn on an
-[`CTBase.Plotting.Axes`](@extref) on top of its series.
+$(TYPEDEF)
+
+A text placed in a cell (e.g. the label of a phase). Its abscissa `x` is a data
+coordinate; its ordinate `y` is relative to the y-axis range: `0` is the bottom of the
+axis and `1` its top, so the text keeps its place whatever the data. The backend reads
+the y-range once the series are drawn.
+
+`style` uses the neutral vocabulary of [`CTBase.Plotting.Series`](@extref) where it applies
+(`color`, `backend_kwargs`), plus `fontsize` and `halign` (`:left`, `:center`,
+`:right`) / `valign` (`:bottom`, `:center`, `:top`). Annotations carry no legend entry.
+
+# Fields
+$(TYPEDFIELDS)
+
+# Example
+```julia-repl
+julia> using CTBase: Plotting
+
+julia> a = Plotting.Annotation(0.5, "bang"; y=0.9);
+
+julia> (a.x, a.y, a.text)
+(0.5, 0.9, "bang")
+```
 """
-const Decoration = Union{HLine,VLine}
+struct Annotation
+    x::Float64
+    y::Float64
+    text::String
+    style::NamedTuple
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build an [`CTBase.Plotting.Annotation`](@extref) at abscissa `x` (data coordinate) and relative
+ordinate `y` (default `0.92`, near the top of the axis).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `y` is not in `[0, 1]`.
+"""
+function Annotation(
+    x::Real, text::AbstractString; y::Real=0.92, style::NamedTuple=NamedTuple()
+)
+    0 <= y <= 1 || throw(
+        Exceptions.IncorrectArgument(
+            "the ordinate of an Annotation is relative to the y-axis range";
+            got="y=$y",
+            expected="a value in [0, 1] (0 = bottom of the axis, 1 = top)",
+            context="Plotting.Annotation",
+        ),
+    )
+    return Annotation(Float64(x), Float64(y), String(text), style)
+end
+
+"""
+Either an [`CTBase.Plotting.HLine`](@extref) or a [`CTBase.Plotting.VLine`](@extref) — a reference line — or an
+[`CTBase.Plotting.Annotation`](@extref) — a text —, drawn on an [`CTBase.Plotting.Axes`](@extref) on top of its series.
+"""
+const Decoration = Union{HLine,VLine,Annotation}
 
 # --- one cell = one axis system ----------------------------------------------
 
@@ -372,6 +427,38 @@ function Base.show(io::IO, ::MIME"text/plain", v::VLine)
     print(io, fmt.name, "VLine", fmt.reset, " at x=", fmt.value, v.value, fmt.reset)
     if !isempty(v.style)
         print(io, "  style: ", fmt.label, v.style, fmt.reset)
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compact one-line display of an [`CTBase.Plotting.Annotation`](@extref).
+
+See also: `Base.show`
+"""
+function Base.show(io::IO, a::Annotation)
+    fmt = Core.get_format_codes(io)
+    return print(
+        io, fmt.name, "Annotation", fmt.reset, "(", fmt.label, repr(a.text), fmt.reset, ")"
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Pretty display of an [`CTBase.Plotting.Annotation`](@extref): its text, abscissa and relative
+ordinate.
+
+See also: `Base.show`
+"""
+function Base.show(io::IO, ::MIME"text/plain", a::Annotation)
+    fmt = Core.get_format_codes(io)
+    print(io, fmt.name, "Annotation", fmt.reset, " ", fmt.label, repr(a.text), fmt.reset)
+    print(io, " at x=", fmt.value, a.x, fmt.reset, ", y=", fmt.value, a.y, fmt.reset)
+    print(io, " (relative)")
+    if !isempty(a.style)
+        print(io, "  style: ", fmt.label, a.style, fmt.reset)
     end
 end
 

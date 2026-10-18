@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- `Plotting.Annotation`, a text drawn in a cell, e.g. the label of a phase
+  ([#612](https://github.com/control-toolbox/CTBase.jl/issues/612)). Its abscissa is a
+  data coordinate and its ordinate is relative to the y-axis range (`0` bottom, `1` top,
+  default `0.92`), so the text keeps its place whatever the data. It is a
+  `Plotting.Decoration`, like `HLine` and `VLine`. `Plotting.lower` takes an
+  `annotations` keyword that attaches them to the top cell of a panel. Both backends draw
+  them: Plots places the text once the y-range of the subplot is set, and Makie makes it
+  follow the axis limits.
+
 ## [0.30.10] - 2026-10-15
 
 ### ✨ New Features

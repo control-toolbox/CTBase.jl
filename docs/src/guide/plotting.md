@@ -58,6 +58,19 @@ s = CTBase.Plotting.Series(
 [`CTBase.Plotting.HLine`](@ref) and [`CTBase.Plotting.VLine`](@ref) are reference lines drawn on top of series
 (e.g. box bounds, initial/final time markers).
 
+An [`CTBase.Plotting.Annotation`](@ref) is a text drawn in a cell, for example the label of a
+phase. Its abscissa is a data coordinate, but its ordinate is **relative** to the y-axis
+range: `0` is the bottom of the axis, `1` its top, and the default `0.92` sits near the
+top. The text therefore keeps its place whatever the data. The style accepts `fontsize`,
+`color`, `halign` (`:left`, `:center`, `:right`) and `valign` (`:bottom`, `:center`,
+`:top`).
+
+```@example plot
+a = CTBase.Plotting.Annotation(0.5, "bang"; style=(color=:gray,))
+```
+
+Lines and annotations are both [`CTBase.Plotting.Decoration`](@ref)s.
+
 ### Axes
 
 An [`CTBase.Plotting.Axes`](@ref) is a single drawable cell: one axis system holding a list of
@@ -146,6 +159,20 @@ Optional keyword arguments:
 - `time_name`: x-axis label for the bottom cell.
 - `vlines`: vertical reference lines attached to every cell.
 - `hlines`: per-component horizontal reference lines.
+- `annotations`: texts attached to the top cell in `:split` (the one with the title),
+  or to the single cell in `:group`. Like `vlines`, their abscissae are in the plotted
+  time, already normalised when `time=:normalize`.
+
+```@example plot
+labelled = CTBase.Plotting.lower(
+    panel;
+    vlines=[CTBase.Plotting.VLine(1.0)],
+    annotations=[
+        CTBase.Plotting.Annotation(0.5, "phase 1"),
+        CTBase.Plotting.Annotation(1.5, "phase 2"),
+    ],
+)
+```
 
 ### Combinators
 
@@ -274,7 +301,7 @@ index when overlaying with `render!`.
 
 | Category | Symbols |
 | :--- | :--- |
-| IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
+| IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Annotation`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
 | Building blocks | [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.lower`](@ref) |
 | Combinators | [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref), [`CTBase.Plotting.Grid`](@ref) |
 | Backend | [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref), [`CTBase.Plotting.MakieBackend`](@ref), [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref) |

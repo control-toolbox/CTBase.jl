@@ -59,6 +59,13 @@ function test_display()
                 Test.@test occursin("2.5", out)
             end
 
+            Test.@testset "Annotation compact" begin
+                a = Plotting.Annotation(0.5, "bang")
+                out = _sprint_show(a)
+                Test.@test occursin("Annotation", out)
+                Test.@test occursin("\"bang\"", out)
+            end
+
             Test.@testset "Axes compact" begin
                 ax = _axes(; title="State", nseries=2)
                 out = _sprint_show(ax)
@@ -162,6 +169,29 @@ function test_display()
                 out = _sprint_plain(v)
                 Test.@test occursin("VLine", out)
                 Test.@test occursin("0.0", out)
+            end
+
+            Test.@testset "Annotation pretty" begin
+                a = Plotting.Annotation(1.5, "singular"; y=0.25)
+                out = _sprint_plain(a)
+                Test.@test occursin("Annotation", out)
+                Test.@test occursin("\"singular\"", out)
+                Test.@test occursin("x=1.5", out)
+                Test.@test occursin("y=0.25", out)
+                Test.@test occursin("relative", out)
+                Test.@test !occursin("style", out)
+                styled = _sprint_plain(Plotting.Annotation(0.0, "s"; style=(color=:red,)))
+                Test.@test occursin("style", styled)
+            end
+
+            Test.@testset "Axes pretty lists its annotations" begin
+                ax = Plotting.Axes(
+                    [_series("x(t)", 3)];
+                    decorations=[Plotting.VLine(1.0), Plotting.Annotation(0.5, "bang")],
+                )
+                out = _sprint_plain(ax)
+                Test.@test occursin("VLine", out)
+                Test.@test occursin("Annotation(\"bang\")", out)
             end
 
             Test.@testset "Axes pretty — series and labels" begin

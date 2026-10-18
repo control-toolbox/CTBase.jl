@@ -161,6 +161,54 @@ function test_contract()
             labelled = Plotting.render(fig; label="sol")
             Test.@test all(sp -> sp[:legend_position] !== :none, labelled.subplots)
         end
+
+        Test.@testset "annotations: text at a relative height of the cell" begin
+            t = collect(range(0.0, 2.0, 21))
+            texts = [
+                Plotting.Annotation(0.5, "bang"),
+                Plotting.Annotation(
+                    1.5,
+                    "singular";
+                    y=0.25,
+                    style=(fontsize=12, color=:red, halign=:left, valign=:top),
+                ),
+            ]
+            # fixed y-limits: the relative ordinate maps onto them exactly
+            p = Plotting.Panel(t, [t 2t]; labels=["a", "b"])
+            node = Plotting.lower(p; layout=:split, annotations=texts)
+            plt = Plotting.render(Plotting.Figure(node); ylims=(-1.0, 3.0))
+            ann = plt.subplots[1][:annotations]
+            Test.@test length(ann) == 2
+            Test.@test isempty(plt.subplots[2][:annotations])   # top cell only
+            x1, y1, t1 = ann[1]
+            Test.@test x1 ≈ 0.5
+            Test.@test y1 ≈ -1.0 + 0.92 * 4.0
+            Test.@test t1.str == "bang"
+            # default style: 9 pt, black, centred
+            Test.@test t1.font.pointsize == 9
+            Test.@test t1.font.halign === :hcenter
+            Test.@test t1.font.valign === :vcenter
+            x2, y2, t2 = ann[2]
+            Test.@test (x2, y2) == (1.5, -1.0 + 0.25 * 4.0)
+            Test.@test t2.font.pointsize == 12
+            Test.@test t2.font.halign === :left
+            Test.@test t2.font.valign === :top
+            Test.@test t2.font.color == Plots.parse(Plots.Colorant, "red")
+            # automatic y-limits: the text stays inside the final y-range
+            plt_auto = Plotting.render(Plotting.Figure(node))
+            lo, hi = Plots.ylims(plt_auto.subplots[1])
+            _, ya, _ = plt_auto.subplots[1][:annotations][1]
+            Test.@test ya ≈ lo + 0.92 * (hi - lo)
+            Test.@test lo < ya < hi
+            # render! overlay also draws them, without new subplots
+            n = length(plt_auto.subplots)
+            Plotting.render!(plt_auto, Plotting.Figure(node))
+            Test.@test length(plt_auto.subplots) == n
+            Test.@test length(plt_auto.subplots[1][:annotations]) == 4
+            # no annotation: none drawn
+            plain = Plotting.render(_figure())
+            Test.@test all(sp -> isempty(sp[:annotations]), plain.subplots)
+        end
     end
     return nothing
 end
