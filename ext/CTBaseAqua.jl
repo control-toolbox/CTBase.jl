@@ -42,8 +42,11 @@ function _owned_symbols(pkg::Module)
             value = getfield(mod, name)
             if value isa Module
                 value !== mod && parentmodule(value) === mod && push!(work, value)
-            elseif value isa Union{Function,Type} && parentmodule(Base.unwrap_unionall(value)) === mod
-                push!(owned, value)
+            elseif value isa Union{Function,Type}
+                # A `Union` has no parent module; its members are collected on their own.
+                unwrapped = Base.unwrap_unionall(value)
+                unwrapped isa Union && continue
+                parentmodule(unwrapped) === mod && push!(owned, value)
             end
         end
     end
