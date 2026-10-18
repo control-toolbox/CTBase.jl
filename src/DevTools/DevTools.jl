@@ -16,12 +16,15 @@ include("documenter_reference.jl")
 include("documentation_helpers.jl")
 include("coverage_postprocessing.jl")
 include("test_runner.jl")
+include("extensions_quality.jl")
 
 # Export public API
 export automatic_reference_documentation, postprocess_coverage, run_tests
+export test_extensions_quality
 export repl_without_extensions, warnings_without_paths
 export AbstractDocumenterReferenceTag, DocumenterReferenceTag
 export AbstractCoveragePostprocessingTag, CoveragePostprocessingTag
 export AbstractTestRunnerTag, TestRunnerTag
+export AbstractExtensionsQualityTag, ExtensionsQualityTag
 
 end # module

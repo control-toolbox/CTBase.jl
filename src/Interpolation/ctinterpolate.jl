@@ -10,7 +10,7 @@ function (interp::Interpolant{Linear})(t)
     elseif t >= x[end]
         return f[end]
     else
-        i = searchsortedlast(x, t)
+        i = searchsortedlast(x, t)::Int
         i == length(x) && return f[end]
         α = (t - x[i]) / (x[i + 1] - x[i])
         return f[i] + α * (f[i + 1] - f[i])
@@ -25,7 +25,7 @@ function (interp::Interpolant{Constant})(t)
     elseif t >= x[end]
         return f[end]
     else
-        return f[searchsortedlast(x, t)]
+        return f[searchsortedlast(x, t)::Int]
     end
 end
 

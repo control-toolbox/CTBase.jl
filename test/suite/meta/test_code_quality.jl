@@ -9,6 +9,16 @@ using Logging: Logging
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
+const EXTENSION_TRIGGERS = [
+    :Coverage,
+    :DifferentiationInterface,
+    :Documenter,
+    :CairoMakie,
+    :Markdown,
+    :MarkdownAST,
+    :Plots,
+]
+
 # ==============================================================================
 # Filter LoweredCodeUtils' benign "skipping callee ... UndefRefError()" warnings
 # ==============================================================================
@@ -60,6 +70,12 @@ function Logging.handle_message(
 end
 
 function test_code_quality()
+    # Load every extension trigger first: the checks below must hold with the extensions
+    # loaded, whatever the order in which the test files run.
+    for trigger in EXTENSION_TRIGGERS
+        Base.require(@__MODULE__, trigger)
+    end
+
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Code quality" begin
         Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Aqua" begin
             Aqua.test_all(
@@ -79,6 +95,11 @@ function test_code_quality()
             ) do
                 JET.test_package(CTBase; target_modules=(CTBase,))
             end
+        end
+
+        # Aqua.test_all does not inspect extensions (ct-conventions TST8)
+        Test.@testset "Extensions" begin
+            CTBase.DevTools.test_extensions_quality(CTBase)
         end
 
         # Test.@testset "JuliaFormatter" begin

@@ -13,6 +13,7 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 struct FakeDocumenterReferenceTag <: DevTools.AbstractDocumenterReferenceTag end
 struct FakeCoveragePostprocessingTag <: DevTools.AbstractCoveragePostprocessingTag end
 struct FakeTestRunnerTag <: DevTools.AbstractTestRunnerTag end
+struct FakeExtensionsQualityTag <: DevTools.AbstractExtensionsQualityTag end
 
 function test_extension_stubs()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Extension Function Error Handling" begin
@@ -34,6 +35,13 @@ function test_extension_stubs()
         Test.@testset "run_tests" begin
             Test.@test_throws Exceptions.ExtensionError DevTools.run_tests(
                 FakeTestRunnerTag()
+            )
+        end
+
+        # Test test_extensions_quality error
+        Test.@testset "test_extensions_quality" begin
+            Test.@test_throws Exceptions.ExtensionError DevTools.test_extensions_quality(
+                FakeExtensionsQualityTag(), Test
             )
         end
     end
