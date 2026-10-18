@@ -274,6 +274,10 @@ function test_contract_makie()
             Test.@test _count_plots(axs[1], Makie.Text) == 2
             Test.@test _count_plots(axs[2], Makie.Text) == 0   # top cell only
             tps = [pl for pl in axs[1].scene.plots if pl isa Makie.Text]
+            # automatic limits: room above the data (in [0, 2]) for the texts
+            top = axs[1].finallimits[].origin[2] + axs[1].finallimits[].widths[2]
+            Test.@test top ≥ 2.0 + 0.2 * 2.0 - 1e-6
+            Test.@test _count_plots(axs[2], Makie.Text) == 0
             Makie.ylims!(axs[1], -1.0, 3.0)
             Makie.reset_limits!(axs[1])
             pos1 = tps[1][1][]

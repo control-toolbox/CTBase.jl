@@ -246,6 +246,11 @@ function _draw_axes!(
     else
         Plots.plot!(p; attrs..., ylims=yl, extra...)
     end
+    # automatic y-limits: room above the data for the annotations
+    if !(yl isa Tuple) && any(d -> d isa Plotting.Annotation, ax.decorations)
+        lo, hi = Plots.ylims(p[sp])
+        Plots.plot!(p; subplot=sp, ylims=(lo, hi + Plotting._ANNOTATION_HEADROOM * (hi - lo)))
+    end
     return _draw_annotations!(p, ax, sp)
 end
 

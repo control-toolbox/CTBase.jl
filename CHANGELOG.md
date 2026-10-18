@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Plotting.Decoration`, like `HLine` and `VLine`. `Plotting.lower` takes an
   `annotations` keyword that attaches them to the top cell of a panel. Both backends draw
   them: Plots places the text once the y-range of the subplot is set, and Makie makes it
-  follow the axis limits.
+  follow the axis limits. A cell holding annotations gets 20 % of room above its data when
+  its y-limits are automatic, so that the texts do not cover the curves.
 
 ## [0.30.10] - 2026-10-15
 

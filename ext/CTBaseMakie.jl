@@ -367,7 +367,25 @@ function _render_node!(
     _draw_into_axis!(
         axis, node.axes; series_user=series_user, legend=get(axes_user, :legend, nothing)
     )
+    pinned = haskey(axes_user, :ylims) || _resolve_ylims(node.axes) !== nothing
+    pinned || _annotation_headroom!(axis, node.axes)
     return gl
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Give `axis` some room above its data when `ax` holds annotations and its y-limits are
+automatic (see `CTBase.Plotting._ANNOTATION_HEADROOM`), so that a text near the top does
+not cover the curves.
+"""
+function _annotation_headroom!(axis, ax::Plotting.Axes)
+    any(d -> d isa Plotting.Annotation, ax.decorations) || return axis
+    Makie.reset_limits!(axis)
+    r = axis.finallimits[]
+    lo, hi = r.origin[2], r.origin[2] + r.widths[2]
+    Makie.ylims!(axis, lo, hi + Plotting._ANNOTATION_HEADROOM * (hi - lo))
+    return axis
 end
 function _render_node!(
     gl, node::Plotting.VBox; series_user=NamedTuple(), axes_user=NamedTuple()

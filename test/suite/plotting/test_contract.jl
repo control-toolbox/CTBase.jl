@@ -200,6 +200,12 @@ function test_contract()
             _, ya, _ = plt_auto.subplots[1][:annotations][1]
             Test.@test ya ≈ lo + 0.92 * (hi - lo)
             Test.@test lo < ya < hi
+            # room above the data (t ∈ [0, 2], so the first cell's data is in [0, 2])
+            Test.@test hi ≥ 2.0 + 0.2 * 2.0 - 1e-8
+            Test.@test ya > 2.0                     # the text is above the curves
+            # no annotation, automatic limits: no extra room
+            plain_hi = Plots.ylims(Plotting.render(Plotting.Figure(Plotting.lower(p))).subplots[1])[2]
+            Test.@test plain_hi < 2.0 + 0.2 * 2.0
             # render! overlay also draws them, without new subplots
             n = length(plt_auto.subplots)
             Plotting.render!(plt_auto, Plotting.Figure(node))

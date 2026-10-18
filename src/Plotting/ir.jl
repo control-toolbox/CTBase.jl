@@ -84,6 +84,10 @@ the y-range once the series are drawn.
 (`color`, `backend_kwargs`), plus `fontsize` and `halign` (`:left`, `:center`,
 `:right`) / `valign` (`:bottom`, `:center`, `:top`). Annotations carry no legend entry.
 
+A cell holding annotations gets some room above its data when its y-limits are automatic
+(see [`CTBase.Plotting._ANNOTATION_HEADROOM`](@extref)), so that a text near the top does
+not cover the curves.
+
 # Fields
 $(TYPEDFIELDS)
 
@@ -126,6 +130,14 @@ function Annotation(
     )
     return Annotation(Float64(x), Float64(y), String(text), style)
 end
+
+"""
+Room added above the data of a cell that holds annotations, as a fraction of the data
+range, when the y-limits are automatic: the top of the data then sits at
+`1 / (1 + 0.2) ≈ 0.83` of the axis height, below the default ordinate `0.92` of an
+[`CTBase.Plotting.Annotation`](@extref).
+"""
+const _ANNOTATION_HEADROOM = 0.2
 
 """
 Either an [`CTBase.Plotting.HLine`](@extref) or a [`CTBase.Plotting.VLine`](@extref) — a reference line — or an
