@@ -122,6 +122,12 @@ Default axis-label font size in points, used by the Plots renderer.
 """
 const _LABEL_FONT_SIZE = 10
 
+"""
+Default font size in points of an [`CTBase.Plotting.Annotation`](@extref), used by both
+renderers when its style gives no `fontsize`.
+"""
+const _ANNOTATION_FONT_SIZE = 9
+
 # --- display -----------------------------------------------------------------
 
 """

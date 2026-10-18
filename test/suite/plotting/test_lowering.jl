@@ -102,6 +102,40 @@ function test_lowering()
             Test.@test length(g.axes.decorations) == 3
         end
 
+        Test.@testset "annotations: top cell in split, the cell in group" begin
+            p = Plotting.Panel(t, [t 2t 3t]; labels=["a", "b", "c"])
+            texts = [Plotting.Annotation(0.5, "bang"), Plotting.Annotation(1.5, "singular")]
+            node = Plotting.lower(
+                p; layout=:split, vlines=[Plotting.VLine(1.0)], annotations=texts
+            )
+            ls = Plotting.leaves(node)
+            # top cell: the shared vline, then the annotations, in order
+            Test.@test ls[1].axes.decorations ==
+                Plotting.Decoration[Plotting.VLine(1.0), texts...]
+            # the other cells carry no annotation
+            for k in 2:3
+                Test.@test !any(d -> d isa Plotting.Annotation, ls[k].axes.decorations)
+                Test.@test count(d -> d isa Plotting.VLine, ls[k].axes.decorations) == 1
+            end
+            # a single-component split is a Leaf that carries them
+            leaf = Plotting.lower(Plotting.Panel(t, t[:, :]); annotations=texts)
+            Test.@test leaf isa Plotting.Leaf
+            Test.@test count(d -> d isa Plotting.Annotation, leaf.axes.decorations) == 2
+            # group: hlines, vlines, then annotations, all in the single cell
+            g = Plotting.lower(
+                p;
+                layout=:group,
+                vlines=[Plotting.VLine(1.0)],
+                hlines=[[Plotting.HLine(0.0)], Plotting.HLine[], Plotting.HLine[]],
+                annotations=texts,
+            )
+            Test.@test g.axes.decorations ==
+                Plotting.Decoration[Plotting.HLine(0.0), Plotting.VLine(1.0), texts...]
+            # no annotation by default: the decorations are unchanged
+            Test.@test Plotting.leaves(Plotting.lower(p; layout=:split))[1].axes.decorations ==
+                Plotting.Decoration[]
+        end
+
         Test.@testset "per-component style" begin
             p = Plotting.Panel(
                 t, [t 2t]; labels=["a", "b"], styles=[(color=1,), (color=2,)]

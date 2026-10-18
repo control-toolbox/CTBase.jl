@@ -58,6 +58,21 @@ s = CTBase.Plotting.Series(
 [`CTBase.Plotting.HLine`](@ref) and [`CTBase.Plotting.VLine`](@ref) are reference lines drawn on top of series
 (e.g. box bounds, initial/final time markers).
 
+An [`CTBase.Plotting.Annotation`](@ref) is a text drawn in a cell, for example the label of a
+phase. Its abscissa is a data coordinate, but its ordinate is **relative** to the y-axis
+range: `0` is the bottom of the axis, `1` its top, and the default `0.92` sits near the
+top. The text therefore keeps its place whatever the data. The style accepts `fontsize`,
+`color`, `halign` (`:left`, `:center`, `:right`) and `valign` (`:bottom`, `:center`,
+`:top`).
+
+```@example plot
+a = CTBase.Plotting.Annotation(0.5, "bang"; style=(color=:gray,))
+```
+
+Lines and annotations are subtypes of [`CTBase.Plotting.AbstractDecoration`](@ref). A new
+kind of decoration is a new subtype with a drawing method in each backend extension; a
+backend without that method throws a `NotImplemented` error when it renders it.
+
 ### Axes
 
 An [`CTBase.Plotting.Axes`](@ref) is a single drawable cell: one axis system holding a list of
@@ -146,6 +161,50 @@ Optional keyword arguments:
 - `time_name`: x-axis label for the bottom cell.
 - `vlines`: vertical reference lines attached to every cell.
 - `hlines`: per-component horizontal reference lines.
+- `annotations`: texts attached to the top cell in `:split` (the one with the title),
+  or to the single cell in `:group`. Like `vlines`, their abscissae are in the plotted
+  time, already normalised when `time=:normalize`.
+
+```@example plot
+labelled = CTBase.Plotting.lower(
+    panel;
+    vlines=[CTBase.Plotting.VLine(1.0)],
+    annotations=[
+        CTBase.Plotting.Annotation(0.5, "phase 1"),
+        CTBase.Plotting.Annotation(1.5, "phase 2"),
+    ],
+)
+```
+
+### Trajectories made of phases
+
+A trajectory computed phase by phase has switching times, at which the state, costate
+or control may jump, and a label per phase. Three building blocks turn this structure
+into plot data; the case layer reads the switching times, the limits and the labels, and
+passes them as plain data:
+
+- [`CTBase.Plotting.splice_jumps`](@ref) inserts the left and right limits at every
+  switching time into the samples of a panel, so that a jump is drawn as a vertical
+  segment; with `connect=false`, the curve is broken between the two limits instead, so
+  that no segment suggests values the trajectory does not take;
+- [`CTBase.Plotting.switching_vlines`](@ref) returns the vertical lines at the switching
+  times, for the `vlines` of `lower`;
+- [`CTBase.Plotting.phase_annotations`](@ref) returns the labels as texts centred on each
+  phase, for the `annotations` of `lower`. A phase with an empty label gets no text.
+
+The last two take `time` like `lower`, and return abscissae in the plotted time.
+
+```@example plot
+t = collect(range(0.0, 2.0, 21))
+x = reshape([s < 1 ? s : s + 1 for s in t], :, 1)     # a jump of +1 at t = 1
+xs, data = CTBase.Plotting.splice_jumps(t, x, [1.0], [1.0;;], [2.0;;])
+jump_panel = CTBase.Plotting.Panel(xs, data; title="state", labels=["x"])
+CTBase.Plotting.lower(
+    jump_panel;
+    vlines=CTBase.Plotting.switching_vlines(t, [1.0]; style=(linestyle=:dash,)),
+    annotations=CTBase.Plotting.phase_annotations(t, [1.0], ["phase 1", "phase 2"]),
+)
+```
 
 ### Combinators
 
@@ -274,8 +333,9 @@ index when overlaying with `render!`.
 
 | Category | Symbols |
 | :--- | :--- |
-| IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
+| IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.AbstractDecoration`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Annotation`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
 | Building blocks | [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.lower`](@ref) |
+| Phases | [`CTBase.Plotting.splice_jumps`](@ref), [`CTBase.Plotting.switching_vlines`](@ref), [`CTBase.Plotting.phase_annotations`](@ref) |
 | Combinators | [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref), [`CTBase.Plotting.Grid`](@ref) |
 | Backend | [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref), [`CTBase.Plotting.MakieBackend`](@ref), [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref) |
 

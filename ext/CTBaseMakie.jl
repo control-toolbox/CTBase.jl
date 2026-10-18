@@ -17,6 +17,7 @@ using Makie: Makie
 using DocStringExtensions: TYPEDSIGNATURES
 
 using CTBase: Plotting
+using CTBase: Exceptions
 
 # --- style translation : neutral vocabulary -> Makie attributes ---------------
 
@@ -236,7 +237,7 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Draw a decoration (`HLine` or `VLine`) into `axis` via `Makie.hlines!` / `vlines!`,
+Draw a reference line (`HLine` or `VLine`) into `axis` via `Makie.hlines!` / `vlines!`,
 with style translation. Decorations carry no legend entry.
 """
 function _draw_decoration!(axis, d::Plotting.HLine)
@@ -245,6 +246,54 @@ function _draw_decoration!(axis, d::Plotting.HLine)
 end
 function _draw_decoration!(axis, d::Plotting.VLine)
     Makie.vlines!(axis, d.value; _translate_style(d.style)...)
+    return axis
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Fallback for a decoration the Makie backend cannot draw (see
+[`CTBase.Plotting.AbstractDecoration`](@extref)).
+
+# Throws
+- [`CTBase.Exceptions.NotImplemented`](@extref): always.
+"""
+function _draw_decoration!(axis, d::Plotting.AbstractDecoration)
+    throw(
+        Exceptions.NotImplemented(
+            "the Makie backend cannot draw a $(nameof(typeof(d)))";
+            required_method="CTBaseMakie._draw_decoration!(axis, ::$(nameof(typeof(d))))",
+            suggestion="define _draw_decoration! for this decoration in the Makie extension",
+            context="Makie rendering of a decoration",
+        ),
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Draw an [`CTBase.Plotting.Annotation`](@extref) into `axis` via `Makie.text!`. Its position
+follows the axis limits: the relative ordinate is mapped onto `axis.finallimits`, and the
+text is excluded from auto-limits, so it stays at the same height when the data change.
+The neutral style gives `fontsize` (default `Plotting._ANNOTATION_FONT_SIZE`), `color` (default `:black`) and
+`halign` / `valign` (both centred by default); `backend_kwargs` are forwarded.
+"""
+function _draw_decoration!(axis, a::Plotting.Annotation)
+    pos = Makie.lift(axis.finallimits) do r
+        Makie.Point2f(a.x, r.origin[2] + a.y * r.widths[2])
+    end
+    bk = get(a.style, :backend_kwargs, NamedTuple())
+    Makie.text!(
+        axis,
+        pos;
+        text=a.text,
+        fontsize=get(a.style, :fontsize, Plotting._ANNOTATION_FONT_SIZE),
+        color=get(a.style, :color, :black),
+        align=(get(a.style, :halign, :center), get(a.style, :valign, :center)),
+        xautolimits=false,
+        yautolimits=false,
+        bk...,
+    )
     return axis
 end
 
@@ -339,7 +388,25 @@ function _render_node!(
     _draw_into_axis!(
         axis, node.axes; series_user=series_user, legend=get(axes_user, :legend, nothing)
     )
+    pinned = haskey(axes_user, :ylims) || _resolve_ylims(node.axes) !== nothing
+    pinned || _annotation_headroom!(axis, node.axes)
     return gl
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Give `axis` some room above its data when `ax` holds annotations and its y-limits are
+automatic (see `CTBase.Plotting._ANNOTATION_HEADROOM`), so that a text near the top does
+not cover the curves.
+"""
+function _annotation_headroom!(axis, ax::Plotting.Axes)
+    any(d -> d isa Plotting.Annotation, ax.decorations) || return axis
+    Makie.reset_limits!(axis)
+    r = axis.finallimits[]
+    lo, hi = r.origin[2], r.origin[2] + r.widths[2]
+    Makie.ylims!(axis, lo, hi + Plotting._ANNOTATION_HEADROOM * (hi - lo))
+    return axis
 end
 function _render_node!(
     gl, node::Plotting.VBox; series_user=NamedTuple(), axes_user=NamedTuple()

@@ -45,13 +45,30 @@ end
 """
 $(TYPEDEF)
 
+Abstract type of the decorations drawn on an [`CTBase.Plotting.Axes`](@extref) on top of its
+series: reference lines ([`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref))
+and texts ([`CTBase.Plotting.Annotation`](@extref)). Decorations carry no legend entry.
+
+# Interface Requirements
+A new decoration is a subtype with a drawing method in each backend extension:
+`_draw_decoration!(p, d, sp)` in `CTBasePlots` and `_draw_decoration!(axis, d)` in
+`CTBaseMakie`. A backend without such a method throws a
+[`CTBase.Exceptions.NotImplemented`](@extref) when it renders the decoration.
+
+See also: [`CTBase.Plotting.Axes`](@extref).
+"""
+abstract type AbstractDecoration end
+
+"""
+$(TYPEDEF)
+
 A horizontal reference line at height `value` (e.g. a box bound). `style` follows
 the same neutral vocabulary as [`CTBase.Plotting.Series`](@extref).
 
 # Fields
 $(TYPEDFIELDS)
 """
-struct HLine
+struct HLine <: AbstractDecoration
     value::Float64
     style::NamedTuple
 end
@@ -66,17 +83,84 @@ follows the same neutral vocabulary as [`CTBase.Plotting.Series`](@extref).
 # Fields
 $(TYPEDFIELDS)
 """
-struct VLine
+struct VLine <: AbstractDecoration
     value::Float64
     style::NamedTuple
 end
 VLine(value::Real; style::NamedTuple=NamedTuple()) = VLine(Float64(value), style)
 
 """
-Either an [`CTBase.Plotting.HLine`](@extref) or a [`CTBase.Plotting.VLine`](@extref) — a reference line drawn on an
-[`CTBase.Plotting.Axes`](@extref) on top of its series.
+$(TYPEDEF)
+
+A text placed in a cell (e.g. the label of a phase). Its abscissa `x` is a data
+coordinate; its ordinate `y` is relative to the y-axis range: `0` is the bottom of the
+axis and `1` its top, so the text keeps its place whatever the data. The backend reads
+the y-range once the series are drawn.
+
+`style` uses the neutral vocabulary of [`CTBase.Plotting.Series`](@extref) where it applies
+(`color`, `backend_kwargs`), plus `fontsize` and `halign` (`:left`, `:center`,
+`:right`) / `valign` (`:bottom`, `:center`, `:top`). Annotations carry no legend entry.
+
+A cell holding annotations gets some room above its data when its y-limits are automatic
+(see [`CTBase.Plotting._ANNOTATION_HEADROOM`](@extref)), so that a text near the top does
+not cover the curves.
+
+# Fields
+$(TYPEDFIELDS)
+
+# Example
+```julia-repl
+julia> using CTBase: Plotting
+
+julia> a = Plotting.Annotation(0.5, "bang"; y=0.9);
+
+julia> (a.x, a.y, a.text)
+(0.5, 0.9, "bang")
+```
 """
-const Decoration = Union{HLine,VLine}
+struct Annotation <: AbstractDecoration
+    x::Float64
+    y::Float64
+    text::String
+    style::NamedTuple
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Build an [`CTBase.Plotting.Annotation`](@extref) at abscissa `x` (data coordinate) and relative
+ordinate `y` (default `0.92`, near the top of the axis).
+
+# Throws
+- [`CTBase.Exceptions.IncorrectArgument`](@extref): if `y` is not in `[0, 1]`.
+"""
+function Annotation(
+    x::Real, text::AbstractString; y::Real=0.92, style::NamedTuple=NamedTuple()
+)
+    0 <= y <= 1 || throw(
+        Exceptions.IncorrectArgument(
+            "the ordinate of an Annotation is relative to the y-axis range";
+            got="y=$y",
+            expected="a value in [0, 1] (0 = bottom of the axis, 1 = top)",
+            suggestion="give y as a fraction of the axis height, e.g. y=0.92 near the top",
+            context="Plotting.Annotation",
+        ),
+    )
+    return Annotation(Float64(x), Float64(y), String(text), style)
+end
+
+"""
+Room added above the data of a cell that holds annotations, as a fraction of the data
+range, when the y-limits are automatic: the top of the data then sits at
+`1 / (1 + 0.2) ≈ 0.83` of the axis height, below the default ordinate `0.92` of an
+[`CTBase.Plotting.Annotation`](@extref).
+"""
+const _ANNOTATION_HEADROOM = 0.2
+
+"""
+Former name of [`CTBase.Plotting.AbstractDecoration`](@extref), kept as an alias.
+"""
+const Decoration = AbstractDecoration
 
 # --- one cell = one axis system ----------------------------------------------
 
@@ -84,7 +168,7 @@ const Decoration = Union{HLine,VLine}
 $(TYPEDEF)
 
 One drawable cell: a single axis system holding a list of [`CTBase.Plotting.Series`](@extref),
-optional [`CTBase.Plotting.Decoration`](@extref)s drawn on top, and its labels/limits. Domain-free —
+optional [`CTBase.Plotting.AbstractDecoration`](@extref)s drawn on top, and its labels/limits. Domain-free —
 the case layer decides what a cell *means*.
 
 `ylims` is one of:
@@ -102,7 +186,7 @@ struct Axes
     xlabel::String
     ylabel::String
     series::Vector{Series}
-    decorations::Vector{Decoration}
+    decorations::Vector{AbstractDecoration}
     legend::Bool
     ylims::Union{Nothing,Tuple{Float64,Float64},Symbol}
 end
@@ -112,7 +196,7 @@ function Axes(
     title::AbstractString="",
     xlabel::AbstractString="",
     ylabel::AbstractString="",
-    decorations::AbstractVector=Decoration[],
+    decorations::AbstractVector=AbstractDecoration[],
     legend::Bool=false,
     ylims::Union{Nothing,Tuple{Real,Real},Symbol}=:auto_guarded,
 )
@@ -122,7 +206,7 @@ function Axes(
         String(xlabel),
         String(ylabel),
         collect(Series, series),
-        collect(Decoration, decorations),
+        collect(AbstractDecoration, decorations),
         legend,
         yl,
     )
@@ -372,6 +456,38 @@ function Base.show(io::IO, ::MIME"text/plain", v::VLine)
     print(io, fmt.name, "VLine", fmt.reset, " at x=", fmt.value, v.value, fmt.reset)
     if !isempty(v.style)
         print(io, "  style: ", fmt.label, v.style, fmt.reset)
+    end
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Compact one-line display of an [`CTBase.Plotting.Annotation`](@extref).
+
+See also: `Base.show`
+"""
+function Base.show(io::IO, a::Annotation)
+    fmt = Core.get_format_codes(io)
+    return print(
+        io, fmt.name, "Annotation", fmt.reset, "(", fmt.label, repr(a.text), fmt.reset, ")"
+    )
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Pretty display of an [`CTBase.Plotting.Annotation`](@extref): its text, abscissa and relative
+ordinate.
+
+See also: `Base.show`
+"""
+function Base.show(io::IO, ::MIME"text/plain", a::Annotation)
+    fmt = Core.get_format_codes(io)
+    print(io, fmt.name, "Annotation", fmt.reset, " ", fmt.label, repr(a.text), fmt.reset)
+    print(io, " at x=", fmt.value, a.x, fmt.reset, ", y=", fmt.value, a.y, fmt.reset)
+    print(io, " (relative)")
+    if !isempty(a.style)
+        print(io, "  style: ", fmt.label, a.style, fmt.reset)
     end
 end
 

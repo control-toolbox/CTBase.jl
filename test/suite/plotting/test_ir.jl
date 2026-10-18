@@ -7,6 +7,9 @@ using CTBase: Exceptions
 const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
+# A decoration no backend knows (TST3: fakes at module top level).
+struct FakeDecoration <: Plotting.AbstractDecoration end
+
 _leaf(v=[0.0, 1.0]) = Plotting.Leaf(Plotting.Axes([Plotting.Series([0.0, 1.0], v)]))
 
 function test_ir()
@@ -25,11 +28,49 @@ function test_ir()
             )
         end
 
-        Test.@testset "HLine / VLine / Decoration" begin
+        Test.@testset "HLine / VLine / AbstractDecoration" begin
             Test.@test Plotting.HLine(1).value === 1.0
             Test.@test Plotting.VLine(2.0; style=(color=:red,)).style == (color=:red,)
-            Test.@test Plotting.HLine(0) isa Plotting.Decoration
-            Test.@test Plotting.VLine(0) isa Plotting.Decoration
+            Test.@test Plotting.HLine(0) isa Plotting.AbstractDecoration
+            Test.@test Plotting.VLine(0) isa Plotting.AbstractDecoration
+            Test.@test Plotting.HLine <: Plotting.AbstractDecoration
+            Test.@test Plotting.VLine <: Plotting.AbstractDecoration
+            Test.@test Plotting.Annotation <: Plotting.AbstractDecoration
+            # former name, kept as an alias
+            Test.@test Plotting.Decoration === Plotting.AbstractDecoration
+            # an Axes accepts any decoration
+            fake = FakeDecoration()
+            ax = Plotting.Axes([Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[fake])
+            Test.@test ax.decorations == Plotting.AbstractDecoration[fake]
+        end
+
+        Test.@testset "Annotation" begin
+            # defaults: near the top, no style
+            a = Plotting.Annotation(1, "bang")
+            Test.@test a isa Plotting.Decoration
+            Test.@test a.x === 1.0
+            Test.@test a.y === 0.92
+            Test.@test a.text == "bang"
+            Test.@test a.style == NamedTuple()
+            # explicit ordinate, style, and conversions (Int abscissa, SubString text)
+            b = Plotting.Annotation(2, SubString("singular", 1, 4); y=0, style=(color=:red,))
+            Test.@test b.x === 2.0 && b.y === 0.0
+            Test.@test b.text === "sing"
+            Test.@test b.style == (color=:red,)
+            Test.@test Plotting.Annotation(0.0, "top"; y=1).y === 1.0
+            # the ordinate is relative to the y-axis range
+            Test.@test_throws Exceptions.IncorrectArgument Plotting.Annotation(
+                0.0, "low"; y=-0.1
+            )
+            Test.@test_throws Exceptions.IncorrectArgument Plotting.Annotation(
+                0.0, "high"; y=1.5
+            )
+            # accepted as an Axes decoration, next to reference lines
+            ax = Plotting.Axes(
+                [Plotting.Series([0.0, 1.0], [0.0, 1.0])];
+                decorations=[Plotting.VLine(0.5), a],
+            )
+            Test.@test ax.decorations == Plotting.Decoration[Plotting.VLine(0.5), a]
         end
 
         Test.@testset "Axes defaults" begin

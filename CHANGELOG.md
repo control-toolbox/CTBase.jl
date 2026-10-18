@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- `Plotting.Annotation`, a text drawn in a cell, e.g. the label of a phase
+  ([#612](https://github.com/control-toolbox/CTBase.jl/issues/612)). Its abscissa is a
+  data coordinate and its ordinate is relative to the y-axis range (`0` bottom, `1` top,
+  default `0.92`), so the text keeps its place whatever the data. It is a
+  `Plotting.Decoration`, like `HLine` and `VLine`. `Plotting.lower` takes an
+  `annotations` keyword that attaches them to the top cell of a panel. Both backends draw
+  them: Plots places the text once the y-range of the subplot is set, and Makie makes it
+  follow the axis limits. A cell holding annotations gets 20 % of room above its data when
+  its y-limits are automatic, so that the texts do not cover the curves. The default font
+  size, `Plotting._ANNOTATION_FONT_SIZE`, is shared by both backends.
+- Case-layer building blocks for trajectories made of phases
+  ([#612](https://github.com/control-toolbox/CTBase.jl/issues/612)), shared by the plots
+  of CTModels and CTFlows: `Plotting.splice_jumps` inserts the left and right limits at
+  the switching times into the samples of a panel (a jump is drawn as a vertical
+  segment), `Plotting.switching_vlines` returns the lines at the switching times, and
+  `Plotting.phase_annotations` the labels of the phases (none for an empty label).
+  `splice_jumps(...; connect=false)` breaks the curve between the two limits (a row of
+  `NaN`) instead of drawing the vertical segment.
+- `Plotting.AbstractDecoration`, the abstract type of `HLine`, `VLine` and `Annotation`:
+  another package can add a decoration with a subtype and a drawing method per backend (a
+  backend without one throws `NotImplemented`). `Plotting.Decoration`, formerly the union
+  of the decoration types, is kept as an alias.
+
+### ✅ Compatibility
+
+- **No breaking changes**: additive plotting API; `Plotting.Decoration` stays available as
+  an alias of `Plotting.AbstractDecoration`, and `lower` gains optional keywords only. See
+  [BREAKING.md](BREAKING.md).
+
 ## [0.30.10] - 2026-10-15
 
 ### ✨ New Features

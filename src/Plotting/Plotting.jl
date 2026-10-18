@@ -5,7 +5,7 @@ Generic, domain-free plotting engine for the Control Toolbox.
 
 It manipulates a backend-agnostic intermediate representation (IR): a weighted
 tree ([`CTBase.Plotting.Leaf`](@extref)/[`CTBase.Plotting.HBox`](@extref)/[`CTBase.Plotting.VBox`](@extref)) of titled [`CTBase.Plotting.Axes`](@extref)
-carrying [`CTBase.Plotting.Series`](@extref) and [`CTBase.Plotting.Decoration`](@extref)s. It knows nothing about
+carrying [`CTBase.Plotting.Series`](@extref) and [`CTBase.Plotting.AbstractDecoration`](@extref)s. It knows nothing about
 states, controls, costates, trajectories or optimal control — the *case layers*
 (CTModels, CTFlows) build the IR and hand it to a backend via [`CTBase.Plotting.render`](@extref).
 
@@ -14,10 +14,12 @@ drawing lives in an extension (`CTBasePlots` for Plots.jl). See the design repor
 in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
 
 # Public API
-- IR: [`CTBase.Plotting.Series`](@extref), [`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref), [`CTBase.Plotting.Axes`](@extref),
+- IR: [`CTBase.Plotting.Series`](@extref), [`CTBase.Plotting.AbstractDecoration`](@extref), [`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref), [`CTBase.Plotting.Annotation`](@extref), [`CTBase.Plotting.Axes`](@extref),
   [`CTBase.Plotting.Leaf`](@extref), [`CTBase.Plotting.HBox`](@extref), [`CTBase.Plotting.VBox`](@extref), [`CTBase.Plotting.Figure`](@extref), [`CTBase.Plotting.leaves`](@extref)
 - case-layer building blocks: [`CTBase.Plotting.Panel`](@extref), [`CTBase.Plotting.Stacked`](@extref), [`CTBase.Plotting.Paired`](@extref),
-  [`CTBase.Plotting.Grid`](@extref)
+  [`CTBase.Plotting.Grid`](@extref); for trajectories made of phases,
+  [`CTBase.Plotting.splice_jumps`](@extref), [`CTBase.Plotting.switching_vlines`](@extref),
+  [`CTBase.Plotting.phase_annotations`](@extref)
 - backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@extref), [`CTBase.Plotting.PlotsBackend`](@extref),
   [`CTBase.Plotting.MakieBackend`](@extref), [`CTBase.Plotting.render`](@extref), [`CTBase.Plotting.render!`](@extref)
 """
@@ -25,12 +27,14 @@ module Plotting
 
 # =============================================================================
 # Files (all backend-free, live in `src`):
-#   - ir.jl          : the IR itself (pure data): Series, HLine/VLine, Axes,
+#   - ir.jl          : the IR itself (pure data): Series, HLine/VLine, Annotation, Axes,
 #                      Leaf/HBox/VBox, Figure — plus deterministic leaf traversal.
 #   - panel.jl       : Panel (a titled group of components, with its own x grid
 #                      and optional per-component style) + replaceable defaults.
 #   - combinators.jl : level-2 declarative layout: Stacked / Paired / Grid.
 #   - lowering.jl    : Panel/combinator -> Axes/tree (weights, ylims guard, time).
+#   - switching.jl   : trajectories made of phases: jumps spliced into the samples,
+#                      switching-time lines, phase labels.
 #   - heuristics.jl  : figure-size heuristics driven by the weighted tree.
 #   - labels.jl      : user `title`/`xlabel`/`ylabel` keywords resolved on the IR.
 #   - contract.jl    : AbstractPlottingBackend, PlotsBackend, render/render! (stubs here;
@@ -48,18 +52,20 @@ include(joinpath(@__DIR__, "ir.jl"))
 include(joinpath(@__DIR__, "panel.jl"))
 include(joinpath(@__DIR__, "combinators.jl"))
 include(joinpath(@__DIR__, "lowering.jl"))
+include(joinpath(@__DIR__, "switching.jl"))
 include(joinpath(@__DIR__, "heuristics.jl"))
 include(joinpath(@__DIR__, "labels.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
 
 # --- IR ----------------------------------------------------------------------
-export Series, HLine, VLine, Axes
+export Series, AbstractDecoration, HLine, VLine, Annotation, Axes
 export AbstractLayoutNode, Leaf, HBox, VBox, Figure
 export leaves
 
 # --- case-layer building blocks ----------------------------------------------
 export Panel
 export Stacked, Paired, Grid
+export splice_jumps, switching_vlines, phase_annotations
 
 # --- backend contract --------------------------------------------------------
 export AbstractPlottingBackend, PlotsBackend, MakieBackend

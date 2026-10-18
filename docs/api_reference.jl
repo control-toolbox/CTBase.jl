@@ -217,6 +217,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Plotting", "combinators.jl"),
                 joinpath("Plotting", "labels.jl"),
                 joinpath("Plotting", "lowering.jl"),
+                joinpath("Plotting", "switching.jl"),
                 joinpath("Plotting", "heuristics.jl"),
                 joinpath("Plotting", "contract.jl"),
             ),

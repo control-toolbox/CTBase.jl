@@ -23,6 +23,8 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Fake backend at module top level (TST3: fake types never inside functions).
 struct DummyBackend <: Plotting.AbstractPlottingBackend end
+# A decoration the backend cannot draw.
+struct FakeDecoration <: Plotting.AbstractDecoration end
 
 # state (2 comps) stacked over control (1 comp), decorated — same shape as
 # test_contract.jl so the two backends are compared on the same IR.
@@ -51,9 +53,19 @@ _n_axes(f) = length(_axes(f))
 _n_legends(f) = count(x -> x isa Makie.Legend, f.content)
 _n_labels(f) = count(x -> x isa Makie.Label, f.content)
 _count_plots(axis, ::Type{T}) where {T} = count(p -> p isa T, axis.scene.plots)
+# A Makie attribute may hold one value or a one-element vector of values.
+_one(x) = x isa AbstractVector ? only(x) : x
 
 function test_contract_makie()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Plotting Makie backend contract" begin
+        Test.@testset "a decoration the backend cannot draw -> NotImplemented" begin
+            ax = Plotting.Axes(
+                [Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[FakeDecoration()]
+            )
+            fig = Plotting.Figure(Plotting.Leaf(ax))
+            Test.@test_throws Exceptions.NotImplemented Plotting.render(Plotting.MakieBackend(), fig)
+        end
+
         Test.@testset "MakieBackend is a registered backend type" begin
             Test.@test Plotting.MakieBackend <: Plotting.AbstractPlottingBackend
             Test.@test isdefined(Plotting, :MakieBackend)
@@ -252,6 +264,62 @@ function test_contract_makie()
             f = Makie.Figure()
             Plotting.render!(Plotting.MakieBackend(), f, _figure())
             Test.@test _n_axes(f) == Plotting.n_leaves(_figure())
+        end
+
+        Test.@testset "annotations are drawn as text that follows the axis limits" begin
+            t = collect(range(0.0, 2.0, 21))
+            texts = [
+                Plotting.Annotation(0.5, "bang"),
+                Plotting.Annotation(
+                    1.5,
+                    "singular";
+                    y=0.25,
+                    style=(fontsize=16, color=:red, halign=:left, valign=:top),
+                ),
+            ]
+            p = Plotting.Panel(t, [t 2t]; labels=["a", "b"])
+            node = Plotting.lower(p; layout=:split, annotations=texts)
+            f = Plotting.render(Plotting.MakieBackend(), Plotting.Figure(node))
+            axs = _axes(f)
+            Test.@test _count_plots(axs[1], Makie.Text) == 2
+            Test.@test _count_plots(axs[2], Makie.Text) == 0   # top cell only
+            tps = [pl for pl in axs[1].scene.plots if pl isa Makie.Text]
+            # automatic limits: room above the data (in [0, 2]) for the texts
+            top = axs[1].finallimits[].origin[2] + axs[1].finallimits[].widths[2]
+            Test.@test top ≥ 2.0 + 0.2 * 2.0 - 1e-6
+            Test.@test _count_plots(axs[2], Makie.Text) == 0
+            Makie.ylims!(axs[1], -1.0, 3.0)
+            Makie.reset_limits!(axs[1])
+            pos1 = tps[1][1][]
+            pos2 = tps[2][1][]
+            pos1 = pos1 isa AbstractVector ? pos1[1] : pos1
+            pos2 = pos2 isa AbstractVector ? pos2[1] : pos2
+            Test.@test pos1[1] ≈ 0.5
+            Test.@test pos1[2] ≈ -1.0 + 0.92 * 4.0 atol = 1e-5
+            Test.@test pos2[1] ≈ 1.5
+            Test.@test pos2[2] ≈ -1.0 + 0.25 * 4.0 atol = 1e-5
+            # the text follows a change of the limits
+            Makie.ylims!(axs[1], 0.0, 10.0)
+            Makie.reset_limits!(axs[1])
+            p1 = tps[1][1][]
+            p1 = p1 isa AbstractVector ? p1[1] : p1
+            Test.@test p1[2] ≈ 9.2 atol = 1e-4
+            # style: text, default and explicit attributes
+            Test.@test _one(tps[1].text[]) == "bang"
+            Test.@test tps[1].fontsize[] == Plotting._ANNOTATION_FONT_SIZE
+            Test.@test tps[1].align[] == (:center, :center)
+            Test.@test _one(tps[2].text[]) == "singular"
+            Test.@test tps[2].fontsize[] == 16
+            Test.@test tps[2].align[] == (:left, :top)
+            Test.@test tps[2].color[] == Makie.to_color(:red)
+            # the texts do not take part in auto-limits
+            Test.@test tps[1].yautolimits[] == false
+            # render! overlay adds them to the target axis
+            Plotting.render!(Plotting.MakieBackend(), f, Plotting.Figure(node))
+            Test.@test _count_plots(axs[1], Makie.Text) == 4
+            # no annotation: no text
+            g = Plotting.render(Plotting.MakieBackend(), _figure())
+            Test.@test all(ax -> _count_plots(ax, Makie.Text) == 0, _axes(g))
         end
 
         Test.@testset "unknown backend still errors (guards the fallback refactor)" begin
