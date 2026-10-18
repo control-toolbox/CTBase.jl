@@ -13,6 +13,7 @@ using Plots: Plots
 using DocStringExtensions: TYPEDSIGNATURES
 
 using CTBase: Plotting
+using CTBase: Exceptions
 
 # --- fonts / margins (semantic sizes come from src; Plots objects made here) --
 """
@@ -162,6 +163,26 @@ end
 function _draw_decoration!(p, d::Plotting.VLine, sp::Int)
     Plots.vline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
     return p
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Fallback for a decoration the Plots backend cannot draw (see
+[`CTBase.Plotting.AbstractDecoration`](@extref)).
+
+# Throws
+- [`CTBase.Exceptions.NotImplemented`](@extref): always.
+"""
+function _draw_decoration!(p, d::Plotting.AbstractDecoration, sp::Int)
+    throw(
+        Exceptions.NotImplemented(
+            "the Plots backend cannot draw a $(nameof(typeof(d)))";
+            required_method="CTBasePlots._draw_decoration!(p, ::$(nameof(typeof(d))), sp::Int)",
+            suggestion="define _draw_decoration! for this decoration in the Plots extension",
+            context="Plots rendering of a decoration",
+        ),
+    )
 end
 
 """

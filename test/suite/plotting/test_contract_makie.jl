@@ -23,6 +23,8 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 # Fake backend at module top level (TST3: fake types never inside functions).
 struct DummyBackend <: Plotting.AbstractPlottingBackend end
+# A decoration the backend cannot draw.
+struct FakeDecoration <: Plotting.AbstractDecoration end
 
 # state (2 comps) stacked over control (1 comp), decorated — same shape as
 # test_contract.jl so the two backends are compared on the same IR.
@@ -56,6 +58,14 @@ _one(x) = x isa AbstractVector ? only(x) : x
 
 function test_contract_makie()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Plotting Makie backend contract" begin
+        Test.@testset "a decoration the backend cannot draw -> NotImplemented" begin
+            ax = Plotting.Axes(
+                [Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[FakeDecoration()]
+            )
+            fig = Plotting.Figure(Plotting.Leaf(ax))
+            Test.@test_throws Exceptions.NotImplemented Plotting.render(Plotting.MakieBackend(), fig)
+        end
+
         Test.@testset "MakieBackend is a registered backend type" begin
             Test.@test Plotting.MakieBackend <: Plotting.AbstractPlottingBackend
             Test.@test isdefined(Plotting, :MakieBackend)

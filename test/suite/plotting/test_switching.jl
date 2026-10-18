@@ -46,6 +46,24 @@ function test_switching()
             Test.@test length(x) == length(t) + 2
         end
 
+        Test.@testset "splice_jumps: connect=false breaks the curve" begin
+            x, d = Plotting.splice_jumps(
+                [0.0, 1.0, 2.0], [0.0 10; 1 11; 2 12], [1.0], [1.0 11;], [3.0 13;];
+                connect=false,
+            )
+            Test.@test x == [0.0, 1.0, 1.0, 1.0, 2.0]
+            Test.@test d[2, :] == [1.0, 11.0]
+            Test.@test all(isnan, d[3, :])
+            Test.@test d[4, :] == [3.0, 13.0]
+            # the y-limits guard ignores the NaN rows
+            Test.@test Plotting._ylims_guard(d[:, 1]) === :auto
+            Test.@test Plotting._ylims_guard([1.0, NaN, 1.0]) == (0.0, 2.0)
+            # lowered and rendered: the NaN row reaches the series
+            node = Plotting.lower(Plotting.Panel(x, d; labels=["a", "b"]))
+            s = first(Plotting.leaves(node)).axes.series[1]
+            Test.@test count(isnan, s.y) == 1
+        end
+
         Test.@testset "splice_jumps: unchanged without switching time or limits" begin
             t, M = [0.0, 1.0], [1.0 2.0; 3.0 4.0]
             Test.@test Plotting.splice_jumps(t, M, Float64[], zeros(0, 2), zeros(0, 2)) ==

@@ -69,7 +69,9 @@ top. The text therefore keeps its place whatever the data. The style accepts `fo
 a = CTBase.Plotting.Annotation(0.5, "bang"; style=(color=:gray,))
 ```
 
-Lines and annotations are both [`CTBase.Plotting.Decoration`](@ref)s.
+Lines and annotations are subtypes of [`CTBase.Plotting.AbstractDecoration`](@ref). A new
+kind of decoration is a new subtype with a drawing method in each backend extension; a
+backend without that method throws a `NotImplemented` error when it renders it.
 
 ### Axes
 
@@ -183,7 +185,8 @@ passes them as plain data:
 
 - [`CTBase.Plotting.splice_jumps`](@ref) inserts the left and right limits at every
   switching time into the samples of a panel, so that a jump is drawn as a vertical
-  segment;
+  segment; with `connect=false`, the curve is broken between the two limits instead, so
+  that no segment suggests values the trajectory does not take;
 - [`CTBase.Plotting.switching_vlines`](@ref) returns the vertical lines at the switching
   times, for the `vlines` of `lower`;
 - [`CTBase.Plotting.phase_annotations`](@ref) returns the labels as texts centred on each
@@ -330,7 +333,7 @@ index when overlaying with `render!`.
 
 | Category | Symbols |
 | :--- | :--- |
-| IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Annotation`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
+| IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.AbstractDecoration`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Annotation`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
 | Building blocks | [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.lower`](@ref) |
 | Phases | [`CTBase.Plotting.splice_jumps`](@ref), [`CTBase.Plotting.switching_vlines`](@ref), [`CTBase.Plotting.phase_annotations`](@ref) |
 | Combinators | [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref), [`CTBase.Plotting.Grid`](@ref) |

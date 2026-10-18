@@ -17,6 +17,7 @@ using Makie: Makie
 using DocStringExtensions: TYPEDSIGNATURES
 
 using CTBase: Plotting
+using CTBase: Exceptions
 
 # --- style translation : neutral vocabulary -> Makie attributes ---------------
 
@@ -246,6 +247,26 @@ end
 function _draw_decoration!(axis, d::Plotting.VLine)
     Makie.vlines!(axis, d.value; _translate_style(d.style)...)
     return axis
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Fallback for a decoration the Makie backend cannot draw (see
+[`CTBase.Plotting.AbstractDecoration`](@extref)).
+
+# Throws
+- [`CTBase.Exceptions.NotImplemented`](@extref): always.
+"""
+function _draw_decoration!(axis, d::Plotting.AbstractDecoration)
+    throw(
+        Exceptions.NotImplemented(
+            "the Makie backend cannot draw a $(nameof(typeof(d)))";
+            required_method="CTBaseMakie._draw_decoration!(axis, ::$(nameof(typeof(d))))",
+            suggestion="define _draw_decoration! for this decoration in the Makie extension",
+            context="Makie rendering of a decoration",
+        ),
+    )
 end
 
 """

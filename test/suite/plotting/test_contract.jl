@@ -12,6 +12,8 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 # Having no specific render method, it hits the abstract fallback -> ExtensionError,
 # which is exactly the "no backend loaded" behaviour, testable with Plots present.
 struct DummyBackend <: Plotting.AbstractPlottingBackend end
+# A decoration the backend cannot draw.
+struct FakeDecoration <: Plotting.AbstractDecoration end
 
 # Build a small figure: state (2 comps) stacked over control (1 comp), decorated.
 function _figure(; title=nothing)
@@ -36,6 +38,14 @@ end
 
 function test_contract()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Plotting backend contract" begin
+        Test.@testset "a decoration the backend cannot draw -> NotImplemented" begin
+            ax = Plotting.Axes(
+                [Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[FakeDecoration()]
+            )
+            fig = Plotting.Figure(Plotting.Leaf(ax))
+            Test.@test_throws Exceptions.NotImplemented Plotting.render(Plotting.PlotsBackend(), fig)
+        end
+
         Test.@testset "unknown backend -> ExtensionError" begin
             fig = _figure()
             Test.@test_throws Exceptions.ExtensionError Plotting.render(DummyBackend(), fig)

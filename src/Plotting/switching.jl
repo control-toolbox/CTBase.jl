@@ -42,16 +42,25 @@ inserted at `τ`, in time order; a sample already at `τ` is replaced by these t
 The samples are returned unchanged when there is no switching time, or when the limits
 are not known (matrices with no column).
 
+With `connect = true` (default), the curve goes from the left to the right limit: a jump
+is drawn as a vertical segment. This makes jumps easy to see, and to compare with a
+solution whose jump is smoothed (e.g. from a direct method). With `connect = false`, a row
+of `NaN` is inserted between the two limits: both backends break the curve there, so the
+curve ends at the left limit and starts again at the right limit, with no segment that
+could be read as values taken by the trajectory.
+
 # Arguments
 - `x::AbstractVector{<:Real}`: the sample times, increasing.
 - `data::AbstractMatrix{<:Real}`: the samples, one row per time, one column per component.
 - `times::AbstractVector{<:Real}`: the switching times, increasing.
 - `left`, `right::AbstractMatrix{<:Real}`: the limits before and after each switching time,
   one row per switching time, one column per component (or no column: not known).
+- `connect::Bool = true`: draw a jump as a vertical segment (`true`) or break the curve
+  (`false`).
 
 # Returns
-- `(x, data)`: the sample times (each switching time twice) and the samples, as
-  `Vector{Float64}` and `Matrix{Float64}`.
+- `(x, data)`: the sample times (each switching time twice, three times with
+  `connect = false`) and the samples, as `Vector{Float64}` and `Matrix{Float64}`.
 
 # Throws
 - [`CTBase.Exceptions.IncorrectArgument`](@extref): if `left` or `right` does not have one
@@ -85,7 +94,8 @@ function splice_jumps(
     data::AbstractMatrix{<:Real},
     times::AbstractVector{<:Real},
     left::AbstractMatrix{<:Real},
-    right::AbstractMatrix{<:Real},
+    right::AbstractMatrix{<:Real};
+    connect::Bool=true,
 )
     isempty(times) && return (collect(Float64, x), Matrix{Float64}(data))
     size(left, 2) == 0 && size(right, 2) == 0 &&
@@ -108,8 +118,7 @@ function splice_jumps(
     i = 1
     for k in eachindex(x)
         while i <= length(times) && times[i] <= x[k]
-            push!(xs, times[i], times[i])
-            push!(rows, left[i, :], right[i, :])
+            _push_limits!(xs, rows, times[i], left[i, :], right[i, :], connect)
             i += 1
         end
         # a sample exactly at a switching time is replaced by its two limits
@@ -118,11 +127,27 @@ function splice_jumps(
         push!(rows, data[k, :])
     end
     while i <= length(times)   # switching times after the last sample
-        push!(xs, times[i], times[i])
-        push!(rows, left[i, :], right[i, :])
+        _push_limits!(xs, rows, times[i], left[i, :], right[i, :], connect)
         i += 1
     end
     return (xs, Matrix{Float64}(permutedims(reduce(hcat, rows))))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Append the left and right limits at the switching time `τ` to the sample times `xs` and
+rows `rows`; with `connect = false`, a row of `NaN` between them breaks the curve.
+"""
+function _push_limits!(xs, rows, τ, left, right, connect::Bool)
+    if connect
+        push!(xs, τ, τ)
+        push!(rows, left, right)
+    else
+        push!(xs, τ, τ, τ)
+        push!(rows, left, fill(NaN, length(left)), right)
+    end
+    return nothing
 end
 
 """

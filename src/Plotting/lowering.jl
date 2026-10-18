@@ -53,8 +53,9 @@ collapse to a line.
 - `(lo, hi)::Tuple{Float64,Float64}` when the series is (near-)constant, `:auto` otherwise.
 """
 function _ylims_guard(y::AbstractArray)
-    isempty(y) && return :auto
-    lo, hi = extrema(y)
+    finite = filter(isfinite, y)   # a NaN row breaks a curve (see `splice_jumps`)
+    isempty(finite) && return :auto
+    lo, hi = extrema(finite)
     return (hi - lo) ≤ 1e-8 ? (lo - 1.0, hi + 1.0) : :auto
 end
 
@@ -66,12 +67,12 @@ Collect decorations for component `i` in `:split` layout: its own horizontal lin
 the top cell.
 
 # Returns
-- `Vector{Decoration}`: the merged decoration list for the cell.
+- `Vector{AbstractDecoration}`: the merged decoration list for the cell.
 """
 function _cell_decorations(hlines, vlines, i::Integer, annotations=Annotation[])
     own = (i ≤ length(hlines)) ? hlines[i] : HLine[]
     texts = i == 1 ? annotations : Annotation[]
-    return Decoration[own..., vlines..., texts...]
+    return AbstractDecoration[own..., vlines..., texts...]
 end
 
 """
@@ -157,7 +158,7 @@ function _lower_group(p::Panel, x, time_name, vlines, hlines, annotations=Annota
     series = [
         Series(x, p.data[:, i]; label=p.labels[i], style=component_style(p, i)) for i in 1:k
     ]
-    merged = Decoration[]
+    merged = AbstractDecoration[]
     for hl in hlines
         append!(merged, hl)
     end

@@ -45,13 +45,30 @@ end
 """
 $(TYPEDEF)
 
+Abstract type of the decorations drawn on an [`CTBase.Plotting.Axes`](@extref) on top of its
+series: reference lines ([`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref))
+and texts ([`CTBase.Plotting.Annotation`](@extref)). Decorations carry no legend entry.
+
+# Interface Requirements
+A new decoration is a subtype with a drawing method in each backend extension:
+`_draw_decoration!(p, d, sp)` in `CTBasePlots` and `_draw_decoration!(axis, d)` in
+`CTBaseMakie`. A backend without such a method throws a
+[`CTBase.Exceptions.NotImplemented`](@extref) when it renders the decoration.
+
+See also: [`CTBase.Plotting.Axes`](@extref).
+"""
+abstract type AbstractDecoration end
+
+"""
+$(TYPEDEF)
+
 A horizontal reference line at height `value` (e.g. a box bound). `style` follows
 the same neutral vocabulary as [`CTBase.Plotting.Series`](@extref).
 
 # Fields
 $(TYPEDFIELDS)
 """
-struct HLine
+struct HLine <: AbstractDecoration
     value::Float64
     style::NamedTuple
 end
@@ -66,7 +83,7 @@ follows the same neutral vocabulary as [`CTBase.Plotting.Series`](@extref).
 # Fields
 $(TYPEDFIELDS)
 """
-struct VLine
+struct VLine <: AbstractDecoration
     value::Float64
     style::NamedTuple
 end
@@ -101,7 +118,7 @@ julia> (a.x, a.y, a.text)
 (0.5, 0.9, "bang")
 ```
 """
-struct Annotation
+struct Annotation <: AbstractDecoration
     x::Float64
     y::Float64
     text::String
@@ -141,10 +158,9 @@ range, when the y-limits are automatic: the top of the data then sits at
 const _ANNOTATION_HEADROOM = 0.2
 
 """
-Either an [`CTBase.Plotting.HLine`](@extref) or a [`CTBase.Plotting.VLine`](@extref) — a reference line — or an
-[`CTBase.Plotting.Annotation`](@extref) — a text —, drawn on an [`CTBase.Plotting.Axes`](@extref) on top of its series.
+Former name of [`CTBase.Plotting.AbstractDecoration`](@extref), kept as an alias.
 """
-const Decoration = Union{HLine,VLine,Annotation}
+const Decoration = AbstractDecoration
 
 # --- one cell = one axis system ----------------------------------------------
 
@@ -152,7 +168,7 @@ const Decoration = Union{HLine,VLine,Annotation}
 $(TYPEDEF)
 
 One drawable cell: a single axis system holding a list of [`CTBase.Plotting.Series`](@extref),
-optional [`CTBase.Plotting.Decoration`](@extref)s drawn on top, and its labels/limits. Domain-free —
+optional [`CTBase.Plotting.AbstractDecoration`](@extref)s drawn on top, and its labels/limits. Domain-free —
 the case layer decides what a cell *means*.
 
 `ylims` is one of:
@@ -170,7 +186,7 @@ struct Axes
     xlabel::String
     ylabel::String
     series::Vector{Series}
-    decorations::Vector{Decoration}
+    decorations::Vector{AbstractDecoration}
     legend::Bool
     ylims::Union{Nothing,Tuple{Float64,Float64},Symbol}
 end
@@ -180,7 +196,7 @@ function Axes(
     title::AbstractString="",
     xlabel::AbstractString="",
     ylabel::AbstractString="",
-    decorations::AbstractVector=Decoration[],
+    decorations::AbstractVector=AbstractDecoration[],
     legend::Bool=false,
     ylims::Union{Nothing,Tuple{Real,Real},Symbol}=:auto_guarded,
 )
@@ -190,7 +206,7 @@ function Axes(
         String(xlabel),
         String(ylabel),
         collect(Series, series),
-        collect(Decoration, decorations),
+        collect(AbstractDecoration, decorations),
         legend,
         yl,
     )
