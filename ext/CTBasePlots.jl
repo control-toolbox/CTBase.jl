@@ -168,14 +168,14 @@ end
 $(TYPEDSIGNATURES)
 
 Translate the neutral text style of an [`CTBase.Plotting.Annotation`](@extref) into a
-`Plots.Font`: `fontsize` (default 9), `color` (default `:black`), `halign` (`:left`,
+`Plots.Font`: `fontsize` (default `Plotting._ANNOTATION_FONT_SIZE`), `color` (default `:black`), `halign` (`:left`,
 `:center`, `:right`) and `valign` (`:bottom`, `:center`, `:top`), both centred by default.
 """
 function _annotation_font(style::NamedTuple)
     h = get(style, :halign, :center)
     v = get(style, :valign, :center)
     return Plots.font(;
-        pointsize=get(style, :fontsize, 9),
+        pointsize=get(style, :fontsize, Plotting._ANNOTATION_FONT_SIZE),
         color=get(style, :color, :black),
         halign=(h === :center ? :hcenter : h),
         valign=(v === :center ? :vcenter : v),

@@ -17,7 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `annotations` keyword that attaches them to the top cell of a panel. Both backends draw
   them: Plots places the text once the y-range of the subplot is set, and Makie makes it
   follow the axis limits. A cell holding annotations gets 20 % of room above its data when
-  its y-limits are automatic, so that the texts do not cover the curves.
+  its y-limits are automatic, so that the texts do not cover the curves. The default font
+  size, `Plotting._ANNOTATION_FONT_SIZE`, is shared by both backends.
+- Case-layer building blocks for trajectories made of phases
+  ([#612](https://github.com/control-toolbox/CTBase.jl/issues/612)), shared by the plots
+  of CTModels and CTFlows: `Plotting.splice_jumps` inserts the left and right limits at
+  the switching times into the samples of a panel (a jump is drawn as a vertical
+  segment), `Plotting.switching_vlines` returns the lines at the switching times, and
+  `Plotting.phase_annotations` the labels of the phases (none for an empty label).
 
 ## [0.30.10] - 2026-10-15
 

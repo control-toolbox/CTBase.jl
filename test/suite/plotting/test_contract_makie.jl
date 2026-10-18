@@ -296,7 +296,7 @@ function test_contract_makie()
             Test.@test p1[2] ≈ 9.2 atol = 1e-4
             # style: text, default and explicit attributes
             Test.@test _one(tps[1].text[]) == "bang"
-            Test.@test tps[1].fontsize[] == 12
+            Test.@test tps[1].fontsize[] == Plotting._ANNOTATION_FONT_SIZE
             Test.@test tps[1].align[] == (:center, :center)
             Test.@test _one(tps[2].text[]) == "singular"
             Test.@test tps[2].fontsize[] == 16

@@ -184,8 +184,8 @@ function test_contract()
             Test.@test x1 ≈ 0.5
             Test.@test y1 ≈ -1.0 + 0.92 * 4.0
             Test.@test t1.str == "bang"
-            # default style: 9 pt, black, centred
-            Test.@test t1.font.pointsize == 9
+            # default style: the shared font size, black, centred
+            Test.@test t1.font.pointsize == Plotting._ANNOTATION_FONT_SIZE
             Test.@test t1.font.halign === :hcenter
             Test.@test t1.font.valign === :vcenter
             x2, y2, t2 = ann[2]

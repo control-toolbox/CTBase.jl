@@ -174,6 +174,35 @@ labelled = CTBase.Plotting.lower(
 )
 ```
 
+### Trajectories made of phases
+
+A trajectory computed phase by phase has switching times, at which the state, costate
+or control may jump, and a label per phase. Three building blocks turn this structure
+into plot data; the case layer reads the switching times, the limits and the labels, and
+passes them as plain data:
+
+- [`CTBase.Plotting.splice_jumps`](@ref) inserts the left and right limits at every
+  switching time into the samples of a panel, so that a jump is drawn as a vertical
+  segment;
+- [`CTBase.Plotting.switching_vlines`](@ref) returns the vertical lines at the switching
+  times, for the `vlines` of `lower`;
+- [`CTBase.Plotting.phase_annotations`](@ref) returns the labels as texts centred on each
+  phase, for the `annotations` of `lower`. A phase with an empty label gets no text.
+
+The last two take `time` like `lower`, and return abscissae in the plotted time.
+
+```@example plot
+t = collect(range(0.0, 2.0, 21))
+x = reshape([s < 1 ? s : s + 1 for s in t], :, 1)     # a jump of +1 at t = 1
+xs, data = CTBase.Plotting.splice_jumps(t, x, [1.0], [1.0;;], [2.0;;])
+jump_panel = CTBase.Plotting.Panel(xs, data; title="state", labels=["x"])
+CTBase.Plotting.lower(
+    jump_panel;
+    vlines=CTBase.Plotting.switching_vlines(t, [1.0]; style=(linestyle=:dash,)),
+    annotations=CTBase.Plotting.phase_annotations(t, [1.0], ["phase 1", "phase 2"]),
+)
+```
+
 ### Combinators
 
 Level-2 declarative layout builders operate on already-lowered nodes:
@@ -303,6 +332,7 @@ index when overlaying with `render!`.
 | :--- | :--- |
 | IR | [`CTBase.Plotting.Series`](@ref), [`CTBase.Plotting.HLine`](@ref), [`CTBase.Plotting.VLine`](@ref), [`CTBase.Plotting.Annotation`](@ref), [`CTBase.Plotting.Axes`](@ref), [`CTBase.Plotting.Leaf`](@ref), [`CTBase.Plotting.HBox`](@ref), [`CTBase.Plotting.VBox`](@ref), [`CTBase.Plotting.Figure`](@ref), [`CTBase.Plotting.leaves`](@ref) |
 | Building blocks | [`CTBase.Plotting.Panel`](@ref), [`CTBase.Plotting.lower`](@ref) |
+| Phases | [`CTBase.Plotting.splice_jumps`](@ref), [`CTBase.Plotting.switching_vlines`](@ref), [`CTBase.Plotting.phase_annotations`](@ref) |
 | Combinators | [`CTBase.Plotting.Stacked`](@ref), [`CTBase.Plotting.Paired`](@ref), [`CTBase.Plotting.Grid`](@ref) |
 | Backend | [`CTBase.Plotting.AbstractPlottingBackend`](@ref), [`CTBase.Plotting.PlotsBackend`](@ref), [`CTBase.Plotting.MakieBackend`](@ref), [`CTBase.Plotting.render`](@ref), [`CTBase.Plotting.render!`](@ref) |
 

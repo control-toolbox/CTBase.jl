@@ -125,6 +125,7 @@ function Annotation(
             "the ordinate of an Annotation is relative to the y-axis range";
             got="y=$y",
             expected="a value in [0, 1] (0 = bottom of the axis, 1 = top)",
+            suggestion="give y as a fraction of the axis height, e.g. y=0.92 near the top",
             context="Plotting.Annotation",
         ),
     )

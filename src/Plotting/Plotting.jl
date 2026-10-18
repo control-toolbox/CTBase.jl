@@ -17,7 +17,9 @@ in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
 - IR: [`CTBase.Plotting.Series`](@extref), [`CTBase.Plotting.HLine`](@extref), [`CTBase.Plotting.VLine`](@extref), [`CTBase.Plotting.Annotation`](@extref), [`CTBase.Plotting.Axes`](@extref),
   [`CTBase.Plotting.Leaf`](@extref), [`CTBase.Plotting.HBox`](@extref), [`CTBase.Plotting.VBox`](@extref), [`CTBase.Plotting.Figure`](@extref), [`CTBase.Plotting.leaves`](@extref)
 - case-layer building blocks: [`CTBase.Plotting.Panel`](@extref), [`CTBase.Plotting.Stacked`](@extref), [`CTBase.Plotting.Paired`](@extref),
-  [`CTBase.Plotting.Grid`](@extref)
+  [`CTBase.Plotting.Grid`](@extref); for trajectories made of phases,
+  [`CTBase.Plotting.splice_jumps`](@extref), [`CTBase.Plotting.switching_vlines`](@extref),
+  [`CTBase.Plotting.phase_annotations`](@extref)
 - backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@extref), [`CTBase.Plotting.PlotsBackend`](@extref),
   [`CTBase.Plotting.MakieBackend`](@extref), [`CTBase.Plotting.render`](@extref), [`CTBase.Plotting.render!`](@extref)
 """
@@ -31,6 +33,8 @@ module Plotting
 #                      and optional per-component style) + replaceable defaults.
 #   - combinators.jl : level-2 declarative layout: Stacked / Paired / Grid.
 #   - lowering.jl    : Panel/combinator -> Axes/tree (weights, ylims guard, time).
+#   - switching.jl   : trajectories made of phases: jumps spliced into the samples,
+#                      switching-time lines, phase labels.
 #   - heuristics.jl  : figure-size heuristics driven by the weighted tree.
 #   - labels.jl      : user `title`/`xlabel`/`ylabel` keywords resolved on the IR.
 #   - contract.jl    : AbstractPlottingBackend, PlotsBackend, render/render! (stubs here;
@@ -48,6 +52,7 @@ include(joinpath(@__DIR__, "ir.jl"))
 include(joinpath(@__DIR__, "panel.jl"))
 include(joinpath(@__DIR__, "combinators.jl"))
 include(joinpath(@__DIR__, "lowering.jl"))
+include(joinpath(@__DIR__, "switching.jl"))
 include(joinpath(@__DIR__, "heuristics.jl"))
 include(joinpath(@__DIR__, "labels.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
@@ -60,6 +65,7 @@ export leaves
 # --- case-layer building blocks ----------------------------------------------
 export Panel
 export Stacked, Paired, Grid
+export splice_jumps, switching_vlines, phase_annotations
 
 # --- backend contract --------------------------------------------------------
 export AbstractPlottingBackend, PlotsBackend, MakieBackend

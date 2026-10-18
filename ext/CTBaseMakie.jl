@@ -254,7 +254,7 @@ $(TYPEDSIGNATURES)
 Draw an [`CTBase.Plotting.Annotation`](@extref) into `axis` via `Makie.text!`. Its position
 follows the axis limits: the relative ordinate is mapped onto `axis.finallimits`, and the
 text is excluded from auto-limits, so it stays at the same height when the data change.
-The neutral style gives `fontsize` (default 12), `color` (default `:black`) and
+The neutral style gives `fontsize` (default `Plotting._ANNOTATION_FONT_SIZE`), `color` (default `:black`) and
 `halign` / `valign` (both centred by default); `backend_kwargs` are forwarded.
 """
 function _draw_decoration!(axis, a::Plotting.Annotation)
@@ -266,7 +266,7 @@ function _draw_decoration!(axis, a::Plotting.Annotation)
         axis,
         pos;
         text=a.text,
-        fontsize=get(a.style, :fontsize, 12),
+        fontsize=get(a.style, :fontsize, Plotting._ANNOTATION_FONT_SIZE),
         color=get(a.style, :color, :black),
         align=(get(a.style, :halign, :center), get(a.style, :valign, :center)),
         xautolimits=false,
