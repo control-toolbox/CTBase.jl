@@ -98,7 +98,8 @@ function splice_jumps(
     connect::Bool=true,
 )
     isempty(times) && return (collect(Float64, x), Matrix{Float64}(data))
-    size(left, 2) == 0 && size(right, 2) == 0 &&
+    size(left, 2) == 0 &&
+        size(right, 2) == 0 &&
         return (collect(Float64, x), Matrix{Float64}(data))
     for (name, L) in (("left", left), ("right", right))
         size(L) == (length(times), size(data, 2)) || throw(
@@ -237,7 +238,8 @@ function phase_annotations(
     bounds = vcat(first(x), times, last(x))
     s = merge(_PHASE_LABEL_STYLE, style)
     return Annotation[
-        Annotation(_plotted_time((bounds[k] + bounds[k + 1]) / 2, x, time), labels[k]; style=s)
-        for k in eachindex(labels) if !isempty(labels[k])
+        Annotation(
+            _plotted_time((bounds[k] + bounds[k + 1]) / 2, x, time), labels[k]; style=s
+        ) for k in eachindex(labels) if !isempty(labels[k])
     ]
 end

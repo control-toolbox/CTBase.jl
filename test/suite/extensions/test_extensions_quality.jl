@@ -11,22 +11,22 @@ const CTBaseAqua = Base.get_extension(CTBase, :CTBaseAqua)
 
 # Fakes: a package, one clean extension and one pirating, ambiguous extension.
 module FakePkg
-struct Owned end
-const OwnedOrInt = Union{Owned,Int}
-const ForeignUnion = Union{Int,AbstractVector{<:Real}}
-f(::Int) = 1
+    struct Owned end
+    const OwnedOrInt = Union{Owned,Int}
+    const ForeignUnion = Union{Int,AbstractVector{<:Real}}
+    f(::Int) = 1
 end
 
 module FakeCleanExt
-using ..FakePkg
-FakePkg.f(::Float64) = 2
-Base.show(::IO, ::FakePkg.Owned) = nothing
+    using ..FakePkg
+    FakePkg.f(::Float64) = 2
+    Base.show(::IO, ::FakePkg.Owned) = nothing
 end
 
 module FakePirateExt
-Base.sin(::Symbol) = 1
-Base.cos(::Symbol, ::Any) = 1
-Base.cos(::Any, ::Symbol) = 2
+    Base.sin(::Symbol) = 1
+    Base.cos(::Symbol, ::Any) = 1
+    Base.cos(::Any, ::Symbol) = 2
 end
 
 function test_extensions_quality()

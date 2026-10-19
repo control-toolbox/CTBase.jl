@@ -259,7 +259,7 @@ Fallback for a decoration the Makie backend cannot draw (see
 - [`CTBase.Exceptions.NotImplemented`](@extref): always.
 """
 function _draw_decoration!(axis, d::Plotting.AbstractDecoration)
-    throw(
+    return throw(
         Exceptions.NotImplemented(
             "the Makie backend cannot draw a $(nameof(typeof(d)))";
             required_method="CTBaseMakie._draw_decoration!(axis, ::$(nameof(typeof(d))))",
@@ -280,7 +280,7 @@ The neutral style gives `fontsize` (default `Plotting._ANNOTATION_FONT_SIZE`), `
 """
 function _draw_decoration!(axis, a::Plotting.Annotation)
     pos = Makie.lift(axis.finallimits) do r
-        Makie.Point2f(a.x, r.origin[2] + a.y * r.widths[2])
+        return Makie.Point2f(a.x, r.origin[2] + a.y * r.widths[2])
     end
     bk = get(a.style, :backend_kwargs, NamedTuple())
     Makie.text!(

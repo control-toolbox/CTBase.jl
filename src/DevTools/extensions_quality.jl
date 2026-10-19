@@ -82,7 +82,10 @@ function test_extensions_quality(
 )
     return throw(
         Exceptions.ExtensionError(
-            :Aqua, :Test; feature="extension quality checks", context="test_extensions_quality"
+            :Aqua,
+            :Test;
+            feature="extension quality checks",
+            context="test_extensions_quality",
         ),
     )
 end

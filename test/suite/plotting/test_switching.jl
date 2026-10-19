@@ -48,7 +48,11 @@ function test_switching()
 
         Test.@testset "splice_jumps: connect=false breaks the curve" begin
             x, d = Plotting.splice_jumps(
-                [0.0, 1.0, 2.0], [0.0 10; 1 11; 2 12], [1.0], [1.0 11;], [3.0 13;];
+                [0.0, 1.0, 2.0],
+                [0.0 10; 1 11; 2 12],
+                [1.0],
+                [1.0 11;],
+                [3.0 13;];
                 connect=false,
             )
             Test.@test x == [0.0, 1.0, 1.0, 1.0, 2.0]
@@ -68,7 +72,8 @@ function test_switching()
             t, M = [0.0, 1.0], [1.0 2.0; 3.0 4.0]
             Test.@test Plotting.splice_jumps(t, M, Float64[], zeros(0, 2), zeros(0, 2)) ==
                 (t, M)
-            Test.@test Plotting.splice_jumps(t, M, [0.5], zeros(1, 0), zeros(1, 0)) == (t, M)
+            Test.@test Plotting.splice_jumps(t, M, [0.5], zeros(1, 0), zeros(1, 0)) ==
+                (t, M)
         end
 
         # ====================================================================
@@ -82,8 +87,10 @@ function test_switching()
             Test.@test [l.value for l in v] == [1.5, 2.5]
             Test.@test all(l -> l.style == (color=:red,), v)
             # normalised time, over the grid of the trajectory
-            Test.@test only(Plotting.switching_vlines(t, [1.5]; time=:normalize)).value ≈ 0.25
-            Test.@test only(Plotting.switching_vlines(t, [1.5]; time=:normalise)).value ≈ 0.25
+            Test.@test only(Plotting.switching_vlines(t, [1.5]; time=:normalize)).value ≈
+                0.25
+            Test.@test only(Plotting.switching_vlines(t, [1.5]; time=:normalise)).value ≈
+                0.25
             Test.@test isempty(Plotting.switching_vlines(t, Float64[]))
         end
 
@@ -167,8 +174,7 @@ function test_switching()
             Test.@test s.x[k + 1] == 1.0
             Test.@test s.y[k + 1] - s.y[k] ≈ 1.0
             Test.@test count(d -> d isa Plotting.VLine, ax.decorations) == 1
-            Test.@test [d.text for d in ax.decorations if d isa Plotting.Annotation] ==
-                ["p1", "p2"]
+            Test.@test [d.text for d in ax.decorations if d isa Plotting.Annotation] == ["p1", "p2"]
         end
     end
     return nothing
