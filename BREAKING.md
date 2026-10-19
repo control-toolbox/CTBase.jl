@@ -2,6 +2,12 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.12)
+
+- **`DevTools.test_extensions_quality`**: a `Union` alias in the tested package no longer
+  makes it throw (#620). **No breaking change**: no public signature, type or name
+  changed; no migration required.
+
 ## Non-breaking note (0.30.11)
 
 - **Plotting decorations**: added `Plotting.AbstractDecoration`, `Plotting.Annotation`,

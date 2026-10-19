@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.12] - 2026-10-19
+
+### 🐛 Bug Fixes
+
+- `DevTools.test_extensions_quality` no longer throws on a package that defines a `Union`
+  alias: `_owned_symbols` skips the alias, whose members are collected on their own
+  ([#619](https://github.com/control-toolbox/CTBase.jl/issues/619),
+  [#620](https://github.com/control-toolbox/CTBase.jl/pull/620)).
+
 ### 📚 Documentation
 
 - ct-conventions pinned at `v0.7.0` in `AGENTS.md`: the release rules `REL1`–`REL7` in the
@@ -18,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ReleaseTag.yml` (tag and GitHub release of a merged release PR) call CTActions;
   `Breakage.yml` moves to `breakage-suite.yml` (one report, the `REL1` check of a release
   PR) and also runs on push to `main`; `Documentation.yml` accepts `workflow_dispatch`.
+
+### ✅ Compatibility
+
+- **No breaking changes**: a bug fix, documentation and CI only. See
+  [BREAKING.md](BREAKING.md).
 
 ## [0.30.11] - 2026-10-18
 
