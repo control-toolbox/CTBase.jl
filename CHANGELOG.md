@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🧪 Testing
+
+- `Breakage.yml` also tests CTLie, which depends on CTBase: the packages tested are the
+  ones that list CTBase in their `Project.toml` (CTDirect, CTFlows, CTLie, CTModels,
+  CTParser, CTSolvers, OptimalControl).
+
 ## [0.30.12] - 2026-10-19
 
 ### 🐛 Bug Fixes
