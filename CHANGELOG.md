@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🧪 Testing
+
+- `Breakage.yml` no longer lists the packages to test: CTActions derives them from the
+  `Project.toml` files of the organization (the packages that load CTBase in their `deps`,
+  `weakdeps`, `extras` or test environment), so CTLie is tested too.
+
 ## [0.30.12] - 2026-10-19
 
 ### 🐛 Bug Fixes
