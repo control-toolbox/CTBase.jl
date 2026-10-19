@@ -40,7 +40,9 @@ function test_ir()
             Test.@test Plotting.Decoration === Plotting.AbstractDecoration
             # an Axes accepts any decoration
             fake = FakeDecoration()
-            ax = Plotting.Axes([Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[fake])
+            ax = Plotting.Axes(
+                [Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[fake]
+            )
             Test.@test ax.decorations == Plotting.AbstractDecoration[fake]
         end
 
@@ -53,7 +55,9 @@ function test_ir()
             Test.@test a.text == "bang"
             Test.@test a.style == NamedTuple()
             # explicit ordinate, style, and conversions (Int abscissa, SubString text)
-            b = Plotting.Annotation(2, SubString("singular", 1, 4); y=0, style=(color=:red,))
+            b = Plotting.Annotation(
+                2, SubString("singular", 1, 4); y=0, style=(color=:red,)
+            )
             Test.@test b.x === 2.0 && b.y === 0.0
             Test.@test b.text === "sing"
             Test.@test b.style == (color=:red,)

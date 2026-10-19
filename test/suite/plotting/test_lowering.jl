@@ -129,8 +129,9 @@ function test_lowering()
                 hlines=[[Plotting.HLine(0.0)], Plotting.HLine[], Plotting.HLine[]],
                 annotations=texts,
             )
-            Test.@test g.axes.decorations ==
-                Plotting.Decoration[Plotting.HLine(0.0), Plotting.VLine(1.0), texts...]
+            Test.@test g.axes.decorations == Plotting.Decoration[
+                Plotting.HLine(0.0), Plotting.VLine(1.0), texts...
+            ]
             # no annotation by default: the decorations are unchanged
             Test.@test Plotting.leaves(Plotting.lower(p; layout=:split))[1].axes.decorations ==
                 Plotting.Decoration[]

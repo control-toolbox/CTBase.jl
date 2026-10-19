@@ -175,7 +175,7 @@ Fallback for a decoration the Plots backend cannot draw (see
 - [`CTBase.Exceptions.NotImplemented`](@extref): always.
 """
 function _draw_decoration!(p, d::Plotting.AbstractDecoration, sp::Int)
-    throw(
+    return throw(
         Exceptions.NotImplemented(
             "the Plots backend cannot draw a $(nameof(typeof(d)))";
             required_method="CTBasePlots._draw_decoration!(p, ::$(nameof(typeof(d))), sp::Int)",
@@ -270,7 +270,9 @@ function _draw_axes!(
     # automatic y-limits: room above the data for the annotations
     if !(yl isa Tuple) && any(d -> d isa Plotting.Annotation, ax.decorations)
         lo, hi = Plots.ylims(p[sp])
-        Plots.plot!(p; subplot=sp, ylims=(lo, hi + Plotting._ANNOTATION_HEADROOM * (hi - lo)))
+        Plots.plot!(
+            p; subplot=sp, ylims=(lo, hi + Plotting._ANNOTATION_HEADROOM * (hi - lo))
+        )
     end
     return _draw_annotations!(p, ax, sp)
 end

@@ -63,7 +63,9 @@ function test_contract_makie()
                 [Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[FakeDecoration()]
             )
             fig = Plotting.Figure(Plotting.Leaf(ax))
-            Test.@test_throws Exceptions.NotImplemented Plotting.render(Plotting.MakieBackend(), fig)
+            Test.@test_throws Exceptions.NotImplemented Plotting.render(
+                Plotting.MakieBackend(), fig
+            )
         end
 
         Test.@testset "MakieBackend is a registered backend type" begin

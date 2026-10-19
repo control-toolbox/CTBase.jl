@@ -43,7 +43,9 @@ function test_contract()
                 [Plotting.Series([0.0, 1.0], [0.0, 1.0])]; decorations=[FakeDecoration()]
             )
             fig = Plotting.Figure(Plotting.Leaf(ax))
-            Test.@test_throws Exceptions.NotImplemented Plotting.render(Plotting.PlotsBackend(), fig)
+            Test.@test_throws Exceptions.NotImplemented Plotting.render(
+                Plotting.PlotsBackend(), fig
+            )
         end
 
         Test.@testset "unknown backend -> ExtensionError" begin
@@ -214,7 +216,9 @@ function test_contract()
             Test.@test hi ≥ 2.0 + 0.2 * 2.0 - 1e-8
             Test.@test ya > 2.0                     # the text is above the curves
             # no annotation, automatic limits: no extra room
-            plain_hi = Plots.ylims(Plotting.render(Plotting.Figure(Plotting.lower(p))).subplots[1])[2]
+            plain_hi = Plots.ylims(
+                Plotting.render(Plotting.Figure(Plotting.lower(p))).subplots[1]
+            )[2]
             Test.@test plain_hi < 2.0 + 0.2 * 2.0
             # render! overlay also draws them, without new subplots
             n = length(plt_auto.subplots)

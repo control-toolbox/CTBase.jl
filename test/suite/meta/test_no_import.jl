@@ -42,15 +42,11 @@ function test_no_import()
             check_dotted = !(basename(relpath) in DOTTED_USING_EXEMPT)
             for (line_number, line) in enumerate(eachline(path))
                 if occursin(IMPORT_RE, line)
-                    push!(
-                        violations,
-                        "$relpath:$line_number: `import`: $(strip(line))",
-                    )
+                    push!(violations, "$relpath:$line_number: `import`: $(strip(line))")
                 end
                 if check_dotted && occursin(DOTTED_USING_RE, line)
                     push!(
-                        violations,
-                        "$relpath:$line_number: dotted `using`: $(strip(line))",
+                        violations, "$relpath:$line_number: dotted `using`: $(strip(line))"
                     )
                 end
             end

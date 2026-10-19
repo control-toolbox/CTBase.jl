@@ -66,7 +66,9 @@ $(TYPEDSIGNATURES)
 Return the methods of the extension `ext` that pirate a function and types not owned by
 `pkg` or `ext`, every function and type of `pkg` being treated as owned.
 """
-_piracies(pkg::Module, ext::Module) = Aqua.Piracy.hunt(ext; treat_as_own=_owned_symbols(pkg))
+function _piracies(pkg::Module, ext::Module)
+    return Aqua.Piracy.hunt(ext; treat_as_own=_owned_symbols(pkg))
+end
 
 """
 $(TYPEDSIGNATURES)
@@ -87,22 +89,25 @@ function _test_extension(pkg::Module, ext::Module, allowed::AbstractDict{String,
     pirates = _piracies(pkg, ext)
     unlisted = [m for m in pirates if !haskey(allowed, _piracy_key(m))]
     Test.@test isempty(unlisted) || begin
-        @error "Unlisted piracy in $(nameof(ext)); add it to `allowed_piracies` with a reason" methods =
-            [_piracy_key(m) => string(m) for m in unlisted]
+        @error "Unlisted piracy in $(nameof(ext)); add it to `allowed_piracies` with a reason" methods = [
+            _piracy_key(m) => string(m) for m in unlisted
+        ]
         false
     end
 
     stale = setdiff(keys(allowed), Set(_piracy_key.(pirates)))
     Test.@test isempty(stale) || begin
-        @error "Stale `allowed_piracies` entries for $(nameof(ext)): no longer pirated" entries =
-            collect(stale)
+        @error "Stale `allowed_piracies` entries for $(nameof(ext)): no longer pirated" entries = collect(
+            stale
+        )
         false
     end
 
     ambiguities = _ambiguities(ext)
     Test.@test isempty(ambiguities) || begin
-        @error "Ambiguities introduced by $(nameof(ext))" pairs =
-            [(string(a), string(b)) for (a, b) in ambiguities]
+        @error "Ambiguities introduced by $(nameof(ext))" pairs = [
+            (string(a), string(b)) for (a, b) in ambiguities
+        ]
         false
     end
     return nothing
@@ -127,7 +132,11 @@ function DevTools.test_extensions_quality(
                 ext = Base.get_extension(pkg, Symbol(name))
                 Test.@test ext isa Module
                 ext isa Module || continue
-                _test_extension(pkg, ext, Dict{String,String}(get(allowed_piracies, name, Dict{String,String}())))
+                _test_extension(
+                    pkg,
+                    ext,
+                    Dict{String,String}(get(allowed_piracies, name, Dict{String,String}())),
+                )
             end
         end
     end
