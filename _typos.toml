@@ -12,7 +12,8 @@ extend-ignore-re = [
 
 [files]
 extend-exclude = [
-    ".conventions/",
+    ".ct-conventions/",
+    ".ct-agents/",
     "*.json",
     "*.toml",
     "*.svg",
