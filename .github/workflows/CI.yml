@@ -19,7 +19,7 @@ jobs:
       github.event_name != 'pull_request' ||
       (github.event.action == 'labeled' && github.event.label.name == 'run ci github-runner') ||
       (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run ci github-runner'))
-    uses: control-toolbox/CTActions/.github/workflows/ci.yml@main
+    uses: control-toolbox/CTActions/.github/workflows/ci.yml@fix/fork-safe
     with:
       runs_on: '["ubuntu-latest", "macos-latest", "windows-latest"]'
       runner_type: 'github'
