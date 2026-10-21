@@ -39,6 +39,11 @@ which implements the contract methods using `DifferentiationInterface.gradient`
 and friends. It is loaded automatically when `DifferentiationInterface` is loaded
 together with `CTBase`.
 
+Before differentiating, the extension adjusts the AD inputs through the tag of the backend
+(`_ad_tag`, hook `_materialize`). The `CTBaseMooncake` extension (loaded with `Mooncake`)
+uses it to replace a view of a host array by a dense copy, for which Mooncake returns an
+array gradient rather than a structural tangent.
+
 ## Exports
 
 - `AbstractADBackend`
@@ -60,6 +65,7 @@ module Differentiation
 
 using ADTypes: ADTypes
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
+using ..Core: AbstractTag
 using ..Data
 using ..Exceptions
 using ..Strategies
@@ -70,6 +76,7 @@ using ..Strategies
 
 include(joinpath(@__DIR__, "default.jl"))
 include(joinpath(@__DIR__, "abstract_ad_backend.jl"))
+include(joinpath(@__DIR__, "ad_tags.jl"))
 include(joinpath(@__DIR__, "differentiation_interface.jl"))
 
 # ==============================================================================

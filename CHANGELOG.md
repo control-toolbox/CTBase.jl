@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+
+- Gradients with `AutoMooncake` at a **view of a host array** are now arrays. Mooncake
+  returns a structural `Mooncake.Tangent` (fields `parent`, `indices`, …) for a `SubArray`,
+  even with `friendly_tangents=true`
+  ([chalk-lab/Mooncake.jl#1294](https://github.com/chalk-lab/Mooncake.jl/issues/1294)), so
+  `hamiltonian_gradient` and the other entry points of `Differentiation` returned a value
+  that could not be negated (a `MethodError` in the Hamiltonian right-hand sides of CTFlows,
+  [CTFlows.jl#448](https://github.com/control-toolbox/CTFlows.jl/issues/448)). The new
+  `CTBaseMooncake` extension materializes such views before the closures are built, through
+  a tag (`Differentiation.MooncakeTag`, hook `Differentiation._materialize`); the other
+  backends and the device arrays are unchanged.
+
+### 📦 Dependencies
+
+- `Mooncake` (0.5) is a new weak dependency, triggering the `CTBaseMooncake` extension, and a
+  test dependency.
+
 ### 📚 Documentation
 
 - ct-agents pinned at `v0.2.0` and ct-conventions at `v0.7.1` in `AGENTS.md`: the recipes (the
