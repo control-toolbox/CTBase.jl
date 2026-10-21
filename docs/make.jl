@@ -21,6 +21,7 @@ using MarkdownAST: MarkdownAST
 using Test
 using Coverage
 using DifferentiationInterface
+using Mooncake: Mooncake
 using Plots
 using CairoMakie: CairoMakie, Makie   # qualified `using`: loads CairoMakie and exposes
 # CairoMakie/Makie without importing Makie's `plot`/`plot!`
@@ -42,6 +43,7 @@ for _ext_sym in (
     :CoveragePostprocessing,
     :DocumenterReference,
     :CTBaseDifferentiationInterface,
+    :CTBaseMooncake,
     :CTBasePlots,
     :CTBaseMakie,
 )

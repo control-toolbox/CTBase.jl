@@ -81,6 +81,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Differentiation", "Differentiation.jl"),
                 joinpath("Differentiation", "default.jl"),
                 joinpath("Differentiation", "abstract_ad_backend.jl"),
+                joinpath("Differentiation", "materialize.jl"),
                 joinpath("Differentiation", "differentiation_interface.jl"),
             ),
         ),
@@ -280,6 +281,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("TestRunner", "types.jl"),
             ),
         ),
+        (:CTBaseMooncake, ext(joinpath("CTBaseMooncake.jl"))),
         (:CTBasePlots, ext(joinpath("CTBasePlots.jl"))),
         (:CTBaseMakie, ext(joinpath("CTBaseMakie.jl"))),
     ]

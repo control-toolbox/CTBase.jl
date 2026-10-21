@@ -86,6 +86,17 @@ function _checked_backend(backend::Differentiation.DifferentiationInterface)
     return Differentiation.ad_backend(backend)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+The AD inputs `args` in the form the backend `ad` differentiates correctly (see
+[`CTBase.Differentiation._materialize`](@extref)). Applied before the closures are built,
+so that they capture the adjusted inputs too.
+"""
+function _ad_inputs(ad::ADTypes.AbstractADType, args::Vararg{Any,N}) where {N}
+    return map(a -> Differentiation._materialize(ad, a), args)
+end
+
 # ==============================================================================
 # Differentiation.hamiltonian_gradient / variable_gradient
 # ==============================================================================
@@ -137,10 +148,11 @@ function Differentiation.hamiltonian_gradient(
     v,
 )
     di_backend = _checked_backend(backend)
-    h_x(x_) = h(t, x_, p, v)
-    h_p(p_) = h(t, x, p_, v)
-    grad_x = _derivator(typeof(x))(h_x, di_backend, x)
-    grad_p = _derivator(typeof(p))(h_p, di_backend, p)
+    xm, pm, vm = _ad_inputs(di_backend, x, p, v)
+    h_x(x_) = h(t, x_, pm, vm)
+    h_p(p_) = h(t, xm, p_, vm)
+    grad_x = _derivator(typeof(xm))(h_x, di_backend, xm)
+    grad_p = _derivator(typeof(pm))(h_p, di_backend, pm)
     return (grad_x, grad_p)
 end
 
@@ -163,8 +175,9 @@ function Differentiation.variable_gradient(
     v,
 )
     di_backend = _checked_backend(backend)
-    h_v(v_) = h(t, x, p, v_)
-    return _derivator(typeof(v))(h_v, di_backend, v)
+    xm, pm, vm = _ad_inputs(di_backend, x, p, v)
+    h_v(v_) = h(t, xm, pm, v_)
+    return _derivator(typeof(vm))(h_v, di_backend, vm)
 end
 
 """
@@ -205,10 +218,11 @@ function Differentiation.pseudo_hamiltonian_gradient(
     v,
 )
     di_backend = _checked_backend(backend)
-    h̃_x(x_) = h̃(t, x_, p, u, v)
-    h̃_p(p_) = h̃(t, x, p_, u, v)
-    grad_x = _derivator(typeof(x))(h̃_x, di_backend, x)
-    grad_p = _derivator(typeof(p))(h̃_p, di_backend, p)
+    xm, pm, um, vm = _ad_inputs(di_backend, x, p, u, v)
+    h̃_x(x_) = h̃(t, x_, pm, um, vm)
+    h̃_p(p_) = h̃(t, xm, p_, um, vm)
+    grad_x = _derivator(typeof(xm))(h̃_x, di_backend, xm)
+    grad_p = _derivator(typeof(pm))(h̃_p, di_backend, pm)
     return (grad_x, grad_p)
 end
 
@@ -244,8 +258,9 @@ function Differentiation.pseudo_hamiltonian_control_gradient(
     v,
 )
     di_backend = _checked_backend(backend)
-    h̃_u(u_) = h̃(t, x, p, u_, v)
-    grad_u = _derivator(typeof(u))(h̃_u, di_backend, u)
+    xm, pm, um, vm = _ad_inputs(di_backend, x, p, u, v)
+    h̃_u(u_) = h̃(t, xm, pm, u_, vm)
+    grad_u = _derivator(typeof(um))(h̃_u, di_backend, um)
     return grad_u
 end
 
@@ -272,8 +287,9 @@ function Differentiation.pseudo_variable_gradient(
     v,
 )
     di_backend = _checked_backend(backend)
-    h̃_v(v_) = h̃(t, x, p, u, v_)
-    return _derivator(typeof(v))(h̃_v, di_backend, v)
+    xm, pm, um, vm = _ad_inputs(di_backend, x, p, u, v)
+    h̃_v(v_) = h̃(t, xm, pm, um, v_)
+    return _derivator(typeof(vm))(h̃_v, di_backend, vm)
 end
 
 # =============================================================================
@@ -300,7 +316,8 @@ function Differentiation.gradient(
     backend::Differentiation.DifferentiationInterface, f::Function, x::AbstractArray
 )
     ad = _checked_backend(backend)
-    return DI.gradient(f, ad, x)
+    (xm,) = _ad_inputs(ad, x)
+    return DI.gradient(f, ad, xm)
 end
 
 """
@@ -373,9 +390,11 @@ function Differentiation.differentiate(
     consts::Vararg{Any,N},
 ) where {Slot,N}
     di = _checked_backend(backend)
+    inputs = _ad_inputs(di, active, consts...)
+    am, cm = first(inputs), Base.tail(inputs)
     f_active(active_) =
-        f(ntuple(i -> i == Slot ? active_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
-    return _derivator(typeof(active))(f_active, di, active)
+        f(ntuple(i -> i == Slot ? active_ : cm[i < Slot ? i : i - 1], Val(N + 1))...)
+    return _derivator(typeof(am))(f_active, di, am)
 end
 
 """
@@ -398,9 +417,10 @@ function Differentiation.pushforward(
     consts::Vararg{Any,N},
 ) where {Slot,N}
     di = _checked_backend(backend)
-    f_slot(x_) =
-        f(ntuple(i -> i == Slot ? x_ : consts[i < Slot ? i : i - 1], Val(N + 1))...)
-    return only(DI.pushforward(f_slot, di, x, (dx,)))
+    inputs = _ad_inputs(di, x, dx, consts...)
+    xm, dxm, cm = inputs[1], inputs[2], Base.tail(Base.tail(inputs))
+    f_slot(x_) = f(ntuple(i -> i == Slot ? x_ : cm[i < Slot ? i : i - 1], Val(N + 1))...)
+    return only(DI.pushforward(f_slot, di, xm, (dxm,)))
 end
 
 end # module
