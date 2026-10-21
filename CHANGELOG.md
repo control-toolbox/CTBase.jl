@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.13] - 2026-10-21
+
 ### 🐛 Bug Fixes
 
 - Gradients with `AutoMooncake` at a **view of a host array** are now arrays. Mooncake
@@ -33,12 +35,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   conventions is now `.ct-conventions/` (it was `.conventions/`), like `.ct-agents/`.
 - ct-agents pinned at `v0.3.0` in `AGENTS.md`: at the close of a release the agent runs
   `release.jl audit`, which checks the trail the release left.
+- ct-conventions pinned at `v0.8.0` in `AGENTS.md`
+  ([#634](https://github.com/control-toolbox/CTBase.jl/pull/634)).
+- `docs/make.jl` appends the repository root to `LOAD_PATH` so that the `docs/` environment
+  wins ([#633](https://github.com/control-toolbox/CTBase.jl/pull/633)).
 
 ### 🧪 Testing
 
 - `Breakage.yml` no longer lists the packages to test: CTActions derives them from the
   `Project.toml` files of the organization (the packages that load CTBase in their `deps`,
   `weakdeps`, `extras` or test environment), so CTLie is tested too.
+
+### ✅ Compatibility
+
+- **No breaking changes**: a bug fix (gradients with `AutoMooncake` at a view of a host
+  array), a new weak dependency (`Mooncake`), documentation and CI only. See
+  [BREAKING.md](BREAKING.md).
 
 ## [0.30.12] - 2026-10-19
 

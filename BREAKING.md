@@ -2,6 +2,14 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (0.30.13)
+
+- **`AutoMooncake` on views of host arrays**: the gradients of `CTBase.Differentiation` at a
+  `SubArray` of a host `Array` are now arrays (the new `CTBaseMooncake` extension, loaded
+  with `Mooncake`, materializes the view). **No breaking change**: no public signature,
+  type or name changed, and a value that was a `Mooncake.Tangent` (unusable as an array) is
+  now an array; no migration required.
+
 ## Non-breaking note (0.30.12)
 
 - **`DevTools.test_extensions_quality`**: a `Union` alias in the tested package no longer
