@@ -82,40 +82,33 @@ function test_mooncake_extension()
         end
 
         # ======================================================================
-        # Unit: the tag of a backend and the materialization hook
+        # Unit: the materialization hook, dispatched on the ADTypes backend
         # ======================================================================
 
-        Test.@testset "Unit: _ad_tag" begin
-            Test.@test Differentiation._ad_tag(ADTypes.AutoMooncake()) ===
-                Differentiation.MooncakeTag
-            Test.@test Differentiation._ad_tag(ADTypes.AutoForwardDiff()) ===
-                Differentiation.GenericADTag
-            Test.@test Differentiation._ad_tag(ADTypes.AutoZygote()) ===
-                Differentiation.GenericADTag
-        end
-
-        Test.@testset "Unit: _materialize keeps inputs for a generic backend" begin
-            Test.@test Differentiation._materialize(Differentiation.GenericADTag, X) === X
-            Test.@test Differentiation._materialize(Differentiation.GenericADTag, 1.0) === 1.0
+        Test.@testset "Unit: _materialize keeps inputs for other backends" begin
+            for ad in (ADTypes.AutoForwardDiff(), ADTypes.AutoZygote())
+                Test.@test Differentiation._materialize(ad, X) === X
+                Test.@test Differentiation._materialize(ad, 1.0) === 1.0
+            end
         end
 
         Test.@testset "Unit: _materialize copies host views for Mooncake" begin
-            tag = Differentiation.MooncakeTag
+            ad = ADTypes.AutoMooncake()
             # vector view
-            xm = Differentiation._materialize(tag, X)
+            xm = Differentiation._materialize(ad, X)
             Test.@test xm isa Vector{Float64}
             Test.@test xm == X
             Test.@test parent(X) !== xm   # a copy, not the parent
             # row-block view of a matrix (a batch of columns)
             M = [1.0 2.0; 3.0 4.0; 5.0 6.0; 7.0 8.0]
-            Mm = Differentiation._materialize(tag, view(M, 1:2, :))
+            Mm = Differentiation._materialize(ad, view(M, 1:2, :))
             Test.@test Mm isa Matrix{Float64}
             Test.@test Mm == M[1:2, :]
             # anything else is left untouched
             vec_ = [1.0, 2.0]
-            Test.@test Differentiation._materialize(tag, vec_) === vec_
-            Test.@test Differentiation._materialize(tag, 1.0) === 1.0
-            Test.@test Differentiation._materialize(tag, nothing) === nothing
+            Test.@test Differentiation._materialize(ad, vec_) === vec_
+            Test.@test Differentiation._materialize(ad, 1.0) === 1.0
+            Test.@test Differentiation._materialize(ad, nothing) === nothing
         end
 
         # ======================================================================

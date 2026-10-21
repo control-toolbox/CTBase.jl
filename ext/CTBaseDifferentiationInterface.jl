@@ -89,13 +89,12 @@ end
 """
 $(TYPEDSIGNATURES)
 
-The AD inputs `args` in the form the backend `ad` differentiates correctly, through the
-backend's tag (see [`CTBase.Differentiation._materialize`](@extref)). Applied before the
-closures are built, so that they capture the adjusted inputs too.
+The AD inputs `args` in the form the backend `ad` differentiates correctly (see
+[`CTBase.Differentiation._materialize`](@extref)). Applied before the closures are built,
+so that they capture the adjusted inputs too.
 """
 function _ad_inputs(ad::ADTypes.AbstractADType, args::Vararg{Any,N}) where {N}
-    tag = Differentiation._ad_tag(ad)
-    return map(a -> Differentiation._materialize(tag, a), args)
+    return map(a -> Differentiation._materialize(ad, a), args)
 end
 
 # ==============================================================================

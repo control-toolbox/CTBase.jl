@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `hamiltonian_gradient` and the other entry points of `Differentiation` returned a value
   that could not be negated (a `MethodError` in the Hamiltonian right-hand sides of CTFlows,
   [CTFlows.jl#448](https://github.com/control-toolbox/CTFlows.jl/issues/448)). The new
-  `CTBaseMooncake` extension materializes such views before the closures are built, through
-  a tag (`Differentiation.MooncakeTag`, hook `Differentiation._materialize`); the other
+  `CTBaseMooncake` extension materializes such views before the closures are built, by
+  overloading the hook `Differentiation._materialize` for `ADTypes.AutoMooncake`; the other
   backends and the device arrays are unchanged.
 
 ### 📦 Dependencies

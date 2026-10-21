@@ -81,7 +81,7 @@ function generate_api_reference(src_dir::String)
                 joinpath("Differentiation", "Differentiation.jl"),
                 joinpath("Differentiation", "default.jl"),
                 joinpath("Differentiation", "abstract_ad_backend.jl"),
-                joinpath("Differentiation", "ad_tags.jl"),
+                joinpath("Differentiation", "materialize.jl"),
                 joinpath("Differentiation", "differentiation_interface.jl"),
             ),
         ),
