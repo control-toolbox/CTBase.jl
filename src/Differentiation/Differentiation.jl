@@ -65,7 +65,7 @@ module Differentiation
 
 using ADTypes: ADTypes
 using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES
-using ..Core: AbstractTag
+using ..Core: Core
 using ..Data
 using ..Exceptions
 using ..Strategies

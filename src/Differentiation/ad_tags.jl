@@ -11,7 +11,7 @@ AD inputs. The `CTBaseMooncake` extension overloads
 
 See also: [`CTBase.Differentiation.GenericADTag`](@extref), [`CTBase.Differentiation._ad_tag`](@extref).
 """
-struct MooncakeTag <: AbstractTag end
+struct MooncakeTag <: Core.AbstractTag end
 
 """
 $(TYPEDEF)
@@ -20,7 +20,7 @@ Tag of every AD backend that needs no adjustment of its inputs.
 
 See also: [`CTBase.Differentiation.MooncakeTag`](@extref), [`CTBase.Differentiation._ad_tag`](@extref).
 """
-struct GenericADTag <: AbstractTag end
+struct GenericADTag <: Core.AbstractTag end
 
 """
 $(TYPEDSIGNATURES)
@@ -44,4 +44,4 @@ Mooncake returns a structural tangent (not an array) for a `SubArray`.
 
 See also: [`CTBase.Differentiation._ad_tag`](@extref).
 """
-_materialize(::Type{<:AbstractTag}, x) = x
+_materialize(::Type{<:Core.AbstractTag}, x) = x
