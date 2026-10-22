@@ -16,6 +16,7 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 ADTypes = "1"
+CTBase = "0.30"
 CairoMakie = "0.15"
 Coverage = "1"
 DifferentiationInterface = "0.7"
