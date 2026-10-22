@@ -55,12 +55,14 @@ const UC = view([0.2, 0.1, 9.0], 1:2)
 
 # entry point => arguments after the backend
 const CALLS = (
-    "hamiltonian_gradient" => (Differentiation.hamiltonian_gradient, (FAKE_H, 0.0, X, P, nothing)),
+    "hamiltonian_gradient" =>
+        (Differentiation.hamiltonian_gradient, (FAKE_H, 0.0, X, P, nothing)),
     "variable_gradient" => (Differentiation.variable_gradient, (FAKE_H_V, 0.0, X, P, V)),
     "pseudo_hamiltonian_gradient" =>
         (Differentiation.pseudo_hamiltonian_gradient, (FAKE_H̃, 0.0, X, P, UC, nothing)),
     "pseudo_hamiltonian_control_gradient" => (
-        Differentiation.pseudo_hamiltonian_control_gradient, (FAKE_H̃, 0.0, X, P, UC, nothing)
+        Differentiation.pseudo_hamiltonian_control_gradient,
+        (FAKE_H̃, 0.0, X, P, UC, nothing),
     ),
     "pseudo_variable_gradient" =>
         (Differentiation.pseudo_variable_gradient, (FAKE_H̃_V, 0.0, X, P, UC, V)),
@@ -146,7 +148,9 @@ function test_mooncake_extension()
 
         Test.@testset "Contract: generic backends still receive the views" begin
             # ForwardDiff is unaffected: same result on a view and on its copy
-            gx_view, _ = Differentiation.hamiltonian_gradient(FD, FAKE_H, 0.0, X, P, nothing)
+            gx_view, _ = Differentiation.hamiltonian_gradient(
+                FD, FAKE_H, 0.0, X, P, nothing
+            )
             gx_copy, _ = Differentiation.hamiltonian_gradient(
                 FD, FAKE_H, 0.0, copy(X), copy(P), nothing
             )
