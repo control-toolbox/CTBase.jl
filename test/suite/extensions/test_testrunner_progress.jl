@@ -214,7 +214,7 @@ function test_testrunner_progress()
             fmt(io_c, info; cumulative_severity=2)
             output = String(take!(buf))
             Test.@test occursin("\e[33m[", output) ||
-                occursin("\e[33m[", replace(output, "\e[0m"=>""))
+                occursin("\e[33m[", replace(output, "\e[0m" => ""))
         end
 
         Test.@testset "_format_progress_line show_progress_bar=false" begin

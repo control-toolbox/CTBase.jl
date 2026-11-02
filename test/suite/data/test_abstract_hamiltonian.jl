@@ -18,7 +18,7 @@ struct FakeHamiltonian{TD,VD} <: Data.AbstractHamiltonian{TD,VD} end
 # ==============================================================================
 
 function test_abstract_hamiltonian()
-    Test.@testset "AbstractHamiltonian Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "AbstractHamiltonian Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Type Definition

@@ -72,7 +72,7 @@ Tests uncovered lines in routing.jl:
 - Lines 379, 384: _warn_unknown_option_permissive (not called in current codebase)
 """
 function test_coverage_routing_catch()
-    Test.@testset "Routing Catch Block Coverage" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Routing Catch Block Coverage" verbose = VERBOSE showtiming = SHOWTIMING begin
         registry = Strategies.create_registry(
             FakeDiscretizer => (FakeDisc,), FakeModeler => (FakeMod,)
         )

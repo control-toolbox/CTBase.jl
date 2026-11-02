@@ -8,7 +8,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_controlled_vector_field()
-    Test.@testset "ControlledVectorField Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "ControlledVectorField Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ── construction + traits, all (TD, VD) combinations ─────────────────
 

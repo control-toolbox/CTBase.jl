@@ -128,7 +128,7 @@ end
 # ============================================================================
 
 function test_traits_module()
-    Test.@testset "Traits Module Exports" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Traits Module Exports" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # Module availability

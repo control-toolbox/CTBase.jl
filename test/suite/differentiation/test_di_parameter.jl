@@ -14,7 +14,8 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_di_parameter()
     DI = Differentiation.DifferentiationInterface
-    Test.@testset "DifferentiationInterface{P} parameterization" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "DifferentiationInterface{P} parameterization" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # CONTRACT - parameter / default_parameter / id

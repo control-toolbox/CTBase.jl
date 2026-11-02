@@ -8,7 +8,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_composed_vector_field()
-    Test.@testset "ComposedVectorField Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "ComposedVectorField Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ── composition value: ClosedLoop and OpenLoop ───────────────────────
 

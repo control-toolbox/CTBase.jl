@@ -14,7 +14,7 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 Tests for strategy metadata functionality.
 """
 function test_metadata()
-    Test.@testset "StrategyMetadata" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "StrategyMetadata" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================
         # Basic construction with varargs

@@ -26,7 +26,7 @@ This function tests the complete Strategies module exports including:
 - Utility functions (filter_options, suggest_options, etc.)
 """
 function test_strategies()
-    Test.@testset "Strategies Module" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategies Module" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # META TESTS - Exports / Public API surface

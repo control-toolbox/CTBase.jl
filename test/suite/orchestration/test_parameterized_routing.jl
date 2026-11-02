@@ -88,7 +88,7 @@ const CPU_METHOD = (:routing_model, :routing_solver, :cpu)
 const GPU_METHOD = (:routing_model, :routing_solver, :gpu)
 
 function test_parameterized_routing()
-    Test.@testset "Parameterized option routing" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Parameterized option routing" verbose = VERBOSE showtiming = SHOWTIMING begin
         resolved_cpu = Orchestration.resolve_method(
             CPU_METHOD, PARAMETERIZED_ROUTING_FAMILIES, PARAMETERIZED_ROUTING_REGISTRY
         )

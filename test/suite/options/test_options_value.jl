@@ -10,7 +10,7 @@ const VERBOSE = isdefined(Main, :TestData) ? Main.TestData.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 
 function test_options_value()
-    Test.@testset "Options module" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Options module" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # META TESTS - Exports / Public API surface

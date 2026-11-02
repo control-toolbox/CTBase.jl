@@ -68,7 +68,7 @@ function _resolve_labels(fig::Figure; kwargs...)
     haskey(kwargs, :ylabel) && @warn(
         "`ylabel` is ignored: each cell carries its own y label (one per component). " *
             "Change it after rendering with the backend API (e.g. `ylabel!(p[i], \"…\")` in Plots).",
-        ylabel = kwargs[:ylabel],
+        ylabel=kwargs[:ylabel],
     )
     root = xlabel === nothing ? fig.root : _with_xlabel(fig.root, string(xlabel))
     ti = if title === nothing

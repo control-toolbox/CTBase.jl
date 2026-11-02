@@ -7,7 +7,7 @@ const VERBOSE = isdefined(Main, :TestTraits) ? Main.TestTraits.VERBOSE : true
 const SHOWTIMING = isdefined(Main, :TestTraits) ? Main.TestTraits.SHOWTIMING : true
 
 function test_feedback()
-    Test.@testset "Feedback Trait Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Feedback Trait Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Type

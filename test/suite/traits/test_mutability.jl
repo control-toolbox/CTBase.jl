@@ -33,7 +33,7 @@ Fake type for testing mutability trait without the trait.
 struct FakeNoMutability end
 
 function test_mutability()
-    Test.@testset "Mutability Trait Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Mutability Trait Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Types

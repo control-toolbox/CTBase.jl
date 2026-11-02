@@ -30,7 +30,7 @@ FakeBackendAP() = FakeBackendAP(Strategies.StrategyOptions())
 _default_backend() = Differentiation.DifferentiationInterface()
 
 function test_arg_placement()
-    Test.@testset "differentiate/pushforward" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "differentiate/pushforward" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ======================================================================
         # Stub error tests

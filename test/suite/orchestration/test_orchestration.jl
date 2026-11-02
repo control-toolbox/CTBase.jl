@@ -21,7 +21,7 @@ This function tests the complete Orchestration module exports including:
 - Internal functions (NOT exported)
 """
 function test_orchestration()
-    Test.@testset "Orchestration Module" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Orchestration Module" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # META TESTS - Exports / Public API surface

@@ -11,7 +11,8 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 struct BadParam <: Strategies.AbstractStrategyParameter end
 
 function test_parameters()
-    Test.@testset "AbstractStrategyParameter Contract" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "AbstractStrategyParameter Contract" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Contract Implementation

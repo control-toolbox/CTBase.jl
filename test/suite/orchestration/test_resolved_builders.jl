@@ -62,7 +62,8 @@ const RB_FAMILIES = (discretizer=RBDiscretizer, modeler=RBModeler)
 const RB_METHOD = (:rb_disc_a, :rb_mod_a)
 
 function test_resolved_builders()
-    Test.@testset "Orchestration resolved builders" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Orchestration resolved builders" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         resolved = Orchestration.resolve_method(RB_METHOD, RB_FAMILIES, RB_REGISTRY)
 
         # ====================================================================

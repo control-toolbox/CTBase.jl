@@ -82,7 +82,7 @@ end
 # ============================================================================
 
 function test_differentiation_module()
-    Test.@testset "Differentiation Module Exports" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Differentiation Module Exports" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # Module availability

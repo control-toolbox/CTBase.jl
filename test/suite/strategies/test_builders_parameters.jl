@@ -91,7 +91,7 @@ function TestStratB{P}(;
 end
 
 function test_builders_parameters()
-    Test.@testset "Builders with Parameters" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Builders with Parameters" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - extract_global_parameter_from_method

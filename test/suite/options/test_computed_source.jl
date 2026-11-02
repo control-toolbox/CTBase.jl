@@ -43,7 +43,7 @@ function FakeParameterizedStrategy{P}(; mode::Symbol=:strict, kwargs...) where {
 end
 
 function test_computed_source()
-    Test.@testset "Computed Source" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Computed Source" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - OptionDefinition with computed field

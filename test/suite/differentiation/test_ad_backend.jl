@@ -36,7 +36,7 @@ end
 FakeHamiltonian() = FakeHamiltonian((x, p) -> 0.0)
 
 function test_ad_backend()
-    Test.@testset "AD Backend Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "AD Backend Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ==============================================================================
         # Unit Tests

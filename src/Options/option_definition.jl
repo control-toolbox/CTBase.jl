@@ -89,7 +89,7 @@ struct OptionDefinition{T}
             try
                 validator(default)
             catch e
-                @error "Validation failed for option $name with default value $default" exception=(
+                @error "Validation failed for option $name with default value $default" exception = (
                     e, catch_backtrace()
                 )
                 rethrow()

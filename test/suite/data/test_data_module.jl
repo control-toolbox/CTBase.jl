@@ -130,7 +130,7 @@ end
 # ============================================================================
 
 function test_data_module()
-    Test.@testset "Data Module Exports" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Data Module Exports" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # Module availability

@@ -29,7 +29,7 @@ Traits.has_control_dependence_trait(::FakeWithControl) = true
 Traits.control_dependence(::FakeWithControl) = Traits.WithControl
 
 function test_control_dependence()
-    Test.@testset "Control Dependence Trait Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Control Dependence Trait Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Trait Types
