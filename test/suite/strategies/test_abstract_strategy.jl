@@ -98,7 +98,7 @@ end
 Tests for abstract strategy contract.
 """
 function test_abstract_strategy()
-    Test.@testset "Abstract Strategy" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Abstract Strategy" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================
         # UNIT TESTS

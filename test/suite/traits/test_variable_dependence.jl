@@ -29,7 +29,8 @@ Traits.has_variable_dependence_trait(::FakeNonFixed) = true
 Traits.variable_dependence(::FakeNonFixed) = Traits.NonFixed
 
 function test_variable_dependence()
-    Test.@testset "Variable Dependence Trait Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Variable Dependence Trait Tests" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Trait Types

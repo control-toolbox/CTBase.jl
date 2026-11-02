@@ -51,7 +51,7 @@ _error_of(f) =
     end
 
 function test_backend_available()
-    Test.@testset "Backend availability" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Backend availability" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ======================================================================
         # UNIT — package name of a backend

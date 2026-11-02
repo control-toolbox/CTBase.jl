@@ -30,7 +30,7 @@ Tests uncovered lines in parameters.jl:
 - Lines 193-194: id() for CPU and GPU parameters
 """
 function test_parameters_coverage()
-    Test.@testset "Strategy Parameters Coverage" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Parameters Coverage" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - id() for Built-in Parameters

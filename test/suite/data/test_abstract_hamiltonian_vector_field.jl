@@ -18,7 +18,8 @@ struct FakeHamiltonianVectorField{TD,VD,MD} <: Data.AbstractHamiltonianVectorFie
 # ==============================================================================
 
 function test_abstract_hamiltonian_vector_field()
-    Test.@testset "AbstractHamiltonianVectorField Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "AbstractHamiltonianVectorField Tests" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Type Definition

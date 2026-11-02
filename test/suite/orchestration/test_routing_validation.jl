@@ -77,7 +77,7 @@ function create_test_setup()
 end
 
 function test_routing_validation()
-    Test.@testset "Routing Validation Modes" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Routing Validation Modes" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Mode Parameter Validation

@@ -29,7 +29,7 @@ Traits.has_time_dependence_trait(::FakeNonAutonomous) = true
 Traits.time_dependence(::FakeNonAutonomous) = Traits.NonAutonomous
 
 function test_time_dependence()
-    Test.@testset "Time Dependence Trait Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Time Dependence Trait Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Trait Types

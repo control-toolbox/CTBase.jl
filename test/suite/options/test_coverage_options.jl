@@ -31,7 +31,8 @@ function Strategies.metadata(::Type{<:CovOptFakeStrategy})
 end
 
 function test_coverage_options()
-    Test.@testset "Coverage: Options & StrategyOptions" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Coverage: Options & StrategyOptions" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - NotStored display (not_provided.jl)

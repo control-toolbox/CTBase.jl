@@ -17,7 +17,8 @@ end
 Strategies.id(::Type{FakeParamWithField}) = :fake_param_with_field
 
 function test_parameter_contract_helpers()
-    Test.@testset "Strategy Parameter Contract Helpers" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Parameter Contract Helpers" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Predicates and Aliases

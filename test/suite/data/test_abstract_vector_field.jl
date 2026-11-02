@@ -18,7 +18,7 @@ struct FakeVectorField{TD,VD,MD} <: Data.AbstractVectorField{TD,VD,MD} end
 # ==============================================================================
 
 function test_abstract_vector_field()
-    Test.@testset "AbstractVectorField Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "AbstractVectorField Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Type Definition

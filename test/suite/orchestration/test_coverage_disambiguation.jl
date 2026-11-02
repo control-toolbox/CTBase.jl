@@ -90,7 +90,8 @@ const COV_ACTION_DEFS = [
 # ============================================================================
 
 function test_coverage_disambiguation()
-    Test.@testset "Coverage: Disambiguation & Routing" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Coverage: Disambiguation & Routing" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         resolved = Orchestration.resolve_method(COV_METHOD, COV_FAMILIES, COV_REGISTRY)
 
         # ====================================================================

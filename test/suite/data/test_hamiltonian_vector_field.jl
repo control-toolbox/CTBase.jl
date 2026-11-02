@@ -17,7 +17,7 @@ _multi_method_hvf(x::AbstractVector, p) = (x, -p)
 _bad_arity_hvf(x) = (x, -x)
 
 function test_hamiltonian_vector_field()
-    Test.@testset "Hamiltonian Vector Field Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Hamiltonian Vector Field Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Construction

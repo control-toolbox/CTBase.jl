@@ -49,7 +49,7 @@ const BYPASS_ACTION_DEFS = Options.OptionDefinition[]
 # ============================================================================
 
 function test_bypass()
-    Test.@testset "Bypass Mechanism" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Bypass Mechanism" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - BypassValue type

@@ -36,7 +36,7 @@ end
 FakePseudoHamiltonian() = FakePseudoHamiltonian((x, p, u, v) -> 0.0)
 
 function test_pseudo_variable_gradient()
-    Test.@testset "PseudoVariableGradient Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "PseudoVariableGradient Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ==============================================================================
         # Error — NotImplemented stub

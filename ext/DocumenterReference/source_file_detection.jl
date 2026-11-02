@@ -35,7 +35,7 @@ function _get_source_file(mod::Module, key::Symbol, type::DocType)
 
         return nothing
     catch e
-        @debug "Could not determine source file for $key in $mod" exception=e
+        @debug "Could not determine source file for $key in $mod" exception = e
         return nothing
     end
 end

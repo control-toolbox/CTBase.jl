@@ -55,7 +55,7 @@ Strategies.options(s::TestUtilStrategy) = s.options
 Tests for strategy utilities.
 """
 function test_utilities()
-    Test.@testset "Strategy Utilities" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Utilities" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # filter_options - Single key

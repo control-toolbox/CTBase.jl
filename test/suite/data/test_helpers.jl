@@ -12,7 +12,7 @@ const SHOWTIMING = isdefined(Main, :TestData) ? Main.TestData.SHOWTIMING : true
 # ==============================================================================
 
 function test_helpers()
-    Test.@testset "Helpers Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Helpers Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Label Helpers

@@ -50,7 +50,7 @@ Strategies.id(::Type{<:FakeLooseStrat}) = :fake_loose
 Strategies.parameter(::Type{<:FakeLooseStrat{A,P}}) where {A,P} = P
 
 function test_registry_parameters()
-    Test.@testset "Registry with Parameters" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Registry with Parameters" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - create_registry with parameterized strategies

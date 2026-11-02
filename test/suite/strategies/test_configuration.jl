@@ -75,7 +75,7 @@ Strategies.options(s::Union{TestStrategyA,TestStrategyB}) = s.options
 Tests for strategy configuration.
 """
 function test_configuration()
-    Test.@testset "Strategy Configuration" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Configuration" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # build_strategy_options

@@ -21,7 +21,7 @@ This function tests the complete Options module including:
 - Type validation and helpful error messages
 """
 function test_options()
-    Test.@testset "Options Module" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Options Module" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # META TESTS - Exports / Public API surface

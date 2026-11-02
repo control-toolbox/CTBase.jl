@@ -128,7 +128,7 @@ end
 Tests for strategy builders.
 """
 function test_builders()
-    Test.@testset "Strategy Builders" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Builders" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # Create test registry
         registry = Strategies.create_registry(

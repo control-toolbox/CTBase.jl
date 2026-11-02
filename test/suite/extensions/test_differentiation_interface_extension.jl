@@ -36,7 +36,8 @@ const FAKE_HAMILTONIAN_NONFIXED = Data.Hamiltonian(
 # ==============================================================================
 
 function test_differentiation_interface_extension()
-    Test.@testset "DifferentiationInterface Extension Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "DifferentiationInterface Extension Tests" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
         Test.@testset "Integration: hamiltonian_gradient (Fixed)" begin
             backend = Differentiation.DifferentiationInterface(;
                 ad_backend=ADTypes.AutoForwardDiff()
@@ -50,9 +51,9 @@ function test_differentiation_interface_extension()
                 backend, FAKE_HAMILTONIAN_FIXED, t, x, p, v
             )
             Test.@test grad_x isa AbstractVector
-            Test.@test grad_x ≈ x atol=1e-8
+            Test.@test grad_x ≈ x atol = 1e-8
             Test.@test grad_p isa AbstractVector
-            Test.@test grad_p ≈ p atol=1e-8
+            Test.@test grad_p ≈ p atol = 1e-8
         end
 
         Test.@testset "Integration: variable_gradient (NonFixed)" begin
@@ -68,7 +69,7 @@ function test_differentiation_interface_extension()
                 backend, FAKE_HAMILTONIAN_NONFIXED, t, x, p, v
             )
             Test.@test grad_v isa AbstractVector
-            Test.@test grad_v ≈ v atol=1e-8
+            Test.@test grad_v ≈ v atol = 1e-8
         end
 
         Test.@testset "Integration: gradient (vector input)" begin
@@ -78,7 +79,7 @@ function test_differentiation_interface_extension()
             f(x) = sum(x .^ 2)            # ∇f = 2x
             g = Differentiation.gradient(backend, f, [1.0, 2.0])
             Test.@test g isa AbstractVector
-            Test.@test g ≈ [2.0, 4.0] atol=1e-8
+            Test.@test g ≈ [2.0, 4.0] atol = 1e-8
         end
 
         Test.@testset "Integration: gradient (scalar overload)" begin
@@ -86,7 +87,7 @@ function test_differentiation_interface_extension()
                 ad_backend=ADTypes.AutoForwardDiff()
             )
             f(x) = x^3                    # f'(x) = 3x²
-            Test.@test Differentiation.gradient(backend, f, 2.0) ≈ 12.0 atol=1e-8
+            Test.@test Differentiation.gradient(backend, f, 2.0) ≈ 12.0 atol = 1e-8
         end
 
         Test.@testset "Integration: derivative (scalar input)" begin
@@ -94,7 +95,7 @@ function test_differentiation_interface_extension()
                 ad_backend=ADTypes.AutoForwardDiff()
             )
             g(t) = t^3                    # g'(t) = 3t²
-            Test.@test Differentiation.derivative(backend, g, 2.0) ≈ 12.0 atol=1e-8
+            Test.@test Differentiation.derivative(backend, g, 2.0) ≈ 12.0 atol = 1e-8
         end
     end
 end

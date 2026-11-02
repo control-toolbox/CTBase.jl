@@ -94,7 +94,7 @@ Strategies.options(s::CovFakeParamStrategy) = s.options
 # ============================================================================
 
 function test_coverage_abstract_strategy()
-    Test.@testset "Coverage: Abstract Strategy" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Coverage: Abstract Strategy" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - show(io, MIME"text/plain", strategy) - pretty display

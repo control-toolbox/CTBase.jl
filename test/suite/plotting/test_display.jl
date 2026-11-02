@@ -22,7 +22,7 @@ end
 _leaf(; title="State") = Plotting.Leaf(_axes(; title=title))
 
 function test_display()
-    Test.@testset "Plotting Display" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Plotting Display" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================
         # UNIT TESTS — compact show (one-line)

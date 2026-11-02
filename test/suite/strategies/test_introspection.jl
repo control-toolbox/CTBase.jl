@@ -58,7 +58,7 @@ Strategies.metadata(::Type{<:EmptyOptionsStrategy}) = Strategies.StrategyMetadat
 Tests for strategy introspection utilities.
 """
 function test_introspection()
-    Test.@testset "Strategy Introspection" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Introspection" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================
         # UNIT TESTS

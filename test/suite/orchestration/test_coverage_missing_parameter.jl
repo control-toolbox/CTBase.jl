@@ -59,7 +59,8 @@ Tests uncovered lines in Orchestration:
 - builders.jl:47, 109, 117 - Missing parameter errors for parameterized strategies
 """
 function test_coverage_missing_parameter()
-    Test.@testset "Orchestration Missing Parameter Coverage" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Orchestration Missing Parameter Coverage" verbose = VERBOSE showtiming =
+        SHOWTIMING begin
 
         # Create registry with parameterized strategy
         registry = Strategies.create_registry(

@@ -99,7 +99,7 @@ This test suite validates the behavior of the 8 private functions extracted
 from route_all_options to improve modularity and adherence to SRP.
 """
 function test_routing_internals()
-    Test.@testset "Routing Internals" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Routing Internals" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Internal Helper Functions

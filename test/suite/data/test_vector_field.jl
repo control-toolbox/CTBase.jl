@@ -21,7 +21,7 @@ _bad_arity_f(x, y, z) = x + y + z
 # ==============================================================================
 
 function test_vector_field()
-    Test.@testset "VectorField Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "VectorField Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ====================================================================
         # UNIT TESTS - Abstract Types

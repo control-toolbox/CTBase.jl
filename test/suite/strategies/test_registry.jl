@@ -59,7 +59,7 @@ Strategies.metadata(::Type{<:WrongTypeStrategy}) = Strategies.StrategyMetadata()
 Tests for strategy registry API.
 """
 function test_registry()
-    Test.@testset "Strategy Registry" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Strategy Registry" verbose = VERBOSE showtiming = SHOWTIMING begin
 
         # ========================================================================
         # UNIT TESTS

@@ -78,7 +78,7 @@ _results(r) = r isa Tuple ? r : (r,)
 # ==============================================================================
 
 function test_mooncake_extension()
-    Test.@testset "Mooncake Extension Tests" verbose=VERBOSE showtiming=SHOWTIMING begin
+    Test.@testset "Mooncake Extension Tests" verbose = VERBOSE showtiming = SHOWTIMING begin
         Test.@testset "Extension is loaded" begin
             Test.@test Base.get_extension(CTBase, :CTBaseMooncake) isa Module
         end
