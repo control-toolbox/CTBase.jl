@@ -187,8 +187,6 @@ else
     # PR previews are opt-in: CTActions sets DOCUMENTER_PUSH_PREVIEW to "true" only on a
     # PR carrying the `documentation push preview` label.
     DocumenterVitepress.deploydocs(;
-        repo=repo_url * ".git",
-        devbranch="main",
-        push_preview=push_preview,
+        repo=repo_url * ".git", devbranch="main", push_preview=push_preview
     )
 end
