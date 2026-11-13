@@ -2,6 +2,10 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (Unreleased)
+
+- **Documentation and CI only**: the `Release` caller and the pins of ct-conventions and ct-agents. **No breaking change**; no migration required.
+
 ## Non-breaking note (0.30.13)
 
 - **`AutoMooncake` on views of host arrays**: the gradients of `CTBase.Differentiation` at a
