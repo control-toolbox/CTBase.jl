@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documentation previews now deploy only when requested with the
   `documentation push preview` label ([#648](https://github.com/control-toolbox/CTBase.jl/issues/648)).
+- ct-conventions pinned at `v0.13.0` and ct-agents at `v0.5.0` in `AGENTS.md`; the `Release` workflow of CTActions is called from `.github/workflows/Release.yml`.
+
+### ✅ Compatibility
+
+- **No breaking changes**: documentation and CI only. See [BREAKING.md](BREAKING.md).
 
 ## [0.30.13] - 2026-10-21
 
