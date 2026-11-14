@@ -26,8 +26,9 @@ on:
 jobs:
   call:
     if: inputs.pr == '' || inputs.target == 'packages'
-    uses: control-toolbox/CTActions/.github/workflows/breakage-suite.yml@main
+    uses: control-toolbox/CTActions/.github/workflows/breakage-suite.yml@refactor/breakage-suite-shell
     with:
+      ctactions_ref: refactor/breakage-suite-shell
       use_ct_registry: true
     secrets:
       SSH_KEY: ${{ secrets.SSH_KEY }}
