@@ -6,7 +6,7 @@ Documentation site for CTBase.jl, built with
 Build (from the package root):
 
 ```bash
-julia --project=. docs/make.jl
+julia --project=docs docs/make.jl
 ```
 
 Preview after build: `npx serve docs/build/1 --listen 5173`

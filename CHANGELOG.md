@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation previews now deploy only when requested with the
   `documentation push preview` label ([#648](https://github.com/control-toolbox/CTBase.jl/issues/648)).
 - ct-conventions pinned at `v0.13.0` and ct-agents at `v0.5.0` in `AGENTS.md`; the `Release` workflow of CTActions is called from `.github/workflows/Release.yml`.
+- ct-conventions pinned at `v0.14.0` in `AGENTS.md`; the header of `docs/make.jl` and `docs/README.md` give the docs build command `julia --project=docs docs/make.jl`, the command of CI, instead of `--project=.`, which let the root environment shadow `docs/` (`SITE18`, [ct-conventions#63](https://github.com/control-toolbox/ct-conventions/issues/63)).
 
 ### ✅ Compatibility
 
