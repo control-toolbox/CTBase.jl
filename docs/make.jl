@@ -1,4 +1,4 @@
-# to run the documentation generation: julia --project=. docs/make.jl
+# to run the documentation generation: julia --project=docs docs/make.jl
 # to serve the documentation (option 1 — handles clean URLs natively):
 #   npx serve docs/build/1 --listen 5173
 # to serve the documentation (option 2 — Julia only):
