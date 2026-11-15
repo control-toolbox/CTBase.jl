@@ -36,6 +36,33 @@ function _figure(; title=nothing)
     return Plotting.Figure(root; title=title)
 end
 
+# Two stacked cells whose decorations differ in number and colour: the first has none,
+# the second has bounds and time lines, drawn in the colours of `Plotting.COLORS`.
+function _uneven_figure()
+    t = collect(range(0.0, 2.0, 51))
+    pa = Plotting.Panel(t, reshape(t, :, 1); title="a", labels=["x"])
+    pb = Plotting.Panel(t, reshape(2 .- t, :, 1); title="b", labels=["y"])
+    na = Plotting.lower(pa; layout=:split)
+    nb = Plotting.lower(
+        pb;
+        layout=:split,
+        vlines=[Plotting.VLine(0.0; style=(color=Plotting.COLORS.time,))],
+        hlines=[
+            [
+                Plotting.HLine(0.0; style=(color=Plotting.COLORS.bound,)),
+                Plotting.HLine(2.0; style=(color=Plotting.COLORS.bound,)),
+            ],
+        ],
+    )
+    return Plotting.Figure(Plotting.Stacked(Plotting.AbstractLayoutNode[na, nb]))
+end
+
+# The k-th colour of the default palette, as Plots stores the colour of a series.
+_palette(k) = Plots.RGBA(Plots.palette(:default)[k])
+
+# The data curves of a subplot (the decorations have an empty label).
+_data(sp, label) = [s for s in sp.series_list if s[:label] == label]
+
 function test_contract()
     Test.@testset verbose = VERBOSE showtiming = SHOWTIMING "Plotting backend contract" begin
         Test.@testset "a decoration the backend cannot draw -> NotImplemented" begin
@@ -105,6 +132,76 @@ function test_contract()
             out = Plotting.render!(plt, _figure(); color=1, linestyle=:dash)
             Test.@test out === plt
             Test.@test length(plt.subplots) == n            # no new subplots
+        end
+
+        Test.@testset "overlay: the k-th curve has the same colour in every subplot (#657)" begin
+            plt = Plotting.render(_uneven_figure(); label="first", legend=false)
+            Plotting.render!(plt, _uneven_figure(); label="second")
+            for label in ("first", "second")
+                colours = [only(_data(sp, label))[:seriescolor] for sp in plt.subplots]
+                Test.@test allequal(colours)
+            end
+            first_colour = only(_data(plt.subplots[1], "first"))[:seriescolor]
+            second_colour = only(_data(plt.subplots[1], "second"))[:seriescolor]
+            Test.@test first_colour != second_colour
+            Test.@test first_colour == _palette(1)
+            Test.@test second_colour == _palette(2)
+            # a third curve follows, still in the colour of its rank
+            Plotting.render!(plt, _uneven_figure(); label="third")
+            Test.@test all(
+                only(_data(sp, "third"))[:seriescolor] == _palette(3) for sp in plt.subplots
+            )
+        end
+
+        Test.@testset "the decorations keep their colour and stay out of the legend (#657)" begin
+            plt = Plotting.render(_uneven_figure(); label="first")
+            Plotting.render!(plt, _uneven_figure(); label="second")
+            bound = Plots.RGBA(Plots.parse(Plots.Colorant, Plotting.COLORS.bound))
+            lines = [s for s in plt.subplots[2].series_list if s[:label] == ""]
+            Test.@test length(lines) == 2 * 3          # 3 lines per figure, drawn twice
+            Test.@test count(s -> s[:linecolor] == bound, lines) == 2 * 2
+            # one legend entry per data curve: the lines are secondary series
+            Test.@test count(s -> s[:primary], plt.subplots[2].series_list) == 2
+            Test.@test count(s -> s[:primary], plt.subplots[1].series_list) == 2
+        end
+
+        Test.@testset "aliases of series attributes reach the series (#657)" begin
+            data(plt) = [s for sp in plt.subplots for s in _data(sp, "x")]
+            for (kw, attr, value, expected) in (
+                (:color, :seriescolor, 3, _palette(3)),
+                (:c, :seriescolor, 4, _palette(4)),
+                (:seriescolor, :seriescolor, 2, _palette(2)),
+                (:lw, :linewidth, 5, 5),
+                (:linewidth, :linewidth, 6, 6),
+                (:ls, :linestyle, :dash, :dash),
+            )
+                plt = Plotting.render(_uneven_figure(); label="x", legend=false, (kw => value,)...)
+                series = data(plt)
+                Test.@test !isempty(series)
+                Test.@test all(s -> s[attr] == expected, series)
+            end
+            # a series alias is not taken for a subplot attribute: no warning either
+            Test.@test_logs Plotting.render(_uneven_figure(); color=2, lw=2)
+        end
+
+        Test.@testset "the margins: the user's win over the defaults (#657)" begin
+            mm = Plots.Measures.mm
+            margins(plt) = (plt.subplots[1][:left_margin], plt.subplots[1][:bottom_margin])
+            Test.@test margins(Plotting.render(_uneven_figure())) == (5mm, 5mm)
+            Test.@test margins(Plotting.render(_uneven_figure(); left_margin=15mm)) ==
+                (15mm, 5mm)
+            Test.@test margins(Plotting.render(_uneven_figure(); bottom_margin=9mm)) ==
+                (5mm, 9mm)
+            # an alias counts as the attribute it stands for
+            Test.@test margins(Plotting.render(_uneven_figure(); leftmargin=15mm)) ==
+                (15mm, 5mm)
+            # `margin` stands for the four sides: it replaces both defaults
+            Test.@test margins(Plotting.render(_uneven_figure(); margin=12mm)) ==
+                (12mm, 12mm)
+            # a side and `margin` together: the side wins on its own side
+            Test.@test margins(
+                Plotting.render(_uneven_figure(); margin=12mm, left_margin=20mm)
+            )[1] == 20mm
         end
 
         Test.@testset "render! warns that label keywords are ignored (#569)" begin

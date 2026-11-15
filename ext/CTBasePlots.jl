@@ -33,16 +33,52 @@ const _LABEL_FONT_SIZE = Plotting._LABEL_FONT_SIZE
 """
     _LEFT_MARGIN
 
-Left margin (5 mm) applied to every rendered figure.
+Default left margin (5 mm) of a rendered figure, unless the user gives one.
 """
 const _LEFT_MARGIN = 5 * Plots.Measures.mm
 
 """
     _BOTTOM_MARGIN
 
-Bottom margin (5 mm) applied to every rendered figure.
+Default bottom margin (5 mm) of a rendered figure, unless the user gives one.
 """
 const _BOTTOM_MARGIN = 5 * Plots.Measures.mm
+
+"""
+    _MARGIN_KEYS
+
+The margin attributes of a plot: `margin` sets the four of them, the others one side.
+"""
+const _MARGIN_KEYS = (:margin, :left_margin, :bottom_margin, :top_margin, :right_margin)
+
+"""
+$(TYPEDSIGNATURES)
+
+Map every spelling of a margin attribute (`leftmargin`, `left_margins`, …) to its
+canonical name in `_MARGIN_KEYS`.
+"""
+function _margin_aliases()
+    d = Dict{Symbol,Symbol}(k => k for k in _MARGIN_KEYS)
+    for k in _MARGIN_KEYS, a in Plots.aliases(k)
+        d[a] = k
+    end
+    return d
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Margins of a rendered figure: the defaults of CTBase (`_LEFT_MARGIN`, `_BOTTOM_MARGIN`),
+where the user's `axes_user` gives none, and the user's own otherwise. A `margin` of the
+user stands for the four sides, so it replaces both defaults.
+"""
+function _margins(axes_user)
+    names = _margin_aliases()
+    user = NamedTuple(names[k] => v for (k, v) in pairs(axes_user) if haskey(names, k))
+    defaults = haskey(user, :margin) ? NamedTuple() :
+        (; left_margin=_LEFT_MARGIN, bottom_margin=_BOTTOM_MARGIN)
+    return merge(defaults, user)
+end
 
 # --- style translation : neutral vocabulary -> Plots attributes ---------------
 """
@@ -88,14 +124,30 @@ _z_rank(z::Symbol) =
 """
 $(TYPEDSIGNATURES)
 
-Split user keyword arguments into series attributes (accepted by `Plots.attributes(:Series)`)
-and the remaining subplot/plot attributes.
+Names under which a keyword is accepted as an attribute of a series: the canonical names
+of `Plots.attributes(:Series)` and every alias of Plots (`color` for `seriescolor`, `lw`
+for `linewidth`, `ls` for `linestyle`, …).
+"""
+function _series_keys()
+    canonical = Plots.attributes(:Series)
+    keys = Set{Symbol}(canonical)
+    for k in canonical
+        union!(keys, Plots.aliases(k))
+    end
+    return keys
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Split user keyword arguments into series attributes (accepted by `Plots.attributes(:Series)`,
+under their canonical name or an alias) and the remaining subplot/plot attributes.
 
 # Returns
 - `(series, other)`: two `NamedTuple`s — series attributes and everything else.
 """
 function _partition_user(; kwargs...)
-    ok = Plots.attributes(:Series)
+    ok = _series_keys()
     series = NamedTuple(kw for kw in kwargs if kw[1] in ok)
     other = NamedTuple(kw for kw in kwargs if !(kw[1] in ok))
     return series, other
@@ -155,13 +207,22 @@ end
 $(TYPEDSIGNATURES)
 
 Draw a reference line (`HLine` or `VLine`) into subplot `sp` of plot `p`.
+
+The line is a secondary series (`primary=false`): Plots gives the automatic colours to the
+primary series, one after the other in each subplot, and a line that took one would shift
+the colour of the next curve of that subplot only. With secondary lines, the k-th curve
+drawn into a figure has the same colour in every subplot, whatever the lines it holds.
 """
 function _draw_decoration!(p, d::Plotting.HLine, sp::Int)
-    Plots.hline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
+    Plots.hline!(
+        p, [d.value]; subplot=sp, label="", primary=false, _translate_style(d.style)...
+    )
     return p
 end
 function _draw_decoration!(p, d::Plotting.VLine, sp::Int)
-    Plots.vline!(p, [d.value]; subplot=sp, label="", _translate_style(d.style)...)
+    Plots.vline!(
+        p, [d.value]; subplot=sp, label="", primary=false, _translate_style(d.style)...
+    )
     return p
 end
 
@@ -359,7 +420,7 @@ function Plotting.render(::Plotting.PlotsBackend, fig::Plotting.Figure; kwargs..
     )
     p = _render_node(fig.root; series_user=series_user, axes_user=axes_user)
     sz = Plotting.default_size(fig)
-    root_attrs = (; size=sz, left_margin=_LEFT_MARGIN, bottom_margin=_BOTTOM_MARGIN)
+    root_attrs = (; size=sz, _margins(axes_user)...)
     if fig.title === nothing
         Plots.plot!(p; root_attrs...)
     else

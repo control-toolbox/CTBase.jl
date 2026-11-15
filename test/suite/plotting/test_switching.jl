@@ -101,9 +101,9 @@ function test_switching()
             Test.@test [x.x for x in a] == [0.5, 2.0, 3.5]
             Test.@test [x.text for x in a] == ["a", "b", "c"]
             # default style (grey), merged with the user style
-            Test.@test a[1].style == (color=:gray30,)
+            Test.@test a[1].style == (color=Plotting.COLORS.phase_label,)
             s = Plotting.phase_annotations(t, [1.0], ["a", "b"]; style=(fontsize=12,))
-            Test.@test s[1].style == (color=:gray30, fontsize=12)
+            Test.@test s[1].style == (color=Plotting.COLORS.phase_label, fontsize=12)
             r = Plotting.phase_annotations(t, [1.0], ["a", "b"]; style=(color=:red,))
             Test.@test r[1].style.color === :red
             # normalised time

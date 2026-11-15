@@ -297,8 +297,10 @@ CTBase.Plotting.render(fig; title="Relabelled", xlabel="time")
 two backends split the remaining keywords differently.
 
 The **Plots backend** (`CTBasePlots._partition_user`) asks Plots itself:
-`Plots.attributes(:Series)` is the authoritative set of series-attribute names, so
-any kwarg in it goes to the series and everything else to the subplot. A key Plots
+`Plots.attributes(:Series)` is the authoritative set of series-attribute names, and
+`Plots.aliases` gives the other spellings of each (`color` for `seriescolor`, `lw` for
+`linewidth`, `ls` for `linestyle`, …). Any kwarg under one of those names goes to the
+series and everything else to the subplot. A key Plots
 does not recognise still reaches Plots, which emits its own warning. Layout keys the
 renderer owns (`CTBasePlots._RESERVED_AXES_KEYS`: `subplot`, `legend`, `ylims`,
 `titlefont`, `guidefontsize`) are protected so the computed layout survives;
@@ -322,6 +324,26 @@ For a case layer or a caller this means:
   style's `backend_kwargs` escape hatch, not in a `render` kwarg: only the matching
   backend honours it, and the Makie whitelist would drop it from a `render` call
   anyway.
+
+### Colours and margins
+
+The colour of a curve is not set by the IR: each backend gives the successive curves of a
+figure the colours of its own palette, in order, and `color=` overrides it. The k-th curve
+drawn into a figure, by `render` then k − 1 calls of `render!`, has the colour k of the
+palette in every cell. On the Plots backend, the decorations are drawn as secondary series
+(`primary=false`) so that they do not advance the automatic colour of their cell: a cell
+with bounds would otherwise colour the next curve differently from a cell without.
+
+A colour given as an integer is an index into the palette of the backend, and the
+palettes differ: Plots cycles over a longer list than the seven colours of Makie, so the
+same index draws two unrelated colours. The elements that must look the same everywhere
+take a concrete colour from [`CTBase.Plotting.COLORS`](@ref): the bounds, the time lines
+and the labels of the phases.
+
+The Plots backend leaves a margin of 5 mm on the left and at the bottom, so that the
+labels of the axes are not clipped. A `left_margin`, `bottom_margin` or `margin` of the
+user replaces it (`margin` stands for the four sides, so it replaces both defaults).
+Makie sizes its axes to their labels and needs no margin.
 
 ## Leaf Traversal
 

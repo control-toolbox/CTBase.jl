@@ -20,6 +20,7 @@ in `CTModels.jl/.reports/dev/plot_engine_ctbase_report.md`.
   [`CTBase.Plotting.Grid`](@extref); for trajectories made of phases,
   [`CTBase.Plotting.splice_jumps`](@extref), [`CTBase.Plotting.switching_vlines`](@extref),
   [`CTBase.Plotting.phase_annotations`](@extref)
+- colours shared by the backends: [`CTBase.Plotting.COLORS`](@extref)
 - backend contract: [`CTBase.Plotting.AbstractPlottingBackend`](@extref), [`CTBase.Plotting.PlotsBackend`](@extref),
   [`CTBase.Plotting.MakieBackend`](@extref), [`CTBase.Plotting.render`](@extref), [`CTBase.Plotting.render!`](@extref)
 """
@@ -27,6 +28,7 @@ module Plotting
 
 # =============================================================================
 # Files (all backend-free, live in `src`):
+#   - colors.jl      : COLORS, the concrete colours shared by every backend.
 #   - ir.jl          : the IR itself (pure data): Series, HLine/VLine, Annotation, Axes,
 #                      Leaf/HBox/VBox, Figure — plus deterministic leaf traversal.
 #   - panel.jl       : Panel (a titled group of components, with its own x grid
@@ -48,6 +50,7 @@ using DocStringExtensions: TYPEDEF, TYPEDSIGNATURES, TYPEDFIELDS
 using ..Exceptions
 using ..Core: Core
 
+include(joinpath(@__DIR__, "colors.jl"))
 include(joinpath(@__DIR__, "ir.jl"))
 include(joinpath(@__DIR__, "panel.jl"))
 include(joinpath(@__DIR__, "combinators.jl"))
@@ -56,6 +59,9 @@ include(joinpath(@__DIR__, "switching.jl"))
 include(joinpath(@__DIR__, "heuristics.jl"))
 include(joinpath(@__DIR__, "labels.jl"))
 include(joinpath(@__DIR__, "contract.jl"))
+
+# --- colours -----------------------------------------------------------------
+export COLORS
 
 # --- IR ----------------------------------------------------------------------
 export Series, AbstractDecoration, HLine, VLine, Annotation, Axes

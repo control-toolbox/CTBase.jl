@@ -14,7 +14,7 @@
 Default style of the phase labels written by [`CTBase.Plotting.phase_annotations`](@extref):
 grey text, of the default size of an [`CTBase.Plotting.Annotation`](@extref).
 """
-const _PHASE_LABEL_STYLE = (color=:gray30,)
+const _PHASE_LABEL_STYLE = (color=COLORS.phase_label,)
 
 """
 $(TYPEDSIGNATURES)
