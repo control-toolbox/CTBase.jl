@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.14] - 2026-11-15
+
 ### ✨ New Features
 
 - **`CTBase.Plotting.COLORS`**: concrete colours (`bound`, `time`, `phase_label`), the same in every backend, for the elements drawn around the data. A colour given as an integer is an index into the palette of a backend, and the palettes differ: the case layers should use these instead

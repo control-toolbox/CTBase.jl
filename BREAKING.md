@@ -2,7 +2,7 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
-## Non-breaking note (Unreleased)
+## Non-breaking note (0.30.14)
 
 - **Plots backend**: `color=` and the other aliases of Plots reach the series, a margin given by the user is honoured, and the k-th curve of an overlay has the same colour in every subplot (#657). **No breaking change**: no public signature, type or name changed, and the new export `CTBase.Plotting.COLORS` is an addition. A figure whose `color=` was ignored, or whose margin was overwritten, now renders as asked; no migration required.
 - **Documentation and CI**: the `Release` caller and the pins of ct-conventions and ct-agents.
