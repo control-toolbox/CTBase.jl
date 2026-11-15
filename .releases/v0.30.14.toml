@@ -1,0 +1,56 @@
+# The request of the release of CTBase v0.30.14, for the release workflow of CTActions.
+# Written by `release.jl facts`, completed by the agent after the human's validation, checked
+# by `release.jl request` and again by the workflow. The proposal is in .releases/v0.30.14.md.
+
+[release]
+package = "CTBase"
+version = "0.30.14"
+kind = "stable"
+mode = "autonomous" # supervised or autonomous: the human's choice
+requested_by = "ocots" # the GitHub login of the person who validated the proposal
+reference = "0.30.13"
+base = "18307d255c97e359efd23a374d6513619c24dfdb"
+
+[versions]
+ct_agents = "v0.5.0"
+ct_conventions = "v0.14.0"
+ctactions = "f1d6b68"
+
+[facts]
+expected_version = "0.30.14"
+breaking = false
+feature = true
+rel4 = true
+rel7 = 12
+jump = "none"
+labels = ["run breakage", "run ci github-runner", "run documentation", "documentation push preview"]
+
+[[review]]
+id = "pr-639"
+what = "#639 CompatHelper: add new compat entry for CTBase at version 0.30 for package docs, (keep existing compat) — touches docs; not cited in the changelog since `v0.30.13`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "CompatHelper: a compat entry of the docs environment; not shipped with the package."
+
+[[review]]
+id = "pr-643"
+what = "#643 CompatHelper: bump compat for JET to 0.13 for package docs, (keep existing compat) — touches docs; not cited in the changelog since `v0.30.13`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "CompatHelper: a compat bound of the docs environment; not shipped with the package."
+
+[[review]]
+id = "pr-645"
+what = "#645 [AUTO] JuliaFormatter.jl run — touches ext, src; not cited in the changelog since `v0.30.13`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "JuliaFormatter run: whitespace and layout only, no behaviour change."
+
+[[review]]
+id = "pr-652"
+what = "#652 [AUTO] JuliaFormatter.jl run — touches docs; not cited in the changelog since `v0.30.13`"
+verdict = "not-user-facing"   # covered, added, not-user-facing
+note = "JuliaFormatter run on docs files: layout only."
+
+[[review]]
+id = "pr-655"
+what = "#655 chore: pin ct-conventions v0.14.0; build the docs with --project=docs — touches docs; not cited in the changelog since `v0.30.13`"
+verdict = "covered"   # covered, added, not-user-facing
+note = "The pin of ct-conventions v0.14.0 and the docs build command are in the Documentation section of [Unreleased]."

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- **`CTBase.Plotting.COLORS`**: concrete colours (`bound`, `time`, `phase_label`), the same in every backend, for the elements drawn around the data. A colour given as an integer is an index into the palette of a backend, and the palettes differ: the case layers should use these instead
+  ([#657](https://github.com/control-toolbox/CTBase.jl/issues/657)).
+
 ### 🐛 Bug Fixes
 
 - **Plots backend: the k-th curve of an overlay has the same colour in every subplot.** The decorations (bounds, time lines) were primary series, so each one advanced the automatic colour of its subplot: a curve overlaid with `render!` took a different colour in a subplot with bounds and in one without. They are now secondary series (`primary=false`)
@@ -14,11 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Plots backend: `color=` and the other aliases of Plots reach the series.** `_partition_user` knew only the canonical names of `Plots.attributes(:Series)`: `color`, `c`, `lw`, `ls`, … were taken for subplot attributes and had no effect. It now also uses `Plots.aliases`
   ([#657](https://github.com/control-toolbox/CTBase.jl/issues/657)).
 - **Plots backend: the user's `left_margin`, `bottom_margin` and `margin` are honoured.** The renderer applied its 5 mm defaults after them. The defaults now apply only where the user gives none
-  ([#657](https://github.com/control-toolbox/CTBase.jl/issues/657)).
-
-### ✨ Features
-
-- **`CTBase.Plotting.COLORS`**: concrete colours (`bound`, `time`, `phase_label`), the same in every backend, for the elements drawn around the data. A colour given as an integer is an index into the palette of a backend, and the palettes differ: the case layers should use these instead
   ([#657](https://github.com/control-toolbox/CTBase.jl/issues/657)).
 
 ### 📚 Documentation
