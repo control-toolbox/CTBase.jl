@@ -213,6 +213,7 @@ function generate_api_reference(src_dir::String)
             filename="plotting",
             files=src(
                 joinpath("Plotting", "Plotting.jl"),
+                joinpath("Plotting", "colors.jl"),
                 joinpath("Plotting", "ir.jl"),
                 joinpath("Plotting", "panel.jl"),
                 joinpath("Plotting", "combinators.jl"),

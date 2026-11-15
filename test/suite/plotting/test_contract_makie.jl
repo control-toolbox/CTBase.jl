@@ -48,6 +48,27 @@ function _figure(; title=nothing)
     return Plotting.Figure(root; title=title)
 end
 
+# Two stacked cells whose decorations differ in number and colour: the first has none,
+# the second has bounds and time lines, drawn in the colours of `Plotting.COLORS`.
+function _uneven_figure()
+    t = collect(range(0.0, 2.0, 51))
+    pa = Plotting.Panel(t, reshape(t, :, 1); title="a", labels=["x"])
+    pb = Plotting.Panel(t, reshape(2 .- t, :, 1); title="b", labels=["y"])
+    na = Plotting.lower(pa; layout=:split)
+    nb = Plotting.lower(
+        pb;
+        layout=:split,
+        vlines=[Plotting.VLine(0.0; style=(color=Plotting.COLORS.time,))],
+        hlines=[
+            [
+                Plotting.HLine(0.0; style=(color=Plotting.COLORS.bound,)),
+                Plotting.HLine(2.0; style=(color=Plotting.COLORS.bound,)),
+            ],
+        ],
+    )
+    return Plotting.Figure(Plotting.Stacked(Plotting.AbstractLayoutNode[na, nb]))
+end
+
 _axes(f) = [x for x in f.content if x isa Makie.Axis]
 _n_axes(f) = length(_axes(f))
 _n_legends(f) = count(x -> x isa Makie.Legend, f.content)
@@ -250,6 +271,35 @@ function test_contract_makie()
             Test.@test out === f
             Test.@test _n_axes(f) == n                       # no new axes
             Test.@test _count_plots(_axes(f)[1], Makie.Lines) == nlines + 1
+        end
+
+        Test.@testset "overlay: the k-th curve has the same colour in every axis (#657)" begin
+            f = Plotting.render(Plotting.MakieBackend(), _uneven_figure())
+            Plotting.render!(Plotting.MakieBackend(), f, _uneven_figure())
+            data(ax) = [_one(p.color[]) for p in ax.scene.plots if p isa Makie.Lines]
+            first_colours = [first(data(ax)) for ax in _axes(f)]
+            second_colours = [last(data(ax)) for ax in _axes(f)]
+            Test.@test allequal(first_colours)
+            Test.@test allequal(second_colours)
+            Test.@test first(first_colours) != first(second_colours)
+        end
+
+        Test.@testset "the decorations are not drawn in the colour of a curve (#657)" begin
+            f = Plotting.render(Plotting.MakieBackend(), _uneven_figure())
+            Plotting.render!(Plotting.MakieBackend(), f, _uneven_figure())
+            ax = _axes(f)[2]
+            bound = Makie.to_color(Plotting.COLORS.bound)
+            hlines = [p for p in ax.scene.plots if p isa Makie.HLines]
+            Test.@test length(hlines) == 2 * 2             # two bounds, drawn by two figures
+            Test.@test all(p -> Makie.to_color(_one(p.color[])) == bound, hlines)
+            curves = [Makie.to_color(_one(p.color[])) for p in ax.scene.plots if p isa Makie.Lines]
+            Test.@test bound ∉ curves
+        end
+
+        Test.@testset "a concrete colour role is the same colour whatever the backend palette (#657)" begin
+            # the bound colour is an explicit colour, not a cycled index
+            Test.@test !(Plotting.COLORS.bound isa Integer)
+            Test.@test Makie.to_color(Plotting.COLORS.bound) isa Makie.Colors.Colorant
         end
 
         Test.@testset "render! warns that label keywords are ignored (#569)" begin
