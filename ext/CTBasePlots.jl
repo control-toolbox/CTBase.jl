@@ -75,8 +75,11 @@ user stands for the four sides, so it replaces both defaults.
 function _margins(axes_user)
     names = _margin_aliases()
     user = NamedTuple(names[k] => v for (k, v) in pairs(axes_user) if haskey(names, k))
-    defaults = haskey(user, :margin) ? NamedTuple() :
+    defaults = if haskey(user, :margin)
+        NamedTuple()
+    else
         (; left_margin=_LEFT_MARGIN, bottom_margin=_BOTTOM_MARGIN)
+    end
     return merge(defaults, user)
 end
 

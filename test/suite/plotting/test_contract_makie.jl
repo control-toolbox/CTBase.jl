@@ -59,12 +59,10 @@ function _uneven_figure()
         pb;
         layout=:split,
         vlines=[Plotting.VLine(0.0; style=(color=Plotting.COLORS.time,))],
-        hlines=[
-            [
-                Plotting.HLine(0.0; style=(color=Plotting.COLORS.bound,)),
-                Plotting.HLine(2.0; style=(color=Plotting.COLORS.bound,)),
-            ],
-        ],
+        hlines=[[
+            Plotting.HLine(0.0; style=(color=Plotting.COLORS.bound,)),
+            Plotting.HLine(2.0; style=(color=Plotting.COLORS.bound,)),
+        ],],
     )
     return Plotting.Figure(Plotting.Stacked(Plotting.AbstractLayoutNode[na, nb]))
 end
@@ -292,7 +290,9 @@ function test_contract_makie()
             hlines = [p for p in ax.scene.plots if p isa Makie.HLines]
             Test.@test length(hlines) == 2 * 2             # two bounds, drawn by two figures
             Test.@test all(p -> Makie.to_color(_one(p.color[])) == bound, hlines)
-            curves = [Makie.to_color(_one(p.color[])) for p in ax.scene.plots if p isa Makie.Lines]
+            curves = [
+                Makie.to_color(_one(p.color[])) for p in ax.scene.plots if p isa Makie.Lines
+            ]
             Test.@test bound ∉ curves
         end
 
