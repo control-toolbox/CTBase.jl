@@ -47,12 +47,10 @@ function _uneven_figure()
         pb;
         layout=:split,
         vlines=[Plotting.VLine(0.0; style=(color=Plotting.COLORS.time,))],
-        hlines=[
-            [
-                Plotting.HLine(0.0; style=(color=Plotting.COLORS.bound,)),
-                Plotting.HLine(2.0; style=(color=Plotting.COLORS.bound,)),
-            ],
-        ],
+        hlines=[[
+            Plotting.HLine(0.0; style=(color=Plotting.COLORS.bound,)),
+            Plotting.HLine(2.0; style=(color=Plotting.COLORS.bound,)),
+        ],],
     )
     return Plotting.Figure(Plotting.Stacked(Plotting.AbstractLayoutNode[na, nb]))
 end
@@ -175,7 +173,9 @@ function test_contract()
                 (:linewidth, :linewidth, 6, 6),
                 (:ls, :linestyle, :dash, :dash),
             )
-                plt = Plotting.render(_uneven_figure(); label="x", legend=false, (kw => value,)...)
+                plt = Plotting.render(
+                    _uneven_figure(); label="x", legend=false, (kw => value,)...
+                )
                 series = data(plt)
                 Test.@test !isempty(series)
                 Test.@test all(s -> s[attr] == expected, series)
