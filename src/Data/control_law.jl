@@ -41,7 +41,7 @@ Every `ControlLaw` is callable via its **natural** signature (matching the
 traits), and via a **uniform** signature that depends on the feedback trait:
 
 | Feedback | Natural `(Aut, Fixed)` | Uniform |
-|---|---|---|
+|:---|:---|:---|
 | `OpenLoop` | `u(t)` (`Aut` is always `NonAutonomous`) | `u(t, v)` |
 | `ClosedLoop` | `u(x)` | `u(t, x, v)` |
 | `DynClosedLoop` | `u(x, p)` | `u(t, x, p, v)` |

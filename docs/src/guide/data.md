@@ -17,7 +17,7 @@ using LinearAlgebra: dot
 ## Overview
 
 | Type | Mathematical object | Out-of-place call | In-place |
-|---|---|---|---|
+|:---|:---|:---|:---|
 | [`Data.VectorField`](@ref CTBase.Data.VectorField) | ``X : \mathcal{X} \to \mathbb{R}^n`` | `X([t, ]x[, v])` | ✓ |
 | [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H([t, ]x, p[, v])` | — |
 | [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃([t, ]x, p, u[, v])` | — |
@@ -405,7 +405,7 @@ time/variable traits add `t` and `v` as for other data types.
 Three user-facing constructors fix the feedback trait:
 
 | Constructor | Feedback trait | Out-of-place call |
-|---|---|---|
+|:---|:---|:---|
 | [`Data.OpenLoop`](@ref CTBase.Data.OpenLoop) | `OpenLoopFeedback` | `u(t[, v])` |
 | [`Data.ClosedLoop`](@ref CTBase.Data.ClosedLoop) | `ClosedLoopFeedback` | `u([t, ]x[, v])` |
 | [`Data.DynClosedLoop`](@ref CTBase.Data.DynClosedLoop) | `DynClosedLoopFeedback` | `u([t, ]x, p[, v])` |
@@ -444,7 +444,7 @@ Every `ControlLaw` is callable via its **natural** signature (matching the
 traits) and via a **uniform** signature that depends on the feedback trait:
 
 | Feedback | Natural | Uniform |
-|---|---|---|
+|:---|:---|:---|
 | `OpenLoop` | `u(t[, v])` | `u(t, v)` |
 | `ClosedLoop` | `u([t, ]x[, v])` | `u(t, x, v)` |
 | `DynClosedLoop` | `u([t, ]x, p[, v])` | `u(t, x, p, v)` |
@@ -477,7 +477,7 @@ time/variable traits add `t` and `v` as for other data types.
 Three user-facing constructors fix the constraint kind:
 
 | Constructor | Constraint kind | Out-of-place call |
-|---|---|---|
+|:---|:---|:---|
 | [`Data.StateConstraint`](@ref CTBase.Data.StateConstraint) | `StateConstraintKind` | `g([t, ]x[, v])` |
 | [`Data.ControlConstraint`](@ref CTBase.Data.ControlConstraint) | `ControlConstraintKind` | `g([t, ]u[, v])` |
 | [`Data.MixedConstraint`](@ref CTBase.Data.MixedConstraint) | `MixedConstraintKind` | `g([t, ]x, u[, v])` |

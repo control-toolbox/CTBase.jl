@@ -373,7 +373,7 @@ throw(CTBase.Exceptions.SolverFailure(
 Constructors below are written relative to `CTBase.Exceptions` (e.g. `using CTBase: Exceptions`, then `throw(Exceptions.IncorrectArgument(...))`).
 
 | Situation | Exception | Example |
-|-----------|-----------|---------|
+|:----------|:----------|:--------|
 | Invalid argument value | [`CTBase.Exceptions.IncorrectArgument`](@ref) | `IncorrectArgument("x must be > 0"; got="-5")` |
 | Wrong function call order | [`CTBase.Exceptions.PreconditionError`](@ref) | `PreconditionError("Must init first")` |
 | Unimplemented interface | [`CTBase.Exceptions.NotImplemented`](@ref) | `NotImplemented("run! not implemented")` |

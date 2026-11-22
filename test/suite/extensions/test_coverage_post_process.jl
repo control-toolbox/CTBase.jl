@@ -160,6 +160,8 @@ function test_coverage_post_process()
                 report = read(joinpath("coverage", "cov_report.md"), String)
                 Test.@test occursin("foo.jl", report)
                 Test.@test occursin("100.0", report) # 1 line covered out of 1
+                # SITE19: the file column is left-aligned, the numeric ones right-aligned
+                Test.@test occursin("|:---|---:|---:|---:|", report)
             end
         end
     end

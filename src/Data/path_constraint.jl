@@ -39,7 +39,7 @@ traits), and via the **uniform** signature `g(t, x, u, v)` (ignoring unused
 arguments), used by flow integrators:
 
 | Kind | Natural `(Aut, Fixed)` | Uniform |
-|---|---|---|
+|:---|:---|:---|
 | `StateConstraint` | `g(x)` | `g(t, x, u, v)` |
 | `ControlConstraint` | `g(u)` | `g(t, x, u, v)` |
 | `MixedConstraint` | `g(x, u)` | `g(t, x, u, v)` |
