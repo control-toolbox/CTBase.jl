@@ -8,7 +8,7 @@ please see the user guide: https://github.com/orgs/control-toolbox/discussions/6
 CTBase.jl is the **foundational layer** of the [control-toolbox ecosystem](https://github.com/control-toolbox): it provides the shared types, exception infrastructure, extensions scaffolding, and development utilities that all other packages in the ecosystem build on.
 
 | **Category** | **Badge** |
-|:-----------------------|:-----------|
+|:----------------------|:----------|
 | **Documentation** | [![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://control-toolbox.org/CTBase.jl/stable/) [![Dev Docs](https://img.shields.io/badge/docs-dev-8A2BE2.svg)](https://control-toolbox.org/CTBase.jl/dev/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/control-toolbox/CTBase.jl) |
 | **CI / Build** | [![Build Status](https://github.com/control-toolbox/CTBase.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/control-toolbox/CTBase.jl/actions/workflows/CI.yml?query=branch%3Amain) |
 | **Test Coverage** | [![Coverage](https://codecov.io/gh/control-toolbox/CTBase.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/control-toolbox/CTBase.jl) |

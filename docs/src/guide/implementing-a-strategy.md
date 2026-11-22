@@ -392,7 +392,7 @@ Collocation(grid_size = Strategies.bypass("oops"))  # no error
 This is more surgical than `mode = :permissive`:
 
 | Approach                       | Scope       | Unknown option names  | Type validation             |
-|:--------------------------------|:-------------|:-----------------------|:-----------------------------|
+|:-------------------------------|:------------|:----------------------|:----------------------------|
 | `mode = :permissive`           | all options | accepted with warning | skipped for unknowns        |
 | `bypass(val)` / `force(val)`   | one value   | accepted silently     | skipped for that value only |
 
