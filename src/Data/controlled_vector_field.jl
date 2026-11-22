@@ -34,7 +34,7 @@ Callable via its **natural** signature (matching the traits) and via a **uniform
 signature `(t, x, u, v)` that ignores unused arguments.
 
 | `(TD, VD)` | natural | uniform |
-|---|---|---|
+|:---|:---|:---|
 | `(Autonomous, Fixed)` | `fc(x, u)` | `fc(t, x, u, v)` |
 | `(NonAutonomous, Fixed)` | `fc(t, x, u)` | `fc(t, x, u, v)` |
 | `(Autonomous, NonFixed)` | `fc(x, u, v)` | `fc(t, x, u, v)` |

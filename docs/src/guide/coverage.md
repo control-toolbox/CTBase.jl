@@ -153,7 +153,7 @@ A markdown table of the `worst_n_files` least-covered files (default: 20), sorte
 ## Lowest-covered files (top 20)
 
 | file | covered | total | % |
-|---|---:|---:|---:|
+|:---|---:|---:|---:|
 | `src/MyModule.jl` | 60 | 70 | 85.71 |
 | `ext/MyExt/foo.jl` | 10 | 20 | 50.0  |
 ````

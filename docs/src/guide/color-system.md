@@ -41,7 +41,7 @@ Each role has a distinct name and meaning. Two roles can share the same default
 color, but they are independently configurable:
 
 | Role | `fmt` key | Default | Meaning |
-| --- | --- | --- | --- |
+| :--- | :--- | :--- | :--- |
 | `name` | `fmt.name` | bold blue | identifiers, type names, option keys |
 | `type` | `fmt.type` | cyan | type annotations, hierarchy entries |
 | `value` | `fmt.value` | green | data / option values |

@@ -357,7 +357,7 @@ Strategies.describe(:fake_optimizer, registry)
 ## Summary
 
 | Aspect | Description |
-|--------|-------------|
+|:--------|:-------------|
 | **Purpose** | Compile-time specialization of strategy defaults and metadata |
 | **Parameter contract** | Singleton struct + `id` + `description` implementations |
 | **Strategy contract** | `parameter(::Type{<:S{P}}) = P` + `default_parameter(::Type{<:S})` |

@@ -39,7 +39,7 @@ state the version you applied in plans and reports.
 Read in this order:
 
 | File | Content |
-| --- | --- |
+| :--- | :--- |
 | [`rules/general.md`](.ct-conventions/rules/general.md) | Rules that hold everywhere — **always read** |
 | [`README.md`](.ct-conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`, `REL`) |
 | [`method.md`](.ct-conventions/method.md) | How to work: tests, coverage, docs build, output capture |

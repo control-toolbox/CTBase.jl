@@ -25,7 +25,7 @@ runtime conditionals.
 Does the object depend on time ``t``?
 
 | Type | Meaning |
-|---|---|
+|:---|:---|
 | [`Traits.Autonomous`](@ref CTBase.Traits.Autonomous) | ``t`` is not an argument |
 | [`Traits.NonAutonomous`](@ref CTBase.Traits.NonAutonomous) | ``t`` must be supplied |
 
@@ -44,7 +44,7 @@ Does the object depend on an extra parameter ``v`` (e.g. a free final time or a
 design variable)?
 
 | Type | Meaning |
-|---|---|
+|:---|:---|
 | [`Traits.Fixed`](@ref CTBase.Traits.Fixed) | no ``v`` argument |
 | [`Traits.NonFixed`](@ref CTBase.Traits.NonFixed) | ``v`` must be supplied |
 
@@ -60,7 +60,7 @@ Traits.NonFixed <: Traits.VariableDependence
 Does the optimal control problem carry a control input ``u``?
 
 | Type | Meaning |
-|---|---|
+|:---|:---|
 | [`Traits.ControlFree`](@ref CTBase.Traits.ControlFree) | no control: ``ẋ = f(t, x, v)`` |
 | [`Traits.WithControl`](@ref CTBase.Traits.WithControl) | control ``u``: ``ẋ = f(t, x, u, v)`` |
 
@@ -76,7 +76,7 @@ Traits.WithControl <: Traits.ControlDependence
 Does a function allocate a new output, or write into a pre-allocated buffer?
 
 | Type | Meaning |
-|---|---|
+|:---|:---|
 | [`Traits.OutOfPlace`](@ref CTBase.Traits.OutOfPlace) | returns a new value |
 | [`Traits.InPlace`](@ref CTBase.Traits.InPlace) | writes into a buffer (first arg) |
 
@@ -86,7 +86,7 @@ How does a control law close the loop? The feedback trait encodes which argument
 the control law depends on, and therefore which dynamics trait it implies.
 
 | Type | Meaning | Control law signature |
-|---|---|---|
+|:---|:---|:---|
 | [`Traits.OpenLoopFeedback`](@ref CTBase.Traits.OpenLoopFeedback) | time (and variable) only | `u(t[, v])` |
 | [`Traits.ClosedLoopFeedback`](@ref CTBase.Traits.ClosedLoopFeedback) | time and state | `u(t, x[, v])` |
 | [`Traits.DynClosedLoopFeedback`](@ref CTBase.Traits.DynClosedLoopFeedback) | time, state, and costate | `u(t, x, p[, v])` |
@@ -133,7 +133,7 @@ Which primal variables does a path constraint `g(...)` depend on? The
 constraint-kind trait encodes this at the type level.
 
 | Type | Meaning | Constraint signature |
-|---|---|---|
+|:---|:---|:---|
 | [`Traits.StateConstraintKind`](@ref CTBase.Traits.StateConstraintKind) | state only | `g(x)` |
 | [`Traits.ControlConstraintKind`](@ref CTBase.Traits.ControlConstraintKind) | control only | `g(u)` |
 | [`Traits.MixedConstraintKind`](@ref CTBase.Traits.MixedConstraintKind) | state and control | `g(x, u)` |
@@ -171,7 +171,7 @@ Traits.is_state_constraint(g)
 ### Other families
 
 | Family | Values | How it is read |
-|---|---|---|
+|:---|:---|:---|
 | Integration mode | [`Traits.EndPointMode`](@ref CTBase.Traits.EndPointMode), [`Traits.TrajectoryMode`](@ref CTBase.Traits.TrajectoryMode) | type parameter of the consuming type |
 | Dynamics | [`Traits.StateDynamics`](@ref CTBase.Traits.StateDynamics), [`Traits.HamiltonianDynamics`](@ref CTBase.Traits.HamiltonianDynamics), [`Traits.AugmentedHamiltonianDynamics`](@ref CTBase.Traits.AugmentedHamiltonianDynamics) | [`Traits.dynamics_trait`](@ref CTBase.Traits.dynamics_trait), defined per data family |
 | Automatic differentiation | [`Traits.WithAD`](@ref CTBase.Traits.WithAD), [`Traits.WithoutAD`](@ref CTBase.Traits.WithoutAD) | [`Traits.ad_trait`](@ref CTBase.Traits.ad_trait), default `WithoutAD` |
@@ -264,7 +264,7 @@ Traits.is_autonomous(3.14)
 ## Accessor / predicate summary
 
 | Trait value function | Boolean predicates |
-|---|---|
+|:---|:---|
 | [`Traits.time_dependence`](@ref CTBase.Traits.time_dependence) | `is_autonomous`, `is_nonautonomous` |
 | [`Traits.variable_dependence`](@ref CTBase.Traits.variable_dependence) | `is_variable`, `is_nonvariable`, `has_variable` |
 | [`Traits.control_dependence`](@ref CTBase.Traits.control_dependence) | `is_control_free`, `has_control` |

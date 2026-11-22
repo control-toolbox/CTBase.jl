@@ -30,7 +30,7 @@ using ADTypes: ADTypes
 The module is organised around a two-level strategy contract:
 
 | Level | Symbol | Role |
-|---|---|---|
+|:---|:---|:---|
 | Family | [`Differentiation.AbstractADBackend`](@ref CTBase.Differentiation.AbstractADBackend) | abstract strategy; defines the AD contract |
 | Concrete | [`Differentiation.DifferentiationInterface`](@ref CTBase.Differentiation.DifferentiationInterface) | wraps a [DifferentiationInterface.jl](https://github.com/JuliaDiff/DifferentiationInterface.jl) backend |
 
@@ -101,7 +101,7 @@ The `:ad_backend` default is **computed from the parameter** — each device get
 different default AD backend:
 
 | Parameter | Default `:ad_backend` | Notes |
-|-----------|----------------------|-------|
+|:-----------|:----------------------|:-------|
 | `CPU` | `AutoForwardDiff()` | General-purpose, well-tested |
 | `GPU` | `AutoMooncake()` | Validated end-to-end on `CuArray`, including through a mutating in-place RHS |
 

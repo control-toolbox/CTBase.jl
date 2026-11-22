@@ -178,7 +178,7 @@ When an option name appears in multiple strategies (e.g., `backend` is defined b
 `route_to` accepts two equivalent syntaxes — keyword and positional — choose based on preference:
 
 | Syntax      | Example                      |
-|-------------|------------------------------|
+|:-------------|:------------------------------|
 | Keyword     | `route_to(adnlp = :sparse)`  |
 | Positional  | `route_to(:adnlp, :sparse)`  |
 

@@ -94,7 +94,7 @@ false)` is `false`, or when the active palette has an empty code for that role
 A `NamedTuple` with the following fields:
 
 | Field | Default colour | Semantic role |
-| --- | --- | --- |
+| :--- | :--- | :--- |
 | `name` | bold blue | identifiers, type names, option keys |
 | `type` | cyan | type annotations, hierarchy entries |
 | `value` | green | data values |

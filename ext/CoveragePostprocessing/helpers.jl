@@ -250,7 +250,7 @@ function _generate_coverage_reports!(
 
         println(io, "## Lowest-covered files (top $(worst_n_files))\n")
         println(io, "| file | covered | total | % |")
-        println(io, "|---|---:|---:|---:|")
+        println(io, "|:---|---:|---:|---:|")
         for (f, h, t, p) in rows[1:min(end, worst_n_files)]
             rel_f = relative_path(f, root_dir)
             println(io, "| `", rel_f, "` | ", h, " | ", t, " | ", round(p; digits=2), " |")
