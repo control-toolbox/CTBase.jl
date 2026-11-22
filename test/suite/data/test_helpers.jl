@@ -56,6 +56,27 @@ function test_helpers()
         end
 
         # ====================================================================
+        # UNIT TESTS - ConstrainedPseudoHamiltonian Signature Helpers
+        # ====================================================================
+
+        Test.@testset "ConstrainedPseudoHamiltonian Signature Helpers" begin
+            Test.@testset "_natural_sig_cph" begin
+                Test.@test Data._natural_sig_cph(Traits.Autonomous, Traits.Fixed) ==
+                    "H(x, p, u, μ)"
+                Test.@test Data._natural_sig_cph(Traits.NonAutonomous, Traits.Fixed) ==
+                    "H(t, x, p, u, μ)"
+                Test.@test Data._natural_sig_cph(Traits.Autonomous, Traits.NonFixed) ==
+                    "H(x, p, u, μ, v)"
+                Test.@test Data._natural_sig_cph(Traits.NonAutonomous, Traits.NonFixed) ==
+                    "H(t, x, p, u, μ, v)"
+            end
+
+            Test.@testset "_uniform_sig_cph" begin
+                Test.@test Data._uniform_sig_cph() == "H(t, x, p, u, μ, v)"
+            end
+        end
+
+        # ====================================================================
         # UNIT TESTS - VectorField Signature Helpers
         # ====================================================================
 

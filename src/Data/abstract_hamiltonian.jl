@@ -99,3 +99,23 @@ Return the dynamics trait of an `AbstractHamiltonian`, namely [`CTBase.Traits.Ha
 See also: [`CTBase.Traits.dynamics_trait`](@extref), [`CTBase.Data.AbstractHamiltonian`](@extref).
 """
 Traits.dynamics_trait(::AbstractHamiltonian) = Traits.HamiltonianDynamics
+
+# =============================================================================
+# hamiltonian — generic accessor, extended by the packages that build Hamiltonians
+# =============================================================================
+
+"""
+    hamiltonian(object, args...; kwargs...)
+
+Return the Hamiltonian of `object`, an [`CTBase.Data.AbstractHamiltonian`](@extref).
+
+This generic function has no method in CTBase: it is the single owner of the name, and
+each package that builds a Hamiltonian adds its own methods to it (for instance the
+Hamiltonian of an optimal control problem, or the one a Hamiltonian flow integrates), so
+that every method is reached through one function. It is the counterpart of
+[`CTBase.Data.pseudo_hamiltonian`](@extref).
+
+See also: [`CTBase.Data.AbstractHamiltonian`](@extref),
+[`CTBase.Data.pseudo_hamiltonian`](@extref).
+"""
+function hamiltonian end

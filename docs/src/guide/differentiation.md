@@ -338,6 +338,42 @@ This differs from [`Differentiation.variable_gradient`](@ref CTBase.Differentiat
 whenever the feedback is not stationary (`∂H̃/∂u ≠ 0`), because the total derivative
 would also account for `∂H̃/∂u · ∂u/∂v`.
 
+## Constrained Hamiltonians: partial or total derivative
+
+For a problem with path constraints, the maximum principle uses the **partial**
+derivatives of the constrained pseudo-Hamiltonian
+``H(t, x, p, u, \mu, v)`` at fixed control and multiplier. Freeze the multiplier with
+[`Data.freeze_multiplier`](@ref CTBase.Data.freeze_multiplier) and use the
+pseudo-Hamiltonian gradient, the control being held constant as usual:
+
+```@example diff
+# H = p·u − x² + μ·(x − lb): order-one state constraint x ≥ lb
+lb = 0.1
+Hc = Data.ConstrainedPseudoHamiltonian((x, p, u, μ) -> p[1] * u - x[1]^2 + μ * (x[1] - lb))
+x, p = [1.5], [2.0]
+u, μ = 0.0, 2 * x[1]                       # control and multiplier of the boundary arc
+Differentiation.pseudo_hamiltonian_gradient(
+    backend, Data.freeze_multiplier(Hc, μ), 0.0, x, p, u, nothing,
+)                                          # (∂H/∂x, ∂H/∂p) = (−2x + μ, u) = ([0.0], [0.0])
+```
+
+A [`Data.ComposedConstrainedHamiltonian`](@ref CTBase.Data.ComposedConstrainedHamiltonian)
+is differentiated **through** the law and the multiplier: its gradient is the total
+derivative, which adds ``\partial H/\partial u \cdot \partial u/\partial x`` and
+``g \cdot \partial \mu/\partial x``:
+
+```@example diff
+hc = Data.ComposedConstrainedHamiltonian(
+    Hc, Data.DynClosedLoop((x, p) -> 0.0), Data.Multiplier((x, p) -> 2 * x[1]),
+)
+Differentiation.hamiltonian_gradient(backend, hc, 0.0, x, p, nothing)
+# h = x² − 2 lb x  →  ∂h/∂x = 2x − 2lb = 2.8: the extra term g·∂μ/∂x = (x − lb)·2
+```
+
+The two agree on an optimal arc, where the constraint is active (``g = 0``) and the law
+is stationary or locally constant, but not elsewhere, for instance during the iterations
+of a shooting method.
+
 ## The contract without the extension
 
 Every differentiation primitive has a fallback on `AbstractADBackend` that throws

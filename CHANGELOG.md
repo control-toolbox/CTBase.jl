@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- **Constrained Hamiltonians** ([CTModels#536](https://github.com/control-toolbox/CTModels.jl/issues/536)):
+  - `Data.ConstrainedPseudoHamiltonian` is the pseudo-Hamiltonian `H(t, x, p, u, μ, v) = H̃ + μ·g` of the maximum principle for a problem with path constraints, with the multiplier `μ` as an explicit argument, like the control. Its abstract supertype is `Data.AbstractConstrainedPseudoHamiltonian`.
+  - `Data.freeze_multiplier(H, μ)` returns the `PseudoHamiltonian` at a fixed value of `μ`. Its gradients are the partial derivatives of the maximum principle, at fixed control and multiplier.
+  - `Data.ComposedConstrainedHamiltonian(H, law, μ)` eliminates the control and the multiplier, both in feedback form: `h(t, x, p, v) = H(t, x, p, u(·), μ(·), v)`. Its gradients are the total derivatives. The new getter `Data.multiplier` returns its multiplier.
+- **`Data.hamiltonian`** is a generic function with no method in CTBase. It is the counterpart of `Data.pseudo_hamiltonian`, so that the packages that build Hamiltonians (CTModels, CTFlows) extend one function each.
+
+### 📚 Documentation
+
+- The Data guide has sections on `ConstrainedPseudoHamiltonian` and `ComposedConstrainedHamiltonian`. The Differentiation guide explains the partial and total derivatives of a constrained Hamiltonian.
+
 ## [0.30.14] - 2026-11-15
 
 ### ✨ New Features
