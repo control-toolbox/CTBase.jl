@@ -48,7 +48,7 @@ def = Options.OptionDefinition(
 ### Fields
 
 | Field         | Type                      | Description                           |
-|-------------- |---------------------------|---------------------------------------|
+|:------------- |:--------------------------|:--------------------------------------|
 | `name`        | `Symbol`                  | Primary option name                   |
 | `type`        | `Type`                    | Expected Julia type                   |
 | `default`     | `Any`                     | Default value (or `NotProvided`)      |
@@ -159,7 +159,7 @@ Options.OptionValue(42, :computed)
 ### Three sources
 
 | Source     | Meaning                                   |
-|----------- |-------------------------------------------|
+|:---------- |:------------------------------------------|
 | `:user`    | Explicitly provided by the user           |
 | `:default` | Came from the `OptionDefinition` default  |
 | `:computed`| Derived or computed from other options    |

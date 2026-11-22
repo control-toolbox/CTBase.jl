@@ -30,16 +30,16 @@ is not the pinned tag, (re)create it:
 
 ```bash
 rm -rf .ct-conventions
-git -c advice.detachedHead=false clone --quiet --depth 1 --branch v0.14.0 https://github.com/control-toolbox/ct-conventions.git .ct-conventions
+git -c advice.detachedHead=false clone --quiet --depth 1 --branch v0.15.0 https://github.com/control-toolbox/ct-conventions.git .ct-conventions
 ```
 
-**Pinned version: ct-conventions v0.14.0.** Cite rules by identifier (`MOD3`, `TST1`), and
+**Pinned version: ct-conventions v0.15.0.** Cite rules by identifier (`MOD3`, `TST1`), and
 state the version you applied in plans and reports.
 
 Read in this order:
 
 | File | Content |
-| --- | --- |
+| :--- | :--- |
 | [`rules/general.md`](.ct-conventions/rules/general.md) | Rules that hold everywhere — **always read** |
 | [`README.md`](.ct-conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`, `REL`) |
 | [`method.md`](.ct-conventions/method.md) | How to work: tests, coverage, docs build, output capture |

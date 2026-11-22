@@ -41,7 +41,7 @@ the traits), and via a **uniform** signature `(t, x, p, u, μ, v)` that ignores 
 arguments.
 
 | `TD` / `VD` | Natural | Uniform |
-| --- | --- | --- |
+| :--- | :--- | :--- |
 | `Autonomous` / `Fixed` | `H(x, p, u, μ)` | `H(t, x, p, u, μ, v)` |
 | `NonAutonomous` / `Fixed` | `H(t, x, p, u, μ)` | `H(t, x, p, u, μ, v)` |
 | `Autonomous` / `NonFixed` | `H(x, p, u, μ, v)` | `H(t, x, p, u, μ, v)` |

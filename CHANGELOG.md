@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📚 Documentation
 
 - The Data guide has sections on `ConstrainedPseudoHamiltonian` and `ComposedConstrainedHamiltonian`. The Differentiation guide explains the partial and total derivatives of a constrained Hamiltonian.
+- Every table column states its alignment (`:---` text, `---:` numbers): a bare `---` was rendered right-aligned. Fixed in the guides, the docstrings, `README.md`, `AGENTS.md` and the table emitted by the coverage report; a meta test guards it (`SITE19`, [#656](https://github.com/control-toolbox/CTBase.jl/issues/656)).
+- ct-conventions pinned at `v0.15.0` in `AGENTS.md`.
 
 ## [0.30.14] - 2026-11-15
 
