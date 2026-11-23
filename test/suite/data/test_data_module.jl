@@ -39,6 +39,7 @@ const EXPORTED_ABSTRACT_TYPES = (
     :AbstractPseudoHamiltonianVectorField,
     :AbstractPathConstraint,
     :AbstractMultiplier,
+    :AbstractConstrainedPseudoHamiltonian,
 )
 
 const EXPORTED_CONCRETE_TYPES = (
@@ -56,6 +57,13 @@ const EXPORTED_CONCRETE_TYPES = (
     :ControlConstraint,
     :MixedConstraint,
     :Multiplier,
+    :ComposedHamiltonian,
+    :ConstrainedPseudoHamiltonian,
+    :ComposedConstrainedHamiltonian,
+)
+
+const EXPORTED_FUNCTIONS = (
+    :hamiltonian, :pseudo_hamiltonian, :control_law, :multiplier, :freeze_multiplier
 )
 
 const PRIVATE_SYMBOLS = (
@@ -90,6 +98,10 @@ const PRIVATE_SYMBOLS = (
     :_uniform_sig_pc,
     :_natural_sig_mult,
     :_uniform_sig_mult,
+    :_natural_sig_cph,
+    :_uniform_sig_cph,
+    :_FrozenMultiplier,
+    :_composed_constrained_H,
 )
 
 # ============================================================================
@@ -160,6 +172,14 @@ function test_data_module()
         end
 
         # ====================================================================
+        # Exported functions verification
+        # ====================================================================
+
+        Test.@testset "Exported functions" begin
+            test_exported_symbols(Data, EXPORTED_FUNCTIONS)
+        end
+
+        # ====================================================================
         # Private symbols (not exported) verification
         # ====================================================================
 
@@ -185,6 +205,9 @@ function test_data_module()
                     Data.AbstractHamiltonianVectorField
                 Test.@test Data.PseudoHamiltonianVectorField <:
                     Data.AbstractPseudoHamiltonianVectorField
+                Test.@test Data.ConstrainedPseudoHamiltonian <:
+                    Data.AbstractConstrainedPseudoHamiltonian
+                Test.@test Data.ComposedConstrainedHamiltonian <: Data.AbstractHamiltonian
                 # Note: Hamiltonian is parametric (Hamiltonian{F, TD, VD} <: AbstractHamiltonian{TD, VD})
                 # Test via instance instead of type
                 h = Data.Hamiltonian((x, p) -> 0.0)

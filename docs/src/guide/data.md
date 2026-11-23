@@ -22,6 +22,8 @@ using LinearAlgebra: dot
 | [`Data.Hamiltonian`](@ref CTBase.Data.Hamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H([t, ]x, p[, v])` | — |
 | [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian) | ``\tilde{H} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}`` | `H̃([t, ]x, p, u[, v])` | — |
 | [`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian) | ``H : T^*\mathcal{X} \to \mathbb{R}`` | `H([t, ]x, p[, v])` | — |
+| [`Data.ConstrainedPseudoHamiltonian`](@ref CTBase.Data.ConstrainedPseudoHamiltonian) | ``H : T^*\mathcal{X} \times \mathcal{U} \times \mathbb{R}^{n_g} \to \mathbb{R}`` | `H([t, ]x, p, u, μ[, v])` | — |
+| [`Data.ComposedConstrainedHamiltonian`](@ref CTBase.Data.ComposedConstrainedHamiltonian) | ``h : T^*\mathcal{X} \to \mathbb{R}`` | `h([t, ]x, p[, v])` | — |
 | [`Data.HamiltonianVectorField`](@ref CTBase.Data.HamiltonianVectorField) | ``\vec{H} : T^*\mathcal{X} \to \mathbb{R}^{2n}`` | `HVF([t, ]x, p[, v])` | ✓ |
 | [`Data.PseudoHamiltonianVectorField`](@ref CTBase.Data.PseudoHamiltonianVectorField) | ``\vec{\tilde{H}} : T^*\mathcal{X} \times \mathcal{U} \to \mathbb{R}^{2n}`` | `H̃VF([t, ]x, p, u[, v])` | ✓ |
 | [`Data.ControlledVectorField`](@ref CTBase.Data.ControlledVectorField) | ``f_c : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^n`` | `fc([t, ]x, u[, v])` | — |
@@ -46,7 +48,7 @@ In the call patterns, brackets `[…]` denote optional arguments controlled by t
 - † `⋯` depends on an additional trait: **feedback** for `ControlLaw` (see below),
   **constraint-kind** for `PathConstraint` (see below).
 
-All eleven share the same time-dependence and variable-dependence trait axes.
+All thirteen share the same time-dependence and variable-dependence trait axes.
 `VectorField`, `HamiltonianVectorField` and `PseudoHamiltonianVectorField` also carry a
 mutability trait (in-place / out-of-place);
 `ControlLaw` carries a feedback trait;
@@ -392,6 +394,99 @@ Data.control_law(H)          # the DynClosedLoop law
 
 The constructor rejects non-`DynClosedLoop` laws (`OpenLoop`, `ClosedLoop`) with a
 `MethodError` — those are the state-space path (`ComposedVectorField`).
+
+---
+
+## ConstrainedPseudoHamiltonian
+
+A `ConstrainedPseudoHamiltonian` is the pseudo-Hamiltonian of the maximum principle for
+a problem with path constraints ``g \ge 0``: the multiplier ``\mu`` is an **explicit
+argument**, like the control,
+
+```math
+H(t, x, p, u, \mu, v) = \tilde{H}(t, x, p, u, v) + \mu \cdot g(t, x, u, v).
+```
+
+The **natural** call is `H([t, ]x, p, u, μ[, v])`; the **uniform** call
+`H(t, x, p, u, μ, v)` always works regardless of traits. It is not an
+[`AbstractPseudoHamiltonian`](@ref CTBase.Data.AbstractPseudoHamiltonian) (it takes one
+more argument) but an
+[`AbstractConstrainedPseudoHamiltonian`](@ref CTBase.Data.AbstractConstrainedPseudoHamiltonian).
+The container only carries the traits and the call signatures: how the constraint term is
+written belongs to the wrapped function.
+
+**Construction and calling**
+
+The order-one state constraint ``x \ge l_b`` of a problem with dynamics ``\dot x = u``
+and cost ``\int x^2 \to \min`` (``p^0 = -1``) gives
+``H = p\,u - x^2 + \mu\,(x - l_b)``:
+
+```@example data
+lb = 0.1
+Hc = Data.ConstrainedPseudoHamiltonian((x, p, u, μ) -> p * u - x^2 + μ * (x - lb))
+```
+
+```@example data
+Hc(1.0, 2.0, 0.5, 3.0)                    # natural call H(x, p, u, μ)
+Hc(0.0, 1.0, 2.0, 0.5, 3.0, nothing)      # uniform call H(t, x, p, u, μ, v)
+```
+
+**Freezing the multiplier**
+
+[`Data.freeze_multiplier`](@ref CTBase.Data.freeze_multiplier) returns the
+pseudo-Hamiltonian ``\tilde{H}(t, x, p, u, v) = H(t, x, p, u, \mu, v)`` at a fixed value of
+``\mu``, as a [`Data.PseudoHamiltonian`](@ref CTBase.Data.PseudoHamiltonian). Its
+derivatives in ``x`` and ``p`` are the **partial** derivatives of the maximum principle,
+at fixed ``u`` and ``\mu`` (see [Differentiation](@ref guide-differentiation)):
+
+```@example data
+H̃3 = Data.freeze_multiplier(Hc, 3.0)
+H̃3(1.0, 2.0, 0.5) == Hc(1.0, 2.0, 0.5, 3.0)
+```
+
+---
+
+## ComposedConstrainedHamiltonian
+
+A `ComposedConstrainedHamiltonian` eliminates both the control and the multiplier from a
+[`Data.ConstrainedPseudoHamiltonian`](@ref CTBase.Data.ConstrainedPseudoHamiltonian),
+with a dynamic closed-loop [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) and a
+[`Data.Multiplier`](@ref CTBase.Data.Multiplier), both in feedback form:
+
+```math
+h(t, x, p, v) = H(t, x, p, u(t, x, p, v), \mu(t, x, p, v), v).
+```
+
+Its time/variable dependences are the **join** of the three inputs. It subtypes
+[`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian). Differentiating it
+gives the **total** derivative, through the law and the multiplier.
+
+On the boundary arc of the example above, ``x = l_b`` so ``u = 0``, and the multiplier is
+``\mu = 2x``:
+
+```@example data
+hc = Data.ComposedConstrainedHamiltonian(
+    Hc, Data.DynClosedLoop((x, p) -> 0.0), Data.Multiplier((x, p) -> 2x)
+)
+```
+
+```@example data
+hc(1.0, 2.0) == Hc(1.0, 2.0, 0.0, 2.0)
+```
+
+**Getters**
+
+```@example data
+Data.pseudo_hamiltonian(hc) === Hc, Data.control_law(hc), Data.multiplier(hc)
+```
+
+The constructor accepts only a `DynClosedLoop` law and a `Multiplier`; anything else is a
+`MethodError`.
+
+The generic function [`Data.hamiltonian`](@ref CTBase.Data.hamiltonian) has no method in
+CTBase: the packages that build Hamiltonians, such as the Hamiltonian of an optimal
+control problem or the one integrated by a flow, add their methods to it, as they do for
+[`Data.pseudo_hamiltonian`](@ref CTBase.Data.pseudo_hamiltonian).
 
 ---
 

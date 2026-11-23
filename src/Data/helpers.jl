@@ -590,3 +590,41 @@ See also: [`CTBase.Data._natural_sig_mult`](@extref).
 function _uniform_sig_mult()
     return "μ(t, x, p, v)"
 end
+
+# =============================================================================
+# ConstrainedPseudoHamiltonian-specific signature helpers
+# =============================================================================
+
+"""
+    _natural_sig_cph(::Type{TD}, ::Type{VD}) where {TD, VD} -> String
+
+Return the natural call signature for a `ConstrainedPseudoHamiltonian` based on its traits.
+
+The arguments always include `x, p, u, μ`, with `t` prepended for non-autonomous and `v`
+appended for variable.
+
+See also: [`CTBase.Data._uniform_sig_cph`](@extref).
+"""
+function _natural_sig_cph(
+    ::Type{TD}, ::Type{VD}
+) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
+    args = String[]
+    TD === Traits.NonAutonomous && push!(args, "t")
+    append!(args, ["x", "p", "u", "μ"])
+    VD === Traits.NonFixed && push!(args, "v")
+    return "H(" * join(args, ", ") * ")"
+end
+
+"""
+    _uniform_sig_cph() -> String
+
+Return the uniform call signature for a `ConstrainedPseudoHamiltonian`.
+
+The uniform signature always includes all arguments `(t, x, p, u, μ, v)` regardless of
+traits.
+
+See also: [`CTBase.Data._natural_sig_cph`](@extref).
+"""
+function _uniform_sig_cph()
+    return "H(t, x, p, u, μ, v)"
+end
