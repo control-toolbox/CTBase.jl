@@ -10,6 +10,7 @@ module TestConstrainedHamiltonianGradient
 using Test: Test
 using CTBase: Differentiation
 using CTBase: Data
+using CTBase: Traits
 using ADTypes: ADTypes
 using ForwardDiff: ForwardDiff
 using DifferentiationInterface: DifferentiationInterface
@@ -37,6 +38,14 @@ u_ns(x, p) = p[1]
 # Variable-dependent case: H(x,p,u,μ,v) = p·u + μ·v·x, multiplier μ(x,p,v) = v.
 h_var(x, p, u, μ, v) = p[1] * u + μ * v * x[1]
 μ_var(x, p, v) = v
+
+# A subtype of AbstractConstrainedPseudoHamiltonian that is not a
+# ConstrainedPseudoHamiltonian, implementing only the call contract: h_bd, autonomous and
+# fixed. Its gradients must be those of the concrete type.
+struct FakeConstrainedPH <:
+       Data.AbstractConstrainedPseudoHamiltonian{Traits.Autonomous,Traits.Fixed} end
+(::FakeConstrainedPH)(x, p, u, μ) = h_bd(x, p, u, μ)
+(h::FakeConstrainedPH)(t, x, p, u, μ, v) = h(x, p, u, μ)
 
 backend() = Differentiation.DifferentiationInterface(; ad_backend=ADTypes.AutoForwardDiff())
 
@@ -135,6 +144,28 @@ function test_constrained_hamiltonian_gradient()
             x, p, v = [1.5], [2.0], 0.7
             gv = Differentiation.variable_gradient(backend(), h, 0.0, x, p, v)
             Test.@test gv ≈ 2 * v * x[1]                       # d/dv (v·v·x)
+        end
+
+        Test.@testset "Contract: a subtype of the abstract type has the same gradients" begin
+            Hc, Hf = Data.ConstrainedPseudoHamiltonian(h_bd), FakeConstrainedPH()
+            x, p, u, μ = [1.5], [2.0], 0.3, 4.0
+            # partial derivatives, through freeze_multiplier
+            gc = Differentiation.pseudo_hamiltonian_gradient(
+                backend(), Data.freeze_multiplier(Hc, μ), 0.0, x, p, u, nothing
+            )
+            gf = Differentiation.pseudo_hamiltonian_gradient(
+                backend(), Data.freeze_multiplier(Hf, μ), 0.0, x, p, u, nothing
+            )
+            Test.@test gf[1] ≈ gc[1]
+            Test.@test gf[2] ≈ gc[2]
+            # total derivatives, through the composed Hamiltonian
+            law, mult = Data.DynClosedLoop(u_bd), Data.Multiplier(μ_bd)
+            hc = Data.ComposedConstrainedHamiltonian(Hc, law, mult)
+            hf = Data.ComposedConstrainedHamiltonian(Hf, law, mult)
+            tc = Differentiation.hamiltonian_gradient(backend(), hc, 0.0, x, p, nothing)
+            tf = Differentiation.hamiltonian_gradient(backend(), hf, 0.0, x, p, nothing)
+            Test.@test tf[1] ≈ tc[1]
+            Test.@test tf[2] ≈ tc[2]
         end
 
         # ======================================================================

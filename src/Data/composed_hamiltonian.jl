@@ -73,9 +73,7 @@ See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 function ComposedHamiltonian(
     h̃::PseudoHamiltonian, law::ControlLaw{<:Function,Traits.DynClosedLoopFeedback}
 )
-    TD = Traits.join_time_dependence(
-        Traits.time_dependence(h̃), Traits.time_dependence(law)
-    )
+    TD = Traits.join_time_dependence(Traits.time_dependence(h̃), Traits.time_dependence(law))
     VD = Traits.join_variable_dependence(
         Traits.variable_dependence(h̃), Traits.variable_dependence(law)
     )

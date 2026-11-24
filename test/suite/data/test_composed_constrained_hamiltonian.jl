@@ -49,6 +49,35 @@ function (s::SpyMultiplier)(args...)
     return 2.0
 end
 
+# A subtype of AbstractConstrainedPseudoHamiltonian that is not a
+# ConstrainedPseudoHamiltonian: it implements only the call contract of the abstract type,
+# the natural call of its traits and the uniform call (t, x, p, u, μ, v), with
+# H = p·u − x² + μ·(x − LB) + t + v (t when non-autonomous, v when non-fixed).
+struct FakeConstrainedPH{TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} <:
+       Data.AbstractConstrainedPseudoHamiltonian{TD,VD} end
+
+fake_H(t, x, p, u, μ, v) = p * u - x^2 + μ * (x - LB) + t + v
+
+(::FakeConstrainedPH{Traits.Autonomous,Traits.Fixed})(x, p, u, μ) = fake_H(0, x, p, u, μ, 0)
+function (::FakeConstrainedPH{Traits.NonAutonomous,Traits.Fixed})(t, x, p, u, μ)
+    return fake_H(t, x, p, u, μ, 0)
+end
+function (::FakeConstrainedPH{Traits.Autonomous,Traits.NonFixed})(x, p, u, μ, v)
+    return fake_H(0, x, p, u, μ, v)
+end
+function (::FakeConstrainedPH{Traits.NonAutonomous,Traits.NonFixed})(t, x, p, u, μ, v)
+    return fake_H(t, x, p, u, μ, v)
+end
+function (h::FakeConstrainedPH{Traits.Autonomous,Traits.Fixed})(t, x, p, u, μ, v)
+    return h(x, p, u, μ)
+end
+function (h::FakeConstrainedPH{Traits.NonAutonomous,Traits.Fixed})(t, x, p, u, μ, v)
+    return h(t, x, p, u, μ)
+end
+function (h::FakeConstrainedPH{Traits.Autonomous,Traits.NonFixed})(t, x, p, u, μ, v)
+    return h(x, p, u, μ, v)
+end
+
 function composed_bd()
     return Data.ComposedConstrainedHamiltonian(
         Data.ConstrainedPseudoHamiltonian(h_bd),
@@ -230,6 +259,31 @@ function test_composed_constrained_hamiltonian()
                 h = Data.ComposedConstrainedHamiltonian(H, law, μ)
                 Test.@test h(0.0, 2.0, 3.0, 4.0) ≈ -9.0 + 1.0
             end
+        end
+
+        Test.@testset "Contract: any AbstractConstrainedPseudoHamiltonian can be composed" begin
+            law, μ = Data.DynClosedLoop(u_bd), Data.Multiplier(μ_bd)
+            H = FakeConstrainedPH{Traits.Autonomous,Traits.Fixed}()
+            h = Data.ComposedConstrainedHamiltonian(H, law, μ)
+            x, p = 1.5, 2.0
+            Test.@test h(x, p) == H(x, p, u_bd(x, p), μ_bd(x, p))
+            Test.@test h(0.0, x, p, nothing) == h(x, p)                     # uniform call
+            Test.@test Data.pseudo_hamiltonian(h) === H
+            Test.@test Traits.time_dependence(h) === Traits.Autonomous
+            Test.@test Traits.variable_dependence(h) === Traits.Fixed
+            Test.@test (Test.@inferred h(x, p)) isa Float64
+            # same value as the concrete type with the same function
+            hc = Data.ComposedConstrainedHamiltonian(
+                Data.ConstrainedPseudoHamiltonian(h_bd), law, μ
+            )
+            Test.@test h(x, p) ≈ hc(x, p)
+            # the traits of the fake enter the join
+            HN = FakeConstrainedPH{Traits.NonAutonomous,Traits.NonFixed}()
+            hN = Data.ComposedConstrainedHamiltonian(HN, law, μ)
+            Test.@test Traits.time_dependence(hN) === Traits.NonAutonomous
+            Test.@test Traits.variable_dependence(hN) === Traits.NonFixed
+            t, v = 2.0, 5.0
+            Test.@test hN(t, x, p, v) == HN(t, x, p, u_bd(x, p), μ_bd(x, p), v)
         end
 
         # ======================================================================

@@ -66,7 +66,7 @@ See also: [`CTBase.Data.ConstrainedPseudoHamiltonian`](@extref),
 struct ComposedConstrainedHamiltonian{
     TD<:Traits.TimeDependence,
     VD<:Traits.VariableDependence,
-    PH<:ConstrainedPseudoHamiltonian,
+    PH<:AbstractConstrainedPseudoHamiltonian,
     L<:ControlLaw{<:Function,Traits.DynClosedLoopFeedback},
     M<:Multiplier,
 } <: AbstractHamiltonian{TD,VD}
@@ -89,7 +89,7 @@ composed time/variable dependences as the join of the three inputs.
 See also: [`CTBase.Data.ComposedConstrainedHamiltonian`](@extref).
 """
 function ComposedConstrainedHamiltonian(
-    h::ConstrainedPseudoHamiltonian,
+    h::AbstractConstrainedPseudoHamiltonian,
     law::ControlLaw{<:Function,Traits.DynClosedLoopFeedback},
     μ::Multiplier,
 )

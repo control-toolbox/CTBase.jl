@@ -174,34 +174,34 @@ in a [`CTBase.Data.PseudoHamiltonian`](@extref) by [`CTBase.Data.freeze_multipli
 
 See also: [`CTBase.Data.freeze_multiplier`](@extref).
 """
-struct _FrozenMultiplier{H<:ConstrainedPseudoHamiltonian,M} <: Function
+struct _FrozenMultiplier{H<:AbstractConstrainedPseudoHamiltonian,M} <: Function
     h::H
     μ::M
 end
 
 function (f::_FrozenMultiplier{
-    <:ConstrainedPseudoHamiltonian{<:Function,Traits.Autonomous,Traits.Fixed}
+    <:AbstractConstrainedPseudoHamiltonian{Traits.Autonomous,Traits.Fixed}
 })(
     x, p, u
 )
     return f.h(x, p, u, f.μ)
 end
 function (f::_FrozenMultiplier{
-    <:ConstrainedPseudoHamiltonian{<:Function,Traits.NonAutonomous,Traits.Fixed}
+    <:AbstractConstrainedPseudoHamiltonian{Traits.NonAutonomous,Traits.Fixed}
 })(
     t, x, p, u
 )
     return f.h(t, x, p, u, f.μ)
 end
 function (f::_FrozenMultiplier{
-    <:ConstrainedPseudoHamiltonian{<:Function,Traits.Autonomous,Traits.NonFixed}
+    <:AbstractConstrainedPseudoHamiltonian{Traits.Autonomous,Traits.NonFixed}
 })(
     x, p, u, v
 )
     return f.h(x, p, u, f.μ, v)
 end
 function (f::_FrozenMultiplier{
-    <:ConstrainedPseudoHamiltonian{<:Function,Traits.NonAutonomous,Traits.NonFixed}
+    <:AbstractConstrainedPseudoHamiltonian{Traits.NonAutonomous,Traits.NonFixed}
 })(
     t, x, p, u, v
 )
@@ -245,7 +245,7 @@ See also: [`CTBase.Data.ConstrainedPseudoHamiltonian`](@extref),
 [`CTBase.Data.ComposedConstrainedHamiltonian`](@extref).
 """
 function freeze_multiplier(
-    h::ConstrainedPseudoHamiltonian{<:Function,TD,VD}, μ
+    h::AbstractConstrainedPseudoHamiltonian{TD,VD}, μ
 ) where {TD<:Traits.TimeDependence,VD<:Traits.VariableDependence}
     return PseudoHamiltonian(_FrozenMultiplier(h, μ), TD, VD)
 end
