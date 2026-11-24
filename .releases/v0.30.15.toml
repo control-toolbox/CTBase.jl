@@ -1,0 +1,44 @@
+# The request of the release of CTBase v0.30.15, for the release workflow of CTActions.
+# Written by `release.jl facts`, completed by the agent after the human's validation, checked
+# by `release.jl request` and again by the workflow. The proposal is in .releases/v0.30.15.md.
+
+[release]
+package = "CTBase"
+version = "0.30.15"
+kind = "stable"
+mode = "autonomous"
+requested_by = "ocots"
+reference = "0.30.14"
+base = "aed019dae42c79bc29902fda2e28e25ab5b29431"
+
+[versions]
+ct_agents = "v0.5.0"
+ct_conventions = "v0.15.0"
+ctactions = "dc60661"
+
+[facts]
+expected_version = "0.30.15"
+breaking = false
+feature = true
+rel4 = true
+rel7 = 29
+jump = "none"
+labels = ["run breakage", "run ci github-runner", "run documentation", "documentation push preview"]
+
+[[review]]
+id = "pr-661"
+what = "#661 [AUTO] JuliaFormatter.jl run — touches ext; not cited in the changelog since `v0.30.14`"
+verdict = "not-user-facing"
+note = "Formatter run on the CTBase extension files: whitespace only, no behaviour change."
+
+[[review]]
+id = "pr-663"
+what = "#663 Constrained pseudo-Hamiltonian, freeze_multiplier and composed constrained Hamiltonian — touches docs, src; not cited in the changelog since `v0.30.14`"
+verdict = "covered"
+note = "Cited in [Unreleased] by its tracking issue (CTModels#536): the Constrained Hamiltonians, Data.hamiltonian and Documentation entries."
+
+[[review]]
+id = "wording-4cd537ce"
+what = "under `### 🔄 Refactoring`, “removed”: The private helpers `Data._join_td` and `Data._join_vd` are removed, replaced by the public trait joins ([#666](https://github.com/control-toolbox/CTBase.jl/iss…"
+verdict = "covered"
+note = "The private helpers removed are replaced by the public trait joins of #666; BREAKING.md has a non-breaking note (they were private)."
