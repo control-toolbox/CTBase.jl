@@ -16,6 +16,7 @@ const EXTENSION_TRIGGERS = [
     :CairoMakie,
     :Markdown,
     :MarkdownAST,
+    :Mooncake,
     :Plots,
 ]
 
