@@ -118,6 +118,7 @@ export is_autonomous, is_nonautonomous, is_variable, is_nonvariable, has_variabl
 export is_control_free, has_control
 export has_time_dependence_trait, time_dependence, has_mutability_trait, mutability
 export has_variable_dependence_trait, variable_dependence
+export join_time_dependence, join_variable_dependence
 export has_control_dependence_trait, control_dependence
 
 end # module Traits

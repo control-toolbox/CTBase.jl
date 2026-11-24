@@ -63,8 +63,12 @@ function ComposedVectorField(
     fc::ControlledVectorField,
     law::ControlLaw{<:Function,<:Union{Traits.OpenLoopFeedback,Traits.ClosedLoopFeedback}},
 )
-    TD = _join_td(Traits.time_dependence(fc), Traits.time_dependence(law))
-    VD = _join_vd(Traits.variable_dependence(fc), Traits.variable_dependence(law))
+    TD = Traits.join_time_dependence(
+        Traits.time_dependence(fc), Traits.time_dependence(law)
+    )
+    VD = Traits.join_variable_dependence(
+        Traits.variable_dependence(fc), Traits.variable_dependence(law)
+    )
     return ComposedVectorField{TD,VD,typeof(fc),typeof(law)}(fc, law)
 end
 

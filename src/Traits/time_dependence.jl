@@ -143,3 +143,18 @@ function is_nonautonomous(obj::Any)
     has_time_dependence_trait(obj)
     return time_dependence(obj) === NonAutonomous
 end
+
+# =============================================================================
+# Time-dependence join
+# =============================================================================
+
+join_time_dependence(::Type{TD}) where {TD<:TimeDependence} = TD
+join_time_dependence(::Type{Autonomous}, ::Type{Autonomous}) = Autonomous
+function join_time_dependence(::Type{<:TimeDependence}, ::Type{<:TimeDependence})
+    return NonAutonomous
+end
+function join_time_dependence(
+    ::Type{TD1}, ::Type{TD2}, ::Type{TD3}, rest::Type{<:TimeDependence}...
+) where {TD1<:TimeDependence,TD2<:TimeDependence,TD3<:TimeDependence}
+    return join_time_dependence(join_time_dependence(TD1, TD2), TD3, rest...)
+end

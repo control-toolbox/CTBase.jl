@@ -93,12 +93,12 @@ function ComposedConstrainedHamiltonian(
     law::ControlLaw{<:Function,Traits.DynClosedLoopFeedback},
     μ::Multiplier,
 )
-    TD = _join_td(
-        _join_td(Traits.time_dependence(h), Traits.time_dependence(law)),
-        Traits.time_dependence(μ),
+    TD = Traits.join_time_dependence(
+        Traits.time_dependence(h), Traits.time_dependence(law), Traits.time_dependence(μ)
     )
-    VD = _join_vd(
-        _join_vd(Traits.variable_dependence(h), Traits.variable_dependence(law)),
+    VD = Traits.join_variable_dependence(
+        Traits.variable_dependence(h),
+        Traits.variable_dependence(law),
         Traits.variable_dependence(μ),
     )
     return ComposedConstrainedHamiltonian{TD,VD,typeof(h),typeof(law),typeof(μ)}(h, law, μ)

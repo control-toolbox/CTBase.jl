@@ -185,3 +185,20 @@ if `variable_dependence(obj)` is `NonFixed`.
 See also: [`CTBase.Traits.is_variable`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 has_variable(obj::Any) = is_variable(obj)
+
+# =============================================================================
+# Variable-dependence join
+# =============================================================================
+
+join_variable_dependence(::Type{VD}) where {VD<:VariableDependence} = VD
+join_variable_dependence(::Type{Fixed}, ::Type{Fixed}) = Fixed
+function join_variable_dependence(
+    ::Type{<:VariableDependence}, ::Type{<:VariableDependence}
+)
+    return NonFixed
+end
+function join_variable_dependence(
+    ::Type{VD1}, ::Type{VD2}, ::Type{VD3}, rest::Type{<:VariableDependence}...
+) where {VD1<:VariableDependence,VD2<:VariableDependence,VD3<:VariableDependence}
+    return join_variable_dependence(join_variable_dependence(VD1, VD2), VD3, rest...)
+end

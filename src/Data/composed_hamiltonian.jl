@@ -58,34 +58,6 @@ struct ComposedHamiltonian{
 end
 
 # =============================================================================
-# Trait joins — NonAutonomous / NonFixed win
-# =============================================================================
-
-"""
-Join two time-dependence trait types: `Autonomous` only if both are `Autonomous`,
-otherwise `NonAutonomous`.
-
-See also: [`CTBase.Data.ComposedHamiltonian`](@extref),
-[`CTBase.Data.ComposedVectorField`](@extref).
-"""
-_join_td(::Type{Traits.Autonomous}, ::Type{Traits.Autonomous}) = Traits.Autonomous
-function _join_td(::Type{<:Traits.TimeDependence}, ::Type{<:Traits.TimeDependence})
-    return Traits.NonAutonomous
-end
-
-"""
-Join two variable-dependence trait types: `Fixed` only if both are `Fixed`,
-otherwise `NonFixed`.
-
-See also: [`CTBase.Data.ComposedHamiltonian`](@extref),
-[`CTBase.Data.ComposedVectorField`](@extref).
-"""
-_join_vd(::Type{Traits.Fixed}, ::Type{Traits.Fixed}) = Traits.Fixed
-function _join_vd(::Type{<:Traits.VariableDependence}, ::Type{<:Traits.VariableDependence})
-    return Traits.NonFixed
-end
-
-# =============================================================================
 # Constructor — computes the composed traits from the join of the two inputs
 # =============================================================================
 
@@ -101,8 +73,12 @@ See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 function ComposedHamiltonian(
     h̃::PseudoHamiltonian, law::ControlLaw{<:Function,Traits.DynClosedLoopFeedback}
 )
-    TD = _join_td(Traits.time_dependence(h̃), Traits.time_dependence(law))
-    VD = _join_vd(Traits.variable_dependence(h̃), Traits.variable_dependence(law))
+    TD = Traits.join_time_dependence(
+        Traits.time_dependence(h̃), Traits.time_dependence(law)
+    )
+    VD = Traits.join_variable_dependence(
+        Traits.variable_dependence(h̃), Traits.variable_dependence(law)
+    )
     return ComposedHamiltonian{TD,VD,typeof(h̃),typeof(law)}(h̃, law)
 end
 
