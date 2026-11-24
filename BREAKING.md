@@ -2,7 +2,7 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
-## Non-breaking note (Unreleased)
+## Non-breaking note (0.30.15)
 
 - **Trait joins**: the private `CTBase.Data._join_td` and `CTBase.Data._join_vd` are removed, replaced by the public `CTBase.Traits.join_time_dependence` and `CTBase.Traits.join_variable_dependence`, which also take more than two arguments ([#666](https://github.com/control-toolbox/CTBase.jl/issues/666)). **No breaking change**: the helpers were private, and no package of the ecosystem uses them. Code that called them uses the public functions instead.
 - **Constrained pseudo-Hamiltonian**: `Data.freeze_multiplier` and `Data.ComposedConstrainedHamiltonian` accept any `Data.AbstractConstrainedPseudoHamiltonian`, and the type parameter `PH` of `ComposedConstrainedHamiltonian` is bounded by the abstract type. **No breaking change**: only upper bounds are widened, and every call that worked before gives the same result; no migration required.
