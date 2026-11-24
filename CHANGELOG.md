@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The private helpers `Data._join_td` and `Data._join_vd` are removed, replaced by the public trait joins ([#666](https://github.com/control-toolbox/CTBase.jl/issues/666)). See [BREAKING.md](BREAKING.md).
 
+### 🧪 Testing
+
+- The code-quality meta test loads `Mooncake` before checking the extensions, so `CTBaseMooncake` is checked when `suite/meta` runs alone, not only when `suite/extensions` happens to run first.
+
 ### 📚 Documentation
 
 - The Data guide has sections on `ConstrainedPseudoHamiltonian` and `ComposedConstrainedHamiltonian`, with how to extend `AbstractConstrainedPseudoHamiltonian`. The Differentiation guide explains the partial and total derivatives of a constrained Hamiltonian.
@@ -31,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✅ Compatibility
 
-- **No breaking changes**: every addition is new API, the signatures of `freeze_multiplier` and `ComposedConstrainedHamiltonian` are only widened, and the removed helpers were private. See [BREAKING.md](BREAKING.md).
+- **No breaking changes**: every addition is new API, the signatures of `freeze_multiplier` and `ComposedConstrainedHamiltonian` are only widened, the removed helpers were private, and the test change does not touch the package. See [BREAKING.md](BREAKING.md).
 
 ## [0.30.14] - 2026-11-15
 
