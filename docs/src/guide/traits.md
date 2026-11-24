@@ -261,6 +261,38 @@ Traits.is_autonomous(3.14)
     implements `time_dependence` returning `Traits.Autonomous` are compatible by
     construction — no conversion or mapping needed.
 
+## [Joining traits](@id guide-traits-join)
+
+An object built from several parts depends on time as soon as one of its parts does,
+and on the variable as soon as one of its parts does. For example, a Hamiltonian
+``h(t, x, p, v) = \tilde H(t, x, p, u(t, x, p, v), v)`` built from an autonomous
+pseudo-Hamiltonian ``\tilde H`` and a time-dependent control law ``u`` is
+non-autonomous. [`Traits.join_time_dependence`](@ref CTBase.Traits.join_time_dependence)
+and [`Traits.join_variable_dependence`](@ref CTBase.Traits.join_variable_dependence)
+compute this from the trait values of the parts:
+
+| Join | Result |
+|:---|:---|
+| `join_time_dependence(TD₁, …, TDₙ)` | `Autonomous` if every `TDᵢ` is `Autonomous`, `NonAutonomous` otherwise |
+| `join_variable_dependence(VD₁, …, VDₙ)` | `Fixed` if every `VDᵢ` is `Fixed`, `NonFixed` otherwise |
+
+```@repl traits
+Traits.join_time_dependence(Traits.Autonomous, Traits.NonAutonomous)
+Traits.join_variable_dependence(Traits.Fixed, Traits.Fixed, Traits.Fixed)
+```
+
+They take one or more trait values (types), as returned by
+[`Traits.time_dependence`](@ref CTBase.Traits.time_dependence) and
+[`Traits.variable_dependence`](@ref CTBase.Traits.variable_dependence), and the result is
+a compile-time constant. The composed types of [`CTBase.Data`](@ref CTBase.Data), such as
+[`Data.ComposedHamiltonian`](@ref CTBase.Data.ComposedHamiltonian), use them to set their
+type parameters:
+
+```@repl traits
+parts = (Traits.Autonomous, Traits.Autonomous, Traits.NonAutonomous)  # e.g. H, law, μ
+Traits.join_time_dependence(parts...)
+```
+
 ## Accessor / predicate summary
 
 | Trait value function | Boolean predicates |

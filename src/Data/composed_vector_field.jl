@@ -55,7 +55,9 @@ $(TYPEDSIGNATURES)
 
 Construct a [`CTBase.Data.ComposedVectorField`](@extref) from a controlled vector field and
 an open-loop or closed-loop control law, computing the composed time/variable
-dependences as the join of the two inputs.
+dependences as the join of the two inputs (see
+[`CTBase.Traits.join_time_dependence`](@extref) and
+[`CTBase.Traits.join_variable_dependence`](@extref)).
 
 See also: [`CTBase.Data.ComposedVectorField`](@extref).
 """

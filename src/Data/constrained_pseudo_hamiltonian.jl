@@ -222,7 +222,8 @@ fixed `u` and `μ` (the `:partial` mode of a flow). The gradient primitives of
 [`CTBase.Differentiation.pseudo_hamiltonian_gradient`](@extref), apply to it unchanged.
 
 # Arguments
-- `h::ConstrainedPseudoHamiltonian`: the constrained pseudo-Hamiltonian.
+- `h::AbstractConstrainedPseudoHamiltonian`: the constrained pseudo-Hamiltonian, any
+  subtype that implements the natural and uniform calls of the abstract type.
 - `μ`: the value of the multiplier, a number or a vector.
 
 # Returns

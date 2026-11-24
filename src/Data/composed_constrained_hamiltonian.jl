@@ -6,8 +6,9 @@
 """
 $(TYPEDEF)
 
-Hamiltonian obtained by eliminating the control **and** the multiplier from a
-[`CTBase.Data.ConstrainedPseudoHamiltonian`](@extref), with a dynamic closed-loop
+Hamiltonian obtained by eliminating the control **and** the multiplier from a constrained
+pseudo-Hamiltonian (any [`CTBase.Data.AbstractConstrainedPseudoHamiltonian`](@extref),
+such as a [`CTBase.Data.ConstrainedPseudoHamiltonian`](@extref)), with a dynamic closed-loop
 [`CTBase.Data.ControlLaw`](@extref) and a [`CTBase.Data.Multiplier`](@extref), both in
 feedback form:
 
@@ -29,7 +30,7 @@ inherited, and it can be used anywhere a Hamiltonian is expected.
   (`NonAutonomous` if any of them depends on time).
 - `VD <: VariableDependence`: the **join** of the three variable dependences (`NonFixed`
   if any of them depends on the variable).
-- `PH <: ConstrainedPseudoHamiltonian`: concrete constrained pseudo-Hamiltonian type.
+- `PH <: AbstractConstrainedPseudoHamiltonian`: type of the constrained pseudo-Hamiltonian.
 - `L <: ControlLaw`: concrete control-law type (must carry `DynClosedLoopFeedback`).
 - `M <: Multiplier`: concrete multiplier type.
 
@@ -84,7 +85,9 @@ $(TYPEDSIGNATURES)
 
 Construct a [`CTBase.Data.ComposedConstrainedHamiltonian`](@extref) from a constrained
 pseudo-Hamiltonian, a dynamic closed-loop control law and a multiplier, computing the
-composed time/variable dependences as the join of the three inputs.
+composed time/variable dependences as the join of the three inputs (see
+[`CTBase.Traits.join_time_dependence`](@extref) and
+[`CTBase.Traits.join_variable_dependence`](@extref)).
 
 See also: [`CTBase.Data.ComposedConstrainedHamiltonian`](@extref).
 """

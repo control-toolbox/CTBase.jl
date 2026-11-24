@@ -66,7 +66,8 @@ $(TYPEDSIGNATURES)
 
 Construct a [`CTBase.Data.ComposedHamiltonian`](@extref) from a pseudo-Hamiltonian and a
 dynamic closed-loop control law, computing the composed time/variable dependences as
-the join of the two inputs.
+the join of the two inputs (see [`CTBase.Traits.join_time_dependence`](@extref) and
+[`CTBase.Traits.join_variable_dependence`](@extref)).
 
 See also: [`CTBase.Data.ComposedHamiltonian`](@extref).
 """

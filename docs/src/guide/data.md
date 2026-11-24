@@ -444,12 +444,38 @@ H̃3 = Data.freeze_multiplier(Hc, 3.0)
 H̃3(1.0, 2.0, 0.5) == Hc(1.0, 2.0, 0.5, 3.0)
 ```
 
+**Extending the abstract type**
+
+`ConstrainedPseudoHamiltonian` wraps a plain function. A package can also define its own
+subtype of
+[`AbstractConstrainedPseudoHamiltonian`](@ref CTBase.Data.AbstractConstrainedPseudoHamiltonian),
+for instance a callable struct that stores the data of the problem. It inherits the traits
+from its type parameters and implements two calls: the **natural** call of its traits and
+the **uniform** call `(t, x, p, u, μ, v)`. Then
+[`Data.freeze_multiplier`](@ref CTBase.Data.freeze_multiplier) and
+[`Data.ComposedConstrainedHamiltonian`](@ref CTBase.Data.ComposedConstrainedHamiltonian)
+accept it, like the concrete type:
+
+```@example data
+struct OrderOneH <: Data.AbstractConstrainedPseudoHamiltonian{Traits.Autonomous,Traits.Fixed}
+    lb::Float64
+end
+(H::OrderOneH)(x, p, u, μ) = p * u - x^2 + μ * (x - H.lb)   # natural call
+(H::OrderOneH)(t, x, p, u, μ, v) = H(x, p, u, μ)            # uniform call
+
+Hs = OrderOneH(lb)
+Data.freeze_multiplier(Hs, 3.0)(1.0, 2.0, 0.5) == Hc(1.0, 2.0, 0.5, 3.0)
+```
+
 ---
 
 ## ComposedConstrainedHamiltonian
 
 A `ComposedConstrainedHamiltonian` eliminates both the control and the multiplier from a
-[`Data.ConstrainedPseudoHamiltonian`](@ref CTBase.Data.ConstrainedPseudoHamiltonian),
+constrained pseudo-Hamiltonian (a
+[`Data.ConstrainedPseudoHamiltonian`](@ref CTBase.Data.ConstrainedPseudoHamiltonian), or
+any other subtype of
+[`AbstractConstrainedPseudoHamiltonian`](@ref CTBase.Data.AbstractConstrainedPseudoHamiltonian)),
 with a dynamic closed-loop [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) and a
 [`Data.Multiplier`](@ref CTBase.Data.Multiplier), both in feedback form:
 
@@ -457,7 +483,8 @@ with a dynamic closed-loop [`Data.ControlLaw`](@ref CTBase.Data.ControlLaw) and 
 h(t, x, p, v) = H(t, x, p, u(t, x, p, v), \mu(t, x, p, v), v).
 ```
 
-Its time/variable dependences are the **join** of the three inputs. It subtypes
+Its time/variable dependences are the **join** of the three inputs (see
+[Joining traits](@ref guide-traits-join)). It subtypes
 [`Data.AbstractHamiltonian`](@ref CTBase.Data.AbstractHamiltonian). Differentiating it
 gives the **total** derivative, through the law and the multiplier.
 

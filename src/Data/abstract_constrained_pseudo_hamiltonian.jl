@@ -27,9 +27,22 @@ one more argument.
 - `TD <: TimeDependence`: `Autonomous` or `NonAutonomous`.
 - `VD <: VariableDependence`: `Fixed` or `NonFixed`.
 
+# Interface Requirements
+
+A subtype `H <: AbstractConstrainedPseudoHamiltonian{TD,VD}` implements two calls:
+- the **natural** call of its traits: `H(x, p, u, μ)`, `H(t, x, p, u, μ)`,
+  `H(x, p, u, μ, v)` or `H(t, x, p, u, μ, v)`;
+- the **uniform** call `H(t, x, p, u, μ, v)`, which ignores the arguments its traits do
+  not use.
+
+The traits and the dynamics trait come from the abstract type. With these two calls,
+[`CTBase.Data.freeze_multiplier`](@extref) and
+[`CTBase.Data.ComposedConstrainedHamiltonian`](@extref) accept the subtype, and so do the
+gradient primitives of [`CTBase.Differentiation`](@extref) through them.
+[`CTBase.Data.ConstrainedPseudoHamiltonian`](@extref) is the subtype that wraps a plain
+function.
+
 # Notes
-- All constrained pseudo-Hamiltonian types support both natural and uniform call
-  signatures.
 - The uniform signature `(t, x, p, u, μ, v)` is used internally by flows.
 - The dynamics trait is always `HamiltonianDynamics`.
 

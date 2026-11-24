@@ -2,6 +2,11 @@
 
 This document outlines all breaking changes introduced in CTBase v0.18.0-beta compared to v0.17.4. Use this guide to migrate your code and understand the impact of these changes.
 
+## Non-breaking note (Unreleased)
+
+- **Trait joins**: the private `CTBase.Data._join_td` and `CTBase.Data._join_vd` are removed, replaced by the public `CTBase.Traits.join_time_dependence` and `CTBase.Traits.join_variable_dependence`, which also take more than two arguments ([#666](https://github.com/control-toolbox/CTBase.jl/issues/666)). **No breaking change**: the helpers were private, and no package of the ecosystem uses them. Code that called them uses the public functions instead.
+- **Constrained pseudo-Hamiltonian**: `Data.freeze_multiplier` and `Data.ComposedConstrainedHamiltonian` accept any `Data.AbstractConstrainedPseudoHamiltonian`, and the type parameter `PH` of `ComposedConstrainedHamiltonian` is bounded by the abstract type. **No breaking change**: only upper bounds are widened, and every call that worked before gives the same result; no migration required.
+
 ## Non-breaking note (0.30.14)
 
 - **Plots backend**: `color=` and the other aliases of Plots reach the series, a margin given by the user is honoured, and the k-th curve of an overlay has the same colour in every subplot (#657). **No breaking change**: no public signature, type or name changed, and the new export `CTBase.Plotting.COLORS` is an addition. A figure whose `color=` was ignored, or whose margin was overwritten, now renders as asked; no migration required.
