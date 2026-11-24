@@ -70,6 +70,51 @@ function test_variable_dependence()
         end
 
         # ====================================================================
+        # UNIT TESTS - Join
+        # ====================================================================
+
+        Test.@testset "UNIT TESTS - join_variable_dependence" begin
+            F, V = Traits.Fixed, Traits.NonFixed
+            Test.@testset "one argument is returned as is" begin
+                Test.@test Traits.join_variable_dependence(F) === F
+                Test.@test Traits.join_variable_dependence(V) === V
+            end
+            Test.@testset "two arguments: Fixed only if both are" begin
+                Test.@test Traits.join_variable_dependence(F, F) === F
+                Test.@test Traits.join_variable_dependence(F, V) === V
+                Test.@test Traits.join_variable_dependence(V, F) === V
+                Test.@test Traits.join_variable_dependence(V, V) === V
+            end
+            Test.@testset "three or more arguments" begin
+                Test.@test Traits.join_variable_dependence(F, F, F) === F
+                Test.@test Traits.join_variable_dependence(F, F, V) === V
+                Test.@test Traits.join_variable_dependence(V, F, F) === V
+                Test.@test Traits.join_variable_dependence(F, F, F, F) === F
+                Test.@test Traits.join_variable_dependence(F, F, F, V) === V
+            end
+            Test.@testset "type-stable (folded to a constant)" begin
+                Test.@test Test.@inferred(Traits.join_variable_dependence(F, F)) === F
+                Test.@test Test.@inferred(Traits.join_variable_dependence(F, V)) === V
+                Test.@test Test.@inferred(Traits.join_variable_dependence(F, F, F, F)) === F
+                Test.@test Test.@inferred(Traits.join_variable_dependence(F, F, V, F)) === V
+            end
+        end
+
+        Test.@testset "ERROR TESTS - join_variable_dependence" begin
+            Test.@testset "a value of another trait family is rejected" begin
+                Test.@test_throws MethodError Traits.join_variable_dependence(
+                    Traits.Autonomous
+                )
+                Test.@test_throws MethodError Traits.join_variable_dependence(
+                    Traits.Fixed, Traits.Autonomous
+                )
+            end
+            Test.@testset "at least one argument" begin
+                Test.@test_throws MethodError Traits.join_variable_dependence()
+            end
+        end
+
+        # ====================================================================
         # CONTRACT TESTS - Variable-Dependence Trait Pattern
         # ====================================================================
 
@@ -105,7 +150,11 @@ function test_variable_dependence()
             end
 
             Test.@testset "Exported variable-dependence trait functions" begin
-                for sym in (:has_variable_dependence_trait, :variable_dependence)
+                for sym in (
+                    :has_variable_dependence_trait,
+                    :variable_dependence,
+                    :join_variable_dependence,
+                )
                     Test.@test isdefined(Traits, sym)
                 end
             end

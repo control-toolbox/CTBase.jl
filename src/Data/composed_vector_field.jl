@@ -55,7 +55,9 @@ $(TYPEDSIGNATURES)
 
 Construct a [`CTBase.Data.ComposedVectorField`](@extref) from a controlled vector field and
 an open-loop or closed-loop control law, computing the composed time/variable
-dependences as the join of the two inputs.
+dependences as the join of the two inputs (see
+[`CTBase.Traits.join_time_dependence`](@extref) and
+[`CTBase.Traits.join_variable_dependence`](@extref)).
 
 See also: [`CTBase.Data.ComposedVectorField`](@extref).
 """
@@ -63,8 +65,12 @@ function ComposedVectorField(
     fc::ControlledVectorField,
     law::ControlLaw{<:Function,<:Union{Traits.OpenLoopFeedback,Traits.ClosedLoopFeedback}},
 )
-    TD = _join_td(Traits.time_dependence(fc), Traits.time_dependence(law))
-    VD = _join_vd(Traits.variable_dependence(fc), Traits.variable_dependence(law))
+    TD = Traits.join_time_dependence(
+        Traits.time_dependence(fc), Traits.time_dependence(law)
+    )
+    VD = Traits.join_variable_dependence(
+        Traits.variable_dependence(fc), Traits.variable_dependence(law)
+    )
     return ComposedVectorField{TD,VD,typeof(fc),typeof(law)}(fc, law)
 end
 

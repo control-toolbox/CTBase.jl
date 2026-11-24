@@ -185,3 +185,81 @@ if `variable_dependence(obj)` is `NonFixed`.
 See also: [`CTBase.Traits.is_variable`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
 """
 has_variable(obj::Any) = is_variable(obj)
+
+# =============================================================================
+# Variable-dependence join
+# =============================================================================
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of variable dependences: `Fixed` only if all of them are `Fixed`, `NonFixed`
+otherwise. With a single argument, return it.
+
+The arguments are trait values (types), as returned by
+[`CTBase.Traits.variable_dependence`](@extref). A composed object, such as a Hamiltonian
+built from a pseudo-Hamiltonian and a control law, depends on the variable as soon as one
+of its parts does. The result is a compile-time constant when the arguments are.
+
+# Arguments
+- `VD`: a variable dependence, `Fixed` or `NonFixed`. With several arguments, see the
+  two-argument and the n-argument methods.
+
+# Returns
+- `Type{<:VariableDependence}`: `VD` itself.
+
+# Example
+
+```julia-repl
+julia> using CTBase: Traits
+
+julia> Traits.join_variable_dependence(Traits.Fixed)
+CTBase.Traits.Fixed
+
+julia> Traits.join_variable_dependence(Traits.Fixed, Traits.NonFixed)
+CTBase.Traits.NonFixed
+
+julia> Traits.join_variable_dependence(Traits.Fixed, Traits.Fixed, Traits.Fixed)
+CTBase.Traits.Fixed
+```
+
+See also: [`CTBase.Traits.join_time_dependence`](@extref),
+[`CTBase.Traits.variable_dependence`](@extref), [`CTBase.Traits.VariableDependence`](@extref).
+"""
+join_variable_dependence(::Type{VD}) where {VD<:VariableDependence} = VD
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of two `Fixed` variable dependences: `Fixed`.
+
+See also: [`CTBase.Traits.join_variable_dependence`](@extref).
+"""
+join_variable_dependence(::Type{Fixed}, ::Type{Fixed}) = Fixed
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of two variable dependences, at least one of them `NonFixed`: `NonFixed`.
+
+See also: [`CTBase.Traits.join_variable_dependence`](@extref).
+"""
+function join_variable_dependence(
+    ::Type{<:VariableDependence}, ::Type{<:VariableDependence}
+)
+    return NonFixed
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of three or more variable dependences, folded from the left: `Fixed` only if all of
+them are.
+
+See also: [`CTBase.Traits.join_variable_dependence`](@extref).
+"""
+function join_variable_dependence(
+    ::Type{VD1}, ::Type{VD2}, ::Type{VD3}, rest::Type{<:VariableDependence}...
+) where {VD1<:VariableDependence,VD2<:VariableDependence,VD3<:VariableDependence}
+    return join_variable_dependence(join_variable_dependence(VD1, VD2), VD3, rest...)
+end

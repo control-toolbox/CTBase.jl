@@ -143,3 +143,79 @@ function is_nonautonomous(obj::Any)
     has_time_dependence_trait(obj)
     return time_dependence(obj) === NonAutonomous
 end
+
+# =============================================================================
+# Time-dependence join
+# =============================================================================
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of time dependences: `Autonomous` only if all of them are `Autonomous`,
+`NonAutonomous` otherwise. With a single argument, return it.
+
+The arguments are trait values (types), as returned by
+[`CTBase.Traits.time_dependence`](@extref). A composed object, such as a Hamiltonian built
+from a pseudo-Hamiltonian and a control law, depends on time as soon as one of its parts
+does. The result is a compile-time constant when the arguments are.
+
+# Arguments
+- `TD`: a time dependence, `Autonomous` or `NonAutonomous`. With several arguments, see the
+  two-argument and the n-argument methods.
+
+# Returns
+- `Type{<:TimeDependence}`: `TD` itself.
+
+# Example
+
+```julia-repl
+julia> using CTBase: Traits
+
+julia> Traits.join_time_dependence(Traits.Autonomous)
+CTBase.Traits.Autonomous
+
+julia> Traits.join_time_dependence(Traits.Autonomous, Traits.NonAutonomous)
+CTBase.Traits.NonAutonomous
+
+julia> Traits.join_time_dependence(Traits.Autonomous, Traits.Autonomous, Traits.Autonomous)
+CTBase.Traits.Autonomous
+```
+
+See also: [`CTBase.Traits.join_variable_dependence`](@extref),
+[`CTBase.Traits.time_dependence`](@extref), [`CTBase.Traits.TimeDependence`](@extref).
+"""
+join_time_dependence(::Type{TD}) where {TD<:TimeDependence} = TD
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of two `Autonomous` time dependences: `Autonomous`.
+
+See also: [`CTBase.Traits.join_time_dependence`](@extref).
+"""
+join_time_dependence(::Type{Autonomous}, ::Type{Autonomous}) = Autonomous
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of two time dependences, at least one of them `NonAutonomous`: `NonAutonomous`.
+
+See also: [`CTBase.Traits.join_time_dependence`](@extref).
+"""
+function join_time_dependence(::Type{<:TimeDependence}, ::Type{<:TimeDependence})
+    return NonAutonomous
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Join of three or more time dependences, folded from the left: `Autonomous` only if all of
+them are.
+
+See also: [`CTBase.Traits.join_time_dependence`](@extref).
+"""
+function join_time_dependence(
+    ::Type{TD1}, ::Type{TD2}, ::Type{TD3}, rest::Type{<:TimeDependence}...
+) where {TD1<:TimeDependence,TD2<:TimeDependence,TD3<:TimeDependence}
+    return join_time_dependence(join_time_dependence(TD1, TD2), TD3, rest...)
+end

@@ -37,6 +37,35 @@ function (s::SpyH)(args...)
     return 0.0
 end
 
+# A subtype of AbstractConstrainedPseudoHamiltonian that is not a
+# ConstrainedPseudoHamiltonian: it implements only the call contract of the abstract type,
+# the natural call of its traits and the uniform call (t, x, p, u, μ, v), with
+# H = p·u − x² + μ·(x − 0.1) + t + v (t when non-autonomous, v when non-fixed).
+struct FakeConstrainedPH{TD<:Traits.TimeDependence,VD<:Traits.VariableDependence} <:
+       Data.AbstractConstrainedPseudoHamiltonian{TD,VD} end
+
+fake_H(t, x, p, u, μ, v) = p * u - x^2 + μ * (x - 0.1) + t + v
+
+(::FakeConstrainedPH{Traits.Autonomous,Traits.Fixed})(x, p, u, μ) = fake_H(0, x, p, u, μ, 0)
+function (::FakeConstrainedPH{Traits.NonAutonomous,Traits.Fixed})(t, x, p, u, μ)
+    return fake_H(t, x, p, u, μ, 0)
+end
+function (::FakeConstrainedPH{Traits.Autonomous,Traits.NonFixed})(x, p, u, μ, v)
+    return fake_H(0, x, p, u, μ, v)
+end
+function (::FakeConstrainedPH{Traits.NonAutonomous,Traits.NonFixed})(t, x, p, u, μ, v)
+    return fake_H(t, x, p, u, μ, v)
+end
+function (h::FakeConstrainedPH{Traits.Autonomous,Traits.Fixed})(t, x, p, u, μ, v)
+    return h(x, p, u, μ)
+end
+function (h::FakeConstrainedPH{Traits.NonAutonomous,Traits.Fixed})(t, x, p, u, μ, v)
+    return h(t, x, p, u, μ)
+end
+function (h::FakeConstrainedPH{Traits.Autonomous,Traits.NonFixed})(t, x, p, u, μ, v)
+    return h(x, p, u, μ, v)
+end
+
 function test_constrained_pseudo_hamiltonian()
     Test.@testset "ConstrainedPseudoHamiltonian Tests" verbose = VERBOSE showtiming =
         SHOWTIMING begin
@@ -196,6 +225,31 @@ function test_constrained_pseudo_hamiltonian()
             Test.@test Traits.has_variable_dependence_trait(H) === true
         end
 
+        Test.@testset "Contract: freeze_multiplier accepts any AbstractConstrainedPseudoHamiltonian" begin
+            A, N = Traits.Autonomous, Traits.NonAutonomous
+            F, V = Traits.Fixed, Traits.NonFixed
+            t, x, p, u, μ, v = 2.0, 1.0, 3.0, 0.5, 4.0, 5.0
+            for (TD, VD) in ((A, F), (N, F), (A, V), (N, V))
+                H = FakeConstrainedPH{TD,VD}()
+                H̃ = Data.freeze_multiplier(H, μ)
+                Test.@test H̃ isa Data.PseudoHamiltonian
+                Test.@test Traits.time_dependence(H̃) === TD
+                Test.@test Traits.variable_dependence(H̃) === VD
+                Test.@test H̃(t, x, p, u, v) == H(t, x, p, u, μ, v)      # uniform call
+                Test.@test H̃(t, x, p, u, v) ==
+                    fake_H(TD === N ? t : 0, x, p, u, μ, VD === V ? v : 0)
+            end
+            # natural calls
+            Test.@test Data.freeze_multiplier(FakeConstrainedPH{A,F}(), μ)(x, p, u) ==
+                fake_H(0, x, p, u, μ, 0)
+            Test.@test Data.freeze_multiplier(FakeConstrainedPH{N,F}(), μ)(t, x, p, u) ==
+                fake_H(t, x, p, u, μ, 0)
+            Test.@test Data.freeze_multiplier(FakeConstrainedPH{A,V}(), μ)(x, p, u, v) ==
+                fake_H(0, x, p, u, μ, v)
+            Test.@test Data.freeze_multiplier(FakeConstrainedPH{N,V}(), μ)(t, x, p, u, v) ==
+                fake_H(t, x, p, u, μ, v)
+        end
+
         # ======================================================================
         # UNIT — type stability
         # ======================================================================
@@ -207,6 +261,11 @@ function test_constrained_pseudo_hamiltonian()
             H̃ = Data.freeze_multiplier(H, 3.0)
             Test.@test (Test.@inferred H̃(1.0, 2.0, 0.5)) isa Float64
             Test.@test (Test.@inferred H̃(0.0, 1.0, 2.0, 0.5, nothing)) isa Float64
+            H̃f = Data.freeze_multiplier(
+                FakeConstrainedPH{Traits.Autonomous,Traits.Fixed}(), 3.0
+            )
+            Test.@test (Test.@inferred H̃f(1.0, 2.0, 0.5)) isa Float64
+            Test.@test (Test.@inferred H̃f(0.0, 1.0, 2.0, 0.5, nothing)) isa Float64
         end
 
         # ======================================================================
@@ -218,6 +277,13 @@ function test_constrained_pseudo_hamiltonian()
             Test.@test_throws MethodError H(1.0, 2.0, 0.5)                  # μ missing
             H̃ = Data.freeze_multiplier(H, 3.0)
             Test.@test_throws MethodError H̃(1.0, 2.0, 0.5, 3.0)            # μ already frozen
+        end
+
+        Test.@testset "Error: freeze_multiplier rejects what is not a constrained pseudo-Hamiltonian" begin
+            Test.@test_throws MethodError Data.freeze_multiplier(
+                Data.PseudoHamiltonian((x, p, u) -> p * u), 3.0
+            )
+            Test.@test_throws MethodError Data.freeze_multiplier(h_aut_fixed, 3.0)
         end
     end
 end

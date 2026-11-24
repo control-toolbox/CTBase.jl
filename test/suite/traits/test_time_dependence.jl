@@ -68,6 +68,49 @@ function test_time_dependence()
         end
 
         # ====================================================================
+        # UNIT TESTS - Join
+        # ====================================================================
+
+        Test.@testset "UNIT TESTS - join_time_dependence" begin
+            A, N = Traits.Autonomous, Traits.NonAutonomous
+            Test.@testset "one argument is returned as is" begin
+                Test.@test Traits.join_time_dependence(A) === A
+                Test.@test Traits.join_time_dependence(N) === N
+            end
+            Test.@testset "two arguments: Autonomous only if both are" begin
+                Test.@test Traits.join_time_dependence(A, A) === A
+                Test.@test Traits.join_time_dependence(A, N) === N
+                Test.@test Traits.join_time_dependence(N, A) === N
+                Test.@test Traits.join_time_dependence(N, N) === N
+            end
+            Test.@testset "three or more arguments" begin
+                Test.@test Traits.join_time_dependence(A, A, A) === A
+                Test.@test Traits.join_time_dependence(A, A, N) === N
+                Test.@test Traits.join_time_dependence(N, A, A) === N
+                Test.@test Traits.join_time_dependence(A, A, A, A) === A
+                Test.@test Traits.join_time_dependence(A, A, A, N) === N
+            end
+            Test.@testset "type-stable (folded to a constant)" begin
+                Test.@test Test.@inferred(Traits.join_time_dependence(A, A)) === A
+                Test.@test Test.@inferred(Traits.join_time_dependence(A, N)) === N
+                Test.@test Test.@inferred(Traits.join_time_dependence(A, A, A, A)) === A
+                Test.@test Test.@inferred(Traits.join_time_dependence(A, A, N, A)) === N
+            end
+        end
+
+        Test.@testset "ERROR TESTS - join_time_dependence" begin
+            Test.@testset "a value of another trait family is rejected" begin
+                Test.@test_throws MethodError Traits.join_time_dependence(Traits.Fixed)
+                Test.@test_throws MethodError Traits.join_time_dependence(
+                    Traits.Autonomous, Traits.Fixed
+                )
+            end
+            Test.@testset "at least one argument" begin
+                Test.@test_throws MethodError Traits.join_time_dependence()
+            end
+        end
+
+        # ====================================================================
         # CONTRACT TESTS - Time-Dependence Trait Pattern
         # ====================================================================
 
@@ -95,7 +138,8 @@ function test_time_dependence()
 
         Test.@testset "Exports Verification" begin
             Test.@testset "Exported time-dependence trait functions" begin
-                for sym in (:has_time_dependence_trait, :time_dependence)
+                for sym in
+                    (:has_time_dependence_trait, :time_dependence, :join_time_dependence)
                     Test.@test isdefined(Traits, sym)
                 end
             end

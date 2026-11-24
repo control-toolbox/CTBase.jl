@@ -75,6 +75,8 @@ const EXPORTED_FUNCTIONS = (
     :mutability,
     :has_variable_dependence_trait,
     :variable_dependence,
+    :join_time_dependence,
+    :join_variable_dependence,
     :is_autonomous,
     :is_nonautonomous,
     :is_variable,
